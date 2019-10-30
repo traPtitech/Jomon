@@ -1,0 +1,525 @@
+openapi: 3.0.0
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: '/api'
+info:
+  version: "1.0.0"
+  title: Jomon API
+  description: >-
+    JomonのAPIです。
+security:
+  - application:
+      - read
+      - write
+paths:
+  '/applications':
+    get:
+      description: 申請書一覧を取得する。
+      tags:
+        - Applications
+      parameters:
+        - name: sort
+          description: |
+            並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", タイトルの昇順 "title",
+            タイトルの降順 "-title", 更新日時が新しい "modified_at", 更新日時が古い
+            "-modified_at" )
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: current_state
+          description: 現在の申請書の状態（"0","1","2","3","4")
+          required: false
+          in: query
+          schema:
+            type: integer
+        - name: applicant
+          description: 誰が申請したか
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: type
+          description: どのタイプか（"Club","Contest","Event","Public")
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: applied_since
+          description: いつからの申請か
+          required: false
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: applied_until
+          description: いつまでの申請か
+          required: false
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: 取得できた。返す。該当するものがなくても空配列を返す。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Applications"
+        "400":
+          description: リクエストがおかしい。
+    post:
+      description: 申請書を新規作成する。
+      tags:
+        - Applications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Application"
+      responses:
+        "201":
+          description: 作成した。作成した先を返す。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: "申請書のレコードid"
+                  application_id:
+                    type: integer
+                    example: "同一申請書ごとのid"
+                  created_at:
+                    type: string
+                    format: "date-time"
+                    example: "2019/07/28 22:00:00"
+                  current_state:
+                    type: integer
+                    example: 1
+                  application: 
+                    $ref: "#/components/schemas/Application"
+
+        "400":
+          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたpaid_by_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: "ammout"
+  "/applications/{applicationId}":
+    get:
+      description: 指定した申請書の詳細を取得する。
+      tags:
+        - Applications
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: あったら返す。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: "申請書のレコードid"
+                  application_id:
+                    type: integer
+                    example: "同一申請書ごとのid"
+                  created_at:
+                    type: string
+                    format: "date-time"
+                    example: "2019/07/28 22:00:00"
+                  current_state:
+                    type: integer
+                    example: 1
+                  application: 
+                    $ref: "#/components/schemas/Application"
+                  comments:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Comment"
+                  states:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/State"
+                  logs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user:
+                          $ref: "#/components/schemas/User"
+                        updated_at:
+                          type: string
+                          format: date-time
+        "400":
+          description: リクエストがおかしい。
+        "404":
+          description: 指定されたApplicationIdはない。
+    patch:
+      description: 指定したApplicationを修正する。(新しレコードを作る）。修正できるのは申請書の作成者かadminで、かつstateが0(申請済み)もしくは2（要修正)のとき。
+      tags:
+        - Applications
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Application"
+      responses:
+        "200":
+          description: 修正できた。返す。
+          content:
+            application/json:
+             schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: "申請書のレコードid"
+                  application_id:
+                    type: integer
+                    example: "同一申請書ごとのid"
+                  created_at:
+                    type: string
+                    format: "date-time"
+                    example: "2019/07/28 22:00:00"
+                  current_state:
+                    type: integer
+                    example: 1
+                  application: 
+                    $ref: "#/components/schemas/Application"
+        "400":
+          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたpaid_by_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: "ammout"
+        "403":
+          description: 編集権限がない人による操作または編集できないstate
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_user_permitted:
+                    type: boolean
+                    example: fales
+                  current_state:
+                    type: integer
+                    example: 1
+        "404":
+          description: 指定された申請書はない。
+  "/applications/{applicationId}/comment":
+    post:
+      description: 指定した申請書にコメントを新規作成する。
+      tags:
+        - Comments
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+                  example: "ここを修正してください。"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+             schema:
+                    $ref: "#/components/schemas/Comment"
+        "400":
+          description: リクエストに形式上または内容の不備がある。例えばコメント欄が空欄。
+        "404":
+          description: 指定された申請書はない。
+  "/applications/{applicationId}/states":
+    put:
+      description: 指定した申請書のstateを変更する。
+      tags:
+        - States
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                state:
+                  type: integer
+                  example: 3
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+             schema:
+              type: object
+              properties:
+                user:
+                  $ref: "#/components/schemas/User"
+                updated_at:
+                  type: string
+                  format: date-time
+                current_state:
+                  type: integer
+                  example: 3
+                past_state:
+                  type: integer
+                  example: 1
+        "400":
+          description: リクエストに形式上または内容の不備がある。
+        "403":
+          description: 編集権限がない人による操作または行き来できないstate
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_user_permitted:
+                    type: boolean
+                    example: fales
+                  current_state:
+                    type: integer
+                    example: 1
+                  to_state:
+                    type: integer
+                    example: 4
+        "404":
+          description: 指定された申請書はない。
+  "/logs/{logId}":
+    get:
+      description: 申請書について指定したidの変更履歴の詳細をみる。
+      tags:
+        - Logs
+      parameters:
+        - name: logId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+             schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: "申請書のレコードid"
+                  application_id:
+                    type: integer
+                    example: "同一申請書ごとのid"
+                  created_at:
+                    type: string
+                    format: "date-time"
+                    example: "2019/07/28 22:00:00"
+                  application: 
+                    $ref: "#/components/schemas/Application"
+        "404":
+          description: 指定された変更履歴はない。
+  "/users":
+    get:
+      description: ユーザの一覧を返す
+      tags:
+        - Users
+      responses:
+        "200":
+          description: 取得に成功した。返す
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user:
+                      $ref: "#/components/schemas/User"
+                    admin:
+                      type: boolean
+  "/users/admin":
+    get:
+      description: adminユーザの一覧を返す。
+      tags:
+        - Users
+      responses:
+        "200":
+          description: 取得に成功した。返す
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user:
+                      $ref: "#/components/schemas/User"
+                    admin:
+                      type: boolean
+    post:
+      description: adminユーザーを変更する。
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                  type: object
+                  properties:
+                    user:
+                      $ref: "#/components/schemas/User"
+                    to_admin:
+                      type: boolean
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema:
+                  type: object
+                  properties:
+                    user:
+                      $ref: "#/components/schemas/User"
+                    current_admin:
+                      type: boolean
+
+        "400":
+          description: リクエストに形式上または内容の不備がある。例えばadminの状態が変更前と同じだった時。
+        "403":
+          description: admin以外の人
+        "404":
+          description: adminを変更しようとした対象者は存在しない
+
+components:
+  schemas: 
+    Applications:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+          example: "冬コミの交通費です"
+        created_at:
+          type: string
+          format: date-time
+        aplicant:
+          $ref: "#/components/schemas/User"
+        current_state:
+          type: integer
+          example: "2"
+        ammount:
+          type: integer
+          example: 1200
+    Application:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "Public"
+        title:
+          type: string
+          example: "夏コミの交通費をお願いします。"
+        remarks:
+          type: string
+          example: "〇〇駅から〇〇駅への移動"
+        ammount:
+          type: integer   
+          example: 1200
+        paid_to_id:
+          type: array
+          items: 
+            type: string
+            example: "nagatech"
+        image_name:
+          type: string
+          example: "画像の保管場所を表す何か"
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+          example: "traQで他にユーザーidに関する文字列を持っているなら保持します"
+        traQId:
+          type: string
+          example: "nagatech"
+        displayName:
+          type: string
+          example: "ながてち"
+        iconFiled:
+          type: string
+          example: "e0628393-8045-4c6c-b23c-6f5e6a2c252b"
+    Comment:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        comment:
+          type: string
+          example: "traQのコメントid"
+        created_at:
+          type: string
+          format: "date-time"
+          example: "2019/07/28 22:00:00"
+    State:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        state:
+          type: integer
+          example: 1
+        created_at:
+          type: string
+          format: "date-time"
+          example: "2019/07/28 22:00:00"
+  securitySchemes:
+    application:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: 'http://example.com/oauth/token'
+          scopes:
+            write: allows modifying resources
+            read: allows reading resources
