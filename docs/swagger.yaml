@@ -28,11 +28,11 @@ paths:
           schema:
             type: string
         - name: current_state
-          description: 現在の申請書の状態（"0","1","2","3","4")
+          description: 現在の申請書の状態（"applied","rejected","fix_required","permitted","paid")
           required: false
           in: query
           schema:
-            type: integer
+            type: string
         - name: applicant
           description: 誰が申請したか
           required: false
@@ -67,9 +67,29 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Applications"
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                      example: "冬コミの交通費です"
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_at:
+                      type: string
+                      format: data_time
+                    aplicant:
+                      $ref: "#/components/schemas/User"
+                    current_state:
+                      type: string
+                      example: "fix-requied"
+                    ammount:
+                      type: integer
+                      example: 1200
         "400":
-          description: リクエストがおかしい。
+            description: リクエストがおかしい。
     post:
       description: 申請書を新規作成する。
       tags:
@@ -99,8 +119,8 @@ paths:
                     format: "date-time"
                     example: "2019/07/28 22:00:00"
                   current_state:
-                    type: integer
-                    example: 1
+                    type: string
+                    example: "rejected"
                   application: 
                     $ref: "#/components/schemas/Application"
 
@@ -143,25 +163,25 @@ paths:
                     format: "date-time"
                     example: "2019/07/28 22:00:00"
                   current_state:
-                    type: integer
-                    example: 1
+                    type: string
+                    example: "rejected"
                   application: 
                     $ref: "#/components/schemas/Application"
-                  comments:
+                  comments_logs:
                     type: array
                     items:
                       $ref: "#/components/schemas/Comment"
-                  states:
+                  state_logs:
                     type: array
                     items:
                       $ref: "#/components/schemas/State"
-                  logs:
+                  application_logs:
                     type: array
                     items:
                       type: object
                       properties:
                         user:
-                          $ref: "#/components/schemas/User"
+                          $ref: "#/components/schemas/Application"
                         updated_at:
                           type: string
                           format: date-time
@@ -170,7 +190,7 @@ paths:
         "404":
           description: 指定されたApplicationIdはない。
     patch:
-      description: 指定したApplicationを修正する。(新しレコードを作る）。修正できるのは申請書の作成者かadminで、かつstateが0(申請済み)もしくは2（要修正)のとき。
+      description: 指定したApplicationを修正する。(新しいレコードを作る）。修正できるのは申請書の作成者かadminで、かつstateが"applied"(申請済み)もしくは"fix_required"(要修正))のとき。
       tags:
         - Applications
       parameters:
@@ -204,8 +224,8 @@ paths:
                     format: "date-time"
                     example: "2019/07/28 22:00:00"
                   current_state:
-                    type: integer
-                    example: 1
+                    type: string
+                    example: "rejected"
                   application: 
                     $ref: "#/components/schemas/Application"
         "400":
@@ -228,8 +248,8 @@ paths:
                     type: boolean
                     example: fales
                   current_state:
-                    type: integer
-                    example: 1
+                    type: string
+                    example: "rejected"
         "404":
           description: 指定された申請書はない。
   "/applications/{applicationId}/comment":
@@ -266,7 +286,7 @@ paths:
           description: 指定された申請書はない。
   "/applications/{applicationId}/states":
     put:
-      description: 指定した申請書のstateを変更する。
+      description: 指定した申請書のstateを変更のみ（新規はpost /applications で)する。reasonについてはstateを「appliedからfix_required」「appliedからrejected」「permittedからapplied」にするとき必須。stateの行き来の定義は作成者は「fix_requiredからapplied（このときapplication更新も行なっているはず）」をでき、adminは「appliedからrejected」「appliedからrequired」「fix_requiredからapplied」「appliedからpermitted」「permittedからapplied」「permittedからpaid」の操作のみ可。
       tags:
         - States
       parameters:
@@ -282,9 +302,12 @@ paths:
             schema:
               type: object
               properties:
-                state:
-                  type: integer
-                  example: 3
+                to_state:
+                  type: string
+                  example: "permitted"
+                reason:
+                  type: string
+                  example: "良いですね。"
       responses:
         "200":
           description: OK
@@ -299,11 +322,11 @@ paths:
                   type: string
                   format: date-time
                 current_state:
-                  type: integer
-                  example: 3
+                  type: string
+                  example: "permitted"
                 past_state:
-                  type: integer
-                  example: 1
+                  type: string
+                  example: "rejected"
         "400":
           description: リクエストに形式上または内容の不備がある。
         "403":
@@ -317,46 +340,13 @@ paths:
                     type: boolean
                     example: fales
                   current_state:
-                    type: integer
-                    example: 1
+                    type: string
+                    example: "rejected"
                   to_state:
-                    type: integer
-                    example: 4
+                    type: string
+                    example: "paid"
         "404":
           description: 指定された申請書はない。
-  "/logs/{logId}":
-    get:
-      description: 申請書について指定したidの変更履歴の詳細をみる。
-      tags:
-        - Logs
-      parameters:
-        - name: logId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-             schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                    example: "申請書のレコードid"
-                  application_id:
-                    type: integer
-                    example: "同一申請書ごとのid"
-                  created_at:
-                    type: string
-                    format: "date-time"
-                    example: "2019/07/28 22:00:00"
-                  application: 
-                    $ref: "#/components/schemas/Application"
-        "404":
-          description: 指定された変更履歴はない。
   "/users":
     get:
       description: ユーザの一覧を返す
@@ -376,6 +366,18 @@ paths:
                       $ref: "#/components/schemas/User"
                     admin:
                       type: boolean
+  "/users/me":
+    get:
+      tags:
+        - Users
+      description: 自分のユーザー情報を取得します
+      responses:
+        '200':
+          description: 正常に取得できました。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
   "/users/admin":
     get:
       description: adminユーザの一覧を返す。
@@ -395,7 +397,7 @@ paths:
                       $ref: "#/components/schemas/User"
                     admin:
                       type: boolean
-    post:
+    put:
       description: adminユーザーを変更する。
       tags:
         - Users
@@ -406,8 +408,9 @@ paths:
               schema:
                   type: object
                   properties:
-                    user:
-                      $ref: "#/components/schemas/User"
+                    trap_id:
+                      type: string
+                      example: "nagatech"
                     to_admin:
                       type: boolean
       responses:
@@ -432,25 +435,6 @@ paths:
 
 components:
   schemas: 
-    Applications:
-      type: object
-      properties:
-        id:
-          type: integer
-        title:
-          type: string
-          example: "冬コミの交通費です"
-        created_at:
-          type: string
-          format: date-time
-        aplicant:
-          $ref: "#/components/schemas/User"
-        current_state:
-          type: integer
-          example: "2"
-        ammount:
-          type: integer
-          example: 1200
     Application:
       type: object
       properties:
@@ -472,22 +456,20 @@ components:
             type: string
             example: "nagatech"
         image_name:
-          type: string
-          example: "画像の保管場所を表す何か"
+          type: array
+          items: 
+            type: string
+            example: "画像の保管場所を表す何か"
     User:
       type: object
       properties:
-        userId:
-          type: string
-          format: uuid
-          example: "traQで他にユーザーidに関する文字列を持っているなら保持します"
-        traQId:
+        trap_id:
           type: string
           example: "nagatech"
-        displayName:
+        display_name:
           type: string
           example: "ながてち"
-        iconFiled:
+        icon_filed:
           type: string
           example: "e0628393-8045-4c6c-b23c-6f5e6a2c252b"
     Comment:
@@ -507,9 +489,14 @@ components:
       properties:
         user:
           $ref: "#/components/schemas/User"
-        state:
-          type: integer
-          example: 1
+        to_state:
+          description: 申請済み(applied) ,却下(rejected),要修正(fix_required),許可済み(permitted),返金済み(paid)
+          type: string
+          example: "rejected"
+        reason:
+          type: string
+          default: null
+          example: "これは雑すぎますね。"
         created_at:
           type: string
           format: "date-time"
@@ -523,3 +510,4 @@ components:
           scopes:
             write: allows modifying resources
             read: allows reading resources
+            
