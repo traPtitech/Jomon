@@ -1,5 +1,5 @@
 # DB schema
-**Jomon**のDBです。外部キー制約は全て`ON UPDATE reference_option`,`ON DELETE reference_option`共にデフォルト(`RESTRICT`)です。
+**Jomon**のDBです。外部キー制約は **（※）** を除いて全て`ON UPDATE reference_option`,`ON DELETE reference_option`共にデフォルト(`RESTRICT`)です。申請書リスト取得時の処理を高めるために、appolicationsに'applications_details_id','states_logs_id'を追加したことで相互参照が起凝ります。よって以上二つ(※）については内容としてはMULですが、DMSによっては制限しないことにします。
 
 ### administrators
 
@@ -17,6 +17,8 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
 | ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
 | id          | int(11) | NO   | PRI | _NULL_  | auto_increment |
+| applications_details_id          | int(11) | NO   | MUL | _NULL_  || 経費申請詳細の最新id**Parents:applications_details.id** **（※）** |
+| states_logs_id          | int(11) | NO   | MUL | _NULL_  || 状態の最新id**Parents:states_logs.id**　**（※）**  |
 | create_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 申請者のtraPid |            
 | created_at       | timestamp  | NO   |     | CURRENT_TIMESTAMP |       | 申請書が作成された日時 |
 

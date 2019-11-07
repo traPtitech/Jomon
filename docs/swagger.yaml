@@ -21,8 +21,7 @@ paths:
         - name: sort
           description: |
             並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", タイトルの昇順 "title",
-            タイトルの降順 "-title", 更新日時が新しい "modified_at", 更新日時が古い
-            "-modified_at" )
+            タイトルの降順 "-title")
           required: false
           in: query
           schema:
@@ -97,9 +96,9 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/Application"
+              $ref: "#/components/schemas/PostApplication"
       responses:
         "201":
           description: 作成した。作成した先を返す。
@@ -202,9 +201,9 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/Application"
+              $ref: "#/components/schemas/PostApplication"
       responses:
         "200":
           description: 修正できた。返す。
@@ -328,9 +327,9 @@ paths:
                   type: string
                   example: "rejected"
         "400":
-          description: リクエストに形式上または内容の不備がある。
+          description: リクエストに形式上または内容の不備がある。または行き来できないstate。
         "403":
-          description: 編集権限がない人による操作または行き来できないstate
+          description: 編集権限がない人による操作。
           content:
             application/json:
               schema:
@@ -460,6 +459,34 @@ components:
           items: 
             type: string
             example: "画像の保管場所を表す何か"
+    PostApplication:
+      type: object
+      properties:
+        adress:
+            type: object
+            properties:
+              type:
+                type: string
+                example: "Public"
+              title:
+                type: string
+                example: "夏コミの交通費をお願いします。"
+              remarks:
+                type: string
+                example: "〇〇駅から〇〇駅への移動"
+              ammount:
+                type: integer   
+                example: 1200
+              paid_to_id:
+                type: array
+                items: 
+                  type: string
+                  example: "nagatech"
+        image_name:
+          type: array
+          items: 
+            type: string
+            format: binary
     User:
       type: object
       properties:
@@ -479,7 +506,7 @@ components:
           $ref: "#/components/schemas/User"
         comment:
           type: string
-          example: "traQのコメントid"
+          example: "コメント内容"
         created_at:
           type: string
           format: "date-time"
