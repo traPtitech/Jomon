@@ -19,7 +19,7 @@ paths:
         - Applications
       parameters:
         - name: sort
-          description: |
+          description:
             並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", タイトルの昇順 "title",
             タイトルの降順 "-title")
           required: false
@@ -589,9 +589,6 @@ components:
         display_name:
           type: string
           example: "ながてち"
-        icon_filed:
-          type: string
-          example: "e0628393-8045-4c6c-b23c-6f5e6a2c252b"
     Comment:
       type: object
       properties:
