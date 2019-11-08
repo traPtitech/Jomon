@@ -24,7 +24,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 
 ### applications_details
 
-経費精算申請（新規、変更ごとに新しレコードが作られます。申請の削除はできず、一度作ったら必ずいずれかのstateに当てはまります。created_atが新しい順にかつapplications_idが一つとなるようにすれば最新の状態が得られます。）
+経費精算申請（新規、変更ごとに新しレコードが作られます。申請の削除はできず、一度作ったら必ずいずれかのstateに当てはまります。)
 
 | Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
 | ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -41,25 +41,31 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 
 ### return_users
 
-申請idにつき、誰に返金されるか　(払い戻し対象者の変更ログは残りません)(現在usertableがないためtraPidはtraQ(できればportal)のapiをたたく必要がありそう。)
+申請idにつき、誰に返金されるか　(払い戻し対象者の変更ログは残りません)(現在usertableがないためtraPidはtraQ(できればportal)のapiをたたきます。)(変更時には対応する`application_id`のレコードすべてを削除して、新しいレコードを追加します。)
 
 | Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
 | ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| application_id          | int(11) | NO   | PRI | _NULL_  || 申請書のid |
+| id          | int(11) | NO   | PRI | _NULL_  |auto_increment|  |
+| application_id          | int(11) | NO   | MUL | _NULL_  || 申請書のid |
 | reimbursed_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 払い戻される人のtraPid |
+| paid          | boolean | NO   |  | false  ||払い戻されたらtrueにする  |
+| paid_by_user_trap_id      | varchar(32) | YES   | MUL | _NULL_  |           | お金を渡した人のtraPid |
+| paid_at          | timestamp | YES   |  | _NULL_  | |払い戻された日  |
+
 
 ### applications_images
 
-申請idにつき、対応する画像　(画像変更ログは残りません)
+申請idにつき、対応する画像　(画像変更ログは残りません。)(変更時には対応する`application_id`のレコードすべてを削除して、新しいレコードを追加します。)
 
 | Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
 | ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| application_id          | int(11) | NO   | PRI | _NULL_  || 申請書のid |
+| id          | int(11) | NO   | PRI | _NULL_  |auto_increment|  |
+| application_id          | int(11) | NO   | MULL | _NULL_  || 申請書のid |
 | image_name | text | YES   |     |_NULL_       |       | 領収書等の画像   |
 
 ### states_logs
 
-状態の記録（状態の変更があるたびにレコードを追加）(初めて申請書が作られたときも0をレコードとして入れます）
+状態の記録（状態の変更があるたびにレコードを追加します。）(初めて申請書が作られたときも0をレコードとして入れます。）（理由の変更、削除はできません。)(stateの`4`は`return_users`に依存していて、全員が`true`となった時に変えてください。)
 
 | Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
 | ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -67,14 +73,14 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | application_id          | int(11) | NO   | MUL | _NULL_  || 申請書のid **parents:applications.id**|
 | change_user_trap_id      | varchar(32) | NO   |  | _NULL_  |           | 状態を変えた人のtraPid |
 | to_state     | tinyint(4) | NO   |     | 0                 |                | どの状態へ変えたか (0(申請済み) ,1(却下),2(要修正),3(許可済み),4(返金済み))                                                                                 |
-| reason     |varchar(32) | YES  |     | _NULL_                 |                | 状態を変えたとき状態の変え方によってコメントをつけられたり付けられなかったりします。（swagger参照) |
+| reason     |text | YES  |     | _NULL_                 |                | 状態を変えたとき状態の変え方によってコメントをつけられたり付けられなかったりします。（swagger参照) |
 | created_at       | timestamp  | NO   |     | CURRENT_TIMESTAMP |                | 状態が更新された日時                                                                                                  |
 
 
 
 ### comments
 
-申請書ごとのコメント（コメントの変更、削除はできません）
+申請書ごとのコメント（コメントの変更、削除は対応するレコードを変更することで行います。そのため変更前の状態履歴は残りません。）
 
 | Field            | Type      | Null | Key | Default           | Extra          | 説明など                                            |
 | ---------------- | --------- | ---- | --- | ----------------- | -------------- | --------------------------------------------------- |
@@ -83,3 +89,5 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | user_trap_id      | varchar(32)  | NO  | MUL | _NULL_            |                | コメントした人の traPID                                     |
 | comment       |  text    | NO  |     | _NULL_            |       |コメント内容そのもの                                       |
 | created_at     | timestamp | NO   |     | CURRENT_TIMESTAMP |                | コメントが作成された日時                                                                                              |
+| updated_at     | timestamp |  NO  |     | CURRENT_TIMESTAMP |    on update CURRENT_TIMESTAMP            | コメントが更新された日時                                                                                              | 
+| deleted_at     | timestamp |  YES  |     | NULL |                | コメントが削除された日時                                                                                              |

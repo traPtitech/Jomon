@@ -27,7 +27,7 @@ paths:
           schema:
             type: string
         - name: current_state
-          description: 現在の申請書の状態（"applied","rejected","fix_required","permitted","paid")
+          description: 現在の申請書の状態（"applied","rejected","fix_required","permitted","fully_paid")
           required: false
           in: query
           schema:
@@ -76,9 +76,6 @@ paths:
                     created_at:
                       type: string
                       format: date-time
-                    updated_at:
-                      type: string
-                      format: data_time
                     aplicant:
                       $ref: "#/components/schemas/User"
                     current_state:
@@ -124,7 +121,7 @@ paths:
                     $ref: "#/components/schemas/Application"
 
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたpaid_by_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
+          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたpaid_to_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
           content:
             application/json:
               schema:
@@ -133,16 +130,16 @@ paths:
                   type: string
                   example: "ammout"
   "/applications/{applicationId}":
+    parameters:
+    - name: applicationId
+      in: path
+      required: true
+      schema:
+        type: integer
     get:
-      description: 指定した申請書の詳細を取得する。
+      description: 指定した申請書の詳細を取得する。(コメントは作成日時を返す)
       tags:
         - Applications
-      parameters:
-        - name: applicationId
-          in: path
-          required: true
-          schema:
-            type: integer
       responses:
         "200":
           description: あったら返す。
@@ -174,16 +171,14 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/State"
+                  paid_logs:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Paid"
                   application_logs:
                     type: array
                     items:
-                      type: object
-                      properties:
-                        user:
-                          $ref: "#/components/schemas/Application"
-                        updated_at:
-                          type: string
-                          format: date-time
+                      $ref: "#/components/schemas/ApplicationLog"
         "400":
           description: リクエストがおかしい。
         "404":
@@ -192,12 +187,6 @@ paths:
       description: 指定したApplicationを修正する。(新しいレコードを作る）。修正できるのは申請書の作成者かadminで、かつstateが"applied"(申請済み)もしくは"fix_required"(要修正))のとき。
       tags:
         - Applications
-      parameters:
-        - name: applicationId
-          in: path
-          required: true
-          schema:
-            type: integer
       requestBody:
         required: true
         content:
@@ -218,7 +207,7 @@ paths:
                   application_id:
                     type: integer
                     example: "同一申請書ごとのid"
-                  created_at:
+                  updated_at:
                     type: string
                     format: "date-time"
                     example: "2019/07/28 22:00:00"
@@ -228,7 +217,7 @@ paths:
                   application: 
                     $ref: "#/components/schemas/Application"
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたpaid_by_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
+          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたpaid_to_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
           content:
             application/json:
               schema:
@@ -273,7 +262,7 @@ paths:
                   type: string
                   example: "ここを修正してください。"
       responses:
-        "200":
+        "201":
           description: OK
           content:
             application/json:
@@ -282,10 +271,58 @@ paths:
         "400":
           description: リクエストに形式上または内容の不備がある。例えばコメント欄が空欄。
         "404":
+          description: 指定されたコメントはない。
+  "/comments/{commentId}":
+    parameters:
+    - name: commentId
+      in: path
+      required: true
+      schema:
+        type: integer
+    put:
+      description: コメントを変更する。
+      tags:
+        - Comments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+                  example: "ここを修正してください。"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+             schema:
+                    $ref: "#/components/schemas/Comment"
+        "400":
+          description: リクエストに形式上または内容の不備がある。例えばコメント欄が空欄。
+        "403":
+          description: 編集権限がない人(コメント作成者以外)による操作。
+        "404":
           description: 指定された申請書はない。
+        
+    delete:
+      description: 指定したコメントを削除する。
+      tags:
+        - Comments
+      responses:
+        "204":
+          description: 正常に取り消すことができました。
+        "400":
+          description: リクエストに形式上または内容の不備がある。例えばコメント欄が空欄。
+        "403":
+          description: 編集権限がない人(コメント作成者以外)による操作。
+        "404":
+          description: 指定されたコメントはない。
   "/applications/{applicationId}/states":
     put:
-      description: 指定した申請書のstateを変更のみ（新規はpost /applications で)する。reasonについてはstateを「appliedからfix_required」「appliedからrejected」「permittedからapplied」にするとき必須。stateの行き来の定義は作成者は「fix_requiredからapplied（このときapplication更新も行なっているはず）」をでき、adminは「appliedからrejected」「appliedからrequired」「fix_requiredからapplied」「appliedからpermitted」「permittedからapplied」「permittedからpaid」の操作のみ可。
+      description: 指定した申請書のstateを変更のみ（新規はpost /applications で)する。reasonについてはstateを「appliedからfix_required」「appliedからrejected」「permittedからapplied」にするとき必須。stateの行き来の定義は作成者は「fix_requiredからapplied（このときapplication更新も行なっているはず）」をでき、adminは「appliedからrejected」「appliedからrequired」「fix_requiredからapplied」「appliedからpermitted」「permittedからapplied（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「permittedからfully_paid」の操作はここでは行えない。
       tags:
         - States
       parameters:
@@ -328,24 +365,57 @@ paths:
                   example: "rejected"
         "400":
           description: リクエストに形式上または内容の不備がある。または行き来できないstate。
-        "403":
-          description: 編集権限がない人による操作。
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  is_user_permitted:
-                    type: boolean
-                    example: fales
                   current_state:
                     type: string
                     example: "rejected"
                   to_state:
                     type: string
-                    example: "paid"
+                    example: "fully_paid"
         "404":
           description: 指定された申請書はない。
+  "/applications/{applicationId}/states/paid/{paidToId}":
+    put:
+      description: 指定した申請書、支払い対象者についての返金状態を変更する（paidがfalseからtrueへの変更のみ）。ただし操作できるのはadminかつstateが"permitted"の時のみ。db上では全員に返却されたときに「3(permitted)から4(fully_paid)」の操作を行う。
+      tags:
+        - States
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: paidToId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+             schema:
+              type: object
+              properties:
+                paid_by_user:
+                  $ref: "#/components/schemas/User"
+                paid_to_user:
+                  $ref: "#/components/schemas/User"
+                paid_at:
+                  type: string
+                  format: date-time
+                to_state:
+                    type: string
+                    example: "fully_paid"
+        "400":
+          description: すでに返金済みのユーザー。
+        "404":
+          description: 指定された申請書または返金対象者はない。
   "/users":
     get:
       description: ユーザの一覧を返す
@@ -413,7 +483,7 @@ paths:
                     to_admin:
                       type: boolean
       responses:
-        "201":
+        "200":
           description: OK
           content:
             application/json:
@@ -437,6 +507,8 @@ components:
     Application:
       type: object
       properties:
+        aplicant:
+          $ref: "#/components/schemas/User"
         type:
           type: string
           example: "Public"
@@ -454,35 +526,56 @@ components:
           items: 
             type: string
             example: "nagatech"
-        image_name:
+        image:
           type: array
           items: 
             type: string
             example: "画像の保管場所を表す何か"
+    ApplicationLog:
+      type: object
+      properties:
+        update_user:
+          $ref: "#/components/schemas/User"
+        type:
+          type: string
+          example: "Public"
+        title:
+          type: string
+          example: "夏コミの交通費をお願いします。"
+        remarks:
+          type: string
+          example: "〇〇駅から〇〇駅への移動"
+        ammount:
+          type: integer   
+          example: 1200
+        updated_at:
+          type: string
+          format: "date-time"
+          example: "2019/07/28 22:00:00"
     PostApplication:
       type: object
       properties:
-        adress:
-            type: object
-            properties:
-              type:
+        details:
+          type: object
+          properties:
+            type:
+              type: string
+              example: "Public"
+            title:
+              type: string
+              example: "夏コミの交通費をお願いします。"
+            remarks:
+              type: string
+              example: "〇〇駅から〇〇駅への移動"
+            ammount:
+              type: integer   
+              example: 1200
+            paid_to_id:
+              type: array
+              items: 
                 type: string
-                example: "Public"
-              title:
-                type: string
-                example: "夏コミの交通費をお願いします。"
-              remarks:
-                type: string
-                example: "〇〇駅から〇〇駅への移動"
-              ammount:
-                type: integer   
-                example: 1200
-              paid_to_id:
-                type: array
-                items: 
-                  type: string
-                  example: "nagatech"
-        image_name:
+                example: "nagatech"
+        image:
           type: array
           items: 
             type: string
@@ -504,6 +597,9 @@ components:
       properties:
         user:
           $ref: "#/components/schemas/User"
+        comment_id:
+          type: integer
+          description: コメント変更削除に対応するため
         comment:
           type: string
           example: "コメント内容"
@@ -517,7 +613,7 @@ components:
         user:
           $ref: "#/components/schemas/User"
         to_state:
-          description: 申請済み(applied) ,却下(rejected),要修正(fix_required),許可済み(permitted),返金済み(paid)
+          description: 申請済み(applied) ,却下(rejected),要修正(fix_required),許可済み(permitted),全員に返金済み(fully_paid)
           type: string
           example: "rejected"
         reason:
@@ -528,6 +624,16 @@ components:
           type: string
           format: "date-time"
           example: "2019/07/28 22:00:00"
+    Paid:
+      type: object
+      properties:
+        paid_by_user:
+          $ref: "#/components/schemas/User"
+        paid_to_user:
+          $ref: "#/components/schemas/User"
+        paid_at:
+          type: string
+          format: date-time
   securitySchemes:
     application:
       type: oauth2
