@@ -27,7 +27,7 @@ paths:
           schema:
             type: string
         - name: current_state
-          description: 現在の申請書の状態（"applied","rejected","fix_required","permitted","fully_paid")
+          description: 現在の申請書の状態（"applied","rejected","fix_required","permitted","fully_returned")
           required: false
           in: query
           schema:
@@ -114,7 +114,8 @@ paths:
                     type: integer
                     example: "申請書のレコードid"
                   application_id:
-                    type: integer
+                    type: string
+                    format: uuid
                     example: "同一申請書ごとのid"
                   created_at:
                     type: string
@@ -127,7 +128,7 @@ paths:
                     $ref: "#/components/schemas/Application"
 
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたpaid_to_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
+          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたreturned_to_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
           content:
             application/json:
               schema:
@@ -143,7 +144,7 @@ paths:
       schema:
         type: integer
     get:
-      description: 指定した申請書の詳細を取得する。(コメントは作成日時を返す)
+      description: 指定した申請書の詳細を取得する。(コメントは作成日時を返す)(画像についてはresponseの画像idから再度apiをたたく。)
       tags:
         - Applications
       responses:
@@ -158,7 +159,8 @@ paths:
                     type: integer
                     example: "申請書のレコードid"
                   application_id:
-                    type: integer
+                    type: string
+                    format: uuid
                     example: "同一申請書ごとのid"
                   created_at:
                     type: string
@@ -177,10 +179,10 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/State"
-                  paid_logs:
+                  returned_logs:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Paid"
+                      $ref: "#/components/schemas/returned"
                   application_logs:
                     type: array
                     items:
@@ -190,7 +192,7 @@ paths:
         "404":
           description: 指定されたApplicationIdはない。
     patch:
-      description: 指定したApplicationを修正する。(新しいレコードを作る）。修正できるのは申請書の作成者かadminで、かつstateが"applied"(申請済み)もしくは"fix_required"(要修正))のとき。
+      description: 指定したApplicationを修正する。(新しいレコードを作る）。修正できるのは申請書の作成者かadminで、かつstateが"applied"(申請済み)もしくは"fix_required"(要修正))のとき。画像以外はここのbodyの内容を新たな情報と上書きします（追加、削除、変更をおこなう）。画像についてはここでは追加のみ行い、削除はしません（`delete applicaitions/{applicationId}/images/{imageId}`でおこなう）。
       tags:
         - Applications
       requestBody:
@@ -211,7 +213,8 @@ paths:
                     type: integer
                     example: "申請書のレコードid"
                   application_id:
-                    type: integer
+                    type: string
+                    format: uuid
                     example: "同一申請書ごとのid"
                   updated_at:
                     type: string
@@ -223,7 +226,7 @@ paths:
                   application: 
                     $ref: "#/components/schemas/Application"
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたpaid_to_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
+          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたreturned_to_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
           content:
             application/json:
               schema:
@@ -246,6 +249,45 @@ paths:
                     example: "rejected"
         "404":
           description: 指定された申請書はない。
+  "/applications/{applicationId}/images/{imageId}":
+    parameters:
+    - name: applicationId
+      in: path
+      required: true
+      schema:
+        type: integer
+    - name: imageId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    get:
+      tags:
+        - Applications
+      description: 指定された画像ファイルを返す
+      responses:
+        "200":
+          description: 該当する画像ファイルが存在した 返す
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not Found
+
+    delete:
+      description: 指定した画像idの画像ファイルを削除する。
+      tags:
+        - Applications
+      responses:
+        "204":
+          description: 正常に取り消すことができました。
+        "403":
+          description: 編集権限がない人(作成者、admin以外)による操作。
+        "404":
+          description: 指定されたimageIdはない。
   "/applications/{applicationId}/comment":
     post:
       description: 指定した申請書にコメントを新規作成する。
@@ -319,16 +361,14 @@ paths:
         - Comments
       responses:
         "204":
-          description: 正常に取り消すことができました。
-        "400":
-          description: リクエストに形式上または内容の不備がある。例えばコメント欄が空欄。
+          description: 正常に取り消すことができました。。
         "403":
           description: 編集権限がない人(コメント作成者以外)による操作。
         "404":
           description: 指定されたコメントはない。
   "/applications/{applicationId}/states":
     put:
-      description: 指定した申請書のstateを変更のみ（新規はpost /applications で)する。reasonについてはstateを「appliedからfix_required」「appliedからrejected」「permittedからapplied」にするとき必須。stateの行き来の定義は作成者は「fix_requiredからapplied（このときapplication更新も行なっているはず）」をでき、adminは「appliedからrejected」「appliedからrequired」「fix_requiredからapplied」「appliedからpermitted」「permittedからapplied（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「permittedからfully_paid」の操作はここでは行えない。
+      description: 指定した申請書のstateを変更のみ（新規はpost /applications で)する。reasonについてはstateを「appliedからfix_required」「appliedからrejected」「permittedからapplied」にするとき必須。stateの行き来の定義は作成者は「fix_requiredからapplied（このときapplication更新も行なっているはず）」をでき、adminは「appliedからrejected」「appliedからrequired」「fix_requiredからapplied」「appliedからpermitted」「permittedからapplied（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「permittedからfully_returned」の操作はここでは行えない。
       tags:
         - States
       parameters:
@@ -381,12 +421,12 @@ paths:
                     example: "rejected"
                   to_state:
                     type: string
-                    example: "fully_paid"
+                    example: "fully_returned"
         "404":
           description: 指定された申請書はない。
-  "/applications/{applicationId}/states/paid/{paidToId}":
+  "/applications/{applicationId}/states/returned/{returnedToId}":
     put:
-      description: 指定した申請書、支払い対象者についての返金状態を変更する（paidがfalseからtrueへの変更のみ）。ただし操作できるのはadminかつstateが"permitted"の時のみ。db上では全員に返却されたときに「3(permitted)から4(fully_paid)」の操作を行う。
+      description: 指定した申請書、支払い対象者についての返金状態を変更する（returnedがfalseからtrueへの変更のみ）。ただし操作できるのはadminかつstateが"permitted"の時のみ。db上では全員に返却されたときに「3(permitted)から4(fully_returned)」の操作を行う。
       tags:
         - States
       parameters:
@@ -395,7 +435,7 @@ paths:
           required: true
           schema:
             type: integer
-        - name: paidToId
+        - name: returnedToId
           in: path
           required: true
           schema:
@@ -408,16 +448,16 @@ paths:
              schema:
               type: object
               properties:
-                paid_by_user:
+                returned_by_user:
                   $ref: "#/components/schemas/User"
-                paid_to_user:
+                returned_to_user:
                   $ref: "#/components/schemas/User"
-                paid_at:
+                returned_at:
                   type: string
                   format: date-time
                 to_state:
                     type: string
-                    example: "fully_paid"
+                    example: "fully_returned"
         "400":
           description: すでに返金済みのユーザー。
         "404":
@@ -531,7 +571,7 @@ components:
         ammount:
           type: integer   
           example: 1200
-        paid_to_id:
+        returned_to_id:
           type: array
           items: 
             type: string
@@ -540,7 +580,8 @@ components:
           type: array
           items: 
             type: string
-            example: "画像の保管場所を表す何か"
+            format: uuid
+            example: "画像のuuid"
     ApplicationLog:
       type: object
       properties:
@@ -588,7 +629,7 @@ components:
             ammount:
               type: integer   
               example: 1200
-            paid_to_id:
+            returned_to_id:
               type: array
               items: 
                 type: string
@@ -628,7 +669,7 @@ components:
         user:
           $ref: "#/components/schemas/User"
         to_state:
-          description: 申請済み(applied) ,却下(rejected),要修正(fix_required),許可済み(permitted),全員に返金済み(fully_paid)
+          description: 申請済み(applied) ,却下(rejected),要修正(fix_required),許可済み(permitted),全員に返金済み(fully_returned)
           type: string
           example: "rejected"
         reason:
@@ -639,14 +680,14 @@ components:
           type: string
           format: "date-time"
           example: "2019/07/28 22:00:00"
-    Paid:
+    returned:
       type: object
       properties:
-        paid_by_user:
+        returned_by_user:
           $ref: "#/components/schemas/User"
-        paid_to_user:
+        returned_to_user:
           $ref: "#/components/schemas/User"
-        paid_at:
+        returned_at:
           type: string
           format: date-time
   securitySchemes:
