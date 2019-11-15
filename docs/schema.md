@@ -16,7 +16,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 
 | Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
 | ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| id          | int(11) | NO   | PRI | _NULL_  | auto_increment |
+| id          | char(36) | NO   | PRI | _NULL_  |  |uuid|
 | applications_details_id          | int(11) | NO   | MUL | _NULL_  || 経費申請詳細の最新id**Parents:applications_details.id** **（※）** |
 | states_logs_id          | int(11) | NO   | MUL | _NULL_  || 状態の最新id**Parents:states_logs.id**　**（※）**  |
 | create_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 申請者のtraPid |            
@@ -29,14 +29,14 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
 | ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
 | id          | int(11) | NO   | PRI | _NULL_  | auto_increment |
-|application_id|int(11)|NO|MUL|_NULL_||経費精算申請ごとにつくid **parents:applications.id**|
+|application_id|char(36)|NO|MUL|_NULL_||経費精算申請ごとにつくid **parents:applications.id**|
 | update_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 変更者（初めは申請者）のtraPid |
 | type             | tinyint(4)   | NO   |     | _NULL_            |                | どのタイプの申請か (0(Club), 1(Contest), 2(Event), 3(Public)) |
 | title        | text      | NO  |     | _NULL_||        申請の目的、概要(大会名など) |
 | remarks       | text      | YES  |     | _NULL_ |           |   備考（購入したものの概要、旅程、乗車区間など） |
 | amount | int(11)    | NO  |     | _NULL_    |         |申請金額    |                     
+| bought_at       | timestamp  | NO   |     |  |       | お金を使った日  |
 | created_at       | timestamp  | NO   |     | CURRENT_TIMESTAMP |       | 申請書が作成（変更）された日時  |
-
 
 
 ### return_users
@@ -46,11 +46,10 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
 | ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
 | id          | int(11) | NO   | PRI | _NULL_  |auto_increment|  |
-| application_id          | int(11) | NO   | MUL | _NULL_  || 申請書のid |
-| reimbursed_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 払い戻される人のtraPid |
-| paid          | boolean | NO   |  | false  ||払い戻されたらtrueにする  |
-| paid_by_user_trap_id      | varchar(32) | YES   | MUL | _NULL_  |           | お金を渡した人のtraPid |
-| paid_at          | timestamp | YES   |  | _NULL_  | |払い戻された日  |
+| application_id          | char(36) | NO   | MUL | _NULL_  || 申請書のid |
+| returned_to_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 払い戻される人のtraPid |
+| returned_by_user_trap_id      | varchar(32) | YES   | MUL | _NULL_  |           | お金を渡した人のtraPid |
+| returned_at          | timestamp | YES   |  | _NULL_  | |払い戻された日  |
 
 
 ### applications_images
@@ -59,9 +58,9 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 
 | Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
 | ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| id          | int(11) | NO   | PRI | _NULL_  |auto_increment|  |
-| application_id          | int(11) | NO   | MULL | _NULL_  || 申請書のid |
-| image_name | text | YES   |     |_NULL_       |       | 領収書等の画像   |
+| id          |char(36) | NO   | PRI | _NULL_  || uuid |
+| application_id          | char(36) | NO   | MULL | _NULL_  || 申請書のid |
+| image | binary | YES   |     |_NULL_       |       | 領収書等の画像   |
 
 ### states_logs
 
@@ -70,7 +69,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
 | ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
 | id          | int(11) | NO   | PRI | _NULL_  |auto_increment|  |
-| application_id          | int(11) | NO   | MUL | _NULL_  || 申請書のid **parents:applications.id**|
+| application_id          | char(36) | NO   | MUL | _NULL_  || 申請書のid **parents:applications.id**|
 | change_user_trap_id      | varchar(32) | NO   |  | _NULL_  |           | 状態を変えた人のtraPid |
 | to_state     | tinyint(4) | NO   |     | 0                 |                | どの状態へ変えたか (0(申請済み) ,1(却下),2(要修正),3(許可済み),4(返金済み))                                                                                 |
 | reason     |text | YES  |     | _NULL_                 |                | 状態を変えたとき状態の変え方によってコメントをつけられたり付けられなかったりします。（swagger参照) |
@@ -85,7 +84,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | Field            | Type      | Null | Key | Default           | Extra          | 説明など                                            |
 | ---------------- | --------- | ---- | --- | ----------------- | -------------- | --------------------------------------------------- |
 | id      | int(11)   | NO   | PRI | _NULL_            | auto_increment | コメントIＤ |
-| application_id | int(11)   | NO   | MUL | _NULL_            |                | どの申請書へのコメントか **Parents:applications.id**                          |
+| application_id | char(36)  | NO   | MUL | _NULL_            |                | どの申請書へのコメントか **Parents:applications.id**                          |
 | user_trap_id      | varchar(32)  | NO  | MUL | _NULL_            |                | コメントした人の traPID                                     |
 | comment       |  text    | NO  |     | _NULL_            |       |コメント内容そのもの                                       |
 | created_at     | timestamp | NO   |     | CURRENT_TIMESTAMP |                | コメントが作成された日時                                                                                              |

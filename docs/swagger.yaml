@@ -32,6 +32,12 @@ paths:
           in: query
           schema:
             type: string
+        - name: financial_year
+          description: 何年度の申請か
+          required: false
+          in: query
+          schema:
+            type: integer
         - name: applicant
           description: 誰が申請したか
           required: false
@@ -518,6 +524,10 @@ components:
         remarks:
           type: string
           example: "〇〇駅から〇〇駅への移動"
+        bought_at:
+          type: string
+          format: "date-time"
+          example: "2019/07/28 22:00:00"
         ammount:
           type: integer   
           example: 1200
@@ -548,6 +558,10 @@ components:
         ammount:
           type: integer   
           example: 1200
+        bought_at:
+          type: string
+          format: "date-time"
+          example: "2019/07/28 22:00:00"
         updated_at:
           type: string
           format: "date-time"
@@ -567,6 +581,10 @@ components:
             remarks:
               type: string
               example: "〇〇駅から〇〇駅への移動"
+            bought_at:
+              type: string
+              format: "date-time"
+              example: "2019/07/28 22:00:00"
             ammount:
               type: integer   
               example: 1200
