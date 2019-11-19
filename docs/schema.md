@@ -1,5 +1,5 @@
 # DB schema
-**Jomon**のDBです。外部キー制約は **（※）** を除いて全て`ON UPDATE reference_option`,`ON DELETE reference_option`共にデフォルト(`RESTRICT`)です。申請書リスト取得時の処理を高めるために、appolicationsに'applications_details_id','states_logs_id'を追加したことで相互参照が起凝ります。よって以上二つ(※）については内容としてはMULですが、DMSによっては制限しないことにします。
+**Jomon**のDBです。外部キー制約は **（※）** を除いて全て`ON UPDATE reference_option`,`ON DELETE reference_option`共にデフォルト(`RESTRICT`)です。申請書リスト取得時の処理を高めるために、appolicationsに'applications_details_id','states_logs_id'を追加したことで相互参照が起こります。よって以上二つ(※）については内容としてはMULですが、DMSによっては制限しないことにします。
 
 ### administrators
 
@@ -24,7 +24,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 
 ### applications_details
 
-経費精算申請（新規、変更ごとに新しレコードが作られます。申請の削除はできず、一度作ったら必ずいずれかのstateに当てはまります。)
+経費精算申請（新規、変更ごとに新しいレコードが作られます。申請の削除はできず、一度作ったら必ずいずれかのstateに当てはまります。)
 
 | Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
 | ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |

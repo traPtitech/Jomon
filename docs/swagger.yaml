@@ -104,7 +104,7 @@ paths:
               $ref: "#/components/schemas/PostApplication"
       responses:
         "201":
-          description: 作成した。作成した先を返す。
+          description: 作成した。結果を返す。
           content:
             application/json:
               schema:
@@ -283,12 +283,12 @@ paths:
         - Applications
       responses:
         "204":
-          description: 正常に取り消すことができました。
+          description: 正常に取り消すことができた。
         "403":
           description: 編集権限がない人(作成者、admin以外)による操作。
         "404":
-          description: 指定されたimageIdはない。
-  "/applications/{applicationId}/comment":
+          description: 該当する画像はない。
+  "/applications/{applicationId}/comments":
     post:
       description: 指定した申請書にコメントを新規作成する。
       tags:
@@ -320,8 +320,13 @@ paths:
           description: リクエストに形式上または内容の不備がある。例えばコメント欄が空欄。
         "404":
           description: 指定されたコメントはない。
-  "/comments/{commentId}":
+  "/applications/{applicationId}/comments/{commentId}":
     parameters:
+    - name: applicationId
+      in: path
+      required: true
+      schema:
+        type: integer
     - name: commentId
       in: path
       required: true
