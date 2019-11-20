@@ -19,7 +19,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | id          | char(36) | NO   | PRI | _NULL_  |  |uuid|
 | applications_details_id          | int(11) | NO   | MUL | _NULL_  || 経費申請詳細の最新id**Parents:applications_details.id** **（※）** |
 | states_logs_id          | int(11) | NO   | MUL | _NULL_  || 状態の最新id**Parents:states_logs.id**　**（※）**  |
-| create_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 申請者のtraPid |            
+| create_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 申請者のtraPid |
 | created_at       | timestamp  | NO   |     | CURRENT_TIMESTAMP |       | 申請書が作成された日時 |
 
 ### applications_details
@@ -34,7 +34,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | type             | tinyint(4)   | NO   |     | _NULL_            |                | どのタイプの申請か (0(Club), 1(Contest), 2(Event), 3(Public)) |
 | title        | text      | NO  |     | _NULL_||        申請の目的、概要(大会名など) |
 | remarks       | text      | YES  |     | _NULL_ |           |   備考（購入したものの概要、旅程、乗車区間など） |
-| amount | int(11)    | NO  |     | _NULL_    |         |申請金額    |                     
+| amount | int(11)    | NO  |     | _NULL_    |         |申請金額    |
 | bought_at       | timestamp  | NO   |     |  |       | お金を使った日  |
 | created_at       | timestamp  | NO   |     | CURRENT_TIMESTAMP |       | 申請書が作成（変更）された日時  |
 
@@ -70,7 +70,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
 | id          | int(11) | NO   | PRI | _NULL_  |auto_increment|  |
 | application_id          | char(36) | NO   | MUL | _NULL_  || 申請書のid **parents:applications.id**|
-| change_user_trap_id      | varchar(32) | NO   |  | _NULL_  |           | 状態を変えた人のtraPid |
+| update_user_trap_id      | varchar(32) | NO   |  | _NULL_  |           | 状態を変えた人のtraPid |
 | to_state     | tinyint(4) | NO   |     | 0                 |                | どの状態へ変えたか (0(申請済み) ,1(却下),2(要修正),3(許可済み),4(返金済み))                                                                                 |
 | reason     |text | YES  |     | _NULL_                 |                | 状態を変えたとき状態の変え方によってコメントをつけられたり付けられなかったりします。（swagger参照) |
 | created_at       | timestamp  | NO   |     | CURRENT_TIMESTAMP |                | 状態が更新された日時                                                                                                  |
@@ -88,5 +88,5 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | user_trap_id      | varchar(32)  | NO  | MUL | _NULL_            |                | コメントした人の traPID                                     |
 | comment       |  text    | NO  |     | _NULL_            |       |コメント内容そのもの                                       |
 | created_at     | timestamp | NO   |     | CURRENT_TIMESTAMP |                | コメントが作成された日時                                                                                              |
-| updated_at     | timestamp |  NO  |     | CURRENT_TIMESTAMP |    on update CURRENT_TIMESTAMP            | コメントが更新された日時                                                                                              | 
+| updated_at     | timestamp |  NO  |     | CURRENT_TIMESTAMP |    on update CURRENT_TIMESTAMP            | コメントが更新された日時                                                                                              |
 | deleted_at     | timestamp |  YES  |     | NULL |                | コメントが削除された日時                                                                                              |
