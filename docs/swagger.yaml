@@ -27,7 +27,7 @@ paths:
           schema:
             type: string
         - name: current_state
-          description: 現在の申請書の状態（"applied","rejected","fix_required","permitted","fully_returned")
+          description: 現在の申請書の状態（"submitted","rejected","fix_required","accepted","fully_repaid")
           required: false
           in: query
           schema:
@@ -45,19 +45,19 @@ paths:
           schema:
             type: string
         - name: type
-          description: どのタイプか（"Club","Contest","Event","Public")
+          description: どのタイプか（"club","contest","event","public")
           in: query
           required: false
           schema:
             type: string
-        - name: applied_since
+        - name: submitted_since
           description: いつからの申請か
           required: false
           in: query
           schema:
             type: string
             format: date
-        - name: applied_until
+        - name: submitted_until
           description: いつまでの申請か
           required: false
           in: query
@@ -94,7 +94,7 @@ paths:
                 $ref: "#/components/schemas/DetailedApplication"
 
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたreturned_to_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
+          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたrepaid_to_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
           content:
             application/json:
               schema:
@@ -125,7 +125,7 @@ paths:
         "404":
           description: 指定されたApplicationIdはない。
     patch:
-      description: 指定したApplicationを修正する。(新しいレコードを作る）。修正できるのは申請書の作成者かadminで、かつstateが"applied"(申請済み)もしくは"fix_required"(要修正))のとき。画像以外はここのbodyの内容を新たな情報と上書きします（追加、削除、変更をおこなう）。画像についてはここでは追加のみ行い、削除はしません（`delete applicaitions/{applicationId}/images/{imageId}`でおこなう）。
+      description: 指定したApplicationを修正する。(新しいレコードを作る）。修正できるのは申請書の作成者かadminで、かつstateが"submitted"(申請済み)もしくは"fix_required"(要修正))のとき。画像以外はここのbodyの内容を新たな情報と上書きします（追加、削除、変更をおこなう）。画像についてはここでは追加のみ行い、削除はしません（`delete applicaitions/{applicationId}/images/{imageId}`でおこなう）。
       tags:
         - Applications
       requestBody:
@@ -142,7 +142,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/DetailedApplication"
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたreturned_to_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
+          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄である、amountが負である,指定されたrepaid_to_idに該当するClientが存在しないなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
           content:
             application/json:
               schema:
@@ -157,12 +157,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  is_user_permitted:
+                  is_user_accepted:
                     type: boolean
-                    example: fales
+                    example: false
                   current_state:
-                    type: string
-                    example: "rejected"
+                    $ref: "#/components/schemas/StateEnum"
         "404":
           description: 指定された申請書はない。
   "/applications/{applicationId}/images/{imageId}":
@@ -288,7 +287,7 @@ paths:
           description: 指定されたコメントはない。
   "/applications/{applicationId}/states":
     put:
-      description: 指定した申請書のstateを変更のみ（新規はpost /applications で)する。reasonについてはstateを「appliedからfix_required」「appliedからrejected」「permittedからapplied」にするとき必須。stateの行き来の定義は作成者は「fix_requiredからapplied（このときapplication更新も行なっているはず）」をでき、adminは「appliedからrejected」「appliedからrequired」「fix_requiredからapplied」「appliedからpermitted」「permittedからapplied（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「permittedからfully_returned」の操作はここでは行えない。
+      description: 指定した申請書のstateを変更のみ（新規はpost /applications で)する。reasonについてはstateを「submittedからfix_required」「submittedからrejected」「acceptedからsubmitted」にするとき必須。stateの行き来の定義は作成者は「fix_requiredからsubmitted（このときapplication更新も行なっているはず）」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからfully_repaid」の操作はここでは行えない。
       tags:
         - States
       parameters:
@@ -306,7 +305,7 @@ paths:
               properties:
                 to_state:
                   type: string
-                  example: "permitted"
+                  example: "accepted"
                 reason:
                   type: string
                   example: "良いですね。"
@@ -325,7 +324,7 @@ paths:
                     format: date-time
                   current_state:
                     type: string
-                    example: "permitted"
+                    example: "accepted"
                   past_state:
                     type: string
                     example: "rejected"
@@ -341,12 +340,12 @@ paths:
                     example: "rejected"
                   to_state:
                     type: string
-                    example: "fully_returned"
+                    example: "fully_repaid"
         "404":
           description: 指定された申請書はない。
-  "/applications/{applicationId}/states/returned/{returnedToId}":
+  "/applications/{applicationId}/states/repaid/{repaidToId}":
     put:
-      description: 指定した申請書、支払い対象者についての返金状態を変更する。ただし操作できるのはadminかつstateが"permitted"の時のみ。db上では全員に返却されたときに「3(permitted)から4(fully_returned)」の操作を行う。
+      description: 指定した申請書、支払い対象者についての返金状態を変更する。ただし操作できるのはadminかつstateが"accepted"の時のみ。db上では全員に返却されたときに「2(accepted)から3(fully_repaid)」の操作を行う。
       tags:
         - States
       parameters:
@@ -355,7 +354,7 @@ paths:
           required: true
           schema:
             type: integer
-        - name: returnedToId
+        - name: repaidToId
           in: path
           required: true
           schema:
@@ -368,16 +367,15 @@ paths:
               schema:
                 type: object
                 properties:
-                  returned_by_user:
+                  repaid_by_user:
                     $ref: "#/components/schemas/User"
-                  returned_to_user:
+                  repaid_to_user:
                     $ref: "#/components/schemas/User"
-                  returned_at:
+                  repaid_at:
                     type: string
                     format: date-time
                   to_state:
-                    type: string
-                    example: "fully_returned"
+                    $ref: "#/components/schemas/StateEnum"
         "400":
           description: すでに返金済みのユーザー。
         "404":
@@ -470,7 +468,7 @@ components:
       enum: ["club", "contest", "event", "public"]
     StateEnum:
       type: string
-      enum: ["submitted", "fix_required", "accepted", "fully_returned", "rejected"]
+      enum: ["submitted", "fix_required", "accepted", "fully_repaid", "rejected"]
     CompactApplication:
       type: object
       properties:
@@ -492,7 +490,7 @@ components:
         remarks:
           type: string
           example: "〇〇駅から〇〇駅への移動"
-        bought_at:
+        paid_at:
           type: string
           format: date
         ammount:
@@ -503,7 +501,7 @@ components:
         - $ref: "#/components/schemas/CompactApplication"
         - type: object
           properties:
-            returned_to_id:
+            repaid_to_id:
               type: array
               items:
                 type: string
@@ -525,7 +523,7 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/ApplicationLog"
-            return_logs:
+            repayment_logs:
               type: array
               items:
                 $ref: "#/components/schemas/Repayment"
@@ -545,7 +543,7 @@ components:
         ammount:
           type: integer
           example: 1200
-        bought_at:
+        paid_at:
           type: string
           format: date
         updated_at:
@@ -565,13 +563,13 @@ components:
             remarks:
               type: string
               example: "〇〇駅から〇〇駅への移動"
-            bought_at:
+            paid_at:
               type: string
               format: date-time
             ammount:
               type: integer
               example: 1200
-            returned_to_id:
+            repaid_to_id:
               type: array
               items:
                 type: string
@@ -626,10 +624,10 @@ components:
     Repayment:
       type: object
       properties:
-        returned_by_user:
+        repaid_by_user:
           $ref: "#/components/schemas/User"
-        returned_to_user:
+        repaid_to_user:
           $ref: "#/components/schemas/User"
-        returned_at:
+        repaid_at:
           type: string
           format: date-time
