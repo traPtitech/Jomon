@@ -467,10 +467,10 @@ components:
   schemas:
     TypeEnum:
       type: string
-      enum: ["Club", "Contest", "Event", "Public"]
+      enum: ["club", "contest", "event", "public"]
     StateEnum:
       type: string
-      enum: ["applied", "fix_required", "permitted", "fully_returned", "rejected"]
+      enum: ["submitted", "fix_required", "accepted", "fully_returned", "rejected"]
     CompactApplication:
       type: object
       properties:
