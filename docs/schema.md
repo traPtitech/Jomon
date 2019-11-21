@@ -8,7 +8,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 
 | Field            | Type     | Null | Key | Default | Extra | 説明など |
 | ---------------- | -------- | ---- | --- | ------- | ----- | -------- |
-| admin_trap_id     | varchar(32) | NO   | PRI | _NULL_  |
+| trap_id     | varchar(32) | NO   | PRI | _NULL_  |
 
 ## applications
 
