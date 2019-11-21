@@ -386,12 +386,8 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    user:
-                      $ref: "#/components/schemas/User"
-                    admin:
-                      type: boolean
+                  $ref: "#/components/schemas/User"
+
   "/users/me":
     get:
       tags:
@@ -427,25 +423,20 @@ paths:
         content:
             application/json:
               schema:
-                  type: object
-                  properties:
-                    trap_id:
-                      type: string
-                      example: "nagatech"
-                    to_admin:
-                      type: boolean
+                type: object
+                properties:
+                  trap_id:
+                    type: string
+                    example: "nagatech"
+                  to_admin:
+                    type: boolean
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                  type: object
-                  properties:
-                    user:
-                      $ref: "#/components/schemas/User"
-                    current_admin:
-                      type: boolean
+                $ref: "#/components/schemas/User"
         "400":
           description: リクエストに形式上の不備がある。
         "403":
