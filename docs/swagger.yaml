@@ -120,8 +120,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DetailedApplication"
-        "400":
-          description: リクエストがおかしい。
         "404":
           description: 指定されたApplicationIdはない。
     patch:
@@ -450,7 +448,7 @@ paths:
                       type: boolean
 
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばadminの状態が変更前と同じだった時。
+          description: リクエストに形式上の不備がある。
         "403":
           description: admin以外の人
         "404":
