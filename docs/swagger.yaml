@@ -375,7 +375,7 @@ paths:
           description: 該当する画像はない。
   "/users":
     get:
-      description: ユーザの一覧を返す
+      description: ユーザーの一覧を返す
       tags:
         - Users
       responses:
@@ -406,7 +406,7 @@ paths:
                 $ref: "#/components/schemas/User"
   "/users/admins":
     get:
-      description: adminユーザの一覧を返す。
+      description: adminユーザーの一覧を返す。
       tags:
         - Users
       responses:
