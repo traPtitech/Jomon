@@ -457,10 +457,10 @@ components:
   schemas:
     TypeEnum:
       type: string
-      enum: ["club", "contest", "event", "public"]
+      enum: [club, contest, event, public]
     StateEnum:
       type: string
-      enum: ["submitted", "fix_required", "accepted", "fully_repaid", "rejected"]
+      enum: [submitted, fix_required, accepted, fully_repaid, rejected]
     CompactApplication:
       type: object
       properties:
@@ -569,6 +569,8 @@ components:
               items:
                 type: string
                 example: "nagatech"
+              uniqueItems: true
+              minItems: 1
         images:
           type: array
           items:
