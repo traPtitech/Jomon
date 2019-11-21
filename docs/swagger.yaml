@@ -164,45 +164,6 @@ paths:
                     $ref: "#/components/schemas/StateEnum"
         "404":
           description: 指定された申請書はない。
-  "/applications/{applicationId}/images/{imageId}":
-    parameters:
-    - name: applicationId
-      in: path
-      required: true
-      schema:
-        type: integer
-    - name: imageId
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-    get:
-      tags:
-        - Applications
-      description: 指定された画像ファイルを返す
-      responses:
-        "200":
-          description: 該当する画像ファイルが存在した 返す
-          content:
-            image/png:
-              schema:
-                type: string
-                format: binary
-        "404":
-          description: Not Found
-
-    delete:
-      description: 指定した画像idの画像ファイルを削除する。
-      tags:
-        - Applications
-      responses:
-        "204":
-          description: 正常に取り消すことができた。
-        "403":
-          description: 編集権限がない人(作成者、admin以外)による操作。
-        "404":
-          description: 該当する画像はない。
   "/applications/{applicationId}/comments":
     post:
       description: 指定した申請書にコメントを新規作成する。
@@ -380,6 +341,40 @@ paths:
           description: すでに返金済みのユーザー。
         "404":
           description: 指定された申請書または返金対象者はない。
+  "/images/{imageId}":
+    parameters:
+    - name: imageId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    get:
+      tags:
+        - Applications
+      description: 指定された画像ファイルを返す
+      responses:
+        "200":
+          description: 該当する画像ファイルが存在した 返す
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not Found
+
+    delete:
+      description: 指定した画像idの画像ファイルを削除する。
+      tags:
+        - Applications
+      responses:
+        "204":
+          description: 正常に取り消すことができた。
+        "403":
+          description: 編集権限がない人(作成者、admin以外)による操作。
+        "404":
+          description: 該当する画像はない。
   "/users":
     get:
       description: ユーザの一覧を返す
