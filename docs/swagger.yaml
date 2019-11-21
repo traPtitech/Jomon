@@ -446,7 +446,6 @@ paths:
                       $ref: "#/components/schemas/User"
                     current_admin:
                       type: boolean
-
         "400":
           description: リクエストに形式上の不備がある。
         "403":
@@ -488,6 +487,7 @@ components:
           format: date
         ammount:
           type: integer
+          minimum: 1
           example: 1200
     DetailedApplication:
       allOf:
@@ -535,6 +535,7 @@ components:
           example: "〇〇駅から〇〇駅への移動"
         ammount:
           type: integer
+          minimum: 1
           example: 1200
         paid_at:
           type: string
@@ -561,6 +562,7 @@ components:
               format: date-time
             ammount:
               type: integer
+              minimum: 1
               example: 1200
             repaid_to_id:
               type: array
