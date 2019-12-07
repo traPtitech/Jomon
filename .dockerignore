@@ -1,0 +1,11 @@
+Dockerfile
+docker-compose.yml
+.dockerignore
+.git
+.gitignore
+
+Jomon
+showcase.yaml
+/client/node_modules/
+/client/dist/
+/docs/
