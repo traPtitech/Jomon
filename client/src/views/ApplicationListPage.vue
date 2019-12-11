@@ -1,5 +1,5 @@
 <template>
-  <div class="applicationlist">
+  <div class="application-list">
     <h1>This is an application list page</h1>
     <li><router-link to="/applications/1">id1 </router-link></li>
     <li><router-link to="/applications/2">id2 </router-link></li>
