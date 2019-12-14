@@ -3,7 +3,7 @@ import VueRouter from "vue-router";
 import ApplicationListPage from "../views/ApplicationListPage.vue";
 import ApplicationDetailPage from "../views/ApplicationDetailPage.vue";
 import AdminPage from "../views/AdminPage";
-import NewApplicationPage from "../views/NewApplication.vue";
+import NewApplicationPage from "../views/NewApplicationPage.vue";
 
 Vue.use(VueRouter);
 
