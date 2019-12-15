@@ -1,4 +1,4 @@
-FROM golang:1.12.5-alpine as build
+FROM golang:1.13.5-alpine as build
 RUN apk add --update --no-cache ca-certificates git
 
 WORKDIR /github.com/traPtitech/Jomon
