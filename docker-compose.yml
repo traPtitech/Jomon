@@ -5,14 +5,15 @@ services:
     ports:
       - "3000:80"
     volumes:
-      - ../docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - jomon-server
       - jomon-client
+
   jomon-server:
     build:
-      context: ..
-      dockerfile: development/Dockerfile
+      context: ./
+      dockerfile: ./development/Dockerfile
     environment:
       MARIADB_USERNAME: root
       MARIADB_PASSWORD: password
@@ -21,14 +22,14 @@ services:
     ports:
       - '1323:1323'
     volumes:
-      - '../:/go/src/github.com/traPtitech/Jomon'
+      - './:/go/src/github.com/traPtitech/Jomon'
     depends_on:
       - db
 
   jomon-client:
-    build: ../client
+    build: ./client
     volumes:
-      - '../client/app'
+      - './client/app'
     tty: true
     entrypoint: npm run serve
 
@@ -39,8 +40,6 @@ services:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: jomon
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
-    volumes:
-      - './init.sql:/docker-entrypoint-initdb.d/init.sql'
     expose:
       - '3306'
     ports:
