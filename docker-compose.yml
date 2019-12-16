@@ -17,7 +17,7 @@ services:
     environment:
       MARIADB_USERNAME: root
       MARIADB_PASSWORD: password
-      MARIADB_HOSTNAME: mysql
+      MARIADB_HOSTNAME: db
       MARIADB_DATABASE: jomon
     ports:
       - '1323:1323'
