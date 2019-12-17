@@ -7,9 +7,11 @@ import (
 )
 
 func PutStatus(c echo.Context) error {
+	// some program
 	return c.String(http.StatusOK, "PutStatus")
 }
 
 func PutRepaidStatus(c echo.Context) error {
+	// some program
 	return c.String(http.StatusOK, "PutRepaidStatus")
 }

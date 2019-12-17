@@ -5,39 +5,37 @@ import (
 )
 
 func SetRouting(e *echo.Echo) {
-	api := e.Group("/api")
+
+	apiApplications := e.Group("/applications")
 	{
-		apiApplications := api.Group("/applications")
-		{
-			apiApplications.GET("", GetApplications)
-			apiApplications.POST("", PostApplications)
-			apiApplications.PATCH("/:applicationId", PatchApplications)
-		}
-		apiImages := api.Group("/images")
-		{
-			apiImages.GET("/:imageId", GetImages)
-			apiImages.DELETE("/:imageId", DeleteImages)
-		}
+		apiApplications.GET("", GetApplications)
+		apiApplications.POST("", PostApplications)
+		apiApplications.PATCH("/:applicationId", PatchApplications)
+	}
+	apiImages := e.Group("/images")
+	{
+		apiImages.GET("/:imageId", GetImages)
+		apiImages.DELETE("/:imageId", DeleteImages)
+	}
 
-		apiComments := api.Group("/applications/:applicationId/comments")
-		{
-			apiComments.POST("", PostComments)
-			apiComments.PUT("/:commentId", PutComments)
-			apiComments.DELETE("/:commentId", DeleteComments)
-		}
+	apiComments := e.Group("/applications/:applicationId/comments")
+	{
+		apiComments.POST("", PostComments)
+		apiComments.PUT("/:commentId", PutComments)
+		apiComments.DELETE("/:commentId", DeleteComments)
+	}
 
-		apiStatus := api.Group("/application/:applicationId/status")
-		{
-			apiStatus.PUT("", PutStatus)
-			apiStatus.PUT("/repaid/:repaidTold", PutRepaidStatus)
-		}
+	apiStatus := e.Group("/application/:applicationId/status")
+	{
+		apiStatus.PUT("", PutStatus)
+		apiStatus.PUT("/repaid/:repaidTold", PutRepaidStatus)
+	}
 
-		apiUsers := api.Group("/users")
-		{
-			apiUsers.GET("", GetUsers)
-			apiUsers.GET("/me", GetMyUser)
-			apiUsers.GET("/admins", GetAdminUsers)
-			apiUsers.PUT("/admins", PutAdminUsers)
-		}
+	apiUsers := e.Group("/users")
+	{
+		apiUsers.GET("", GetUsers)
+		apiUsers.GET("/me", GetMyUser)
+		apiUsers.GET("/admins", GetAdminUsers)
+		apiUsers.PUT("/admins", PutAdminUsers)
 	}
 }

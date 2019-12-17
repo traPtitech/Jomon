@@ -7,13 +7,16 @@ import (
 )
 
 func PostComments(c echo.Context) error {
+	// some program
 	return c.String(http.StatusOK, "PostComments")
 }
 
 func PutComments(c echo.Context) error {
+	// some program
 	return c.String(http.StatusOK, "PutComments")
 }
 
 func DeleteComments(c echo.Context) error {
+	// some program
 	return c.String(http.StatusOK, "DeleteComments")
 }

@@ -7,9 +7,11 @@ import (
 )
 
 func GetImages(c echo.Context) error {
+	// some program
 	return c.String(http.StatusOK, "GetImages")
 }
 
 func DeleteImages(c echo.Context) error {
+	// some program
 	return c.String(http.StatusOK, "DeleteImages")
 }

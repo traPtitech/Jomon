@@ -7,13 +7,16 @@ import (
 )
 
 func GetApplications(c echo.Context) error {
+	// some program
 	return c.String(http.StatusOK, "GetApplications")
 }
 
 func PostApplications(c echo.Context) error {
+	// some program
 	return c.String(http.StatusOK, "PostApplications")
 }
 
 func PatchApplications(c echo.Context) error {
+	// some program
 	return c.String(http.StatusOK, "PatchApplications")
 }
