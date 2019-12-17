@@ -14,7 +14,7 @@ var allTables = []interface{}{
 	Application{},
 	ApplicationsDetail{},
 	RepayUser{},
-	ApplicationImage{},
+	ApplicationsImage{},
 	StatesLog{},
 	Comment{},
 }

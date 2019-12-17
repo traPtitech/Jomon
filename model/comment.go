@@ -13,5 +13,5 @@ type Comment struct {
 	Comment      string    `gorm:"type:text;not null"`
 	CreatedAt    time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP"`
 	UpdatedAt    time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
-	DeletedAt    time.Time `gorm:"type:timestamp;default:CURRENT_TIMESTAMP"`
+	DeletedAt    *time.Time
 }

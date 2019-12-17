@@ -11,5 +11,5 @@ type RepayUser struct {
 	AppicationID       uuid.UUID `gorm:"type:char(36);not null;index"`
 	RepaidToUserTrapID string    `gorm:"type:varchar(32);not null;index"`
 	RepaidByUserTrapID string    `gorm:"type:varchar(32);null;index"`
-	RepaidAt           time.Time `gorm:"type:timestamp;null"`
+	RepaidAt           *time.Time
 }
