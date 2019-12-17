@@ -12,6 +12,11 @@ var db *gorm.DB
 var allTables = []interface{}{
 	Administrator{},
 	Application{},
+	ApplicationsDetail{},
+	RepayUser{},
+	ApplicationImage{},
+	StatesLog{},
+	Comment{},
 }
 
 func EstablishConnection() (*gorm.DB, error) {
