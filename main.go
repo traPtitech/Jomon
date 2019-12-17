@@ -1,10 +1,12 @@
 package main
 
 import (
+	"net/http"
+
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/model"
-	"net/http"
+	"github.com/traPtitech/Jomon/router"
 )
 
 func main() {
@@ -22,7 +24,7 @@ func main() {
 	e := echo.New()
 
 	e.GET("/", genRootHandler(err == nil))
-
+	router.SetRouting(e)
 	e.Start(":1323")
 }
 
