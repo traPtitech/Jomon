@@ -9,12 +9,15 @@ import (
 	"github.com/traPtitech/Jomon/model"
 =======
 	"github.com/jinzhu/gorm"
-	"github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/labstack/echo/v4"
 	"net/http"
 
+<<<<<<< HEAD
 
 >>>>>>> masterに合わせるように変更
+=======
+>>>>>>> masterに合わせて変更
 	"github.com/traPtitech/Jomon/router"
 )
 
