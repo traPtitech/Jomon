@@ -1,11 +1,20 @@
 package main
 
 import (
+<<<<<<< HEAD
 	"net/http"
 
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/model"
+=======
+	"github.com/jinzhu/gorm"
+	"github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/labstack/echo/v4"
+	"net/http"
+
+
+>>>>>>> masterに合わせるように変更
 	"github.com/traPtitech/Jomon/router"
 )
 
