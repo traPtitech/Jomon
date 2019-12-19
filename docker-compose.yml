@@ -22,7 +22,7 @@ services:
     ports:
       - '1323:1323'
     volumes:
-      - './:/go/src/github.com/traPtitech/Jomon'
+      - './:/src'
     depends_on:
       - db
 
