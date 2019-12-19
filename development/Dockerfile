@@ -1,17 +1,19 @@
 FROM golang:1.13.5-alpine as build
-RUN apk add --update --no-cache ca-certificates git
+ENV DOCKERIZE_VERSION v0.6.1
 
-WORKDIR /github.com/traPtitech/Jomon
+RUN apk add --update --no-cache ca-certificates git openssl \
+    && wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
+WORKDIR /src
 
 COPY go.mod go.sum ./
-RUN go mod download
+RUN go mod download \
+    && go get github.com/pilu/fresh
 
 COPY . .
 
-RUN go build -o /Jomon
+RUN go build -o /app/Jomon
 
-FROM alpine:3.9
-WORKDIR /app
-
-COPY --from=build /Jomon ./
-ENTRYPOINT ./Jomon
+ENTRYPOINT dockerize -wait tcp://db:3306 -timeout 60s fresh
