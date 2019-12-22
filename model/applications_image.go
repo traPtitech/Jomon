@@ -6,5 +6,5 @@ import (
 
 type ApplicationsImage struct {
 	ID            uuid.UUID `gorm:"type:char(36);not null;primary_key"`
-	ApplicationID uuid.UUID `gorm:"type:char(36);not null;index"`
+	ApplicationID uuid.UUID `gorm:"type:char(36);not null"`
 }

@@ -8,7 +8,7 @@ import (
 
 type ApplicationsDetail struct {
 	ID               int       `gorm:"type:int(11);not null;primary_key;AUTO_INCREMENT"`
-	AppicationID     uuid.UUID `gorm:"type:char(36);not null;index"`
+	ApplicationID    uuid.UUID `gorm:"type:char(36);not null"`
 	UpdateUserTrapID string    `gorm:"type:varchar(32);not null;index"`
 	Type             int       `gorm:"type:tinyint(4);not null"`
 	Title            string    `gorm:"type:text;not null"`
