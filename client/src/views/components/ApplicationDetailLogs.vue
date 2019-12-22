@@ -1,120 +1,40 @@
 <!-- 親コンポーネントから受け取ったjsonを基に申請書logを描画 -->
+<!-- ここへのlogのjsonは日付の古い方を前にして突っ込んでください。--->
 <template>
   <div class="app-detail-log">
     <template>
       <v-container style="max-width: 600px;">
+        <h1>ここからログ</h1>
         <v-timeline dense clipped>
-          <v-timeline-item
-            fill-dot
-            class="white--text mb-12"
-            color="orange"
-            large
-          >
-            <template v-slot:icon>
-              <span>JL</span>
-            </template>
-            <v-text-field
-              v-model="input"
-              hide-details
-              flat
-              label="Leave a comment..."
-              solo
-              @keydown.enter="comment"
-            >
-              <template v-slot:append>
-                <v-btn class="mx-0" depressed @click="comment">
-                  Post
-                </v-btn>
-              </template>
-            </v-text-field>
-          </v-timeline-item>
-
-          <v-slide-x-transition group>
-            <v-timeline-item
-              v-for="event in timeline"
-              :key="event.id"
-              class="mb-4"
-              color="pink"
-              small
-            >
-              <v-row justify="space-between">
-                <v-col cols="7" v-text="event.text"></v-col>
-                <v-col class="text-right" cols="5" v-text="event.time"></v-col>
-              </v-row>
-            </v-timeline-item>
-          </v-slide-x-transition>
-
-          <v-timeline-item class="mb-6" hide-dot>
-            <span>TODAY</span>
-          </v-timeline-item>
-
-          <v-timeline-item
-            class="mb-4"
-            color="grey"
-            icon-color="grey lighten-2"
-            small
-          >
-            <v-row justify="space-between">
-              <v-col cols="7">This order was archived.</v-col>
-              <v-col class="text-right" cols="5">15:26 EDT</v-col>
-            </v-row>
-          </v-timeline-item>
-
-          <v-timeline-item class="mb-4" small>
-            <v-row justify="space-between">
-              <v-col cols="7">
-                <v-chip class="white--text ml-0" color="purple" label small>
-                  APP
-                </v-chip>
-                Digital Downloads fulfilled 1 item.
-              </v-col>
-              <v-col class="text-right" cols="5">15:25 EDT</v-col>
-            </v-row>
-          </v-timeline-item>
-
-          <v-timeline-item class="mb-4" color="grey" small>
-            <v-row justify="space-between">
-              <v-col cols="7">
-                Order confirmation email was sent to John Leider
-                (john@vuetifyjs.com).
-              </v-col>
-              <v-col class="text-right" cols="5">15:25 EDT</v-col>
-            </v-row>
-          </v-timeline-item>
-
-          <v-timeline-item class="mb-4" hide-dot>
-            <v-btn class="mx-0" color="white">
-              Resend Email
-            </v-btn>
-          </v-timeline-item>
-
-          <v-timeline-item class="mb-4" color="grey" small>
-            <v-row justify="space-between">
-              <v-col cols="7">
-                A $15.00 USD payment was processed on PayPal Express Checkout
-              </v-col>
-              <v-col class="text-right" cols="5">15:25 EDT</v-col>
-            </v-row>
-          </v-timeline-item>
-
-          <v-timeline-item color="grey" small>
-            <v-row justify="space-between">
-              <v-col cols="7">
-                John Leider placed this order on Online Store (checkout
-                #1937432132572).
-              </v-col>
-              <v-col class="text-right" cols="5">15:25 EDT</v-col>
-            </v-row>
-          </v-timeline-item>
+          <!-- <Log :log="this.$store.state.logs[0]" /> -->
+          <Log
+            v-for="log in this.$store.state.logs"
+            :key="log.log_type"
+            :log="log"
+          />
+          <v-divider class="m pb-1" />
         </v-timeline>
+        <NewComment />
+
+        <h1>ここまでログ</h1>
       </v-container>
     </template>
   </div>
 </template>
 
 <script>
+import Log from "./Log";
+import NewComment from "./TimelineNewComment";
 export default {
   //nameは.vueファイルはファイル名がnameになるので不要
-  props: ["log"]
+  //props: ["log"]
+  props: {
+    //申請書詳細はpropsで管理しない
+    // log: Object
+  },
+  components: {
+    Log,
+    NewComment
+  }
 };
 </script>

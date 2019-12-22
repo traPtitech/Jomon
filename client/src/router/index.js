@@ -14,11 +14,6 @@ const routes = [
     component: ApplicationListPage
   },
   {
-    path: "/applications/:id",
-    name: "Application",
-    component: ApplicationDetailPage
-  },
-  {
     path: "/admin",
     name: "Admin Page",
     component: AdminPage
@@ -27,6 +22,11 @@ const routes = [
     path: "/applications/new",
     name: "New Application Page",
     component: NewApplicationPage
+  },
+  {
+    path: "/applications/:id",
+    name: "Application",
+    component: ApplicationDetailPage
   }
 ];
 
