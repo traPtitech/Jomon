@@ -1,15 +1,24 @@
 package main
 
 import (
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/model"
 	"net/http"
 )
 
 func main() {
-	db, err := gorm.Open("mysql", "user:password@/dbname?charset=utf8&parseTime=True&loc=Local")
+	db, err := model.EstablishConnection()
+	if err != nil {
+		panic(err)
+	}
 	defer db.Close()
+
+	err = model.Migrate()
+	if err != nil {
+		panic(err)
+	}
+
 	e := echo.New()
 
 	e.GET("/", genRootHandler(err == nil))
