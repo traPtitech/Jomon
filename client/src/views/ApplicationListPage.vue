@@ -7,7 +7,7 @@
       <v-card-text class="pl-0 pr-0 pb-0">
         <v-list>
           <v-list-item-group color="primary">
-            <Application :list="header"></Application>
+            <Application :list="header" class="pb-0 pt-0"></Application>
             <v-list-item
               v-for="list in applicationList"
               v-bind:key="list.id"
