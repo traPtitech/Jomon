@@ -1,10 +1,24 @@
 package main
 
 import (
+<<<<<<< HEAD
+	"net/http"
+
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/model"
+=======
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/labstack/echo/v4"
 	"net/http"
+
+<<<<<<< HEAD
+
+>>>>>>> masterに合わせるように変更
+=======
+>>>>>>> masterに合わせて変更
+	"github.com/traPtitech/Jomon/router"
 )
 
 func main() {
@@ -22,7 +36,7 @@ func main() {
 	e := echo.New()
 
 	e.GET("/", genRootHandler(err == nil))
-
+	router.SetRouting(e)
 	e.Start(":1323")
 }
 
