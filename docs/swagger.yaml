@@ -463,23 +463,10 @@ components:
           format: date-time
         applicant:
           $ref: "#/components/schemas/User"
+        current_detail:
+          $ref: "#/components/schemas/ApplicationLog"
         current_state:
           $ref: "#/components/schemas/StateEnum"
-        type:
-          $ref: "#/components/schemas/TypeEnum"
-        title:
-          type: string
-          example: "夏コミの交通費をお願いします。"
-        remarks:
-          type: string
-          example: "〇〇駅から〇〇駅への移動"
-        paid_at:
-          type: string
-          format: date
-        ammount:
-          type: integer
-          minimum: 1
-          example: 1200
     DetailedApplication:
       allOf:
         - $ref: "#/components/schemas/CompactApplication"
@@ -573,9 +560,6 @@ components:
         trap_id:
           type: string
           example: "nagatech"
-        display_name:
-          type: string
-          example: "ながてち"
         is_admin:
           type: boolean
     Comment:
