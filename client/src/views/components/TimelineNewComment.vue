@@ -1,27 +1,5 @@
 <template>
   <div>
-    <!-- <v-card>
-      <v-row align="center">
-        <v-form ref="form" v-model="valid" :lazy-validation="lazy">
-          <v-text-field
-            v-model="name"
-            :counter="10"
-            :rules="nameRules"
-            label="Comment"
-            required
-          ></v-text-field>
-
-          <v-btn
-            :disabled="!valid"
-            color="success"
-            class="mr-4"
-            @click="validate"
-          >
-            Validate
-          </v-btn>
-        </v-form>
-      </v-row>
-    </v-card> -->
     <v-row justify="space-between">
       <v-col cols="1">
         <Icon :user="this.$store.state.me.trap_id" :size="25" />

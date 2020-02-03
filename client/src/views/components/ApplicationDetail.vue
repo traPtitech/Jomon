@@ -4,6 +4,10 @@
     <h1>ここから</h1>
     <!-- <h1>{{ this.$store.state.application_detail_test }}</h1> -->
     <v-card>
+      <h1>{{ this.$store.state.application_detail_paper.type }}申請書</h1>
+      <template>
+        <v-divider></v-divider>
+      </template>
       <h1>
         申請書タイトル:{{ this.$store.state.application_detail_paper.title }}
       </h1>
