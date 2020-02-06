@@ -50,8 +50,7 @@ func Migrate() error {
 	if err := db.AutoMigrate(allTables...).Error; err != nil {
 		return err
 	}
-	db.Model(&Application{}).AddForeignKey("applications_details_id", "applications_details(id)", "RESTRICT", "RESTRICT")
-	db.Model(&Application{}).AddForeignKey("states_logs_id", "states_logs(id)", "RESTRICT", "RESTRICT")
+
 	db.Model(&ApplicationsDetail{}).AddForeignKey("application_id", "applications(id)", "RESTRICT", "RESTRICT")
 	db.Model(&RepayUser{}).AddForeignKey("application_id", "applications(id)", "RESTRICT", "RESTRICT")
 	db.Model(&ApplicationsImage{}).AddForeignKey("application_id", "applications(id)", "RESTRICT", "RESTRICT")

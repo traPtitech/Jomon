@@ -472,11 +472,6 @@ components:
         - $ref: "#/components/schemas/CompactApplication"
         - type: object
           properties:
-            repaid_to_id:
-              type: array
-              items:
-                type: string
-                example: "nagatech"
             images:
               type: array
               items:
