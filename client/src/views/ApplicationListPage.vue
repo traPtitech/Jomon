@@ -36,7 +36,7 @@ export default {
         title: "タイトル",
         name: "申請者名",
         money: "金額",
-        state: "状態"
+        state: ""
       }
     };
   },
