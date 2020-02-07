@@ -29,6 +29,24 @@ export default {
       money: Number,
       state: String
     }
+  },
+  computed: {
+    chip: function() {
+      switch (this.list.state) {
+        case "submitted":
+          return "black white--text";
+        case "rejected":
+          return "yellow red--text";
+        case "fix_required":
+          return "orange white--text";
+        case "accepted":
+          return "red white--text";
+        case "fully_repaid":
+          return "gray black--text";
+        default:
+          return "white red--text";
+      }
+    }
   }
 };
 </script>
