@@ -11,7 +11,7 @@ import (
 type ApplicationsDetail struct {
 	ID               int             `gorm:"type:int(11) AUTO_INCREMENT;primary_key" json:"-"`
 	ApplicationID    uuid.UUID       `gorm:"type:char(36);not null" json:"-"`
-	UpdateUserTrapID User          `gorm:"embedded;embedded_prefix:update_user_" json:"update_user"`
+	UpdateUserTrapID User            `gorm:"embedded;embedded_prefix:update_user_" json:"update_user"`
 	Type             ApplicationType `gorm:"embedded" json:"type"`
 	Title            string          `gorm:"type:text;not null" json:"title"`
 	Remarks          string          `gorm:"type:text;not null" json:"remarks"`
