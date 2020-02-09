@@ -506,7 +506,7 @@ components:
         remarks:
           type: string
           example: "〇〇駅から〇〇駅への移動"
-        ammount:
+        amount:
           type: integer
           minimum: 1
           example: 1200
@@ -533,7 +533,7 @@ components:
             paid_at:
               type: string
               format: date-time
-            ammount:
+            amount:
               type: integer
               minimum: 1
               example: 1200
