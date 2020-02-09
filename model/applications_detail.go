@@ -17,7 +17,7 @@ type ApplicationsDetail struct {
 	Remarks          string          `gorm:"type:text;not null" json:"remarks"`
 	Amount           int             `gorm:"type:int(11);not null" json:"amount"`
 	PaidAt           time.Time       `gorm:"type:timestamp" json:"paid_at"`
-	CreatedAt        time.Time       `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt        time.Time       `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
 type ApplicationType struct {
@@ -27,15 +27,13 @@ type ApplicationType struct {
 func (ty ApplicationType) MarshalJSON() ([]byte, error) {
 	switch ty.Type {
 	case 0:
-		return json.Marshal("submitted")
+		return json.Marshal("club")
 	case 1:
-		return json.Marshal("fix_required")
+		return json.Marshal("contest")
 	case 2:
-		return json.Marshal("accepted")
+		return json.Marshal("event")
 	case 3:
-		return json.Marshal("fully_repaid")
-	case 4:
-		return json.Marshal("rejected")
+		return json.Marshal("public")
 	}
 	return nil, errors.New("unknown application type")
 }

@@ -36,7 +36,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | remarks       | text      | NO  |     | _NULL_ |           |   備考（購入したものの概要、旅程、乗車区間など） |
 | amount | int(11)    | NO  |     | _NULL_    |         |申請金額    |
 | paid_at       | timestamp  | NO   |     |  |       | お金を使った日  |
-| created_at       | timestamp  | NO   |     | CURRENT_TIMESTAMP |       | 申請書が作成（変更）された日時  |
+| updated_at       | timestamp  | NO   |     | CURRENT_TIMESTAMP |       | 申請書が作成（変更）された日時  |
 
 ## repay_users
 
