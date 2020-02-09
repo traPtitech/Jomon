@@ -34,5 +34,5 @@ func (ty StateType) MarshalJSON() ([]byte, error) {
 	case 4:
 		return json.Marshal("rejected")
 	}
-	return nil, errors.New("unknown application type")
+	return nil, errors.New("unknown state type")
 }
