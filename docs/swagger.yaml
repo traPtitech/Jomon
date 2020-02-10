@@ -472,11 +472,6 @@ components:
         - $ref: "#/components/schemas/CompactApplication"
         - type: object
           properties:
-            repaid_to_id:
-              type: array
-              items:
-                type: string
-                example: "nagatech"
             images:
               type: array
               items:
@@ -511,7 +506,7 @@ components:
         remarks:
           type: string
           example: "〇〇駅から〇〇駅への移動"
-        ammount:
+        amount:
           type: integer
           minimum: 1
           example: 1200
@@ -538,7 +533,7 @@ components:
             paid_at:
               type: string
               format: date-time
-            ammount:
+            amount:
               type: integer
               minimum: 1
               example: 1200
