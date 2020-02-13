@@ -2,8 +2,13 @@
 <!-- コンポーネント配置とaxiosで受け取ったjsonを分割し各コンポーネントに渡す-->
 <template>
   <div class="application-detail">
-    <h1>This is an application detail pagea</h1>
-    <div>ID: {{ $route.params.id }}</div>
+    <!-- <div>ID: {{ $route.params.id }}</div> -->
+    <v-row :justify="`space-between`">
+      <h3 class="ml-4">
+        現在の状態:{{ returnState(this.detail.current_state) }}
+      </h3>
+      <state-button-controller class="mr-4" />
+    </v-row>
     <!-- <div>{{ this.application_detail_paper.title }}</div> -->
     <!-- <application-paper :detail="application_detail_paper" :test="test" />
     <application-logs :log="applitaion_detail_log" /> -->
@@ -15,14 +20,17 @@
 <script>
 import ApplicationPaper from "./components/ApplicationDetail";
 import ApplicationLogs from "./components/ApplicationDetailLogs";
+import StateButtonController from "./components/StateButtonController";
 export default {
   name: "AppDetail",
   components: {
     ApplicationPaper,
-    ApplicationLogs
+    ApplicationLogs,
+    StateButtonController
   },
   data() {
     return {
+      detail: this.$store.state.application_detail_paper
       //とりあえず申請書詳細はstoreで管理します。
       // test: "piyo",
       // application_detail_paper: {
@@ -100,6 +108,24 @@ export default {
       //   ]
       // }
     };
+  },
+  methods: {
+    returnState: function(state) {
+      switch (state) {
+        case "submitted":
+          return "承認待ち";
+        case "fix_required":
+          return "要修正";
+        case "accepted":
+          return "承認済み";
+        case "fully_repaid":
+          return "返済完了";
+        case "rejected":
+          return "取り下げ";
+        default:
+          return "状態が間違っています";
+      }
+    }
   }
 };
 </script>

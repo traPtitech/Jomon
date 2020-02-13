@@ -21,10 +21,3 @@ export default {
   }
 };
 </script>
-<img
-  :src="
-    checkSienka
-      ? `https://q.trap.jp/api/1.0/public/icon/${$route.params.name}`
-      : sienka
-  "
-/>

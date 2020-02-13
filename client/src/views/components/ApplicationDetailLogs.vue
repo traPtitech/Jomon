@@ -4,7 +4,7 @@
   <div class="app-detail-log">
     <template>
       <v-container style="max-width: 600px;">
-        <h1>ここからログ</h1>
+        <h1>申請書ログ</h1>
         <v-timeline dense clipped>
           <!-- <Log :log="this.$store.state.logs[0]" /> -->
           <Log
@@ -15,8 +15,6 @@
           <v-divider class="m pb-1" />
         </v-timeline>
         <NewComment />
-
-        <h1>ここまでログ</h1>
       </v-container>
     </template>
   </div>
