@@ -1,7 +1,6 @@
 <!-- 受け取ったデータを基に申請書詳細ページの下半分にログ、コメント等配置 -->
 <template>
   <div class="app-detail-paper">
-    <!-- <h1>ここから</h1> -->
     <v-card>
       <v-row class="ml-4 mr-4" :justify="`space-between`">
         <h1>{{ returnType(this.detail.type) }}申請書</h1>
@@ -74,17 +73,15 @@
         {{ path }}
       </li>
     </v-card>
-    <!-- <h1>ここまで</h1> -->
   </div>
 </template>
 
 <script>
 import Icon from "./Icon";
+import { mapState } from "vuex";
 export default {
-  data: function() {
-    return {
-      detail: this.$store.state.application_detail_paper
-    };
+  computed: {
+    ...mapState({ detail: "application_detail_paper" })
   },
   methods: {
     returnDate: function(date) {
@@ -127,18 +124,7 @@ export default {
       }
     }
   },
-  // name: "ApplicationDetail"
-  //.Vueファイルではnameはファイル名なので不要
-  //.Vueファイルについてはhttps://jp.vuejs.org/v2/guide/single-file-components.html
-
-  //props: ['test',detail]
-  //propsはhttps://jp.vuejs.org/v2/style-guide/index.htmlによると下の書き方ほうが良い。
-  //型が異なるとjavascriptのコンソール画面で警告が出るhttps://jp.vuejs.org/v2/guide/components-props.html
-  props: {
-    //申請書詳細はpropsで管理しない
-    // test: String,
-    // detail: Object
-  },
+  props: {},
   components: {
     Icon
   }

@@ -6,7 +6,6 @@
       <v-container style="max-width: 600px;">
         <h1>申請書ログ</h1>
         <v-timeline dense clipped>
-          <!-- <Log :log="this.$store.state.logs[0]" /> -->
           <Log
             v-for="log in this.$store.state.logs"
             :key="log.log_type"
@@ -24,12 +23,7 @@
 import Log from "./Log";
 import NewComment from "./TimelineNewComment";
 export default {
-  //nameは.vueファイルはファイル名がnameになるので不要
-  //props: ["log"]
-  props: {
-    //申請書詳細はpropsで管理しない
-    // log: Object
-  },
+  props: {},
   components: {
     Log,
     NewComment

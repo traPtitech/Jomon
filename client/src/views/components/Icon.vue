@@ -13,7 +13,7 @@ export default {
   name: "Icon",
   computed: {},
   props: {
-    user: Object,
+    user: String,
     size: {
       type: Number,
       default: 40

@@ -29,5 +29,10 @@
   </div>
 </template>
 <script>
-export default {};
+import Icon from "./Icon";
+export default {
+  components: {
+    Icon
+  }
+};
 </script>

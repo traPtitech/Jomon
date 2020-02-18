@@ -24,7 +24,6 @@
       </v-card-text>
     </v-card>
   </v-timeline-item>
-  <!-- <div v-else-if="log.log_type === `state`"> -->
   <v-timeline-item
     v-else-if="log.log_type === `state`"
     color="red lighten-2"
@@ -107,11 +106,8 @@ export default {
   },
   methods: {
     dayPrint(time) {
-      //let d = this.log.content.created_at;
       let d = new Date(time);
-      //let year = hiduke.getFullYear();
       let month = d.getMonth() + 1;
-      //let week = hiduke.getDay();
       let day = d.getDate();
       let res = month + "/" + day;
       return res;
