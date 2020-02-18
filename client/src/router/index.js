@@ -3,7 +3,7 @@ import VueRouter from "vue-router";
 import ApplicationListPage from "../views/ApplicationListPage.vue";
 import ApplicationDetailPage from "../views/ApplicationDetailPage.vue";
 import AdminPage from "../views/AdminPage";
-import NewApplicationPage from "../views/NewApplication.vue";
+import NewApplicationPage from "../views/NewApplicationPage.vue";
 
 Vue.use(VueRouter);
 
@@ -14,11 +14,6 @@ const routes = [
     component: ApplicationListPage
   },
   {
-    path: "/applications/:id",
-    name: "Application",
-    component: ApplicationDetailPage
-  },
-  {
     path: "/admin",
     name: "Admin Page",
     component: AdminPage
@@ -27,6 +22,11 @@ const routes = [
     path: "/applications/new",
     name: "New Application Page",
     component: NewApplicationPage
+  },
+  {
+    path: "/applications/:id",
+    name: "Application",
+    component: ApplicationDetailPage
   }
 ];
 
