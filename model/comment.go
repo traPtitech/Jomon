@@ -15,3 +15,11 @@ type Comment struct {
 	UpdatedAt     time.Time  `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"updated_at"`
 	DeletedAt     *time.Time `gorm:"type:timestamp;not null;" json:"-"`
 }
+
+func (com *Comment) GiveIsUserAdmin(admins []string) {
+	if com == nil {
+		return
+	}
+
+	com.UserTrapID.GiveIsUserAdmin(admins)
+}

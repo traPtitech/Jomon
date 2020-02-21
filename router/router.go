@@ -8,10 +8,12 @@ func SetRouting(e *echo.Echo) {
 
 	apiApplications := e.Group("/applications")
 	{
-		apiApplications.GET("", GetApplications)
-		apiApplications.POST("", PostApplications)
-		apiApplications.PATCH("/:applicationId", PatchApplications)
+		apiApplications.GET("", GetApplicationList)
+		apiApplications.POST("", PostApplication)
+		apiApplications.GET("/:applicationId", GetApplication)
+		apiApplications.PATCH("/:applicationId", PatchApplication)
 	}
+
 	apiImages := e.Group("/images")
 	{
 		apiImages.GET("/:imageId", GetImages)

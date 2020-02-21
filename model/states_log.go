@@ -36,3 +36,51 @@ func (ty StateType) MarshalJSON() ([]byte, error) {
 	}
 	return nil, errors.New("unknown state type")
 }
+
+func GetStateType(str string) (StateType, error) {
+	var result StateType
+	var err error
+	switch str {
+	case "submitted":
+		result.Type = 0
+	case "fix_required":
+		result.Type = 1
+	case "accepted":
+		result.Type = 2
+	case "fully_repaid":
+		result.Type = 3
+	case "rejected":
+		result.Type = 4
+	default:
+		err = errors.New("unknown state type")
+	}
+
+	return result, err
+}
+
+func (st *StatesLog) GiveIsUserAdmin(admins []string) {
+	if st == nil {
+		return
+	}
+
+	st.UpdateUserTrapID.GiveIsUserAdmin(admins)
+}
+
+func CreateStatesLog(applicationId uuid.UUID, updateUserTrapId string) (StatesLog, error) {
+	log := StatesLog{
+		ApplicationID: applicationId,
+		UpdateUserTrapID: User{
+			TrapId: updateUserTrapId,
+		},
+		ToState:StateType{Type:1},
+		Reason: "",
+	}
+
+	err := db.Create(&log).Error
+
+	if err != nil {
+		return StatesLog{}, err
+	}
+
+	return log, nil
+}

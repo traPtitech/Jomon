@@ -13,3 +13,12 @@ type RepayUser struct {
 	RepaidByUserTrapID User       `gorm:"embedded;embedded_prefix:repaid_by_user_" json:"repaid_by_user"`
 	RepaidAt           *time.Time `gorm:"type:timestamp;null;" json:"repaid_at"`
 }
+
+func (ru *RepayUser) GiveIsUserAdmin(admins []string) {
+	if ru == nil {
+		return
+	}
+
+	ru.RepaidToUserTrapID.GiveIsUserAdmin(admins)
+	ru.RepaidByUserTrapID.GiveIsUserAdmin(admins)
+}
