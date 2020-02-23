@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	club int = iota
-	contest
-	event
-	public
+	club    int = 1
+	contest int = 2
+	event   int = 3
+	public  int = 4
 )
 
 type ApplicationsDetail struct {
@@ -81,7 +81,7 @@ func GetApplicationType(str string) (ApplicationType, error) {
 		return ApplicationType{}, err
 	}
 
-	return ApplicationType{Type:typeInt}, nil
+	return ApplicationType{Type: typeInt}, nil
 }
 
 func (det *ApplicationsDetail) GiveIsUserAdmin(admins []string) {

@@ -8,6 +8,14 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+const (
+	submitted   int = 1
+	fixRequired int = 2
+	accepted    int = 3
+	fullyRepaid int = 4
+	rejected    int = 5
+)
+
 type StatesLog struct {
 	ID               int       `gorm:"type:int(11) AUTO_INCREMENT;primary_key" json:"-"`
 	ApplicationID    uuid.UUID `gorm:"type:char(36);not null" json:"-"`
@@ -23,15 +31,15 @@ type StateType struct {
 
 func (ty StateType) MarshalJSON() ([]byte, error) {
 	switch ty.Type {
-	case 0:
+	case submitted:
 		return json.Marshal("submitted")
-	case 1:
+	case fixRequired:
 		return json.Marshal("fix_required")
-	case 2:
+	case accepted:
 		return json.Marshal("accepted")
-	case 3:
+	case fullyRepaid:
 		return json.Marshal("fully_repaid")
-	case 4:
+	case rejected:
 		return json.Marshal("rejected")
 	}
 	return nil, errors.New("unknown state type")
@@ -42,15 +50,15 @@ func GetStateType(str string) (StateType, error) {
 	var err error
 	switch str {
 	case "submitted":
-		result.Type = 0
+		result.Type = submitted
 	case "fix_required":
-		result.Type = 1
+		result.Type = fixRequired
 	case "accepted":
-		result.Type = 2
+		result.Type = accepted
 	case "fully_repaid":
-		result.Type = 3
+		result.Type = fullyRepaid
 	case "rejected":
-		result.Type = 4
+		result.Type = rejected
 	default:
 		err = errors.New("unknown state type")
 	}
@@ -72,8 +80,8 @@ func CreateStatesLog(applicationId uuid.UUID, updateUserTrapId string) (StatesLo
 		UpdateUserTrapID: User{
 			TrapId: updateUserTrapId,
 		},
-		ToState:StateType{Type:1},
-		Reason: "",
+		ToState: StateType{Type: 1},
+		Reason:  "",
 	}
 
 	err := db.Create(&log).Error
