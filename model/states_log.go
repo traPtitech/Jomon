@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"github.com/jinzhu/gorm"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -74,7 +75,7 @@ func (st *StatesLog) GiveIsUserAdmin(admins []string) {
 	st.UpdateUserTrapID.GiveIsUserAdmin(admins)
 }
 
-func CreateStatesLog(applicationId uuid.UUID, updateUserTrapId string) (StatesLog, error) {
+func createStatesLog(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapId string) (StatesLog, error) {
 	log := StatesLog{
 		ApplicationID: applicationId,
 		UpdateUserTrapID: User{
@@ -84,7 +85,7 @@ func CreateStatesLog(applicationId uuid.UUID, updateUserTrapId string) (StatesLo
 		Reason:  "",
 	}
 
-	err := db.Create(&log).Error
+	err := db_.Create(&log).Error
 
 	if err != nil {
 		return StatesLog{}, err

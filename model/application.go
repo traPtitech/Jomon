@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"github.com/jinzhu/gorm"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -35,27 +36,33 @@ func (app *Application) GiveIsUserAdmin(admins []string) {
 
 	app.CreateUserTrapID.GiveIsUserAdmin(admins)
 	app.LatestApplicationsDetail.GiveIsUserAdmin(admins)
+	app.LatestStatesLog.GiveIsUserAdmin(admins)
 
-	for _, det := range app.ApplicationsDetails {
-		det.GiveIsUserAdmin(admins)
+	for i := range app.ApplicationsDetails {
+		app.ApplicationsDetails[i].GiveIsUserAdmin(admins)
 	}
 
-	for _, st := range app.StatesLogs {
-		st.GiveIsUserAdmin(admins)
+	for i := range app.StatesLogs {
+		app.StatesLogs[i].GiveIsUserAdmin(admins)
 	}
 
-	for _, com := range app.Comments {
-		com.GiveIsUserAdmin(admins)
+	for i := range app.Comments {
+		app.Comments[i].GiveIsUserAdmin(admins)
 	}
 
-	for _, ru := range app.RepayUsers {
-		ru.GiveIsUserAdmin(admins)
+	for i := range app.RepayUsers {
+		app.RepayUsers[i].GiveIsUserAdmin(admins)
 	}
 }
 
-func GetApplication(id uuid.UUID, giveAdmin bool) (Application, error) {
+func GetApplication(id uuid.UUID, giveAdmin bool, preload bool) (Application, error) {
 	var app Application
-	err := db.Set("gorm:auto_preload", true).First(&app, Application{ID: id}).Error
+	query := db
+	if preload {
+		query = query.Set("gorm:auto_preload", true)
+	}
+
+	err := query.First(&app, Application{ID: id}).Error
 	if err != nil {
 		return Application{}, err
 	}
@@ -68,7 +75,7 @@ func GetApplication(id uuid.UUID, giveAdmin bool) (Application, error) {
 		app.GiveIsUserAdmin(admins)
 	}
 
-	return Application{}, nil
+	return app, nil
 }
 
 func GetApplicationList(sort *string, currentState *StateType, financialYear *int, applicant *string, typ *ApplicationType, submittedSince *time.Time, submittedUntil *time.Time, giveAdmin bool) ([]Application, error) {
@@ -105,6 +112,8 @@ func GetApplicationList(sort *string, currentState *StateType, financialYear *in
 		case "-title":
 			query = query.Joins("JOIN applications_details ON applications_details.id = applications.applications_details_id").Order("applications_details.title desc")
 		}
+	} else {
+		query = query.Order("created_at desc")
 	}
 
 	//noinspection GoPreferNilSlice
@@ -120,63 +129,79 @@ func GetApplicationList(sort *string, currentState *StateType, financialYear *in
 			return nil, err
 		}
 
-		for _, app := range apps {
-			app.GiveIsUserAdmin(admins)
+		for i := range apps {
+			apps[i].GiveIsUserAdmin(admins)
 		}
 	}
 
 	return apps, nil
 }
 
-func CreateApplication(createUserTrapID string, giveAdmin bool) (Application, error) {
+func BuildApplication(createUserTrapID string, typ ApplicationType, title string, remarks string, amount int, paidAt time.Time) (uuid.UUID, error) {
+	var id uuid.UUID
+
+	err := db.Transaction(func(tx *gorm.DB) error {
+		_id, err := createApplication(tx, createUserTrapID)
+		if err != nil {
+			return err
+		}
+		id = _id
+
+		detail, err := createApplicationsDetail(tx, id, createUserTrapID, typ, title, remarks, amount, paidAt)
+		if err != nil {
+			return err
+		}
+
+		state, err := createStatesLog(tx, id, createUserTrapID)
+		if err != nil {
+			return err
+		}
+
+		return tx.Model(Application{}).Where(&Application{ID: id}).Updates(Application{
+			ApplicationsDetailsID: detail.ID,
+			StatesLogsID:          state.ID,
+		}).Error
+	})
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return id, nil
+}
+
+func PatchApplication(appId uuid.UUID, updateUserTrapId string, typ *ApplicationType, title *string, remarks *string, amount *int, paidAt *time.Time) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		app, err := GetApplication(appId, false, false)
+		if err != nil {
+			return err
+		}
+
+		detail, err := putApplicationsDetail(tx, app.ApplicationsDetailsID, updateUserTrapId, typ, title, remarks, amount, paidAt)
+		if err != nil {
+			return err
+		}
+
+		return tx.Model(&Application{ID: appId}).Updates(Application{
+			ApplicationsDetailsID: detail.ID,
+		}).Error
+	})
+}
+
+func createApplication(db_ *gorm.DB, createUserTrapID string) (uuid.UUID, error) {
 	id, err := uuid.NewV4()
 	if err != nil {
-		return Application{}, err
+		return uuid.Nil, err
 	}
 
 	app := Application{
 		ID:               id,
 		CreateUserTrapID: User{TrapId: createUserTrapID},
 	}
-	db.Create(&app)
 
-	if giveAdmin {
-		admins, err := GetAdministratorList()
-		if err != nil {
-			return Application{}, err
-		}
-		app.GiveIsUserAdmin(admins)
-	}
-
-	return Application{}, nil
-}
-
-func UpdateApplicationDetailId(id uuid.UUID, newApplicationDetailId int) (Application, error) {
-	app := Application{
-		ID: id,
-	}
-
-	err := db.Model(&app).Updates(Application{
-		ApplicationsDetailsID: newApplicationDetailId,
-	}).Error
+	err = db_.Create(&app).Error
 	if err != nil {
-		return Application{}, err
+		return uuid.Nil, err
 	}
 
-	return Application{}, nil
-}
-
-func UpdateStatesLogsId(id uuid.UUID, newStatesLogsId int) (Application, error) {
-	app := Application{
-		ID: id,
-	}
-
-	err := db.Model(&app).Updates(Application{
-		StatesLogsID: newStatesLogsId,
-	}).Error
-	if err != nil {
-		return Application{}, err
-	}
-
-	return Application{}, nil
+	return id, nil
 }

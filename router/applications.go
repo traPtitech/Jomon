@@ -12,22 +12,22 @@ import (
 )
 
 type GetApplicationsListQuery struct {
-	Sort *string `query:"sort"`
-	CurrentState *string `query:"current_state"`
-	FinancialYear *int `query:"financial_year"`
-	Applicant *string `query:"applicant"`
-	Type *string `query:"type"`
+	Sort           *string `query:"sort"`
+	CurrentState   *string `query:"current_state"`
+	FinancialYear  *int    `query:"financial_year"`
+	Applicant      *string `query:"applicant"`
+	Type           *string `query:"type"`
 	SubmittedSince *string `query:"submitted_since"`
 	SubmittedUntil *string `query:"submitted_until"`
 }
 
 type PostApplicationRequest struct {
-	Type *model.ApplicationType `json:"type"`
-	Title *string `json:"title"`
-	Remarks *string `json:"remarks"`
-	PaidAt *time.Time `json:"paid_at"`
-	Amount *int `json:"amount"`
-	RepaidToId []string `json:"repaid_to_id"`
+	Type       *model.ApplicationType `json:"type"`
+	Title      *string                `json:"title"`
+	Remarks    *string                `json:"remarks"`
+	PaidAt     *time.Time             `json:"paid_at"`
+	Amount     *int                   `json:"amount"`
+	RepaidToId []string               `json:"repaid_to_id"`
 }
 
 func GetApplicationList(c echo.Context) error {
@@ -84,7 +84,7 @@ func GetApplication(c echo.Context) error {
 	if applicationId == uuid.Nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
-	application, err := model.GetApplication(applicationId, true)
+	application, err := model.GetApplication(applicationId, true, true)
 	if gorm.IsRecordNotFoundError(err) {
 		return c.NoContent(http.StatusNotFound)
 	} else if err != nil {
@@ -98,7 +98,7 @@ func PostApplication(c echo.Context) error {
 	details := c.FormValue("details")
 	var req PostApplicationRequest
 	if err := json.Unmarshal([]byte(details), &req); err != nil {
-		// TODO
+		// TODO more information
 		return c.NoContent(http.StatusBadRequest)
 	}
 
@@ -108,27 +108,12 @@ func PostApplication(c echo.Context) error {
 
 	userId := ""
 
-	app, err := model.CreateApplication(userId, false)
+	id, err := model.BuildApplication(userId, *req.Type, *req.Title, *req.Remarks, *req.Amount, *req.PaidAt)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	detail, err := model.CreateApplicationsDetail(app.ID, userId, *req.Type, *req.Title, *req.Remarks, *req.Amount, *req.PaidAt)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	_, err = model.UpdateApplicationDetailId(app.ID, detail.ID)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
-
-	state, err := model.CreateStatesLog(app.ID, userId)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	_, err = model.UpdateStatesLogsId(app.ID, state.ID)
-
-	app, err = model.GetApplication(app.ID, true)
+	app, err := model.GetApplication(id, true, true)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -152,24 +137,14 @@ func PatchApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	app, err := model.GetApplication(applicationId, false)
+	err := model.PatchApplication(applicationId, userId, req.Type, req.Title, req.Remarks, req.Amount, req.PaidAt)
 	if gorm.IsRecordNotFoundError(err) {
 		return c.NoContent(http.StatusNotFound)
 	} else if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	detail, err := model.PutApplicationsDetail(app.ApplicationsDetailsID, userId, req.Type, req.Title, req.Remarks, req.Amount, req.PaidAt)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
-
-	_, err = model.UpdateApplicationDetailId(app.ID, detail.ID)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
-
-	app, err = model.GetApplication(applicationId, true)
+	app, err := model.GetApplication(applicationId, true, true)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}

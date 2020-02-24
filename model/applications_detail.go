@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"github.com/jinzhu/gorm"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -92,25 +93,7 @@ func (det *ApplicationsDetail) GiveIsUserAdmin(admins []string) {
 	det.UpdateUserTrapID.GiveIsUserAdmin(admins)
 }
 
-func GetApplicationsDetail(id int, giveAdmin bool) (ApplicationsDetail, error) {
-	var detail ApplicationsDetail
-	err := db.First(&detail, ApplicationsDetail{ID: id}).Error
-	if err != nil {
-		return ApplicationsDetail{}, err
-	}
-
-	if giveAdmin {
-		admins, err := GetAdministratorList()
-		if err != nil {
-			return ApplicationsDetail{}, err
-		}
-		detail.GiveIsUserAdmin(admins)
-	}
-
-	return detail, nil
-}
-
-func CreateApplicationsDetail(applicationId uuid.UUID, updateUserTrapID string, typ ApplicationType, title string, remarks string, amount int, paidAt time.Time) (ApplicationsDetail, error) {
+func createApplicationsDetail(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapID string, typ ApplicationType, title string, remarks string, amount int, paidAt time.Time) (ApplicationsDetail, error) {
 	detail := ApplicationsDetail{
 		ApplicationID:    applicationId,
 		UpdateUserTrapID: User{TrapId: updateUserTrapID},
@@ -121,7 +104,7 @@ func CreateApplicationsDetail(applicationId uuid.UUID, updateUserTrapID string, 
 		PaidAt:           paidAt,
 	}
 
-	err := db.Create(&detail).Error
+	err := db_.Create(&detail).Error
 	if err != nil {
 		return ApplicationsDetail{}, err
 	}
@@ -129,9 +112,9 @@ func CreateApplicationsDetail(applicationId uuid.UUID, updateUserTrapID string, 
 	return detail, nil
 }
 
-func PutApplicationsDetail(currentDetailId int, updateUserTrapID string, typ *ApplicationType, title *string, remarks *string, amount *int, paidAt *time.Time) (ApplicationsDetail, error) {
+func putApplicationsDetail(db_ *gorm.DB, currentDetailId int, updateUserTrapID string, typ *ApplicationType, title *string, remarks *string, amount *int, paidAt *time.Time) (ApplicationsDetail, error) {
 	var detail ApplicationsDetail
-	err := db.Find(&detail, ApplicationsDetail{ID: currentDetailId}).Error
+	err := db_.Find(&detail, ApplicationsDetail{ID: currentDetailId}).Error
 	if err != nil {
 		return ApplicationsDetail{}, err
 	}
@@ -158,7 +141,7 @@ func PutApplicationsDetail(currentDetailId int, updateUserTrapID string, typ *Ap
 		detail.PaidAt = *paidAt
 	}
 
-	err = db.Create(&detail).Error
+	err = db_.Create(&detail).Error
 	if err != nil {
 		return ApplicationsDetail{}, err
 	}
