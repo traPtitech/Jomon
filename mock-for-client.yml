@@ -1,0 +1,27 @@
+version: '3'
+services:
+  proxy:
+    image: nginx
+    ports:
+      - "3000:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - jomon-server
+      - jomon-client
+
+  jomon-server:
+    image: swaggermock/swagger-mock
+    environment:
+      SWAGGER_MOCK_SPECIFICATION_URL: "/docs/swagger.yaml"
+    ports:
+      - '1323:8080'
+    volumes:
+      - './docs:/docs'
+
+  jomon-client:
+    build: ./client
+    volumes:
+      - './client/app'
+    tty: true
+    entrypoint: npm run serve

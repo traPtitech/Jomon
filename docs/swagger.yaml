@@ -43,7 +43,7 @@ paths:
           required: false
           in: query
           schema:
-            type: string
+            $ref: "#/components/schemas/TrapID"
         - name: type
           description: どのタイプか（"club","contest","event","public")
           in: query
@@ -426,8 +426,7 @@ paths:
                 type: object
                 properties:
                   trap_id:
-                    type: string
-                    example: "nagatech"
+                    $ref: "#/components/schemas/TrapID"
                   to_admin:
                     type: boolean
       responses:
@@ -452,6 +451,10 @@ components:
     StateEnum:
       type: string
       enum: [submitted, fix_required, accepted, fully_repaid, rejected]
+    TrapID:
+      type: string
+      pattern: "^[0-9a-zA-Z_]{1,32}$"
+      example: "nagatech"
     CompactApplication:
       type: object
       properties:
@@ -536,12 +539,12 @@ components:
             amount:
               type: integer
               minimum: 1
+              maximum: 2147483647
               example: 1200
             repaid_to_id:
               type: array
               items:
-                type: string
-                example: "nagatech"
+                $ref: "#/components/schemas/TrapID"
               uniqueItems: true
               minItems: 1
         images:
@@ -553,8 +556,7 @@ components:
       type: object
       properties:
         trap_id:
-          type: string
-          example: "nagatech"
+          $ref: "#/components/schemas/TrapID"
         is_admin:
           type: boolean
     Comment:
