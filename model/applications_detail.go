@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/jinzhu/gorm"
 	"time"
 
@@ -24,7 +25,7 @@ type ApplicationsDetail struct {
 	Title            string          `gorm:"type:text;not null" json:"title"`
 	Remarks          string          `gorm:"type:text;not null" json:"remarks"`
 	Amount           int             `gorm:"type:int(11);not null" json:"amount"`
-	PaidAt           time.Time       `gorm:"type:timestamp" json:"paid_at"`
+	PaidAt           PaidAt          `gorm:"embedded" json:"paid_at"`
 	UpdatedAt        time.Time       `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
@@ -43,7 +44,7 @@ func (ty ApplicationType) MarshalJSON() ([]byte, error) {
 	case public:
 		return json.Marshal("public")
 	}
-	return nil, errors.New("unknown application type")
+	return nil, fmt.Errorf("unknown application type: %d", ty.Type)
 }
 
 func (ty *ApplicationType) UnmarshalJSON(data []byte) error {
@@ -59,6 +60,14 @@ func (ty *ApplicationType) UnmarshalJSON(data []byte) error {
 
 	ty.Type = typeInt
 	return nil
+}
+
+type PaidAt struct {
+	PaidAt time.Time `gorm:"type:timestamp;not null"`
+}
+
+func (p PaidAt) MarshalJSON() ([]byte, error) {
+	return json.Marshal(p.PaidAt.Format("2006-01-02"))
 }
 
 func GetApplicationTypeFromString(str string) (int, error) {
@@ -101,7 +110,7 @@ func createApplicationsDetail(db_ *gorm.DB, applicationId uuid.UUID, updateUserT
 		Title:            title,
 		Remarks:          remarks,
 		Amount:           amount,
-		PaidAt:           paidAt,
+		PaidAt:           PaidAt{PaidAt: paidAt},
 	}
 
 	err := db_.Create(&detail).Error
@@ -138,7 +147,7 @@ func putApplicationsDetail(db_ *gorm.DB, currentDetailId int, updateUserTrapID s
 	}
 
 	if paidAt != nil {
-		detail.PaidAt = *paidAt
+		detail.PaidAt.PaidAt = *paidAt
 	}
 
 	err = db_.Create(&detail).Error

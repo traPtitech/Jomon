@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"github.com/jinzhu/gorm"
 	"time"
 
@@ -22,11 +21,6 @@ type Application struct {
 	ApplicationsImages       []ApplicationsImage  `json:"images,omitempty"`
 	Comments                 []Comment            `json:"comments,omitempty"`
 	RepayUsers               []RepayUser          `json:"repayment_logs,omitempty" `
-}
-
-func (app Application) MarshalJSON() ([]byte, error) {
-	app.LatestStatus = app.LatestStatesLog.ToState
-	return json.Marshal(app)
 }
 
 func (app *Application) GiveIsUserAdmin(admins []string) {
@@ -67,6 +61,7 @@ func GetApplication(id uuid.UUID, giveAdmin bool, preload bool) (Application, er
 		return Application{}, err
 	}
 
+	app.LatestStatus = app.LatestStatesLog.ToState
 	if giveAdmin {
 		admins, err := GetAdministratorList()
 		if err != nil {
@@ -121,6 +116,10 @@ func GetApplicationList(sort *string, currentState *StateType, financialYear *in
 	err := query.Find(&apps).Error
 	if err != nil {
 		return nil, err
+	}
+
+	for i := range apps {
+		apps[i].LatestStatus = apps[i].LatestStatesLog.ToState
 	}
 
 	if giveAdmin {

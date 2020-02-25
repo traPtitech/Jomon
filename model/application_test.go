@@ -129,7 +129,7 @@ func TestPatchApplication(t *testing.T) {
 		asr.Equal(title, app.LatestApplicationsDetail.Title)
 		asr.Equal(remarks, app.LatestApplicationsDetail.Remarks)
 		asr.Equal(amount, app.LatestApplicationsDetail.Amount)
-		asr.Equal(paidAt, app.LatestApplicationsDetail.PaidAt)
+		asr.Equal(paidAt, app.LatestApplicationsDetail.PaidAt.PaidAt)
 	})
 
 	t.Run("shouldFail", func(t *testing.T) {

@@ -2,6 +2,7 @@ package router
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/traPtitech/Jomon/model"
@@ -90,6 +91,8 @@ func GetApplication(c echo.Context) error {
 	} else if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
+
+	fmt.Printf("%+v\n", application)
 
 	return c.JSON(http.StatusOK, application)
 }

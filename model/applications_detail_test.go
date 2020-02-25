@@ -63,7 +63,7 @@ func TestPutApplicationsDetail(t *testing.T) {
 		asr.Equal(newDetail.Title, oldDetail.Title)
 		asr.Equal(newDetail.Remarks, oldDetail.Remarks)
 		asr.Equal(newDetail.Amount, oldDetail.Amount)
-		asr.Equal(newDetail.PaidAt, oldDetail.PaidAt.Truncate(time.Second))
+		asr.Equal(newDetail.PaidAt.PaidAt, oldDetail.PaidAt.PaidAt.Truncate(time.Second))
 	})
 
 	t.Run("shouldFail", func(t *testing.T) {

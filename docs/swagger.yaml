@@ -7,10 +7,6 @@ info:
   title: Jomon API
   description: >-
     JomonのAPIです。
-security:
-  - application:
-      - read
-      - write
 paths:
   '/applications':
     get:
@@ -108,7 +104,8 @@ paths:
       in: path
       required: true
       schema:
-        type: integer
+        type: string
+        format: uuid
     get:
       description: 指定した申請書の詳細を取得する。(コメントは作成日時を返す)(画像についてはresponseの画像idから再度apiをたたく。)
       tags:
