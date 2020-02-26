@@ -1,4 +1,4 @@
-export const detail = {
+export const applicationDetail = {
   state: {
     application_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     created_at: "Thu, 1 May 2008 02:00:00 +0900",
