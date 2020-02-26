@@ -3,7 +3,6 @@ import Vuex from "vuex";
 import { me } from "./me";
 import { applicationList } from "./list";
 import { detail } from "./detail";
-import { logs } from "./logs";
 
 Vue.use(Vuex);
 export default new Vuex.Store({
@@ -13,7 +12,6 @@ export default new Vuex.Store({
   modules: {
     me: me,
     applicationList: applicationList,
-    application_detail_paper: detail,
-    logs: logs
+    application_detail_paper: detail
   }
 });
