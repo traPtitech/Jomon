@@ -115,11 +115,11 @@ func (s *Service) PostApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	if req.Type == nil || req.Title == "" || req.Remarks == "" || req.Amount == nil || req.PaidAt == nil {
+	if req.Type == nil || req.Title == "" || req.Remarks == "" || req.Amount == nil || req.PaidAt == nil || len(req.RepaidToId) == 0 {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	userId := ""
+	userId := "UserId"
 
 	id, err := s.Applications.repo.BuildApplication(userId, *req.Type, req.Title, req.Remarks, *req.Amount, *req.PaidAt)
 	if err != nil {

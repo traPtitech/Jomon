@@ -1,8 +1,10 @@
 package router
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/gofrs/uuid"
 	"github.com/jinzhu/gorm"
@@ -10,12 +12,16 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/traPtitech/Jomon/model"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/textproto"
 	"net/url"
 	"testing"
 	"time"
 )
+
+const MultipartBoundary = "-------------------------Multipart_Boundary"
 
 /*
 	Definitions of mock
@@ -108,6 +114,7 @@ func (m *applicationRepositoryMock) PatchApplication(
 */
 
 func GenerateApplication(
+	appId uuid.UUID,
 	createUserTrapID string,
 	typ model.ApplicationType,
 	title string,
@@ -115,11 +122,6 @@ func GenerateApplication(
 	amount int,
 	paidAt time.Time,
 ) model.Application {
-	appId, err := uuid.NewV4()
-	if err != nil {
-		panic(err)
-	}
-
 	detail := model.ApplicationsDetail{
 		ID:            1,
 		ApplicationID: appId,
@@ -172,7 +174,12 @@ func GenerateApplication(
 func TestGetApplication(t *testing.T) {
 	appRepMock := NewApplicationRepositoryMock(t)
 
-	application := GenerateApplication("User1", model.ApplicationType{Type: model.Club}, "Title", "Remakrs", 10000, time.Now())
+	appId, err := uuid.NewV4()
+	if err != nil {
+		panic(err)
+	}
+
+	application := GenerateApplication(appId, "User1", model.ApplicationType{Type: model.Club}, "Title", "Remakrs", 10000, time.Now())
 
 	appRepMock.On("GetApplication", application.ID, true, true).Return(application, nil)
 	appRepMock.On("GetApplication", mock.Anything, mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
@@ -188,12 +195,12 @@ func TestGetApplication(t *testing.T) {
 		e := echo.New()
 		ctx := context.TODO()
 
-		req := httptest.NewRequest(http.MethodGet, "/api/applications/"+application.ID.String(), nil)
+		req := httptest.NewRequest(http.MethodGet, "/api/applications/"+appId.String(), nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
-		c.SetParamValues(application.ID.String())
+		c.SetParamValues(appId.String())
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -264,7 +271,12 @@ func TestGetApplication(t *testing.T) {
 func TestGetApplicationList(t *testing.T) {
 	appRepMock := NewApplicationRepositoryMock(t)
 
-	application := GenerateApplication("User1", model.ApplicationType{Type: model.Club}, "Title", "Remakrs", 10000, time.Now())
+	appId, err := uuid.NewV4()
+	if err != nil {
+		panic(err)
+	}
+
+	application := GenerateApplication(appId, "User1", model.ApplicationType{Type: model.Club}, "Title", "Remakrs", 10000, time.Now())
 
 	appRepMock.On("GetApplicationList", "", (*model.StateType)(nil), (*int)(nil), "", (*model.ApplicationType)(nil), (*time.Time)(nil), (*time.Time)(nil), mock.Anything).Return([]model.Application{application}, nil)
 	appRepMock.On("GetApplicationList", "title", (*model.StateType)(nil), (*int)(nil), "User1", (*model.ApplicationType)(nil), (*time.Time)(nil), (*time.Time)(nil), true).Return([]model.Application{application}, nil)
@@ -404,7 +416,6 @@ func TestGetApplicationList(t *testing.T) {
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
-				// pass error check because this is test for giving invalid query parameter.
 				// panic(err)
 			}
 
@@ -415,7 +426,6 @@ func TestGetApplicationList(t *testing.T) {
 			}
 
 			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-				// pass error check because this is test for giving invalid query parameter.
 				// panic(err)
 			}
 
@@ -431,7 +441,156 @@ func TestGetApplicationList(t *testing.T) {
 }
 
 func TestPostApplication(t *testing.T) {
+	appRepMock := NewApplicationRepositoryMock(t)
 
+	title := "夏コミの交通費をお願いします。"
+	remarks := "〇〇駅から〇〇駅への移動"
+	amount := 1000
+	paidAt := time.Now().Round(time.Second)
+
+	id, err := uuid.NewV4()
+	if err != nil {
+		panic(err)
+	}
+
+	appRepMock.On("GetApplication", id, mock.Anything, mock.Anything).Return(GenerateApplication(id, "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, paidAt), nil)
+	appRepMock.On("BuildApplication", "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, mock.Anything).Return(id, nil)
+
+	service := Service{
+		Applications: NewApplicationService(appRepMock),
+	}
+
+	t.Parallel()
+
+	t.Run("shouldSuccess", func(t *testing.T) {
+		asr := assert.New(t)
+		e := echo.New()
+		ctx := context.TODO()
+
+		body := &bytes.Buffer{}
+		mpw := multipart.NewWriter(body)
+		if err := mpw.SetBoundary(MultipartBoundary); err != nil {
+			panic(err)
+		}
+
+		part := make(textproto.MIMEHeader)
+		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
+		part.Set("Content-Type", "application/json")
+		writer, err := mpw.CreatePart(part)
+		if err != nil {
+			panic(err)
+		}
+		_, err = writer.Write([]byte(fmt.Sprintf(`
+			{
+				"type": "club",
+				"title": "%s",
+				"remarks": "%s",
+				"paid_at": "%s",
+				"amount": %d,
+				"repaid_to_id": [
+					"User1"
+				]
+			}
+		`, title, remarks, paidAt.Format(time.RFC3339), amount)))
+		if err != nil {
+			panic(err)
+		}
+
+		if err = mpw.Close(); err != nil {
+			panic(err)
+		}
+
+		req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
+		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/applications")
+
+		route, pathParam, err := router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PostApplication(c)
+		asr.NoError(err)
+
+		asr.Equal(http.StatusCreated, rec.Code)
+
+		err = validateResponse(&ctx, requestValidationInput, rec)
+		asr.NoError(err)
+	})
+
+	t.Run("shouldFail", func(t *testing.T) {
+		asr := assert.New(t)
+		e := echo.New()
+		ctx := context.TODO()
+
+		body := &bytes.Buffer{}
+		mpw := multipart.NewWriter(body)
+		if err := mpw.SetBoundary(MultipartBoundary); err != nil {
+			panic(err)
+		}
+
+		part := make(textproto.MIMEHeader)
+		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
+		part.Set("Content-Type", "application/json")
+		writer, err := mpw.CreatePart(part)
+		if err != nil {
+			panic(err)
+		}
+		_, err = writer.Write([]byte(fmt.Sprintf(`
+			{
+				"type": "club",
+				"title": "%s",
+				"remarks": "%s",
+				"paid_at": "%s",
+				"amount": %d
+			}
+		`, title, remarks, paidAt.Format(time.RFC3339), amount)))
+		if err != nil {
+			// panic(err)
+		}
+
+		if err = mpw.Close(); err != nil {
+			panic(err)
+		}
+
+		req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
+		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/applications")
+
+		route, pathParam, err := router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			// panic(err)
+		}
+
+		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			// panic(err)
+		}
+
+		err = service.PostApplication(c)
+		asr.NoError(err)
+
+		asr.Equal(http.StatusBadRequest, rec.Code)
+	})
 }
 
 func TestPatchApplication(t *testing.T) {
