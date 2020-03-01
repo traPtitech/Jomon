@@ -14,7 +14,7 @@ func TestCreateApplicationsDetail(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appId, err := createApplication(db, "userId")
+		appId, err := repo.createApplication(db, "userId")
 		if err != nil {
 			panic(err)
 		}
@@ -43,7 +43,7 @@ func TestPutApplicationsDetail(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appId, err := createApplication(db, "userId")
+		appId, err := repo.createApplication(db, "userId")
 		if err != nil {
 			panic(err)
 		}
@@ -54,7 +54,7 @@ func TestPutApplicationsDetail(t *testing.T) {
 		}
 
 		newUserId := "user2Id"
-		newDetail, err := putApplicationsDetail(db, oldDetail.ID, newUserId, nil, nil, nil, nil, nil)
+		newDetail, err := putApplicationsDetail(db, oldDetail.ID, newUserId, nil, "", "", nil, nil)
 		asr.NoError(err)
 
 		asr.Equal(newDetail.ApplicationID, appId)
@@ -69,7 +69,7 @@ func TestPutApplicationsDetail(t *testing.T) {
 	t.Run("shouldFail", func(t *testing.T) {
 		asr := assert.New(t)
 
-		_, err := putApplicationsDetail(db, intsets.MaxInt, "userId", nil, nil, nil, nil, nil)
+		_, err := putApplicationsDetail(db, intsets.MaxInt, "userId", nil, "", "", nil, nil)
 		asr.Error(err)
 	})
 }

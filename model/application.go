@@ -52,10 +52,10 @@ func (app *Application) GiveIsUserAdmin(admins []string) {
 type ApplicationRepository interface {
 	GetApplication(id uuid.UUID, giveAdmin bool, preload bool) (Application, error)
 	GetApplicationList(
-		sort *string,
+		sort string,
 		currentState *StateType,
 		financialYear *int,
-		applicant *string,
+		applicant string,
 		typ *ApplicationType,
 		submittedSince *time.Time,
 		submittedUntil *time.Time,
@@ -73,8 +73,8 @@ type ApplicationRepository interface {
 		appId uuid.UUID,
 		updateUserTrapId string,
 		typ *ApplicationType,
-		title *string,
-		remarks *string,
+		title string,
+		remarks string,
 		amount *int,
 		paidAt *time.Time,
 	) error
@@ -110,15 +110,15 @@ func (_ *applicationRepository) GetApplication(id uuid.UUID, giveAdmin bool, pre
 	return app, nil
 }
 
-func (_ *applicationRepository) GetApplicationList(sort *string, currentState *StateType, financialYear *int, applicant *string, typ *ApplicationType, submittedSince *time.Time, submittedUntil *time.Time, giveAdmin bool) ([]Application, error) {
+func (_ *applicationRepository) GetApplicationList(sort string, currentState *StateType, financialYear *int, applicant string, typ *ApplicationType, submittedSince *time.Time, submittedUntil *time.Time, giveAdmin bool) ([]Application, error) {
 	query := db
 
 	if currentState != nil {
 		query = query.Joins("JOIN states_logs ON states_logs.id = applications.states_logs_id").Where("states_logs.to_state = ?", currentState.Type)
 	}
 
-	if applicant != nil {
-		query = query.Where("create_user_trap_id = ?", *applicant)
+	if applicant != "" {
+		query = query.Where("create_user_trap_id = ?", applicant)
 	}
 
 	if typ != nil {
@@ -133,19 +133,15 @@ func (_ *applicationRepository) GetApplicationList(sort *string, currentState *S
 		query = query.Where("created_at < ?", *submittedUntil)
 	}
 
-	if sort != nil {
-		switch *sort {
-		case "created_at":
-			query = query.Order("created_at desc")
-		case "-created_at":
-			query = query.Order("created_at")
-		case "title":
-			query = query.Joins("JOIN applications_details ON applications_details.id = applications.applications_details_id").Order("applications_details.title")
-		case "-title":
-			query = query.Joins("JOIN applications_details ON applications_details.id = applications.applications_details_id").Order("applications_details.title desc")
-		}
-	} else {
+	switch sort {
+	case "", "created_at":
 		query = query.Order("created_at desc")
+	case "-created_at":
+		query = query.Order("created_at")
+	case "title":
+		query = query.Joins("JOIN applications_details ON applications_details.id = applications.applications_details_id").Order("applications_details.title")
+	case "-title":
+		query = query.Joins("JOIN applications_details ON applications_details.id = applications.applications_details_id").Order("applications_details.title desc")
 	}
 
 	//noinspection GoPreferNilSlice
@@ -205,7 +201,7 @@ func (repo *applicationRepository) BuildApplication(createUserTrapID string, typ
 	return id, nil
 }
 
-func (repo *applicationRepository) PatchApplication(appId uuid.UUID, updateUserTrapId string, typ *ApplicationType, title *string, remarks *string, amount *int, paidAt *time.Time) error {
+func (repo *applicationRepository) PatchApplication(appId uuid.UUID, updateUserTrapId string, typ *ApplicationType, title string, remarks string, amount *int, paidAt *time.Time) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		app, err := repo.GetApplication(appId, false, false)
 		if err != nil {

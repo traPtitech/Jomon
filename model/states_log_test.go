@@ -12,7 +12,7 @@ func TestCreateStatesLog(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		id, err := createApplication(db, "userId")
+		id, err := repo.createApplication(db, "userId")
 		if err != nil {
 			panic(err)
 		}

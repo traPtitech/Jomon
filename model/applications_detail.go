@@ -121,7 +121,7 @@ func createApplicationsDetail(db_ *gorm.DB, applicationId uuid.UUID, updateUserT
 	return detail, nil
 }
 
-func putApplicationsDetail(db_ *gorm.DB, currentDetailId int, updateUserTrapID string, typ *ApplicationType, title *string, remarks *string, amount *int, paidAt *time.Time) (ApplicationsDetail, error) {
+func putApplicationsDetail(db_ *gorm.DB, currentDetailId int, updateUserTrapID string, typ *ApplicationType, title string, remarks string, amount *int, paidAt *time.Time) (ApplicationsDetail, error) {
 	var detail ApplicationsDetail
 	err := db_.Find(&detail, ApplicationsDetail{ID: currentDetailId}).Error
 	if err != nil {
@@ -134,12 +134,12 @@ func putApplicationsDetail(db_ *gorm.DB, currentDetailId int, updateUserTrapID s
 		detail.Type = *typ
 	}
 
-	if title != nil {
-		detail.Title = *title
+	if title != "" {
+		detail.Title = title
 	}
 
-	if remarks != nil {
-		detail.Remarks = *remarks
+	if remarks != "" {
+		detail.Remarks = remarks
 	}
 
 	if amount != nil {
