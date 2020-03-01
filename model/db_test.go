@@ -10,6 +10,7 @@ import (
 const userNameChrs = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 var randSrc = rand.NewSource(0)
+var repo = &applicationRepository{}
 
 func TestMain(m *testing.M) {
 	db := setupDB()

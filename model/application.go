@@ -49,7 +49,44 @@ func (app *Application) GiveIsUserAdmin(admins []string) {
 	}
 }
 
-func GetApplication(id uuid.UUID, giveAdmin bool, preload bool) (Application, error) {
+type ApplicationRepository interface {
+	GetApplication(id uuid.UUID, giveAdmin bool, preload bool) (Application, error)
+	GetApplicationList(
+		sort *string,
+		currentState *StateType,
+		financialYear *int,
+		applicant *string,
+		typ *ApplicationType,
+		submittedSince *time.Time,
+		submittedUntil *time.Time,
+		giveAdmin bool,
+	) ([]Application, error)
+	BuildApplication(
+		createUserTrapID string,
+		typ ApplicationType,
+		title string,
+		remarks string,
+		amount int,
+		paidAt time.Time,
+	) (uuid.UUID, error)
+	PatchApplication(
+		appId uuid.UUID,
+		updateUserTrapId string,
+		typ *ApplicationType,
+		title *string,
+		remarks *string,
+		amount *int,
+		paidAt *time.Time,
+	) error
+}
+
+type applicationRepository struct{}
+
+func NewApplicationRepository() ApplicationRepository {
+	return &applicationRepository{}
+}
+
+func (_ *applicationRepository) GetApplication(id uuid.UUID, giveAdmin bool, preload bool) (Application, error) {
 	var app Application
 	query := db
 	if preload {
@@ -73,7 +110,7 @@ func GetApplication(id uuid.UUID, giveAdmin bool, preload bool) (Application, er
 	return app, nil
 }
 
-func GetApplicationList(sort *string, currentState *StateType, financialYear *int, applicant *string, typ *ApplicationType, submittedSince *time.Time, submittedUntil *time.Time, giveAdmin bool) ([]Application, error) {
+func (_ *applicationRepository) GetApplicationList(sort *string, currentState *StateType, financialYear *int, applicant *string, typ *ApplicationType, submittedSince *time.Time, submittedUntil *time.Time, giveAdmin bool) ([]Application, error) {
 	query := db
 
 	if currentState != nil {
@@ -136,11 +173,11 @@ func GetApplicationList(sort *string, currentState *StateType, financialYear *in
 	return apps, nil
 }
 
-func BuildApplication(createUserTrapID string, typ ApplicationType, title string, remarks string, amount int, paidAt time.Time) (uuid.UUID, error) {
+func (repo *applicationRepository) BuildApplication(createUserTrapID string, typ ApplicationType, title string, remarks string, amount int, paidAt time.Time) (uuid.UUID, error) {
 	var id uuid.UUID
 
 	err := db.Transaction(func(tx *gorm.DB) error {
-		_id, err := createApplication(tx, createUserTrapID)
+		_id, err := repo.createApplication(tx, createUserTrapID)
 		if err != nil {
 			return err
 		}
@@ -168,9 +205,9 @@ func BuildApplication(createUserTrapID string, typ ApplicationType, title string
 	return id, nil
 }
 
-func PatchApplication(appId uuid.UUID, updateUserTrapId string, typ *ApplicationType, title *string, remarks *string, amount *int, paidAt *time.Time) error {
+func (repo *applicationRepository) PatchApplication(appId uuid.UUID, updateUserTrapId string, typ *ApplicationType, title *string, remarks *string, amount *int, paidAt *time.Time) error {
 	return db.Transaction(func(tx *gorm.DB) error {
-		app, err := GetApplication(appId, false, false)
+		app, err := repo.GetApplication(appId, false, false)
 		if err != nil {
 			return err
 		}
@@ -186,7 +223,7 @@ func PatchApplication(appId uuid.UUID, updateUserTrapId string, typ *Application
 	})
 }
 
-func createApplication(db_ *gorm.DB, createUserTrapID string) (uuid.UUID, error) {
+func (_ *applicationRepository) createApplication(db_ *gorm.DB, createUserTrapID string) (uuid.UUID, error) {
 	id, err := uuid.NewV4()
 	if err != nil {
 		return uuid.Nil, err

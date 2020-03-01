@@ -12,7 +12,7 @@ func TestCreateApplication(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appId, err := createApplication(db, "User1")
+		appId, err := repo.createApplication(db, "User1")
 		asr.NotEqual(appId, uuid.Nil)
 		asr.NoError(err)
 	})
@@ -22,7 +22,7 @@ func TestBuildApplication(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appId, err := BuildApplication("User1", ApplicationType{Type: contest}, "Title", "Remarks", 1000, time.Now())
+		appId, err := repo.BuildApplication("User1", ApplicationType{Type: Contest}, "Title", "Remarks", 1000, time.Now())
 		asr.NoError(err)
 		asr.NotEqual(appId, uuid.Nil)
 	})
@@ -39,12 +39,12 @@ func TestGetApplication(t *testing.T) {
 			panic(err)
 		}
 
-		appId, err := BuildApplication(user, ApplicationType{Type: contest}, "Title", "Remarks", 1000, time.Now())
+		appId, err := repo.BuildApplication(user, ApplicationType{Type: Contest}, "Title", "Remarks", 1000, time.Now())
 		if err != nil {
 			panic(err)
 		}
 
-		app, err := GetApplication(appId, true, true)
+		app, err := repo.GetApplication(appId, true, true)
 
 		asr.NoError(err)
 		asr.Equal(appId, app.ID)
@@ -70,12 +70,12 @@ func TestGetApplication(t *testing.T) {
 			panic(err)
 		}
 
-		appId, err := BuildApplication(user, ApplicationType{Type: contest}, "Title", "Remarks", 1000, time.Now())
+		appId, err := repo.BuildApplication(user, ApplicationType{Type: Contest}, "Title", "Remarks", 1000, time.Now())
 		if err != nil {
 			panic(err)
 		}
 
-		app, err := GetApplication(appId, true, true)
+		app, err := repo.GetApplication(appId, true, true)
 
 		asr.NoError(err)
 		asr.Equal(appId, app.ID)
@@ -91,7 +91,7 @@ func TestGetApplication(t *testing.T) {
 			panic(err)
 		}
 
-		_, err = GetApplication(id, true, true)
+		_, err = repo.GetApplication(id, true, true)
 		asr.Error(err)
 		asr.True(gorm.IsRecordNotFoundError(err))
 	})
@@ -103,21 +103,21 @@ func TestPatchApplication(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		typ := ApplicationType{Type: club}
+		typ := ApplicationType{Type: Club}
 		title := "Title"
 		remarks := "Remarks"
 		amount := 1000
 		paidAt := time.Now().Round(time.Second)
-		appId, err := BuildApplication("User", typ, title, remarks, amount, paidAt)
+		appId, err := repo.BuildApplication("User", typ, title, remarks, amount, paidAt)
 		if err != nil {
 			panic(err)
 		}
 
-		newType := ApplicationType{Type: contest}
-		err = PatchApplication(appId, "User", &newType, &title, &remarks, &amount, &paidAt)
+		newType := ApplicationType{Type: Contest}
+		err = repo.PatchApplication(appId, "User", &newType, &title, &remarks, &amount, &paidAt)
 		asr.NoError(err)
 
-		app, err := GetApplication(appId, true, true)
+		app, err := repo.GetApplication(appId, true, true)
 		if err != nil {
 			panic(err)
 		}
@@ -140,7 +140,7 @@ func TestPatchApplication(t *testing.T) {
 			panic(err)
 		}
 
-		err = PatchApplication(id, generateRandomUserName(), nil, nil, nil, nil, nil)
+		err = repo.PatchApplication(id, generateRandomUserName(), nil, nil, nil, nil, nil)
 		asr.Error(err)
 		asr.True(gorm.IsRecordNotFoundError(err))
 	})
@@ -160,20 +160,20 @@ func TestGetApplicationList(t *testing.T) {
 		}
 
 		app1SubTime := time.Date(2020, 1, 10, 12, 0, 0, 0, time.Local)
-		app1Id := buildApplicationWithSubmitTime(user1, app1SubTime, ApplicationType{Type: club}, "CCCCC", "Remarks", 10000, time.Now())
+		app1Id := buildApplicationWithSubmitTime(user1, app1SubTime, ApplicationType{Type: Club}, "CCCCC", "Remarks", 10000, time.Now())
 
 		app2SubTime := time.Date(2020, 1, 20, 12, 0, 0, 0, time.Local)
-		app2Id := buildApplicationWithSubmitTime(user2, app2SubTime, ApplicationType{Type: contest}, "AAAAA", "Remarks", 10000, time.Now())
+		app2Id := buildApplicationWithSubmitTime(user2, app2SubTime, ApplicationType{Type: Contest}, "AAAAA", "Remarks", 10000, time.Now())
 
 		app3SubTime := time.Date(2020, 1, 30, 12, 0, 0, 0, time.Local)
-		app3Id := buildApplicationWithSubmitTime(user2, app3SubTime, ApplicationType{Type: event}, "BBBBB", "Remarks", 10000, time.Now())
+		app3Id := buildApplicationWithSubmitTime(user2, app3SubTime, ApplicationType{Type: Event}, "BBBBB", "Remarks", 10000, time.Now())
 
 		t.Parallel()
 
 		t.Run("allNil", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := GetApplicationList(nil, nil, nil, nil, nil, nil, nil, true)
+			apps, err := repo.GetApplicationList(nil, nil, nil, nil, nil, nil, nil, true)
 			asr.NoError(err)
 
 			asr.Len(apps, 3)
@@ -189,7 +189,7 @@ func TestGetApplicationList(t *testing.T) {
 		t.Run("filterByApplicant", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := GetApplicationList(nil, nil, nil, &user2, nil, nil, nil, true)
+			apps, err := repo.GetApplicationList(nil, nil, nil, &user2, nil, nil, nil, true)
 			asr.NoError(err)
 
 			asr.Len(apps, 2)
@@ -200,7 +200,7 @@ func TestGetApplicationList(t *testing.T) {
 		t.Run("filterByApplicationType", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := GetApplicationList(nil, nil, nil, nil, &ApplicationType{Type: contest}, nil, nil, false)
+			apps, err := repo.GetApplicationList(nil, nil, nil, nil, &ApplicationType{Type: Contest}, nil, nil, false)
 			asr.NoError(err)
 
 			asr.Len(apps, 1)
@@ -210,7 +210,7 @@ func TestGetApplicationList(t *testing.T) {
 		t.Run("emptyResult", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := GetApplicationList(nil, nil, nil, &user3, nil, nil, nil, false)
+			apps, err := repo.GetApplicationList(nil, nil, nil, &user3, nil, nil, nil, false)
 			asr.NoError(err)
 
 			asr.Empty(apps)
@@ -225,7 +225,7 @@ func TestGetApplicationList(t *testing.T) {
 			t.Run("Since", func(t *testing.T) {
 				asr := assert.New(t)
 
-				apps, err := GetApplicationList(nil, nil, nil, nil, nil, &beforeApp3, nil, false)
+				apps, err := repo.GetApplicationList(nil, nil, nil, nil, nil, &beforeApp3, nil, false)
 				asr.NoError(err)
 
 				asr.Len(apps, 1)
@@ -235,7 +235,7 @@ func TestGetApplicationList(t *testing.T) {
 			t.Run("until", func(t *testing.T) {
 				asr := assert.New(t)
 
-				apps, err := GetApplicationList(nil, nil, nil, nil, nil, nil, &beforeApp3, false)
+				apps, err := repo.GetApplicationList(nil, nil, nil, nil, nil, nil, &beforeApp3, false)
 				asr.NoError(err)
 
 				asr.Len(apps, 2)
@@ -245,7 +245,7 @@ func TestGetApplicationList(t *testing.T) {
 			t.Run("both", func(t *testing.T) {
 				asr := assert.New(t)
 
-				apps, err := GetApplicationList(nil, nil, nil, nil, nil, &beforeApp2, &beforeApp3, false)
+				apps, err := repo.GetApplicationList(nil, nil, nil, nil, nil, &beforeApp2, &beforeApp3, false)
 				asr.NoError(err)
 
 				asr.Len(apps, 1)
@@ -282,7 +282,7 @@ func TestGetApplicationList(t *testing.T) {
 				t.Run(test.SortBy, func(t *testing.T) {
 					asr := assert.New(t)
 
-					apps, err := GetApplicationList(&test.SortBy, nil, nil, nil, nil, nil, nil, false)
+					apps, err := repo.GetApplicationList(&test.SortBy, nil, nil, nil, nil, nil, nil, false)
 					asr.NoError(err)
 
 					asr.Len(apps, 3)

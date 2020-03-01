@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	club    int = 1
-	contest int = 2
-	event   int = 3
-	public  int = 4
+	Club    int = 1
+	Contest int = 2
+	Event   int = 3
+	Public  int = 4
 )
 
 type ApplicationsDetail struct {
@@ -35,13 +35,13 @@ type ApplicationType struct {
 
 func (ty ApplicationType) MarshalJSON() ([]byte, error) {
 	switch ty.Type {
-	case club:
+	case Club:
 		return json.Marshal("club")
-	case contest:
+	case Contest:
 		return json.Marshal("contest")
-	case event:
+	case Event:
 		return json.Marshal("event")
-	case public:
+	case Public:
 		return json.Marshal("public")
 	}
 	return nil, fmt.Errorf("unknown application type: %d", ty.Type)
@@ -73,13 +73,13 @@ func (p PaidAt) MarshalJSON() ([]byte, error) {
 func GetApplicationTypeFromString(str string) (int, error) {
 	switch str {
 	case "club":
-		return club, nil
+		return Club, nil
 	case "contest":
-		return contest, nil
+		return Contest, nil
 	case "event":
-		return event, nil
+		return Event, nil
 	case "public":
-		return public, nil
+		return Public, nil
 	}
 
 	return 0, errors.New("unknown application type")

@@ -20,7 +20,7 @@ func TestCreateStatesLog(t *testing.T) {
 		state, err := createStatesLog(db, id, "userId")
 		asr.NoError(err)
 		asr.Equal(state.ApplicationID, id)
-		asr.Equal(state.ToState.Type, submitted)
+		asr.Equal(state.ToState.Type, Submitted)
 	})
 
 	t.Run("shouldFail", func(t *testing.T) {

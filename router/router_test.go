@@ -1,9 +1,10 @@
 package router
 
 import (
+	"context"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
-	"github.com/traPtitech/Jomon/model"
+	"net/http/httptest"
 	"os"
 	"testing"
 )
@@ -11,13 +12,6 @@ import (
 var router *openapi3filter.Router
 
 func TestMain(m *testing.M) {
-	if _, err := model.EstablishConnection(); err != nil {
-		panic(err)
-	}
-	if err := model.Migrate(); err != nil {
-		panic(err)
-	}
-
 	setRouter()
 
 	code := m.Run()
@@ -27,4 +21,15 @@ func TestMain(m *testing.M) {
 func setRouter() {
 	openapi3.DefineStringFormat("uuid", openapi3.FormatOfStringForUUIDOfRFC4122)
 	router = openapi3filter.NewRouter().WithSwaggerFromFile("../docs/swagger.yaml")
+}
+
+func validateResponse(ctx *context.Context, requestValidationInput *openapi3filter.RequestValidationInput, rec *httptest.ResponseRecorder) error {
+	responseValidationInput := &openapi3filter.ResponseValidationInput{
+		RequestValidationInput: requestValidationInput,
+		Status:                 rec.Code,
+		Header:                 rec.Header(),
+	}
+	responseValidationInput.SetBodyBytes(rec.Body.Bytes())
+
+	return openapi3filter.ValidateResponse(*ctx, responseValidationInput)
 }

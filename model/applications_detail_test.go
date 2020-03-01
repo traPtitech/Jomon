@@ -19,7 +19,7 @@ func TestCreateApplicationsDetail(t *testing.T) {
 			panic(err)
 		}
 
-		detail, err := createApplicationsDetail(db, appId, "userId", ApplicationType{Type: club}, "Title", "Remarks", 1000, time.Now())
+		detail, err := createApplicationsDetail(db, appId, "userId", ApplicationType{Type: Club}, "Title", "Remarks", 1000, time.Now())
 		asr.NoError(err)
 		asr.Equal(detail.ApplicationID, appId)
 	})
@@ -32,7 +32,7 @@ func TestCreateApplicationsDetail(t *testing.T) {
 			panic(err)
 		}
 
-		_, err = createApplicationsDetail(db, id, "userId", ApplicationType{Type: club}, "Title", "Remakrs", 1000, time.Now())
+		_, err = createApplicationsDetail(db, id, "userId", ApplicationType{Type: Club}, "Title", "Remakrs", 1000, time.Now())
 		asr.Error(err)
 	})
 }
@@ -48,7 +48,7 @@ func TestPutApplicationsDetail(t *testing.T) {
 			panic(err)
 		}
 
-		oldDetail, err := createApplicationsDetail(db, appId, "userId", ApplicationType{Type: club}, "Title", "Remarks", 1000, time.Now())
+		oldDetail, err := createApplicationsDetail(db, appId, "userId", ApplicationType{Type: Club}, "Title", "Remarks", 1000, time.Now())
 		if err != nil {
 			panic(err)
 		}

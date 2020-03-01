@@ -12,6 +12,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type ApplicationService struct {
+	repo model.ApplicationRepository
+}
+
+func NewApplicationService(repo model.ApplicationRepository) *ApplicationService {
+	return &ApplicationService{repo: repo}
+}
+
 type GetApplicationsListQuery struct {
 	Sort           *string `query:"sort"`
 	CurrentState   *string `query:"current_state"`
@@ -31,7 +39,7 @@ type PostApplicationRequest struct {
 	RepaidToId []string               `json:"repaid_to_id"`
 }
 
-func GetApplicationList(c echo.Context) error {
+func (s *Service) GetApplicationList(c echo.Context) error {
 	var query GetApplicationsListQuery
 	err := c.Bind(&query)
 	if err != nil {
@@ -76,16 +84,16 @@ func GetApplicationList(c echo.Context) error {
 		submittedUntil = &_submittedUntil
 	}
 
-	applications, err := model.GetApplicationList(query.Sort, currentState, query.FinancialYear, query.Applicant, typ, submittedSince, submittedUntil, true)
+	applications, err := s.Applications.repo.GetApplicationList(query.Sort, currentState, query.FinancialYear, query.Applicant, typ, submittedSince, submittedUntil, true)
 	return c.JSON(http.StatusOK, applications)
 }
 
-func GetApplication(c echo.Context) error {
+func (s *Service) GetApplication(c echo.Context) error {
 	applicationId := uuid.FromStringOrNil(c.Param("applicationId"))
 	if applicationId == uuid.Nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
-	application, err := model.GetApplication(applicationId, true, true)
+	application, err := s.Applications.repo.GetApplication(applicationId, true, true)
 	if gorm.IsRecordNotFoundError(err) {
 		return c.NoContent(http.StatusNotFound)
 	} else if err != nil {
@@ -97,7 +105,7 @@ func GetApplication(c echo.Context) error {
 	return c.JSON(http.StatusOK, application)
 }
 
-func PostApplication(c echo.Context) error {
+func (s *Service) PostApplication(c echo.Context) error {
 	details := c.FormValue("details")
 	var req PostApplicationRequest
 	if err := json.Unmarshal([]byte(details), &req); err != nil {
@@ -111,12 +119,12 @@ func PostApplication(c echo.Context) error {
 
 	userId := ""
 
-	id, err := model.BuildApplication(userId, *req.Type, *req.Title, *req.Remarks, *req.Amount, *req.PaidAt)
+	id, err := s.Applications.repo.BuildApplication(userId, *req.Type, *req.Title, *req.Remarks, *req.Amount, *req.PaidAt)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	app, err := model.GetApplication(id, true, true)
+	app, err := s.Applications.repo.GetApplication(id, true, true)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -126,7 +134,7 @@ func PostApplication(c echo.Context) error {
 	return c.JSON(http.StatusCreated, app)
 }
 
-func PatchApplication(c echo.Context) error {
+func (s *Service) PatchApplication(c echo.Context) error {
 	applicationId := uuid.FromStringOrNil(c.Param("applicationId"))
 	userId := ""
 	if applicationId == uuid.Nil {
@@ -140,14 +148,14 @@ func PatchApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	err := model.PatchApplication(applicationId, userId, req.Type, req.Title, req.Remarks, req.Amount, req.PaidAt)
+	err := s.Applications.repo.PatchApplication(applicationId, userId, req.Type, req.Title, req.Remarks, req.Amount, req.PaidAt)
 	if gorm.IsRecordNotFoundError(err) {
 		return c.NoContent(http.StatusNotFound)
 	} else if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	app, err := model.GetApplication(applicationId, true, true)
+	app, err := s.Applications.repo.GetApplication(applicationId, true, true)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}

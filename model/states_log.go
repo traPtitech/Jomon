@@ -10,11 +10,11 @@ import (
 )
 
 const (
-	submitted   int = 1
-	fixRequired int = 2
-	accepted    int = 3
-	fullyRepaid int = 4
-	rejected    int = 5
+	Submitted   int = 1
+	FixRequired int = 2
+	Accepted    int = 3
+	FullyRepaid int = 4
+	Rejected    int = 5
 )
 
 type StatesLog struct {
@@ -32,15 +32,15 @@ type StateType struct {
 
 func (ty StateType) MarshalJSON() ([]byte, error) {
 	switch ty.Type {
-	case submitted:
+	case Submitted:
 		return json.Marshal("submitted")
-	case fixRequired:
+	case FixRequired:
 		return json.Marshal("fix_required")
-	case accepted:
+	case Accepted:
 		return json.Marshal("accepted")
-	case fullyRepaid:
+	case FullyRepaid:
 		return json.Marshal("fully_repaid")
-	case rejected:
+	case Rejected:
 		return json.Marshal("rejected")
 	}
 	return nil, errors.New("unknown state type")
@@ -51,15 +51,15 @@ func GetStateType(str string) (StateType, error) {
 	var err error
 	switch str {
 	case "submitted":
-		result.Type = submitted
+		result.Type = Submitted
 	case "fix_required":
-		result.Type = fixRequired
+		result.Type = FixRequired
 	case "accepted":
-		result.Type = accepted
+		result.Type = Accepted
 	case "fully_repaid":
-		result.Type = fullyRepaid
+		result.Type = FullyRepaid
 	case "rejected":
-		result.Type = rejected
+		result.Type = Rejected
 	default:
 		err = errors.New("unknown state type")
 	}
