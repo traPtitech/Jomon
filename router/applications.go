@@ -179,10 +179,10 @@ func (s *Service) PatchApplication(c echo.Context) error {
 			return c.JSON(http.StatusForbidden, &PatchErrorMessage{
 				IsUserAccepted: false,
 			})
-		} else if app.LatestStatus.Type != model.Submitted && app.LatestStatus.Type != model.FixRequired {
+		} else if app.LatestState.Type != model.Submitted && app.LatestState.Type != model.FixRequired {
 			return c.JSON(http.StatusForbidden, &PatchErrorMessage{
 				IsUserAccepted: true,
-				CurrentState:   &app.LatestStatus,
+				CurrentState:   &app.LatestState,
 			})
 		}
 	}

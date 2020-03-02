@@ -12,7 +12,7 @@ type Application struct {
 	LatestApplicationsDetail ApplicationsDetail   `gorm:"foreignkey:ApplicationsDetailsID" json:"current_detail"`
 	ApplicationsDetailsID    int                  `gorm:"type:int(11);not null" json:"-"`
 	LatestStatesLog          StatesLog            `gorm:"foreignkey:StatesLogsID" json:"-"`
-	LatestStatus             StateType            `gorm:"-" json:"current_state"`
+	LatestState              StateType            `gorm:"-" json:"current_state"`
 	StatesLogsID             int                  `gorm:"type:int(11);not null" json:"-"`
 	CreateUserTrapID         User                 `gorm:"embedded;embedded_prefix:create_user_;" json:"applicant"`
 	CreatedAt                time.Time            `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
@@ -99,7 +99,7 @@ func (_ *applicationRepository) GetApplication(id uuid.UUID, preload bool) (Appl
 		return Application{}, err
 	}
 
-	app.LatestStatus = app.LatestStatesLog.ToState
+	app.LatestState = app.LatestStatesLog.ToState
 
 	return app, nil
 }
@@ -146,7 +146,7 @@ func (_ *applicationRepository) GetApplicationList(sort string, currentState *St
 	}
 
 	for i := range apps {
-		apps[i].LatestStatus = apps[i].LatestStatesLog.ToState
+		apps[i].LatestState = apps[i].LatestStatesLog.ToState
 	}
 
 	return apps, nil

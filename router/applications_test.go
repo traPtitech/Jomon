@@ -181,7 +181,7 @@ func GenerateApplication(
 		LatestApplicationsDetail: detail,
 		ApplicationsDetailsID:    1,
 		LatestStatesLog:          state,
-		LatestStatus:             model.StateType{Type: model.Submitted},
+		LatestState:              model.StateType{Type: model.Submitted},
 		StatesLogsID:             1,
 		CreateUserTrapID: model.User{
 			TrapId:  createUserTrapID,
