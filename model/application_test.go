@@ -22,7 +22,7 @@ func TestBuildApplication(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appId, err := repo.BuildApplication("User1", ApplicationType{Type: Contest}, "Title", "Remarks", 1000, time.Now())
+		appId, err := repo.BuildApplication("User1", ApplicationType{Type: Contest}, "Title", "Remarks", 1000, time.Now(), []string{"User1"})
 		asr.NoError(err)
 		asr.NotEqual(appId, uuid.Nil)
 	})
@@ -35,21 +35,16 @@ func TestGetApplication(t *testing.T) {
 		asr := assert.New(t)
 
 		user := generateRandomUserName()
-		if err := AddAdministrator(user); err != nil {
-			panic(err)
-		}
 
-		appId, err := repo.BuildApplication(user, ApplicationType{Type: Contest}, "Title", "Remarks", 1000, time.Now())
+		appId, err := repo.BuildApplication(user, ApplicationType{Type: Contest}, "Title", "Remarks", 1000, time.Now(), []string{user})
 		if err != nil {
 			panic(err)
 		}
 
-		app, err := repo.GetApplication(appId, true, true)
+		app, err := repo.GetApplication(appId, true)
 
 		asr.NoError(err)
 		asr.Equal(appId, app.ID)
-
-		asr.True(app.CreateUserTrapID.IsAdmin)
 
 		asr.Equal(app.ApplicationsDetailsID, app.LatestApplicationsDetail.ID)
 		asr.Equal(app.StatesLogsID, app.LatestStatesLog.ID)
@@ -57,30 +52,24 @@ func TestGetApplication(t *testing.T) {
 		asr.Equal(app.LatestApplicationsDetail, app.ApplicationsDetails[0])
 		asr.Len(app.StatesLogs, 1)
 		asr.Equal(app.LatestStatesLog, app.StatesLogs[0])
-
-		asr.True(app.LatestApplicationsDetail.UpdateUserTrapID.IsAdmin)
-		asr.True(app.LatestStatesLog.UpdateUserTrapID.IsAdmin)
+		asr.Len(app.RepayUsers, 1)
 	})
 
 	t.Run("shouldSuccess?giveAdmin=true&preload=false", func(t *testing.T) {
 		asr := assert.New(t)
 
 		user := generateRandomUserName()
-		if err := AddAdministrator(user); err != nil {
-			panic(err)
-		}
 
-		appId, err := repo.BuildApplication(user, ApplicationType{Type: Contest}, "Title", "Remarks", 1000, time.Now())
+		appId, err := repo.BuildApplication(user, ApplicationType{Type: Contest}, "Title", "Remarks", 1000, time.Now(), []string{user})
 		if err != nil {
 			panic(err)
 		}
 
-		app, err := repo.GetApplication(appId, true, true)
+		app, err := repo.GetApplication(appId, false)
 
 		asr.NoError(err)
 		asr.Equal(appId, app.ID)
 
-		asr.True(app.CreateUserTrapID.IsAdmin)
 	})
 
 	t.Run("shouldFail", func(t *testing.T) {
@@ -91,7 +80,7 @@ func TestGetApplication(t *testing.T) {
 			panic(err)
 		}
 
-		_, err = repo.GetApplication(id, true, true)
+		_, err = repo.GetApplication(id, true)
 		asr.Error(err)
 		asr.True(gorm.IsRecordNotFoundError(err))
 	})
@@ -108,16 +97,16 @@ func TestPatchApplication(t *testing.T) {
 		remarks := "Remarks"
 		amount := 1000
 		paidAt := time.Now().Round(time.Second)
-		appId, err := repo.BuildApplication("User", typ, title, remarks, amount, paidAt)
+		appId, err := repo.BuildApplication("User", typ, title, remarks, amount, paidAt, []string{"User"})
 		if err != nil {
 			panic(err)
 		}
 
 		newType := ApplicationType{Type: Contest}
-		err = repo.PatchApplication(appId, "User", &newType, title, remarks, &amount, &paidAt)
+		err = repo.PatchApplication(appId, "User", &newType, "", "", nil, nil, []string{})
 		asr.NoError(err)
 
-		app, err := repo.GetApplication(appId, true, true)
+		app, err := repo.GetApplication(appId, true)
 		if err != nil {
 			panic(err)
 		}
@@ -140,7 +129,7 @@ func TestPatchApplication(t *testing.T) {
 			panic(err)
 		}
 
-		err = repo.PatchApplication(id, generateRandomUserName(), nil, "", "", nil, nil)
+		err = repo.PatchApplication(id, generateRandomUserName(), nil, "", "", nil, nil, []string{})
 		asr.Error(err)
 		asr.True(gorm.IsRecordNotFoundError(err))
 	})
@@ -154,10 +143,6 @@ func TestGetApplicationList(t *testing.T) {
 		user1 := "User1"
 		user2 := "User2"
 		user3 := "User3"
-
-		if err := AddAdministrator(user1); err != nil {
-			panic(err)
-		}
 
 		app1SubTime := time.Date(2020, 1, 10, 12, 0, 0, 0, time.Local)
 		app1Id := buildApplicationWithSubmitTime(user1, app1SubTime, ApplicationType{Type: Club}, "CCCCC", "Remarks", 10000, time.Now())
@@ -173,7 +158,7 @@ func TestGetApplicationList(t *testing.T) {
 		t.Run("allNil", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := repo.GetApplicationList("", nil, nil, "", nil, nil, nil, true)
+			apps, err := repo.GetApplicationList("", nil, nil, "", nil, nil, nil)
 			asr.NoError(err)
 
 			asr.Len(apps, 3)
@@ -183,13 +168,12 @@ func TestGetApplicationList(t *testing.T) {
 			asr.False(apps[1].CreatedAt.Before(apps[2].CreatedAt))
 
 			asr.Equal(user1, apps[2].CreateUserTrapID.TrapId)
-			asr.True(apps[2].CreateUserTrapID.IsAdmin)
 		})
 
 		t.Run("filterByApplicant", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := repo.GetApplicationList("", nil, nil, user2, nil, nil, nil, true)
+			apps, err := repo.GetApplicationList("", nil, nil, user2, nil, nil, nil)
 			asr.NoError(err)
 
 			asr.Len(apps, 2)
@@ -200,7 +184,7 @@ func TestGetApplicationList(t *testing.T) {
 		t.Run("filterByApplicationType", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := repo.GetApplicationList("", nil, nil, "", &ApplicationType{Type: Contest}, nil, nil, false)
+			apps, err := repo.GetApplicationList("", nil, nil, "", &ApplicationType{Type: Contest}, nil, nil)
 			asr.NoError(err)
 
 			asr.Len(apps, 1)
@@ -210,7 +194,7 @@ func TestGetApplicationList(t *testing.T) {
 		t.Run("emptyResult", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := repo.GetApplicationList("", nil, nil, user3, nil, nil, nil, false)
+			apps, err := repo.GetApplicationList("", nil, nil, user3, nil, nil, nil)
 			asr.NoError(err)
 
 			asr.Empty(apps)
@@ -225,7 +209,7 @@ func TestGetApplicationList(t *testing.T) {
 			t.Run("Since", func(t *testing.T) {
 				asr := assert.New(t)
 
-				apps, err := repo.GetApplicationList("", nil, nil, "", nil, &beforeApp3, nil, false)
+				apps, err := repo.GetApplicationList("", nil, nil, "", nil, &beforeApp3, nil)
 				asr.NoError(err)
 
 				asr.Len(apps, 1)
@@ -235,7 +219,7 @@ func TestGetApplicationList(t *testing.T) {
 			t.Run("until", func(t *testing.T) {
 				asr := assert.New(t)
 
-				apps, err := repo.GetApplicationList("", nil, nil, "", nil, nil, &beforeApp3, false)
+				apps, err := repo.GetApplicationList("", nil, nil, "", nil, nil, &beforeApp3)
 				asr.NoError(err)
 
 				asr.Len(apps, 2)
@@ -245,7 +229,7 @@ func TestGetApplicationList(t *testing.T) {
 			t.Run("both", func(t *testing.T) {
 				asr := assert.New(t)
 
-				apps, err := repo.GetApplicationList("", nil, nil, "", nil, &beforeApp2, &beforeApp3, false)
+				apps, err := repo.GetApplicationList("", nil, nil, "", nil, &beforeApp2, &beforeApp3)
 				asr.NoError(err)
 
 				asr.Len(apps, 1)
@@ -282,7 +266,7 @@ func TestGetApplicationList(t *testing.T) {
 				t.Run(test.SortBy, func(t *testing.T) {
 					asr := assert.New(t)
 
-					apps, err := repo.GetApplicationList(test.SortBy, nil, nil, "", nil, nil, nil, false)
+					apps, err := repo.GetApplicationList(test.SortBy, nil, nil, "", nil, nil, nil)
 					asr.NoError(err)
 
 					asr.Len(apps, 3)
@@ -317,12 +301,12 @@ func buildApplicationWithSubmitTime(createUserTrapID string, submittedAt time.Ti
 		panic(err)
 	}
 
-	detail, err := createApplicationsDetail(db, id, createUserTrapID, typ, title, remarks, amount, paidAt)
+	detail, err := repo.createApplicationsDetail(db, id, createUserTrapID, typ, title, remarks, amount, paidAt)
 	if err != nil {
 		panic(err)
 	}
 
-	state, err := createStatesLog(db, id, createUserTrapID)
+	state, err := repo.createStatesLog(db, id, createUserTrapID)
 	if err != nil {
 		panic(err)
 	}

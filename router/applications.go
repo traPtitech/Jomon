@@ -11,14 +11,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type ApplicationService struct {
-	repo model.ApplicationRepository
-}
-
-func NewApplicationService(repo model.ApplicationRepository) *ApplicationService {
-	return &ApplicationService{repo: repo}
-}
-
 type GetApplicationsListQuery struct {
 	Sort           string `query:"sort"`
 	CurrentState   string `query:"current_state"`
@@ -83,10 +75,17 @@ func (s *Service) GetApplicationList(c echo.Context) error {
 		submittedUntil = &_submittedUntil
 	}
 
-	applications, err := s.Applications.repo.GetApplicationList(query.Sort, currentState, query.FinancialYear, query.Applicant, typ, submittedSince, submittedUntil, true)
-
+	applications, err := s.Applications.GetApplicationList(query.Sort, currentState, query.FinancialYear, query.Applicant, typ, submittedSince, submittedUntil)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	admins, err := s.Administrators.GetAdministratorList()
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	for i := range applications {
+		applications[i].GiveIsUserAdmin(admins)
 	}
 
 	return c.JSON(http.StatusOK, applications)
@@ -97,12 +96,18 @@ func (s *Service) GetApplication(c echo.Context) error {
 	if applicationId == uuid.Nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
-	application, err := s.Applications.repo.GetApplication(applicationId, true, true)
+	application, err := s.Applications.GetApplication(applicationId, true)
 	if gorm.IsRecordNotFoundError(err) {
 		return c.NoContent(http.StatusNotFound)
 	} else if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
+
+	admins, err := s.Administrators.GetAdministratorList()
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	application.GiveIsUserAdmin(admins)
 
 	return c.JSON(http.StatusOK, application)
 }
@@ -121,19 +126,30 @@ func (s *Service) PostApplication(c echo.Context) error {
 
 	userId := "UserId"
 
-	id, err := s.Applications.repo.BuildApplication(userId, *req.Type, req.Title, req.Remarks, *req.Amount, *req.PaidAt)
+	id, err := s.Applications.BuildApplication(userId, *req.Type, req.Title, req.Remarks, *req.Amount, *req.PaidAt, req.RepaidToId)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	app, err := s.Applications.repo.GetApplication(id, true, true)
+	app, err := s.Applications.GetApplication(id, true)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
+
+	admins, err := s.Administrators.GetAdministratorList()
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	app.GiveIsUserAdmin(admins)
 
 	// TODO Handle image files
 
 	return c.JSON(http.StatusCreated, app)
+}
+
+type PatchErrorMessage struct {
+	IsUserAccepted bool             `json:"is_user_accepted"`
+	CurrentState   *model.StateType `json:"current_state,omitempty"`
 }
 
 func (s *Service) PatchApplication(c echo.Context) error {
@@ -150,21 +166,44 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	if req.Type == nil && req.Title == "" && req.Remarks == "" && req.Amount == nil && req.PaidAt == nil && len(req.RepaidToId) == 0 {
+	if req.Type == nil && req.Title == "" && req.Remarks == "" && req.Amount == nil && req.PaidAt == nil && (len(req.RepaidToId) == 0) {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	err := s.Applications.repo.PatchApplication(applicationId, userId, req.Type, req.Title, req.Remarks, req.Amount, req.PaidAt)
+	app, err := s.Applications.GetApplication(applicationId, true)
+	isRequestUserAdmin, err := s.Administrators.IsAdmin(userId)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	} else if !isRequestUserAdmin {
+		if app.CreateUserTrapID.TrapId != userId {
+			return c.JSON(http.StatusForbidden, &PatchErrorMessage{
+				IsUserAccepted: false,
+			})
+		} else if app.LatestStatus.Type != model.Submitted && app.LatestStatus.Type != model.FixRequired {
+			return c.JSON(http.StatusForbidden, &PatchErrorMessage{
+				IsUserAccepted: true,
+				CurrentState:   &app.LatestStatus,
+			})
+		}
+	}
+
+	err = s.Applications.PatchApplication(applicationId, userId, req.Type, req.Title, req.Remarks, req.Amount, req.PaidAt, req.RepaidToId)
 	if gorm.IsRecordNotFoundError(err) {
 		return c.NoContent(http.StatusNotFound)
 	} else if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	app, err := s.Applications.repo.GetApplication(applicationId, true, true)
+	app, err = s.Applications.GetApplication(applicationId, true)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
+
+	admins, err := s.Administrators.GetAdministratorList()
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	app.GiveIsUserAdmin(admins)
 
 	// TODO Handle image files
 

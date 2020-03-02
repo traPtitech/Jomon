@@ -6,12 +6,14 @@ import (
 )
 
 type Service struct {
-	Applications *ApplicationService
+	Administrators model.AdministratorRepository
+	Applications   model.ApplicationRepository
 }
 
 func SetRouting(e *echo.Echo) {
-	service := Service{
-		Applications: NewApplicationService(model.NewApplicationRepository()),
+	service := &Service{
+		Administrators: model.NewAdministratorRepository(),
+		Applications:   model.NewApplicationRepository(),
 	}
 
 	apiApplications := e.Group("/applications")

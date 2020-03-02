@@ -50,7 +50,7 @@ func (app *Application) GiveIsUserAdmin(admins []string) {
 }
 
 type ApplicationRepository interface {
-	GetApplication(id uuid.UUID, giveAdmin bool, preload bool) (Application, error)
+	GetApplication(id uuid.UUID, preload bool) (Application, error)
 	GetApplicationList(
 		sort string,
 		currentState *StateType,
@@ -59,7 +59,6 @@ type ApplicationRepository interface {
 		typ *ApplicationType,
 		submittedSince *time.Time,
 		submittedUntil *time.Time,
-		giveAdmin bool,
 	) ([]Application, error)
 	BuildApplication(
 		createUserTrapID string,
@@ -68,6 +67,7 @@ type ApplicationRepository interface {
 		remarks string,
 		amount int,
 		paidAt time.Time,
+		repayUsers []string,
 	) (uuid.UUID, error)
 	PatchApplication(
 		appId uuid.UUID,
@@ -77,6 +77,7 @@ type ApplicationRepository interface {
 		remarks string,
 		amount *int,
 		paidAt *time.Time,
+		repayUsers []string,
 	) error
 }
 
@@ -86,7 +87,7 @@ func NewApplicationRepository() ApplicationRepository {
 	return &applicationRepository{}
 }
 
-func (_ *applicationRepository) GetApplication(id uuid.UUID, giveAdmin bool, preload bool) (Application, error) {
+func (_ *applicationRepository) GetApplication(id uuid.UUID, preload bool) (Application, error) {
 	var app Application
 	query := db
 	if preload {
@@ -99,18 +100,11 @@ func (_ *applicationRepository) GetApplication(id uuid.UUID, giveAdmin bool, pre
 	}
 
 	app.LatestStatus = app.LatestStatesLog.ToState
-	if giveAdmin {
-		admins, err := GetAdministratorList()
-		if err != nil {
-			return Application{}, err
-		}
-		app.GiveIsUserAdmin(admins)
-	}
 
 	return app, nil
 }
 
-func (_ *applicationRepository) GetApplicationList(sort string, currentState *StateType, financialYear *int, applicant string, typ *ApplicationType, submittedSince *time.Time, submittedUntil *time.Time, giveAdmin bool) ([]Application, error) {
+func (_ *applicationRepository) GetApplicationList(sort string, currentState *StateType, financialYear *int, applicant string, typ *ApplicationType, submittedSince *time.Time, submittedUntil *time.Time) ([]Application, error) {
 	query := db
 
 	if currentState != nil {
@@ -155,21 +149,10 @@ func (_ *applicationRepository) GetApplicationList(sort string, currentState *St
 		apps[i].LatestStatus = apps[i].LatestStatesLog.ToState
 	}
 
-	if giveAdmin {
-		admins, err := GetAdministratorList()
-		if err != nil {
-			return nil, err
-		}
-
-		for i := range apps {
-			apps[i].GiveIsUserAdmin(admins)
-		}
-	}
-
 	return apps, nil
 }
 
-func (repo *applicationRepository) BuildApplication(createUserTrapID string, typ ApplicationType, title string, remarks string, amount int, paidAt time.Time) (uuid.UUID, error) {
+func (repo *applicationRepository) BuildApplication(createUserTrapID string, typ ApplicationType, title string, remarks string, amount int, paidAt time.Time, repayUsers []string) (uuid.UUID, error) {
 	var id uuid.UUID
 
 	err := db.Transaction(func(tx *gorm.DB) error {
@@ -179,14 +162,20 @@ func (repo *applicationRepository) BuildApplication(createUserTrapID string, typ
 		}
 		id = _id
 
-		detail, err := createApplicationsDetail(tx, id, createUserTrapID, typ, title, remarks, amount, paidAt)
+		detail, err := repo.createApplicationsDetail(tx, id, createUserTrapID, typ, title, remarks, amount, paidAt)
 		if err != nil {
 			return err
 		}
 
-		state, err := createStatesLog(tx, id, createUserTrapID)
+		state, err := repo.createStatesLog(tx, id, createUserTrapID)
 		if err != nil {
 			return err
+		}
+
+		for _, userId := range repayUsers {
+			if err = repo.createRepayUser(tx, id, userId); err != nil {
+				return err
+			}
 		}
 
 		return tx.Model(Application{}).Where(&Application{ID: id}).Updates(Application{
@@ -201,16 +190,28 @@ func (repo *applicationRepository) BuildApplication(createUserTrapID string, typ
 	return id, nil
 }
 
-func (repo *applicationRepository) PatchApplication(appId uuid.UUID, updateUserTrapId string, typ *ApplicationType, title string, remarks string, amount *int, paidAt *time.Time) error {
+func (repo *applicationRepository) PatchApplication(appId uuid.UUID, updateUserTrapId string, typ *ApplicationType, title string, remarks string, amount *int, paidAt *time.Time, repayUsers []string) error {
 	return db.Transaction(func(tx *gorm.DB) error {
-		app, err := repo.GetApplication(appId, false, false)
+		app, err := repo.GetApplication(appId, false)
 		if err != nil {
 			return err
 		}
 
-		detail, err := putApplicationsDetail(tx, app.ApplicationsDetailsID, updateUserTrapId, typ, title, remarks, amount, paidAt)
+		detail, err := repo.putApplicationsDetail(tx, app.ApplicationsDetailsID, updateUserTrapId, typ, title, remarks, amount, paidAt)
 		if err != nil {
 			return err
+		}
+
+		if len(repayUsers) > 0 {
+			if err = repo.deleteRepayUserByApplicationID(tx, appId); err != nil {
+				return err
+			}
+
+			for _, userId := range repayUsers {
+				if err = repo.createRepayUser(tx, appId, userId); err != nil {
+					return err
+				}
+			}
 		}
 
 		return tx.Model(&Application{ID: appId}).Updates(Application{

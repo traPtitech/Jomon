@@ -38,8 +38,8 @@ func NewApplicationRepositoryMock(t *testing.T) *applicationRepositoryMock {
 	return m
 }
 
-func (m *applicationRepositoryMock) GetApplication(id uuid.UUID, giveAdmin bool, preload bool) (model.Application, error) {
-	ret := m.Called(id, giveAdmin, preload)
+func (m *applicationRepositoryMock) GetApplication(id uuid.UUID, preload bool) (model.Application, error) {
+	ret := m.Called(id, preload)
 	return ret.Get(0).(model.Application), ret.Error(1)
 }
 
@@ -51,9 +51,8 @@ func (m *applicationRepositoryMock) GetApplicationList(
 	typ *model.ApplicationType,
 	submittedSince *time.Time,
 	submittedUntil *time.Time,
-	giveAdmin bool,
 ) ([]model.Application, error) {
-	ret := m.Called(sort, currentState, financialYear, applicant, typ, submittedSince, submittedUntil, giveAdmin)
+	ret := m.Called(sort, currentState, financialYear, applicant, typ, submittedSince, submittedUntil)
 	if sort != "" {
 		m.asr.Contains([...]string{"", "created_at", "-created_at", "title", "-title"}, sort)
 	}
@@ -76,8 +75,9 @@ func (m *applicationRepositoryMock) BuildApplication(
 	remarks string,
 	amount int,
 	paidAt time.Time,
+	repayUsers []string,
 ) (uuid.UUID, error) {
-	ret := m.Called(createUserTrapID, typ, title, remarks, amount, paidAt)
+	ret := m.Called(createUserTrapID, typ, title, remarks, amount, paidAt, repayUsers)
 	m.asr.NotEqual("", createUserTrapID)
 	m.asr.Contains([...]int{model.Club, model.Contest, model.Event, model.Public}, typ.Type)
 	m.asr.NotEqual("", title)
@@ -93,8 +93,9 @@ func (m *applicationRepositoryMock) PatchApplication(
 	remarks string,
 	amount *int,
 	paidAt *time.Time,
+	repayUsers []string,
 ) error {
-	ret := m.Called(appId, updateUserTrapId, typ, title, remarks, amount, paidAt)
+	ret := m.Called(appId, updateUserTrapId, typ, title, remarks, amount, paidAt, repayUsers)
 
 	m.asr.NotEqual("", updateUserTrapId)
 
@@ -106,6 +107,34 @@ func (m *applicationRepositoryMock) PatchApplication(
 		m.asr.Less(0, *amount)
 	}
 
+	return ret.Error(0)
+}
+
+type administratorRepositoryMock struct {
+	mock.Mock
+}
+
+func NewAdministratorRepositoryMock() *administratorRepositoryMock {
+	return new(administratorRepositoryMock)
+}
+
+func (m *administratorRepositoryMock) IsAdmin(userId string) (bool, error) {
+	ret := m.Called(userId)
+	return ret.Bool(0), ret.Error(1)
+}
+
+func (m *administratorRepositoryMock) GetAdministratorList() ([]string, error) {
+	ret := m.Called()
+	return ret.Get(0).([]string), ret.Error(1)
+}
+
+func (m *administratorRepositoryMock) AddAdministrator(userId string) error {
+	ret := m.Called(userId)
+	return ret.Error(0)
+}
+
+func (m *administratorRepositoryMock) RemoveAdministrator(userId string) error {
+	ret := m.Called(userId)
 	return ret.Error(0)
 }
 
@@ -179,13 +208,18 @@ func TestGetApplication(t *testing.T) {
 		panic(err)
 	}
 
-	application := GenerateApplication(appId, "User1", model.ApplicationType{Type: model.Club}, "Title", "Remakrs", 10000, time.Now())
+	application := GenerateApplication(appId, "User1", model.ApplicationType{Type: model.Club}, "Title", "Remarks", 10000, time.Now())
 
-	appRepMock.On("GetApplication", application.ID, true, true).Return(application, nil)
-	appRepMock.On("GetApplication", mock.Anything, mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
+	appRepMock.On("GetApplication", application.ID, true).Return(application, nil)
+	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
+
+	adminRepMock := NewAdministratorRepositoryMock()
+
+	adminRepMock.On("GetAdministratorList").Return([]string{"User1", "User2"}, nil)
 
 	service := Service{
-		Applications: NewApplicationService(appRepMock),
+		Administrators: adminRepMock,
+		Applications:   appRepMock,
 	}
 
 	t.Parallel()
@@ -278,12 +312,17 @@ func TestGetApplicationList(t *testing.T) {
 
 	application := GenerateApplication(appId, "User1", model.ApplicationType{Type: model.Club}, "Title", "Remakrs", 10000, time.Now())
 
-	appRepMock.On("GetApplicationList", "", (*model.StateType)(nil), (*int)(nil), "", (*model.ApplicationType)(nil), (*time.Time)(nil), (*time.Time)(nil), mock.Anything).Return([]model.Application{application}, nil)
-	appRepMock.On("GetApplicationList", "title", (*model.StateType)(nil), (*int)(nil), "User1", (*model.ApplicationType)(nil), (*time.Time)(nil), (*time.Time)(nil), true).Return([]model.Application{application}, nil)
-	appRepMock.On("GetApplicationList", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]model.Application{}, nil)
+	appRepMock.On("GetApplicationList", "", (*model.StateType)(nil), (*int)(nil), "", (*model.ApplicationType)(nil), (*time.Time)(nil), (*time.Time)(nil)).Return([]model.Application{application}, nil)
+	appRepMock.On("GetApplicationList", "title", (*model.StateType)(nil), (*int)(nil), "User1", (*model.ApplicationType)(nil), (*time.Time)(nil), (*time.Time)(nil)).Return([]model.Application{application}, nil)
+	appRepMock.On("GetApplicationList", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]model.Application{}, nil)
+
+	adminRepMock := NewAdministratorRepositoryMock()
+
+	adminRepMock.On("GetAdministratorList").Return([]string{"User1", "User2"}, nil)
 
 	service := Service{
-		Applications: NewApplicationService(appRepMock),
+		Administrators: adminRepMock,
+		Applications:   appRepMock,
 	}
 
 	t.Parallel()
@@ -453,11 +492,16 @@ func TestPostApplication(t *testing.T) {
 		panic(err)
 	}
 
-	appRepMock.On("GetApplication", id, mock.Anything, mock.Anything).Return(GenerateApplication(id, "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, paidAt), nil)
-	appRepMock.On("BuildApplication", "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, mock.Anything).Return(id, nil)
+	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplication(id, "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, paidAt), nil)
+	appRepMock.On("BuildApplication", "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, mock.Anything, []string{"User1"}).Return(id, nil)
+
+	adminRepMock := NewAdministratorRepositoryMock()
+
+	adminRepMock.On("GetAdministratorList").Return([]string{"User1", "User2"}, nil)
 
 	service := Service{
-		Applications: NewApplicationService(appRepMock),
+		Administrators: adminRepMock,
+		Applications:   appRepMock,
 	}
 
 	t.Parallel()
@@ -606,13 +650,15 @@ func TestPatchApplication(t *testing.T) {
 		panic(err)
 	}
 
-	appRepMock.On("GetApplication", id, mock.Anything, mock.Anything).Return(GenerateApplication(id, "UserId", model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
-	appRepMock.On("PatchApplication", id, "UserId", &model.ApplicationType{Type: model.Contest}, "", "", (*int)(nil), mock.Anything).Return(nil)
-	appRepMock.On("PatchApplication", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(gorm.ErrRecordNotFound)
+	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplication(id, "User2", model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
+	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
+	appRepMock.On("PatchApplication", id, "UserId", &model.ApplicationType{Type: model.Contest}, "", "", (*int)(nil), mock.Anything, ([]string)(nil)).Return(nil)
+	appRepMock.On("PatchApplication", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(gorm.ErrRecordNotFound)
 
-	service := Service{
-		Applications: NewApplicationService(appRepMock),
-	}
+	defaultAdminRepMock := NewAdministratorRepositoryMock()
+
+	defaultAdminRepMock.On("GetAdministratorList").Return([]string{"UserId"}, nil)
+	defaultAdminRepMock.On("IsAdmin", mock.Anything).Return(true, nil)
 
 	t.Parallel()
 
@@ -620,6 +666,11 @@ func TestPatchApplication(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
+
+		service := Service{
+			Administrators: defaultAdminRepMock,
+			Applications:   appRepMock,
+		}
 
 		body := &bytes.Buffer{}
 		mpw := multipart.NewWriter(body)
@@ -680,6 +731,11 @@ func TestPatchApplication(t *testing.T) {
 		e := echo.New()
 		ctx := context.TODO()
 
+		service := Service{
+			Administrators: defaultAdminRepMock,
+			Applications:   appRepMock,
+		}
+
 		body := &bytes.Buffer{}
 		mpw := multipart.NewWriter(body)
 		if err := mpw.SetBoundary(MultipartBoundary); err != nil {
@@ -736,6 +792,11 @@ func TestPatchApplication(t *testing.T) {
 		e := echo.New()
 		ctx := context.TODO()
 
+		service := Service{
+			Administrators: defaultAdminRepMock,
+			Applications:   appRepMock,
+		}
+
 		notExistId, err := uuid.NewV4()
 		if err != nil {
 			panic(err)
@@ -790,5 +851,74 @@ func TestPatchApplication(t *testing.T) {
 		asr.NoError(err)
 
 		asr.Equal(http.StatusNotFound, rec.Code)
+	})
+
+	t.Run("shouldFail", func(t *testing.T) {
+		asr := assert.New(t)
+		e := echo.New()
+		ctx := context.TODO()
+
+		adminRepMock := NewAdministratorRepositoryMock()
+
+		adminRepMock.On("GetAdministratorList").Return([]string{}, nil)
+		adminRepMock.On("IsAdmin", mock.Anything).Return(false, nil)
+
+		service := Service{
+			Administrators: adminRepMock,
+			Applications:   appRepMock,
+		}
+
+		body := &bytes.Buffer{}
+		mpw := multipart.NewWriter(body)
+		if err := mpw.SetBoundary(MultipartBoundary); err != nil {
+			panic(err)
+		}
+
+		part := make(textproto.MIMEHeader)
+		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
+		part.Set("Content-Type", "application/json")
+		writer, err := mpw.CreatePart(part)
+		if err != nil {
+			panic(err)
+		}
+		_, err = writer.Write([]byte(`{"type": "contest"}`))
+		if err != nil {
+			panic(err)
+		}
+
+		if err = mpw.Close(); err != nil {
+			panic(err)
+		}
+
+		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
+		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+
+		route, pathParam, err := router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PatchApplication(c)
+		asr.NoError(err)
+
+		asr.Equal(http.StatusForbidden, rec.Code)
+
+		err = validateResponse(&ctx, requestValidationInput, rec)
+		asr.NoError(err)
 	})
 }

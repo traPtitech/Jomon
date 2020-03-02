@@ -75,7 +75,7 @@ func (st *StatesLog) GiveIsUserAdmin(admins []string) {
 	st.UpdateUserTrapID.GiveIsUserAdmin(admins)
 }
 
-func createStatesLog(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapId string) (StatesLog, error) {
+func (_ *applicationRepository) createStatesLog(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapId string) (StatesLog, error) {
 	log := StatesLog{
 		ApplicationID: applicationId,
 		UpdateUserTrapID: User{

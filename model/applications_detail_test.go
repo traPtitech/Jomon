@@ -19,7 +19,7 @@ func TestCreateApplicationsDetail(t *testing.T) {
 			panic(err)
 		}
 
-		detail, err := createApplicationsDetail(db, appId, "userId", ApplicationType{Type: Club}, "Title", "Remarks", 1000, time.Now())
+		detail, err := repo.createApplicationsDetail(db, appId, "userId", ApplicationType{Type: Club}, "Title", "Remarks", 1000, time.Now())
 		asr.NoError(err)
 		asr.Equal(detail.ApplicationID, appId)
 	})
@@ -32,7 +32,7 @@ func TestCreateApplicationsDetail(t *testing.T) {
 			panic(err)
 		}
 
-		_, err = createApplicationsDetail(db, id, "userId", ApplicationType{Type: Club}, "Title", "Remakrs", 1000, time.Now())
+		_, err = repo.createApplicationsDetail(db, id, "userId", ApplicationType{Type: Club}, "Title", "Remakrs", 1000, time.Now())
 		asr.Error(err)
 	})
 }
@@ -48,13 +48,13 @@ func TestPutApplicationsDetail(t *testing.T) {
 			panic(err)
 		}
 
-		oldDetail, err := createApplicationsDetail(db, appId, "userId", ApplicationType{Type: Club}, "Title", "Remarks", 1000, time.Now())
+		oldDetail, err := repo.createApplicationsDetail(db, appId, "userId", ApplicationType{Type: Club}, "Title", "Remarks", 1000, time.Now())
 		if err != nil {
 			panic(err)
 		}
 
 		newUserId := "user2Id"
-		newDetail, err := putApplicationsDetail(db, oldDetail.ID, newUserId, nil, "", "", nil, nil)
+		newDetail, err := repo.putApplicationsDetail(db, oldDetail.ID, newUserId, nil, "", "", nil, nil)
 		asr.NoError(err)
 
 		asr.Equal(newDetail.ApplicationID, appId)
@@ -69,7 +69,7 @@ func TestPutApplicationsDetail(t *testing.T) {
 	t.Run("shouldFail", func(t *testing.T) {
 		asr := assert.New(t)
 
-		_, err := putApplicationsDetail(db, intsets.MaxInt, "userId", nil, "", "", nil, nil)
+		_, err := repo.putApplicationsDetail(db, intsets.MaxInt, "userId", nil, "", "", nil, nil)
 		asr.Error(err)
 	})
 }

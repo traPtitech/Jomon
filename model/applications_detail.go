@@ -102,7 +102,7 @@ func (det *ApplicationsDetail) GiveIsUserAdmin(admins []string) {
 	det.UpdateUserTrapID.GiveIsUserAdmin(admins)
 }
 
-func createApplicationsDetail(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapID string, typ ApplicationType, title string, remarks string, amount int, paidAt time.Time) (ApplicationsDetail, error) {
+func (_ *applicationRepository) createApplicationsDetail(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapID string, typ ApplicationType, title string, remarks string, amount int, paidAt time.Time) (ApplicationsDetail, error) {
 	detail := ApplicationsDetail{
 		ApplicationID:    applicationId,
 		UpdateUserTrapID: User{TrapId: updateUserTrapID},
@@ -121,7 +121,7 @@ func createApplicationsDetail(db_ *gorm.DB, applicationId uuid.UUID, updateUserT
 	return detail, nil
 }
 
-func putApplicationsDetail(db_ *gorm.DB, currentDetailId int, updateUserTrapID string, typ *ApplicationType, title string, remarks string, amount *int, paidAt *time.Time) (ApplicationsDetail, error) {
+func (_ *applicationRepository) putApplicationsDetail(db_ *gorm.DB, currentDetailId int, updateUserTrapID string, typ *ApplicationType, title string, remarks string, amount *int, paidAt *time.Time) (ApplicationsDetail, error) {
 	var detail ApplicationsDetail
 	err := db_.Find(&detail, ApplicationsDetail{ID: currentDetailId}).Error
 	if err != nil {

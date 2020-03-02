@@ -17,7 +17,7 @@ func TestCreateStatesLog(t *testing.T) {
 			panic(err)
 		}
 
-		state, err := createStatesLog(db, id, "userId")
+		state, err := repo.createStatesLog(db, id, "userId")
 		asr.NoError(err)
 		asr.Equal(state.ApplicationID, id)
 		asr.Equal(state.ToState.Type, Submitted)
@@ -31,7 +31,7 @@ func TestCreateStatesLog(t *testing.T) {
 			panic(err)
 		}
 
-		_, err = createStatesLog(db, id, "userId")
+		_, err = repo.createStatesLog(db, id, "userId")
 		asr.Error(err)
 	})
 }
