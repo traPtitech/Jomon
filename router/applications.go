@@ -138,7 +138,7 @@ func (s *Service) PostApplication(c echo.Context) error {
 
 func (s *Service) PatchApplication(c echo.Context) error {
 	applicationId := uuid.FromStringOrNil(c.Param("applicationId"))
-	userId := ""
+	userId := "UserId"
 	if applicationId == uuid.Nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
@@ -147,6 +147,10 @@ func (s *Service) PatchApplication(c echo.Context) error {
 	var req PostApplicationRequest
 	if err := json.Unmarshal([]byte(details), &req); err != nil {
 		// TODO
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	if req.Type == nil && req.Title == "" && req.Remarks == "" && req.Amount == nil && req.PaidAt == nil && len(req.RepaidToId) == 0 {
 		return c.NoContent(http.StatusBadRequest)
 	}
 

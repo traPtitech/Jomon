@@ -594,5 +594,201 @@ func TestPostApplication(t *testing.T) {
 }
 
 func TestPatchApplication(t *testing.T) {
+	appRepMock := NewApplicationRepositoryMock(t)
 
+	title := "夏コミの交通費をお願いします。"
+	remarks := "〇〇駅から〇〇駅への移動"
+	amount := 1000
+	paidAt := time.Now().Round(time.Second)
+
+	id, err := uuid.NewV4()
+	if err != nil {
+		panic(err)
+	}
+
+	appRepMock.On("GetApplication", id, mock.Anything, mock.Anything).Return(GenerateApplication(id, "UserId", model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
+	appRepMock.On("PatchApplication", id, "UserId", &model.ApplicationType{Type: model.Contest}, "", "", (*int)(nil), mock.Anything).Return(nil)
+	appRepMock.On("PatchApplication", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(gorm.ErrRecordNotFound)
+
+	service := Service{
+		Applications: NewApplicationService(appRepMock),
+	}
+
+	t.Parallel()
+
+	t.Run("shouldSuccess", func(t *testing.T) {
+		asr := assert.New(t)
+		e := echo.New()
+		ctx := context.TODO()
+
+		body := &bytes.Buffer{}
+		mpw := multipart.NewWriter(body)
+		if err := mpw.SetBoundary(MultipartBoundary); err != nil {
+			panic(err)
+		}
+
+		part := make(textproto.MIMEHeader)
+		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
+		part.Set("Content-Type", "application/json")
+		writer, err := mpw.CreatePart(part)
+		if err != nil {
+			panic(err)
+		}
+		_, err = writer.Write([]byte(`{"type": "contest"}`))
+		if err != nil {
+			panic(err)
+		}
+
+		if err = mpw.Close(); err != nil {
+			panic(err)
+		}
+
+		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
+		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+
+		route, pathParam, err := router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PatchApplication(c)
+		asr.NoError(err)
+
+		asr.Equal(http.StatusOK, rec.Code)
+
+		err = validateResponse(&ctx, requestValidationInput, rec)
+		asr.NoError(err)
+	})
+
+	t.Run("shouldFail", func(t *testing.T) {
+		asr := assert.New(t)
+		e := echo.New()
+		ctx := context.TODO()
+
+		body := &bytes.Buffer{}
+		mpw := multipart.NewWriter(body)
+		if err := mpw.SetBoundary(MultipartBoundary); err != nil {
+			panic(err)
+		}
+
+		part := make(textproto.MIMEHeader)
+		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
+		part.Set("Content-Type", "application/json")
+		writer, err := mpw.CreatePart(part)
+		if err != nil {
+			panic(err)
+		}
+		_, err = writer.Write([]byte("{}"))
+		if err != nil {
+			// panic(err)
+		}
+
+		if err = mpw.Close(); err != nil {
+			panic(err)
+		}
+
+		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
+		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+
+		route, pathParam, err := router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			// panic(err)
+		}
+
+		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			// panic(err)
+		}
+
+		err = service.PatchApplication(c)
+		asr.NoError(err)
+
+		asr.Equal(http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("shouldFail", func(t *testing.T) {
+		asr := assert.New(t)
+		e := echo.New()
+		ctx := context.TODO()
+
+		notExistId, err := uuid.NewV4()
+		if err != nil {
+			panic(err)
+		}
+
+		body := &bytes.Buffer{}
+		mpw := multipart.NewWriter(body)
+		if err := mpw.SetBoundary(MultipartBoundary); err != nil {
+			panic(err)
+		}
+
+		part := make(textproto.MIMEHeader)
+		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
+		part.Set("Content-Type", "application/json")
+		writer, err := mpw.CreatePart(part)
+		if err != nil {
+			panic(err)
+		}
+		_, err = writer.Write([]byte(`{"type": "contest"}`))
+		if err != nil {
+			// panic(err)
+		}
+
+		if err = mpw.Close(); err != nil {
+			panic(err)
+		}
+
+		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+notExistId.String(), body)
+		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(notExistId.String())
+
+		route, pathParam, err := router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			// panic(err)
+		}
+
+		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			// panic(err)
+		}
+
+		err = service.PatchApplication(c)
+		asr.NoError(err)
+
+		asr.Equal(http.StatusNotFound, rec.Code)
+	})
 }
