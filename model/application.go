@@ -105,7 +105,7 @@ func (_ *applicationRepository) GetApplication(id uuid.UUID, preload bool) (Appl
 }
 
 func (_ *applicationRepository) GetApplicationList(sort string, currentState *StateType, financialYear *int, applicant string, typ *ApplicationType, submittedSince *time.Time, submittedUntil *time.Time) ([]Application, error) {
-	query := db
+	query := db.Preload("LatestStatesLog").Preload("LatestApplicationsDetail")
 
 	if currentState != nil {
 		query = query.Joins("JOIN states_logs ON states_logs.id = applications.states_logs_id").Where("states_logs.to_state = ?", currentState.Type)

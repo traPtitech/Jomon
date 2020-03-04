@@ -164,6 +164,12 @@ func TestGetApplicationList(t *testing.T) {
 			asr.Len(apps, 3)
 			asr.Equal([]uuid.UUID{app3Id, app2Id, app1Id}, mapToApplicationID(apps))
 
+			for _, app := range apps {
+				asr.NotZero(app.LatestApplicationsDetail)
+				asr.NotZero(app.LatestStatesLog)
+				asr.NotZero(app.LatestState)
+			}
+
 			asr.False(apps[0].CreatedAt.Before(apps[1].CreatedAt))
 			asr.False(apps[1].CreatedAt.Before(apps[2].CreatedAt))
 
