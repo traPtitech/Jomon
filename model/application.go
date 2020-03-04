@@ -120,7 +120,7 @@ func (_ *applicationRepository) GetApplicationList(sort string, currentState *St
 	}
 
 	if submittedSince != nil {
-		query = query.Where("created_at > ?", *submittedSince)
+		query = query.Where("created_at >= ?", *submittedSince)
 	}
 
 	if submittedUntil != nil {
