@@ -104,6 +104,7 @@ func (_ *applicationRepository) GetApplication(id uuid.UUID, preload bool) (Appl
 	return app, nil
 }
 
+//noinspection GoUnusedParameter `financialYear`
 func (_ *applicationRepository) GetApplicationList(sort string, currentState *StateType, financialYear *int, applicant string, typ *ApplicationType, submittedSince *time.Time, submittedUntil *time.Time) ([]Application, error) {
 	query := db.Preload("LatestStatesLog").Preload("LatestApplicationsDetail")
 
