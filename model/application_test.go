@@ -152,6 +152,15 @@ func TestGetApplicationList(t *testing.T) {
 
 		app3SubTime := time.Date(2020, 1, 30, 12, 0, 0, 0, time.Local)
 		app3Id := buildApplicationWithSubmitTime(user2, app3SubTime, ApplicationType{Type: Event}, "BBBBB", "Remarks", 10000, time.Now())
+		app3, err := repo.GetApplication(app3Id, true)
+		if err != nil {
+			panic(err)
+		}
+
+		// TODO Use a appropriate function defined in model/states_log.go after implementing such a function.
+		db.Model(&app3.LatestStatesLog).Updates(StatesLog{
+			ToState: StateType{FullyRepaid},
+		})
 
 		t.Parallel()
 
@@ -185,7 +194,15 @@ func TestGetApplicationList(t *testing.T) {
 			asr.Len(apps, 2)
 		})
 
-		// TODO filterByCurrentState
+		t.Run("filterByCurrentState", func(t *testing.T) {
+			asr := assert.New(t)
+
+			apps, err := repo.GetApplicationList("", &StateType{FullyRepaid}, nil, "", nil, nil, nil)
+			asr.NoError(err)
+
+			asr.Len(apps, 1)
+			asr.Equal(app3Id, apps[0].ID)
+		})
 
 		t.Run("filterByApplicationType", func(t *testing.T) {
 			asr := assert.New(t)

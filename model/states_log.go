@@ -27,7 +27,7 @@ type StatesLog struct {
 }
 
 type StateType struct {
-	Type int `gorm:"type:tinyint(4);not null;default:0"`
+	Type int `gorm:"column:to_state;type:tinyint(4);not null;default:0"`
 }
 
 func (ty StateType) MarshalJSON() ([]byte, error) {
