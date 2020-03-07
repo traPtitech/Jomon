@@ -7,10 +7,6 @@ info:
   title: Jomon API
   description: >-
     JomonのAPIです。
-security:
-  - application:
-      - read
-      - write
 paths:
   '/applications':
     get:

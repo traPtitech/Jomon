@@ -71,7 +71,7 @@ jobs:
       run: go mod download
 
     - name: Test
-      run: go test ./...
+      run: go test -v ./...
       env:
         MARIADB_USERNAME: root
         MARIADB_PASSWORD: password
