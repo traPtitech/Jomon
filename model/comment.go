@@ -13,7 +13,7 @@ type Comment struct {
 	Comment       string     `gorm:"type:text;not null" json:"comment"`
 	CreatedAt     time.Time  `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt     time.Time  `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"updated_at"`
-	DeletedAt     *time.Time `gorm:"type:timestamp;not null;" json:"-"`
+	DeletedAt     *time.Time `json:"-"`
 }
 
 func (com *Comment) GiveIsUserAdmin(admins []string) {
@@ -22,4 +22,59 @@ func (com *Comment) GiveIsUserAdmin(admins []string) {
 	}
 
 	com.UserTrapID.GiveIsUserAdmin(admins)
+}
+
+func GetComment(applicationId uuid.UUID, commentId int) (Comment, error) {
+	comment := Comment{
+		ID:            commentId,
+		ApplicationID: applicationId,
+	}
+
+	if err := db.First(&comment).Error; err != nil {
+		return Comment{}, err
+	}
+	return comment, nil
+}
+
+func CreateComment(applicationId uuid.UUID, commentBody string, userId string) (Comment, error) {
+	comment := Comment{
+		ApplicationID: applicationId,
+		UserTrapID:    User{TrapId: userId},
+		Comment:       commentBody,
+	}
+
+	if err := db.Create(&comment).Error; err != nil {
+		return Comment{}, err
+	}
+
+	return comment, nil
+}
+
+func UpdateComment(applicationId uuid.UUID, commentId int, commentBody string) (Comment, error) {
+	comment := Comment{
+		ID:            commentId,
+		ApplicationID: applicationId,
+	}
+
+	if err := db.First(&comment).Error; err != nil {
+		return Comment{}, err
+	}
+
+	if err := db.Model(&comment).Update("Comment", commentBody).Error; err != nil {
+		return Comment{}, err
+	}
+
+	return comment, nil
+}
+
+func DeleteComment(applicationId uuid.UUID, commentId int) error {
+	comment := Comment{
+		ID:            commentId,
+		ApplicationID: applicationId,
+	}
+
+	if err := db.Delete(&comment).Error; err != nil {
+		return err
+	}
+	return nil
 }
