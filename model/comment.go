@@ -36,11 +36,11 @@ func GetComment(applicationId uuid.UUID, commentId int) (Comment, error) {
 	return comment, nil
 }
 
-func CreateComment(applicationId uuid.UUID, commentBody string, userId string) (Comment, error) {
+func CreateComment(applicationId uuid.UUID, commentText string, userId string) (Comment, error) {
 	comment := Comment{
 		ApplicationID: applicationId,
 		UserTrapID:    User{TrapId: userId},
-		Comment:       commentBody,
+		Comment:       commentText,
 	}
 
 	if err := db.Create(&comment).Error; err != nil {
@@ -50,7 +50,7 @@ func CreateComment(applicationId uuid.UUID, commentBody string, userId string) (
 	return comment, nil
 }
 
-func UpdateComment(applicationId uuid.UUID, commentId int, commentBody string) (Comment, error) {
+func PutComment(applicationId uuid.UUID, commentId int, commentText string) (Comment, error) {
 	comment := Comment{
 		ID:            commentId,
 		ApplicationID: applicationId,
@@ -60,7 +60,7 @@ func UpdateComment(applicationId uuid.UUID, commentId int, commentBody string) (
 		return Comment{}, err
 	}
 
-	if err := db.Model(&comment).Update("Comment", commentBody).Error; err != nil {
+	if err := db.Model(&comment).Update("Comment", commentText).Error; err != nil {
 		return Comment{}, err
 	}
 
@@ -71,6 +71,10 @@ func DeleteComment(applicationId uuid.UUID, commentId int) error {
 	comment := Comment{
 		ID:            commentId,
 		ApplicationID: applicationId,
+	}
+
+	if err := db.First(&comment).Error; err != nil {
+		return err
 	}
 
 	if err := db.Delete(&comment).Error; err != nil {

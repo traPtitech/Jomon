@@ -14,7 +14,7 @@ type PostCommentRequest struct {
 	Comment string `json:"comment"`
 }
 
-func PostComments(c echo.Context) error {
+func (s *Service) PostComments(c echo.Context) error {
 	applicationId := uuid.FromStringOrNil(c.Param("applicationId"))
 	if applicationId == uuid.Nil {
 		return c.NoContent(http.StatusBadRequest)
@@ -39,7 +39,7 @@ func PostComments(c echo.Context) error {
 	return c.JSON(http.StatusOK, comment)
 }
 
-func PutComments(c echo.Context) error {
+func (s *Service) PutComments(c echo.Context) error {
 	applicationId, err := uuid.FromString(c.Param("applicationId"))
 	if err != nil {
 		return c.NoContent(http.StatusBadRequest)
@@ -71,7 +71,7 @@ func PutComments(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	comment, err = model.UpdateComment(applicationId, commentId, req.Comment)
+	comment, err = model.PutComment(applicationId, commentId, req.Comment)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -79,7 +79,7 @@ func PutComments(c echo.Context) error {
 	return c.JSON(http.StatusOK, comment)
 }
 
-func DeleteComments(c echo.Context) error {
+func (s *Service) DeleteComments(c echo.Context) error {
 	applicationId, err := uuid.FromString(c.Param("applicationId"))
 	if err != nil {
 		return c.NoContent(http.StatusBadRequest)
