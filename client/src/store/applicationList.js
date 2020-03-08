@@ -1,3 +1,6 @@
+import axios from "axios";
+import Vue from "vue";
+
 export const State = {
   submitted: "submitted",
   rejected: "rejected",
@@ -29,5 +32,23 @@ export const applicationList = {
       },
       current_state: State.submitted
     }
-  ]
+  ],
+  mutations: {
+    set(state, newState) {
+      state.splice(0);
+      newState.forEach((element, index) => {
+        Vue.set(state, index, element);
+      });
+    }
+  },
+  actions: {
+    async getApplicationList({ commit }) {
+      try {
+        const response = await axios.get("/api/applications");
+        commit("set", response.data);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
 };

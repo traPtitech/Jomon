@@ -23,12 +23,15 @@
   </div>
 </template>
 <script>
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 import Application from "./components/Application";
 export default {
   name: "ApplicationList",
   computed: {
     ...mapState(["applicationList"])
+  },
+  methods: {
+    ...mapActions(["getApplicationList"])
   },
   data() {
     return {
@@ -43,6 +46,9 @@ export default {
         current_state: ""
       }
     };
+  },
+  created() {
+    this.getApplicationList();
   },
   components: {
     Application
