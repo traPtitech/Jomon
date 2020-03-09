@@ -98,23 +98,24 @@
       <h3 class="ml-4 mr-4">払い戻し対象者</h3>
       リストです
       <v-autocomplete
-        ref="country"
-        v-model="country"
-        :rules="[() => !!country || '返金対象者は一人以上必要です']"
+        ref="traPID"
+        v-model="traPID"
+        :rules="[() => !!traPID || '返金対象者は一人以上必要です']"
         :items="traPIDs"
         placeholder="返金対象者のtraPidを入力..."
         required
         multiple
       >
-        <!-- <Icon slot="prepend" :user="country" :size="25" /> -->
+        <!-- <Icon slot="prepend" :user="traPID" :size="25" /> -->
       </v-autocomplete>
 
-      <v-btn>返金対象者追加</v-btn>
+      <!-- <v-btn>返金対象者追加</v-btn> -->
 
       <h3 class="ml-4 mr-4">申請書画像リスト</h3>
 
       画像リスト(画像アップロード)
     </v-card>
+    <pre>{{ traPIDs }}</pre>
     <v-btn>作成する</v-btn>
   </div>
 </template>
@@ -125,17 +126,7 @@ export default {
   data: () => ({
     date: null,
     menu: false,
-    traPIDs: [
-      "series2",
-      "nagatech",
-      "ryoha",
-      "Adwaver_4157",
-      "rencon_man",
-      "RLook",
-      "mds_boy",
-      "xxpoxx"
-    ],
-    country: null
+    traPID: null
   }),
   computed: {
     computedDateFormatted() {
@@ -143,8 +134,11 @@ export default {
     },
     form() {
       return {
-        country: this.country
+        traPID: this.traPID
       };
+    },
+    traPIDs() {
+      return this.$store.getters.userList;
     }
   },
 
