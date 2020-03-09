@@ -19,8 +19,34 @@
     <v-btn to="/admin" text>
       管理ページ
     </v-btn>
-    <v-btn to="/applications/new" text>
-      新規作成
-    </v-btn>
+    <v-menu open-on-hover top offset-y>
+      <template v-slot:activator="{ on }">
+        <v-btn color="primary" dark v-on="on">
+          新規作成
+        </v-btn>
+      </template>
+
+      <v-list>
+        <v-list-item
+          v-for="(item, index) in items"
+          :key="index"
+          :to="'/applications/new/' + item.title"
+        >
+          <v-list-item-title>{{ item.page }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
   </v-app-bar>
 </template>
+<script>
+export default {
+  data: () => ({
+    items: [
+      { title: "club", page: "部費利用申請" },
+      { title: "contest", page: "大会等旅費補助申請" },
+      { title: "event", page: "イベント交通費補助申請" },
+      { title: "public", page: "渉外交通費補助" }
+    ]
+  })
+};
+</script>
