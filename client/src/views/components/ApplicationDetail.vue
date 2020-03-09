@@ -1,7 +1,7 @@
 <!-- 受け取ったデータを基に申請書詳細ページの下半分にログ、コメント等配置 -->
 <template>
   <div class="app-detail-paper">
-    <v-card>
+    <v-card class="ml-2 mr-2 mt-2 pa-3" tile>
       <v-row class="ml-4 mr-4" :justify="`space-between`">
         <h1>{{ returnType(this.detail.type) }}申請書</h1>
         <div>
@@ -16,46 +16,65 @@
       <h1>タイトル:{{ this.detail.title }}</h1>
 
       <div>
-        <v-container>
-          <v-row :justify="`space-around`">
-            <v-row class="ml-4 mr-4" no-gutters>
-              <v-col>
-                <v-card class="pa-2" outlined tile>
-                  申請者trapid
-                </v-card>
-                <v-card class="pa-2" outlined tile>
-                  申請金額
-                </v-card>
-              </v-col>
-              <v-col>
-                <v-card class="pa-2" outlined tile>
-                  <Icon :user="this.detail.applicant.trap_id" :size="20" />{{
-                    this.detail.applicant.trap_id
-                  }}
-                </v-card>
-                <v-card class="pa-2" outlined tile>
-                  {{ this.detail.ammount }}円
-                </v-card>
-              </v-col>
-            </v-row>
-            <v-row class="ml-4 mr-4" no-gutters>
-              <v-col>
-                <v-card class="pa-2" outlined tile>
-                  申請書作成日
-                </v-card>
-                <v-card class="pa-2" outlined tile>
-                  支払った日
-                </v-card>
-              </v-col>
-              <v-col>
-                <v-card class="pa-2" outlined tile>
-                  {{ returnDate(this.detail.created_at) }}
-                </v-card>
-                <v-card class="pa-2" outlined tile>
-                  {{ returnDate(this.detail.paid_at) }}
-                </v-card>
-              </v-col>
-            </v-row>
+        <v-container class="pa-0">
+          <v-row>
+            <!-- 以下は左列 -->
+            <v-col cols="12" md="6">
+              <v-row no-gutters>
+                <v-col cols="4" md="6">
+                  <v-card height="100%" class="pa-2" outlined tile>
+                    申請者trapid
+                  </v-card>
+                </v-col>
+                <v-col cols="8" md="6">
+                  <v-card height="100%" class="pa-2" outlined tile>
+                    <Icon :user="this.detail.applicant.trap_id" :size="20" />{{
+                      this.detail.applicant.trap_id
+                    }}
+                  </v-card>
+                </v-col>
+              </v-row>
+              <v-row no-gutters>
+                <v-col cols="4" md="6">
+                  <v-card height="100%" class="pa-2" outlined tile>
+                    申請金額
+                  </v-card>
+                </v-col>
+                <v-col>
+                  <v-card height="100%" class="pa-2" outlined tile>
+                    {{ this.detail.ammount }}円
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-col>
+            <!-- 以上左列以下右列 -->
+            <v-col cols="12" md="6">
+              <v-row no-gutters>
+                <v-col cols="4" md="6">
+                  <v-card height="100%" class="pa-2" outlined tile>
+                    申請書作成日
+                  </v-card>
+                </v-col>
+                <v-col height="100%" cols="8" md="6">
+                  <v-card height="100%" class="pa-2" outlined tile>
+                    {{ returnDate(this.detail.created_at) }}
+                  </v-card>
+                </v-col>
+              </v-row>
+              <v-row no-gutters>
+                <v-col cols="4" md="6">
+                  <v-card height="100%" class="pa-2" outlined tile>
+                    支払った日
+                  </v-card>
+                </v-col>
+                <v-col cols="8" md="6">
+                  <v-card height="100%" class="pa-2" outlined tile>
+                    {{ returnDate(this.detail.paid_at) }}
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-col>
+            <!-- 以上右列 -->
           </v-row>
         </v-container>
       </div>

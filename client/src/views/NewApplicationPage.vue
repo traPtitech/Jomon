@@ -28,8 +28,8 @@
                     申請者trapid
                   </v-card>
                 </v-col>
-                <v-col height="100%" cols="8" md="6">
-                  <v-card class="pa-2" outlined tile>
+                <v-col cols="8" md="6">
+                  <v-card height="100%" class="pa-2" outlined tile>
                     <Icon :user="`series2`" :size="20" />series2
                   </v-card>
                 </v-col>
