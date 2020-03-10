@@ -15,6 +15,7 @@ func SetRouting(e *echo.Echo) {
 	service := &Service{
 		Administrators: model.NewAdministratorRepository(),
 		Applications:   model.NewApplicationRepository(),
+		Comments:       model.NewCommentRepository(),
 	}
 
 	apiApplications := e.Group("/applications")

@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/gofrs/uuid"
-	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,6 +26,20 @@ func TestCreateComment(t *testing.T) {
 		asr.Equal(comment.ApplicationID, appId)
 		asr.Equal(comment.Comment, commentText)
 		asr.Equal(comment.UserTrapID.TrapId, userId)
+
+		commentText2 := "This is comment 2."
+
+		comment2, err := commentRepo.CreateComment(appId, commentText2, userId)
+		asr.NoError(err)
+		asr.Equal(comment2.Comment, commentText2)
+
+		getComment, err := commentRepo.GetComment(appId, comment.ID)
+		asr.NoError(err)
+		asr.Equal(getComment.Comment, commentText)
+
+		getComment2, err := commentRepo.GetComment(appId, comment2.ID)
+		asr.NoError(err)
+		asr.Equal(getComment2.Comment, commentText2)
 	})
 
 	t.Run("shouldFail", func(t *testing.T) {
@@ -57,7 +70,9 @@ func TestPutComment(t *testing.T) {
 		}
 
 		comment, err := commentRepo.CreateComment(appId, commentText, userId)
-		asr.NoError(err)
+		if err != nil {
+			panic(err)
+		}
 
 		newCommentText := "This is new comment."
 
@@ -71,7 +86,7 @@ func TestPutComment(t *testing.T) {
 		asr.Equal(app.Comments[0].Comment, newCommentText)
 	})
 
-	t.Run("shouldFail", func(t *testing.T) {
+	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
 		appId, err := repo.createApplication(db, userId)
@@ -79,9 +94,29 @@ func TestPutComment(t *testing.T) {
 			panic(err)
 		}
 
-		_, err = commentRepo.PutComment(appId, int(randSrc.Int63()), userId)
-		asr.Error(err)
-		asr.True(gorm.IsRecordNotFoundError(err))
+		_, err = commentRepo.CreateComment(appId, commentText, userId)
+		if err != nil {
+			panic(err)
+		}
+
+		commentText2 := "This is comment 2."
+
+		comment, err := commentRepo.CreateComment(appId, commentText2, userId)
+		if err != nil {
+			panic(err)
+		}
+
+		newCommentText2 := "This is new comment2."
+
+		comment, err = commentRepo.PutComment(appId, comment.ID, newCommentText2)
+		asr.NoError(err)
+		asr.Equal(comment.Comment, newCommentText2)
+
+		app, err := repo.GetApplication(appId, true)
+		asr.NoError(err)
+		asr.Len(app.Comments, 2)
+		asr.NotEqual(app.Comments[1].Comment, commentText2)
+		asr.Equal(app.Comments[1].Comment, newCommentText2)
 	})
 }
 
@@ -100,7 +135,9 @@ func TestDeleteComment(t *testing.T) {
 		}
 
 		comment, err := commentRepo.CreateComment(appId, commentText, userId)
-		asr.NoError(err)
+		if err != nil {
+			panic(err)
+		}
 
 		err = commentRepo.DeleteComment(appId, comment.ID)
 		asr.NoError(err)
@@ -110,7 +147,7 @@ func TestDeleteComment(t *testing.T) {
 		asr.Empty(app.Comments)
 	})
 
-	t.Run("shouldFail", func(t *testing.T) {
+	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
 		appId, err := repo.createApplication(db, userId)
@@ -118,8 +155,24 @@ func TestDeleteComment(t *testing.T) {
 			panic(err)
 		}
 
-		err = commentRepo.DeleteComment(appId, int(randSrc.Int63()))
-		asr.Error(err)
-		asr.True(gorm.IsRecordNotFoundError(err))
+		_, err = commentRepo.CreateComment(appId, commentText, userId)
+		if err != nil {
+			panic(err)
+		}
+
+		commentText2 := "This is comment 2."
+
+		comment, err := commentRepo.CreateComment(appId, commentText2, userId)
+		if err != nil {
+			panic(err)
+		}
+
+		err = commentRepo.DeleteComment(appId, comment.ID)
+		asr.NoError(err)
+
+		app, err := repo.GetApplication(appId, true)
+		asr.NoError(err)
+		asr.Len(app.Comments, 1)
+		asr.Equal(app.Comments[0].Comment, commentText)
 	})
 }

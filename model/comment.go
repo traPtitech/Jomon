@@ -37,7 +37,7 @@ func NewCommentRepository() CommentRepository {
 	return &commentRepository{}
 }
 
-func (_ commentRepository) GetComment(applicationId uuid.UUID, commentId int) (Comment, error) {
+func (_ *commentRepository) GetComment(applicationId uuid.UUID, commentId int) (Comment, error) {
 	comment := Comment{
 		ID:            commentId,
 		ApplicationID: applicationId,
@@ -49,7 +49,7 @@ func (_ commentRepository) GetComment(applicationId uuid.UUID, commentId int) (C
 	return comment, nil
 }
 
-func (_ commentRepository) CreateComment(applicationId uuid.UUID, commentText string, userId string) (Comment, error) {
+func (_ *commentRepository) CreateComment(applicationId uuid.UUID, commentText string, userId string) (Comment, error) {
 	comment := Comment{
 		ApplicationID: applicationId,
 		UserTrapID:    User{TrapId: userId},
@@ -63,14 +63,10 @@ func (_ commentRepository) CreateComment(applicationId uuid.UUID, commentText st
 	return comment, nil
 }
 
-func (_ commentRepository) PutComment(applicationId uuid.UUID, commentId int, commentText string) (Comment, error) {
+func (_ *commentRepository) PutComment(applicationId uuid.UUID, commentId int, commentText string) (Comment, error) {
 	comment := Comment{
 		ID:            commentId,
 		ApplicationID: applicationId,
-	}
-
-	if err := db.First(&comment).Error; err != nil {
-		return Comment{}, err
 	}
 
 	if err := db.Model(&comment).Update("Comment", commentText).Error; err != nil {
@@ -80,14 +76,10 @@ func (_ commentRepository) PutComment(applicationId uuid.UUID, commentId int, co
 	return comment, nil
 }
 
-func (_ commentRepository) DeleteComment(applicationId uuid.UUID, commentId int) error {
+func (_ *commentRepository) DeleteComment(applicationId uuid.UUID, commentId int) error {
 	comment := Comment{
 		ID:            commentId,
 		ApplicationID: applicationId,
-	}
-
-	if err := db.First(&comment).Error; err != nil {
-		return err
 	}
 
 	if err := db.Delete(&comment).Error; err != nil {
