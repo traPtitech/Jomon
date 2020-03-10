@@ -23,6 +23,7 @@
   </div>
 </template>
 <script>
+import axios from "axios";
 import WithReasonButton from "./StateWithReasonButton";
 import { mapState } from "vuex";
 export default {
@@ -40,6 +41,11 @@ export default {
   },
   methods: {
     accept() {
+      axios
+        .put("api/applications​/{applicationId}​/states", {
+          to_state: "accepted"
+        })
+        .then(response => alert(response.status));
       alert("承認しました");
     }
   }
