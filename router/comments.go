@@ -7,7 +7,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo/v4"
-	"github.com/traPtitech/Jomon/model"
 )
 
 type PostCommentRequest struct {
@@ -18,6 +17,14 @@ func (s *Service) PostComments(c echo.Context) error {
 	applicationId := uuid.FromStringOrNil(c.Param("applicationId"))
 	if applicationId == uuid.Nil {
 		return c.NoContent(http.StatusBadRequest)
+	}
+
+	if _, err := s.Applications.GetApplication(applicationId, false); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.NoContent(http.StatusNotFound)
+		} else {
+			return c.NoContent(http.StatusBadRequest)
+		}
 	}
 
 	var req PostCommentRequest
@@ -31,12 +38,12 @@ func (s *Service) PostComments(c echo.Context) error {
 
 	userId := "UserId"
 
-	comment, err := model.CreateComment(applicationId, req.Comment, userId)
+	comment, err := s.Comments.CreateComment(applicationId, req.Comment, userId)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	return c.JSON(http.StatusOK, comment)
+	return c.JSON(http.StatusCreated, comment)
 }
 
 func (s *Service) PutComments(c echo.Context) error {
@@ -50,7 +57,7 @@ func (s *Service) PutComments(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	comment, err := model.GetComment(applicationId, commentId)
+	comment, err := s.Comments.GetComment(applicationId, commentId)
 	if err == gorm.ErrRecordNotFound {
 		return c.NoContent(http.StatusNotFound)
 	} else if err != nil {
@@ -71,7 +78,7 @@ func (s *Service) PutComments(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	comment, err = model.PutComment(applicationId, commentId, req.Comment)
+	comment, err = s.Comments.PutComment(applicationId, commentId, req.Comment)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -90,7 +97,7 @@ func (s *Service) DeleteComments(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	comment, err := model.GetComment(applicationId, commentId)
+	comment, err := s.Comments.GetComment(applicationId, commentId)
 	if err == gorm.ErrRecordNotFound {
 		return c.NoContent(http.StatusNotFound)
 	} else if err != nil {
@@ -102,7 +109,7 @@ func (s *Service) DeleteComments(c echo.Context) error {
 		return c.NoContent(http.StatusForbidden)
 	}
 
-	if err = model.DeleteComment(applicationId, commentId); err != nil {
+	if err = s.Comments.DeleteComment(applicationId, commentId); err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 

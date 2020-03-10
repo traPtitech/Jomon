@@ -24,7 +24,20 @@ func (com *Comment) GiveIsUserAdmin(admins []string) {
 	com.UserTrapID.GiveIsUserAdmin(admins)
 }
 
-func GetComment(applicationId uuid.UUID, commentId int) (Comment, error) {
+type CommentRepository interface {
+	GetComment(applicationId uuid.UUID, commentId int) (Comment, error)
+	CreateComment(applicationId uuid.UUID, commentText string, userId string) (Comment, error)
+	PutComment(applicationId uuid.UUID, commentId int, commentText string) (Comment, error)
+	DeleteComment(applicationId uuid.UUID, commentId int) error
+}
+
+type commentRepository struct{}
+
+func NewCommentRepository() CommentRepository {
+	return &commentRepository{}
+}
+
+func (_ commentRepository) GetComment(applicationId uuid.UUID, commentId int) (Comment, error) {
 	comment := Comment{
 		ID:            commentId,
 		ApplicationID: applicationId,
@@ -36,7 +49,7 @@ func GetComment(applicationId uuid.UUID, commentId int) (Comment, error) {
 	return comment, nil
 }
 
-func CreateComment(applicationId uuid.UUID, commentText string, userId string) (Comment, error) {
+func (_ commentRepository) CreateComment(applicationId uuid.UUID, commentText string, userId string) (Comment, error) {
 	comment := Comment{
 		ApplicationID: applicationId,
 		UserTrapID:    User{TrapId: userId},
@@ -50,7 +63,7 @@ func CreateComment(applicationId uuid.UUID, commentText string, userId string) (
 	return comment, nil
 }
 
-func PutComment(applicationId uuid.UUID, commentId int, commentText string) (Comment, error) {
+func (_ commentRepository) PutComment(applicationId uuid.UUID, commentId int, commentText string) (Comment, error) {
 	comment := Comment{
 		ID:            commentId,
 		ApplicationID: applicationId,
@@ -67,7 +80,7 @@ func PutComment(applicationId uuid.UUID, commentId int, commentText string) (Com
 	return comment, nil
 }
 
-func DeleteComment(applicationId uuid.UUID, commentId int) error {
+func (_ commentRepository) DeleteComment(applicationId uuid.UUID, commentId int) error {
 	comment := Comment{
 		ID:            commentId,
 		ApplicationID: applicationId,

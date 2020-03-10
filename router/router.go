@@ -8,6 +8,7 @@ import (
 type Service struct {
 	Administrators model.AdministratorRepository
 	Applications   model.ApplicationRepository
+	Comments       model.CommentRepository
 }
 
 func SetRouting(e *echo.Echo) {

@@ -1,16 +1,18 @@
 package model
 
 import (
-	"github.com/jinzhu/gorm"
 	"math/rand"
 	"os"
 	"testing"
+
+	"github.com/jinzhu/gorm"
 )
 
 const userNameChrs = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 var randSrc = rand.NewSource(0)
 var repo = &applicationRepository{}
+var commentRepo = &commentRepository{}
 
 func TestMain(m *testing.M) {
 	db := setupDB()

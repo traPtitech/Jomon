@@ -42,7 +42,7 @@ func TestGetApplication(t *testing.T) {
 			panic(err)
 		}
 
-		comment, err := CreateComment(appId, "This is comment.", user)
+		comment, err := commentRepo.CreateComment(appId, "This is comment.", user)
 
 		app, err := repo.GetApplication(appId, true)
 

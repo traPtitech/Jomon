@@ -22,7 +22,7 @@ func TestCreateComment(t *testing.T) {
 			panic(err)
 		}
 
-		comment, err := CreateComment(appId, commentText, userId)
+		comment, err := commentRepo.CreateComment(appId, commentText, userId)
 		asr.NoError(err)
 		asr.Equal(comment.ApplicationID, appId)
 		asr.Equal(comment.Comment, commentText)
@@ -37,7 +37,7 @@ func TestCreateComment(t *testing.T) {
 			panic(err)
 		}
 
-		_, err = CreateComment(id, commentText, userId)
+		_, err = commentRepo.CreateComment(id, commentText, userId)
 		asr.Error(err)
 	})
 }
@@ -56,12 +56,12 @@ func TestPutComment(t *testing.T) {
 			panic(err)
 		}
 
-		comment, err := CreateComment(appId, commentText, userId)
+		comment, err := commentRepo.CreateComment(appId, commentText, userId)
 		asr.NoError(err)
 
 		newCommentText := "This is new comment."
 
-		comment, err = PutComment(appId, comment.ID, newCommentText)
+		comment, err = commentRepo.PutComment(appId, comment.ID, newCommentText)
 		asr.NoError(err)
 		asr.Equal(comment.Comment, newCommentText)
 
@@ -79,7 +79,7 @@ func TestPutComment(t *testing.T) {
 			panic(err)
 		}
 
-		_, err = PutComment(appId, int(randSrc.Int63()), userId)
+		_, err = commentRepo.PutComment(appId, int(randSrc.Int63()), userId)
 		asr.Error(err)
 		asr.True(gorm.IsRecordNotFoundError(err))
 	})
@@ -99,17 +99,16 @@ func TestDeleteComment(t *testing.T) {
 			panic(err)
 		}
 
-		comment, err := CreateComment(appId, commentText, userId)
+		comment, err := commentRepo.CreateComment(appId, commentText, userId)
 		asr.NoError(err)
 
-		err = DeleteComment(appId, comment.ID)
+		err = commentRepo.DeleteComment(appId, comment.ID)
 		asr.NoError(err)
 
 		app, err := repo.GetApplication(appId, true)
 		asr.NoError(err)
 		asr.Empty(app.Comments)
 	})
-
 
 	t.Run("shouldFail", func(t *testing.T) {
 		asr := assert.New(t)
@@ -119,7 +118,7 @@ func TestDeleteComment(t *testing.T) {
 			panic(err)
 		}
 
-		err = DeleteComment(appId, int(randSrc.Int63()))
+		err = commentRepo.DeleteComment(appId, int(randSrc.Int63()))
 		asr.Error(err)
 		asr.True(gorm.IsRecordNotFoundError(err))
 	})
