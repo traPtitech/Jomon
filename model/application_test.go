@@ -1,11 +1,12 @@
 package model
 
 import (
+	"testing"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestCreateApplication(t *testing.T) {
@@ -41,6 +42,8 @@ func TestGetApplication(t *testing.T) {
 			panic(err)
 		}
 
+		comment, err := commentRepo.CreateComment(appId, "This is comment.", user)
+
 		app, err := repo.GetApplication(appId, true)
 
 		asr.NoError(err)
@@ -53,6 +56,11 @@ func TestGetApplication(t *testing.T) {
 		asr.Len(app.StatesLogs, 1)
 		asr.Equal(app.LatestStatesLog, app.StatesLogs[0])
 		asr.Len(app.RepayUsers, 1)
+
+		asr.Equal(comment.ID, app.Comments[0].ID)
+		asr.Equal(comment.Comment, app.Comments[0].Comment)
+		asr.Equal(comment.UserTrapID, app.Comments[0].UserTrapID)
+		asr.Len(app.Comments, 1)
 	})
 
 	t.Run("shouldSuccess?giveAdmin=true&preload=false", func(t *testing.T) {
