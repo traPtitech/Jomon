@@ -517,6 +517,12 @@ components:
         paid_at:
           type: string
           format: date
+        repaid_to_id:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrapID"
+          uniqueItems: true
+          minItems: 1
         updated_at:
           type: string
           format: date-time
