@@ -19,7 +19,7 @@
     <v-btn to="/admin" text>
       管理ページ
     </v-btn>
-    <v-menu open-on-hover top offset-y>
+    <v-menu open-on-hover offset-y>
       <template v-slot:activator="{ on }">
         <v-btn color="primary" dark v-on="on">
           新規作成

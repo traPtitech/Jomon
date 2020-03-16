@@ -41,6 +41,7 @@ export default {
   },
   methods: {
     accept() {
+      // {applicationId}をURLから受け取るかstoreから受け取るか。。。
       axios
         .put("api/applications​/{applicationId}​/states", {
           to_state: "accepted"

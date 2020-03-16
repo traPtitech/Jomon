@@ -80,11 +80,11 @@ export default {
     postreason() {
       if (this.$refs.form.validate()) {
         axios
-          .put("api/applications​/{applicationId}​/states", {
+          .post("api/applications​/{applicationId}​/states", {
             to_state: this.props.to_state,
             reason: this.reason
           })
-          .then(response => alert(response.status));
+          .then(response => console.log(response.status));
         this.$refs.form.reset();
         this.dialog = false;
       }

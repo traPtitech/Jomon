@@ -37,6 +37,7 @@
                   <v-col cols="8" md="6">
                     <v-card height="100%" class="pa-2" outlined tile>
                       <Icon :user="`series2`" :size="20" />series2
+                      <!-- todo 自分のアイコン -->
                     </v-card>
                   </v-col>
                 </v-row>
@@ -140,10 +141,7 @@
           required
           multiple
         >
-          <!-- <Icon slot="prepend" :user="traPID" :size="25" /> -->
         </v-autocomplete>
-
-        <!-- <v-btn>返金対象者追加</v-btn> -->
 
         <h3 class="ml-0 mr-0">申請書画像リスト</h3>
 
@@ -154,7 +152,6 @@
           <v-btn :disabled="!valid" @click="submit" class="ma-3" v-on="on"
             >作成する</v-btn
           >
-          <v-btn @click="submit" class="ma-3" v-on="on">作成す</v-btn>
         </template>
         <v-card class="pa-3">
           <v-card-title class="headline"
@@ -262,6 +259,8 @@ export default {
     }
   },
 
+  // todo 返金対象者周りのポスト等
+  // todo 画像のアップロード
   methods: {
     submit() {
       if (this.$refs.form.validate()) {
