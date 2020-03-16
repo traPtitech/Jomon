@@ -34,7 +34,7 @@ export const applicationList = {
     }
   ],
   mutations: {
-    set(state, newState) {
+    setApplicationList(state, newState) {
       state.splice(0);
       newState.forEach((element, index) => {
         Vue.set(state, index, element);
@@ -45,7 +45,7 @@ export const applicationList = {
     async getApplicationList({ commit }) {
       try {
         const response = await axios.get("/api/applications");
-        commit("set", response.data);
+        commit("setApplicationList", response.data);
       } catch (err) {
         console.log(err);
       }
