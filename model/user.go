@@ -27,6 +27,17 @@ func (user *User) GiveIsUserAdmin(admins []string) {
 	}
 }
 
+type UserRepository interface {
+	GetUsers(token string, admins []string, adminOnly bool) ([]User, error)
+	GetMyUser(token string, admins []string) (User, error)
+}
+
+type userRepository struct{}
+
+func NewUserRepository() UserRepository {
+	return &userRepository{}
+}
+
 type traqUser struct {
 	Name string `json:"name"`
 }
@@ -41,7 +52,7 @@ func sendReqTraq(token string, req *http.Request) ([]byte, error) {
 		return nil, err
 	}
 	if res.StatusCode != 200 {
-		return nil, errors.New("認証に失敗しました")
+		return nil, errors.New("StatusCode is not 200")
 	}
 
 	defer res.Body.Close()
@@ -52,7 +63,7 @@ func sendReqTraq(token string, req *http.Request) ([]byte, error) {
 	return body, nil
 }
 
-func GetUsers(token string, admins []string, adminOnly bool) ([]User, error) {
+func (_ *userRepository) GetUsers(token string, admins []string, adminOnly bool) ([]User, error) {
 	req, err := http.NewRequest("GET", baseURL+"/users", nil)
 	if err != nil {
 		return nil, err
@@ -85,7 +96,7 @@ func GetUsers(token string, admins []string, adminOnly bool) ([]User, error) {
 	return users, nil
 }
 
-func GetMyUser(token string, admins []string) (User, error) {
+func (_ *userRepository) GetMyUser(token string, admins []string) (User, error) {
 	req, err := http.NewRequest("GET", baseURL+"/users/me", nil)
 	if err != nil {
 		return User{}, err
