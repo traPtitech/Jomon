@@ -3,7 +3,7 @@
   <div class="app-detail-paper">
     <v-card>
       <v-row class="ml-4 mr-4" :justify="`space-between`">
-        <h1>{{ returnType(this.detail.type) }}申請書</h1>
+        <h1>{{ returnType(this.detail.current_detail.type) }}申請書</h1>
         <div>
           <div>申請書ID: {{ this.detail.application_id }}</div>
           <v-divider></v-divider>
@@ -13,7 +13,7 @@
       <template>
         <v-divider></v-divider>
       </template>
-      <h1>タイトル:{{ this.detail.title }}</h1>
+      <h1>タイトル:{{ this.detail.current_detail.title }}</h1>
 
       <div>
         <v-container>
@@ -34,7 +34,7 @@
                   }}
                 </v-card>
                 <v-card class="pa-2" outlined tile>
-                  {{ this.detail.ammount }}円
+                  {{ this.detail.current_detail.amount }}円
                 </v-card>
               </v-col>
             </v-row>
@@ -52,7 +52,7 @@
                   {{ returnDate(this.detail.created_at) }}
                 </v-card>
                 <v-card class="pa-2" outlined tile>
-                  {{ returnDate(this.detail.paid_at) }}
+                  {{ returnDate(this.detail.current_detail.paid_at) }}
                 </v-card>
               </v-col>
             </v-row>
@@ -61,10 +61,12 @@
       </div>
 
       <h3>
-        {{ returnRemarkTitle(this.detail.type) }}:{{ this.detail.remarks }}
+        {{ returnRemarkTitle(this.detail.current_detail.type) }}:{{
+          this.detail.current_detail.remarks
+        }}
       </h3>
       <h3>払い戻し対象者</h3>
-      <li :key="user" v-for="user in this.detail.repaid_to_id">
+      <li :key="user" v-for="user in this.detail.current_detail.repaid_to_id">
         <Icon :user="user" :size="25" />
         {{ user }}
       </li>

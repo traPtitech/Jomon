@@ -2,7 +2,6 @@ import axios from "axios";
 export const me = {
   state: {
     trap_id: "",
-    display_name: "",
     is_admin: false
   },
   mutations: {
