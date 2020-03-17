@@ -30,6 +30,7 @@ func (user *User) GiveIsUserAdmin(admins []string) {
 type UserRepository interface {
 	GetUsers(token string, admins []string, adminOnly bool) ([]User, error)
 	GetMyUser(token string, admins []string) (User, error)
+	IsUserFound(token string, trapId string) (bool, error)
 }
 
 type userRepository struct{}
@@ -118,4 +119,19 @@ func (_ *userRepository) GetMyUser(token string, admins []string) (User, error) 
 	user.GiveIsUserAdmin(admins)
 
 	return user, nil
+}
+
+func (repo *userRepository) IsUserFound(token string, trapId string) (bool, error) {
+	users, err := repo.GetUsers(token, nil, false)
+	if err != nil {
+		return false, err
+	}
+
+	for _, user := range users {
+		if trapId == user.TrapId {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

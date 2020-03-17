@@ -10,9 +10,6 @@ import (
 
 func (s *Service) GetUsers(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")
-	if token == "" {
-		return c.NoContent(http.StatusUnauthorized)
-	}
 
 	admins, err := s.Administrators.GetAdministratorList()
 	if err != nil {
@@ -56,8 +53,8 @@ func (s *Service) GetAdminUsers(c echo.Context) error {
 }
 
 type PutAdminRequest struct {
-	trapId  string `json:"trap_id"`
-	toAdmin bool   `json:"to_admin"`
+	TrapId  string `json:"trap_id"`
+	ToAdmin bool   `json:"to_admin"`
 }
 
 func (s *Service) PutAdminUsers(c echo.Context) error {
@@ -66,16 +63,39 @@ func (s *Service) PutAdminUsers(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	//403
-	//404
-
-	if req.toAdmin {
-		s.Administrators.AddAdministrator(req.trapId)
-	} else {
-		s.Administrators.RemoveAdministrator(req.trapId)
+	myUser, ok := c.Get("user").(model.User)
+	if !ok || myUser.TrapId == "" {
+		return c.NoContent(http.StatusUnauthorized)
 	}
 
-	return c.JSON(http.StatusOK, req)
+	if !myUser.IsAdmin {
+		return c.NoContent(http.StatusForbidden)
+	}
+
+	token := c.Request().Header.Get("Authorization")
+	found, err := s.Users.IsUserFound(token, req.TrapId)
+	if !found || err != nil {
+		return c.NoContent(http.StatusNotFound)
+	}
+
+	if req.ToAdmin {
+		s.Administrators.AddAdministrator(req.TrapId)
+	} else {
+		s.Administrators.RemoveAdministrator(req.TrapId)
+	}
+
+	user := model.User{
+		TrapId: req.TrapId,
+	}
+
+	admins, err := s.Administrators.GetAdministratorList()
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	user.GiveIsUserAdmin(admins)
+
+	return c.JSON(http.StatusOK, user)
 }
 
 func (s *Service) SetMyUser(c echo.Context) (echo.Context, error) {
