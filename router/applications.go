@@ -2,11 +2,12 @@ package router
 
 import (
 	"encoding/json"
+	"net/http"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/traPtitech/Jomon/model"
-	"net/http"
-	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -124,9 +125,12 @@ func (s *Service) PostApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	userId := "UserId"
+	user, ok := c.Get("user").(model.User)
+	if !ok || user.TrapId == "" {
+		return c.NoContent(http.StatusUnauthorized)
+	}
 
-	id, err := s.Applications.BuildApplication(userId, *req.Type, req.Title, req.Remarks, *req.Amount, *req.PaidAt, req.RepaidToId)
+	id, err := s.Applications.BuildApplication(user.TrapId, *req.Type, req.Title, req.Remarks, *req.Amount, *req.PaidAt, req.RepaidToId)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -154,7 +158,6 @@ type PatchErrorMessage struct {
 
 func (s *Service) PatchApplication(c echo.Context) error {
 	applicationId := uuid.FromStringOrNil(c.Param("applicationId"))
-	userId := "UserId"
 	if applicationId == uuid.Nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
@@ -171,11 +174,14 @@ func (s *Service) PatchApplication(c echo.Context) error {
 	}
 
 	app, err := s.Applications.GetApplication(applicationId, true)
-	isRequestUserAdmin, err := s.Administrators.IsAdmin(userId)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	} else if !isRequestUserAdmin {
-		if app.CreateUserTrapID.TrapId != userId {
+
+	user, ok := c.Get("user").(model.User)
+	if !ok || user.TrapId == "" {
+		return c.NoContent(http.StatusUnauthorized)
+	}
+
+	if !user.IsAdmin {
+		if app.CreateUserTrapID.TrapId != user.TrapId {
 			return c.JSON(http.StatusForbidden, &PatchErrorMessage{
 				IsUserAccepted: false,
 			})
@@ -187,7 +193,7 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		}
 	}
 
-	err = s.Applications.PatchApplication(applicationId, userId, req.Type, req.Title, req.Remarks, req.Amount, req.PaidAt, req.RepaidToId)
+	err = s.Applications.PatchApplication(applicationId, user.TrapId, req.Type, req.Title, req.Remarks, req.Amount, req.PaidAt, req.RepaidToId)
 	if gorm.IsRecordNotFoundError(err) {
 		return c.NoContent(http.StatusNotFound)
 	} else if err != nil {

@@ -127,6 +127,9 @@ func TestPostComment(t *testing.T) {
 		c.SetPath("/applications/:applicationId/comments")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		c.Set("user", model.User{
+			TrapId: "UserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -176,6 +179,9 @@ func TestPostComment(t *testing.T) {
 		c.SetPath("/applications/:applicationId/comments")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(anotherId.String())
+		c.Set("user", model.User{
+			TrapId: "UserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -217,6 +223,9 @@ func TestPostComment(t *testing.T) {
 		c.SetPath("/applications/:applicationId/comments")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		c.Set("user", model.User{
+			TrapId: "UserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -271,18 +280,18 @@ func TestPutComment(t *testing.T) {
 	commentRepoMock.On("PutComment", id, commentId, newCommentText).Return(GenerateComment(id, commentId, "UserId", newCommentText), nil)
 	commentRepoMock.On("PutComment", mock.Anything, mock.Anything, mock.Anything).Return(model.Comment{}, gorm.ErrRecordNotFound)
 
+	service := Service{
+		Administrators: adminRepMock,
+		Applications:   appRepMock,
+		Comments:       commentRepoMock,
+	}
+
 	t.Parallel()
 
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
-
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-			Comments:       commentRepoMock,
-		}
 
 		body := fmt.Sprintf(`
 		{
@@ -297,6 +306,9 @@ func TestPutComment(t *testing.T) {
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(commentId))
+		c.Set("user", model.User{
+			TrapId: "UserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -328,11 +340,6 @@ func TestPutComment(t *testing.T) {
 		e := echo.New()
 		ctx := context.TODO()
 
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-			Comments:       commentRepoMock,
-		}
 		anotherCommentId := int(randSrc.Int63())
 
 		body := fmt.Sprintf(`
@@ -348,6 +355,9 @@ func TestPutComment(t *testing.T) {
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(anotherCommentId))
+		c.Set("user", model.User{
+			TrapId: "UserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -376,20 +386,6 @@ func TestPutComment(t *testing.T) {
 		e := echo.New()
 		ctx := context.TODO()
 
-		newCommentRepoMock := NewCommentRepositoryMock(t)
-
-		newCommentRepoMock.On("GetComment", id, commentId).Return(GenerateComment(id, commentId, "AnotherUserId", commentText), nil)
-		newCommentRepoMock.On("GetComment", mock.Anything, mock.Anything).Return(model.Comment{}, gorm.ErrRecordNotFound)
-
-		newCommentRepoMock.On("PutComment", id, commentId, newCommentText).Return(GenerateComment(id, commentId, "UserId", newCommentText), nil)
-		newCommentRepoMock.On("PutComment", mock.Anything, mock.Anything, mock.Anything).Return(model.Comment{}, gorm.ErrRecordNotFound)
-
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-			Comments:       newCommentRepoMock,
-		}
-
 		body := fmt.Sprintf(`
 		{
 			"comment":"%s"
@@ -403,6 +399,9 @@ func TestPutComment(t *testing.T) {
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(commentId))
+		c.Set("user", model.User{
+			TrapId: "AnotherUserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -450,6 +449,9 @@ func TestPutComment(t *testing.T) {
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(commentId))
+		c.Set("user", model.User{
+			TrapId: "UserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -504,18 +506,18 @@ func TestDeleteComment(t *testing.T) {
 	commentRepoMock.On("DeleteComment", id, commentId).Return(nil)
 	commentRepoMock.On("DeleteComment", mock.Anything, mock.Anything).Return(gorm.ErrRecordNotFound)
 
+	service := Service{
+		Administrators: adminRepMock,
+		Applications:   appRepMock,
+		Comments:       commentRepoMock,
+	}
+
 	t.Parallel()
 
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
-
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-			Comments:       commentRepoMock,
-		}
 
 		req := httptest.NewRequest(http.MethodDelete, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(commentId), nil)
 		req.Header.Set(echo.HeaderContentType, "application/json")
@@ -524,6 +526,9 @@ func TestDeleteComment(t *testing.T) {
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(commentId))
+		c.Set("user", model.User{
+			TrapId: "UserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -569,6 +574,9 @@ func TestDeleteComment(t *testing.T) {
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(anotherCommentId))
+		c.Set("user", model.User{
+			TrapId: "UserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -597,20 +605,6 @@ func TestDeleteComment(t *testing.T) {
 		e := echo.New()
 		ctx := context.TODO()
 
-		newCommentRepoMock := NewCommentRepositoryMock(t)
-
-		newCommentRepoMock.On("GetComment", id, commentId).Return(GenerateComment(id, commentId, "AnotherUserId", commentText), nil)
-		newCommentRepoMock.On("GetComment", mock.Anything, mock.Anything).Return(model.Comment{}, gorm.ErrRecordNotFound)
-
-		newCommentRepoMock.On("DeleteComment", id, commentId).Return(nil)
-		newCommentRepoMock.On("DeleteComment", mock.Anything, mock.Anything).Return(gorm.ErrRecordNotFound)
-
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-			Comments:       newCommentRepoMock,
-		}
-
 		req := httptest.NewRequest(http.MethodDelete, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(commentId), nil)
 		req.Header.Set(echo.HeaderContentType, "application/json")
 		rec := httptest.NewRecorder()
@@ -618,6 +612,9 @@ func TestDeleteComment(t *testing.T) {
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(commentId))
+		c.Set("user", model.User{
+			TrapId: "AnotherUserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {

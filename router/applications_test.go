@@ -5,13 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/getkin/kin-openapi/openapi3filter"
-	"github.com/gofrs/uuid"
-	"github.com/jinzhu/gorm"
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/traPtitech/Jomon/model"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -19,6 +12,14 @@ import (
 	"net/url"
 	"testing"
 	"time"
+
+	"github.com/getkin/kin-openapi/openapi3filter"
+	"github.com/gofrs/uuid"
+	"github.com/jinzhu/gorm"
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/traPtitech/Jomon/model"
 )
 
 const MultipartBoundary = "-------------------------Multipart_Boundary"
@@ -549,6 +550,9 @@ func TestPostApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications")
+		c.Set("user", model.User{
+			TrapId: "UserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -614,6 +618,9 @@ func TestPostApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications")
+		c.Set("user", model.User{
+			TrapId: "UserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -701,6 +708,10 @@ func TestPatchApplication(t *testing.T) {
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		c.Set("user", model.User{
+			TrapId:  "UserId",
+			IsAdmin: true,
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -765,6 +776,10 @@ func TestPatchApplication(t *testing.T) {
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		c.Set("user", model.User{
+			TrapId:  "UserId",
+			IsAdmin: true,
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -831,6 +846,10 @@ func TestPatchApplication(t *testing.T) {
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(notExistId.String())
+		c.Set("user", model.User{
+			TrapId:  "UserId",
+			IsAdmin: true,
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -897,6 +916,9 @@ func TestPatchApplication(t *testing.T) {
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		c.Set("user", model.User{
+			TrapId: "UserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
