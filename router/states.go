@@ -9,11 +9,11 @@ import (
 func PutStates(c echo.Context) error {
 	// some program
 	c.Response().Header().Set(echo.HeaderContentType, "application/json")
-	return c.String(http.StatusOK, "PutStatus")
+	return c.String(http.StatusOK, "PutStates")
 }
 
 func PutRepaidStates(c echo.Context) error {
 	// some program
 	c.Response().Header().Set(echo.HeaderContentType, "application/json")
-	return c.String(http.StatusOK, "PutRepaidStatus")
+	return c.String(http.StatusOK, "PutRepaidStates")
 }
