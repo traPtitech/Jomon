@@ -33,10 +33,14 @@ type UserRepository interface {
 	IsUserFound(token string, trapId string) (bool, error)
 }
 
-type userRepository struct{}
+type userRepository struct {
+	traqRepository TraqRepository
+}
 
 func NewUserRepository() UserRepository {
-	return &userRepository{}
+	return &userRepository{
+		traqRepository: NewTraqRepository(),
+	}
 }
 
 type traqUser struct {
@@ -45,7 +49,17 @@ type traqUser struct {
 
 const baseURL = "https://q.trap.jp/api/1.0"
 
-func sendReqTraq(req *http.Request) ([]byte, error) {
+type TraqRepository interface {
+	sendReq(req *http.Request) ([]byte, error)
+}
+
+type traqRepository struct{}
+
+func NewTraqRepository() TraqRepository {
+	return &traqRepository{}
+}
+
+func (_ *traqRepository) sendReq(req *http.Request) ([]byte, error) {
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -62,14 +76,14 @@ func sendReqTraq(req *http.Request) ([]byte, error) {
 	return body, nil
 }
 
-func (_ *userRepository) GetUsers(token string) ([]User, error) {
+func (repo *userRepository) GetUsers(token string) ([]User, error) {
 	req, err := http.NewRequest("GET", baseURL+"/users", nil)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Authorization", token)
 
-	body, err := sendReqTraq(req)
+	body, err := repo.traqRepository.sendReq(req)
 	if err != nil {
 		return nil, err
 	}
@@ -90,14 +104,14 @@ func (_ *userRepository) GetUsers(token string) ([]User, error) {
 	return users, nil
 }
 
-func (_ *userRepository) GetMyUser(token string) (User, error) {
+func (repo *userRepository) GetMyUser(token string) (User, error) {
 	req, err := http.NewRequest("GET", baseURL+"/users/me", nil)
 	if err != nil {
 		return User{}, err
 	}
 	req.Header.Set("Authorization", token)
 
-	body, err := sendReqTraq(req)
+	body, err := repo.traqRepository.sendReq(req)
 	if err != nil {
 		return User{}, err
 	}
