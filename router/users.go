@@ -90,25 +90,30 @@ func (s *Service) PutAdminUsers(c echo.Context) error {
 		return c.NoContent(http.StatusNotFound)
 	}
 
-	if req.ToAdmin {
-		if err := s.Administrators.AddAdministrator(req.TrapId); err != nil {
-			return c.NoContent(http.StatusInternalServerError)
-		}
-	} else {
-		if err := s.Administrators.RemoveAdministrator(req.TrapId); err != nil {
-			return c.NoContent(http.StatusInternalServerError)
-		}
-	}
-
-	user := model.User{
-		TrapId: req.TrapId,
-	}
-
 	admins, err := s.Administrators.GetAdministratorList()
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
+	user := model.User{
+		TrapId: req.TrapId,
+	}
+	user.GiveIsUserAdmin(admins)
+
+	if req.ToAdmin && !user.IsAdmin {
+		if err := s.Administrators.AddAdministrator(req.TrapId); err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
+	} else if !req.ToAdmin && user.IsAdmin {
+		if err := s.Administrators.RemoveAdministrator(req.TrapId); err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
+	}
+
+	admins, err = s.Administrators.GetAdministratorList()
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
 	user.GiveIsUserAdmin(admins)
 
 	return c.JSON(http.StatusOK, user)
