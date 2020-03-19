@@ -6,14 +6,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func PutStatus(c echo.Context) error {
+func PutStates(c echo.Context) error {
 	// some program
 	c.Response().Header().Set(echo.HeaderContentType, "application/json")
-	return c.String(http.StatusOK, "PutStatus")
+	return c.String(http.StatusOK, "PutStates")
 }
 
-func PutRepaidStatus(c echo.Context) error {
+func PutRepaidStates(c echo.Context) error {
 	// some program
 	c.Response().Header().Set(echo.HeaderContentType, "application/json")
-	return c.String(http.StatusOK, "PutRepaidStatus")
+	return c.String(http.StatusOK, "PutRepaidStates")
 }
