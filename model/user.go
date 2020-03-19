@@ -28,8 +28,8 @@ func (user *User) GiveIsUserAdmin(admins []string) {
 }
 
 type UserRepository interface {
-	GetUsers(token string, admins []string, adminOnly bool) ([]User, error)
-	GetMyUser(token string, admins []string) (User, error)
+	GetUsers(token string) ([]User, error)
+	GetMyUser(token string) (User, error)
 	IsUserFound(token string, trapId string) (bool, error)
 }
 
@@ -45,9 +45,7 @@ type traqUser struct {
 
 const baseURL = "https://q.trap.jp/api/1.0"
 
-func sendReqTraq(token string, req *http.Request) ([]byte, error) {
-	req.Header.Set("Authorization", token)
-
+func sendReqTraq(req *http.Request) ([]byte, error) {
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -64,13 +62,14 @@ func sendReqTraq(token string, req *http.Request) ([]byte, error) {
 	return body, nil
 }
 
-func (_ *userRepository) GetUsers(token string, admins []string, adminOnly bool) ([]User, error) {
+func (_ *userRepository) GetUsers(token string) ([]User, error) {
 	req, err := http.NewRequest("GET", baseURL+"/users", nil)
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Authorization", token)
 
-	body, err := sendReqTraq(token, req)
+	body, err := sendReqTraq(req)
 	if err != nil {
 		return nil, err
 	}
@@ -85,25 +84,20 @@ func (_ *userRepository) GetUsers(token string, admins []string, adminOnly bool)
 		user := User{
 			TrapId: traqUser.Name,
 		}
-
-		user.GiveIsUserAdmin(admins)
-		if adminOnly && !user.IsAdmin {
-			continue
-		}
-
 		users = append(users, user)
 	}
 
 	return users, nil
 }
 
-func (_ *userRepository) GetMyUser(token string, admins []string) (User, error) {
+func (_ *userRepository) GetMyUser(token string) (User, error) {
 	req, err := http.NewRequest("GET", baseURL+"/users/me", nil)
 	if err != nil {
 		return User{}, err
 	}
+	req.Header.Set("Authorization", token)
 
-	body, err := sendReqTraq(token, req)
+	body, err := sendReqTraq(req)
 	if err != nil {
 		return User{}, err
 	}
@@ -113,16 +107,13 @@ func (_ *userRepository) GetMyUser(token string, admins []string) (User, error) 
 		return User{}, err
 	}
 
-	user := User{
+	return User{
 		TrapId: traqUser.Name,
-	}
-	user.GiveIsUserAdmin(admins)
-
-	return user, nil
+	}, nil
 }
 
 func (repo *userRepository) IsUserFound(token string, trapId string) (bool, error) {
-	users, err := repo.GetUsers(token, nil, false)
+	users, err := repo.GetUsers(token)
 	if err != nil {
 		return false, err
 	}

@@ -11,14 +11,18 @@ import (
 func (s *Service) GetUsers(c echo.Context) error {
 	token := c.Request().Header.Get("Authorization")
 
+	users, err := s.Users.GetUsers(token)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
 	admins, err := s.Administrators.GetAdministratorList()
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	users, err := s.Users.GetUsers(token, admins, false)
-	if err != nil {
-		return c.NoContent(http.StatusUnauthorized)
+	for _, user := range users {
+		user.GiveIsUserAdmin(admins)
 	}
 
 	return c.JSON(http.StatusOK, users)
@@ -39,17 +43,25 @@ func (s *Service) GetAdminUsers(c echo.Context) error {
 		return c.NoContent(http.StatusUnauthorized)
 	}
 
+	allUsers, err := s.Users.GetUsers(token)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
 	admins, err := s.Administrators.GetAdministratorList()
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	users, err := s.Users.GetUsers(token, admins, true)
-	if err != nil {
-		return c.NoContent(http.StatusUnauthorized)
+	adminUsers := []model.User{}
+	for _, user := range allUsers {
+		user.GiveIsUserAdmin(admins)
+		if user.IsAdmin {
+			adminUsers = append(adminUsers, user)
+		}
 	}
 
-	return c.JSON(http.StatusOK, users)
+	return c.JSON(http.StatusOK, adminUsers)
 }
 
 type PutAdminRequest struct {
@@ -79,9 +91,13 @@ func (s *Service) PutAdminUsers(c echo.Context) error {
 	}
 
 	if req.ToAdmin {
-		s.Administrators.AddAdministrator(req.TrapId)
+		if err := s.Administrators.AddAdministrator(req.TrapId); err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
 	} else {
-		s.Administrators.RemoveAdministrator(req.TrapId)
+		if err := s.Administrators.RemoveAdministrator(req.TrapId); err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
 	}
 
 	user := model.User{
@@ -104,15 +120,17 @@ func (s *Service) SetMyUser(c echo.Context) (echo.Context, error) {
 		return c, errors.New("no token")
 	}
 
+	user, err := s.Users.GetMyUser(token)
+	if err != nil {
+		return c, err
+	}
+
 	admins, err := s.Administrators.GetAdministratorList()
 	if err != nil {
 		return c, err
 	}
 
-	user, err := s.Users.GetMyUser(token, admins)
-	if err != nil {
-		return c, err
-	}
+	user.GiveIsUserAdmin(admins)
 
 	c.Set("user", user)
 
