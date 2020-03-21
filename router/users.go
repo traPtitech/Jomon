@@ -85,7 +85,7 @@ func (s *Service) PutAdminUsers(c echo.Context) error {
 	}
 
 	token := c.Request().Header.Get("Authorization")
-	exist, err := s.Users.IsUserExist(token, req.TrapId)
+	exist, err := s.Users.ExistsUser(token, req.TrapId)
 	if !exist || err != nil {
 		return c.NoContent(http.StatusNotFound)
 	}

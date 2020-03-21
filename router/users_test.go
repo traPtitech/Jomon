@@ -39,11 +39,11 @@ func NewUserRepositoryMock(t *testing.T, userId string, adminUserId string) *use
 	m.On("GetMyUser", m.token).Return(model.User{TrapId: userId}, nil)
 	m.On("GetMyUser", m.adminToken).Return(model.User{TrapId: adminUserId}, nil)
 
-	m.On("IsUserExist", m.token, userId).Return(true, nil)
-	m.On("IsUserExist", m.adminToken, userId).Return(true, nil)
-	m.On("IsUserExist", m.token, adminUserId).Return(true, nil)
-	m.On("IsUserExist", m.adminToken, adminUserId).Return(true, nil)
-	m.On("IsUserExist", mock.Anything, mock.Anything).Return(false, nil)
+	m.On("ExistsUser", m.token, userId).Return(true, nil)
+	m.On("ExistsUser", m.adminToken, userId).Return(true, nil)
+	m.On("ExistsUser", m.token, adminUserId).Return(true, nil)
+	m.On("ExistsUser", m.adminToken, adminUserId).Return(true, nil)
+	m.On("ExistsUser", mock.Anything, mock.Anything).Return(false, nil)
 
 	return m
 }
@@ -58,7 +58,7 @@ func (m *userRepositoryMock) GetMyUser(token string) (model.User, error) {
 	return ret.Get(0).(model.User), ret.Error(1)
 }
 
-func (m *userRepositoryMock) IsUserExist(token string, trapId string) (bool, error) {
+func (m *userRepositoryMock) ExistsUser(token string, trapId string) (bool, error) {
 	ret := m.Called(token, trapId)
 	return ret.Bool(0), ret.Error(1)
 }

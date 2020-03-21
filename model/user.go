@@ -30,7 +30,7 @@ func (user *User) GiveIsUserAdmin(admins []string) {
 type UserRepository interface {
 	GetUsers(token string) ([]User, error)
 	GetMyUser(token string) (User, error)
-	IsUserExist(token string, trapId string) (bool, error)
+	ExistsUser(token string, trapId string) (bool, error)
 }
 
 type userRepository struct {
@@ -126,7 +126,7 @@ func (repo *userRepository) GetMyUser(token string) (User, error) {
 	}, nil
 }
 
-func (repo *userRepository) IsUserExist(token string, trapId string) (bool, error) {
+func (repo *userRepository) ExistsUser(token string, trapId string) (bool, error) {
 	users, err := repo.GetUsers(token)
 	if err != nil {
 		return false, err
