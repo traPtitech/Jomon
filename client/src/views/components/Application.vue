@@ -3,17 +3,17 @@
     <v-row class="md5">
       <v-col cols="2" class="text-lg-right">
         <v-chip
-          v-if="list.state !== ''"
+          v-if="list.current_state !== ''"
           :width="10"
           :class="chip"
           label
           style="width:7em"
-          >{{ list.state }}</v-chip
+          >{{ list.current_state }}</v-chip
         >
       </v-col>
-      <v-col cols="4">{{ list.title }}</v-col>
-      <v-col cols="4" class="text-lg-left">{{ list.name }}</v-col>
-      <v-col cols="2">{{ list.money }}</v-col>
+      <v-col cols="4">{{ list.current_detail.title }}</v-col>
+      <v-col cols="4" class="text-lg-left">{{ list.applicant.trap_id }}</v-col>
+      <v-col cols="2">{{ list.current_detail.amount }}</v-col>
     </v-row>
   </v-container>
 </template>
@@ -23,16 +23,30 @@ export default {
   name: "Applicaton",
   props: {
     list: {
-      id: Number,
-      title: String,
-      name: String,
-      money: Number,
-      state: String
+      application_id: String,
+      created_at: String,
+      applicant: {
+        trap_id: String,
+        is_admin: Boolean
+      },
+      current_detail: {
+        update_user: {
+          trap_id: String,
+          is_admin: Boolean
+        },
+        type: String,
+        title: String,
+        remarks: String,
+        amount: Number,
+        paid_at: String,
+        updated_at: String
+      },
+      current_state: String
     }
   },
   computed: {
     chip: function() {
-      switch (this.list.state) {
+      switch (this.list.current_state) {
         case "submitted":
           return "black white--text";
         case "rejected":

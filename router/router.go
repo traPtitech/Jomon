@@ -2,16 +2,30 @@ package router
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/model"
 )
 
+type Service struct {
+	Administrators model.AdministratorRepository
+	Applications   model.ApplicationRepository
+	Comments       model.CommentRepository
+}
+
 func SetRouting(e *echo.Echo) {
+	service := &Service{
+		Administrators: model.NewAdministratorRepository(),
+		Applications:   model.NewApplicationRepository(),
+		Comments:       model.NewCommentRepository(),
+	}
 
 	apiApplications := e.Group("/applications")
 	{
-		apiApplications.GET("", GetApplications)
-		apiApplications.POST("", PostApplications)
-		apiApplications.PATCH("/:applicationId", PatchApplications)
+		apiApplications.GET("", service.GetApplicationList)
+		apiApplications.POST("", service.PostApplication)
+		apiApplications.GET("/:applicationId", service.GetApplication)
+		apiApplications.PATCH("/:applicationId", service.PatchApplication)
 	}
+
 	apiImages := e.Group("/images")
 	{
 		apiImages.GET("/:imageId", GetImages)
@@ -20,15 +34,15 @@ func SetRouting(e *echo.Echo) {
 
 	apiComments := e.Group("/applications/:applicationId/comments")
 	{
-		apiComments.POST("", PostComments)
-		apiComments.PUT("/:commentId", PutComments)
-		apiComments.DELETE("/:commentId", DeleteComments)
+		apiComments.POST("", service.PostComments)
+		apiComments.PUT("/:commentId", service.PutComments)
+		apiComments.DELETE("/:commentId", service.DeleteComments)
 	}
 
-	apiStatus := e.Group("/application/:applicationId/status")
+	apiStatus := e.Group("/application/:applicationId/states")
 	{
-		apiStatus.PUT("", PutStatus)
-		apiStatus.PUT("/repaid/:repaidTold", PutRepaidStatus)
+		apiStatus.PUT("", PutStates)
+		apiStatus.PUT("/repaid/:repaidTold", PutRepaidStates)
 	}
 
 	apiUsers := e.Group("/users")

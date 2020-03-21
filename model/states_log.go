@@ -3,9 +3,18 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"github.com/jinzhu/gorm"
 	"time"
 
 	"github.com/gofrs/uuid"
+)
+
+const (
+	Submitted   int = 1
+	FixRequired int = 2
+	Accepted    int = 3
+	FullyRepaid int = 4
+	Rejected    int = 5
 )
 
 type StatesLog struct {
@@ -18,21 +27,69 @@ type StatesLog struct {
 }
 
 type StateType struct {
-	Type int `gorm:"type:tinyint(4);not null;default:0"`
+	Type int `gorm:"column:to_state;type:tinyint(4);not null;default:0"`
 }
 
 func (ty StateType) MarshalJSON() ([]byte, error) {
 	switch ty.Type {
-	case 0:
+	case Submitted:
 		return json.Marshal("submitted")
-	case 1:
+	case FixRequired:
 		return json.Marshal("fix_required")
-	case 2:
+	case Accepted:
 		return json.Marshal("accepted")
-	case 3:
+	case FullyRepaid:
 		return json.Marshal("fully_repaid")
-	case 4:
+	case Rejected:
 		return json.Marshal("rejected")
 	}
 	return nil, errors.New("unknown state type")
+}
+
+func GetStateType(str string) (StateType, error) {
+	var result StateType
+	var err error
+	switch str {
+	case "submitted":
+		result.Type = Submitted
+	case "fix_required":
+		result.Type = FixRequired
+	case "accepted":
+		result.Type = Accepted
+	case "fully_repaid":
+		result.Type = FullyRepaid
+	case "rejected":
+		result.Type = Rejected
+	default:
+		err = errors.New("unknown state type")
+	}
+
+	return result, err
+}
+
+func (st *StatesLog) GiveIsUserAdmin(admins []string) {
+	if st == nil {
+		return
+	}
+
+	st.UpdateUserTrapID.GiveIsUserAdmin(admins)
+}
+
+func (_ *applicationRepository) createStatesLog(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapId string) (StatesLog, error) {
+	log := StatesLog{
+		ApplicationID: applicationId,
+		UpdateUserTrapID: User{
+			TrapId: updateUserTrapId,
+		},
+		ToState: StateType{Type: 1},
+		Reason:  "",
+	}
+
+	err := db_.Create(&log).Error
+
+	if err != nil {
+		return StatesLog{}, err
+	}
+
+	return log, nil
 }

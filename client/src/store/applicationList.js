@@ -1,33 +1,46 @@
-export const State = {
-  submitted: "submitted",
-  rejected: "rejected",
-  fix_required: "fix_required",
-  accepted: "accepted",
-  fully_repaid: "fully_repaid"
-};
+import axios from "axios";
+import Vue from "vue";
 
 export const applicationList = {
   state: [
     {
-      id: 10,
-      title: "タイトル1",
-      name: "user1",
-      money: 100,
-      state: State.accepted
-    },
-    {
-      id: 13,
-      title: "タイトル2",
-      name: "user2",
-      money: 500,
-      state: State.accepted
-    },
-    {
-      id: 16,
-      title: "タイトル3",
-      name: "user3",
-      money: 2500,
-      state: State.accepted
+      application_id: "",
+      created_at: "",
+      applicant: {
+        trap_id: "",
+        is_admin: false
+      },
+      current_detail: {
+        update_user: {
+          trap_id: "",
+          is_admin: false
+        },
+        type: "",
+        title: "",
+        remarks: "",
+        amount: 0,
+        paid_at: "",
+        updated_at: ""
+      },
+      current_state: ""
     }
-  ]
+  ],
+  mutations: {
+    setApplicationList(state, newState) {
+      state.splice(0);
+      newState.forEach((element, index) => {
+        Vue.set(state, index, element);
+      });
+    }
+  },
+  actions: {
+    async getApplicationList({ commit }) {
+      try {
+        const response = await axios.get("/api/applications");
+        commit("setApplicationList", response.data);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
 };

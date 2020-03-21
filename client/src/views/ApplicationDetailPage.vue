@@ -19,7 +19,7 @@
 import ApplicationPaper from "./components/ApplicationDetail";
 import ApplicationLogs from "./components/ApplicationDetailLogs";
 import StateButtonController from "./components/StateButtonController";
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 export default {
   name: "AppDetail",
   components: {
@@ -30,7 +30,11 @@ export default {
   computed: {
     ...mapState({ detail: "application_detail_paper" })
   },
+  created() {
+    this.getApplicationDetail(this.$route.params.id);
+  },
   methods: {
+    ...mapActions(["getApplicationDetail"]),
     returnState: function(state) {
       switch (state) {
         case "submitted":

@@ -1,42 +1,28 @@
-//import axios from "axios";
+import axios from "axios";
+import Vue from "vue";
 export const userList = {
   state: [
     {
-      trap_id: "user1",
-      is_admin: true
-    },
-    {
-      trap_id: "user2",
-      is_admin: false
-    },
-    {
-      trap_id: "user3",
-      is_admin: false
-    },
-    {
-      trap_id: "user4",
+      trap_id: "",
       is_admin: false
     }
   ],
-  // actions: {
-  //   getUsers: function({ commit }) {
-  //     return axios.get("https://q.trap.jp/api/1.0/users").then(response => {
-  //       commit("setUsers", response.data);
-  //     });
-  //   }
-  // },
-  // mutations: {
-  //   setUsers: function(userList, users) {
-  //     userList.state = users;
-  //   }
-  // },
-  getters: {
-    userList: function(state) {
-      let users = [];
-      state.forEach(function(value) {
-        users.push(value.trap_id);
+  mutations: {
+    setUserList(state, newState) {
+      state.splice(0);
+      newState.forEach((element, index) => {
+        Vue.set(state, index, element);
       });
-      return users;
+    }
+  },
+  actions: {
+    async getUserList({ commit }) {
+      try {
+        const response = await axios.get("/api/users");
+        commit("setUserList", response.data);
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 };
