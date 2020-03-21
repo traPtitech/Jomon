@@ -85,8 +85,8 @@ func (s *Service) PutAdminUsers(c echo.Context) error {
 	}
 
 	token := c.Request().Header.Get("Authorization")
-	found, err := s.Users.IsUserFound(token, req.TrapId)
-	if !found || err != nil {
+	exist, err := s.Users.IsUserExist(token, req.TrapId)
+	if !exist || err != nil {
 		return c.NoContent(http.StatusNotFound)
 	}
 
@@ -100,11 +100,15 @@ func (s *Service) PutAdminUsers(c echo.Context) error {
 	}
 	user.GiveIsUserAdmin(admins)
 
-	if req.ToAdmin && !user.IsAdmin {
+	if req.ToAdmin == user.IsAdmin {
+		return c.NoContent(http.StatusConflict)
+	}
+
+	if req.ToAdmin {
 		if err := s.Administrators.AddAdministrator(req.TrapId); err != nil {
 			return c.NoContent(http.StatusInternalServerError)
 		}
-	} else if !req.ToAdmin && user.IsAdmin {
+	} else {
 		if err := s.Administrators.RemoveAdministrator(req.TrapId); err != nil {
 			return c.NoContent(http.StatusInternalServerError)
 		}

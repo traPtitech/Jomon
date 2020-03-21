@@ -90,7 +90,7 @@ func TestGetMyUser(t *testing.T) {
 	})
 }
 
-func TestIsUserFound(t *testing.T) {
+func TestIsUserExist(t *testing.T) {
 	t.Parallel()
 
 	token := "Token"
@@ -102,16 +102,16 @@ func TestIsUserFound(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		found, err := userRepo.IsUserFound(token, myUserId)
+		exist, err := userRepo.IsUserExist(token, myUserId)
 		asr.NoError(err)
-		asr.True(found)
+		asr.True(exist)
 	})
 
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		found, err := userRepo.IsUserFound(token, "notExistId")
+		exist, err := userRepo.IsUserExist(token, "notExistId")
 		asr.NoError(err)
-		asr.False(found)
+		asr.False(exist)
 	})
 }
