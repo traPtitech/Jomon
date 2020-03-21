@@ -595,9 +595,12 @@ components:
       type: object
       properties:
         repaid_by_user:
-          $ref: "#/components/schemas/User"
+          allOf:
+            - $ref: "#/components/schemas/User"
+          nullable: true
         repaid_to_user:
           $ref: "#/components/schemas/User"
         repaid_at:
           type: string
+          nullable: true
           format: date-time
