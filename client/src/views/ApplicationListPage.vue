@@ -9,9 +9,9 @@
           <v-list-item-group color="primary">
             <Application :list="header" class="pb-0 pt-0"></Application>
             <v-list-item
-              v-for="list in applicationList"
-              v-bind:key="list.id"
-              :to="'/applications/' + list.id"
+              v-for="(list, index) in applicationList"
+              v-bind:key="index"
+              :to="'/applications/' + list.application_id"
               class="pl-0 pr-0"
             >
               <Application :list="list"> </Application>
@@ -23,22 +23,32 @@
   </div>
 </template>
 <script>
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 import Application from "./components/Application";
 export default {
   name: "ApplicationList",
   computed: {
     ...mapState(["applicationList"])
   },
+  methods: {
+    ...mapActions(["getApplicationList"])
+  },
   data() {
     return {
       header: {
-        title: "タイトル",
-        name: "申請者名",
-        money: "金額",
-        state: ""
+        current_detail: {
+          title: "タイトル",
+          amount: "金額"
+        },
+        applicant: {
+          trap_id: "申請者ID"
+        },
+        current_state: ""
       }
     };
+  },
+  created() {
+    this.getApplicationList();
   },
   components: {
     Application

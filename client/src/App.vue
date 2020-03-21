@@ -14,7 +14,9 @@ export default {
     NavBar,
     CoreView
   },
-
+  created() {
+    this.$store.dispatch("getMe");
+  },
   data: () => ({
     //
   })

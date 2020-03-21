@@ -1,73 +1,75 @@
+import axios from "axios";
 export const applicationDetail = {
   state: {
-    application_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    created_at: "Thu, 1 May 2008 02:00:00 +0900",
+    application_id: "",
+    created_at: "",
     applicant: {
-      trap_id: "nagatech",
-      display_name: "ながてち",
-      is_admin: true
+      trap_id: "",
+      is_admin: false
     },
-    current_state: "submitted",
-    type: "club",
-    title: "夏コミの交通費をお願いします。",
-    remarks: "〇〇駅から〇〇駅への移動",
-    paid_at: "Thu, 1 May 2008 02:00:00 +0900",
-    ammount: 1200,
-    repaid_to_id: ["nagatech", "series2"],
-    images: ["3fa85f64-5717-4562-b3fc-2c963f66afa6"],
+    current_detail: {
+      update_user: {
+        trap_id: "",
+        is_admin: ""
+      },
+      type: "",
+      title: "",
+      remarks: "",
+      ammount: 0,
+      paid_at: "",
+      updated_at: "",
+      repaid_to_id: []
+    },
+    current_state: "",
+    images: [""],
     comments: [
       {
         comment_id: 0,
         user: {
-          trap_id: "nagatech",
-          display_name: "ながてち",
-          is_admin: true
+          trap_id: "",
+          is_admin: false
         },
-        comment: "コメント内容",
-        created_at: "Thu, 1 May 2008 02:00:00 +0900",
-        updated_at: "Thu, 1 May 2008 02:00:00 +0900"
+        comment: "",
+        created_at: "",
+        updated_at: ""
       }
     ],
     state_logs: [
       {
         update_user: {
-          trap_id: "nagatech",
-          display_name: "ながてち",
-          is_admin: true
+          trap_id: "",
+          is_admin: false
         },
-        to_state: "submitted",
-        reason: "これは雑すぎますね。",
-        created_at: "Thu, 1 May 2008 02:00:00 +0900"
+        to_state: "",
+        reason: "",
+        created_at: ""
       }
     ],
     application_detail_logs: [
       {
         update_user: {
-          trap_id: "nagatech",
-          display_name: "ながてち",
-          is_admin: true
+          trap_id: "",
+          is_admin: false
         },
-        type: "club",
-        title: "夏コミの交通費をお願いします。",
-        remarks: "〇〇駅から〇〇駅への移動",
-        ammount: 1200,
-        paid_at: "2019-12-13",
-        updated_at: "Thu, 1 May 2008 02:00:00 +0900"
+        type: "",
+        title: "",
+        remarks: "",
+        ammount: 0,
+        paid_at: "",
+        updated_at: ""
       }
     ],
     repayment_logs: [
       {
         repaid_by_user: {
-          trap_id: "nagatech",
-          display_name: "ながてち",
-          is_admin: true
+          trap_id: "",
+          is_admin: false
         },
         repaid_to_user: {
-          trap_id: "nagatech",
-          display_name: "ながてち",
-          is_admin: true
+          trap_id: "",
+          is_admin: false
         },
-        repaid_at: "Thu, 1 May 2008 02:00:00 +0900"
+        repaid_at: ""
       }
     ]
   },
@@ -88,6 +90,23 @@ export const applicationDetail = {
       });
       //TODO:時系列順にlogを並び変える
       return logs;
+    }
+  },
+  mutations: {
+    setApplicationDetail(state, newState) {
+      Object.keys(state).forEach(key => {
+        state[key] = newState[key];
+      });
+    }
+  },
+  actions: {
+    async getApplicationDetail({ commit }, applicationId) {
+      try {
+        const response = await axios.get("/api/applications/" + applicationId);
+        commit("setApplicationDetail", response.data);
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 };
