@@ -604,4 +604,3 @@ components:
           type: string
           nullable: true
           format: date-time
-        
