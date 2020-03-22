@@ -6,7 +6,6 @@
     :x-large="size === `x-large`"
     :class="chip"
     label
-    :style="style"
     :width="width"
   >
     {{ this.state }}
@@ -41,10 +40,6 @@ export default {
       default: "fail"
     },
     size: {
-      type: String,
-      default: ""
-    },
-    style: {
       type: String,
       default: ""
     },
