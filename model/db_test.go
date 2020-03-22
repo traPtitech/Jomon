@@ -13,6 +13,7 @@ const userNameChrs = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 var randSrc = rand.NewSource(0)
 var repo = &applicationRepository{}
 var commentRepo = &commentRepository{}
+var adminRepo = &administratorRepository{}
 
 func TestMain(m *testing.M) {
 	db := setupDB()

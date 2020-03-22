@@ -5,13 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/getkin/kin-openapi/openapi3filter"
-	"github.com/gofrs/uuid"
-	"github.com/jinzhu/gorm"
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/traPtitech/Jomon/model"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -19,6 +12,14 @@ import (
 	"net/url"
 	"testing"
 	"time"
+
+	"github.com/getkin/kin-openapi/openapi3filter"
+	"github.com/gofrs/uuid"
+	"github.com/jinzhu/gorm"
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/traPtitech/Jomon/model"
 )
 
 const MultipartBoundary = "-------------------------Multipart_Boundary"
@@ -114,8 +115,12 @@ type administratorRepositoryMock struct {
 	mock.Mock
 }
 
-func NewAdministratorRepositoryMock() *administratorRepositoryMock {
-	return new(administratorRepositoryMock)
+func NewAdministratorRepositoryMock(adminUserId string) *administratorRepositoryMock {
+	m := new(administratorRepositoryMock)
+
+	m.On("GetAdministratorList").Return([]string{"User1", "User2", adminUserId}, nil)
+
+	return m
 }
 
 func (m *administratorRepositoryMock) IsAdmin(userId string) (bool, error) {
@@ -213,13 +218,14 @@ func TestGetApplication(t *testing.T) {
 	appRepMock.On("GetApplication", application.ID, true).Return(application, nil)
 	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
 
-	adminRepMock := NewAdministratorRepositoryMock()
+	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
-	adminRepMock.On("GetAdministratorList").Return([]string{"User1", "User2"}, nil)
+	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
 		Applications:   appRepMock,
+		Users:          userRepMock,
 	}
 
 	t.Parallel()
@@ -230,6 +236,7 @@ func TestGetApplication(t *testing.T) {
 		ctx := context.TODO()
 
 		req := httptest.NewRequest(http.MethodGet, "/api/applications/"+appId.String(), nil)
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
@@ -251,9 +258,13 @@ func TestGetApplication(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.GetApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusOK, rec.Code)
 
 		err = validateResponse(&ctx, requestValidationInput, rec)
@@ -271,6 +282,7 @@ func TestGetApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodGet, "/api/applications/"+id.String(), nil)
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetParamNames("/applications/:applicationId")
@@ -292,9 +304,13 @@ func TestGetApplication(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.GetApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusNotFound, rec.Code)
 
 		err = validateResponse(&ctx, requestValidationInput, rec)
@@ -316,13 +332,14 @@ func TestGetApplicationList(t *testing.T) {
 	appRepMock.On("GetApplicationList", "title", (*model.StateType)(nil), (*int)(nil), "User1", (*model.ApplicationType)(nil), (*time.Time)(nil), (*time.Time)(nil)).Return([]model.Application{application}, nil)
 	appRepMock.On("GetApplicationList", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]model.Application{}, nil)
 
-	adminRepMock := NewAdministratorRepositoryMock()
+	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
-	adminRepMock.On("GetAdministratorList").Return([]string{"User1", "User2"}, nil)
+	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
 		Applications:   appRepMock,
+		Users:          userRepMock,
 	}
 
 	t.Parallel()
@@ -334,6 +351,7 @@ func TestGetApplicationList(t *testing.T) {
 			ctx := context.TODO()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/applications", nil)
+			req.Header.Set("Authorization", userRepMock.token)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
@@ -353,9 +371,13 @@ func TestGetApplicationList(t *testing.T) {
 				panic(err)
 			}
 
+			c, err = service.SetMyUser(c)
+			if err != nil {
+				panic(err)
+			}
+
 			err = service.GetApplicationList(c)
 			asr.NoError(err)
-
 			asr.Equal(http.StatusOK, rec.Code)
 
 			err = validateResponse(&ctx, requestValidationInput, rec)
@@ -371,6 +393,7 @@ func TestGetApplicationList(t *testing.T) {
 			q.Add("sort", "title")
 			q.Add("applicant", "User1")
 			req := httptest.NewRequest(http.MethodGet, "/api/applications?"+q.Encode(), nil)
+			req.Header.Set("Authorization", userRepMock.token)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
@@ -390,9 +413,13 @@ func TestGetApplicationList(t *testing.T) {
 				panic(err)
 			}
 
+			c, err = service.SetMyUser(c)
+			if err != nil {
+				panic(err)
+			}
+
 			err = service.GetApplicationList(c)
 			asr.NoError(err)
-
 			asr.Equal(http.StatusOK, rec.Code)
 
 			err = validateResponse(&ctx, requestValidationInput, rec)
@@ -408,6 +435,7 @@ func TestGetApplicationList(t *testing.T) {
 			q.Add("sort", "title")
 			q.Add("applicant", "User2")
 			req := httptest.NewRequest(http.MethodGet, "/api/applications?"+q.Encode(), nil)
+			req.Header.Set("Authorization", userRepMock.token)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
@@ -427,9 +455,13 @@ func TestGetApplicationList(t *testing.T) {
 				panic(err)
 			}
 
+			c, err = service.SetMyUser(c)
+			if err != nil {
+				panic(err)
+			}
+
 			err = service.GetApplicationList(c)
 			asr.NoError(err)
-
 			asr.Equal(http.StatusOK, rec.Code)
 
 			err = validateResponse(&ctx, requestValidationInput, rec)
@@ -449,6 +481,7 @@ func TestGetApplicationList(t *testing.T) {
 			q := make(url.Values)
 			q.Add("submitted_since", "invalid")
 			req := httptest.NewRequest(http.MethodGet, "/api/applications?"+q.Encode(), nil)
+			req.Header.Set("Authorization", userRepMock.token)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
@@ -468,9 +501,13 @@ func TestGetApplicationList(t *testing.T) {
 				// panic(err)
 			}
 
+			c, err = service.SetMyUser(c)
+			if err != nil {
+				panic(err)
+			}
+
 			err = service.GetApplicationList(c)
 			asr.NoError(err)
-
 			asr.Equal(http.StatusBadRequest, rec.Code)
 
 			err = validateResponse(&ctx, requestValidationInput, rec)
@@ -495,13 +532,14 @@ func TestPostApplication(t *testing.T) {
 	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplication(id, "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, paidAt), nil)
 	appRepMock.On("BuildApplication", "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, mock.Anything, []string{"User1"}).Return(id, nil)
 
-	adminRepMock := NewAdministratorRepositoryMock()
+	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
-	adminRepMock.On("GetAdministratorList").Return([]string{"User1", "User2"}, nil)
+	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
 		Applications:   appRepMock,
+		Users:          userRepMock,
 	}
 
 	t.Parallel()
@@ -546,6 +584,7 @@ func TestPostApplication(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
 		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications")
@@ -565,9 +604,13 @@ func TestPostApplication(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.PostApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusCreated, rec.Code)
 
 		err = validateResponse(&ctx, requestValidationInput, rec)
@@ -611,9 +654,13 @@ func TestPostApplication(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
 		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications")
+		c.Set("user", model.User{
+			TrapId: "UserId",
+		})
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -630,9 +677,13 @@ func TestPostApplication(t *testing.T) {
 			// panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.PostApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusBadRequest, rec.Code)
 	})
 }
@@ -650,15 +701,27 @@ func TestPatchApplication(t *testing.T) {
 		panic(err)
 	}
 
-	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplication(id, "User2", model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
+	userId := "UserId"
+	adminUserId := "AdminUserId"
+	anotherUserId := "AnotherUserId"
+
+	anotherToken := "AnotherToken"
+
+	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplication(id, userId, model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
 	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
-	appRepMock.On("PatchApplication", id, "UserId", &model.ApplicationType{Type: model.Contest}, "", "", (*int)(nil), mock.Anything, ([]string)(nil)).Return(nil)
+	appRepMock.On("PatchApplication", id, mock.Anything, &model.ApplicationType{Type: model.Contest}, "", "", (*int)(nil), mock.Anything, ([]string)(nil)).Return(nil)
 	appRepMock.On("PatchApplication", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(gorm.ErrRecordNotFound)
 
-	defaultAdminRepMock := NewAdministratorRepositoryMock()
+	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
-	defaultAdminRepMock.On("GetAdministratorList").Return([]string{"UserId"}, nil)
-	defaultAdminRepMock.On("IsAdmin", mock.Anything).Return(true, nil)
+	userRepMock := NewUserRepositoryMock(t, userId, adminUserId)
+	userRepMock.On("GetMyUser", anotherToken).Return(model.User{TrapId: anotherUserId}, nil)
+
+	service := Service{
+		Administrators: adminRepMock,
+		Applications:   appRepMock,
+		Users:          userRepMock,
+	}
 
 	t.Parallel()
 
@@ -666,11 +729,6 @@ func TestPatchApplication(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
-
-		service := Service{
-			Administrators: defaultAdminRepMock,
-			Applications:   appRepMock,
-		}
 
 		body := &bytes.Buffer{}
 		mpw := multipart.NewWriter(body)
@@ -696,6 +754,7 @@ func TestPatchApplication(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
 		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
@@ -717,9 +776,13 @@ func TestPatchApplication(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.PatchApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusOK, rec.Code)
 
 		err = validateResponse(&ctx, requestValidationInput, rec)
@@ -730,11 +793,6 @@ func TestPatchApplication(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
-
-		service := Service{
-			Administrators: defaultAdminRepMock,
-			Applications:   appRepMock,
-		}
 
 		body := &bytes.Buffer{}
 		mpw := multipart.NewWriter(body)
@@ -760,6 +818,7 @@ func TestPatchApplication(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
 		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
@@ -781,9 +840,13 @@ func TestPatchApplication(t *testing.T) {
 			// panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.PatchApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusBadRequest, rec.Code)
 	})
 
@@ -791,11 +854,6 @@ func TestPatchApplication(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
-
-		service := Service{
-			Administrators: defaultAdminRepMock,
-			Applications:   appRepMock,
-		}
 
 		notExistId, err := uuid.NewV4()
 		if err != nil {
@@ -826,6 +884,7 @@ func TestPatchApplication(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+notExistId.String(), body)
 		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set("Authorization", userRepMock.adminToken)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
@@ -847,9 +906,13 @@ func TestPatchApplication(t *testing.T) {
 			// panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.PatchApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusNotFound, rec.Code)
 	})
 
@@ -857,16 +920,6 @@ func TestPatchApplication(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
-
-		adminRepMock := NewAdministratorRepositoryMock()
-
-		adminRepMock.On("GetAdministratorList").Return([]string{}, nil)
-		adminRepMock.On("IsAdmin", mock.Anything).Return(false, nil)
-
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-		}
 
 		body := &bytes.Buffer{}
 		mpw := multipart.NewWriter(body)
@@ -892,6 +945,7 @@ func TestPatchApplication(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
 		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set("Authorization", anotherToken)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
@@ -913,9 +967,13 @@ func TestPatchApplication(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.PatchApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusForbidden, rec.Code)
 
 		err = validateResponse(&ctx, requestValidationInput, rec)

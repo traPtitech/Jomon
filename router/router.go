@@ -9,6 +9,7 @@ type Service struct {
 	Administrators model.AdministratorRepository
 	Applications   model.ApplicationRepository
 	Comments       model.CommentRepository
+	Users          model.UserRepository
 }
 
 func SetRouting(e *echo.Echo) {
@@ -16,7 +17,10 @@ func SetRouting(e *echo.Echo) {
 		Administrators: model.NewAdministratorRepository(),
 		Applications:   model.NewApplicationRepository(),
 		Comments:       model.NewCommentRepository(),
+		Users:          model.NewUserRepository(),
 	}
+
+	e.Use(service.AuthUser)
 
 	apiApplications := e.Group("/applications")
 	{
@@ -47,9 +51,9 @@ func SetRouting(e *echo.Echo) {
 
 	apiUsers := e.Group("/users")
 	{
-		apiUsers.GET("", GetUsers)
-		apiUsers.GET("/me", GetMyUser)
-		apiUsers.GET("/admins", GetAdminUsers)
-		apiUsers.PUT("/admins", PutAdminUsers)
+		apiUsers.GET("", service.GetUsers)
+		apiUsers.GET("/me", service.GetMyUser)
+		apiUsers.GET("/admins", service.GetAdminUsers)
+		apiUsers.PUT("/admins", service.PutAdminUsers)
 	}
 }

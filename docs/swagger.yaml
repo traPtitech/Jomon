@@ -443,6 +443,8 @@ paths:
           description: admin以外の人
         "404":
           description: adminを変更しようとした対象者は存在しない
+        "409":
+          description: 既に指定したadminの状態である
 
 components:
   schemas:
