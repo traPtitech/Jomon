@@ -3,7 +3,7 @@
 <template>
   <div class="app-detail-log">
     <template>
-      <v-container style="max-width: 600px;">
+      <v-container style="max-width: 800px;">
         <h1>申請書ログ</h1>
         <v-timeline dense clipped>
           <Log v-for="(log, index) in this.logs" :key="index" :log="log" />
