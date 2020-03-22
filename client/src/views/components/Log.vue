@@ -136,7 +136,10 @@
   </div>
   <!-- 以下は払い戻しログ -->
   <v-timeline-item
-    v-else-if="log.log_type === `repayment`"
+    v-else-if="
+      log.log_type === `repayment` &&
+        !(log.content.repaid_at === `` || log.content.repaid_at === null)
+    "
     class="mb-4"
     color="grey"
     icon-color="grey lighten-2"
@@ -150,7 +153,7 @@
         </strong>
         が
         <strong :class="strong_text">
-          {{ log.content.repaid_by_user.trap_id }}
+          {{ log.content.repaid_to_user.trap_id }}
         </strong>
         に 払い戻し
         <span :class="larger_size">をしました。</span>
