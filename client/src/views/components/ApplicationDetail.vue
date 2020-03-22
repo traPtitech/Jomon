@@ -85,8 +85,9 @@
         }}
       </h3>
       <h3>払い戻し対象者</h3>
+      <!-- 以下のkeyは多分よろしくない -->
       <li
-        :key="user.repaid_to_user.trap_id"
+        :key="`trap_id-${user.repaid_to_user.trap_id}`"
         v-for="user in this.detail.repayment_logs"
       >
         <Icon :user="user.repaid_to_user.trap_id" :size="25" />

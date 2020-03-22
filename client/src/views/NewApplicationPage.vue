@@ -151,6 +151,7 @@
       </v-card>
       <v-dialog persistent v-model="open_dialog">
         <template v-slot:activator="{ on }">
+          <!-- todo focusしていないところのvalidateが機能していない -->
           <v-btn :disabled="!valid" @click="submit" class="ma-3" v-on="on"
             >作成する</v-btn
           >
