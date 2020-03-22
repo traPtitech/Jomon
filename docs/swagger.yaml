@@ -318,7 +318,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            $ref: "#/components/schemas/TrapID"
       responses:
         "200":
           description: OK
