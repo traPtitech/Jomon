@@ -21,8 +21,8 @@ func (s *Service) GetUsers(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	for _, user := range users {
-		user.GiveIsUserAdmin(admins)
+	for i := range users {
+		users[i].GiveIsUserAdmin(admins)
 	}
 
 	return c.JSON(http.StatusOK, users)

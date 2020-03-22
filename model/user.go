@@ -69,11 +69,7 @@ func (_ *traqRepository) sendReq(req *http.Request) ([]byte, error) {
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return body, nil
+	return ioutil.ReadAll(res.Body)
 }
 
 func (repo *userRepository) GetUsers(token string) ([]User, error) {
