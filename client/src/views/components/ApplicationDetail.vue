@@ -85,9 +85,12 @@
         }}
       </h3>
       <h3>払い戻し対象者</h3>
-      <li :key="user" v-for="user in this.detail.current_detail.repaid_to_id">
-        <Icon :user="user" :size="25" />
-        {{ user }}
+      <li
+        :key="user.repaid_to_user.trap_id"
+        v-for="user in this.detail.repayment_logs"
+      >
+        <Icon :user="user.repaid_to_user.trap_id" :size="25" />
+        {{ user.repaid_to_user.trap_id }}
       </li>
       <h3>申請書画像リスト</h3>
       <li :key="path" v-for="path in this.detail.images">

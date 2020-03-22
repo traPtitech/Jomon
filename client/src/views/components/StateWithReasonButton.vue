@@ -21,7 +21,6 @@
                   <v-text-field
                     @blur="blur"
                     ref="reason"
-                    label="変更理由"
                     :autofocus="dialog"
                     v-model="reason"
                     :rules="nullRules"
@@ -80,10 +79,15 @@ export default {
     postreason() {
       if (this.$refs.form.validate()) {
         axios
-          .post("api/applications​/{applicationId}​/states", {
-            to_state: this.props.to_state,
-            reason: this.reason
-          })
+          .put(
+            "../api/applications/" +
+              this.$store.state.application_detail_paper.application_id +
+              "/states",
+            {
+              to_state: this.to_state,
+              reason: this.reason
+            }
+          )
           .then(response => console.log(response.status));
         this.$refs.form.reset();
         this.dialog = false;

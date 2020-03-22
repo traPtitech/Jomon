@@ -36,8 +36,9 @@
                   </v-col>
                   <v-col cols="8" md="6">
                     <v-card height="100%" class="pa-2" outlined tile>
-                      <Icon :user="`series2`" :size="20" />series2
-                      <!-- todo 自分のアイコン -->
+                      <Icon :user="this.$store.state.me.trap_id" :size="20" />{{
+                        this.$store.state.me.trap_id
+                      }}
                     </v-card>
                   </v-col>
                 </v-row>
@@ -133,6 +134,7 @@
         </v-row>
         <h3 class="ml-0 mr-0">払い戻し対象者</h3>
         <v-autocomplete
+          @focus="getUsers()"
           ref="traPID"
           v-model="traPID"
           :rules="[() => !!traPID || '返金対象者は一人以上必要です']"
@@ -214,6 +216,7 @@
 <script>
 import axios from "axios";
 import Icon from "./components/Icon";
+import { mapActions } from "vuex";
 export default {
   data: () => ({
     response: {
@@ -255,13 +258,20 @@ export default {
       };
     },
     traPIDs() {
-      return this.$store.getters.userList;
+      let trap_ids = new Array();
+      for (let i = 0; i < this.$store.state.userList.length - 1; i++) {
+        trap_ids[i] = this.$store.state.userList[i].trap_id;
+      }
+      return trap_ids;
     }
   },
 
   // todo 返金対象者周りのポスト等
   // todo 画像のアップロード
   methods: {
+    ...mapActions({
+      getUsers: "getUserList"
+    }),
     submit() {
       if (this.$refs.form.validate()) {
         axios
