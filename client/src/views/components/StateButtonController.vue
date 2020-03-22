@@ -10,7 +10,8 @@ this.applicantはthis.detail.applicant.trap_idとすれば良い。この際は�
     </v-row>
   </div>
   <div v-else-if="this.detail.current_state === `accepted`">
-    未返金者: ここに未返金者リストの表示。adminはクリックして返金済みにできる
+    払い戻し完了ボタン:
+    <repaid-button />
     <!-- このリストの制御とリストのクリック先 -->
     <!-- 条件付きでsubmittedへ -->
   </div>
@@ -27,6 +28,7 @@ this.applicantはthis.detail.applicant.trap_idとすれば良い。この際は�
 <script>
 import axios from "axios";
 import WithReasonButton from "./StateWithReasonButton";
+import RepaidButton from "./RepaidButton";
 import { mapState } from "vuex";
 export default {
   data: function() {
@@ -36,7 +38,8 @@ export default {
     };
   },
   components: {
-    WithReasonButton
+    WithReasonButton,
+    RepaidButton
   },
   computed: {
     ...mapState({ detail: "application_detail_paper" })
