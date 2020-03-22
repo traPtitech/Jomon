@@ -1,5 +1,6 @@
 <!-- 申請書ページ描画画面制御 -->
 <!-- コンポーネント配置とaxiosで受け取ったjsonを分割し各コンポーネントに渡す-->
+<!-- todo 返金の操作ボタン -->
 <template>
   <div class="application-detail">
     <!-- <div>ID: {{ $route.params.id }}</div> -->
@@ -7,7 +8,7 @@
       <h3 class="ml-4">
         現在の状態:{{ returnState(this.detail.current_state) }}
       </h3>
-      <state-button-controller class="mr-4" />
+      <state-button-controller class="mr-4 ml-10" />
     </v-row>
     <application-paper />
     <application-logs />
@@ -18,7 +19,7 @@
 import ApplicationPaper from "./components/ApplicationDetail";
 import ApplicationLogs from "./components/ApplicationDetailLogs";
 import StateButtonController from "./components/StateButtonController";
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 export default {
   name: "AppDetail",
   components: {
@@ -29,7 +30,11 @@ export default {
   computed: {
     ...mapState({ detail: "application_detail_paper" })
   },
+  created() {
+    this.getApplicationDetail(this.$route.params.id);
+  },
   methods: {
+    ...mapActions(["getApplicationDetail"]),
     returnState: function(state) {
       switch (state) {
         case "submitted":

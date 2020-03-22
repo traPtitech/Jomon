@@ -3,10 +3,10 @@
 <template>
   <div class="app-detail-log">
     <template>
-      <v-container style="max-width: 600px;">
+      <v-container style="max-width: 800px;">
         <h1>申請書ログ</h1>
         <v-timeline dense clipped>
-          <Log v-for="log in this.logs" :key="log.log_type" :log="log" />
+          <Log v-for="(log, index) in this.logs" :key="index" :log="log" />
           <v-divider class="m pb-1" />
         </v-timeline>
         <NewComment />

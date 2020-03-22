@@ -7,6 +7,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/model"
 )
 
 type PostCommentRequest struct {
@@ -36,9 +37,12 @@ func (s *Service) PostComments(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	userId := "UserId"
+	user, ok := c.Get("user").(model.User)
+	if !ok || user.TrapId == "" {
+		return c.NoContent(http.StatusUnauthorized)
+	}
 
-	comment, err := s.Comments.CreateComment(applicationId, req.Comment, userId)
+	comment, err := s.Comments.CreateComment(applicationId, req.Comment, user.TrapId)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -64,8 +68,12 @@ func (s *Service) PutComments(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	userId := "UserId"
-	if comment.UserTrapID.TrapId != userId {
+	user, ok := c.Get("user").(model.User)
+	if !ok || user.TrapId == "" {
+		return c.NoContent(http.StatusUnauthorized)
+	}
+
+	if comment.UserTrapID.TrapId != user.TrapId {
 		return c.NoContent(http.StatusForbidden)
 	}
 
@@ -104,8 +112,12 @@ func (s *Service) DeleteComments(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	userId := "UserId"
-	if comment.UserTrapID.TrapId != userId {
+	user, ok := c.Get("user").(model.User)
+	if !ok || user.TrapId == "" {
+		return c.NoContent(http.StatusUnauthorized)
+	}
+
+	if comment.UserTrapID.TrapId != user.TrapId {
 		return c.NoContent(http.StatusForbidden)
 	}
 

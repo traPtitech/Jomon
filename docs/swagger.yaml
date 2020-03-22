@@ -443,6 +443,8 @@ paths:
           description: admin以外の人
         "404":
           description: adminを変更しようとした対象者は存在しない
+        "409":
+          description: 既に指定したadminの状態である
 
 components:
   schemas:
@@ -595,9 +597,12 @@ components:
       type: object
       properties:
         repaid_by_user:
-          $ref: "#/components/schemas/User"
+          allOf:
+            - $ref: "#/components/schemas/User"
+          nullable: true
         repaid_to_user:
           $ref: "#/components/schemas/User"
         repaid_at:
           type: string
+          nullable: true
           format: date-time

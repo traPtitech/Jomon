@@ -19,7 +19,7 @@ const routes = [
     component: AdminPage
   },
   {
-    path: "/applications/new",
+    path: "/applications/new/:type",
     name: "New Application Page",
     component: NewApplicationPage
   },

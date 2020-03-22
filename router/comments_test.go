@@ -91,9 +91,7 @@ func TestPostComment(t *testing.T) {
 	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplication(id, "User2", model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
 	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
 
-	adminRepMock := NewAdministratorRepositoryMock()
-
-	adminRepMock.On("GetAdministratorList").Return([]string{"User1", "User2"}, nil)
+	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
 	commentRepoMock := NewCommentRepositoryMock(t)
 
@@ -101,10 +99,13 @@ func TestPostComment(t *testing.T) {
 	commentText := "This is comment."
 	commentRepoMock.On("CreateComment", id, commentText, "UserId").Return(GenerateComment(id, commentId, "UserId", commentText), nil)
 
+	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
+
 	service := Service{
 		Administrators: adminRepMock,
 		Applications:   appRepMock,
 		Comments:       commentRepoMock,
+		Users:          userRepMock,
 	}
 
 	t.Parallel()
@@ -122,6 +123,7 @@ func TestPostComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, "/api/applications/"+id.String()+"/comments", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments")
@@ -143,10 +145,13 @@ func TestPostComment(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.PostComments(c)
-
 		asr.NoError(err)
-
 		asr.Equal(http.StatusCreated, rec.Code)
 
 		err = validateResponse(&ctx, requestValidationInput, rec)
@@ -171,6 +176,7 @@ func TestPostComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, "/api/applications/"+anotherId.String()+"/comments", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments")
@@ -192,8 +198,12 @@ func TestPostComment(t *testing.T) {
 			panic(err)
 		}
 
-		err = service.PostComments(c)
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
 
+		err = service.PostComments(c)
 		asr.NoError(err)
 
 		asr.Equal(http.StatusNotFound, rec.Code)
@@ -212,6 +222,7 @@ func TestPostComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, "/api/applications/"+id.String()+"/comments", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments")
@@ -233,10 +244,13 @@ func TestPostComment(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.PostComments(c)
-
 		asr.NoError(err)
-
 		asr.Equal(http.StatusBadRequest, rec.Code)
 	})
 }
@@ -256,9 +270,7 @@ func TestPutComment(t *testing.T) {
 	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplication(id, "User2", model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
 	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
 
-	adminRepMock := NewAdministratorRepositoryMock()
-
-	adminRepMock.On("GetAdministratorList").Return([]string{"User1", "User2"}, nil)
+	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
 	commentRepoMock := NewCommentRepositoryMock(t)
 
@@ -271,18 +283,24 @@ func TestPutComment(t *testing.T) {
 	commentRepoMock.On("PutComment", id, commentId, newCommentText).Return(GenerateComment(id, commentId, "UserId", newCommentText), nil)
 	commentRepoMock.On("PutComment", mock.Anything, mock.Anything, mock.Anything).Return(model.Comment{}, gorm.ErrRecordNotFound)
 
+	anotherToken := "AnotherToken"
+
+	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
+	userRepMock.On("GetMyUser", anotherToken).Return(model.User{TrapId: "AnotherId"}, nil)
+
+	service := Service{
+		Administrators: adminRepMock,
+		Applications:   appRepMock,
+		Comments:       commentRepoMock,
+		Users:          userRepMock,
+	}
+
 	t.Parallel()
 
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
-
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-			Comments:       commentRepoMock,
-		}
 
 		body := fmt.Sprintf(`
 		{
@@ -292,6 +310,7 @@ func TestPutComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(commentId), strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
@@ -313,10 +332,13 @@ func TestPutComment(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.PutComments(c)
-
 		asr.NoError(err)
-
 		asr.Equal(http.StatusOK, rec.Code)
 
 		err = validateResponse(&ctx, requestValidationInput, rec)
@@ -328,11 +350,6 @@ func TestPutComment(t *testing.T) {
 		e := echo.New()
 		ctx := context.TODO()
 
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-			Comments:       commentRepoMock,
-		}
 		anotherCommentId := int(randSrc.Int63())
 
 		body := fmt.Sprintf(`
@@ -343,6 +360,7 @@ func TestPutComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(anotherCommentId), strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
@@ -364,10 +382,13 @@ func TestPutComment(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.PutComments(c)
-
 		asr.NoError(err)
-
 		asr.Equal(http.StatusNotFound, rec.Code)
 	})
 
@@ -375,20 +396,6 @@ func TestPutComment(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
-
-		newCommentRepoMock := NewCommentRepositoryMock(t)
-
-		newCommentRepoMock.On("GetComment", id, commentId).Return(GenerateComment(id, commentId, "AnotherUserId", commentText), nil)
-		newCommentRepoMock.On("GetComment", mock.Anything, mock.Anything).Return(model.Comment{}, gorm.ErrRecordNotFound)
-
-		newCommentRepoMock.On("PutComment", id, commentId, newCommentText).Return(GenerateComment(id, commentId, "UserId", newCommentText), nil)
-		newCommentRepoMock.On("PutComment", mock.Anything, mock.Anything, mock.Anything).Return(model.Comment{}, gorm.ErrRecordNotFound)
-
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-			Comments:       newCommentRepoMock,
-		}
 
 		body := fmt.Sprintf(`
 		{
@@ -398,6 +405,7 @@ func TestPutComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(commentId), strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
+		req.Header.Set("Authorization", anotherToken)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
@@ -419,10 +427,13 @@ func TestPutComment(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.PutComments(c)
-
 		asr.NoError(err)
-
 		asr.Equal(http.StatusForbidden, rec.Code)
 	})
 
@@ -430,12 +441,6 @@ func TestPutComment(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
-
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-			Comments:       commentRepoMock,
-		}
 
 		body := fmt.Sprintf(`
 		{
@@ -445,6 +450,7 @@ func TestPutComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(commentId), strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
@@ -466,10 +472,13 @@ func TestPutComment(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.PutComments(c)
-
 		asr.NoError(err)
-
 		asr.Equal(http.StatusBadRequest, rec.Code)
 	})
 }
@@ -490,9 +499,7 @@ func TestDeleteComment(t *testing.T) {
 	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplication(id, "User2", model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
 	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
 
-	adminRepMock := NewAdministratorRepositoryMock()
-
-	adminRepMock.On("GetAdministratorList").Return([]string{"User1", "User2"}, nil)
+	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
 	commentRepoMock := NewCommentRepositoryMock(t)
 
@@ -504,6 +511,18 @@ func TestDeleteComment(t *testing.T) {
 	commentRepoMock.On("DeleteComment", id, commentId).Return(nil)
 	commentRepoMock.On("DeleteComment", mock.Anything, mock.Anything).Return(gorm.ErrRecordNotFound)
 
+	anotherToken := "AnotherToken"
+
+	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
+	userRepMock.On("GetMyUser", anotherToken).Return(model.User{TrapId: "AnotherId"}, nil)
+
+	service := Service{
+		Administrators: adminRepMock,
+		Applications:   appRepMock,
+		Comments:       commentRepoMock,
+		Users:          userRepMock,
+	}
+
 	t.Parallel()
 
 	t.Run("shouldSuccess", func(t *testing.T) {
@@ -511,14 +530,8 @@ func TestDeleteComment(t *testing.T) {
 		e := echo.New()
 		ctx := context.TODO()
 
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-			Comments:       commentRepoMock,
-		}
-
 		req := httptest.NewRequest(http.MethodDelete, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(commentId), nil)
-		req.Header.Set(echo.HeaderContentType, "application/json")
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
@@ -540,10 +553,13 @@ func TestDeleteComment(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.DeleteComments(c)
-
 		asr.NoError(err)
-
 		asr.Equal(http.StatusNoContent, rec.Code)
 
 		err = validateResponse(&ctx, requestValidationInput, rec)
@@ -555,15 +571,10 @@ func TestDeleteComment(t *testing.T) {
 		e := echo.New()
 		ctx := context.TODO()
 
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-			Comments:       commentRepoMock,
-		}
 		anotherCommentId := int(randSrc.Int63())
 
 		req := httptest.NewRequest(http.MethodDelete, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(anotherCommentId), nil)
-		req.Header.Set(echo.HeaderContentType, "application/json")
+		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
@@ -585,10 +596,13 @@ func TestDeleteComment(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.DeleteComments(c)
-
 		asr.NoError(err)
-
 		asr.Equal(http.StatusNotFound, rec.Code)
 	})
 
@@ -597,22 +611,8 @@ func TestDeleteComment(t *testing.T) {
 		e := echo.New()
 		ctx := context.TODO()
 
-		newCommentRepoMock := NewCommentRepositoryMock(t)
-
-		newCommentRepoMock.On("GetComment", id, commentId).Return(GenerateComment(id, commentId, "AnotherUserId", commentText), nil)
-		newCommentRepoMock.On("GetComment", mock.Anything, mock.Anything).Return(model.Comment{}, gorm.ErrRecordNotFound)
-
-		newCommentRepoMock.On("DeleteComment", id, commentId).Return(nil)
-		newCommentRepoMock.On("DeleteComment", mock.Anything, mock.Anything).Return(gorm.ErrRecordNotFound)
-
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-			Comments:       newCommentRepoMock,
-		}
-
 		req := httptest.NewRequest(http.MethodDelete, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(commentId), nil)
-		req.Header.Set(echo.HeaderContentType, "application/json")
+		req.Header.Set("Authorization", anotherToken)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
@@ -634,10 +634,13 @@ func TestDeleteComment(t *testing.T) {
 			panic(err)
 		}
 
+		c, err = service.SetMyUser(c)
+		if err != nil {
+			panic(err)
+		}
+
 		err = service.DeleteComments(c)
-
 		asr.NoError(err)
-
 		asr.Equal(http.StatusForbidden, rec.Code)
 	})
 }
