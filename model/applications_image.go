@@ -20,8 +20,8 @@ type applicationsImageRepository struct {
 	storage storagePkg.Storage
 }
 
-func newApplicationsImageRepository(storage storagePkg.Storage) applicationsImageRepository {
-	return applicationsImageRepository{storage: storage}
+func NewApplicationsImageRepository(storage storagePkg.Storage) ApplicationsImageRepository {
+	return &applicationsImageRepository{storage: storage}
 }
 
 func (repo *applicationsImageRepository) CreateApplicationsImage(applicationId uuid.UUID, src io.Reader, ext string) error {
