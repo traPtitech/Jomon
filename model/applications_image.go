@@ -6,17 +6,20 @@ import (
 	storagePkg "github.com/traPtitech/Jomon/storage"
 	"io"
 	"mime"
+	"time"
 )
 
 type ApplicationsImage struct {
 	ID            uuid.UUID `gorm:"type:char(36);primary_key"`
 	ApplicationID uuid.UUID `gorm:"type:char(36);not null"`
 	MimeType      string    `gorm:"type:text;not null" json:"-"`
+	CreatedAt     time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 }
 
 type ApplicationsImageRepository interface {
-	CreateApplicationsImage(applicationId uuid.UUID, src io.Reader, mimeType string) (uuid.UUID, error)
-	OpenApplicationsImage(id uuid.UUID) (io.ReadCloser, error)
+	CreateApplicationsImage(applicationId uuid.UUID, src io.Reader, mimeType string) (ApplicationsImage, error)
+	GetApplicationsImage(id uuid.UUID) (ApplicationsImage, error)
+	OpenApplicationsImage(appImg ApplicationsImage) (io.ReadCloser, error)
 	DeleteApplicationsImage(id uuid.UUID) error
 }
 
@@ -28,24 +31,24 @@ func NewApplicationsImageRepository(storage storagePkg.Storage) ApplicationsImag
 	return &applicationsImageRepository{storage: storage}
 }
 
-func (repo *applicationsImageRepository) CreateApplicationsImage(applicationId uuid.UUID, src io.Reader, mimeType string) (uuid.UUID, error) {
+func (repo *applicationsImageRepository) CreateApplicationsImage(applicationId uuid.UUID, src io.Reader, mimeType string) (ApplicationsImage, error) {
 	id, err := uuid.NewV4()
 	if err != nil {
-		return uuid.Nil, err
+		return ApplicationsImage{}, err
 	}
 
 	ext, err := mime.ExtensionsByType(mimeType)
 	if err != nil {
-		return uuid.Nil, err
+		return ApplicationsImage{}, err
 	} else if len(ext) == 0 {
-		return uuid.Nil, fmt.Errorf("%s is not registered", mimeType)
+		return ApplicationsImage{}, fmt.Errorf("%s is not registered", mimeType)
 	}
 
 	filename := fmt.Sprintf("%s%s", id.String(), ext[0])
 
 	err = repo.storage.Save(filename, src)
 	if err != nil {
-		return uuid.Nil, err
+		return ApplicationsImage{}, err
 	}
 
 	im := ApplicationsImage{
@@ -56,29 +59,33 @@ func (repo *applicationsImageRepository) CreateApplicationsImage(applicationId u
 
 	if err = db.Create(&im).Error; err != nil {
 		_ = repo.storage.Delete(filename)
-		return uuid.Nil, err
+		return ApplicationsImage{}, err
 	}
 
-	return id, nil
+	return im, nil
 }
 
-func (repo *applicationsImageRepository) OpenApplicationsImage(id uuid.UUID) (io.ReadCloser, error) {
+func (repo *applicationsImageRepository) GetApplicationsImage(id uuid.UUID) (ApplicationsImage, error) {
 	im := ApplicationsImage{
 		ID: id,
 	}
 
 	if err := db.First(&im).Error; err != nil {
-		return nil, err
+		return ApplicationsImage{}, err
 	}
 
-	ext, err := mime.ExtensionsByType(im.MimeType)
+	return im, nil
+}
+
+func (repo *applicationsImageRepository) OpenApplicationsImage(appImg ApplicationsImage) (io.ReadCloser, error) {
+	ext, err := mime.ExtensionsByType(appImg.MimeType)
 	if err != nil {
 		return nil, err
 	} else if len(ext) == 0 {
-		return nil, fmt.Errorf("%s is not registered", im.MimeType)
+		return nil, fmt.Errorf("%s is not registered", appImg.MimeType)
 	}
 
-	filename := fmt.Sprintf("%s%s", id.String(), ext[0])
+	filename := fmt.Sprintf("%s%s", appImg.ID.String(), ext[0])
 
 	return repo.storage.Open(filename)
 }
