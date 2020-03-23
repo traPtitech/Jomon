@@ -9,6 +9,7 @@ import (
 type ApplicationsImage struct {
 	ID            uuid.UUID `gorm:"type:char(36);primary_key"`
 	ApplicationID uuid.UUID `gorm:"type:char(36);not null"`
+	MimeType      string    `gorm:"type:text;not null" json:"-"`
 }
 
 type ApplicationsImageRepository interface {
