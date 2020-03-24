@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
-	"github.com/labstack/echo/v4"
 	"net/http/httptest"
 	"os"
 	"testing"
@@ -33,10 +32,4 @@ func validateResponse(ctx *context.Context, requestValidationInput *openapi3filt
 	responseValidationInput.SetBodyBytes(rec.Body.Bytes())
 
 	return openapi3filter.ValidateResponse(*ctx, responseValidationInput)
-}
-
-func newEcho(service Service) *echo.Echo {
-	e := echo.New()
-	e.Use(service.AuthUser)
-	return e
 }
