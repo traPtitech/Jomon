@@ -5,7 +5,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/router"
+	storagePkg "github.com/traPtitech/Jomon/storage"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -23,7 +25,44 @@ func main() {
 	e := echo.New()
 
 	e.GET("/", genRootHandler(err == nil))
-	router.SetRouting(e)
+
+	var storage storagePkg.Storage
+	if os.Getenv("OS_CONTAINER") != "" {
+		// Swiftオブジェクトストレージ
+		swift, err := storagePkg.NewSwiftStorage(
+			os.Getenv("OS_CONTAINER"),
+			os.Getenv("OS_USERNAME"),
+			os.Getenv("OS_PASSWORD"),
+			os.Getenv("OS_TENANT_NAME"),
+			os.Getenv("OS_TENANT_ID"),
+			os.Getenv("OS_AUTH_URL"),
+		)
+		if err != nil {
+			panic(err)
+		}
+		storage = &swift
+	} else {
+		// ローカルストレージ
+		dir := os.Getenv("UPLOAD_DIR")
+		if dir == "" {
+			dir = "./uploads"
+		}
+		local, err := storagePkg.NewLocalStorage(dir)
+		if err != nil {
+			panic(err)
+		}
+		storage = &local
+	}
+
+	service := router.Service{
+		Administrators: model.NewAdministratorRepository(),
+		Applications:   model.NewApplicationRepository(),
+		Comments:       model.NewCommentRepository(),
+		Images:         model.NewApplicationsImageRepository(storage),
+		Users:          model.NewUserRepository(),
+	}
+
+	router.SetRouting(e, service)
 	e.Start(":1323")
 }
 

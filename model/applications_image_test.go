@@ -134,30 +134,10 @@ func TestDeleteApplicationsImage(t *testing.T) {
 			panic(err)
 		}
 
-		err = imageRepo.DeleteApplicationsImage(im.ID)
+		err = imageRepo.DeleteApplicationsImage(im)
 		asr.NoError(err)
 
 		_, err = imageRepo.GetApplicationsImage(im.ID)
-		asr.Error(err)
-		asr.True(gorm.IsRecordNotFoundError(err))
-	})
-
-	t.Run("shouldFail", func(t *testing.T) {
-		asr := assert.New(t)
-
-		sm := new(storageMock)
-		sm.On("Delete", mock.Anything).Run(func(args mock.Arguments) {
-			asr.Fail("Delete was called")
-		})
-
-		imageRepo := NewApplicationsImageRepository(sm)
-
-		id, err := uuid.NewV4()
-		if err != nil {
-			panic(err)
-		}
-
-		err = imageRepo.DeleteApplicationsImage(id)
 		asr.Error(err)
 		asr.True(gorm.IsRecordNotFoundError(err))
 	})

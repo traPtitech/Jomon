@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -8,6 +9,18 @@ import (
 
 type Local struct {
 	localDir string
+}
+
+func NewLocalStorage(dir string) (Local, error) {
+	fi, err := os.Stat(dir)
+	if err != nil {
+		return Local{}, errors.New("dir doesn't exist")
+	}
+	if !fi.IsDir() {
+		return Local{}, errors.New("dir is not a directory")
+	}
+
+	return Local{localDir: dir}, nil
 }
 
 func (l *Local) Save(filename string, src io.Reader) error {

@@ -20,7 +20,7 @@ type ApplicationsImageRepository interface {
 	CreateApplicationsImage(applicationId uuid.UUID, src io.Reader, mimeType string) (ApplicationsImage, error)
 	GetApplicationsImage(id uuid.UUID) (ApplicationsImage, error)
 	OpenApplicationsImage(appImg ApplicationsImage) (io.ReadCloser, error)
-	DeleteApplicationsImage(id uuid.UUID) error
+	DeleteApplicationsImage(appImg ApplicationsImage) error
 }
 
 type applicationsImageRepository struct {
@@ -90,25 +90,17 @@ func (repo *applicationsImageRepository) OpenApplicationsImage(appImg Applicatio
 	return repo.storage.Open(filename)
 }
 
-func (repo *applicationsImageRepository) DeleteApplicationsImage(id uuid.UUID) error {
-	im := ApplicationsImage{
-		ID: id,
-	}
-
-	if err := db.First(&im).Error; err != nil {
-		return err
-	}
-
-	ext, err := mime.ExtensionsByType(im.MimeType)
+func (repo *applicationsImageRepository) DeleteApplicationsImage(appImg ApplicationsImage) error {
+	ext, err := mime.ExtensionsByType(appImg.MimeType)
 	if err != nil {
 		return err
 	} else if len(ext) == 0 {
-		return fmt.Errorf("%s is not registered", im.MimeType)
+		return fmt.Errorf("%s is not registered", appImg.MimeType)
 	}
 
-	filename := fmt.Sprintf("%s%s", id.String(), ext[0])
+	filename := fmt.Sprintf("%s%s", appImg.ID.String(), ext[0])
 
-	if err := db.Delete(im).Error; err != nil {
+	if err := db.Delete(appImg).Error; err != nil {
 		return err
 	}
 

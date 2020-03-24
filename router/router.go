@@ -9,17 +9,11 @@ type Service struct {
 	Administrators model.AdministratorRepository
 	Applications   model.ApplicationRepository
 	Comments       model.CommentRepository
+	Images         model.ApplicationsImageRepository
 	Users          model.UserRepository
 }
 
-func SetRouting(e *echo.Echo) {
-	service := &Service{
-		Administrators: model.NewAdministratorRepository(),
-		Applications:   model.NewApplicationRepository(),
-		Comments:       model.NewCommentRepository(),
-		Users:          model.NewUserRepository(),
-	}
-
+func SetRouting(e *echo.Echo, service Service) {
 	e.Use(service.AuthUser)
 
 	apiApplications := e.Group("/applications")
@@ -32,8 +26,8 @@ func SetRouting(e *echo.Echo) {
 
 	apiImages := e.Group("/images")
 	{
-		apiImages.GET("/:imageId", GetImages)
-		apiImages.DELETE("/:imageId", DeleteImages)
+		apiImages.GET("/:imageId", service.GetImages)
+		apiImages.DELETE("/:imageId", service.DeleteImages)
 	}
 
 	apiComments := e.Group("/applications/:applicationId/comments")
