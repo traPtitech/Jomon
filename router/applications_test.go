@@ -552,24 +552,27 @@ func TestPostApplication(t *testing.T) {
 	t.Parallel()
 
 	t.Run("shouldSuccess", func(t *testing.T) {
-		asr := assert.New(t)
-		e := echo.New()
-		ctx := context.TODO()
+		t.Parallel()
 
-		body := &bytes.Buffer{}
-		mpw := multipart.NewWriter(body)
-		if err := mpw.SetBoundary(MultipartBoundary); err != nil {
-			panic(err)
-		}
+		t.Run("singleFile", func(t *testing.T) {
+			asr := assert.New(t)
+			e := echo.New()
+			ctx := context.TODO()
 
-		part := make(textproto.MIMEHeader)
-		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
-		part.Set("Content-Type", "application/json")
-		writer, err := mpw.CreatePart(part)
-		if err != nil {
-			panic(err)
-		}
-		_, err = writer.Write([]byte(fmt.Sprintf(`
+			body := &bytes.Buffer{}
+			mpw := multipart.NewWriter(body)
+			if err := mpw.SetBoundary(MultipartBoundary); err != nil {
+				panic(err)
+			}
+
+			part := make(textproto.MIMEHeader)
+			part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
+			part.Set("Content-Type", "application/json")
+			writer, err := mpw.CreatePart(part)
+			if err != nil {
+				panic(err)
+			}
+			_, err = writer.Write([]byte(fmt.Sprintf(`
 			{
 				"type": "club",
 				"title": "%s",
@@ -580,60 +583,162 @@ func TestPostApplication(t *testing.T) {
 					"User1"
 				]
 			}
-		`, title, remarks, paidAt.Format(time.RFC3339), amount)))
-		if err != nil {
-			panic(err)
-		}
+			`, title, remarks, paidAt.Format(time.RFC3339), amount)))
+			if err != nil {
+				panic(err)
+			}
 
-		part = make(textproto.MIMEHeader)
-		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="image.png"`, "images"))
-		part.Set("Content-Type", "image/png")
-		writer, err = mpw.CreatePart(part)
-		if err != nil {
-			panic(err)
-		}
-		_, err = writer.Write([]byte(imgString))
-		if err != nil {
-			panic(err)
-		}
+			part = make(textproto.MIMEHeader)
+			part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="image.png"`, "images"))
+			part.Set("Content-Type", "image/png")
+			writer, err = mpw.CreatePart(part)
+			if err != nil {
+				panic(err)
+			}
+			_, err = writer.Write([]byte(imgString))
+			if err != nil {
+				panic(err)
+			}
 
-		if err = mpw.Close(); err != nil {
-			panic(err)
-		}
+			if err = mpw.Close(); err != nil {
+				panic(err)
+			}
 
-		req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
-		req.Header.Set("Authorization", userRepMock.token)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetPath("/applications")
+			req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
+			req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+			req.Header.Set("Authorization", userRepMock.token)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/applications")
 
-		route, pathParam, err := router.FindRoute(req.Method, req.URL)
-		if err != nil {
-			panic(err)
-		}
+			route, pathParam, err := router.FindRoute(req.Method, req.URL)
+			if err != nil {
+				panic(err)
+			}
 
-		requestValidationInput := &openapi3filter.RequestValidationInput{
-			Request:    req,
-			PathParams: pathParam,
-			Route:      route,
-		}
+			requestValidationInput := &openapi3filter.RequestValidationInput{
+				Request:    req,
+				PathParams: pathParam,
+				Route:      route,
+			}
 
-		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
+			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+				panic(err)
+			}
 
-		c, err = service.SetMyUser(c)
-		if err != nil {
-			panic(err)
-		}
+			c, err = service.SetMyUser(c)
+			if err != nil {
+				panic(err)
+			}
 
-		err = service.PostApplication(c)
-		asr.NoError(err)
-		asr.Equal(http.StatusCreated, rec.Code)
+			err = service.PostApplication(c)
+			asr.NoError(err)
+			asr.Equal(http.StatusCreated, rec.Code)
 
-		err = validateResponse(&ctx, requestValidationInput, rec)
-		asr.NoError(err)
+			err = validateResponse(&ctx, requestValidationInput, rec)
+			asr.NoError(err)
+		})
+
+		t.Run("multipleFiles", func(t *testing.T) {
+			asr := assert.New(t)
+			e := echo.New()
+			ctx := context.TODO()
+
+			body := &bytes.Buffer{}
+			mpw := multipart.NewWriter(body)
+			if err := mpw.SetBoundary(MultipartBoundary); err != nil {
+				panic(err)
+			}
+
+			part := make(textproto.MIMEHeader)
+			part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
+			part.Set("Content-Type", "application/json")
+			writer, err := mpw.CreatePart(part)
+			if err != nil {
+				panic(err)
+			}
+			_, err = writer.Write([]byte(fmt.Sprintf(`
+			{
+				"type": "club",
+				"title": "%s",
+				"remarks": "%s",
+				"paid_at": "%s",
+				"amount": %d,
+				"repaid_to_id": [
+					"User1"
+				]
+			}
+			`, title, remarks, paidAt.Format(time.RFC3339), amount)))
+			if err != nil {
+				panic(err)
+			}
+
+			part = make(textproto.MIMEHeader)
+			part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="image1.png"`, "images"))
+			part.Set("Content-Type", "image/png")
+			writer, err = mpw.CreatePart(part)
+			if err != nil {
+				panic(err)
+			}
+			_, err = writer.Write([]byte(imgString))
+			if err != nil {
+				panic(err)
+			}
+
+			if err = mpw.Close(); err != nil {
+				panic(err)
+			}
+
+			part = make(textproto.MIMEHeader)
+			part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="image2.png"`, "images"))
+			part.Set("Content-Type", "image/png")
+			writer, err = mpw.CreatePart(part)
+			if err != nil {
+				panic(err)
+			}
+			_, err = writer.Write([]byte(imgString))
+			if err != nil {
+				panic(err)
+			}
+
+			if err = mpw.Close(); err != nil {
+				panic(err)
+			}
+
+			req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
+			req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+			req.Header.Set("Authorization", userRepMock.token)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/applications")
+
+			route, pathParam, err := router.FindRoute(req.Method, req.URL)
+			if err != nil {
+				panic(err)
+			}
+
+			requestValidationInput := &openapi3filter.RequestValidationInput{
+				Request:    req,
+				PathParams: pathParam,
+				Route:      route,
+			}
+
+			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+				panic(err)
+			}
+
+			c, err = service.SetMyUser(c)
+			if err != nil {
+				panic(err)
+			}
+
+			err = service.PostApplication(c)
+			asr.NoError(err)
+			asr.Equal(http.StatusCreated, rec.Code)
+
+			err = validateResponse(&ctx, requestValidationInput, rec)
+			asr.NoError(err)
+		})
 	})
 
 	t.Run("shouldFail", func(t *testing.T) {
