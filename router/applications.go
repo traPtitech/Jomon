@@ -208,6 +208,11 @@ func (s *Service) PatchApplication(c echo.Context) error {
 	}
 
 	app, err := s.Applications.GetApplication(applicationId, true)
+	if gorm.IsRecordNotFoundError(err) {
+		return c.NoContent(http.StatusNotFound)
+	} else if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
 
 	user, ok := c.Get("user").(model.User)
 	if !ok || user.TrapId == "" {
