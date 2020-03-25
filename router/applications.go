@@ -203,7 +203,7 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	if req.Type == nil && req.Title == "" && req.Remarks == "" && req.Amount == nil && req.PaidAt == nil && (len(req.RepaidToId) == 0) {
+	if req.Type == nil && req.Title == "" && req.Remarks == "" && req.Amount == nil && req.PaidAt == nil && (len(req.RepaidToId) == 0) && (len(form.File["images"]) == 0) {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
