@@ -12,6 +12,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+var acceptedMimeTypes = map[string]bool{
+	"image/jpeg": true,
+	"image/png":  true,
+	"image/gif":  true,
+	"image/bmp":  true,
+}
+
 type GetApplicationsListQuery struct {
 	Sort           string `query:"sort"`
 	CurrentState   string `query:"current_state"`
@@ -114,7 +121,12 @@ func (s *Service) GetApplication(c echo.Context) error {
 }
 
 func (s *Service) PostApplication(c echo.Context) error {
-	details := c.FormValue("details")
+	form, err := c.MultipartForm()
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	details := form.Value["details"][0]
 	var req PostApplicationRequest
 	if err := json.Unmarshal([]byte(details), &req); err != nil {
 		// TODO more information
@@ -135,6 +147,21 @@ func (s *Service) PostApplication(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
+	images := form.File["images"]
+	for _, file := range images {
+		mimeType := file.Header.Get("Content-Type")
+		src, err := file.Open()
+		if err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
+		defer src.Close()
+
+		_, err = s.Images.CreateApplicationsImage(id, src, mimeType)
+		if err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
+	}
+
 	app, err := s.Applications.GetApplication(id, true)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
@@ -146,8 +173,6 @@ func (s *Service) PostApplication(c echo.Context) error {
 	}
 	app.GiveIsUserAdmin(admins)
 
-	// TODO Handle image files
-
 	return c.JSON(http.StatusCreated, app)
 }
 
@@ -157,12 +182,17 @@ type PatchErrorMessage struct {
 }
 
 func (s *Service) PatchApplication(c echo.Context) error {
+	form, err := c.MultipartForm()
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
 	applicationId := uuid.FromStringOrNil(c.Param("applicationId"))
 	if applicationId == uuid.Nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	details := c.FormValue("details")
+	details := form.Value["details"][0]
 	var req PostApplicationRequest
 	if err := json.Unmarshal([]byte(details), &req); err != nil {
 		// TODO
@@ -200,6 +230,21 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
+	images := form.File["images"]
+	for _, file := range images {
+		mimeType := file.Header.Get("Content-Type")
+		src, err := file.Open()
+		if err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
+		defer src.Close()
+
+		_, err = s.Images.CreateApplicationsImage(applicationId, src, mimeType)
+		if err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
+	}
+
 	app, err = s.Applications.GetApplication(applicationId, true)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
@@ -210,8 +255,6 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	app.GiveIsUserAdmin(admins)
-
-	// TODO Handle image files
 
 	return c.JSON(http.StatusOK, &app)
 }

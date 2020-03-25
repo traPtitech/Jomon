@@ -1,6 +1,8 @@
 package model
 
 import (
+	"github.com/stretchr/testify/mock"
+	"strings"
 	"testing"
 	"time"
 
@@ -32,6 +34,11 @@ func TestBuildApplication(t *testing.T) {
 func TestGetApplication(t *testing.T) {
 	t.Parallel()
 
+	sm := new(storageMock)
+	sm.On("Save", mock.Anything, mock.Anything).Return(nil)
+
+	imageRepo := NewApplicationsImageRepository(sm)
+
 	t.Run("shouldSuccess?giveAdmin=true&preload=true", func(t *testing.T) {
 		asr := assert.New(t)
 
@@ -43,6 +50,8 @@ func TestGetApplication(t *testing.T) {
 		}
 
 		comment, err := commentRepo.CreateComment(appId, "This is comment.", user)
+
+		img, err := imageRepo.CreateApplicationsImage(appId, strings.NewReader("TestData"), "image/png")
 
 		app, err := repo.GetApplication(appId, true)
 
@@ -56,6 +65,11 @@ func TestGetApplication(t *testing.T) {
 		asr.Len(app.StatesLogs, 1)
 		asr.Equal(app.LatestStatesLog, app.StatesLogs[0])
 		asr.Len(app.RepayUsers, 1)
+		asr.Len(app.ApplicationsImages, 1)
+
+		asr.Equal(img.ID, app.ApplicationsImages[0].ID)
+		asr.Equal(img.MimeType, app.ApplicationsImages[0].MimeType)
+		asr.WithinDuration(img.CreatedAt, app.ApplicationsImages[0].CreatedAt, 1*time.Second)
 
 		asr.Equal(comment.ID, app.Comments[0].ID)
 		asr.Equal(comment.Comment, app.Comments[0].Comment)

@@ -523,22 +523,29 @@ func TestPostApplication(t *testing.T) {
 	remarks := "〇〇駅から〇〇駅への移動"
 	amount := 1000
 	paidAt := time.Now().Round(time.Second)
+	imgString := "SampleData"
 
 	id, err := uuid.NewV4()
 	if err != nil {
 		panic(err)
 	}
 
-	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplication(id, "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, paidAt), nil)
+	sampleApp := GenerateApplication(id, "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, paidAt)
+
+	appRepMock.On("GetApplication", id, mock.Anything).Return(sampleApp, nil)
 	appRepMock.On("BuildApplication", "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, mock.Anything, []string{"User1"}).Return(id, nil)
 
 	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
+
+	imageRepMock := new(applicationsImageRepositoryMock)
+	imageRepMock.On("CreateApplicationsImage", sampleApp.ID, mock.Anything, "image/png").Return(model.ApplicationsImage{}, nil)
 
 	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
 		Applications:   appRepMock,
+		Images:         imageRepMock,
 		Users:          userRepMock,
 	}
 
@@ -574,6 +581,18 @@ func TestPostApplication(t *testing.T) {
 				]
 			}
 		`, title, remarks, paidAt.Format(time.RFC3339), amount)))
+		if err != nil {
+			panic(err)
+		}
+
+		part = make(textproto.MIMEHeader)
+		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="image.png"`, "images"))
+		part.Set("Content-Type", "image/png")
+		writer, err = mpw.CreatePart(part)
+		if err != nil {
+			panic(err)
+		}
+		_, err = writer.Write([]byte(imgString))
 		if err != nil {
 			panic(err)
 		}
@@ -695,6 +714,7 @@ func TestPatchApplication(t *testing.T) {
 	remarks := "〇〇駅から〇〇駅への移動"
 	amount := 1000
 	paidAt := time.Now().Round(time.Second)
+	imgString := "SampleData"
 
 	id, err := uuid.NewV4()
 	if err != nil {
@@ -712,6 +732,9 @@ func TestPatchApplication(t *testing.T) {
 	appRepMock.On("PatchApplication", id, mock.Anything, &model.ApplicationType{Type: model.Contest}, "", "", (*int)(nil), mock.Anything, ([]string)(nil)).Return(nil)
 	appRepMock.On("PatchApplication", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(gorm.ErrRecordNotFound)
 
+	imageRepMock := new(applicationsImageRepositoryMock)
+	imageRepMock.On("CreateApplicationsImage", id, mock.Anything, "image/png").Return(model.ApplicationsImage{}, nil)
+
 	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
 	userRepMock := NewUserRepositoryMock(t, userId, adminUserId)
@@ -720,6 +743,7 @@ func TestPatchApplication(t *testing.T) {
 	service := Service{
 		Administrators: adminRepMock,
 		Applications:   appRepMock,
+		Images:         imageRepMock,
 		Users:          userRepMock,
 	}
 
@@ -744,6 +768,18 @@ func TestPatchApplication(t *testing.T) {
 			panic(err)
 		}
 		_, err = writer.Write([]byte(`{"type": "contest"}`))
+		if err != nil {
+			panic(err)
+		}
+
+		part = make(textproto.MIMEHeader)
+		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="image.png"`, "images"))
+		part.Set("Content-Type", "image/png")
+		writer, err = mpw.CreatePart(part)
+		if err != nil {
+			panic(err)
+		}
+		_, err = writer.Write([]byte(imgString))
 		if err != nil {
 			panic(err)
 		}
