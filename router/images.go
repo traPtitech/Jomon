@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/traPtitech/Jomon/model"
@@ -73,7 +72,6 @@ func (s *Service) DeleteImages(c echo.Context) error {
 
 	user, ok := c.Get("user").(model.User)
 	if !ok || user.TrapId == "" {
-		fmt.Printf("AAAAAAAAAAAAAa\n\n")
 		return c.NoContent(http.StatusUnauthorized)
 	}
 
