@@ -20,6 +20,8 @@ func TestMain(m *testing.M) {
 
 func setRouter() {
 	openapi3.DefineStringFormat("uuid", openapi3.FormatOfStringForUUIDOfRFC4122)
+	openapi3filter.RegisterBodyDecoder("image/png", openapi3filter.FileBodyDecoder)
+
 	router = openapi3filter.NewRouter().WithSwaggerFromFile("../docs/swagger.yaml")
 }
 
