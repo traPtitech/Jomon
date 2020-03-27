@@ -9,6 +9,16 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+type StateRepository interface {
+	createStatesLog(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapId string) (StatesLog, error)
+}
+
+type stateRepository struct{}
+
+func NewStateRepository() StateRepository {
+	return &applicationRepository{}
+}
+
 const (
 	Submitted   int = 1
 	FixRequired int = 2
