@@ -2,7 +2,6 @@ package router
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/jinzhu/gorm"
 	"github.com/gofrs/uuid"
@@ -11,55 +10,102 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type StatesLog struct {
-	ID               int       `gorm:"type:int(11) AUTO_INCREMENT;primary_key" json:"-"`
-	ApplicationID    uuid.UUID `gorm:"type:char(36);not null" json:"-"`
-	UpdateUserTrapID model.User      `gorm:"embedded;embedded_prefix:update_user_" json:"update_user"`
-	ToState          model.StateType `gorm:"embedded" json:"to_state"`
-	Reason           string    `gorm:"type:text;not null" json:"reason"`
-	CreatedAt        time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
-}
-
-type ChangeState struct {
+type PutState struct {
 	ToState 		model.StateType `gorm:"embedded" json:"to_state"`
 	Reason 			string `gorm:"type:text;not null" json:"reason"`
-}
-
-type ReturnState struct {
-	User			model.User `gorm:"embedded;embedded_prefix:user" json:"user"`
-	UpdatedAt 		time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
-	CurrentState 	model.StateType `gorm:"embedded" json:"current_state"`
-	PastState 		model.StateType `gorm:"embedded" json:"past_state"`
-}
-
-type DebugState struct {
-	CurrentState model.StateType `gorm:"embedded" json:"current_state"`
-	ToState model.StateType `gorm:"embedded" json:"to_state"`
 }
 
 func (s *Service) PutStates(c echo.Context) error {
 	applicationId := uuid.FromStringOrNil(c.Param("applicationId"))
 	if applicationId == uuid.Nil {
 		return c.NoContent(http.StatusBadRequest)
-	} // applicationIdがとれた
-	application, err := s.Applications.GetApplication(applicationId, true)
-	if gorm.IsRecordNotFoundError(err) {
-		return c.NoContent(http.StatusNotFound)
-	} else if err != nil {
+	}
+
+	application, err := s.Applications.GetApplication(applicationId, false)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.NoContent(http.StatusNotFound)
+		} else {
+			return c.NoContent(http.StatusBadRequest)
+		}
+	}
+
+	user, ok := c.Get("user").(model.User)
+	if !ok || user.TrapId == "" {
+		return c.NoContent(http.StatusUnauthorized)
+	}
+
+	var sta PutState
+	if err := c.Bind(sta); err != nil{
+		return c.NoContent(http.StatusBadRequest)
+	}
+	if sta.Reason == "" {
+		if IsNoReasonState(sta.ToState, application.LatestState) {
+			return c.NoContent(http.StatusBadRequest)
+		}
+	}
+
+	if user == application.CreateUserTrapID {
+		if IsCreatorState(sta.ToState, application.LatestState) {
+			return c.NoContent(http.StatusBadRequest)
+		}
+	}
+
+	admin, err := s.Administrators.IsAdmin(user.TrapId)
+	if err != nil{
+		return c.NoContent(http.StatusBadRequest)
+	}
+	if admin {
+		if IsAdminState(sta.ToState, application.LatestState) {
+			return c.NoContent(http.StatusBadRequest)
+		}
+	}
+
+	state, err := s.States.CreateStatesLog(applicationId, user.TrapId, sta.Reason, sta.ToState)
+	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
-	currentState := application.LatestStatesLog.ToState
-	updateState := new(ChangeState)
-	_err := c.Bind(updateState)
-	if _err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+
+	return c.JSON(http.StatusOK, state)
+}
+
+func IsNoReasonState(toState model.StateType, currentState model.StateType) bool {
+	if (toState == model.StateType{Type: 2}) && (currentState == model.StateType{Type: 1}) {
+		return true
 	}
-	toState := updateState.ToState
-	debugState := DebugState{
-		CurrentState: currentState,
-		ToState: toState,
+	if (toState == model.StateType{Type: 5}) && (currentState == model.StateType{Type: 1}) {
+		return true
 	}
-	return c.JSON(http.StatusOK, debugState)
+	if (toState == model.StateType{Type: 1}) && (currentState == model.StateType{Type: 3}) {
+		return true
+	}
+	return false
+}
+
+func IsCreatorState(toState model.StateType, currentState model.StateType) bool {
+	if (toState == model.StateType{Type: 1}) && (currentState == model.StateType{Type: 2}) {
+		return false
+	}
+	return true
+}
+
+func IsAdminState(toState model.StateType, currentState model.StateType) bool {
+	if (toState == model.StateType{Type: 5}) && (currentState == model.StateType{Type: 1}) {
+		return false
+	}
+	if (toState == model.StateType{Type: 2}) && (currentState == model.StateType{Type: 1}) {
+		return false
+	}
+	if (toState == model.StateType{Type: 1}) && (currentState == model.StateType{Type: 2}) {
+		return false
+	}
+	if (toState == model.StateType{Type: 3}) && (currentState == model.StateType{Type: 1}) {
+		return false
+	}
+	if (toState == model.StateType{Type: 1}) && (currentState == model.StateType{Type: 3}) {
+		return false
+	}
+	return true
 }
 
 func (s *Service) PutRepaidStates(c echo.Context) error {

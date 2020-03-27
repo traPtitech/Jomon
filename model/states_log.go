@@ -10,13 +10,13 @@ import (
 )
 
 type StateRepository interface {
-	createStatesLog(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapId string) (StatesLog, error)
+	CreateStatesLog(applicationId uuid.UUID, updateUserTrapId string, reason string, toState StateType) (StatesLog, error)
 }
 
 type stateRepository struct{}
 
 func NewStateRepository() StateRepository {
-	return &applicationRepository{}
+	return &stateRepository{}
 }
 
 const (
@@ -83,6 +83,25 @@ func (st *StatesLog) GiveIsUserAdmin(admins []string) {
 	}
 
 	st.UpdateUserTrapID.GiveIsUserAdmin(admins)
+}
+
+func (_ *stateRepository) CreateStatesLog(applicationId uuid.UUID, updateUserTrapId string, reason string, toState StateType) (StatesLog, error) {
+	log := StatesLog{
+		ApplicationID: applicationId,
+		UpdateUserTrapID: User{
+			TrapId: updateUserTrapId,
+		},
+		ToState: toState,
+		Reason:  reason,
+	}
+
+	err := db.Create(&log).Error
+
+	if err != nil {
+		return StatesLog{}, err
+	}
+
+	return log, nil
 }
 
 func (_ *applicationRepository) createStatesLog(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapId string) (StatesLog, error) {
