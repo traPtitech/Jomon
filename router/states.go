@@ -12,20 +12,20 @@ import (
 )
 
 type PutState struct {
-	ToState 		model.StateType `gorm:"embedded" json:"to_state"`
-	Reason 			string `gorm:"type:text;not null" json:"reason"`
+	ToState 		model.StateType `json:"to_state"`
+	Reason 			string `json:"reason"`
 }
 
 type SuccessState struct {
-	User model.User `gorm:"embedded" json:"user"`
-	UpdatedAt time.Time `gorm:"embedded" json:"updated_at"`
-	CurrentState model.StateType `gorm:"embedded" json:"current_state"`
-	PastState model.StateType `gorm:"embedded" json:"past_state"`
+	User model.User `json:"user"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CurrentState model.StateType `json:"current_state"`
+	PastState model.StateType `json:"past_state"`
 }
 
 type ErrorState struct {
-	CurrentState 	model.StateType `gorm:"embedded" json:"current_state"`
-	ToState 		model.StateType `gorm:"embedded" json:"to_state"`
+	CurrentState 	model.StateType `json:"current_state"`
+	ToState 		model.StateType `json:"to_state"`
 }
 
 func (s *Service) PutStates(c echo.Context) error {
@@ -36,10 +36,10 @@ func (s *Service) PutStates(c echo.Context) error {
 
 	application, err := s.Applications.GetApplication(applicationId, false)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if gorm.IsRecordNotFoundError(err) {
 			return c.NoContent(http.StatusNotFound)
 		} else {
-			return c.NoContent(http.StatusBadRequest)
+			return c.NoContent(http.StatusInternalServerError)
 		}
 	}
 
@@ -49,7 +49,7 @@ func (s *Service) PutStates(c echo.Context) error {
 	}
 
 	var sta PutState
-	if err := c.Bind(sta); err != nil{
+	if err := c.Bind(&sta); err != nil{
 		return c.NoContent(http.StatusBadRequest)
 	}
 
@@ -146,7 +146,7 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 
 	application, err := s.Applications.GetApplication(applicationId, false)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if gorm.IsRecordNotFoundError(err) {
 			return c.NoContent(http.StatusNotFound)
 		} else {
 			return c.NoContent(http.StatusBadRequest)
