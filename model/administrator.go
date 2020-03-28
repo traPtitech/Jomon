@@ -20,9 +20,9 @@ func NewAdministratorRepository() AdministratorRepository {
 }
 
 func (_ administratorRepository) IsAdmin(userId string) (bool, error) {
-	var tmp *Administrator
-	err := db.Where(&Administrator{TrapID: userId}).First(tmp).Error
-	if err != nil {
+	ad := &Administrator{TrapID: userId}
+	err := db.First(ad).Error
+	if err == nil {
 		return true, nil
 	} else if gorm.IsRecordNotFoundError(err) {
 		return false, nil
