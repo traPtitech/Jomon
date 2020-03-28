@@ -79,6 +79,12 @@ type ApplicationRepository interface {
 		paidAt *time.Time,
 		repayUsers []string,
 	) error
+	UpdateStatesLog(
+		applicationId uuid.UUID,
+		updateUserTrapId string,
+		reason string,
+		toState StateType,
+	) (StatesLog, error)
 }
 
 type applicationRepository struct{}

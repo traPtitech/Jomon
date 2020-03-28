@@ -9,16 +9,6 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-type StateRepository interface {
-	CreateStatesLog(applicationId uuid.UUID, updateUserTrapId string, reason string, toState StateType) (StatesLog, error)
-}
-
-type stateRepository struct{}
-
-func NewStateRepository() StateRepository {
-	return &stateRepository{}
-}
-
 const (
 	Submitted   int = 1
 	FixRequired int = 2
@@ -85,7 +75,7 @@ func (st *StatesLog) GiveIsUserAdmin(admins []string) {
 	st.UpdateUserTrapID.GiveIsUserAdmin(admins)
 }
 
-func (_ *stateRepository) CreateStatesLog(applicationId uuid.UUID, updateUserTrapId string, reason string, toState StateType) (StatesLog, error) {
+func (_ *applicationRepository) UpdateStatesLog(applicationId uuid.UUID, updateUserTrapId string, reason string, toState StateType) (StatesLog, error) {
 	log := StatesLog{
 		ApplicationID: applicationId,
 		UpdateUserTrapID: User{
@@ -94,18 +84,16 @@ func (_ *stateRepository) CreateStatesLog(applicationId uuid.UUID, updateUserTra
 		ToState: toState,
 		Reason:  reason,
 	}
+	err := db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&log).Error; err != nil {
+			return err
+		}
 
-	err := db.Create(&log).Error
-
-	if err != nil {
-		return StatesLog{}, err
-	}
-
-	if err := db.Transaction(func(tx *gorm.DB) error {
 		return tx.Model(&Application{ID: applicationId}).Updates(Application{
 			StatesLogsID: log.ID,
 		}).Error
-	}); err != nil {
+	})
+	if err != nil {
 		return StatesLog{}, err
 	}
 

@@ -59,28 +59,28 @@ func (s *Service) PutStates(c echo.Context) error {
 	}
 
 	if sta.Reason == "" {
-		if IsNoReasonState(sta.ToState, application.LatestState) {
+		if IsAbleNoReasonChangeState(sta.ToState, application.LatestState) {
 			return c.JSON(http.StatusBadRequest, errsta)
 		}
 	}
 
 	if user == application.CreateUserTrapID {
-		if IsCreatorState(sta.ToState, application.LatestState) {
+		if IsAbleCreatorChangeState(sta.ToState, application.LatestState) {
 			return c.JSON(http.StatusBadRequest, errsta)
 		}
 	}
 
 	admin, err := s.Administrators.IsAdmin(user.TrapId)
 	if err != nil{
-		return c.NoContent(http.StatusBadRequest)
+		return c.NoContent(http.StatusInternalServerError)
 	}
 	if admin {
-		if IsAdminState(sta.ToState, application.LatestState) {
+		if IsAbleAdminChangeState(sta.ToState, application.LatestState) {
 			return c.JSON(http.StatusBadRequest, errsta)
 		}
 	}
 	
-	state, err := s.States.CreateStatesLog(applicationId, user.TrapId, sta.Reason, sta.ToState)
+	state, err := s.Applications.UpdateStatesLog(applicationId, user.TrapId, sta.Reason, sta.ToState)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -95,47 +95,78 @@ func (s *Service) PutStates(c echo.Context) error {
 	return c.JSON(http.StatusOK, sucsta)
 }
 
-func IsNoReasonState(toState model.StateType, currentState model.StateType) bool {
-	if (toState == model.StateType{Type: 2}) && (currentState == model.StateType{Type: 1}) {
+func IsAbleNoReasonChangeState(toState model.StateType, currentState model.StateType) bool {
+	if (toState == model.StateType{Type: model.FixRequired}) && (currentState == model.StateType{Type: model.Submitted}) {
 		return true
 	}
-	if (toState == model.StateType{Type: 5}) && (currentState == model.StateType{Type: 1}) {
+	if (toState == model.StateType{Type: model.Rejected}) && (currentState == model.StateType{Type: model.Submitted}) {
 		return true
 	}
-	if (toState == model.StateType{Type: 1}) && (currentState == model.StateType{Type: 3}) {
+	if (toState == model.StateType{Type: model.Submitted}) && (currentState == model.StateType{Type: model.Accepted}) {
 		return true
 	}
 	return false
 }
-
-func IsCreatorState(toState model.StateType, currentState model.StateType) bool {
-	if (toState == model.StateType{Type: 1}) && (currentState == model.StateType{Type: 2}) {
+func IsAbleCreatorChangeState(toState model.StateType, currentState model.StateType) bool {
+	if (toState == model.StateType{Type: model.Submitted}) && (currentState == model.StateType{Type: model.FixRequired}) {
 		return false
 	}
 	return true
 }
 
-func IsAdminState(toState model.StateType, currentState model.StateType) bool {
-	if (toState == model.StateType{Type: 5}) && (currentState == model.StateType{Type: 1}) {
+func IsAbleAdminChangeState(toState model.StateType, currentState model.StateType) bool {
+	if (toState == model.StateType{Type: model.Rejected}) && (currentState == model.StateType{Type: model.Submitted}) {
 		return false
 	}
-	if (toState == model.StateType{Type: 2}) && (currentState == model.StateType{Type: 1}) {
+	if (toState == model.StateType{Type: model.FixRequired}) && (currentState == model.StateType{Type: model.Submitted}) {
 		return false
 	}
-	if (toState == model.StateType{Type: 1}) && (currentState == model.StateType{Type: 2}) {
+	if (toState == model.StateType{Type: model.Submitted}) && (currentState == model.StateType{Type: model.FixRequired}) {
 		return false
 	}
-	if (toState == model.StateType{Type: 3}) && (currentState == model.StateType{Type: 1}) {
+	if (toState == model.StateType{Type: model.Accepted}) && (currentState == model.StateType{Type: model.Submitted}) {
 		return false
 	}
-	if (toState == model.StateType{Type: 1}) && (currentState == model.StateType{Type: 3}) {
+	if (toState == model.StateType{Type: model.Submitted}) && (currentState == model.StateType{Type: model.Accepted}) {
 		return false
 	}
 	return true
 }
 
 func (s *Service) PutRepaidStates(c echo.Context) error {
-	// some program
+	applicationId := uuid.FromStringOrNil(c.Param("applicationId"))
+	if applicationId == uuid.Nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	repaidToId := c.Param("repaidToId")
+	if repaidToId == "" {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	application, err := s.Applications.GetApplication(applicationId, false)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.NoContent(http.StatusNotFound)
+		} else {
+			return c.NoContent(http.StatusBadRequest)
+		}
+	}
+
+	user, ok := c.Get("user").(model.User)
+	if !ok || user.TrapId == "" {
+		return c.NoContent(http.StatusUnauthorized)
+	}
+
+
+	admin, err := s.Administrators.IsAdmin(user.TrapId)
+	if err != nil{
+		return c.NoContent(http.StatusBadRequest)
+	}
+	if (!admin) || (application.LatestState != model.StateType{Type: model.Accepted}) {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
 	c.Response().Header().Set(echo.HeaderContentType, "application/json")
 	return c.String(http.StatusOK, "PutRepaidStates")
 }

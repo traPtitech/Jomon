@@ -9,7 +9,6 @@ type Service struct {
 	Administrators model.AdministratorRepository
 	Applications   model.ApplicationRepository
 	Comments       model.CommentRepository
-	States         model.StateRepository
 	Users          model.UserRepository
 }
 
@@ -18,7 +17,6 @@ func SetRouting(e *echo.Echo) {
 		Administrators: model.NewAdministratorRepository(),
 		Applications:   model.NewApplicationRepository(),
 		Comments:       model.NewCommentRepository(),
-		States: 		model.NewStateRepository(),
 		Users:          model.NewUserRepository(),
 	}
 
