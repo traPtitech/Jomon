@@ -121,7 +121,7 @@ export default {
     };
   },
   created() {
-    this.getApplicationList();
+    this.getApplicationList({});
     this.show = this.defaultShow();
   },
   components: {
