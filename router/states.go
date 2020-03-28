@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	"github.com/gofrs/uuid"
@@ -13,6 +14,18 @@ import (
 type PutState struct {
 	ToState 		model.StateType `gorm:"embedded" json:"to_state"`
 	Reason 			string `gorm:"type:text;not null" json:"reason"`
+}
+
+type SuccessState struct {
+	User model.User `gorm:"embedded" json:"user"`
+	UpdatedAt time.Time `gorm:"embedded" json:"updated_at"`
+	CurrentState model.StateType `gorm:"embedded" json:"current_state"`
+	PastState model.StateType `gorm:"embedded" json:"past_state"`
+}
+
+type ErrorState struct {
+	CurrentState 	model.StateType `gorm:"embedded" json:"current_state"`
+	ToState 		model.StateType `gorm:"embedded" json:"to_state"`
 }
 
 func (s *Service) PutStates(c echo.Context) error {
@@ -39,15 +52,21 @@ func (s *Service) PutStates(c echo.Context) error {
 	if err := c.Bind(sta); err != nil{
 		return c.NoContent(http.StatusBadRequest)
 	}
+
+	errsta := &ErrorState{
+		CurrentState: application.LatestState,
+		ToState: sta.ToState,
+	}
+
 	if sta.Reason == "" {
 		if IsNoReasonState(sta.ToState, application.LatestState) {
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusBadRequest, errsta)
 		}
 	}
 
 	if user == application.CreateUserTrapID {
 		if IsCreatorState(sta.ToState, application.LatestState) {
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusBadRequest, errsta)
 		}
 	}
 
@@ -57,16 +76,23 @@ func (s *Service) PutStates(c echo.Context) error {
 	}
 	if admin {
 		if IsAdminState(sta.ToState, application.LatestState) {
-			return c.NoContent(http.StatusBadRequest)
+			return c.JSON(http.StatusBadRequest, errsta)
 		}
 	}
-
+	
 	state, err := s.States.CreateStatesLog(applicationId, user.TrapId, sta.Reason, sta.ToState)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	return c.JSON(http.StatusOK, state)
+	sucsta := &SuccessState{
+		User: user,
+		UpdatedAt: state.CreatedAt,
+		CurrentState: state.ToState,
+		PastState: application.LatestState,
+	}
+
+	return c.JSON(http.StatusOK, sucsta)
 }
 
 func IsNoReasonState(toState model.StateType, currentState model.StateType) bool {

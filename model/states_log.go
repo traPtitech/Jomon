@@ -101,6 +101,14 @@ func (_ *stateRepository) CreateStatesLog(applicationId uuid.UUID, updateUserTra
 		return StatesLog{}, err
 	}
 
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		return tx.Model(&Application{ID: applicationId}).Updates(Application{
+			StatesLogsID: log.ID,
+		}).Error
+	}); err != nil {
+		return StatesLog{}, err
+	}
+
 	return log, nil
 }
 
