@@ -304,7 +304,7 @@ paths:
           description: 指定された申請書はない。
   "/applications/{applicationId}/states/repaid/{repaidToId}":
     put:
-      description: 指定した申請書、支払い対象者についての返金状態を変更する。ただし操作できるのはadminかつstateが"accepted"の時のみ。db上では全員に返却されたときに「2(accepted)から3(fully_repaid)」の操作を行う。
+      description: 指定した申請書、支払い対象者についての返金状態を変更する。ただし操作できるのはadminかつstateが"accepted"の時のみ。db上では全員に返却されたときに「3(accepted)から4(fully_repaid)」の操作を行う。
       tags:
         - States
       parameters:
