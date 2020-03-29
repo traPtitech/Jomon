@@ -14,43 +14,58 @@
               </v-btn>
             </v-card-title>
             <v-card-text v-show="show" style="background:white" class="pt-4">
-              <v-row>
-                <v-btn>更新</v-btn>
-                <v-btn>条件削除</v-btn>
-              </v-row>
-              <v-row>
-                <v-col cols="5">
-                  <v-text-field placeholder="2019/01/01"></v-text-field>
-                </v-col>
-                <v-col cols="2">
-                  <v-text-field placeholder="～" disabled></v-text-field>
-                </v-col>
-                <v-col cols="5">
-                  <v-text-field placeholder="2019/01/01"></v-text-field>
-                </v-col>
-              </v-row>
-              <v-text-field placeholder="2020" label="年度"></v-text-field>
-              <v-select
-                :items="['', 'club', 'contest', 'event', 'public']"
-                label="申請書タイプ"
-              ></v-select>
-              <v-select
-                :items="[
-                  'submitted',
-                  'rejected',
-                  'fix_required',
-                  'accepted',
-                  'fully_repaid'
-                ]"
-                label="現在の状態"
-              ></v-select>
-              <v-autocomplete
-                :items="userList"
-                label="申請者"
-                item-text="trap_id"
-                item-value="trap_id"
-                multiple
-              ></v-autocomplete>
+              <v-form>
+                <v-row>
+                  <v-btn @click="getApplicationList(params)">更新</v-btn>
+                  <v-btn @click="resetParams()">条件削除</v-btn>
+                </v-row>
+                <v-row>
+                  <v-col cols="5">
+                    <v-text-field
+                      v-model="params.submitted_since"
+                      placeholder="2019/01/01"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="2">
+                    <v-text-field
+                      v-model="params.submitted_until"
+                      placeholder="～"
+                      disabled
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="5">
+                    <v-text-field placeholder="2019/01/01"></v-text-field>
+                  </v-col>
+                </v-row>
+                <v-text-field
+                  v-model="params.financial_year"
+                  placeholder="2020"
+                  label="年度"
+                ></v-text-field>
+                <v-select
+                  v-model="params.type"
+                  :items="['club', 'contest', 'event', 'public']"
+                  label="申請書タイプ"
+                ></v-select>
+                <v-select
+                  v-model="params.current_state"
+                  :items="[
+                    'submitted',
+                    'rejected',
+                    'fix_required',
+                    'accepted',
+                    'fully_repaid'
+                  ]"
+                  label="現在の状態"
+                ></v-select>
+                <v-select
+                  v-model="params.applicant"
+                  :items="userList"
+                  label="申請者"
+                  item-text="trap_id"
+                  item-value="trap_id"
+                ></v-select>
+              </v-form>
             </v-card-text>
           </v-card>
         </v-col>
@@ -103,6 +118,20 @@ export default {
         default:
           return true;
       }
+    },
+    /**
+     * 絞り込みリセット
+     */
+    resetParams() {
+      this.params = {
+        sort: "created_at",
+        current_state: "",
+        financial_year: "",
+        applicant: "",
+        type: "",
+        submitted_since: "",
+        submitted_until: ""
+      };
     }
   },
   data() {
@@ -117,7 +146,16 @@ export default {
         },
         current_state: ""
       },
-      show: null
+      show: null,
+      params: {
+        sort: "created_at",
+        current_state: "",
+        financial_year: "",
+        applicant: "",
+        type: "",
+        submitted_since: "",
+        submitted_until: ""
+      }
     };
   },
   created() {
