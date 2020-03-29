@@ -24,5 +24,21 @@ export const userList = {
         console.log(err);
       }
     }
+  },
+  getters: {
+    adminList: state => {
+      let admin = [];
+      state.forEach(user => {
+        if (user.is_admin) admin.push(user.trap_id);
+      });
+      return admin;
+    },
+    notAdminList: state => {
+      let notAdmin = [];
+      state.forEach(user => {
+        if (!user.is_admin) notAdmin.push(user.trap_id);
+      });
+      return notAdmin;
+    }
   }
 };
