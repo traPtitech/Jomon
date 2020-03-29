@@ -77,18 +77,40 @@ export const applicationDetail = {
     logs: state => {
       let logs = [];
       state.comments.forEach(log => {
-        logs.push({ log_type: "comment", content: log });
+        logs.push({
+          log_type: "comment",
+          content: log,
+          sort_date: new Date(log.created_at)
+        });
       });
       state.state_logs.forEach(log => {
-        logs.push({ log_type: "state", content: log });
+        logs.push({
+          log_type: "state",
+          content: log,
+          sort_date: new Date(log.created_at)
+        });
       });
       state.application_detail_logs.forEach(log => {
-        logs.push({ log_type: "application", content: log });
+        logs.push({
+          log_type: "application",
+          content: log,
+          sort_date: new Date(log.updated_at)
+        });
       });
       state.repayment_logs.forEach(log => {
-        logs.push({ log_type: "repayment", content: log });
+        logs.push({
+          log_type: "repayment",
+          content: log,
+          sort_date: new Date(log.repaid_at)
+        });
       });
-      //TODO:時系列順にlogを並び変える
+      logs.sort((a, b) => {
+        if (a.sort_date > b.sort_date) {
+          return 1;
+        } else {
+          return -1;
+        }
+      });
       return logs;
     }
   },
