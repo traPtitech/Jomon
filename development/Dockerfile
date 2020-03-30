@@ -5,7 +5,7 @@ ARG GO_BUILD_TAGS=''
 
 RUN echo $GO_BUILD_TAGS
 
-RUN apk add --update --no-cache ca-certificates git openssl \
+RUN apk add --update --no-cache ca-certificates git openssl curl \
     && wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
@@ -13,8 +13,15 @@ RUN apk add --update --no-cache ca-certificates git openssl \
 WORKDIR /src
 
 COPY go.mod go.sum ./
-RUN go mod download \
-    && go get github.com/pilu/fresh
+RUN go mod download
+
+RUN git clone https://github.com/go-task/task task_prj \
+    && cd task_prj \
+    && go install -v ./cmd/task \
+    && go build -v -o ./task ./cmd/task \
+    && cd .. \
+    && mv ./task_prj/task ./task \
+    && rm -rf task_prj
 
 COPY . .
 
