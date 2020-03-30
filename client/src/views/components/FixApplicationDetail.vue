@@ -1,5 +1,5 @@
 <template>
-  <!-- repuid_to_userについては実際のサーバーでうまくいくか確認する。 -->
+  <!-- repuid_to_userについては実際のサーバーでうまくいくか確認する。おそらくリスト取得がフォーカス後なのでうまくいかない -->
   <div class="fix-applicatoin">
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-card class="ml-2 mr-2 mt-2 pa-3" tile>
@@ -48,9 +48,10 @@
                   </v-col>
                   <v-col cols="8" md="6">
                     <v-card height="100%" class="pa-2" outlined tile>
-                      <Icon :user="this.$store.state.me.trap_id" :size="20" />{{
-                        this.$store.state.me.trap_id
-                      }}
+                      <Icon
+                        :user="this.detail.applicant.trap_id"
+                        :size="20"
+                      />{{ this.detail.applicant.trap_id }}
                     </v-card>
                   </v-col>
                 </v-row>
@@ -90,7 +91,7 @@
                   </v-col>
                   <v-col height="100%" cols="8" md="6">
                     <v-card class="pa-2" outlined tile>
-                      {{ returnDate(new Date()) }}
+                      {{ returnDate(this.detail.created_at) }}
                     </v-card>
                   </v-col>
                 </v-row>
