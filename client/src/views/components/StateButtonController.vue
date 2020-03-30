@@ -10,7 +10,6 @@ this.applicantはthis.detail.applicant.trap_idとすれば良い。この際は�
     </v-row>
   </div>
   <div v-else-if="this.detail.current_state === `accepted`">
-    払い戻し完了ボタン:
     <repaid-button />
     <!-- このリストの制御とリストのクリック先 -->
     <!-- 条件付きでsubmittedへ -->

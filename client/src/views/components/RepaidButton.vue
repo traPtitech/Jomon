@@ -1,7 +1,16 @@
 <template>
   <div>
+    <with-reason-button
+      v-if="
+        repaidtotrapid.length ===
+          this.$store.state.application_detail_paper.repayment_logs.length
+      "
+      class="mr-4"
+      to_state="submitted"
+    />
+    払い戻し完了ボタン:
     <span v-for="user in repaidtotrapid" :key="user">
-      <v-btn color="primary" dark v-on:click="postrepaid(user)">{{
+      <v-btn color="primary" dark v-on:click="putRepaid(user)">{{
         user
       }}</v-btn>
     </span>
@@ -12,9 +21,13 @@
 </template>
 <script>
 import axios from "axios";
+import WithReasonButton from "./StateWithReasonButton";
 export default {
+  components: {
+    WithReasonButton
+  },
   methods: {
-    postrepaid(repaid_to_trap_id) {
+    putRepaid(repaid_to_trap_id) {
       axios
         .put(
           "../api/applications/" +

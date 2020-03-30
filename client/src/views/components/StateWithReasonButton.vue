@@ -9,7 +9,10 @@
 
       <v-card>
         <v-card-title>
-          <span class="headline"
+          <span v-if="to_state === `submitted`" class="headline"
+            >承認済み→{{ this.toStateName(to_state) }} へ戻す理由</span
+          >
+          <span v-else class="headline"
             >承認待ち→{{ this.toStateName(to_state) }} への変更理由</span
           >
         </v-card-title>
@@ -95,6 +98,8 @@ export default {
     },
     toStateName: function(to_state) {
       switch (to_state) {
+        case "submitted":
+          return "提出済み";
         case "fix_required":
           return "要修正";
         case "rejected":
