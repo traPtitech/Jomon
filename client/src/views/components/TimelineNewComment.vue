@@ -51,9 +51,14 @@ export default {
     postcomment() {
       if (this.$refs.form.validate()) {
         axios
-          .post("/api/applications/{applicationId}/comments", {
-            comment: this.comment
-          })
+          .post(
+            "/api/applications/" +
+              this.$store.state.application_detail_paper.application_id +
+              "/comments",
+            {
+              comment: this.comment
+            }
+          )
           .then(response => console.log(response.status));
         this.$refs.form.reset();
       }

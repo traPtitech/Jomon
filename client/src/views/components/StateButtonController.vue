@@ -21,30 +21,42 @@ this.applicantはthis.detail.applicant.trap_idとすれば良い。この際は�
         (this.admin || this.applicant)
     "
   >
-    <v-btn>修正</v-btn>
+    <v-dialog v-model="dialog">
+      <template v-slot:activator="{ on }">
+        <v-btn v-on="on">修正</v-btn>
+      </template>
+      <fix-application-paper />
+    </v-dialog>
+
     <!-- この修正ボタンの先 -->
+    <!-- <div v-if="dialog"><fix-application-paper /></div>
+    <div v-else>piyo</div> -->
   </div>
 </template>
 <script>
 import axios from "axios";
 import WithReasonButton from "./StateWithReasonButton";
+import FixApplicationPaper from "./FixApplicationDetail";
 import RepaidButton from "./RepaidButton";
-import { mapState } from "vuex";
+import { mapState, mapMutations } from "vuex";
 export default {
   data: function() {
     return {
       admin: true,
-      applicant: true
+      applicant: true,
+      dialog: false
     };
   },
   components: {
     WithReasonButton,
-    RepaidButton
+    RepaidButton,
+    FixApplicationPaper
   },
   computed: {
     ...mapState({ detail: "application_detail_paper" })
   },
   methods: {
+    ...mapMutations(["changeFix"]),
     accept() {
       axios
         .put(

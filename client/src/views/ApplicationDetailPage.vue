@@ -11,12 +11,16 @@
       <state-button-controller class="mr-4 ml-10" />
     </v-row>
     <application-paper />
+    <!-- todo storeのfixで制御する、このページのcreatedでstoreのfixはfalseに。 -->
+    <!-- <application-paper v-if="!fix" /> -->
+    <!-- <fix-application-paper v-else /> -->
     <application-logs />
   </div>
 </template>
 
 <script>
 import ApplicationPaper from "./components/ApplicationDetail";
+// import FixApplicationPaper from "./components/FixApplicationDetail";
 import ApplicationLogs from "./components/ApplicationDetailLogs";
 import StateButtonController from "./components/StateButtonController";
 import { mapState, mapActions } from "vuex";
@@ -24,6 +28,7 @@ export default {
   name: "AppDetail",
   components: {
     ApplicationPaper,
+    // FixApplicationPaper,
     ApplicationLogs,
     StateButtonController
   },

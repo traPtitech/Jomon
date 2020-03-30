@@ -1,6 +1,7 @@
 import axios from "axios";
 export const applicationDetail = {
   state: {
+    // fix: false,
     application_id: "",
     created_at: "",
     applicant: {
@@ -98,6 +99,10 @@ export const applicationDetail = {
         state[key] = newState[key];
       });
     }
+    // changeFix(state) {
+    //   state.fix = !state.fix;
+    //   console.log(`change fix:` + state.fix);
+    // }
   },
   actions: {
     async getApplicationDetail({ commit }, applicationId) {
