@@ -3,7 +3,7 @@
     <with-reason-button
       v-if="
         repaidtotrapid.length ===
-          this.$store.state.application_detail_paper.repayment_logs.length
+          this.$store.state.application_detail_paper.core.repayment_logs.length
       "
       class="mr-4"
       to_state="submitted"
@@ -31,7 +31,7 @@ export default {
       axios
         .put(
           "../api/applications/" +
-            this.$store.state.application_detail_paper.application_id +
+            this.$store.state.application_detail_paper.core.application_id +
             "/states/repaid/" +
             repaid_to_trap_id
         )
@@ -42,7 +42,7 @@ export default {
   computed: {
     repaidtotrapid() {
       let trap_ids = new Array();
-      let repayment_logs = this.$store.state.application_detail_paper
+      let repayment_logs = this.$store.state.application_detail_paper.core
         .repayment_logs;
       let count = 0;
       for (let i = 0; i < repayment_logs.length - 1; i++) {

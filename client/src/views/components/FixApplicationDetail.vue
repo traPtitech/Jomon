@@ -18,7 +18,7 @@
           <h1>申請書</h1>
 
           <div>
-            <div>申請書ID: {{ this.detail.application_id }}</div>
+            <div>申請書ID: {{ this.detail.core.application_id }}</div>
             <v-divider></v-divider>
           </div>
         </v-row>
@@ -49,9 +49,9 @@
                   <v-col cols="8" md="6">
                     <v-card height="100%" class="pa-2" outlined tile>
                       <Icon
-                        :user="this.detail.applicant.trap_id"
+                        :user="this.detail.core.applicant.trap_id"
                         :size="20"
-                      />{{ this.detail.applicant.trap_id }}
+                      />{{ this.detail.core.applicant.trap_id }}
                     </v-card>
                   </v-col>
                 </v-row>
@@ -91,7 +91,7 @@
                   </v-col>
                   <v-col height="100%" cols="8" md="6">
                     <v-card class="pa-2" outlined tile>
-                      {{ returnDate(this.detail.created_at) }}
+                      {{ returnDate(this.detail.core.created_at) }}
                     </v-card>
                   </v-col>
                 </v-row>
@@ -137,7 +137,7 @@
           </v-container>
         </div>
         <v-row class="ml-0 mr-0">
-          <h3>{{ returnRemarkTitle($route.params.type) }}:</h3>
+          <h3>{{ returnRemarkTitle(this.type_object.type) }}:</h3>
           <v-textarea
             v-model="remarks_change"
             :rules="nullRules"
@@ -167,9 +167,10 @@
       <v-dialog persistent v-model="open_dialog">
         <template v-slot:activator="{ on }">
           <!-- todo focusしていないところのvalidateが機能していない -->
+
           <v-btn :disabled="!valid" @click="submit" class="ma-3" v-on="on"
             >修正する</v-btn
-          >
+          ><v-btn class="ma-3" @click="deleteFix">取り消す</v-btn>
         </template>
         <v-card class="pa-3">
           <v-card-title class="headline">以下の内容で修正しました</v-card-title>
@@ -217,7 +218,7 @@
               :to="`../../applications/` + response.application_id"
               color="green darken-1"
               text
-              @click="open_dialog = false"
+              @click="[(open_dialog = false), deleteFix()]"
               >OK</v-btn
             >
           </v-card-actions>
@@ -231,7 +232,7 @@
 import axios from "axios";
 import Icon from "./Icon";
 import { mapActions } from "vuex";
-import { mapState } from "vuex";
+import { mapState, mapMutations } from "vuex";
 export default {
   data: function() {
     return {
@@ -266,20 +267,20 @@ export default {
       amount_change: 0,
       repaid_to_id_change: [],
       // todo返金リスト配列
-      changeRules: [v => (v !== this.detail.repayment_logs && !!v) || ""]
+      changeRules: [v => (v !== this.detail.core.repayment_logs && !!v) || ""]
     };
   },
   created: function() {
-    this.title_change = this.detail.current_detail.title;
-    this.type_object.type = this.detail.current_detail.type;
-    this.title_change = this.detail.current_detail.title;
-    this.remarks_change = this.detail.current_detail.remarks;
-    this.paid_at_change = this.detail.current_detail.paid_at;
-    this.amount_change = this.detail.current_detail.amount;
+    this.title_change = this.detail.core.current_detail.title;
+    this.type_object.type = this.detail.core.current_detail.type;
+    this.title_change = this.detail.core.current_detail.title;
+    this.remarks_change = this.detail.core.current_detail.remarks;
+    this.paid_at_change = this.detail.core.current_detail.paid_at;
+    this.amount_change = this.detail.core.current_detail.amount;
 
     let trap_ids = new Array();
-    for (let i = 0; i < this.detail.repayment_logs.length; i++) {
-      trap_ids[i] = this.detail.repayment_logs[i].repaid_to_user.trap_id;
+    for (let i = 0; i < this.detail.core.repayment_logs.length; i++) {
+      trap_ids[i] = this.detail.core.repayment_logs[i].repaid_to_user.trap_id;
     }
     this.repaid_to_id_change = trap_ids;
   },
@@ -307,13 +308,14 @@ export default {
   },
 
   methods: {
+    ...mapMutations(["deleteFix"]),
     ...mapActions({
       getUsers: "getUserList"
     }),
     submit() {
       if (this.$refs.form.validate()) {
         axios
-          .patch("/api/applications/" + this.detail.application_id, {
+          .patch("/api/applications/" + this.detail.core.application_id, {
             type: this.type_object.type,
             title: this.title_change,
             remarks: this.remarks_change,
