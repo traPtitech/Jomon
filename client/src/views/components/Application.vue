@@ -2,14 +2,12 @@
   <v-container>
     <v-row class="md5">
       <v-col cols="2" class="text-lg-right">
-        <v-chip
+        <StateChip
           v-if="list.current_state !== ''"
           :width="10"
-          :class="chip"
-          label
+          :state="list.current_state"
           style="width:7em"
-          >{{ list.current_state }}</v-chip
-        >
+        ></StateChip>
       </v-col>
       <v-col cols="4">{{ list.current_detail.title }}</v-col>
       <v-col cols="4" class="text-lg-left">{{ list.applicant.trap_id }}</v-col>
@@ -19,6 +17,7 @@
 </template>
 
 <script>
+import StateChip from "./StateChip";
 export default {
   name: "Applicaton",
   props: {
@@ -61,6 +60,9 @@ export default {
           return "white red--text";
       }
     }
+  },
+  components: {
+    StateChip
   }
 };
 </script>
