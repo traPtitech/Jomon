@@ -191,7 +191,7 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 		allUsersRepaidCheck = allUsersRepaidCheck && (user.RepaidByUserTrapID != nil) && (user.RepaidAt != nil)
 	}
 	if allUsersRepaidCheck {
-		_, err := s.Applications.UpdateStatesLog(applicationId, user.TrapId, "reason", model.StateType{Type: model.FullyRepaid})
+		_, err := s.Applications.UpdateStatesLog(applicationId, user.TrapId, "", model.StateType{Type: model.FullyRepaid})
 		if err != nil {
 			return c.NoContent(http.StatusInternalServerError)
 		}
