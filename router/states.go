@@ -13,14 +13,14 @@ import (
 
 type PutState struct {
 	ToState 		model.StateType `json:"to_state"`
-	Reason 			string `json:"reason"`
+	Reason 			string 			`json:"reason"`
 }
 
 type SuccessState struct {
-	User model.User `json:"user"`
-	UpdatedAt time.Time `json:"updated_at"`
-	CurrentState model.StateType `json:"current_state"`
-	PastState model.StateType `json:"past_state"`
+	User 			model.User 		`json:"user"`
+	UpdatedAt 		time.Time 		`json:"updated_at"`
+	CurrentState 	model.StateType `json:"current_state"`
+	PastState 		model.StateType `json:"past_state"`
 }
 
 type ErrorState struct {
