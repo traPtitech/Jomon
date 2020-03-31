@@ -45,3 +45,45 @@ func (_ *applicationRepository) deleteRepayUserByApplicationID(db_ *gorm.DB, app
 		ApplicationID: applicationId,
 	}).Delete(&RepayUser{}).Error
 }
+
+
+func (_ *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidToUserTrapID string, repaidByUserTrapID string) (RepayUser, bool, error) {
+	ru := RepayUser{
+		ApplicationID: applicationId,
+		RepaidToUserTrapID: User{
+			TrapId: repaidToUserTrapID,
+		},
+		RepaidByUserTrapID: &User{
+			TrapId: repaidByUserTrapID,
+		},
+	}
+	var repaidUser RepayUser
+	err := db.Where("ApplicationID = ?", applicationId).Where("RepaidToUserTrapID = ?", repaidToUserTrapID).First(&repaidUser).Error
+	if err != nil {
+		return RepayUser{}, false, err
+	}
+	if repaidUser.RepaidByUserTrapID == nil || repaidUser.RepaidAt == nil{
+		return RepayUser{}, true, err
+	}
+	err = db.Transaction(func(tx *gorm.DB) error {
+		return tx.Model(&RepayUser{ApplicationID: applicationId, RepaidToUserTrapID: User{TrapId: repaidToUserTrapID}}).Updates(RepayUser{
+			RepaidByUserTrapID: &User{
+				TrapId: repaidByUserTrapID,
+			},
+			
+		}).Error
+	})
+	if err != nil {
+		return RepayUser{}, false, err
+	}
+
+	return ru, false, nil
+}
+
+func (_ *applicationRepository) FindRepayUser(applicationId uuid.UUID) ([]RepayUser, error) {
+	var ru []RepayUser
+	if err := db.Where("ApplicationID = ?", applicationId).Find(&ru).Error; err != nil {
+		return []RepayUser{}, err
+	}
+	return ru, nil
+}

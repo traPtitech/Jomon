@@ -28,6 +28,13 @@ type ErrorState struct {
 	ToState 		model.StateType `json:"to_state"`
 }
 
+type SuccessRepaid struct {
+	RepaidByUser 	model.User		`json:"repaid_by_user_trap_id"`
+	RepaidToUser 	model.User 		`json:"repaid_to_user_trap_id"`
+	RepaidAt 		*time.Time  		`json:"repaid_at"`
+	ToState 		model.StateType `json:"to_state"`
+}
+
 func (s *Service) PutStates(c echo.Context) error {
 	applicationId := uuid.FromStringOrNil(c.Param("applicationId"))
 	if applicationId == uuid.Nil {
@@ -158,7 +165,6 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 		return c.NoContent(http.StatusUnauthorized)
 	}
 
-
 	admin, err := s.Administrators.IsAdmin(user.TrapId)
 	if err != nil{
 		return c.NoContent(http.StatusBadRequest)
@@ -167,6 +173,53 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	c.Response().Header().Set(echo.HeaderContentType, "application/json")
-	return c.String(http.StatusOK, "PutRepaidStates")
+	updateRepayUser, alreadyRepaid, err := s.Applications.UpdateRepayUser(applicationId, user.TrapId, repaidToId)
+	if alreadyRepaid != false {
+		return c.NoContent(http.StatusBadRequest)
+	}
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	ru, err := s.Applications.FindRepayUser(applicationId)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	allUsersRepaidCheck := true
+	for _, user := range ru {
+		allUsersRepaidCheck = allUsersRepaidCheck && (user.RepaidByUserTrapID != nil) && (user.RepaidAt != nil)
+	}
+	if allUsersRepaidCheck {
+		_, err := s.Applications.UpdateStatesLog(applicationId, user.TrapId, "reason", model.StateType{Type: model.FullyRepaid})
+		if err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
+	}
+	var sucrep *SuccessRepaid
+	if allUsersRepaidCheck {
+		sucrep = &SuccessRepaid{
+			RepaidByUser: model.User{
+				TrapId: updateRepayUser.RepaidByUserTrapID.TrapId,
+			},
+			RepaidToUser: model.User{
+				TrapId: updateRepayUser.RepaidToUserTrapID.TrapId,
+			},
+			RepaidAt: updateRepayUser.RepaidAt,
+			ToState: model.StateType{Type: model.FullyRepaid},
+		}
+	} else {
+		sucrep = &SuccessRepaid{
+			RepaidByUser: model.User{
+				TrapId: updateRepayUser.RepaidByUserTrapID.TrapId,
+			},
+			RepaidToUser: model.User{
+				TrapId: updateRepayUser.RepaidToUserTrapID.TrapId,
+			},
+			RepaidAt: updateRepayUser.RepaidAt,
+			ToState: model.StateType{Type: model.Submitted},
+		}
+	}
+
+	return c.JSON(http.StatusOK, sucrep)
 }

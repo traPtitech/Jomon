@@ -85,6 +85,14 @@ type ApplicationRepository interface {
 		reason string,
 		toState StateType,
 	) (StatesLog, error)
+	UpdateRepayUser(
+		applicationId uuid.UUID,
+		repaidToUserTrapID string,
+		repaidByUserTrapID string,
+	) (RepayUser, bool, error)
+	FindRepayUser(
+		applicationId uuid.UUID,
+	) ([]RepayUser, error)
 }
 
 type applicationRepository struct{}
