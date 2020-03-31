@@ -1,7 +1,6 @@
 package router
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -125,9 +124,6 @@ func (s *Service) PutAdminUsers(c echo.Context) error {
 
 func (s *Service) SetMyUser(c echo.Context) (echo.Context, error) {
 	token := c.Request().Header.Get("Authorization")
-	if token == "" {
-		return c, errors.New("no token")
-	}
 
 	user, err := s.Users.GetMyUser(token)
 	if err != nil {
