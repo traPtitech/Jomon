@@ -46,7 +46,6 @@ func (_ *applicationRepository) deleteRepayUserByApplicationID(db_ *gorm.DB, app
 	}).Delete(&RepayUser{}).Error
 }
 
-
 func (_ *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidToUserTrapID string, repaidByUserTrapID string) (RepayUser, bool, error) {
 	ru := RepayUser{
 		ApplicationID: applicationId,
@@ -62,7 +61,7 @@ func (_ *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidT
 	if err != nil {
 		return RepayUser{}, false, err
 	}
-	if repaidUser.RepaidByUserTrapID == nil || repaidUser.RepaidAt == nil{
+	if repaidUser.RepaidByUserTrapID == nil || repaidUser.RepaidAt == nil {
 		return RepayUser{}, true, err
 	}
 	err = db.Transaction(func(tx *gorm.DB) error {
@@ -70,7 +69,6 @@ func (_ *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidT
 			RepaidByUserTrapID: &User{
 				TrapId: repaidByUserTrapID,
 			},
-			
 		}).Error
 	})
 	if err != nil {

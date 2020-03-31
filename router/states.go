@@ -4,35 +4,35 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jinzhu/gorm"
 	"github.com/gofrs/uuid"
+	"github.com/jinzhu/gorm"
 	"github.com/traPtitech/Jomon/model"
 
 	"github.com/labstack/echo/v4"
 )
 
 type PutState struct {
-	ToState 		model.StateType `json:"to_state"`
-	Reason 			string 			`json:"reason"`
+	ToState model.StateType `json:"to_state"`
+	Reason  string          `json:"reason"`
 }
 
 type SuccessState struct {
-	User 			model.User 		`json:"user"`
-	UpdatedAt 		time.Time 		`json:"updated_at"`
-	CurrentState 	model.StateType `json:"current_state"`
-	PastState 		model.StateType `json:"past_state"`
+	User         model.User      `json:"user"`
+	UpdatedAt    time.Time       `json:"updated_at"`
+	CurrentState model.StateType `json:"current_state"`
+	PastState    model.StateType `json:"past_state"`
 }
 
 type ErrorState struct {
-	CurrentState 	model.StateType `json:"current_state"`
-	ToState 		model.StateType `json:"to_state"`
+	CurrentState model.StateType `json:"current_state"`
+	ToState      model.StateType `json:"to_state"`
 }
 
 type SuccessRepaid struct {
-	RepaidByUser 	model.User		`json:"repaid_by_user_trap_id"`
-	RepaidToUser 	model.User 		`json:"repaid_to_user_trap_id"`
-	RepaidAt 		*time.Time  		`json:"repaid_at"`
-	ToState 		model.StateType `json:"to_state"`
+	RepaidByUser model.User      `json:"repaid_by_user_trap_id"`
+	RepaidToUser model.User      `json:"repaid_to_user_trap_id"`
+	RepaidAt     *time.Time      `json:"repaid_at"`
+	ToState      model.StateType `json:"to_state"`
 }
 
 func (s *Service) PutStates(c echo.Context) error {
@@ -56,13 +56,13 @@ func (s *Service) PutStates(c echo.Context) error {
 	}
 
 	var sta PutState
-	if err := c.Bind(&sta); err != nil{
+	if err := c.Bind(&sta); err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
 	errsta := &ErrorState{
 		CurrentState: application.LatestState,
-		ToState: sta.ToState,
+		ToState:      sta.ToState,
 	}
 
 	if sta.Reason == "" {
@@ -78,7 +78,7 @@ func (s *Service) PutStates(c echo.Context) error {
 	}
 
 	admin, err := s.Administrators.IsAdmin(user.TrapId)
-	if err != nil{
+	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	if admin {
@@ -86,17 +86,17 @@ func (s *Service) PutStates(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, errsta)
 		}
 	}
-	
+
 	state, err := s.Applications.UpdateStatesLog(applicationId, user.TrapId, sta.Reason, sta.ToState)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	sucsta := &SuccessState{
-		User: user,
-		UpdatedAt: state.CreatedAt,
+		User:         user,
+		UpdatedAt:    state.CreatedAt,
 		CurrentState: state.ToState,
-		PastState: application.LatestState,
+		PastState:    application.LatestState,
 	}
 
 	return c.JSON(http.StatusOK, sucsta)
@@ -166,7 +166,7 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 	}
 
 	admin, err := s.Administrators.IsAdmin(user.TrapId)
-	if err != nil{
+	if err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
 	if (!admin) || (application.LatestState != model.StateType{Type: model.Accepted}) {
@@ -206,7 +206,7 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 				TrapId: updateRepayUser.RepaidToUserTrapID.TrapId,
 			},
 			RepaidAt: updateRepayUser.RepaidAt,
-			ToState: model.StateType{Type: model.FullyRepaid},
+			ToState:  model.StateType{Type: model.FullyRepaid},
 		}
 	} else {
 		sucrep = &SuccessRepaid{
@@ -217,7 +217,7 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 				TrapId: updateRepayUser.RepaidToUserTrapID.TrapId,
 			},
 			RepaidAt: updateRepayUser.RepaidAt,
-			ToState: model.StateType{Type: model.Submitted},
+			ToState:  model.StateType{Type: model.Submitted},
 		}
 	}
 
