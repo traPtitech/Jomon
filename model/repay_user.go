@@ -4,8 +4,14 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"time"
+	"errors"
 
 	"github.com/gofrs/uuid"
+)
+
+var (
+    ErrAlreadyRepaid = errors.New("alreadyRepaid")
+    ErrElse = errors.New("else")
 )
 
 type RepayUser struct {
@@ -46,7 +52,7 @@ func (_ *applicationRepository) deleteRepayUserByApplicationID(db_ *gorm.DB, app
 	}).Delete(&RepayUser{}).Error
 }
 
-func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidToUserTrapID string, repaidByUserTrapID string) (RepayUser, bool, bool, error) {
+func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidToUserTrapID string, repaidByUserTrapID string) (RepayUser, bool, error) {
 	dt := time.Now()
 	ru := RepayUser{
 		ApplicationID: applicationId,
@@ -61,10 +67,10 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 	var repaidUser RepayUser
 	err := db.Where("ApplicationID = ?", applicationId).Where("RepaidToUserTrapID = ?", repaidToUserTrapID).First(&repaidUser).Error
 	if err != nil {
-		return RepayUser{}, false, false, err
+		return RepayUser{}, false, ErrElse
 	}
 	if repaidUser.RepaidByUserTrapID == nil || repaidUser.RepaidAt == nil {
-		return RepayUser{}, true, false, err
+		return RepayUser{}, false, ErrAlreadyRepaid
 	}
 
 	log := StatesLog{
@@ -76,7 +82,6 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 		Reason:  "",
 	}
 	allUsersRepaidCheck := true
-
 	err = db.Transaction(func(tx *gorm.DB) error {
 		rus, err := repo.FindRepayUser(applicationId)
 		if err != nil {
@@ -86,7 +91,7 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 			allUsersRepaidCheck = allUsersRepaidCheck && (user.RepaidByUserTrapID != nil) && (user.RepaidAt != nil)
 		}
 		if allUsersRepaidCheck {
-			err := UpdateStatesLogTransaction(tx, applicationId, log)
+			err := repo.updateStatesLogTransaction(tx, applicationId, log)
 			if err != nil {
 				return err
 			}
@@ -98,10 +103,10 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 		}).Error
 	})
 	if err != nil {
-		return RepayUser{}, false, false, err
+		return RepayUser{}, false, ErrElse
 	}
 
-	return ru, false, allUsersRepaidCheck, nil
+	return ru, allUsersRepaidCheck, nil
 }
 
 func (_ *applicationRepository) FindRepayUser(applicationId uuid.UUID) ([]RepayUser, error) {

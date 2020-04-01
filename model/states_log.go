@@ -75,7 +75,7 @@ func (st *StatesLog) GiveIsUserAdmin(admins []string) {
 	st.UpdateUserTrapID.GiveIsUserAdmin(admins)
 }
 
-func (_ *applicationRepository) UpdateStatesLog(applicationId uuid.UUID, updateUserTrapId string, reason string, toState StateType) (StatesLog, error) {
+func (repo *applicationRepository) UpdateStatesLog(applicationId uuid.UUID, updateUserTrapId string, reason string, toState StateType) (StatesLog, error) {
 	log := StatesLog{
 		ApplicationID: applicationId,
 		UpdateUserTrapID: User{
@@ -84,8 +84,9 @@ func (_ *applicationRepository) UpdateStatesLog(applicationId uuid.UUID, updateU
 		ToState: toState,
 		Reason:  reason,
 	}
-
-	err := UpdateStatesLogTransaction(db, applicationId, log)
+	err := db.Transaction(func(tx *gorm.DB) error {
+		return repo.updateStatesLogTransaction(tx, applicationId, log)
+	})
 	if err != nil {
 		return StatesLog{}, err
 	}
@@ -93,16 +94,14 @@ func (_ *applicationRepository) UpdateStatesLog(applicationId uuid.UUID, updateU
 	return log, nil
 }
 
-func UpdateStatesLogTransaction(db *gorm.DB, applicationId uuid.UUID, log StatesLog) error {
-	return db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(&log).Error; err != nil {
-			return err
-		}
+func (_ *applicationRepository) updateStatesLogTransaction(db *gorm.DB, applicationId uuid.UUID, log StatesLog) error {
+	if err := db.Create(&log).Error; err != nil {
+		return err
+	}
 
-		return tx.Model(&Application{ID: applicationId}).Updates(Application{
-			StatesLogsID: log.ID,
-		}).Error
-	})
+	return db.Model(&Application{ID: applicationId}).Updates(Application{
+		StatesLogsID: log.ID,
+	}).Error
 }
 
 func (_ *applicationRepository) createStatesLog(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapId string) (StatesLog, error) {
@@ -111,7 +110,7 @@ func (_ *applicationRepository) createStatesLog(db_ *gorm.DB, applicationId uuid
 		UpdateUserTrapID: User{
 			TrapId: updateUserTrapId,
 		},
-		ToState: StateType{Type: 1},
+		ToState: StateType{Type: Submitted},
 		Reason:  "",
 	}
 

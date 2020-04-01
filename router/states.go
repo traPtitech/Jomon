@@ -173,12 +173,12 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 		return c.NoContent(http.StatusForbidden)
 	}
 
-	updateRepayUser, alreadyRepaid, allUsersRepaidCheck, err := s.Applications.UpdateRepayUser(applicationId, repaidToId, user.TrapId)
-	if alreadyRepaid != false {
-		return c.NoContent(http.StatusBadRequest)
-	}
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+	updateRepayUser, allUsersRepaidCheck, err := s.Applications.UpdateRepayUser(applicationId, repaidToId, user.TrapId)
+	switch err {
+		case model.ErrAlreadyRepaid:
+			return c.NoContent(http.StatusBadRequest)
+		case model.ErrElse:
+			return c.NoContent(http.StatusInternalServerError)
 	}
 
 	var sucrep *SuccessRepaid

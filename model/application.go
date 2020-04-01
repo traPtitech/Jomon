@@ -89,7 +89,7 @@ type ApplicationRepository interface {
 		applicationId uuid.UUID,
 		repaidToUserTrapID string,
 		repaidByUserTrapID string,
-	) (RepayUser, bool, bool, error)
+	) (RepayUser, bool, error)
 	FindRepayUser(
 		applicationId uuid.UUID,
 	) ([]RepayUser, error)
