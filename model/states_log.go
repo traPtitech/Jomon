@@ -84,7 +84,17 @@ func (_ *applicationRepository) UpdateStatesLog(applicationId uuid.UUID, updateU
 		ToState: toState,
 		Reason:  reason,
 	}
-	err := db.Transaction(func(tx *gorm.DB) error {
+
+	err := UpdateStatesLogTransaction(db, applicationId, log)
+	if err != nil {
+		return StatesLog{}, err
+	}
+
+	return log, nil
+}
+
+func UpdateStatesLogTransaction(db *gorm.DB, applicationId uuid.UUID, log StatesLog) error {
+	return db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&log).Error; err != nil {
 			return err
 		}
@@ -93,11 +103,6 @@ func (_ *applicationRepository) UpdateStatesLog(applicationId uuid.UUID, updateU
 			StatesLogsID: log.ID,
 		}).Error
 	})
-	if err != nil {
-		return StatesLog{}, err
-	}
-
-	return log, nil
 }
 
 func (_ *applicationRepository) createStatesLog(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapId string) (StatesLog, error) {

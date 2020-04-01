@@ -13,7 +13,7 @@ type RepayUser struct {
 	ApplicationID      uuid.UUID  `gorm:"type:char(36);not null" json:"-"`
 	RepaidToUserTrapID User       `gorm:"embedded;embedded_prefix:repaid_to_user_;not null" json:"repaid_to_user"`
 	RepaidByUserTrapID *User      `gorm:"embedded;embedded_prefix:repaid_by_user_" json:"repaid_by_user"`
-	RepaidAt           *time.Time `json:"repaid_at"`
+	RepaidAt           *time.Time `gorm:"type:timestamp" json:"repaid_at"`
 }
 
 func (ru *RepayUser) GiveIsUserAdmin(admins []string) {
@@ -46,7 +46,8 @@ func (_ *applicationRepository) deleteRepayUserByApplicationID(db_ *gorm.DB, app
 	}).Delete(&RepayUser{}).Error
 }
 
-func (_ *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidToUserTrapID string, repaidByUserTrapID string) (RepayUser, bool, error) {
+func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidToUserTrapID string, repaidByUserTrapID string) (RepayUser, bool, bool, error) {
+	dt := time.Now()
 	ru := RepayUser{
 		ApplicationID: applicationId,
 		RepaidToUserTrapID: User{
@@ -55,16 +56,41 @@ func (_ *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidT
 		RepaidByUserTrapID: &User{
 			TrapId: repaidByUserTrapID,
 		},
+		RepaidAt: &dt,
 	}
 	var repaidUser RepayUser
 	err := db.Where("ApplicationID = ?", applicationId).Where("RepaidToUserTrapID = ?", repaidToUserTrapID).First(&repaidUser).Error
 	if err != nil {
-		return RepayUser{}, false, err
+		return RepayUser{}, false, false, err
 	}
 	if repaidUser.RepaidByUserTrapID == nil || repaidUser.RepaidAt == nil {
-		return RepayUser{}, true, err
+		return RepayUser{}, true, false, err
 	}
+
+	log := StatesLog{
+		ApplicationID: applicationId,
+		UpdateUserTrapID: User{
+			TrapId: repaidByUserTrapID,
+		},
+		ToState: StateType{Type: FullyRepaid},
+		Reason:  "",
+	}
+	allUsersRepaidCheck := true
+
 	err = db.Transaction(func(tx *gorm.DB) error {
+		rus, err := repo.FindRepayUser(applicationId)
+		if err != nil {
+			return err
+		}
+		for _, user := range rus {
+			allUsersRepaidCheck = allUsersRepaidCheck && (user.RepaidByUserTrapID != nil) && (user.RepaidAt != nil)
+		}
+		if allUsersRepaidCheck {
+			err := UpdateStatesLogTransaction(tx, applicationId, log)
+			if err != nil {
+				return err
+			}
+		}
 		return tx.Model(&RepayUser{ApplicationID: applicationId, RepaidToUserTrapID: User{TrapId: repaidToUserTrapID}}).Updates(RepayUser{
 			RepaidByUserTrapID: &User{
 				TrapId: repaidByUserTrapID,
@@ -72,10 +98,10 @@ func (_ *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidT
 		}).Error
 	})
 	if err != nil {
-		return RepayUser{}, false, err
+		return RepayUser{}, false, false, err
 	}
 
-	return ru, false, nil
+	return ru, false, allUsersRepaidCheck, nil
 }
 
 func (_ *applicationRepository) FindRepayUser(applicationId uuid.UUID) ([]RepayUser, error) {

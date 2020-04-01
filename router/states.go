@@ -156,7 +156,7 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 		if gorm.IsRecordNotFoundError(err) {
 			return c.NoContent(http.StatusNotFound)
 		} else {
-			return c.NoContent(http.StatusBadRequest)
+			return c.NoContent(http.StatusInternalServerError)
 		}
 	}
 
@@ -167,13 +167,13 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 
 	admin, err := s.Administrators.IsAdmin(user.TrapId)
 	if err != nil {
-		return c.NoContent(http.StatusBadRequest)
+		return c.NoContent(http.StatusInternalServerError)
 	}
 	if (!admin) || (application.LatestState != model.StateType{Type: model.Accepted}) {
-		return c.NoContent(http.StatusBadRequest)
+		return c.NoContent(http.StatusForbidden)
 	}
 
-	updateRepayUser, alreadyRepaid, err := s.Applications.UpdateRepayUser(applicationId, user.TrapId, repaidToId)
+	updateRepayUser, alreadyRepaid, allUsersRepaidCheck, err := s.Applications.UpdateRepayUser(applicationId, repaidToId, user.TrapId)
 	if alreadyRepaid != false {
 		return c.NoContent(http.StatusBadRequest)
 	}
@@ -181,21 +181,6 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	ru, err := s.Applications.FindRepayUser(applicationId)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
-
-	allUsersRepaidCheck := true
-	for _, user := range ru {
-		allUsersRepaidCheck = allUsersRepaidCheck && (user.RepaidByUserTrapID != nil) && (user.RepaidAt != nil)
-	}
-	if allUsersRepaidCheck {
-		_, err := s.Applications.UpdateStatesLog(applicationId, user.TrapId, "", model.StateType{Type: model.FullyRepaid})
-		if err != nil {
-			return c.NoContent(http.StatusInternalServerError)
-		}
-	}
 	var sucrep *SuccessRepaid
 	if allUsersRepaidCheck {
 		sucrep = &SuccessRepaid{
