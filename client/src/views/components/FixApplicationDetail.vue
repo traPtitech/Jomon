@@ -164,14 +164,13 @@
 
         画像リスト(画像アップロード)
       </v-card>
-      <v-dialog persistent v-model="open_dialog">
-        <template v-slot:activator="{ on }">
-          <!-- todo focusしていないところのvalidateが機能していない -->
 
-          <v-btn :disabled="!valid" @click="submit" class="ma-3" v-on="on"
-            >修正する</v-btn
-          ><v-btn class="ma-3" @click="deleteFix">取り消す</v-btn>
-        </template>
+      <!-- todo focusしていないところのvalidateが機能していない -->
+
+      <v-btn :disabled="!valid" @click.stop="submit" class="ma-3"
+        >修正する</v-btn
+      ><v-btn class="ma-3" @click="deleteFix">取り消す</v-btn>
+      <v-dialog persistent v-model="open_dialog">
         <v-card class="pa-3">
           <v-card-title class="headline">以下の内容で修正しました</v-card-title>
           <v-row :justify="`space-between`">
@@ -309,21 +308,28 @@ export default {
 
   methods: {
     ...mapMutations(["deleteFix"]),
-    ...mapActions({
-      getUsers: "getUserList"
-    }),
-    submit() {
+    ...mapActions([
+      {
+        getUsers: "getUserList"
+      },
+      "getApplicationDetail"
+    ]),
+    async submit() {
       if (this.$refs.form.validate()) {
-        axios
-          .patch("/api/applications/" + this.detail.core.application_id, {
+        const response = await axios.patch(
+          "/api/applications/" + this.detail.core.application_id,
+          {
             type: this.type_object.type,
             title: this.title_change,
             remarks: this.remarks_change,
             paid_at: this.paid_at_change,
             amount: this.amount_change,
             repaid_to_id: this.repaid_to_id_change
-          })
-          .then(response => (this.response = response.data));
+          }
+        );
+        this.response = response.data;
+        await this.getApplicationDetail(this.$route.params.id);
+        this.open_dialog = true;
       }
     },
     formatDate(date) {

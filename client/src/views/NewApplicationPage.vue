@@ -149,13 +149,12 @@
 
         画像リスト(画像アップロード)
       </v-card>
+
+      <!-- todo focusしていないところのvalidateが機能していない -->
+      <v-btn :disabled="!valid" @click.stop="submit" class="ma-3" v-on="on"
+        >作成する</v-btn
+      >
       <v-dialog persistent v-model="open_dialog">
-        <template v-slot:activator="{ on }">
-          <!-- todo focusしていないところのvalidateが機能していない -->
-          <v-btn :disabled="!valid" @click="submit" class="ma-3" v-on="on"
-            >作成する</v-btn
-          >
-        </template>
         <v-card class="pa-3">
           <v-card-title class="headline"
             >以下の内容で新規作成しました</v-card-title
@@ -284,7 +283,11 @@ export default {
             amount: this.amount,
             repaid_to_id: this.traPID
           })
-          .then(response => (this.response = response.data));
+          .then(
+            response => (
+              (this.response = response.data), (this.open_dialog = true)
+            )
+          );
       }
     },
     formatDate(date) {
