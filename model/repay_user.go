@@ -11,7 +11,6 @@ import (
 
 var (
     ErrAlreadyRepaid = errors.New("alreadyRepaid")
-    ErrElse = errors.New("else")
 )
 
 type RepayUser struct {
@@ -67,9 +66,9 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 	var repaidUser RepayUser
 	err := db.Where("ApplicationID = ?", applicationId).Where("RepaidToUserTrapID = ?", repaidToUserTrapID).First(&repaidUser).Error
 	if err != nil {
-		return RepayUser{}, false, ErrElse
+		return RepayUser{}, false, err
 	}
-	if repaidUser.RepaidByUserTrapID == nil || repaidUser.RepaidAt == nil {
+	if repaidUser.RepaidByUserTrapID != nil || repaidUser.RepaidAt != nil {
 		return RepayUser{}, false, ErrAlreadyRepaid
 	}
 
@@ -103,7 +102,7 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 		}).Error
 	})
 	if err != nil {
-		return RepayUser{}, false, ErrElse
+		return RepayUser{}, false, err
 	}
 
 	return ru, allUsersRepaidCheck, nil
