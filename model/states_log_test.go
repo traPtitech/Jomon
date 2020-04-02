@@ -62,7 +62,7 @@ func TestUpdateStatesLog(t *testing.T){
 	t.Run("shouldFail", func(t *testing.T) {
 		asr := assert.New(t)
 
-		id, err := repo.createApplication(db, "userId")
+		id, err := uuid.NewV4()
 		if err != nil {
 			panic(err)
 		}
