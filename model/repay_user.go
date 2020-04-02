@@ -82,8 +82,8 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 	}
 	allUsersRepaidCheck := true
 	err = db.Transaction(func(tx *gorm.DB) error {
-		rus, err := repo.FindRepayUser(applicationId)
-		if err != nil {
+		var rus []RepayUser
+		if err := db.Where("ApplicationID = ?", applicationId).Find(&rus).Error; err != nil {
 			return err
 		}
 		for _, user := range rus {
@@ -106,12 +106,4 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 	}
 
 	return ru, allUsersRepaidCheck, nil
-}
-
-func (_ *applicationRepository) FindRepayUser(applicationId uuid.UUID) ([]RepayUser, error) {
-	var ru []RepayUser
-	if err := db.Where("ApplicationID = ?", applicationId).Find(&ru).Error; err != nil {
-		return []RepayUser{}, err
-	}
-	return ru, nil
 }

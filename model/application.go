@@ -90,9 +90,6 @@ type ApplicationRepository interface {
 		repaidToUserTrapID string,
 		repaidByUserTrapID string,
 	) (RepayUser, bool, error)
-	FindRepayUser(
-		applicationId uuid.UUID,
-	) ([]RepayUser, error)
 }
 
 type applicationRepository struct{}
