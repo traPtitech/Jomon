@@ -1,0 +1,18 @@
+version: '2'
+
+tasks:
+  default:
+    cmds:
+      - task: run
+
+  run:
+    deps: [build]
+    cmds:
+      - /app/Jomon
+    sources:
+      - '**/*.go'
+
+  build:
+    dir: /src
+    cmds:
+      - go build -tags $GO_BUILD_TAGS -o /app/Jomon
