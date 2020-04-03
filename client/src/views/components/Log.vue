@@ -191,11 +191,31 @@ export default {
   },
   methods: {
     dayPrint(time) {
+      let now = new Date();
       let d = new Date(time);
-      let month = d.getMonth() + 1;
-      let day = d.getDate();
-      let res = month + "/" + day;
-      return res;
+      let diff = (now.getTime() - d.getTime()) / 1000;
+      if (diff < 60) {
+        //1分以内
+        return Math.round(diff) + "秒前";
+      } else if (diff < 60 * 60) {
+        //一時間以内
+        return Math.round(diff / 60) + "分前";
+      } else if (diff < 60 * 60 * 24) {
+        //一日以内
+        return Math.round(diff / 60 / 60) + "時間前";
+      } else if (diff < 60 * 60 * 24 * 28) {
+        //一か月以内
+        let month = d.getMonth() + 1;
+        let day = d.getDate();
+        let res = month + "/" + day;
+        return res;
+      } else {
+        let year = d.getFullYear();
+        let month = d.getMonth() + 1;
+        let day = d.getDate();
+        let res = year + "/" + month + "/" + day;
+        return res;
+      }
     },
     commentChange() {
       this.comment_readonly = false;
