@@ -23,7 +23,8 @@
                   <v-col cols="5">
                     <v-text-field
                       v-model="params.submitted_since"
-                      placeholder="2019/01/01"
+                      placeholder="2019-01-01"
+                      :rules="dayRule"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="2">
@@ -34,11 +35,15 @@
                     ></v-text-field>
                   </v-col>
                   <v-col cols="5">
-                    <v-text-field placeholder="2019/01/01"></v-text-field>
+                    <v-text-field
+                      placeholder="2019-01-01"
+                      :rules="dayRule"
+                    ></v-text-field>
                   </v-col>
                 </v-row>
                 <v-text-field
                   v-model="params.financial_year"
+                  :rules="yearRule"
                   placeholder="2020"
                   label="年度"
                 ></v-text-field>
@@ -155,7 +160,14 @@ export default {
         type: "",
         submitted_since: "",
         submitted_until: ""
-      }
+      },
+      dayRule: [
+        value =>
+          !value ||
+          /^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/.test(value) ||
+          "Invalid Day."
+      ],
+      yearRule: [value => !value || /^[0-9]{4}$/.test(value) || "Invalid Year."]
     };
   },
   created() {
