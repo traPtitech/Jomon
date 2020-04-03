@@ -23,7 +23,7 @@ type StatesLog struct {
 	UpdateUserTrapID User      `gorm:"embedded;embedded_prefix:update_user_" json:"update_user"`
 	ToState          StateType `gorm:"embedded" json:"to_state"`
 	Reason           string    `gorm:"type:text;not null" json:"reason"`
-	CreatedAt        time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
+	CreatedAt        time.Time `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 }
 
 type StateType struct {

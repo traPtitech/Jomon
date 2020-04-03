@@ -26,7 +26,7 @@ type ApplicationsDetail struct {
 	Remarks          string          `gorm:"type:text;not null" json:"remarks"`
 	Amount           int             `gorm:"type:int(11);not null" json:"amount"`
 	PaidAt           PaidAt          `gorm:"embedded" json:"paid_at"`
-	UpdatedAt        time.Time       `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
+	UpdatedAt        time.Time       `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
 type ApplicationType struct {
@@ -63,7 +63,7 @@ func (ty *ApplicationType) UnmarshalJSON(data []byte) error {
 }
 
 type PaidAt struct {
-	PaidAt time.Time `gorm:"type:timestamp;not null"`
+	PaidAt time.Time `gorm:"type:date;not null"`
 }
 
 func (p PaidAt) MarshalJSON() ([]byte, error) {

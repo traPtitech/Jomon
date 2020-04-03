@@ -11,8 +11,8 @@ type Comment struct {
 	ApplicationID uuid.UUID  `gorm:"type:char(36);not null" json:"-"`
 	UserTrapID    User       `gorm:"embedded;embedded_prefix:user_" json:"user"`
 	Comment       string     `gorm:"type:text;not null" json:"comment"`
-	CreatedAt     time.Time  `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt     time.Time  `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"updated_at"`
+	CreatedAt     time.Time  `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt     time.Time  `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"updated_at"`
 	DeletedAt     *time.Time `json:"-"`
 }
 

@@ -13,7 +13,7 @@ type RepayUser struct {
 	ApplicationID      uuid.UUID  `gorm:"type:char(36);not null" json:"-"`
 	RepaidToUserTrapID User       `gorm:"embedded;embedded_prefix:repaid_to_user_;not null" json:"repaid_to_user"`
 	RepaidByUserTrapID *User      `gorm:"embedded;embedded_prefix:repaid_by_user_" json:"repaid_by_user"`
-	RepaidAt           *time.Time `json:"repaid_at"`
+	RepaidAt           *time.Time `gorm:"type:date" json:"repaid_at"`
 }
 
 func (ru *RepayUser) GiveIsUserAdmin(admins []string) {

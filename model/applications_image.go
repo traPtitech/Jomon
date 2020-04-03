@@ -13,7 +13,7 @@ type ApplicationsImage struct {
 	ID            uuid.UUID `gorm:"type:char(36);primary_key"`
 	ApplicationID uuid.UUID `gorm:"type:char(36);not null"`
 	MimeType      string    `gorm:"type:text;not null" json:"-"`
-	CreatedAt     time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
+	CreatedAt     time.Time `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 }
 
 type ApplicationsImageRepository interface {

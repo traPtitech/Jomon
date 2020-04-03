@@ -118,7 +118,7 @@ func TestPatchApplication(t *testing.T) {
 		title := "Title"
 		remarks := "Remarks"
 		amount := 1000
-		paidAt := time.Now().Round(time.Second)
+		paidAt := time.Now()
 		appId, err := repo.BuildApplication("User", typ, title, remarks, amount, paidAt, []string{"User"})
 		if err != nil {
 			panic(err)
@@ -140,7 +140,7 @@ func TestPatchApplication(t *testing.T) {
 		asr.Equal(title, app.LatestApplicationsDetail.Title)
 		asr.Equal(remarks, app.LatestApplicationsDetail.Remarks)
 		asr.Equal(amount, app.LatestApplicationsDetail.Amount)
-		asr.Equal(paidAt, app.LatestApplicationsDetail.PaidAt.PaidAt)
+		asr.Equal(paidAt.Truncate(time.Hour*24), app.LatestApplicationsDetail.PaidAt.PaidAt)
 	})
 
 	t.Run("shouldFail", func(t *testing.T) {
