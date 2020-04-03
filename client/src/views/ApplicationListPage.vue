@@ -20,6 +20,10 @@
                   <v-btn @click="resetParams()">条件削除</v-btn>
                 </v-row>
                 <v-row>
+                  <v-btn @click="sortCreatedAt()">日付順</v-btn>
+                  <v-btn @click="sortTitle()">タイトル順</v-btn>
+                </v-row>
+                <v-row>
                   <v-col cols="5">
                     <v-text-field
                       v-model="params.submitted_since"
@@ -104,6 +108,12 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import Application from "./components/Application";
+let sort = {
+  created_at: "created_at",
+  inv_created_at: "-created_at",
+  title: "title",
+  inv_title: "-title"
+};
 export default {
   name: "ApplicationList",
   computed: {
@@ -129,7 +139,7 @@ export default {
      */
     resetParams() {
       this.params = {
-        sort: "created_at",
+        sort: sort.created_at,
         current_state: "",
         financial_year: "",
         applicant: "",
@@ -137,6 +147,23 @@ export default {
         submitted_since: "",
         submitted_until: ""
       };
+    },
+    /**
+     * 作成日でソート
+     */
+    sortCreatedAt() {
+      if (this.params.sort === sort.created_at)
+        this.params.sort = sort.inv_created_at;
+      else this.params.sort = sort.created_at;
+      this.getApplicationList(this.params);
+    },
+    /**
+     * タイトルでソート
+     */
+    sortTitle() {
+      if (this.params.sort === sort.title) this.params.sort = sort.inv_title;
+      else this.params.sort = sort.title;
+      this.getApplicationList(this.params);
     }
   },
   data() {
@@ -153,7 +180,7 @@ export default {
       },
       show: null,
       params: {
-        sort: "created_at",
+        sort: sort.created_at,
         current_state: "",
         financial_year: "",
         applicant: "",
