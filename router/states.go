@@ -65,6 +65,10 @@ func (s *Service) PutStates(c echo.Context) error {
 		ToState:      sta.ToState,
 	}
 
+	if sta.ToState == application.LatestState {
+		return c.JSON(http.StatusBadRequest, errsta)
+	}
+
 	if sta.Reason == "" {
 		if IsAbleNoReasonChangeState(sta.ToState, application.LatestState) {
 			return c.JSON(http.StatusBadRequest, errsta)

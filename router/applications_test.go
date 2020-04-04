@@ -111,6 +111,54 @@ func (m *applicationRepositoryMock) PatchApplication(
 	return ret.Error(0)
 }
 
+func (m *applicationRepositoryMock) UpdateStatesLog(
+	applicationId uuid.UUID,
+	updateUserTrapId string,
+	reason string,
+	toState model.StateType,
+) (model.StatesLog, error) {
+	ret := m.Called(applicationId, updateUserTrapId, reason, toState)
+
+	m.asr.NotEqual("", updateUserTrapId)
+
+	if &toState != nil {
+		m.asr.Contains([...]int{model.Submitted, model.FixRequired, model.FixRequired, model.Accepted, model.FullyRepaid, model.Rejected}, toState.Type)
+	}
+	state := model.StatesLog{
+		ApplicationID: applicationId,
+		UpdateUserTrapID: model.User{
+			TrapId: updateUserTrapId,
+		},
+		ToState: toState,
+		Reason:  reason,
+	}
+	return state, ret.Error(1)
+}
+
+func (m *applicationRepositoryMock) UpdateRepayUser(
+	applicationId uuid.UUID,
+	repaidToUserTrapID string,
+	repaidByUserTrapID string,
+) (model.RepayUser, bool, error) {
+	ret := m.Called(applicationId, repaidToUserTrapID, repaidByUserTrapID)
+	
+	m.asr.NotEqual("", repaidToUserTrapID)
+	m.asr.NotEqual("", repaidByUserTrapID)
+
+	dt := time.Now()
+	ru := model.RepayUser{
+		ApplicationID: applicationId,
+		RepaidToUserTrapID: model.User{
+			TrapId: repaidToUserTrapID,
+		},
+		RepaidByUserTrapID: &model.User{
+			TrapId: repaidByUserTrapID,
+		},
+		RepaidAt: &dt,
+	}
+	return ru, ret.Get(1).(bool), ret.Error(2)
+}
+
 type administratorRepositoryMock struct {
 	mock.Mock
 }

@@ -30,6 +30,30 @@ type StateType struct {
 	Type int `gorm:"column:to_state;type:tinyint(4);not null;default:0"`
 }
 
+func (ty *StateType) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	var err error
+	switch s {
+	case "submitted":
+		ty.Type = Submitted
+	case "fix_required":
+		ty.Type = FixRequired
+	case "accepted":
+		ty.Type = Accepted
+	case "fully_repaid":
+		ty.Type = FullyRepaid
+	case "rejected":
+		ty.Type = Rejected
+	default:
+		err = errors.New("unknown state type")
+		return err
+	}
+	return nil
+}
+
 func (ty StateType) MarshalJSON() ([]byte, error) {
 	switch ty.Type {
 	case Submitted:

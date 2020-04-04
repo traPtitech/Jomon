@@ -64,11 +64,11 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 		RepaidAt: &dt,
 	}
 	var repaidUser RepayUser
-	err := db.Where("ApplicationID = ?", applicationId).Where("RepaidToUserTrapID = ?", repaidToUserTrapID).First(&repaidUser).Error
+	err := db.Where("application_id = ?", applicationId).Where("repaid_to_user_trap_id = ?", repaidToUserTrapID).First(&repaidUser).Error
 	if err != nil {
 		return RepayUser{}, false, err
 	}
-	if repaidUser.RepaidByUserTrapID != nil || repaidUser.RepaidAt != nil {
+	if repaidUser.RepaidAt != nil {
 		return RepayUser{}, false, ErrAlreadyRepaid
 	}
 
@@ -83,7 +83,7 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 	allUsersRepaidCheck := true
 	err = db.Transaction(func(tx *gorm.DB) error {
 		var rus []RepayUser
-		if err := db.Where("ApplicationID = ?", applicationId).Find(&rus).Error; err != nil {
+		if err := db.Where("application_id = ?", applicationId).Find(&rus).Error; err != nil {
 			return err
 		}
 		for _, user := range rus {
