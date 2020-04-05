@@ -77,7 +77,7 @@ func (repo *userRepository) GetUsers(token string) ([]User, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Authorization", token)
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	body, err := repo.traqRepository.sendReq(req)
 	if err != nil {
@@ -105,7 +105,7 @@ func (repo *userRepository) GetMyUser(token string) (User, error) {
 	if err != nil {
 		return User{}, err
 	}
-	req.Header.Set("Authorization", token)
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	body, err := repo.traqRepository.sendReq(req)
 	if err != nil {

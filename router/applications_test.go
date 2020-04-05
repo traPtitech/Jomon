@@ -705,7 +705,7 @@ func TestPostApplication(t *testing.T) {
 			}
 
 			req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
-			req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+			req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 			req.Header.Set("Authorization", userRepMock.token)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
@@ -806,7 +806,7 @@ func TestPostApplication(t *testing.T) {
 			}
 
 			req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
-			req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+			req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 			req.Header.Set("Authorization", userRepMock.token)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
@@ -877,7 +877,7 @@ func TestPostApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -994,7 +994,7 @@ func TestPatchApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1043,7 +1043,7 @@ func TestPatchApplication(t *testing.T) {
 
 		part := make(textproto.MIMEHeader)
 		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
-		part.Set("Content-Type", "application/json")
+		part.Set(echo.HeaderContentType, "application/json")
 		writer, err := mpw.CreatePart(part)
 		if err != nil {
 			panic(err)
@@ -1058,7 +1058,7 @@ func TestPatchApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1124,7 +1124,7 @@ func TestPatchApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+notExistId.String(), body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		req.Header.Set("Authorization", userRepMock.adminToken)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1185,7 +1185,7 @@ func TestPatchApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		req.Header.Set("Authorization", anotherToken)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)

@@ -149,7 +149,7 @@ func (s *Service) PostApplication(c echo.Context) error {
 
 	images := form.File["images"]
 	for _, file := range images {
-		mimeType := file.Header.Get("Content-Type")
+		mimeType := file.Header.Get(echo.HeaderContentType)
 		if !acceptedMimeTypes[mimeType] {
 			return c.NoContent(http.StatusUnsupportedMediaType)
 		}
@@ -241,7 +241,7 @@ func (s *Service) PatchApplication(c echo.Context) error {
 
 	images := form.File["images"]
 	for _, file := range images {
-		mimeType := file.Header.Get("Content-Type")
+		mimeType := file.Header.Get(echo.HeaderContentType)
 		if !acceptedMimeTypes[mimeType] {
 			return c.NoContent(http.StatusUnsupportedMediaType)
 		}
