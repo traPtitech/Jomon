@@ -194,7 +194,6 @@ func (m *administratorRepositoryMock) RemoveAdministrator(userId string) error {
 /*
 	Util functions
 */
-
 func GenerateApplication(
 	appId uuid.UUID,
 	createUserTrapID string,
@@ -235,6 +234,59 @@ func GenerateApplication(
 		ApplicationsDetailsID:    1,
 		LatestStatesLog:          state,
 		LatestState:              model.StateType{Type: model.Submitted},
+		StatesLogsID:             1,
+		CreateUserTrapID: model.User{
+			TrapId:  createUserTrapID,
+			IsAdmin: false,
+		},
+		CreatedAt:           time.Now(),
+		ApplicationsDetails: []model.ApplicationsDetail{detail},
+		StatesLogs:          []model.StatesLog{state},
+		ApplicationsImages:  []model.ApplicationsImage{},
+		Comments:            []model.Comment{},
+		RepayUsers:          []model.RepayUser{},
+	}
+}
+func GenerateApplicationStatesLogAccepted(
+	appId uuid.UUID,
+	createUserTrapID string,
+	typ model.ApplicationType,
+	title string,
+	remarks string,
+	amount int,
+	paidAt time.Time,
+) model.Application {
+	detail := model.ApplicationsDetail{
+		ID:            1,
+		ApplicationID: appId,
+		UpdateUserTrapID: model.User{
+			TrapId:  createUserTrapID,
+			IsAdmin: false,
+		},
+		Type:      typ,
+		Title:     title,
+		Remarks:   remarks,
+		Amount:    amount,
+		PaidAt:    model.PaidAt{PaidAt: paidAt},
+		UpdatedAt: time.Now(),
+	}
+	state := model.StatesLog{
+		ID:            1,
+		ApplicationID: appId,
+		UpdateUserTrapID: model.User{
+			TrapId:  createUserTrapID,
+			IsAdmin: false,
+		},
+		ToState:   model.StateType{Type: model.Accepted},
+		Reason:    "",
+		CreatedAt: time.Now(),
+	}
+	return model.Application{
+		ID:                       appId,
+		LatestApplicationsDetail: detail,
+		ApplicationsDetailsID:    1,
+		LatestStatesLog:          state,
+		LatestState:              model.StateType{Type: model.Accepted},
 		StatesLogsID:             1,
 		CreateUserTrapID: model.User{
 			TrapId:  createUserTrapID,
