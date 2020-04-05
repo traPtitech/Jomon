@@ -17,7 +17,7 @@ type Service struct {
 func (s *Service) AuthUserMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		c, err := s.AuthUser(c)
-		if err != nil {
+		if c == nil || err != nil {
 			return err
 		}
 		return next(c)

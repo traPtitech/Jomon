@@ -137,7 +137,7 @@ func (s *Service) PostApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	user, ok := c.Get("user").(model.User)
+	user, ok := c.Get(contextUserKey).(model.User)
 	if !ok || user.TrapId == "" {
 		return c.NoContent(http.StatusUnauthorized)
 	}
@@ -214,7 +214,7 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	user, ok := c.Get("user").(model.User)
+	user, ok := c.Get(contextUserKey).(model.User)
 	if !ok || user.TrapId == "" {
 		return c.NoContent(http.StatusUnauthorized)
 	}

@@ -74,7 +74,7 @@ func (d *debugUserRepository) ExistsUser(token string, trapId string) (bool, err
 
 func (s Service) AuthUser(c echo.Context) (echo.Context, error) {
 	user, _ := s.Users.GetMyUser("")
-	c.Set("user", user)
+	c.Set(contextAccessTokenKey, user)
 
 	return c, nil
 }

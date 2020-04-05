@@ -882,7 +882,7 @@ func TestPostApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications")
-		c.Set("user", model.User{
+		c.Set(sessionUserKey, model.User{
 			TrapId: "UserId",
 		})
 

@@ -11,7 +11,14 @@ import (
 	"time"
 )
 
-const sessionDuration = 24 * 60 * 60 * 1000
+const (
+	sessionDuration        = 24 * 60 * 60 * 1000
+	sessionKey             = "sessions"
+	sessionAccessTokenKey  = "access_token"
+	sessionCodeVerifierKey = "code_verifier"
+	sessionRefreshTokenKey = "refresh_token"
+	sessionUserKey         = "user"
+)
 
 type AuthResponse struct {
 	AccessToken  string `json:"access_token"`
@@ -32,12 +39,12 @@ func (s Service) AuthCallback(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	sess, err := session.Get("sessions", c)
+	sess, err := session.Get(sessionKey, c)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	codeVerifier := sess.Values["codeVerifier"].(string)
+	codeVerifier := sess.Values[sessionCodeVerifierKey].(string)
 	res, err := s.TraQAuth.GetAccessToken(code, codeVerifier)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
@@ -48,14 +55,14 @@ func (s Service) AuthCallback(c echo.Context) error {
 		MaxAge:   sessionDuration,
 		HttpOnly: true,
 	}
-	sess.Values["accessToken"] = res.AccessToken
-	sess.Values["refreshToken"] = res.RefreshToken
+	sess.Values[sessionAccessTokenKey] = res.AccessToken
+	sess.Values[sessionRefreshTokenKey] = res.RefreshToken
 
 	user, err := s.Users.GetMyUser(res.AccessToken)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
-	sess.Values["user"] = user
+	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {
 		return c.NoContent(http.StatusInternalServerError)
@@ -65,14 +72,14 @@ func (s Service) AuthCallback(c echo.Context) error {
 }
 
 func (s Service) GeneratePKCE(c echo.Context) error {
-	sess, err := session.Get("sessions", c)
+	sess, err := session.Get(sessionKey, c)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	bytesCodeVerifier := generateCodeVerifier()
 	codeVerifier := string(bytesCodeVerifier)
-	sess.Values["code_verifier"] = codeVerifier
+	sess.Values[sessionCodeVerifierKey] = codeVerifier
 	if err := sess.Save(c.Request(), c.Response()); err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}

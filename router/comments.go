@@ -37,7 +37,7 @@ func (s *Service) PostComments(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	user, ok := c.Get("user").(model.User)
+	user, ok := c.Get(contextUserKey).(model.User)
 	if !ok || user.TrapId == "" {
 		return c.NoContent(http.StatusUnauthorized)
 	}
@@ -68,7 +68,7 @@ func (s *Service) PutComments(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	user, ok := c.Get("user").(model.User)
+	user, ok := c.Get(contextUserKey).(model.User)
 	if !ok || user.TrapId == "" {
 		return c.NoContent(http.StatusUnauthorized)
 	}
@@ -112,7 +112,7 @@ func (s *Service) DeleteComments(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	user, ok := c.Get("user").(model.User)
+	user, ok := c.Get(contextUserKey).(model.User)
 	if !ok || user.TrapId == "" {
 		return c.NoContent(http.StatusUnauthorized)
 	}

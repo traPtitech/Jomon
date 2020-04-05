@@ -37,25 +37,30 @@ func NewService() Service {
 }
 
 func (s Service) AuthUser(c echo.Context) (echo.Context, error) {
-	sess, err := session.Get("sessions", c)
+	sess, err := session.Get(sessionKey, c)
 	if err != nil {
-		return c, c.NoContent(http.StatusInternalServerError)
+		return nil, c.NoContent(http.StatusInternalServerError)
 	}
 
-	accTok := sess.Values["accessToken"]
-	if accTok == nil {
-		return c, c.NoContent(http.StatusUnauthorized)
+	accTok, ok := sess.Values[sessionAccessTokenKey].(string)
+	if !ok || accTok != "" {
+		return nil, c.NoContent(http.StatusUnauthorized)
 	}
+	c.Set(contextAccessTokenKey, accTok)
 
-	user, ok := sess.Values["user_name"].(model.User)
+	user, ok := sess.Values[sessionUserKey].(model.User)
 	if !ok {
-		user, err = s.Users.GetMyUser(accTok.(string))
+		user, err = s.Users.GetMyUser(accTok)
+		sess.Values[sessionUserKey] = user
+		if err := sess.Save(c.Request(), c.Response()); err != nil {
+			return nil, c.NoContent(http.StatusInternalServerError)
+		}
 
 		if err != nil {
-			return c, c.NoContent(http.StatusInternalServerError)
+			return nil, c.NoContent(http.StatusInternalServerError)
 		}
 	}
-	c.Set("user", user)
+	c.Set(contextUserKey, user)
 
 	return c, nil
 }
