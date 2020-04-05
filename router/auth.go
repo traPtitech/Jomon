@@ -20,10 +20,10 @@ type AuthResponse struct {
 }
 
 type PKCEParams struct {
-	CodeChallenge       string
-	CodeChallengeMethod string
-	ClientID            string
-	ResponseType        string
+	CodeChallenge       string `json:"code_challenge"`
+	CodeChallengeMethod string `json:"code_challenge_method"`
+	ClientID            string `json:"client_id"`
+	ResponseType        string `json:"response_type"`
 }
 
 func (s Service) AuthCallback(c echo.Context) error {
