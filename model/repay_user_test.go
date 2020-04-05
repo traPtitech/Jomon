@@ -44,12 +44,11 @@ func TestUpdateRepayUser(t *testing.T) {
 	t.Run("shouldFail", func(t *testing.T) {
 		asr := assert.New(t)
 
-
 		id, err := repo.createApplication(db, "userId")
 		if err != nil {
 			panic(err)
 		}
-		
+
 		_, _, err = repo.UpdateRepayUser(id, "UserId", "userId")
 		asr.Error(err)
 	})

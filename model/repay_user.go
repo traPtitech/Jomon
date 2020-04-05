@@ -1,16 +1,16 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"time"
-	"errors"
 
 	"github.com/gofrs/uuid"
 )
 
 var (
-    ErrAlreadyRepaid = errors.New("alreadyRepaid")
+	ErrAlreadyRepaid = errors.New("alreadyRepaid")
 )
 
 type RepayUser struct {

@@ -141,7 +141,7 @@ func (m *applicationRepositoryMock) UpdateRepayUser(
 	repaidByUserTrapID string,
 ) (model.RepayUser, bool, error) {
 	ret := m.Called(applicationId, repaidToUserTrapID, repaidByUserTrapID)
-	
+
 	m.asr.NotEqual("", repaidToUserTrapID)
 	m.asr.NotEqual("", repaidByUserTrapID)
 

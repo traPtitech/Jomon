@@ -166,7 +166,7 @@ func TestPutState(t *testing.T) {
 	})
 }
 
-func TestPutRepaidStates(t *testing.T){
+func TestPutRepaidStates(t *testing.T) {
 	appRepMock := NewApplicationRepositoryMock(t)
 
 	title := "夏コミの交通費をお願いします。"
@@ -288,7 +288,7 @@ func TestPutRepaidStates(t *testing.T){
 		err = validateResponse(&ctx, requestValidationInput, rec)
 		asr.NoError(err)
 	})
-		t.Run("shouldFail", func(t *testing.T) {
+	t.Run("shouldFail", func(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
