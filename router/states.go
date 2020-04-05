@@ -70,13 +70,13 @@ func (s *Service) PutStates(c echo.Context) error {
 	}
 
 	if sta.Reason == "" {
-		if IsAbleNoReasonChangeState(sta.ToState, application.LatestState) {
+		if !IsAbleNoReasonChangeState(sta.ToState, application.LatestState) {
 			return c.JSON(http.StatusBadRequest, errsta)
 		}
 	}
 
 	if user == application.CreateUserTrapID {
-		if IsAbleCreatorChangeState(sta.ToState, application.LatestState) {
+		if !IsAbleCreatorChangeState(sta.ToState, application.LatestState) {
 			return c.JSON(http.StatusBadRequest, errsta)
 		}
 	}
@@ -86,7 +86,7 @@ func (s *Service) PutStates(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	if admin {
-		if IsAbleAdminChangeState(sta.ToState, application.LatestState) {
+		if !IsAbleAdminChangeState(sta.ToState, application.LatestState) {
 			return c.JSON(http.StatusBadRequest, errsta)
 		}
 	}
@@ -108,40 +108,40 @@ func (s *Service) PutStates(c echo.Context) error {
 
 func IsAbleNoReasonChangeState(toState model.StateType, currentState model.StateType) bool {
 	if (toState == model.StateType{Type: model.FixRequired}) && (currentState == model.StateType{Type: model.Submitted}) {
-		return true
+		return false
 	}
 	if (toState == model.StateType{Type: model.Rejected}) && (currentState == model.StateType{Type: model.Submitted}) {
+		return false
+	}
+	if (toState == model.StateType{Type: model.Submitted}) && (currentState == model.StateType{Type: model.Accepted}) {
+		return false
+	}
+	return true
+}
+func IsAbleCreatorChangeState(toState model.StateType, currentState model.StateType) bool {
+	if (toState == model.StateType{Type: model.Submitted}) && (currentState == model.StateType{Type: model.FixRequired}) {
+		return true
+	}
+	return false
+}
+
+func IsAbleAdminChangeState(toState model.StateType, currentState model.StateType) bool {
+	if (toState == model.StateType{Type: model.Rejected}) && (currentState == model.StateType{Type: model.Submitted}) {
+		return true
+	}
+	if (toState == model.StateType{Type: model.FixRequired}) && (currentState == model.StateType{Type: model.Submitted}) {
+		return true
+	}
+	if (toState == model.StateType{Type: model.Submitted}) && (currentState == model.StateType{Type: model.FixRequired}) {
+		return true
+	}
+	if (toState == model.StateType{Type: model.Accepted}) && (currentState == model.StateType{Type: model.Submitted}) {
 		return true
 	}
 	if (toState == model.StateType{Type: model.Submitted}) && (currentState == model.StateType{Type: model.Accepted}) {
 		return true
 	}
 	return false
-}
-func IsAbleCreatorChangeState(toState model.StateType, currentState model.StateType) bool {
-	if (toState == model.StateType{Type: model.Submitted}) && (currentState == model.StateType{Type: model.FixRequired}) {
-		return false
-	}
-	return true
-}
-
-func IsAbleAdminChangeState(toState model.StateType, currentState model.StateType) bool {
-	if (toState == model.StateType{Type: model.Rejected}) && (currentState == model.StateType{Type: model.Submitted}) {
-		return false
-	}
-	if (toState == model.StateType{Type: model.FixRequired}) && (currentState == model.StateType{Type: model.Submitted}) {
-		return false
-	}
-	if (toState == model.StateType{Type: model.Submitted}) && (currentState == model.StateType{Type: model.FixRequired}) {
-		return false
-	}
-	if (toState == model.StateType{Type: model.Accepted}) && (currentState == model.StateType{Type: model.Submitted}) {
-		return false
-	}
-	if (toState == model.StateType{Type: model.Submitted}) && (currentState == model.StateType{Type: model.Accepted}) {
-		return false
-	}
-	return true
 }
 
 func (s *Service) PutRepaidStates(c echo.Context) error {
