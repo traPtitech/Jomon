@@ -3,7 +3,6 @@ package router
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -19,8 +18,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/traPtitech/Jomon/model"
 )
-
-var randSrc = rand.NewSource(0)
 
 type commentRepositoryMock struct {
 	mock.Mock

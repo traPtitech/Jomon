@@ -141,13 +141,3 @@ func (s *Service) SetMyUser(c echo.Context) (echo.Context, error) {
 
 	return c, nil
 }
-
-func (s *Service) AuthUser(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c, err := s.SetMyUser(c)
-		if err != nil {
-			return c.NoContent(http.StatusUnauthorized)
-		}
-		return next(c)
-	}
-}

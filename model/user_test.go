@@ -20,7 +20,7 @@ func NewTraqRepositoryMock(token string) *traqRepositoryMock {
 	m := new(traqRepositoryMock)
 	m.token = token
 
-	getUsersReq, err := http.NewRequest("GET", baseURL+"/users", nil)
+	getUsersReq, err := http.NewRequest("GET", TraQBaseURL+"/users", nil)
 	if err != nil {
 		panic(err)
 	}
@@ -36,7 +36,7 @@ func NewTraqRepositoryMock(token string) *traqRepositoryMock {
 		}
 	]`, myUserId)), nil)
 
-	getMyUserReq, err := http.NewRequest("GET", baseURL+"/users/me", nil)
+	getMyUserReq, err := http.NewRequest("GET", TraQBaseURL+"/users/me", nil)
 	if err != nil {
 		panic(err)
 	}
