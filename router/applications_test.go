@@ -111,6 +111,54 @@ func (m *applicationRepositoryMock) PatchApplication(
 	return ret.Error(0)
 }
 
+func (m *applicationRepositoryMock) UpdateStatesLog(
+	applicationId uuid.UUID,
+	updateUserTrapId string,
+	reason string,
+	toState model.StateType,
+) (model.StatesLog, error) {
+	ret := m.Called(applicationId, updateUserTrapId, reason, toState)
+
+	m.asr.NotEqual("", updateUserTrapId)
+
+	if &toState != nil {
+		m.asr.Contains([...]int{model.Submitted, model.FixRequired, model.FixRequired, model.Accepted, model.FullyRepaid, model.Rejected}, toState.Type)
+	}
+	state := model.StatesLog{
+		ApplicationID: applicationId,
+		UpdateUserTrapID: model.User{
+			TrapId: updateUserTrapId,
+		},
+		ToState: toState,
+		Reason:  reason,
+	}
+	return state, ret.Error(1)
+}
+
+func (m *applicationRepositoryMock) UpdateRepayUser(
+	applicationId uuid.UUID,
+	repaidToUserTrapID string,
+	repaidByUserTrapID string,
+) (model.RepayUser, bool, error) {
+	ret := m.Called(applicationId, repaidToUserTrapID, repaidByUserTrapID)
+
+	m.asr.NotEqual("", repaidToUserTrapID)
+	m.asr.NotEqual("", repaidByUserTrapID)
+
+	dt := time.Now()
+	ru := model.RepayUser{
+		ApplicationID: applicationId,
+		RepaidToUserTrapID: model.User{
+			TrapId: repaidToUserTrapID,
+		},
+		RepaidByUserTrapID: &model.User{
+			TrapId: repaidByUserTrapID,
+		},
+		RepaidAt: &dt,
+	}
+	return ru, ret.Get(1).(bool), ret.Error(2)
+}
+
 type administratorRepositoryMock struct {
 	mock.Mock
 }
@@ -146,7 +194,6 @@ func (m *administratorRepositoryMock) RemoveAdministrator(userId string) error {
 /*
 	Util functions
 */
-
 func GenerateApplication(
 	appId uuid.UUID,
 	createUserTrapID string,
@@ -187,6 +234,59 @@ func GenerateApplication(
 		ApplicationsDetailsID:    1,
 		LatestStatesLog:          state,
 		LatestState:              model.StateType{Type: model.Submitted},
+		StatesLogsID:             1,
+		CreateUserTrapID: model.User{
+			TrapId:  createUserTrapID,
+			IsAdmin: false,
+		},
+		CreatedAt:           time.Now(),
+		ApplicationsDetails: []model.ApplicationsDetail{detail},
+		StatesLogs:          []model.StatesLog{state},
+		ApplicationsImages:  []model.ApplicationsImage{},
+		Comments:            []model.Comment{},
+		RepayUsers:          []model.RepayUser{},
+	}
+}
+func GenerateApplicationStatesLogAccepted(
+	appId uuid.UUID,
+	createUserTrapID string,
+	typ model.ApplicationType,
+	title string,
+	remarks string,
+	amount int,
+	paidAt time.Time,
+) model.Application {
+	detail := model.ApplicationsDetail{
+		ID:            1,
+		ApplicationID: appId,
+		UpdateUserTrapID: model.User{
+			TrapId:  createUserTrapID,
+			IsAdmin: false,
+		},
+		Type:      typ,
+		Title:     title,
+		Remarks:   remarks,
+		Amount:    amount,
+		PaidAt:    model.PaidAt{PaidAt: paidAt},
+		UpdatedAt: time.Now(),
+	}
+	state := model.StatesLog{
+		ID:            1,
+		ApplicationID: appId,
+		UpdateUserTrapID: model.User{
+			TrapId:  createUserTrapID,
+			IsAdmin: false,
+		},
+		ToState:   model.StateType{Type: model.Accepted},
+		Reason:    "",
+		CreatedAt: time.Now(),
+	}
+	return model.Application{
+		ID:                       appId,
+		LatestApplicationsDetail: detail,
+		ApplicationsDetailsID:    1,
+		LatestStatesLog:          state,
+		LatestState:              model.StateType{Type: model.Accepted},
 		StatesLogsID:             1,
 		CreateUserTrapID: model.User{
 			TrapId:  createUserTrapID,

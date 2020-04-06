@@ -1,11 +1,16 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"time"
 
 	"github.com/gofrs/uuid"
+)
+
+var (
+	ErrAlreadyRepaid = errors.New("alreadyRepaid")
 )
 
 type RepayUser struct {
@@ -44,4 +49,61 @@ func (_ *applicationRepository) deleteRepayUserByApplicationID(db_ *gorm.DB, app
 	return db_.Where(&RepayUser{
 		ApplicationID: applicationId,
 	}).Delete(&RepayUser{}).Error
+}
+
+func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidToUserTrapID string, repaidByUserTrapID string) (RepayUser, bool, error) {
+	dt := time.Now()
+	ru := RepayUser{
+		ApplicationID: applicationId,
+		RepaidToUserTrapID: User{
+			TrapId: repaidToUserTrapID,
+		},
+		RepaidByUserTrapID: &User{
+			TrapId: repaidByUserTrapID,
+		},
+		RepaidAt: &dt,
+	}
+	var repaidUser RepayUser
+	err := db.Where("application_id = ?", applicationId).Where("repaid_to_user_trap_id = ?", repaidToUserTrapID).First(&repaidUser).Error
+	if err != nil {
+		return RepayUser{}, false, err
+	}
+	if repaidUser.RepaidAt != nil {
+		return RepayUser{}, false, ErrAlreadyRepaid
+	}
+
+	log := StatesLog{
+		ApplicationID: applicationId,
+		UpdateUserTrapID: User{
+			TrapId: repaidByUserTrapID,
+		},
+		ToState: StateType{Type: FullyRepaid},
+		Reason:  "",
+	}
+	allUsersRepaidCheck := true
+	err = db.Transaction(func(tx *gorm.DB) error {
+		var rus []RepayUser
+		if err := db.Where("application_id = ?", applicationId).Find(&rus).Error; err != nil {
+			return err
+		}
+		for _, user := range rus {
+			allUsersRepaidCheck = allUsersRepaidCheck && (user.RepaidByUserTrapID != nil) && (user.RepaidAt != nil)
+		}
+		if allUsersRepaidCheck {
+			err := repo.updateStatesLogTransaction(tx, applicationId, log)
+			if err != nil {
+				return err
+			}
+		}
+		return tx.Model(&RepayUser{ApplicationID: applicationId, RepaidToUserTrapID: User{TrapId: repaidToUserTrapID}}).Updates(RepayUser{
+			RepaidByUserTrapID: &User{
+				TrapId: repaidByUserTrapID,
+			},
+		}).Error
+	})
+	if err != nil {
+		return RepayUser{}, false, err
+	}
+
+	return ru, allUsersRepaidCheck, nil
 }

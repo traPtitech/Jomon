@@ -39,8 +39,8 @@ func SetRouting(e *echo.Echo, service Service) {
 
 	apiStatus := e.Group("/application/:applicationId/states")
 	{
-		apiStatus.PUT("", PutStates)
-		apiStatus.PUT("/repaid/:repaidTold", PutRepaidStates)
+		apiStatus.PUT("", service.PutStates)
+		apiStatus.PUT("/repaid/:repaidToId", service.PutRepaidStates)
 	}
 
 	apiUsers := e.Group("/users")
