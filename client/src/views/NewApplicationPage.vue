@@ -146,6 +146,7 @@
         </v-autocomplete>
 
         <h3 class="ml-0 mr-0">申請書画像リスト</h3>
+        <image-uploader />
 
         画像リスト(画像アップロード)
       </v-card>
@@ -216,6 +217,7 @@
 <script>
 import axios from "axios";
 import Icon from "./components/Icon";
+import ImageUploader from "./components/ImageUploader";
 import { mapActions } from "vuex";
 export default {
   data: () => ({
@@ -338,7 +340,8 @@ export default {
   },
   props: {},
   components: {
-    Icon
+    Icon,
+    ImageUploader
   }
 };
 </script>
