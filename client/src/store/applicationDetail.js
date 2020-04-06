@@ -15,7 +15,7 @@ export const applicationDetail = {
       type: "",
       title: "",
       remarks: "",
-      ammount: 0,
+      amount: 0,
       paid_at: "",
       updated_at: "",
       repaid_to_id: []
@@ -54,7 +54,7 @@ export const applicationDetail = {
         type: "",
         title: "",
         remarks: "",
-        ammount: 0,
+        amount: 0,
         paid_at: "",
         updated_at: ""
       }
@@ -90,12 +90,19 @@ export const applicationDetail = {
           sort_date: new Date(log.created_at)
         });
       });
+      let pre_record = "";
       state.application_detail_logs.forEach(log => {
-        logs.push({
-          log_type: "application",
-          content: log,
-          sort_date: new Date(log.updated_at)
-        });
+        if (pre_record !== "") {
+          logs.push({
+            log_type: "application",
+            content: {
+              log: log,
+              pre_log: pre_record
+            },
+            sort_date: new Date(log.updated_at)
+          });
+        }
+        pre_record = log;
       });
       state.repayment_logs.forEach(log => {
         logs.push({
