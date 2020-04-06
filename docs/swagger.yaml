@@ -13,12 +13,13 @@ paths:
       description: PKCEを取得する｡
       tags:
         - Auth
-      response:
+      responses:
         "200":
           description: 取得できた｡
           content:
             application/json:
-              type: object
+              schema:
+                type: object
                 properties:
                   code_challenge:
                     type: string
