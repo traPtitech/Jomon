@@ -60,6 +60,13 @@ func (s Service) AuthUser(c echo.Context) (echo.Context, error) {
 			return nil, c.NoContent(http.StatusInternalServerError)
 		}
 	}
+
+	admins, err := s.Administrators.GetAdministratorList()
+	if err != nil {
+		return nil, c.NoContent(http.StatusInternalServerError)
+	}
+	user.GiveIsUserAdmin(admins)
+
 	c.Set(contextUserKey, user)
 
 	return c, nil

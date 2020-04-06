@@ -77,7 +77,7 @@ func TestGetImages(t *testing.T) {
 
 	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
-	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
+	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -96,12 +96,12 @@ func TestGetImages(t *testing.T) {
 			ctx := context.TODO()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/images/"+imId.String(), nil)
-			req.Header.Set("Authorization", userRepMock.token)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetParamNames("/images/:imageId")
 			c.SetParamNames("imageId")
 			c.SetParamValues(imId.String())
+			userRepMock.SetNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -118,11 +118,6 @@ func TestGetImages(t *testing.T) {
 				panic(err)
 			}
 
-			c, err = service.SetMyUser(c)
-			if err != nil {
-				panic(err)
-			}
-
 			err = service.GetImages(c)
 			asr.NoError(err)
 			asr.Equal(http.StatusOK, rec.Code)
@@ -135,7 +130,6 @@ func TestGetImages(t *testing.T) {
 			ctx := context.TODO()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/images/"+imId.String(), nil)
-			req.Header.Set("Authorization", userRepMock.token)
 			req.Header.Set("If-Modified-Since", createdAt.UTC().Format(http.TimeFormat))
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
@@ -158,11 +152,6 @@ func TestGetImages(t *testing.T) {
 				panic(err)
 			}
 
-			c, err = service.SetMyUser(c)
-			if err != nil {
-				panic(err)
-			}
-
 			err = service.GetImages(c)
 			asr.NoError(err)
 			asr.Equal(http.StatusNotModified, rec.Code)
@@ -178,7 +167,6 @@ func TestGetImages(t *testing.T) {
 		ctx := context.TODO()
 
 		req := httptest.NewRequest(http.MethodGet, "/api/images/"+errImId.String(), nil)
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetParamNames("/images/:imageId")
@@ -197,11 +185,6 @@ func TestGetImages(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -232,10 +215,7 @@ func TestDeleteImages(t *testing.T) {
 
 	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
-	userRepMock := NewUserRepositoryMock(t, userId, "AdminUserId")
-
-	anotherToken := "AnotherToken"
-	userRepMock.On("GetMyUser", anotherToken).Return(model.User{TrapId: "AnotherId"}, nil)
+	userRepMock := NewUserRepositoryMock(userId, "AdminUserId")
 
 	imRepMock := new(applicationsImageRepositoryMock)
 
@@ -278,12 +258,12 @@ func TestDeleteImages(t *testing.T) {
 			ctx := context.TODO()
 
 			req := httptest.NewRequest(http.MethodDelete, "/api/images/"+imId.String(), nil)
-			req.Header.Set("Authorization", userRepMock.token)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetParamNames("/images/:imageId")
 			c.SetParamNames("imageId")
 			c.SetParamValues(imId.String())
+			userRepMock.SetNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -297,11 +277,6 @@ func TestDeleteImages(t *testing.T) {
 			}
 
 			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-				panic(err)
-			}
-
-			c, err = service.SetMyUser(c)
-			if err != nil {
 				panic(err)
 			}
 
@@ -319,12 +294,12 @@ func TestDeleteImages(t *testing.T) {
 			ctx := context.TODO()
 
 			req := httptest.NewRequest(http.MethodDelete, "/api/images/"+imId.String(), nil)
-			req.Header.Set("Authorization", userRepMock.adminToken)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetParamNames("/images/:imageId")
 			c.SetParamNames("imageId")
 			c.SetParamValues(imId.String())
+			userRepMock.SetAdminUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -338,11 +313,6 @@ func TestDeleteImages(t *testing.T) {
 			}
 
 			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-				panic(err)
-			}
-
-			c, err = service.SetMyUser(c)
-			if err != nil {
 				panic(err)
 			}
 
@@ -364,12 +334,12 @@ func TestDeleteImages(t *testing.T) {
 			ctx := context.TODO()
 
 			req := httptest.NewRequest(http.MethodDelete, "/api/images/"+errImId.String(), nil)
-			req.Header.Set("Authorization", userRepMock.token)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetParamNames("/images/:imageId")
 			c.SetParamNames("imageId")
 			c.SetParamValues(errImId.String())
+			userRepMock.SetNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -383,11 +353,6 @@ func TestDeleteImages(t *testing.T) {
 			}
 
 			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-				panic(err)
-			}
-
-			c, err = service.SetMyUser(c)
-			if err != nil {
 				panic(err)
 			}
 
@@ -405,12 +370,12 @@ func TestDeleteImages(t *testing.T) {
 			ctx := context.TODO()
 
 			req := httptest.NewRequest(http.MethodDelete, "/api/images/"+imId.String(), nil)
-			req.Header.Set("Authorization", anotherToken)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetParamNames("/images/:imageId")
 			c.SetParamNames("imageId")
 			c.SetParamValues(imId.String())
+			userRepMock.SetAnotherNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -424,11 +389,6 @@ func TestDeleteImages(t *testing.T) {
 			}
 
 			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-				panic(err)
-			}
-
-			c, err = service.SetMyUser(c)
-			if err != nil {
 				panic(err)
 			}
 

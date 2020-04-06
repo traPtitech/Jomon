@@ -96,7 +96,7 @@ func TestPostComment(t *testing.T) {
 	commentText := "This is comment."
 	commentRepoMock.On("CreateComment", id, commentText, "UserId").Return(GenerateComment(id, commentId, "UserId", commentText), nil)
 
-	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
+	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -120,12 +120,12 @@ func TestPostComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, "/api/applications/"+id.String()+"/comments", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -139,11 +139,6 @@ func TestPostComment(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -173,12 +168,12 @@ func TestPostComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, "/api/applications/"+anotherId.String()+"/comments", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(anotherId.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -192,11 +187,6 @@ func TestPostComment(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -219,12 +209,12 @@ func TestPostComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, "/api/applications/"+id.String()+"/comments", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -238,11 +228,6 @@ func TestPostComment(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -280,10 +265,7 @@ func TestPutComment(t *testing.T) {
 	commentRepoMock.On("PutComment", id, commentId, newCommentText).Return(GenerateComment(id, commentId, "UserId", newCommentText), nil)
 	commentRepoMock.On("PutComment", mock.Anything, mock.Anything, mock.Anything).Return(model.Comment{}, gorm.ErrRecordNotFound)
 
-	anotherToken := "AnotherToken"
-
-	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
-	userRepMock.On("GetMyUser", anotherToken).Return(model.User{TrapId: "AnotherId"}, nil)
+	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -307,12 +289,12 @@ func TestPutComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(commentId), strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(commentId))
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -326,11 +308,6 @@ func TestPutComment(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -357,12 +334,12 @@ func TestPutComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(anotherCommentId), strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(anotherCommentId))
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -376,11 +353,6 @@ func TestPutComment(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -402,12 +374,12 @@ func TestPutComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(commentId), strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", anotherToken)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(commentId))
+		userRepMock.SetAnotherNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -421,11 +393,6 @@ func TestPutComment(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -447,12 +414,12 @@ func TestPutComment(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(commentId), strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(commentId))
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -466,11 +433,6 @@ func TestPutComment(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -508,10 +470,7 @@ func TestDeleteComment(t *testing.T) {
 	commentRepoMock.On("DeleteComment", id, commentId).Return(nil)
 	commentRepoMock.On("DeleteComment", mock.Anything, mock.Anything).Return(gorm.ErrRecordNotFound)
 
-	anotherToken := "AnotherToken"
-
-	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
-	userRepMock.On("GetMyUser", anotherToken).Return(model.User{TrapId: "AnotherId"}, nil)
+	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -528,12 +487,12 @@ func TestDeleteComment(t *testing.T) {
 		ctx := context.TODO()
 
 		req := httptest.NewRequest(http.MethodDelete, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(commentId), nil)
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(commentId))
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -547,11 +506,6 @@ func TestDeleteComment(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -571,12 +525,12 @@ func TestDeleteComment(t *testing.T) {
 		anotherCommentId := int(randSrc.Int63())
 
 		req := httptest.NewRequest(http.MethodDelete, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(anotherCommentId), nil)
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(anotherCommentId))
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -590,11 +544,6 @@ func TestDeleteComment(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -609,12 +558,12 @@ func TestDeleteComment(t *testing.T) {
 		ctx := context.TODO()
 
 		req := httptest.NewRequest(http.MethodDelete, "/api/applications/"+id.String()+"/comments/"+strconv.Itoa(commentId), nil)
-		req.Header.Set("Authorization", anotherToken)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/comments/:commentId")
 		c.SetParamNames("applicationId", "commentId")
 		c.SetParamValues(id.String(), strconv.Itoa(commentId))
+		userRepMock.SetAnotherNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -628,11 +577,6 @@ func TestDeleteComment(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 

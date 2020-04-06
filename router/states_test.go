@@ -61,10 +61,7 @@ func TestPutState(t *testing.T) {
 		panic(err)
 	}
 
-	anotherToken := "AnotherToken"
-
-	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
-	userRepMock.On("GetMyUser", anotherToken).Return(model.User{TrapId: "AnotherId"}, nil)
+	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -84,12 +81,12 @@ func TestPutState(t *testing.T) {
 		`, string(toStateAccepted), stateReason)
 		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/states")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -103,11 +100,6 @@ func TestPutState(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -133,12 +125,12 @@ func TestPutState(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/states")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -152,11 +144,6 @@ func TestPutState(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -196,10 +183,7 @@ func TestPutRepaidStates(t *testing.T) {
 		panic(err)
 	}
 
-	anotherToken := "AnotherToken"
-
-	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
-	userRepMock.On("GetMyUser", anotherToken).Return(model.User{TrapId: "AnotherId"}, nil)
+	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -221,12 +205,12 @@ func TestPutRepaidStates(t *testing.T) {
 		`, string(toStateAccepted), stateReason)
 		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/states")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -242,24 +226,18 @@ func TestPutRepaidStates(t *testing.T) {
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
 			panic(err)
 		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
-			panic(err)
-		}
-
 		err = service.PutStates(c)
 		if err != nil {
 			panic(err)
 		}
 
 		req = httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states/repaid/"+userId, nil)
-		req.Header.Set("Authorization", userRepMock.token)
 		rec = httptest.NewRecorder()
 		c = e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/states/repaid/:repaidToId")
 		c.SetParamNames("applicationId", "repaidToId")
 		c.SetParamValues(id.String(), userId)
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err = router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -273,11 +251,6 @@ func TestPutRepaidStates(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -295,12 +268,12 @@ func TestPutRepaidStates(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states/repaid/"+userId, nil)
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/states/repaid/:repaidToId")
 		c.SetParamNames("applicationId", "repaidToId")
 		c.SetParamValues(id.String(), userId)
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -314,11 +287,6 @@ func TestPutRepaidStates(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -336,12 +304,12 @@ func TestPutRepaidStates(t *testing.T) {
 
 		req = httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states/repaid/"+userId, nil)
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.token)
 		rec = httptest.NewRecorder()
 		c = e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId/states/repaid/:repaidToId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err = router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -355,11 +323,6 @@ func TestPutRepaidStates(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
