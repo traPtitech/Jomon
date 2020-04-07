@@ -35,8 +35,6 @@ func NewUserRepositoryMock(userId string, adminUserId string) *userRepositoryMoc
 	}, nil)
 
 	m.On("ExistsUser", mock.Anything, userId).Return(true, nil)
-	m.On("ExistsUser", mock.Anything, userId).Return(true, nil)
-	m.On("ExistsUser", mock.Anything, adminUserId).Return(true, nil)
 	m.On("ExistsUser", mock.Anything, adminUserId).Return(true, nil)
 	m.On("ExistsUser", mock.Anything, mock.Anything).Return(false, nil)
 

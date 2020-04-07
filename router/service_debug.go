@@ -48,6 +48,7 @@ func NewService() Service {
 				},
 			},
 		},
+		TraQAuth: model.NewTraQAuthRepository(""),
 	}
 }
 

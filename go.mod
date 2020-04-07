@@ -12,6 +12,7 @@ require (
 	github.com/labstack/echo-contrib v0.9.0
 	github.com/labstack/echo/v4 v4.1.11
 	github.com/ncw/swift v1.0.50
+	github.com/srinathgs/mysqlstore v0.0.0-20200324040909-ce0114d1104d
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/tools v0.0.0-20190608022120-eacb66d2a7c3
 )
