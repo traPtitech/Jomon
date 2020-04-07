@@ -34,9 +34,20 @@ export const applicationList = {
     }
   },
   actions: {
-    async getApplicationList({ commit }) {
+    async getApplicationList({ commit }, params) {
+      Object.keys(params).forEach(key => {
+        if (
+          params[key] === null ||
+          params[key] === undefined ||
+          params[key] === ""
+        ) {
+          delete params[key];
+        }
+      });
       try {
-        const response = await axios.get("/api/applications");
+        const response = await axios.get("/api/applications", {
+          params
+        });
         commit("setApplicationList", response.data);
       } catch (err) {
         console.log(err);
