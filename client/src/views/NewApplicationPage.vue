@@ -146,9 +146,7 @@
         </v-autocomplete>
 
         <h3 class="ml-0 mr-0">申請書画像リスト</h3>
-        <image-uploader />
-
-        画像リスト(画像アップロード)
+        <image-uploader v-model="imageURL" />
       </v-card>
 
       <!-- todo focusしていないところのvalidateが機能していない -->
@@ -242,6 +240,7 @@ export default {
     title: "",
     amount: 0,
     remarks: "",
+    imageURL: [],
     nullRules: [v => !!v || ""]
   }),
   mounted() {
@@ -269,7 +268,6 @@ export default {
   },
 
   // todo 返金対象者周りのポスト等
-  // todo 画像のアップロード
   methods: {
     ...mapActions({
       getUsers: "getUserList"
@@ -278,12 +276,15 @@ export default {
       if (this.$refs.form.validate()) {
         axios
           .post("/api/applications/", {
-            type: this.$route.params.type,
-            title: this.title,
-            remarks: this.remarks,
-            paid_at: this.paid_at,
-            amount: this.amount,
-            repaid_to_id: this.traPID
+            details: {
+              type: this.$route.params.type,
+              title: this.title,
+              remarks: this.remarks,
+              paid_at: this.paid_at,
+              amount: this.amount,
+              repaid_to_id: this.traPID
+            },
+            images: this.imageURL
           })
           .then(
             response => (

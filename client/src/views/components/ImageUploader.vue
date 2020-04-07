@@ -25,6 +25,12 @@ export default {
       uploadImageUrl: []
     };
   },
+  props: {
+    value: {
+      type: Array,
+      value: []
+    }
+  },
   methods: {
     imageChange(files) {
       this.uploadImageUrl = [];
@@ -34,6 +40,7 @@ export default {
         fr.readAsDataURL(file);
         fr.addEventListener("load", () => {
           this.uploadImageUrl.push(fr.result);
+          this.$emit("input", this.uploadImageUrl);
         });
       });
     }
