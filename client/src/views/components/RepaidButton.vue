@@ -41,19 +41,14 @@ export default {
   },
   computed: {
     repaidtotrapid() {
-      let trap_ids = new Array();
-      let repayment_logs = this.$store.state.application_detail_paper.core
-        .repayment_logs;
-      let count = 0;
-      for (let i = 0; i < repayment_logs.length - 1; i++) {
-        if (
-          repayment_logs[i].repaid_at === "" ||
-          repayment_logs[i].repaid_at === null
-        ) {
-          trap_ids[count] = repayment_logs[i].repaid_to_user.trap_id;
-          count++;
+      let trap_ids = [];
+      this.$store.state.application_detail_paper.core.repayment_logs.forEach(
+        log => {
+          if (log.repaid_at === "" || log.repaid_at === null) {
+            trap_ids.push(log.repaid_to_user.trap_id);
+          }
         }
-      }
+      );
       return trap_ids;
     }
   }
