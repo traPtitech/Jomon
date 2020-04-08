@@ -23,33 +23,30 @@ func NewService() Service {
 		panic(err)
 	}
 
-	return Service{
+	s := Service{
 		Administrators: model.NewAdministratorRepository(),
 		Applications:   model.NewApplicationRepository(),
 		Comments:       model.NewCommentRepository(),
 		Images:         model.NewApplicationsImageRepository(&local),
 		Users: &debugUserRepository{
 			users: []model.User{
-				{
-					TrapId:  "MyUser",
-					IsAdmin: true,
-				},
-				{
-					TrapId:  "AdminUser",
-					IsAdmin: true,
-				},
-				{
-					TrapId:  "NormalUser1",
-					IsAdmin: false,
-				},
-				{
-					TrapId:  "NormalUser2",
-					IsAdmin: false,
-				},
+				{TrapId:  "MyUser"},
+				{TrapId:  "AdminUser"},
+				{TrapId:  "NormalUser1"},
+				{TrapId:  "NormalUser2"},
 			},
 		},
 		TraQAuth: model.NewTraQAuthRepository(""),
 	}
+
+	if err := s.Administrators.AddAdministrator("MyUser"); err != nil {
+		panic(err)
+	}
+	if err := s.Administrators.AddAdministrator("AdminUser"); err != nil {
+		panic(err)
+	}
+
+	return s
 }
 
 type debugUserRepository struct {
@@ -76,6 +73,7 @@ func (d *debugUserRepository) ExistsUser(token string, trapId string) (bool, err
 func (s Service) AuthUser(c echo.Context) (echo.Context, error) {
 	user, _ := s.Users.GetMyUser("")
 	c.Set(contextUserKey, user)
+	c.Set(contextAccessTokenKey, "")
 
 	return c, nil
 }
