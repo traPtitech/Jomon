@@ -22,7 +22,8 @@ export default {
   data() {
     return {
       images: null,
-      uploadImageUrl: []
+      uploadImageUrl: [],
+      uploadImageBlob: []
     };
   },
   props: {
@@ -34,18 +35,14 @@ export default {
   methods: {
     imageChange(files) {
       this.uploadImageUrl = [];
-      this.uploadImageBin = [];
+      this.uploadImageBlob = [];
       files.forEach(file => {
         const fr = new FileReader();
-        const fr2 = new FileReader();
-        fr2.readAsDataURL(file);
-        fr2.addEventListener("load", () => {
-          this.uploadImageUrl.push(fr2.result);
-        });
-        fr.readAsBinaryString(file);
+        fr.readAsDataURL(file);
+        this.uploadImageBlob.push(file);
+        this.$emit("input", this.uploadImageBlob);
         fr.addEventListener("load", () => {
-          this.uploadImageBin.push(fr.result);
-          this.$emit("input", this.uploadImageBin);
+          this.uploadImageUrl.push(fr.result);
         });
       });
     }

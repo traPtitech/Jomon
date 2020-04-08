@@ -146,7 +146,7 @@
         </v-autocomplete>
 
         <h3 class="ml-0 mr-0">申請書画像リスト</h3>
-        <image-uploader v-model="imageURL" />
+        <image-uploader v-model="imageBlobs" />
       </v-card>
 
       <!-- todo focusしていないところのvalidateが機能していない -->
@@ -240,7 +240,7 @@ export default {
     title: "",
     amount: 0,
     remarks: "",
-    imageURL: [],
+    imageBlobs: [],
     nullRules: [v => !!v || ""]
   }),
   mounted() {
@@ -274,17 +274,22 @@ export default {
     }),
     submit() {
       if (this.$refs.form.validate()) {
+        let form = new FormData();
+        let details = {
+          type: this.$route.params.type,
+          title: this.title,
+          remarks: this.remarks,
+          paid_at: this.paid_at,
+          amount: this.amount,
+          repaid_to_id: this.traPID
+        };
+        form.append("details", details);
+        this.imageBlobs.forEach(imageBlob => {
+          form.append("images", imageBlob);
+        });
         axios
-          .post("/api/applications/", {
-            details: {
-              type: this.$route.params.type,
-              title: this.title,
-              remarks: this.remarks,
-              paid_at: this.paid_at,
-              amount: this.amount,
-              repaid_to_id: this.traPID
-            },
-            images: this.imageURL
+          .post("/api/applications/", form, {
+            headers: { "content-type": "multipart/form-data" }
           })
           .then(
             response => (
