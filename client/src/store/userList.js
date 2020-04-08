@@ -7,6 +7,12 @@ export const userList = {
       is_admin: false
     }
   ],
+  getters: {
+    trap_ids: state => {
+      const trap_ids = state.map(data => data.trap_id);
+      return trap_ids;
+    }
+  },
   mutations: {
     setUserList(state, newState) {
       state.splice(0);
