@@ -147,7 +147,6 @@
         </v-row>
         <h3 class="ml-0 mr-0">払い戻し対象者</h3>
         <v-autocomplete
-          @focus="getUsers()"
           ref="traPID"
           v-model="repaid_to_id_change"
           :rules="[
@@ -269,18 +268,17 @@ export default {
       changeRules: [v => (v !== this.detail.core.repayment_logs && !!v) || ""]
     };
   },
-  created: function() {
+  async created() {
     this.title_change = this.detail.core.current_detail.title;
     this.type_object.type = this.detail.core.current_detail.type;
     this.title_change = this.detail.core.current_detail.title;
     this.remarks_change = this.detail.core.current_detail.remarks;
     this.paid_at_change = this.detail.core.current_detail.paid_at;
     this.amount_change = this.detail.core.current_detail.amount;
-
-    let trap_ids = new Array();
-    for (let i = 0; i < this.detail.core.repayment_logs.length; i++) {
-      trap_ids[i] = this.detail.core.repayment_logs[i].repaid_to_user.trap_id;
-    }
+    await this.getUsers();
+    const trap_ids = this.detail.core.repayment_logs.map(
+      log => log.repaid_to_user.trap_id
+    );
     this.repaid_to_id_change = trap_ids;
   },
   mounted() {},
@@ -308,12 +306,10 @@ export default {
 
   methods: {
     ...mapMutations(["deleteFix"]),
-    ...mapActions([
-      {
-        getUsers: "getUserList"
-      },
-      "getApplicationDetail"
-    ]),
+    ...mapActions({
+      getUsers: "getUserList",
+      getApplicationDetail: "getApplicationDetail"
+    }),
     async submit() {
       if (this.$refs.form.validate()) {
         const response = await axios.patch(
