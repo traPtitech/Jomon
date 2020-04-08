@@ -137,7 +137,7 @@ func (s *Service) PostApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	user, ok := c.Get("user").(model.User)
+	user, ok := c.Get(contextUserKey).(model.User)
 	if !ok || user.TrapId == "" {
 		return c.NoContent(http.StatusUnauthorized)
 	}
@@ -149,7 +149,7 @@ func (s *Service) PostApplication(c echo.Context) error {
 
 	images := form.File["images"]
 	for _, file := range images {
-		mimeType := file.Header.Get("Content-Type")
+		mimeType := file.Header.Get(echo.HeaderContentType)
 		if !acceptedMimeTypes[mimeType] {
 			return c.NoContent(http.StatusUnsupportedMediaType)
 		}
@@ -214,7 +214,7 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	user, ok := c.Get("user").(model.User)
+	user, ok := c.Get(contextUserKey).(model.User)
 	if !ok || user.TrapId == "" {
 		return c.NoContent(http.StatusUnauthorized)
 	}
@@ -241,7 +241,7 @@ func (s *Service) PatchApplication(c echo.Context) error {
 
 	images := form.File["images"]
 	for _, file := range images {
-		mimeType := file.Header.Get("Content-Type")
+		mimeType := file.Header.Get(echo.HeaderContentType)
 		if !acceptedMimeTypes[mimeType] {
 			return c.NoContent(http.StatusUnsupportedMediaType)
 		}

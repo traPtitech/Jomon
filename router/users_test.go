@@ -17,18 +17,16 @@ import (
 
 type userRepositoryMock struct {
 	mock.Mock
-	asr        *assert.Assertions
-	token      string
-	adminToken string
+	userId      string
+	adminUserId string
 }
 
-func NewUserRepositoryMock(t *testing.T, userId string, adminUserId string) *userRepositoryMock {
+func NewUserRepositoryMock(userId string, adminUserId string) *userRepositoryMock {
 	m := new(userRepositoryMock)
-	m.asr = assert.New(t)
-	m.token = "Token"
-	m.adminToken = "AdminToken"
+	m.userId = userId
+	m.adminUserId = adminUserId
 
-	m.On("GetUsers", m.token).Return([]model.User{
+	m.On("GetUsers", mock.Anything).Return([]model.User{
 		{TrapId: "User1"},
 		{TrapId: "User2"},
 		{TrapId: "User3"},
@@ -36,13 +34,8 @@ func NewUserRepositoryMock(t *testing.T, userId string, adminUserId string) *use
 		{TrapId: adminUserId},
 	}, nil)
 
-	m.On("GetMyUser", m.token).Return(model.User{TrapId: userId}, nil)
-	m.On("GetMyUser", m.adminToken).Return(model.User{TrapId: adminUserId}, nil)
-
-	m.On("ExistsUser", m.token, userId).Return(true, nil)
-	m.On("ExistsUser", m.adminToken, userId).Return(true, nil)
-	m.On("ExistsUser", m.token, adminUserId).Return(true, nil)
-	m.On("ExistsUser", m.adminToken, adminUserId).Return(true, nil)
+	m.On("ExistsUser", mock.Anything, userId).Return(true, nil)
+	m.On("ExistsUser", mock.Anything, adminUserId).Return(true, nil)
 	m.On("ExistsUser", mock.Anything, mock.Anything).Return(false, nil)
 
 	return m
@@ -63,13 +56,31 @@ func (m *userRepositoryMock) ExistsUser(token string, trapId string) (bool, erro
 	return ret.Bool(0), ret.Error(1)
 }
 
+func (m *userRepositoryMock) SetNormalUser(c echo.Context) {
+	c.Set(contextUserKey, model.User{TrapId: m.userId})
+}
+
+func (m *userRepositoryMock) SetAnotherNormalUser(c echo.Context) {
+	c.Set(contextUserKey, model.User{
+		TrapId:  "User1",
+		IsAdmin: false,
+	})
+}
+
+func (m *userRepositoryMock) SetAdminUser(c echo.Context) {
+	c.Set(contextUserKey, model.User{
+		TrapId:  m.adminUserId,
+		IsAdmin: true,
+	})
+}
+
 func TestGetUsers(t *testing.T) {
 	userId := "UserId"
 	adminUserId := "AdminUserId"
 
 	adminRepMock := NewAdministratorRepositoryMock(adminUserId)
 
-	userRepMock := NewUserRepositoryMock(t, userId, adminUserId)
+	userRepMock := NewUserRepositoryMock(userId, adminUserId)
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -84,10 +95,11 @@ func TestGetUsers(t *testing.T) {
 		ctx := context.TODO()
 
 		req := httptest.NewRequest(http.MethodGet, "/api/users", nil)
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/users")
+		userRepMock.SetNormalUser(c)
+		c.Set(contextAccessTokenKey, "")
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -101,11 +113,6 @@ func TestGetUsers(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -124,7 +131,7 @@ func TestGetMyUser(t *testing.T) {
 
 	adminRepMock := NewAdministratorRepositoryMock(adminUserId)
 
-	userRepMock := NewUserRepositoryMock(t, userId, adminUserId)
+	userRepMock := NewUserRepositoryMock(userId, adminUserId)
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -137,10 +144,10 @@ func TestGetMyUser(t *testing.T) {
 		ctx := context.TODO()
 
 		req := httptest.NewRequest(http.MethodGet, "/api/users/me", nil)
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/users/me")
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -154,11 +161,6 @@ func TestGetMyUser(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -177,7 +179,7 @@ func TestGetAdminUsers(t *testing.T) {
 
 	adminRepMock := NewAdministratorRepositoryMock(adminUserId)
 
-	userRepMock := NewUserRepositoryMock(t, userId, adminUserId)
+	userRepMock := NewUserRepositoryMock(userId, adminUserId)
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -192,10 +194,11 @@ func TestGetAdminUsers(t *testing.T) {
 		ctx := context.TODO()
 
 		req := httptest.NewRequest(http.MethodGet, "/api/users/admins", nil)
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/users/admins")
+		userRepMock.SetNormalUser(c)
+		c.Set(contextAccessTokenKey, "")
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -212,11 +215,6 @@ func TestGetAdminUsers(t *testing.T) {
 			panic(err)
 		}
 
-		c, err = service.SetMyUser(c)
-		if err != nil {
-			panic(err)
-		}
-
 		err = service.GetAdminUsers(c)
 		asr.NoError(err)
 		asr.Equal(http.StatusOK, rec.Code)
@@ -230,7 +228,7 @@ func TestPutAdminUsers(t *testing.T) {
 	userId := "UserId"
 	adminUserId := "AdminUserId"
 
-	userRepMock := NewUserRepositoryMock(t, userId, adminUserId)
+	userRepMock := NewUserRepositoryMock(userId, adminUserId)
 
 	adminRepMock := NewAdministratorRepositoryMock(adminUserId)
 
@@ -258,10 +256,11 @@ func TestPutAdminUsers(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/users/admins", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.adminToken)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/users/admins")
+		userRepMock.SetAdminUser(c)
+		c.Set(contextAccessTokenKey, "")
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -275,11 +274,6 @@ func TestPutAdminUsers(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -305,10 +299,11 @@ func TestPutAdminUsers(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/users/admins", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.adminToken)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/users/admins")
+		userRepMock.SetAdminUser(c)
+		c.Set(contextAccessTokenKey, "")
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -322,11 +317,6 @@ func TestPutAdminUsers(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -352,10 +342,11 @@ func TestPutAdminUsers(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/users/admins", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/users/admins")
+		userRepMock.SetNormalUser(c)
+		c.Set(contextAccessTokenKey, "")
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -369,11 +360,6 @@ func TestPutAdminUsers(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -399,10 +385,11 @@ func TestPutAdminUsers(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/users/admins", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.adminToken)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/users/admins")
+		userRepMock.SetAdminUser(c)
+		c.Set(contextAccessTokenKey, "")
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -416,11 +403,6 @@ func TestPutAdminUsers(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -446,10 +428,11 @@ func TestPutAdminUsers(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPut, "/api/users/admins", strings.NewReader(body))
 		req.Header.Set(echo.HeaderContentType, "application/json")
-		req.Header.Set("Authorization", userRepMock.adminToken)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/users/admins")
+		userRepMock.SetAdminUser(c)
+		c.Set(contextAccessTokenKey, "")
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -463,11 +446,6 @@ func TestPutAdminUsers(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 

@@ -320,7 +320,7 @@ func TestGetApplication(t *testing.T) {
 
 	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
-	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
+	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -336,12 +336,12 @@ func TestGetApplication(t *testing.T) {
 		ctx := context.TODO()
 
 		req := httptest.NewRequest(http.MethodGet, "/api/applications/"+appId.String(), nil)
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(appId.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -355,11 +355,6 @@ func TestGetApplication(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -382,12 +377,12 @@ func TestGetApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodGet, "/api/applications/"+id.String(), nil)
-		req.Header.Set("Authorization", userRepMock.token)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetParamNames("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, &url.URL{Path: "/api/applications/" + id.String()})
 		if err != nil {
@@ -401,11 +396,6 @@ func TestGetApplication(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -434,7 +424,7 @@ func TestGetApplicationList(t *testing.T) {
 
 	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
-	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
+	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -451,10 +441,10 @@ func TestGetApplicationList(t *testing.T) {
 			ctx := context.TODO()
 
 			req := httptest.NewRequest(http.MethodGet, "/api/applications", nil)
-			req.Header.Set("Authorization", userRepMock.token)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
+			userRepMock.SetNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -468,11 +458,6 @@ func TestGetApplicationList(t *testing.T) {
 			}
 
 			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-				panic(err)
-			}
-
-			c, err = service.SetMyUser(c)
-			if err != nil {
 				panic(err)
 			}
 
@@ -493,10 +478,10 @@ func TestGetApplicationList(t *testing.T) {
 			q.Add("sort", "title")
 			q.Add("applicant", "User1")
 			req := httptest.NewRequest(http.MethodGet, "/api/applications?"+q.Encode(), nil)
-			req.Header.Set("Authorization", userRepMock.token)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
+			userRepMock.SetNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -510,11 +495,6 @@ func TestGetApplicationList(t *testing.T) {
 			}
 
 			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-				panic(err)
-			}
-
-			c, err = service.SetMyUser(c)
-			if err != nil {
 				panic(err)
 			}
 
@@ -535,10 +515,10 @@ func TestGetApplicationList(t *testing.T) {
 			q.Add("sort", "title")
 			q.Add("applicant", "User2")
 			req := httptest.NewRequest(http.MethodGet, "/api/applications?"+q.Encode(), nil)
-			req.Header.Set("Authorization", userRepMock.token)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
+			userRepMock.SetNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -552,11 +532,6 @@ func TestGetApplicationList(t *testing.T) {
 			}
 
 			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-				panic(err)
-			}
-
-			c, err = service.SetMyUser(c)
-			if err != nil {
 				panic(err)
 			}
 
@@ -581,10 +556,10 @@ func TestGetApplicationList(t *testing.T) {
 			q := make(url.Values)
 			q.Add("submitted_since", "invalid")
 			req := httptest.NewRequest(http.MethodGet, "/api/applications?"+q.Encode(), nil)
-			req.Header.Set("Authorization", userRepMock.token)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
+			userRepMock.SetNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -599,11 +574,6 @@ func TestGetApplicationList(t *testing.T) {
 
 			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
 				// panic(err)
-			}
-
-			c, err = service.SetMyUser(c)
-			if err != nil {
-				panic(err)
 			}
 
 			err = service.GetApplicationList(c)
@@ -640,7 +610,7 @@ func TestPostApplication(t *testing.T) {
 	imageRepMock := new(applicationsImageRepositoryMock)
 	imageRepMock.On("CreateApplicationsImage", sampleApp.ID, mock.Anything, "image/png").Return(model.ApplicationsImage{}, nil)
 
-	userRepMock := NewUserRepositoryMock(t, "UserId", "AdminUserId")
+	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -705,11 +675,11 @@ func TestPostApplication(t *testing.T) {
 			}
 
 			req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
-			req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
-			req.Header.Set("Authorization", userRepMock.token)
+			req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
+			userRepMock.SetNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -723,11 +693,6 @@ func TestPostApplication(t *testing.T) {
 			}
 
 			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-				panic(err)
-			}
-
-			c, err = service.SetMyUser(c)
-			if err != nil {
 				panic(err)
 			}
 
@@ -806,11 +771,11 @@ func TestPostApplication(t *testing.T) {
 			}
 
 			req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
-			req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
-			req.Header.Set("Authorization", userRepMock.token)
+			req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
+			userRepMock.SetNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -824,11 +789,6 @@ func TestPostApplication(t *testing.T) {
 			}
 
 			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-				panic(err)
-			}
-
-			c, err = service.SetMyUser(c)
-			if err != nil {
 				panic(err)
 			}
 
@@ -877,14 +837,14 @@ func TestPostApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
-		req.Header.Set("Authorization", userRepMock.token)
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications")
-		c.Set("user", model.User{
+		c.Set(sessionUserKey, model.User{
 			TrapId: "UserId",
 		})
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -899,11 +859,6 @@ func TestPostApplication(t *testing.T) {
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
 			// panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
-			panic(err)
 		}
 
 		err = service.PostApplication(c)
@@ -928,9 +883,6 @@ func TestPatchApplication(t *testing.T) {
 
 	userId := "UserId"
 	adminUserId := "AdminUserId"
-	anotherUserId := "AnotherUserId"
-
-	anotherToken := "AnotherToken"
 
 	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplication(id, userId, model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
 	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
@@ -942,8 +894,7 @@ func TestPatchApplication(t *testing.T) {
 
 	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
-	userRepMock := NewUserRepositoryMock(t, userId, adminUserId)
-	userRepMock.On("GetMyUser", anotherToken).Return(model.User{TrapId: anotherUserId}, nil)
+	userRepMock := NewUserRepositoryMock(userId, adminUserId)
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -994,13 +945,13 @@ func TestPatchApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
-		req.Header.Set("Authorization", userRepMock.token)
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -1014,11 +965,6 @@ func TestPatchApplication(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 
@@ -1043,7 +989,7 @@ func TestPatchApplication(t *testing.T) {
 
 		part := make(textproto.MIMEHeader)
 		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
-		part.Set("Content-Type", "application/json")
+		part.Set(echo.HeaderContentType, "application/json")
 		writer, err := mpw.CreatePart(part)
 		if err != nil {
 			panic(err)
@@ -1058,13 +1004,13 @@ func TestPatchApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
-		req.Header.Set("Authorization", userRepMock.token)
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -1079,11 +1025,6 @@ func TestPatchApplication(t *testing.T) {
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
 			// panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
-			panic(err)
 		}
 
 		err = service.PatchApplication(c)
@@ -1124,13 +1065,13 @@ func TestPatchApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+notExistId.String(), body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
-		req.Header.Set("Authorization", userRepMock.adminToken)
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(notExistId.String())
+		userRepMock.SetAdminUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -1145,11 +1086,6 @@ func TestPatchApplication(t *testing.T) {
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
 			// panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
-			panic(err)
 		}
 
 		err = service.PatchApplication(c)
@@ -1185,13 +1121,13 @@ func TestPatchApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
-		req.Header.Set("Authorization", anotherToken)
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetAnotherNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -1205,11 +1141,6 @@ func TestPatchApplication(t *testing.T) {
 		}
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
-
-		c, err = service.SetMyUser(c)
-		if err != nil {
 			panic(err)
 		}
 

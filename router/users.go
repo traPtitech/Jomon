@@ -7,8 +7,13 @@ import (
 	"github.com/traPtitech/Jomon/model"
 )
 
+const (
+	contextUserKey        = "user"
+	contextAccessTokenKey = "access_token"
+)
+
 func (s *Service) GetUsers(c echo.Context) error {
-	token := c.Request().Header.Get("Authorization")
+	token := c.Get(contextAccessTokenKey).(string)
 
 	users, err := s.Users.GetUsers(token)
 	if err != nil {
@@ -28,7 +33,7 @@ func (s *Service) GetUsers(c echo.Context) error {
 }
 
 func (s *Service) GetMyUser(c echo.Context) error {
-	user, ok := c.Get("user").(model.User)
+	user, ok := c.Get(contextUserKey).(model.User)
 	if !ok || user.TrapId == "" {
 		return c.NoContent(http.StatusUnauthorized)
 	}
@@ -37,10 +42,7 @@ func (s *Service) GetMyUser(c echo.Context) error {
 }
 
 func (s *Service) GetAdminUsers(c echo.Context) error {
-	token := c.Request().Header.Get("Authorization")
-	if token == "" {
-		return c.NoContent(http.StatusUnauthorized)
-	}
+	token := c.Get(contextAccessTokenKey).(string)
 
 	allUsers, err := s.Users.GetUsers(token)
 	if err != nil {
@@ -74,7 +76,7 @@ func (s *Service) PutAdminUsers(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	myUser, ok := c.Get("user").(model.User)
+	myUser, ok := c.Get(contextUserKey).(model.User)
 	if !ok || myUser.TrapId == "" {
 		return c.NoContent(http.StatusUnauthorized)
 	}
@@ -83,7 +85,7 @@ func (s *Service) PutAdminUsers(c echo.Context) error {
 		return c.NoContent(http.StatusForbidden)
 	}
 
-	token := c.Request().Header.Get("Authorization")
+	token := c.Get(contextAccessTokenKey).(string)
 	exist, err := s.Users.ExistsUser(token, req.TrapId)
 	if !exist || err != nil {
 		return c.NoContent(http.StatusNotFound)
@@ -120,34 +122,4 @@ func (s *Service) PutAdminUsers(c echo.Context) error {
 	user.GiveIsUserAdmin(admins)
 
 	return c.JSON(http.StatusOK, user)
-}
-
-func (s *Service) SetMyUser(c echo.Context) (echo.Context, error) {
-	token := c.Request().Header.Get("Authorization")
-
-	user, err := s.Users.GetMyUser(token)
-	if err != nil {
-		return c, err
-	}
-
-	admins, err := s.Administrators.GetAdministratorList()
-	if err != nil {
-		return c, err
-	}
-
-	user.GiveIsUserAdmin(admins)
-
-	c.Set("user", user)
-
-	return c, nil
-}
-
-func (s *Service) AuthUser(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c, err := s.SetMyUser(c)
-		if err != nil {
-			return c.NoContent(http.StatusUnauthorized)
-		}
-		return next(c)
-	}
 }

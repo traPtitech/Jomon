@@ -26,7 +26,7 @@ func (s *Service) GetImages(c echo.Context) error {
 	}
 	modifiedAt := image.CreatedAt.Truncate(time.Second)
 
-	im := c.Request().Header.Get("If-Modified-Since")
+	im := c.Request().Header.Get(echo.HeaderIfModifiedSince)
 	if im != "" {
 		imt, err := http.ParseTime(im)
 		if err != nil {
@@ -45,7 +45,7 @@ func (s *Service) GetImages(c echo.Context) error {
 	defer f.Close()
 
 	c.Response().Header().Set("Cache-Control", "private, no-cache, max-age=0")
-	c.Response().Header().Set("Last-Modified", modifiedAt.UTC().Format(http.TimeFormat))
+	c.Response().Header().Set(echo.HeaderLastModified, modifiedAt.UTC().Format(http.TimeFormat))
 
 	return c.Stream(http.StatusOK, image.MimeType, f)
 }
@@ -70,7 +70,7 @@ func (s *Service) DeleteImages(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	user, ok := c.Get("user").(model.User)
+	user, ok := c.Get(contextUserKey).(model.User)
 	if !ok || user.TrapId == "" {
 		return c.NoContent(http.StatusUnauthorized)
 	}

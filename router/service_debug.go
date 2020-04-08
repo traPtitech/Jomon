@@ -4,6 +4,7 @@ package router
 
 import (
 	"fmt"
+	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/model"
 	storagePkg "github.com/traPtitech/Jomon/storage"
 	"os"
@@ -47,6 +48,7 @@ func NewService() Service {
 				},
 			},
 		},
+		TraQAuth: model.NewTraQAuthRepository(""),
 	}
 }
 
@@ -69,4 +71,11 @@ func (d *debugUserRepository) ExistsUser(token string, trapId string) (bool, err
 		}
 	}
 	return false, nil
+}
+
+func (s Service) AuthUser(c echo.Context) (echo.Context, error) {
+	user, _ := s.Users.GetMyUser("")
+	c.Set(contextAccessTokenKey, user)
+
+	return c, nil
 }

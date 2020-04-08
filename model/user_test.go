@@ -20,11 +20,11 @@ func NewTraqRepositoryMock(token string) *traqRepositoryMock {
 	m := new(traqRepositoryMock)
 	m.token = token
 
-	getUsersReq, err := http.NewRequest("GET", baseURL+"/users", nil)
+	getUsersReq, err := http.NewRequest("GET", TraQBaseURL+"/users", nil)
 	if err != nil {
 		panic(err)
 	}
-	getUsersReq.Header.Set("Authorization", token)
+	getUsersReq.Header.Set("Authorization", "Bearer "+token)
 
 	m.On("sendReq", getUsersReq).Return([]byte(fmt.Sprintf(`
 	[
@@ -36,11 +36,11 @@ func NewTraqRepositoryMock(token string) *traqRepositoryMock {
 		}
 	]`, myUserId)), nil)
 
-	getMyUserReq, err := http.NewRequest("GET", baseURL+"/users/me", nil)
+	getMyUserReq, err := http.NewRequest("GET", TraQBaseURL+"/users/me", nil)
 	if err != nil {
 		panic(err)
 	}
-	getMyUserReq.Header.Set("Authorization", token)
+	getMyUserReq.Header.Set("Authorization", "Bearer "+token)
 
 	m.On("sendReq", getMyUserReq).Return([]byte(fmt.Sprintf(`
 	{
