@@ -34,13 +34,18 @@ export default {
   methods: {
     imageChange(files) {
       this.uploadImageUrl = [];
+      this.uploadImageBin = [];
       files.forEach(file => {
         const fr = new FileReader();
-
-        fr.readAsDataURL(file);
+        const fr2 = new FileReader();
+        fr2.readAsDataURL(file);
+        fr2.addEventListener("load", () => {
+          this.uploadImageUrl.push(fr2.result);
+        });
+        fr.readAsBinaryString(file);
         fr.addEventListener("load", () => {
-          this.uploadImageUrl.push(fr.result);
-          this.$emit("input", this.uploadImageUrl);
+          this.uploadImageBin.push(fr.result);
+          this.$emit("input", this.uploadImageBin);
         });
       });
     }
