@@ -106,32 +106,58 @@
     </v-card>
   </v-timeline-item>
   <!-- 以下は申請書の変更ログ -->
-  <div v-else-if="log.log_type === `application`">
+  <div v-else-if="log.log_type === `application`" class="ma-2">
     <v-timeline-item color="purple lighten-2">
       <template v-slot:icon>
         <span>Application </span>
       </template>
       <v-row justify="space-between">
         <v-col cols="10" :class="grey_text">
-          <Icon :user="log.content.update_user.trap_id" :size="25" />
+          <Icon :user="log.content.log.update_user.trap_id" :size="25" />
           <strong :class="strong_text">
-            {{ log.content.update_user.trap_id }}
+            {{ log.content.log.update_user.trap_id }}
           </strong>
           が修正
           <span :class="larger_size">しました。</span>
         </v-col>
         <v-col class="text-right" cols="2">{{
-          dayPrint(log.content.updated_at)
+          dayPrint(log.content.log.updated_at)
         }}</v-col>
       </v-row>
     </v-timeline-item>
     <v-card>
-      実際は修正された部分だけを示すので、(ex:-hoge
-      +piyo)そのロジックをどっかに書きます。 type:{{
-        log.content.type
-      }}
-      title:{{ log.content.title }} remarks: {{ log.content.remarks }} ammount
-      {{ log.content.ammount }} paid_at{{ log.content.paid_at }}
+      <div style="white-space: pre-line" class="pa-2 ma-0">
+        <defference
+          v-if="log.content.pre_log.type !== log.content.log.type"
+          item="type"
+          :pre="log.content.pre_log.type"
+          :now="log.content.log.type"
+        />
+        <defference
+          v-if="log.content.pre_log.title !== log.content.log.title"
+          item="title"
+          :pre="log.content.pre_log.title"
+          :now="log.content.log.title"
+        />
+        <defference
+          v-if="log.content.pre_log.remarks !== log.content.log.remarks"
+          item="remarks"
+          :pre="log.content.pre_log.remarks"
+          :now="log.content.log.remarks"
+        />
+        <defference
+          v-if="log.content.pre_log.amount !== log.content.log.amount"
+          item="amount"
+          :pre="log.content.pre_log.amount"
+          :now="log.content.log.amount"
+        />
+        <defference
+          v-if="log.content.pre_log.paid_at !== log.content.log.paid_at"
+          item="paid_at"
+          :pre="log.content.pre_log.paid_at"
+          :now="log.content.log.paid_at"
+        />
+      </div>
     </v-card>
   </div>
   <!-- 以下は払い戻しログ -->
@@ -170,6 +196,7 @@ import Icon from "./Icon";
 import StateChip from "./StateChip";
 import Vue from "vue";
 import axios from "axios";
+import Defference from "./ApplicationDetailDefference";
 export default {
   data: function() {
     return {
@@ -188,7 +215,8 @@ export default {
   },
   components: {
     Icon,
-    StateChip
+    StateChip,
+    Defference
   },
   watch: {
     comment_readonly: function() {
@@ -201,12 +229,59 @@ export default {
     }
   },
   methods: {
+    defferenceRecord(pre, now) {
+      let defference_record =
+        pre.type !== now.type
+          ? "申請書:" + pre.type + "から" + now.type + "\n"
+          : "";
+      defference_record +=
+        pre.title !== now.title
+          ? "タイトル:" + pre.title + "から" + now.title + "\n"
+          : "";
+      defference_record +=
+        pre.remarks !== now.remarks
+          ? "詳細:" + pre.remarks + "から" + now.remarks + "\n"
+          : "";
+      defference_record +=
+        pre.amount !== now.amount
+          ? "金額:" + pre.amount + "から" + now.amount + "\n"
+          : "";
+      defference_record +=
+        pre.paid_at !== now.paid_at
+          ? "支払日:" +
+            this.dayPrint(pre.paid_at) +
+            "から" +
+            this.dayPrint(now.paid_at) +
+            "\n"
+          : "";
+      return defference_record;
+    },
     dayPrint(time) {
+      let now = new Date();
       let d = new Date(time);
-      let month = d.getMonth() + 1;
-      let day = d.getDate();
-      let res = month + "/" + day;
-      return res;
+      let diff = (now.getTime() - d.getTime()) / 1000;
+      if (diff < 60) {
+        //1分以内
+        return Math.round(diff) + "秒前";
+      } else if (diff < 60 * 60) {
+        //一時間以内
+        return Math.round(diff / 60) + "分前";
+      } else if (diff < 60 * 60 * 24) {
+        //一日以内
+        return Math.round(diff / 60 / 60) + "時間前";
+      } else if (diff < 60 * 60 * 24 * 28) {
+        //一か月以内
+        let month = d.getMonth() + 1;
+        let day = d.getDate();
+        let res = month + "/" + day;
+        return res;
+      } else {
+        let year = d.getFullYear();
+        let month = d.getMonth() + 1;
+        let day = d.getDate();
+        let res = year + "/" + month + "/" + day;
+        return res;
+      }
     },
     commentChange() {
       this.comment_readonly = false;

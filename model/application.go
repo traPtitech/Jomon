@@ -15,7 +15,7 @@ type Application struct {
 	LatestState              StateType            `gorm:"-" json:"current_state"`
 	StatesLogsID             int                  `gorm:"type:int(11);not null" json:"-"`
 	CreateUserTrapID         User                 `gorm:"embedded;embedded_prefix:create_user_;" json:"applicant"`
-	CreatedAt                time.Time            `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
+	CreatedAt                time.Time            `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 	ApplicationsDetails      []ApplicationsDetail `json:"application_detail_logs,omitempty"`
 	StatesLogs               []StatesLog          `json:"state_logs,omitempty"`
 	ApplicationsImages       []ApplicationsImage  `json:"images,omitempty"`
@@ -79,6 +79,17 @@ type ApplicationRepository interface {
 		paidAt *time.Time,
 		repayUsers []string,
 	) error
+	UpdateStatesLog(
+		applicationId uuid.UUID,
+		updateUserTrapId string,
+		reason string,
+		toState StateType,
+	) (StatesLog, error)
+	UpdateRepayUser(
+		applicationId uuid.UUID,
+		repaidToUserTrapID string,
+		repaidByUserTrapID string,
+	) (RepayUser, bool, error)
 }
 
 type applicationRepository struct{}

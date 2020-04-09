@@ -8,6 +8,27 @@ info:
   description: >-
     JomonのAPIです。
 paths:
+  '/auth/genpkce':
+    get:
+      description: PKCEを取得する｡
+      tags:
+        - Auth
+      responses:
+        "200":
+          description: 取得できた｡
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code_challenge:
+                    type: string
+                  code_challenge_method:
+                    type: string
+                  client_id:
+                    type: string
+                  response_type:
+                    type: string
   '/applications':
     get:
       description: 申請書一覧を取得する。
@@ -443,6 +464,8 @@ paths:
           description: admin以外の人
         "404":
           description: adminを変更しようとした対象者は存在しない
+        "409":
+          description: 既に指定したadminの状態である
 
 components:
   schemas:

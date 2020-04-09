@@ -20,7 +20,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | applications_details_id          | int(11) | NO   | MUL | _NULL_  || 経費申請詳細の最新id**Parents:applications_details.id** **（※）** |
 | states_logs_id          | int(11) | NO   | MUL | _NULL_  || 状態の最新id**Parents:states_logs.id**　**（※）**  |
 | create_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 申請者のtraPid |
-| created_at       | timestamp  | NO   |     | CURRENT_TIMESTAMP |       | 申請書が作成された日時 |
+| created_at       | datetime  | NO   |     | CURRENT_TIMESTAMP |       | 申請書が作成された日時 |
 
 ## applications_details
 
@@ -35,8 +35,8 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | title        | text      | NO  |     | _NULL_||        申請の目的、概要(大会名など) |
 | remarks       | text      | NO  |     | _NULL_ |           |   備考（購入したものの概要、旅程、乗車区間など） |
 | amount | int(11)    | NO  |     | _NULL_    |         |申請金額    |
-| paid_at       | timestamp  | NO   |     |  |       | お金を使った日  |
-| updated_at       | timestamp  | NO   |     | CURRENT_TIMESTAMP |       | 申請書が作成（変更）された日時  |
+| paid_at       | date  | NO   |     |  |       | お金を使った日  |
+| updated_at       | datetime  | NO   |     | CURRENT_TIMESTAMP |       | 申請書が作成（変更）された日時  |
 
 ## repay_users
 
@@ -48,7 +48,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | application_id          | char(36) | NO   | MUL | _NULL_  || 申請書のid |
 | repaid_to_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 払い戻される人のtraPid |
 | repaid_by_user_trap_id      | varchar(32) | YES   | MUL | _NULL_  |           | お金を渡した人のtraPid |
-| repaid_at          | timestamp | YES   |  | _NULL_  | |払い戻された日  |
+| repaid_at          | date | YES   |  | _NULL_  | |払い戻された日  |
 
 ## applications_images
 
@@ -58,6 +58,8 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
 | id          |char(36) | NO   | PRI | _NULL_  || uuid |
 | application_id          | char(36) | NO   | MULL | _NULL_  || 申請書のid |
+| mime_type | text | NO | |_NULL_ || 画像のフォーマット |
+| created_at       | datetime  | NO   |     | CURRENT_TIMESTAMP |       | 画像が登録された日時 |
 
 ## states_logs
 
@@ -70,7 +72,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | update_user_trap_id      | varchar(32) | NO   |  | _NULL_  |           | 状態を変えた人のtraPid |
 | to_state     | tinyint(4) | NO   |     | 0                 |                | どの状態へ変えたか (1(submitted) ,2(fix_required), 3(accepted), 4(fully_repaid), 5(rejected))                                                                                 |
 | reason     |text | NO  |     | _NULL_                 |                | 状態を変えたとき状態の変え方によってコメントをつけられたり付けられなかったりします。（swagger参照) |
-| created_at       | timestamp  | NO   |     | CURRENT_TIMESTAMP |                | 状態が更新された日時                                                                                                  |
+| created_at       | datetime  | NO   |     | CURRENT_TIMESTAMP |                | 状態が更新された日時                                                                                                  |
 
 ## comments
 
@@ -82,6 +84,6 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | application_id | char(36)  | NO   | MUL | _NULL_            |                | どの申請書へのコメントか **Parents:applications.id**                          |
 | user_trap_id      | varchar(32)  | NO  | MUL | _NULL_            |                | コメントした人の traPID                                     |
 | comment       |  text    | NO  |     | _NULL_            |       |コメント内容そのもの                                       |
-| created_at     | timestamp | NO   |     | CURRENT_TIMESTAMP |                | コメントが作成された日時                                                                                              |
-| updated_at     | timestamp |  NO  |     | CURRENT_TIMESTAMP |    on update CURRENT_TIMESTAMP            | コメントが更新された日時                                                                                              |
-| deleted_at     | timestamp |  YES  |     | NULL |                | コメントが削除された日時                                                                                              |
+| created_at     | datetime | NO   |     | CURRENT_TIMESTAMP |                | コメントが作成された日時                                                                                              |
+| updated_at     | datetime |  NO  |     | CURRENT_TIMESTAMP |    on update CURRENT_TIMESTAMP            | コメントが更新された日時                                                                                              |
+| deleted_at     | datetime |  YES  |     | NULL |                | コメントが削除された日時                                                                                              |

@@ -16,7 +16,7 @@
     </div>
     <v-spacer></v-spacer>
 
-    <v-btn to="/admin" text>
+    <v-btn v-if="me.is_admin" to="/admin" text>
       管理ページ
     </v-btn>
     <v-menu open-on-hover offset-y>
@@ -39,7 +39,11 @@
   </v-app-bar>
 </template>
 <script>
+import { mapState } from "vuex";
 export default {
+  computed: {
+    ...mapState(["me"])
+  },
   data: () => ({
     items: [
       { title: "club", page: "部費利用申請" },

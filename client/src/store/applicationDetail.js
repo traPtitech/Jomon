@@ -17,7 +17,7 @@ export const applicationDetail = {
         type: "",
         title: "",
         remarks: "",
-        ammount: 0,
+        amount: 0,
         paid_at: "",
         updated_at: "",
         repaid_to_id: []
@@ -80,18 +80,47 @@ export const applicationDetail = {
     logs: state => {
       let logs = [];
       state.core.comments.forEach(log => {
-        logs.push({ log_type: "comment", content: log });
+        logs.push({
+          log_type: "comment",
+          content: log,
+          sort_date: new Date(log.created_at)
+        });
       });
       state.core.state_logs.forEach(log => {
-        logs.push({ log_type: "state", content: log });
+        logs.push({
+          log_type: "state",
+          content: log,
+          sort_date: new Date(log.created_at)
+        });
       });
+      let pre_record = "";
       state.core.application_detail_logs.forEach(log => {
-        logs.push({ log_type: "application", content: log });
+        if (pre_record !== "") {
+          logs.push({
+            log_type: "application",
+            content: {
+              log: log,
+              pre_log: pre_record
+            },
+            sort_date: new Date(log.updated_at)
+          });
+        }
+        pre_record = log;
       });
       state.core.repayment_logs.forEach(log => {
-        logs.push({ log_type: "repayment", content: log });
+        logs.push({
+          log_type: "repayment",
+          content: log,
+          sort_date: new Date(log.repaid_at)
+        });
       });
-      //TODO:時系列順にlogを並び変える
+      logs.sort((a, b) => {
+        if (a.sort_date > b.sort_date) {
+          return 1;
+        } else {
+          return -1;
+        }
+      });
       return logs;
     }
   },

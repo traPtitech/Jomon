@@ -5,13 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/getkin/kin-openapi/openapi3filter"
-	"github.com/gofrs/uuid"
-	"github.com/jinzhu/gorm"
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"github.com/traPtitech/Jomon/model"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -19,6 +12,14 @@ import (
 	"net/url"
 	"testing"
 	"time"
+
+	"github.com/getkin/kin-openapi/openapi3filter"
+	"github.com/gofrs/uuid"
+	"github.com/jinzhu/gorm"
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/traPtitech/Jomon/model"
 )
 
 const MultipartBoundary = "-------------------------Multipart_Boundary"
@@ -110,12 +111,64 @@ func (m *applicationRepositoryMock) PatchApplication(
 	return ret.Error(0)
 }
 
+func (m *applicationRepositoryMock) UpdateStatesLog(
+	applicationId uuid.UUID,
+	updateUserTrapId string,
+	reason string,
+	toState model.StateType,
+) (model.StatesLog, error) {
+	ret := m.Called(applicationId, updateUserTrapId, reason, toState)
+
+	m.asr.NotEqual("", updateUserTrapId)
+
+	if &toState != nil {
+		m.asr.Contains([...]int{model.Submitted, model.FixRequired, model.FixRequired, model.Accepted, model.FullyRepaid, model.Rejected}, toState.Type)
+	}
+	state := model.StatesLog{
+		ApplicationID: applicationId,
+		UpdateUserTrapID: model.User{
+			TrapId: updateUserTrapId,
+		},
+		ToState: toState,
+		Reason:  reason,
+	}
+	return state, ret.Error(1)
+}
+
+func (m *applicationRepositoryMock) UpdateRepayUser(
+	applicationId uuid.UUID,
+	repaidToUserTrapID string,
+	repaidByUserTrapID string,
+) (model.RepayUser, bool, error) {
+	ret := m.Called(applicationId, repaidToUserTrapID, repaidByUserTrapID)
+
+	m.asr.NotEqual("", repaidToUserTrapID)
+	m.asr.NotEqual("", repaidByUserTrapID)
+
+	dt := time.Now()
+	ru := model.RepayUser{
+		ApplicationID: applicationId,
+		RepaidToUserTrapID: model.User{
+			TrapId: repaidToUserTrapID,
+		},
+		RepaidByUserTrapID: &model.User{
+			TrapId: repaidByUserTrapID,
+		},
+		RepaidAt: &dt,
+	}
+	return ru, ret.Get(1).(bool), ret.Error(2)
+}
+
 type administratorRepositoryMock struct {
 	mock.Mock
 }
 
-func NewAdministratorRepositoryMock() *administratorRepositoryMock {
-	return new(administratorRepositoryMock)
+func NewAdministratorRepositoryMock(adminUserId string) *administratorRepositoryMock {
+	m := new(administratorRepositoryMock)
+
+	m.On("GetAdministratorList").Return([]string{"User1", "User2", adminUserId}, nil)
+
+	return m
 }
 
 func (m *administratorRepositoryMock) IsAdmin(userId string) (bool, error) {
@@ -141,7 +194,6 @@ func (m *administratorRepositoryMock) RemoveAdministrator(userId string) error {
 /*
 	Util functions
 */
-
 func GenerateApplication(
 	appId uuid.UUID,
 	createUserTrapID string,
@@ -195,6 +247,59 @@ func GenerateApplication(
 		RepayUsers:          []model.RepayUser{},
 	}
 }
+func GenerateApplicationStatesLogAccepted(
+	appId uuid.UUID,
+	createUserTrapID string,
+	typ model.ApplicationType,
+	title string,
+	remarks string,
+	amount int,
+	paidAt time.Time,
+) model.Application {
+	detail := model.ApplicationsDetail{
+		ID:            1,
+		ApplicationID: appId,
+		UpdateUserTrapID: model.User{
+			TrapId:  createUserTrapID,
+			IsAdmin: false,
+		},
+		Type:      typ,
+		Title:     title,
+		Remarks:   remarks,
+		Amount:    amount,
+		PaidAt:    model.PaidAt{PaidAt: paidAt},
+		UpdatedAt: time.Now(),
+	}
+	state := model.StatesLog{
+		ID:            1,
+		ApplicationID: appId,
+		UpdateUserTrapID: model.User{
+			TrapId:  createUserTrapID,
+			IsAdmin: false,
+		},
+		ToState:   model.StateType{Type: model.Accepted},
+		Reason:    "",
+		CreatedAt: time.Now(),
+	}
+	return model.Application{
+		ID:                       appId,
+		LatestApplicationsDetail: detail,
+		ApplicationsDetailsID:    1,
+		LatestStatesLog:          state,
+		LatestState:              model.StateType{Type: model.Accepted},
+		StatesLogsID:             1,
+		CreateUserTrapID: model.User{
+			TrapId:  createUserTrapID,
+			IsAdmin: false,
+		},
+		CreatedAt:           time.Now(),
+		ApplicationsDetails: []model.ApplicationsDetail{detail},
+		StatesLogs:          []model.StatesLog{state},
+		ApplicationsImages:  []model.ApplicationsImage{},
+		Comments:            []model.Comment{},
+		RepayUsers:          []model.RepayUser{},
+	}
+}
 
 /*
 	Function Tests
@@ -213,13 +318,14 @@ func TestGetApplication(t *testing.T) {
 	appRepMock.On("GetApplication", application.ID, true).Return(application, nil)
 	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
 
-	adminRepMock := NewAdministratorRepositoryMock()
+	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
-	adminRepMock.On("GetAdministratorList").Return([]string{"User1", "User2"}, nil)
+	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
 		Applications:   appRepMock,
+		Users:          userRepMock,
 	}
 
 	t.Parallel()
@@ -235,6 +341,7 @@ func TestGetApplication(t *testing.T) {
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(appId.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -253,7 +360,6 @@ func TestGetApplication(t *testing.T) {
 
 		err = service.GetApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusOK, rec.Code)
 
 		err = validateResponse(&ctx, requestValidationInput, rec)
@@ -276,6 +382,7 @@ func TestGetApplication(t *testing.T) {
 		c.SetParamNames("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, &url.URL{Path: "/api/applications/" + id.String()})
 		if err != nil {
@@ -294,7 +401,6 @@ func TestGetApplication(t *testing.T) {
 
 		err = service.GetApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusNotFound, rec.Code)
 
 		err = validateResponse(&ctx, requestValidationInput, rec)
@@ -316,13 +422,14 @@ func TestGetApplicationList(t *testing.T) {
 	appRepMock.On("GetApplicationList", "title", (*model.StateType)(nil), (*int)(nil), "User1", (*model.ApplicationType)(nil), (*time.Time)(nil), (*time.Time)(nil)).Return([]model.Application{application}, nil)
 	appRepMock.On("GetApplicationList", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]model.Application{}, nil)
 
-	adminRepMock := NewAdministratorRepositoryMock()
+	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
-	adminRepMock.On("GetAdministratorList").Return([]string{"User1", "User2"}, nil)
+	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
 		Applications:   appRepMock,
+		Users:          userRepMock,
 	}
 
 	t.Parallel()
@@ -337,6 +444,7 @@ func TestGetApplicationList(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
+			userRepMock.SetNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -355,7 +463,6 @@ func TestGetApplicationList(t *testing.T) {
 
 			err = service.GetApplicationList(c)
 			asr.NoError(err)
-
 			asr.Equal(http.StatusOK, rec.Code)
 
 			err = validateResponse(&ctx, requestValidationInput, rec)
@@ -374,6 +481,7 @@ func TestGetApplicationList(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
+			userRepMock.SetNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -392,7 +500,6 @@ func TestGetApplicationList(t *testing.T) {
 
 			err = service.GetApplicationList(c)
 			asr.NoError(err)
-
 			asr.Equal(http.StatusOK, rec.Code)
 
 			err = validateResponse(&ctx, requestValidationInput, rec)
@@ -411,6 +518,7 @@ func TestGetApplicationList(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
+			userRepMock.SetNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -429,7 +537,6 @@ func TestGetApplicationList(t *testing.T) {
 
 			err = service.GetApplicationList(c)
 			asr.NoError(err)
-
 			asr.Equal(http.StatusOK, rec.Code)
 
 			err = validateResponse(&ctx, requestValidationInput, rec)
@@ -452,6 +559,7 @@ func TestGetApplicationList(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/applications")
+			userRepMock.SetNormalUser(c)
 
 			route, pathParam, err := router.FindRoute(req.Method, req.URL)
 			if err != nil {
@@ -470,7 +578,6 @@ func TestGetApplicationList(t *testing.T) {
 
 			err = service.GetApplicationList(c)
 			asr.NoError(err)
-
 			asr.Equal(http.StatusBadRequest, rec.Code)
 
 			err = validateResponse(&ctx, requestValidationInput, rec)
@@ -486,45 +593,56 @@ func TestPostApplication(t *testing.T) {
 	remarks := "〇〇駅から〇〇駅への移動"
 	amount := 1000
 	paidAt := time.Now().Round(time.Second)
+	imgString := "SampleData"
 
 	id, err := uuid.NewV4()
 	if err != nil {
 		panic(err)
 	}
 
-	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplication(id, "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, paidAt), nil)
+	sampleApp := GenerateApplication(id, "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, paidAt)
+
+	appRepMock.On("GetApplication", id, mock.Anything).Return(sampleApp, nil)
 	appRepMock.On("BuildApplication", "UserId", model.ApplicationType{Type: model.Club}, title, remarks, amount, mock.Anything, []string{"User1"}).Return(id, nil)
 
-	adminRepMock := NewAdministratorRepositoryMock()
+	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 
-	adminRepMock.On("GetAdministratorList").Return([]string{"User1", "User2"}, nil)
+	imageRepMock := new(applicationsImageRepositoryMock)
+	imageRepMock.On("CreateApplicationsImage", sampleApp.ID, mock.Anything, "image/png").Return(model.ApplicationsImage{}, nil)
+
+	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
 		Applications:   appRepMock,
+		Images:         imageRepMock,
+		Users:          userRepMock,
 	}
 
 	t.Parallel()
 
 	t.Run("shouldSuccess", func(t *testing.T) {
-		asr := assert.New(t)
-		e := echo.New()
-		ctx := context.TODO()
+		t.Parallel()
 
-		body := &bytes.Buffer{}
-		mpw := multipart.NewWriter(body)
-		if err := mpw.SetBoundary(MultipartBoundary); err != nil {
-			panic(err)
-		}
+		t.Run("singleFile", func(t *testing.T) {
+			asr := assert.New(t)
+			e := echo.New()
+			ctx := context.TODO()
 
-		part := make(textproto.MIMEHeader)
-		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
-		part.Set("Content-Type", "application/json")
-		writer, err := mpw.CreatePart(part)
-		if err != nil {
-			panic(err)
-		}
-		_, err = writer.Write([]byte(fmt.Sprintf(`
+			body := &bytes.Buffer{}
+			mpw := multipart.NewWriter(body)
+			if err := mpw.SetBoundary(MultipartBoundary); err != nil {
+				panic(err)
+			}
+
+			part := make(textproto.MIMEHeader)
+			part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
+			part.Set("Content-Type", "application/json")
+			writer, err := mpw.CreatePart(part)
+			if err != nil {
+				panic(err)
+			}
+			_, err = writer.Write([]byte(fmt.Sprintf(`
 			{
 				"type": "club",
 				"title": "%s",
@@ -535,43 +653,152 @@ func TestPostApplication(t *testing.T) {
 					"User1"
 				]
 			}
-		`, title, remarks, paidAt.Format(time.RFC3339), amount)))
-		if err != nil {
-			panic(err)
-		}
+			`, title, remarks, paidAt.Format(time.RFC3339), amount)))
+			if err != nil {
+				panic(err)
+			}
 
-		if err = mpw.Close(); err != nil {
-			panic(err)
-		}
+			part = make(textproto.MIMEHeader)
+			part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="image.png"`, "images"))
+			part.Set("Content-Type", "image/png")
+			writer, err = mpw.CreatePart(part)
+			if err != nil {
+				panic(err)
+			}
+			_, err = writer.Write([]byte(imgString))
+			if err != nil {
+				panic(err)
+			}
 
-		req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetPath("/applications")
+			if err = mpw.Close(); err != nil {
+				panic(err)
+			}
 
-		route, pathParam, err := router.FindRoute(req.Method, req.URL)
-		if err != nil {
-			panic(err)
-		}
+			req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
+			req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/applications")
+			userRepMock.SetNormalUser(c)
 
-		requestValidationInput := &openapi3filter.RequestValidationInput{
-			Request:    req,
-			PathParams: pathParam,
-			Route:      route,
-		}
+			route, pathParam, err := router.FindRoute(req.Method, req.URL)
+			if err != nil {
+				panic(err)
+			}
 
-		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
-			panic(err)
-		}
+			requestValidationInput := &openapi3filter.RequestValidationInput{
+				Request:    req,
+				PathParams: pathParam,
+				Route:      route,
+			}
 
-		err = service.PostApplication(c)
-		asr.NoError(err)
+			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+				panic(err)
+			}
 
-		asr.Equal(http.StatusCreated, rec.Code)
+			err = service.PostApplication(c)
+			asr.NoError(err)
+			asr.Equal(http.StatusCreated, rec.Code)
 
-		err = validateResponse(&ctx, requestValidationInput, rec)
-		asr.NoError(err)
+			err = validateResponse(&ctx, requestValidationInput, rec)
+			asr.NoError(err)
+		})
+
+		t.Run("multipleFiles", func(t *testing.T) {
+			asr := assert.New(t)
+			e := echo.New()
+			ctx := context.TODO()
+
+			body := &bytes.Buffer{}
+			mpw := multipart.NewWriter(body)
+			if err := mpw.SetBoundary(MultipartBoundary); err != nil {
+				panic(err)
+			}
+
+			part := make(textproto.MIMEHeader)
+			part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
+			part.Set("Content-Type", "application/json")
+			writer, err := mpw.CreatePart(part)
+			if err != nil {
+				panic(err)
+			}
+			_, err = writer.Write([]byte(fmt.Sprintf(`
+			{
+				"type": "club",
+				"title": "%s",
+				"remarks": "%s",
+				"paid_at": "%s",
+				"amount": %d,
+				"repaid_to_id": [
+					"User1"
+				]
+			}
+			`, title, remarks, paidAt.Format(time.RFC3339), amount)))
+			if err != nil {
+				panic(err)
+			}
+
+			part = make(textproto.MIMEHeader)
+			part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="image1.png"`, "images"))
+			part.Set("Content-Type", "image/png")
+			writer, err = mpw.CreatePart(part)
+			if err != nil {
+				panic(err)
+			}
+			_, err = writer.Write([]byte(imgString))
+			if err != nil {
+				panic(err)
+			}
+
+			if err = mpw.Close(); err != nil {
+				panic(err)
+			}
+
+			part = make(textproto.MIMEHeader)
+			part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="image2.png"`, "images"))
+			part.Set("Content-Type", "image/png")
+			writer, err = mpw.CreatePart(part)
+			if err != nil {
+				panic(err)
+			}
+			_, err = writer.Write([]byte(imgString))
+			if err != nil {
+				panic(err)
+			}
+
+			if err = mpw.Close(); err != nil {
+				panic(err)
+			}
+
+			req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
+			req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetPath("/applications")
+			userRepMock.SetNormalUser(c)
+
+			route, pathParam, err := router.FindRoute(req.Method, req.URL)
+			if err != nil {
+				panic(err)
+			}
+
+			requestValidationInput := &openapi3filter.RequestValidationInput{
+				Request:    req,
+				PathParams: pathParam,
+				Route:      route,
+			}
+
+			if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+				panic(err)
+			}
+
+			err = service.PostApplication(c)
+			asr.NoError(err)
+			asr.Equal(http.StatusCreated, rec.Code)
+
+			err = validateResponse(&ctx, requestValidationInput, rec)
+			asr.NoError(err)
+		})
 	})
 
 	t.Run("shouldFail", func(t *testing.T) {
@@ -610,10 +837,14 @@ func TestPostApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications")
+		c.Set(sessionUserKey, model.User{
+			TrapId: "UserId",
+		})
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -632,7 +863,6 @@ func TestPostApplication(t *testing.T) {
 
 		err = service.PostApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusBadRequest, rec.Code)
 	})
 }
@@ -644,21 +874,34 @@ func TestPatchApplication(t *testing.T) {
 	remarks := "〇〇駅から〇〇駅への移動"
 	amount := 1000
 	paidAt := time.Now().Round(time.Second)
+	imgString := "SampleData"
 
 	id, err := uuid.NewV4()
 	if err != nil {
 		panic(err)
 	}
 
-	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplication(id, "User2", model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
+	userId := "UserId"
+	adminUserId := "AdminUserId"
+
+	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplication(id, userId, model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
 	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
-	appRepMock.On("PatchApplication", id, "UserId", &model.ApplicationType{Type: model.Contest}, "", "", (*int)(nil), mock.Anything, ([]string)(nil)).Return(nil)
+	appRepMock.On("PatchApplication", id, mock.Anything, &model.ApplicationType{Type: model.Contest}, "", "", (*int)(nil), mock.Anything, ([]string)(nil)).Return(nil)
 	appRepMock.On("PatchApplication", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(gorm.ErrRecordNotFound)
 
-	defaultAdminRepMock := NewAdministratorRepositoryMock()
+	imageRepMock := new(applicationsImageRepositoryMock)
+	imageRepMock.On("CreateApplicationsImage", id, mock.Anything, "image/png").Return(model.ApplicationsImage{}, nil)
 
-	defaultAdminRepMock.On("GetAdministratorList").Return([]string{"UserId"}, nil)
-	defaultAdminRepMock.On("IsAdmin", mock.Anything).Return(true, nil)
+	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
+
+	userRepMock := NewUserRepositoryMock(userId, adminUserId)
+
+	service := Service{
+		Administrators: adminRepMock,
+		Applications:   appRepMock,
+		Images:         imageRepMock,
+		Users:          userRepMock,
+	}
 
 	t.Parallel()
 
@@ -666,11 +909,6 @@ func TestPatchApplication(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
-
-		service := Service{
-			Administrators: defaultAdminRepMock,
-			Applications:   appRepMock,
-		}
 
 		body := &bytes.Buffer{}
 		mpw := multipart.NewWriter(body)
@@ -690,17 +928,30 @@ func TestPatchApplication(t *testing.T) {
 			panic(err)
 		}
 
+		part = make(textproto.MIMEHeader)
+		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="image.png"`, "images"))
+		part.Set("Content-Type", "image/png")
+		writer, err = mpw.CreatePart(part)
+		if err != nil {
+			panic(err)
+		}
+		_, err = writer.Write([]byte(imgString))
+		if err != nil {
+			panic(err)
+		}
+
 		if err = mpw.Close(); err != nil {
 			panic(err)
 		}
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -719,7 +970,6 @@ func TestPatchApplication(t *testing.T) {
 
 		err = service.PatchApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusOK, rec.Code)
 
 		err = validateResponse(&ctx, requestValidationInput, rec)
@@ -731,11 +981,6 @@ func TestPatchApplication(t *testing.T) {
 		e := echo.New()
 		ctx := context.TODO()
 
-		service := Service{
-			Administrators: defaultAdminRepMock,
-			Applications:   appRepMock,
-		}
-
 		body := &bytes.Buffer{}
 		mpw := multipart.NewWriter(body)
 		if err := mpw.SetBoundary(MultipartBoundary); err != nil {
@@ -744,7 +989,7 @@ func TestPatchApplication(t *testing.T) {
 
 		part := make(textproto.MIMEHeader)
 		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
-		part.Set("Content-Type", "application/json")
+		part.Set(echo.HeaderContentType, "application/json")
 		writer, err := mpw.CreatePart(part)
 		if err != nil {
 			panic(err)
@@ -759,12 +1004,13 @@ func TestPatchApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -783,7 +1029,6 @@ func TestPatchApplication(t *testing.T) {
 
 		err = service.PatchApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusBadRequest, rec.Code)
 	})
 
@@ -791,11 +1036,6 @@ func TestPatchApplication(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
-
-		service := Service{
-			Administrators: defaultAdminRepMock,
-			Applications:   appRepMock,
-		}
 
 		notExistId, err := uuid.NewV4()
 		if err != nil {
@@ -825,12 +1065,13 @@ func TestPatchApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+notExistId.String(), body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(notExistId.String())
+		userRepMock.SetAdminUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -849,7 +1090,6 @@ func TestPatchApplication(t *testing.T) {
 
 		err = service.PatchApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusNotFound, rec.Code)
 	})
 
@@ -857,16 +1097,6 @@ func TestPatchApplication(t *testing.T) {
 		asr := assert.New(t)
 		e := echo.New()
 		ctx := context.TODO()
-
-		adminRepMock := NewAdministratorRepositoryMock()
-
-		adminRepMock.On("GetAdministratorList").Return([]string{}, nil)
-		adminRepMock.On("IsAdmin", mock.Anything).Return(false, nil)
-
-		service := Service{
-			Administrators: adminRepMock,
-			Applications:   appRepMock,
-		}
 
 		body := &bytes.Buffer{}
 		mpw := multipart.NewWriter(body)
@@ -891,12 +1121,13 @@ func TestPatchApplication(t *testing.T) {
 		}
 
 		req := httptest.NewRequest(http.MethodPatch, "/api/applications/"+id.String(), body)
-		req.Header.Set("Content-Type", fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/applications/:applicationId")
 		c.SetParamNames("applicationId")
 		c.SetParamValues(id.String())
+		userRepMock.SetAnotherNormalUser(c)
 
 		route, pathParam, err := router.FindRoute(req.Method, req.URL)
 		if err != nil {
@@ -915,7 +1146,6 @@ func TestPatchApplication(t *testing.T) {
 
 		err = service.PatchApplication(c)
 		asr.NoError(err)
-
 		asr.Equal(http.StatusForbidden, rec.Code)
 
 		err = validateResponse(&ctx, requestValidationInput, rec)

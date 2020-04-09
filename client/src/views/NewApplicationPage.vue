@@ -134,7 +134,6 @@
         </v-row>
         <h3 class="ml-0 mr-0">払い戻し対象者</h3>
         <v-autocomplete
-          @focus="getUsers()"
           ref="traPID"
           v-model="traPID"
           :rules="[() => !!traPID || '返金対象者は一人以上必要です']"
@@ -150,7 +149,7 @@
       </v-card>
 
       <!-- todo focusしていないところのvalidateが機能していない -->
-      <v-btn :disabled="!valid" @click.stop="submit" class="ma-3" v-on="on"
+      <v-btn :disabled="!valid" @click.stop="submit" class="ma-3"
         >作成する</v-btn
       >
       <v-dialog persistent v-model="open_dialog">
@@ -216,7 +215,7 @@
 import axios from "axios";
 import Icon from "./components/Icon";
 import ImageUploader from "./components/ImageUploader";
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 export default {
   data: () => ({
     response: {
@@ -247,6 +246,7 @@ export default {
     this.$refs.firstfocus.focus();
   },
   computed: {
+    ...mapGetters({ traPIDs: "trap_ids" }),
     computedDateFormatted() {
       return this.formatDate(this.date);
     },
@@ -257,17 +257,13 @@ export default {
       return {
         traPID: this.traPID
       };
-    },
-    traPIDs() {
-      let trap_ids = new Array();
-      for (let i = 0; i < this.$store.state.userList.length - 1; i++) {
-        trap_ids[i] = this.$store.state.userList[i].trap_id;
-      }
-      return trap_ids;
     }
   },
 
   // todo 返金対象者周りのポスト等
+  async created() {
+    await this.getUsers();
+  },
   methods: {
     ...mapActions({
       getUsers: "getUserList"

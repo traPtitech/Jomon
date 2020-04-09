@@ -4,6 +4,8 @@ services:
     build:
       context: ./
       dockerfile: ./development/Dockerfile
+      args:
+        - GO_BUILD_TAGS=debug
     entrypoint: dockerize -wait tcp://db:3306 -timeout 60s
     command: go test -v ./...
     environment:
