@@ -145,8 +145,7 @@
         </v-autocomplete>
 
         <h3 class="ml-0 mr-0">申請書画像リスト</h3>
-
-        画像リスト(画像アップロード)
+        <image-uploader v-model="imageBlobs" />
       </v-card>
 
       <!-- todo focusしていないところのvalidateが機能していない -->
@@ -215,6 +214,7 @@
 <script>
 import axios from "axios";
 import Icon from "./components/Icon";
+import ImageUploader from "./components/ImageUploader";
 import { mapActions, mapGetters } from "vuex";
 export default {
   data: () => ({
@@ -239,6 +239,7 @@ export default {
     title: "",
     amount: 0,
     remarks: "",
+    imageBlobs: [],
     nullRules: [v => !!v || ""]
   }),
   mounted() {
@@ -260,7 +261,6 @@ export default {
   },
 
   // todo 返金対象者周りのポスト等
-  // todo 画像のアップロード
   async created() {
     await this.getUsers();
   },
@@ -270,14 +270,22 @@ export default {
     }),
     submit() {
       if (this.$refs.form.validate()) {
+        let form = new FormData();
+        let details = {
+          type: this.$route.params.type,
+          title: this.title,
+          remarks: this.remarks,
+          paid_at: this.paid_at,
+          amount: this.amount,
+          repaid_to_id: this.traPID
+        };
+        form.append("details", details);
+        this.imageBlobs.forEach(imageBlob => {
+          form.append("images", imageBlob);
+        });
         axios
-          .post("/api/applications/", {
-            type: this.$route.params.type,
-            title: this.title,
-            remarks: this.remarks,
-            paid_at: this.paid_at,
-            amount: this.amount,
-            repaid_to_id: this.traPID
+          .post("/api/applications/", form, {
+            headers: { "content-type": "multipart/form-data" }
           })
           .then(
             response => (
@@ -334,7 +342,8 @@ export default {
   },
   props: {},
   components: {
-    Icon
+    Icon,
+    ImageUploader
   }
 };
 </script>
