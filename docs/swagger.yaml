@@ -339,7 +339,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            $ref: "#/components/schemas/TrapID"
       responses:
         "200":
           description: OK

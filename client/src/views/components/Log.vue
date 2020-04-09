@@ -10,13 +10,17 @@
         <!-- todo update_atと比較して薄い灰色で編集済みの記述 -->
         <v-col class="pb-0 pt-0" :class="grey_text" cols="7">
           <strong :class="strong_text"> {{ log.content.user.trap_id }}</strong>
-          <span :class="larger_size">がコメントしました。</span
-          ><span :class="smaller_size">のコメント</span>
+          <span :class="larger_size">がコメントしました。</span>
+          <span :class="smaller_size">のコメント</span>
         </v-col>
         <v-col class="pa-0" cols="2">{{
           dayPrint(log.content.created_at)
         }}</v-col>
-        <v-col class="pa-0" cols="3">
+        <v-col
+          v-if="log.content.user.trap_id === this.$store.state.me.trap_id"
+          class="pa-0"
+          cols="3"
+        >
           <v-btn icon color="success" :disabled="!comment_readonly">
             <v-icon left @click="commentChange()">mdi-pencil</v-icon>
           </v-btn>
@@ -37,7 +41,8 @@
         {{ log.content.comment }}
       </v-card-text> -->
       <v-form ref="form" v-model="comment_valid">
-        <v-text-field
+        <!-- v-text-fieldから変更 -->
+        <v-textarea
           ref="comment"
           v-model="comment_change"
           class="ma-0 black--text"
@@ -51,7 +56,10 @@
           hide-details
           :rules="changeRules"
         >
-        </v-text-field>
+        </v-textarea>
+        <span v-if="log.content.created_at !== log.content.updated_at"
+          >編集済</span
+        >
         <div v-if="!comment_readonly" class="pt-2">
           <v-btn
             @click="
@@ -154,7 +162,10 @@
   </div>
   <!-- 以下は払い戻しログ -->
   <v-timeline-item
-    v-else-if="log.log_type === `repayment`"
+    v-else-if="
+      log.log_type === `repayment` &&
+        !(log.content.repaid_at === `` || log.content.repaid_at === null)
+    "
     class="mb-4"
     color="grey"
     icon-color="grey lighten-2"
@@ -168,7 +179,7 @@
         </strong>
         が
         <strong :class="strong_text">
-          {{ log.content.repaid_by_user.trap_id }}
+          {{ log.content.repaid_to_user.trap_id }}
         </strong>
         に 払い戻し
         <span :class="larger_size">をしました。</span>
@@ -276,17 +287,27 @@ export default {
       this.comment_readonly = false;
     },
     deleteComment() {
-      // {applicationId}をURLから受け取るかstoreから受け取るか。。。
       axios
-        .delete("api/applications/{applicationId}/comments/{commentId}")
+        .delete(
+          "../api/applications/" +
+            this.$store.state.application_detail_paper.application_id +
+            "/comments/" +
+            this.log.content.comment_id
+        )
         .then(response => console.log(response.status));
       alert("コメントを削除しました。");
     },
     putComment() {
       axios
-        .put("api/applications/{applicationId}/comments/{commentId}", {
-          comment: this.comment_change
-        })
+        .put(
+          "../api/applications/" +
+            this.$store.state.application_detail_paper.application_id +
+            "/comments/" +
+            this.log.content.comment_id,
+          {
+            comment: this.comment_change
+          }
+        )
         .then(response => console.log(response.status));
       alert("コメントを変更しました");
       this.comment_readonly = true;

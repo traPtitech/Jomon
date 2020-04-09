@@ -3,9 +3,9 @@
   <div class="app-detail-paper">
     <v-card class="ml-2 mr-2 mt-2 pa-3" tile>
       <v-row class="ml-4 mr-4" :justify="`space-between`">
-        <h1>{{ returnType(this.detail.current_detail.type) }}申請書</h1>
+        <h1>{{ returnType(this.detail.core.current_detail.type) }}申請書</h1>
         <div>
-          <div>申請書ID: {{ this.detail.application_id }}</div>
+          <div>申請書ID: {{ this.detail.core.application_id }}</div>
           <v-divider></v-divider>
         </div>
       </v-row>
@@ -13,7 +13,7 @@
       <template>
         <v-divider></v-divider>
       </template>
-      <h1>タイトル:{{ this.detail.current_detail.title }}</h1>
+      <h1>タイトル:{{ this.detail.core.current_detail.title }}</h1>
 
       <div>
         <v-container class="pa-0">
@@ -28,9 +28,10 @@
                 </v-col>
                 <v-col cols="8" md="6">
                   <v-card height="100%" class="pa-2" outlined tile>
-                    <Icon :user="this.detail.applicant.trap_id" :size="20" />{{
-                      this.detail.applicant.trap_id
-                    }}
+                    <Icon
+                      :user="this.detail.core.applicant.trap_id"
+                      :size="20"
+                    />{{ this.detail.core.applicant.trap_id }}
                   </v-card>
                 </v-col>
               </v-row>
@@ -42,7 +43,7 @@
                 </v-col>
                 <v-col>
                   <v-card height="100%" class="pa-2" outlined tile>
-                    {{ this.detail.current_detail.amount }}円
+                    {{ this.detail.core.current_detail.amount }}円
                   </v-card>
                 </v-col>
               </v-row>
@@ -57,7 +58,7 @@
                 </v-col>
                 <v-col height="100%" cols="8" md="6">
                   <v-card height="100%" class="pa-2" outlined tile>
-                    {{ returnDate(this.detail.created_at) }}
+                    {{ returnDate(this.detail.core.created_at) }}
                   </v-card>
                 </v-col>
               </v-row>
@@ -69,7 +70,7 @@
                 </v-col>
                 <v-col cols="8" md="6">
                   <v-card height="100%" class="pa-2" outlined tile>
-                    {{ returnDate(this.detail.current_detail.paid_at) }}
+                    {{ returnDate(this.detail.core.current_detail.paid_at) }}
                   </v-card>
                 </v-col>
               </v-row>
@@ -80,17 +81,21 @@
       </div>
 
       <h3>
-        {{ returnRemarkTitle(this.detail.current_detail.type) }}:{{
-          this.detail.current_detail.remarks
+        {{ returnRemarkTitle(this.detail.core.current_detail.type) }}:{{
+          this.detail.core.current_detail.remarks
         }}
       </h3>
       <h3>払い戻し対象者</h3>
-      <li :key="user" v-for="user in this.detail.current_detail.repaid_to_id">
-        <Icon :user="user" :size="25" />
-        {{ user }}
+      <!-- 以下のkeyは多分よろしくない -->
+      <li
+        :key="user.repaid_to_user.trap_id"
+        v-for="user in this.detail.core.repayment_logs"
+      >
+        <Icon :user="user.repaid_to_user.trap_id" :size="25" />
+        {{ user.repaid_to_user.trap_id }}
       </li>
       <h3>申請書画像リスト</h3>
-      <li :key="path" v-for="path in this.detail.images">
+      <li :key="path" v-for="path in this.detail.core.images">
         {{ path }}
       </li>
     </v-card>

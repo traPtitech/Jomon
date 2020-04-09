@@ -26,6 +26,10 @@ export const userList = {
     }
   },
   getters: {
+    trap_ids: state => {
+      const trap_ids = state.map(data => data.trap_id);
+      return trap_ids;
+    },
     adminList: state => {
       let admin = [];
       state.forEach(user => {

@@ -1,89 +1,92 @@
 import axios from "axios";
 export const applicationDetail = {
   state: {
-    application_id: "",
-    created_at: "",
-    applicant: {
-      trap_id: "",
-      is_admin: false
-    },
-    current_detail: {
-      update_user: {
+    fix: false,
+    core: {
+      application_id: "",
+      created_at: "",
+      applicant: {
         trap_id: "",
-        is_admin: ""
+        is_admin: false
       },
-      type: "",
-      title: "",
-      remarks: "",
-      amount: 0,
-      paid_at: "",
-      updated_at: "",
-      repaid_to_id: []
-    },
-    current_state: "",
-    images: [""],
-    comments: [
-      {
-        comment_id: 0,
-        user: {
-          trap_id: "",
-          is_admin: false
-        },
-        comment: "",
-        created_at: "",
-        updated_at: ""
-      }
-    ],
-    state_logs: [
-      {
+      current_detail: {
         update_user: {
           trap_id: "",
-          is_admin: false
-        },
-        to_state: "",
-        reason: "",
-        created_at: ""
-      }
-    ],
-    application_detail_logs: [
-      {
-        update_user: {
-          trap_id: "",
-          is_admin: false
+          is_admin: ""
         },
         type: "",
         title: "",
         remarks: "",
         amount: 0,
         paid_at: "",
-        updated_at: ""
-      }
-    ],
-    repayment_logs: [
-      {
-        repaid_by_user: {
-          trap_id: "",
-          is_admin: false
-        },
-        repaid_to_user: {
-          trap_id: "",
-          is_admin: false
-        },
-        repaid_at: ""
-      }
-    ]
+        updated_at: "",
+        repaid_to_id: []
+      },
+      current_state: "",
+      images: [""],
+      comments: [
+        {
+          comment_id: 0,
+          user: {
+            trap_id: "",
+            is_admin: false
+          },
+          comment: "",
+          created_at: "",
+          updated_at: ""
+        }
+      ],
+      state_logs: [
+        {
+          update_user: {
+            trap_id: "",
+            is_admin: false
+          },
+          to_state: "",
+          reason: "",
+          created_at: ""
+        }
+      ],
+      application_detail_logs: [
+        {
+          update_user: {
+            trap_id: "",
+            is_admin: false
+          },
+          type: "",
+          title: "",
+          remarks: "",
+          ammount: 0,
+          paid_at: "",
+          updated_at: ""
+        }
+      ],
+      repayment_logs: [
+        {
+          repaid_by_user: {
+            trap_id: "",
+            is_admin: false
+          },
+          repaid_to_user: {
+            trap_id: "",
+            is_admin: false
+          },
+          repaid_at: ""
+        }
+      ]
+    }
   },
   getters: {
     logs: state => {
       let logs = [];
-      state.comments.forEach(log => {
+      state.core.comments.forEach(log => {
         logs.push({
           log_type: "comment",
           content: log,
           sort_date: new Date(log.created_at)
         });
       });
-      state.state_logs.forEach(log => {
+      state.core.state_logs.forEach(log => {
         logs.push({
           log_type: "state",
           content: log,
@@ -91,7 +94,7 @@ export const applicationDetail = {
         });
       });
       let pre_record = "";
-      state.application_detail_logs.forEach(log => {
+      state.core.application_detail_logs.forEach(log => {
         if (pre_record !== "") {
           logs.push({
             log_type: "application",
@@ -104,7 +107,7 @@ export const applicationDetail = {
         }
         pre_record = log;
       });
-      state.repayment_logs.forEach(log => {
+      state.core.repayment_logs.forEach(log => {
         logs.push({
           log_type: "repayment",
           content: log,
@@ -123,9 +126,15 @@ export const applicationDetail = {
   },
   mutations: {
     setApplicationDetail(state, newState) {
-      Object.keys(state).forEach(key => {
-        state[key] = newState[key];
+      Object.keys(state.core).forEach(key => {
+        state.core[key] = newState[key];
       });
+    },
+    changeFix(state) {
+      state.fix = !state.fix;
+    },
+    deleteFix(state) {
+      state.fix = false;
     }
   },
   actions: {

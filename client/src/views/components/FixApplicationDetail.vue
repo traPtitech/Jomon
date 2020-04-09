@@ -1,11 +1,24 @@
 <template>
-  <div class="new-applicatoin">
+  <!-- repuid_to_userについては実際のサーバーでうまくいくか確認する。おそらくリスト取得がフォーカス後なのでうまくいかない -->
+  <div class="fix-applicatoin">
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-card class="ml-2 mr-2 mt-2 pa-3" tile>
         <v-row class="ml-4 mr-4" :justify="`space-between`">
-          <h1>{{ returnType($route.params.type) }}申請書</h1>
+          <v-select
+            v-model="type_object"
+            :items="types"
+            item-text="jpn"
+            item-value="type"
+            label="Select"
+            persistent-hint
+            return-object
+            single-line
+            dense
+          ></v-select>
+          <h1>申請書</h1>
+
           <div>
-            <div>申請書ID: 自動入力されます</div>
+            <div>申請書ID: {{ this.detail.core.application_id }}</div>
             <v-divider></v-divider>
           </div>
         </v-row>
@@ -16,10 +29,9 @@
         <v-row class="ml-0 mr-0">
           <h1>タイトル:</h1>
           <v-text-field
-            v-model="title"
+            v-model="title_change"
             :rules="nullRules"
             label="入力してください"
-            ref="firstfocus"
           ></v-text-field>
         </v-row>
 
@@ -36,9 +48,10 @@
                   </v-col>
                   <v-col cols="8" md="6">
                     <v-card height="100%" class="pa-2" outlined tile>
-                      <Icon :user="this.$store.state.me.trap_id" :size="20" />{{
-                        this.$store.state.me.trap_id
-                      }}
+                      <Icon
+                        :user="this.detail.core.applicant.trap_id"
+                        :size="20"
+                      />{{ this.detail.core.applicant.trap_id }}
                     </v-card>
                   </v-col>
                 </v-row>
@@ -53,7 +66,7 @@
                       <v-row class="pr-2 pl-2" align="center">
                         <v-col class="pb-1 pt-2" cols="10">
                           <v-text-field
-                            v-model="amount"
+                            v-model="amount_change"
                             :rules="nullRules"
                             type="number"
                             label="金額入力"
@@ -78,7 +91,7 @@
                   </v-col>
                   <v-col height="100%" cols="8" md="6">
                     <v-card class="pa-2" outlined tile>
-                      {{ returnDate(new Date()) }}
+                      {{ returnDate(this.detail.core.created_at) }}
                     </v-card>
                   </v-col>
                 </v-row>
@@ -110,7 +123,7 @@
                           ></v-text-field>
                         </template>
                         <v-date-picker
-                          v-model="date"
+                          v-model="paid_at_change"
                           no-title
                           @input="menu = false"
                         ></v-date-picker>
@@ -124,9 +137,9 @@
           </v-container>
         </div>
         <v-row class="ml-0 mr-0">
-          <h3>{{ returnRemarkTitle($route.params.type) }}:</h3>
+          <h3>{{ returnRemarkTitle(this.type_object.type) }}:</h3>
           <v-textarea
-            v-model="remarks"
+            v-model="remarks_change"
             :rules="nullRules"
             label="入力してください"
             auto-grow
@@ -135,8 +148,10 @@
         <h3 class="ml-0 mr-0">払い戻し対象者</h3>
         <v-autocomplete
           ref="traPID"
-          v-model="traPID"
-          :rules="[() => !!traPID || '返金対象者は一人以上必要です']"
+          v-model="repaid_to_id_change"
+          :rules="[
+            () => !!repaid_to_id_change || '返金対象者は一人以上必要です'
+          ]"
           :items="traPIDs"
           label="返金対象者のtraPidを入力..."
           required
@@ -150,14 +165,13 @@
       </v-card>
 
       <!-- todo focusしていないところのvalidateが機能していない -->
+
       <v-btn :disabled="!valid" @click.stop="submit" class="ma-3"
-        >作成する</v-btn
-      >
+        >修正する</v-btn
+      ><v-btn class="ma-3" @click="deleteFix">取り消す</v-btn>
       <v-dialog persistent v-model="open_dialog">
         <v-card class="pa-3">
-          <v-card-title class="headline"
-            >以下の内容で新規作成しました</v-card-title
-          >
+          <v-card-title class="headline">以下の内容で修正しました</v-card-title>
           <v-row :justify="`space-between`">
             <v-col cols="4" md="2">申請書id</v-col>
             <v-col cols="8" md="10">{{ response.application_id }}</v-col>
@@ -202,7 +216,7 @@
               :to="`../../applications/` + response.application_id"
               color="green darken-1"
               text
-              @click="open_dialog = false"
+              @click="[(open_dialog = false), deleteFix()]"
               >OK</v-btn
             >
           </v-card-actions>
@@ -214,76 +228,104 @@
 
 <script>
 import axios from "axios";
-import Icon from "./components/Icon";
-import { mapActions, mapGetters } from "vuex";
+import Icon from "./Icon";
+import { mapActions } from "vuex";
+import { mapState, mapMutations } from "vuex";
 export default {
-  data: () => ({
-    response: {
-      application_id: null,
-      applicant: { trapid: null },
-      created_at: null,
-      current_detail: {
-        title: null,
-        type: null,
-        amount: 0,
-        remarks: null,
+  data: function() {
+    return {
+      response: {
+        application_id: null,
+        applicant: { trapid: null },
         created_at: null,
-        paid_at: null
-      }
-    },
-    open_dialog: false,
-    date: null,
-    menu: false,
-    traPID: [],
-    valid: true,
-    title: "",
-    amount: 0,
-    remarks: "",
-    nullRules: [v => !!v || ""]
-  }),
-  mounted() {
-    this.$refs.firstfocus.focus();
+        current_detail: {
+          title: null,
+          type: null,
+          amount: 0,
+          remarks: null,
+          created_at: null,
+          paid_at: null
+        }
+      },
+      type_object: { jpn: "", type: "" },
+      types: [
+        { jpn: "部費利用", type: "club" },
+        { jpn: "大会等旅費補助", type: "contest" },
+        { jpn: "イベント交通費補助", type: "event" },
+        { jpn: "渉外交通費補助", type: "public" }
+      ],
+      open_dialog: false,
+      menu: false,
+      valid: true,
+      nullRules: [v => !!v || ""],
+      type_change: "",
+      title_change: "",
+      remarks_change: "",
+      paid_at_change: "",
+      amount_change: 0,
+      repaid_to_id_change: [],
+      // todo返金リスト配列
+      changeRules: [v => (v !== this.detail.core.repayment_logs && !!v) || ""]
+    };
   },
+  async created() {
+    this.title_change = this.detail.core.current_detail.title;
+    this.type_object.type = this.detail.core.current_detail.type;
+    this.title_change = this.detail.core.current_detail.title;
+    this.remarks_change = this.detail.core.current_detail.remarks;
+    this.paid_at_change = this.detail.core.current_detail.paid_at;
+    this.amount_change = this.detail.core.current_detail.amount;
+    await this.getUsers();
+    const trap_ids = this.detail.core.repayment_logs.map(
+      log => log.repaid_to_user.trap_id
+    );
+    this.repaid_to_id_change = trap_ids;
+  },
+  mounted() {},
   computed: {
-    ...mapGetters({ traPIDs: "trap_ids" }),
+    ...mapState({ detail: "application_detail_paper" }),
     computedDateFormatted() {
-      return this.formatDate(this.date);
+      return this.formatDate(this.paid_at_change);
     },
     me() {
       return this.$stor.me;
     },
     form() {
       return {
-        traPID: this.traPID
+        repaid_to_id_change: this.repaid_to_id_change
       };
+    },
+    traPIDs() {
+      let trap_ids = new Array();
+      for (let i = 0; i < this.$store.state.userList.length - 1; i++) {
+        trap_ids[i] = this.$store.state.userList[i].trap_id;
+      }
+      return trap_ids;
     }
   },
 
-  // todo 返金対象者周りのポスト等
-  // todo 画像のアップロード
-  async created() {
-    await this.getUsers();
-  },
   methods: {
+    ...mapMutations(["deleteFix"]),
     ...mapActions({
-      getUsers: "getUserList"
+      getUsers: "getUserList",
+      getApplicationDetail: "getApplicationDetail"
     }),
-    submit() {
+    async submit() {
       if (this.$refs.form.validate()) {
-        axios
-          .post("/api/applications/", {
-            type: this.$route.params.type,
-            title: this.title,
-            remarks: this.remarks,
-            paid_at: this.paid_at,
-            amount: this.amount,
-            repaid_to_id: this.traPID
-          })
-          .then(
-            response => (
-              (this.response = response.data), (this.open_dialog = true)
-            )
-          );
+        const response = await axios.patch(
+          "/api/applications/" + this.detail.core.application_id,
+          {
+            type: this.type_object.type,
+            title: this.title_change,
+            remarks: this.remarks_change,
+            paid_at: this.paid_at_change,
+            amount: this.amount_change,
+            repaid_to_id: this.repaid_to_id_change
+          }
+        );
+        this.response = response.data;
+        await this.getApplicationDetail(this.$route.params.id);
+        this.open_dialog = true;
       }
     },
     formatDate(date) {
