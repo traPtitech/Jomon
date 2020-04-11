@@ -3,8 +3,9 @@ package model
 import (
 	"errors"
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"time"
+
+	"github.com/jinzhu/gorm"
 
 	"github.com/gofrs/uuid"
 )
@@ -16,8 +17,8 @@ var (
 type RepayUser struct {
 	ID                 int        `gorm:"type:int(11) AUTO_INCREMENT;primary_key" json:"-"`
 	ApplicationID      uuid.UUID  `gorm:"type:char(36);not null" json:"-"`
-	RepaidToUserTrapID User       `gorm:"embedded;embedded_prefix:repaid_to_user_;not null" json:"repaid_to_user"`
-	RepaidByUserTrapID *User      `gorm:"embedded;embedded_prefix:repaid_by_user_" json:"repaid_by_user"`
+	RepaidToUserTrapID User       `gorm:"embedded;embedded_prefix:repaid_to_user_" json:"repaid_to_user"`
+	RepaidByUserTrapID User       `gorm:"embedded;embedded_prefix:repaid_by_user_" json:"repaid_by_user"`
 	RepaidAt           *time.Time `gorm:"type:date" json:"repaid_at"`
 }
 
@@ -58,7 +59,7 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 		RepaidToUserTrapID: User{
 			TrapId: repaidToUserTrapID,
 		},
-		RepaidByUserTrapID: &User{
+		RepaidByUserTrapID: User{
 			TrapId: repaidByUserTrapID,
 		},
 		RepaidAt: &dt,
@@ -87,7 +88,7 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 			return err
 		}
 		for _, user := range rus {
-			allUsersRepaidCheck = allUsersRepaidCheck && (user.RepaidByUserTrapID != nil) && (user.RepaidAt != nil)
+			allUsersRepaidCheck = allUsersRepaidCheck && user.RepaidAt != nil
 		}
 		if allUsersRepaidCheck {
 			err := repo.updateStatesLogTransaction(tx, applicationId, log)
@@ -96,7 +97,7 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 			}
 		}
 		return tx.Model(&RepayUser{ApplicationID: applicationId, RepaidToUserTrapID: User{TrapId: repaidToUserTrapID}}).Updates(RepayUser{
-			RepaidByUserTrapID: &User{
+			RepaidByUserTrapID: User{
 				TrapId: repaidByUserTrapID,
 			},
 		}).Error

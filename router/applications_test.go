@@ -151,7 +151,7 @@ func (m *applicationRepositoryMock) UpdateRepayUser(
 		RepaidToUserTrapID: model.User{
 			TrapId: repaidToUserTrapID,
 		},
-		RepaidByUserTrapID: &model.User{
+		RepaidByUserTrapID: model.User{
 			TrapId: repaidByUserTrapID,
 		},
 		RepaidAt: &dt,
