@@ -30,5 +30,6 @@ func main() {
 
 	e.Use(session.Middleware(sessionStore))
 	router.SetRouting(e, router.NewService())
+	router.EchoConfig(e)
 	e.Start(":1323")
 }

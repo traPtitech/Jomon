@@ -36,6 +36,8 @@ func NewService() Service {
 	}
 }
 
+func EchoConfig(_ *echo.Echo) {}
+
 func (s Service) AuthUser(c echo.Context) (echo.Context, error) {
 	sess, err := session.Get(sessionKey, c)
 	if err != nil {
