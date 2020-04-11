@@ -20,8 +20,8 @@
 
 <script>
 import { mapMutations, mapState } from "vuex";
+import axios from "axios";
 import { redirectAuthorizationEndpoint } from "./../../utils/api";
-import { createCodeChallenge } from "./../../utils/hash";
 export default {
   computed: {
     ...mapState(["token"])
@@ -29,19 +29,22 @@ export default {
   methods: {
     ...mapMutations(["toggleLoginDialog"]),
     async login() {
-      //   console.log(`in login:` + this.token.loginDialog);
       this.toggleLoginDialog();
-      //   console.log(`in login:` + this.token.loginDialog);
-      const client_id = "client_id";
-      const response_type = "code";
-      const code_challenge = await createCodeChallenge();
-      const code_challenge_method = "S256";
-      redirectAuthorizationEndpoint(
-        client_id,
-        response_type,
-        code_challenge,
-        code_challenge_method
-      );
+      try {
+        const response = await axios.get("/api/auth/genpkce");
+        const client_id = response.data.client_id;
+        const response_type = response.data.response;
+        const code_challenge = response.data.code_challenge;
+        const code_challenge_method = response.data.code_challenge_method;
+        redirectAuthorizationEndpoint(
+          client_id,
+          response_type,
+          code_challenge,
+          code_challenge_method
+        );
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 };
