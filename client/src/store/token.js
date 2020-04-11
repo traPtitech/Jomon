@@ -1,7 +1,6 @@
 export const token = {
   state: {
-    // loginDialog: false
-    loginDialog: true
+    loginDialog: false
   },
   mutations: {
     toggleLoginDialog(state) {
