@@ -4,7 +4,6 @@ import ApplicationListPage from "../views/ApplicationListPage.vue";
 import ApplicationDetailPage from "../views/ApplicationDetailPage.vue";
 import AdminPage from "../views/AdminPage";
 import NewApplicationPage from "../views/NewApplicationPage.vue";
-import store from "./../store/index";
 
 Vue.use(VueRouter);
 
@@ -28,29 +27,6 @@ const routes = [
     path: "/applications/:id",
     name: "Application",
     component: ApplicationDetailPage
-  },
-  {
-    path: "/callback",
-    name: "callback",
-    component: ApplicationListPage,
-    beforeEnter: async (to, from, next) => {
-      const code = to.query.code;
-      const state = to.query.state;
-      const sessionState = sessionStorage.getItem(`state`);
-      if (state !== sessionState) {
-        console.log("state error");
-      } else {
-        try {
-          // Jomon server にapi
-          console.log(code);
-          const resp = await store.dispatch("getMe");
-          await store.commit("setMe", resp.data);
-          next("/");
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    }
   }
 ];
 
