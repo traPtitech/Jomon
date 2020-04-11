@@ -1,5 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import { token } from "./token";
 import { me } from "./me";
 import { applicationList } from "./applicationList";
 import { applicationDetail } from "./applicationDetail";
@@ -11,6 +12,7 @@ export default new Vuex.Store({
   mutations: {},
   actions: {},
   modules: {
+    token: token,
     me: me,
     applicationList: applicationList,
     application_detail_paper: applicationDetail,
