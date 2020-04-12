@@ -5,6 +5,7 @@ package router
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/traPtitech/Jomon/model"
 	storagePkg "github.com/traPtitech/Jomon/storage"
 	"os"
@@ -30,23 +31,23 @@ func NewService() Service {
 		Images:         model.NewApplicationsImageRepository(&local),
 		Users: &debugUserRepository{
 			users: []model.User{
-				{TrapId:  "MyUser"},
-				{TrapId:  "AdminUser"},
-				{TrapId:  "NormalUser1"},
-				{TrapId:  "NormalUser2"},
+				{TrapId: "MyUser"},
+				{TrapId: "AdminUser"},
+				{TrapId: "NormalUser1"},
+				{TrapId: "NormalUser2"},
 			},
 		},
 		TraQAuth: model.NewTraQAuthRepository(""),
 	}
 
-	if err := s.Administrators.AddAdministrator("MyUser"); err != nil {
-		panic(err)
-	}
-	if err := s.Administrators.AddAdministrator("AdminUser"); err != nil {
-		panic(err)
-	}
+	_ = s.Administrators.AddAdministrator("MyUser")
+	_ = s.Administrators.AddAdministrator("AdminUser")
 
 	return s
+}
+
+func EchoConfig(e *echo.Echo) {
+	e.Use(middleware.Logger())
 }
 
 type debugUserRepository struct {
@@ -72,6 +73,9 @@ func (d *debugUserRepository) ExistsUser(token string, trapId string) (bool, err
 
 func (s Service) AuthUser(c echo.Context) (echo.Context, error) {
 	user, _ := s.Users.GetMyUser("")
+	admins, _ := s.Administrators.GetAdministratorList()
+	user.GiveIsUserAdmin(admins)
+
 	c.Set(contextUserKey, user)
 	c.Set(contextAccessTokenKey, "")
 
