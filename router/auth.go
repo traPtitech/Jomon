@@ -68,7 +68,7 @@ func (s Service) AuthCallback(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	return c.NoContent(http.StatusOK)
+	return c.Redirect(http.StatusSeeOther, "/")
 }
 
 func (s Service) GeneratePKCE(c echo.Context) error {
