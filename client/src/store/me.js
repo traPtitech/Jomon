@@ -20,7 +20,6 @@ export const me = {
         console.log(err);
         if (err.response.status === 401) {
           try {
-            console.log("hoge");
             commit("toggleLoginDialog");
           } catch (err) {
             console.log(err);
