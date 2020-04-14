@@ -22,6 +22,13 @@ export const userList = {
         commit("setUserList", response.data);
       } catch (err) {
         console.log(err);
+        if (err.response.status === 401) {
+          try {
+            commit("toggleLoginDialog");
+          } catch (err) {
+            console.log(err);
+          }
+        }
       }
     }
   },

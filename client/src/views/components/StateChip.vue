@@ -6,7 +6,6 @@
     :x-large="size === `x-large`"
     :class="chip"
     label
-    :width="width"
   >
     {{ this.state }}
   </v-chip>
@@ -40,10 +39,6 @@ export default {
       default: "fail"
     },
     size: {
-      type: String,
-      default: ""
-    },
-    width: {
       type: String,
       default: ""
     }
