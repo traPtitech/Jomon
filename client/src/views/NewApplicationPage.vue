@@ -276,10 +276,10 @@ export default {
           title: this.title,
           remarks: this.remarks,
           paid_at: this.paid_at,
-          amount: this.amount,
+          amount: Number(this.amount),
           repaid_to_id: this.traPID
         };
-        form.append("details", details);
+        form.append("details", JSON.stringify(details));
         this.imageBlobs.forEach(imageBlob => {
           form.append("images", imageBlob);
         });
