@@ -34,7 +34,7 @@ services:
   jomon-client:
     build: ./client
     volumes:
-      - './client:/app'
+      - './client/src:/app/src'
     tty: true
     environment:
     - CHOKIDAR_USEPOLLING=true
