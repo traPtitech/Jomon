@@ -284,7 +284,7 @@ export default {
           form.append("images", imageBlob);
         });
         axios
-          .post("/api/applications/", form, {
+          .post("/api/applications", form, {
             headers: { "content-type": "multipart/form-data" }
           })
           .then(
