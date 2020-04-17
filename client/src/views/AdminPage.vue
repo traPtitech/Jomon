@@ -1,5 +1,5 @@
 <template>
-  <div class="admin">
+  <div v-if="this.$store.state.me.is_admin" class="admin">
     <v-chip v-for="(user, index) in adminList" :key="index">{{ user }}</v-chip>
     <v-autocomplete
       v-model="removeAdminUsers"
@@ -15,6 +15,9 @@
       multiple
     ></v-autocomplete>
     <v-btn @click="addAdmin()">設定</v-btn>
+  </div>
+  <div v-else>
+    権限がありません
   </div>
 </template>
 
