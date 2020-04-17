@@ -250,9 +250,6 @@ export default {
     computedDateFormatted() {
       return this.formatDate(this.date);
     },
-    me() {
-      return this.$stor.me;
-    },
     form() {
       return {
         traPID: this.traPID
