@@ -1,8 +1,8 @@
 <template>
   <v-app>
     <nav-bar />
-    <core-login-dialog />
     <core-view />
+    <core-login-dialog />
   </v-app>
 </template>
 
