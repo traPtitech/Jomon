@@ -271,11 +271,12 @@ export default {
     submit() {
       if (this.$refs.form.validate()) {
         let form = new FormData();
+        let paid_at = new Date(this.date);
         let details = {
           type: this.$route.params.type,
           title: this.title,
           remarks: this.remarks,
-          paid_at: this.paid_at,
+          paid_at: paid_at.toISOString(),
           amount: Number(this.amount),
           repaid_to_id: this.traPID
         };
