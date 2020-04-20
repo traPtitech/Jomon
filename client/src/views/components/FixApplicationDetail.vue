@@ -158,10 +158,13 @@
           multiple
         >
         </v-autocomplete>
-
         <h3 class="ml-0 mr-0">申請書画像リスト</h3>
+        <div :key="path" v-for="path in this.detail.core.images">
+          <v-img :src="'/api/images/' + path" max-width="100%" />
+        </div>
 
-        画像リスト(画像アップロード)
+        <h3 class="ml-0 mr-0">画像を追加</h3>
+        <image-uploader v-model="imageBlobs" />
       </v-card>
 
       <!-- todo focusしていないところのvalidateが機能していない -->
@@ -229,6 +232,7 @@
 <script>
 import axios from "axios";
 import Icon from "./Icon";
+import ImageUploader from "./ImageUploader";
 import { mapActions } from "vuex";
 import { mapState, mapMutations } from "vuex";
 export default {
@@ -264,6 +268,7 @@ export default {
       paid_at_change: "",
       amount_change: 0,
       repaid_to_id_change: [],
+      imageBlobs: [],
       // todo返金リスト配列
       changeRules: [v => (v !== this.detail.core.repayment_logs && !!v) || ""]
     };
@@ -312,15 +317,25 @@ export default {
     }),
     async submit() {
       if (this.$refs.form.validate()) {
+        let form = new FormData();
+        let date = new Date(this.paid_at_change);
+        let details = {
+          type: this.type_object.type,
+          title: this.title_change,
+          remarks: this.remarks_change,
+          paid_at: date.toISOString(),
+          amount: Number(this.amount_change),
+          repaid_to_id: this.repaid_to_id_change
+        };
+        form.append("details", JSON.stringify(details));
+        this.imageBlobs.forEach(imageBlob => {
+          form.append("images", imageBlob);
+        });
         const response = await axios.patch(
           "/api/applications/" + this.detail.core.application_id,
+          form,
           {
-            type: this.type_object.type,
-            title: this.title_change,
-            remarks: this.remarks_change,
-            paid_at: this.paid_at_change,
-            amount: this.amount_change,
-            repaid_to_id: this.repaid_to_id_change
+            headers: { "content-type": "multipart/form-data" }
           }
         );
         this.response = response.data;
@@ -376,7 +391,8 @@ export default {
   },
   props: {},
   components: {
-    Icon
+    Icon,
+    ImageUploader
   }
 };
 </script>
