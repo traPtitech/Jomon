@@ -46,7 +46,7 @@ func SetRouting(e *echo.Echo, service Service) {
 		apiComments.DELETE("/:commentId", service.DeleteComments)
 	}
 
-	apiStatus := e.Group("/application/:applicationId/states", service.AuthUserMiddleware)
+	apiStatus := e.Group("/applications/:applicationId/states", service.AuthUserMiddleware)
 	{
 		apiStatus.PUT("", service.PutStates)
 		apiStatus.PUT("/repaid/:repaidToId", service.PutRepaidStates)

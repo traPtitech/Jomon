@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gofrs/uuid"
 	storagePkg "github.com/traPtitech/Jomon/storage"
@@ -14,6 +15,10 @@ type ApplicationsImage struct {
 	ApplicationID uuid.UUID `gorm:"type:char(36);not null"`
 	MimeType      string    `gorm:"type:text;not null" json:"-"`
 	CreatedAt     time.Time `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
+}
+
+func (image ApplicationsImage) MarshalJSON() ([]byte, error) {
+	return json.Marshal(image.ID)
 }
 
 type ApplicationsImageRepository interface {
