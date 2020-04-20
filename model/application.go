@@ -17,11 +17,11 @@ type Application struct {
 	StatesLogsID             int                  `gorm:"type:int(11);not null" json:"-"`
 	CreateUserTrapID         User                 `gorm:"embedded;embedded_prefix:create_user_;" json:"applicant"`
 	CreatedAt                time.Time            `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
-	ApplicationsDetails      []ApplicationsDetail `json:"application_detail_logs,omitempty"`
-	StatesLogs               []StatesLog          `json:"state_logs,omitempty"`
-	ApplicationsImages       []ApplicationsImage  `json:"images,omitempty"`
-	Comments                 []Comment            `json:"comments,omitempty"`
-	RepayUsers               []RepayUser          `json:"repayment_logs,omitempty" `
+	ApplicationsDetails      []ApplicationsDetail `json:"application_detail_logs"`
+	StatesLogs               []StatesLog          `json:"state_logs"`
+	ApplicationsImages       []ApplicationsImage  `json:"images"`
+	Comments                 []Comment            `json:"comments"`
+	RepayUsers               []RepayUser          `json:"repayment_logs"`
 }
 
 func (app *Application) GiveIsUserAdmin(admins []string) {
