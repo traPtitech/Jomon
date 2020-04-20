@@ -84,7 +84,7 @@ export default {
         axios
           .put(
             "../api/applications/" +
-              this.$store.state.application_detail_paper.application_id +
+              this.$store.state.application_detail_paper.core.application_id +
               "/states",
             {
               to_state: this.to_state,
