@@ -1,8 +1,9 @@
 package model
 
 import (
-	"github.com/jinzhu/gorm"
 	"time"
+
+	"github.com/jinzhu/gorm"
 
 	"github.com/gofrs/uuid"
 )
@@ -103,6 +104,8 @@ func (_ *applicationRepository) GetApplication(id uuid.UUID, preload bool) (Appl
 	query := db
 	if preload {
 		query = query.Set("gorm:auto_preload", true)
+	} else {
+		query = query.Preload("LatestStatesLog")
 	}
 
 	err := query.First(&app, Application{ID: id}).Error
