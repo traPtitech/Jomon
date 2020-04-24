@@ -159,8 +159,28 @@
         >
         </v-autocomplete>
         <h3 class="ml-0 mr-0">申請書画像リスト</h3>
-        <div :key="path" v-for="path in this.detail.core.images">
-          <v-img :src="'/api/images/' + path" max-width="100%" />
+        <div :key="path" v-for="(path, index) in this.detail.core.images">
+          <span v-if="images_change[index]">
+            <v-btn
+              rounded
+              color="primary"
+              name="delete"
+              @click="deleteImage(index)"
+            >
+              delete
+            </v-btn>
+            <v-img :src="'/api/images/' + path" max-width="80%" />
+          </span>
+          <span v-else>
+            <v-btn
+              rounded
+              color="primary"
+              name="cancel"
+              @click="cancelDeleteImage(index)"
+            >
+              cancel
+            </v-btn>
+          </span>
         </div>
 
         <h3 class="ml-0 mr-0">画像を追加</h3>
@@ -268,6 +288,7 @@ export default {
       paid_at_change: "",
       amount_change: 0,
       repaid_to_id_change: [],
+      Images: [],
       imageBlobs: [],
       // todo返金リスト配列
       changeRules: [v => (v !== this.detail.core.repayment_logs && !!v) || ""]
@@ -280,6 +301,8 @@ export default {
     this.remarks_change = this.detail.core.current_detail.remarks;
     this.paid_at_change = this.detail.core.current_detail.paid_at;
     this.amount_change = this.detail.core.current_detail.amount;
+    this.images_change = new Array(this.detail.core.images.length);
+    this.images_change.fill(true);
     await this.getUsers();
     const trap_ids = this.detail.core.repayment_logs.map(
       log => log.repaid_to_user.trap_id
@@ -317,6 +340,11 @@ export default {
     }),
     async submit() {
       if (this.$refs.form.validate()) {
+        this.images_change.forEach((flag, index) => {
+          if (!flag) {
+            axios.delete("/api/images/" + this.detail.core.images[index]);
+          }
+        });
         let form = new FormData();
         let date = new Date(this.paid_at_change);
         let details = {
@@ -387,6 +415,12 @@ export default {
         default:
           return "タイプが間違っています";
       }
+    },
+    deleteImage(index) {
+      this.images_change[index] = false;
+    },
+    cancelDeleteImage(index) {
+      this.images_change[index] = true;
     }
   },
   props: {},
