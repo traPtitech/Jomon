@@ -53,7 +53,7 @@ export default {
         axios
           .post(
             "/api/applications/" +
-              this.$store.state.application_detail_paper.application_id +
+              this.$store.state.application_detail_paper.core.application_id +
               "/comments",
             {
               comment: this.comment
