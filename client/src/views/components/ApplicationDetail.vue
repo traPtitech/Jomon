@@ -96,7 +96,7 @@
       </li>
       <h3>申請書画像リスト</h3>
       <div :key="path" v-for="path in this.detail.core.images">
-        <v-img :src="'/api/images/' + path.ID" max-width="80%" />
+        <v-img :src="'/api/images/' + path" max-width="80%" />
       </div>
     </v-card>
   </div>
