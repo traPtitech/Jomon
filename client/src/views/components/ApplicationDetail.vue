@@ -95,7 +95,7 @@
         {{ user.repaid_to_user.trap_id }}
       </li>
       <h3>申請書画像リスト</h3>
-      <div :key="path.ID" v-for="path in this.detail.core.images">
+      <div :key="path" v-for="path in this.detail.core.images">
         <v-img :src="'/api/images/' + path.ID" max-width="80%" />
       </div>
     </v-card>
