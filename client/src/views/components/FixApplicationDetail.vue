@@ -418,9 +418,11 @@ export default {
     },
     deleteImage(index) {
       this.images_change[index] = false;
+      this.$forceUpdate();
     },
     cancelDeleteImage(index) {
       this.images_change[index] = true;
+      this.$forceUpdate();
     }
   },
   props: {},
