@@ -1,8 +1,10 @@
 <template>
-  <!-- 本番はこのファイルの
-  this.adminはthis.$store.state.me.adminへ、
-this.applicantはthis.detail.core.applicant.trap_idとすれば良い。この際は、dataを削除する-->
-  <div v-if="this.detail.core.current_state === `submitted` && this.admin">
+  <div
+    v-if="
+      this.detail.core.current_state === `submitted` &&
+        this.$store.state.me.admin
+    "
+  >
     <v-row>
       <v-btn v-on:click="accept()">承認 </v-btn>
       <with-reason-button class="ml-4 mr-5" to_state="fix_required" />
@@ -15,7 +17,7 @@ this.applicantはthis.detail.core.applicant.trap_idとすれば良い。この�
   <div
     v-else-if="
       this.detail.core.current_state === `fix_required` &&
-        (this.admin || this.applicant)
+        (this.$store.state.me.admin || this.detail.core.applicant.trap_id)
     "
   >
     <v-btn :disabled="this.detail.fix" @click="changeFix">修正</v-btn>
@@ -29,8 +31,6 @@ import { mapState, mapMutations } from "vuex";
 export default {
   data: function() {
     return {
-      admin: true,
-      applicant: true,
       dialog: false
     };
   },
