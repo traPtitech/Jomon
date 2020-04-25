@@ -2,7 +2,7 @@
   <div
     v-if="
       this.detail.core.current_state === `submitted` &&
-        this.$store.state.me.admin
+        this.$store.state.me.is_admin
     "
   >
     <v-row>
@@ -17,7 +17,7 @@
   <div
     v-else-if="
       this.detail.core.current_state === `fix_required` &&
-        (this.$store.state.me.admin || this.detail.core.applicant.trap_id)
+        (this.$store.state.me.is_admin || this.detail.core.applicant.trap_id)
     "
   >
     <v-btn :disabled="this.detail.fix" @click="changeFix">修正</v-btn>
