@@ -54,7 +54,7 @@
                         <v-col class="pb-1 pt-2" cols="10">
                           <v-text-field
                             v-model="amount"
-                            :rules="nullRules"
+                            :rules="amountRules"
                             type="number"
                             label="金額入力"
                             hide-details
@@ -240,6 +240,10 @@ export default {
     amount: 0,
     remarks: "",
     imageBlobs: [],
+    amountRules: [
+      v => !!v || "",
+      v => !!String(v).match("^[1-9][0-9]*$") || "金額が不正です"
+    ],
     nullRules: [v => !!v || ""]
   }),
   mounted() {
