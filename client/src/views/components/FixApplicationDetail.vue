@@ -67,7 +67,7 @@
                         <v-col class="pb-1 pt-2" cols="10">
                           <v-text-field
                             v-model="amount_change"
-                            :rules="nullRules"
+                            :rules="amountRules"
                             type="number"
                             label="金額入力"
                             hide-details
@@ -257,6 +257,10 @@ export default {
       open_dialog: false,
       menu: false,
       valid: true,
+      amountRules: [
+        v => !!v || "",
+        v => Number(v) >= 0 || "負の金額は入力できません"
+      ],
       nullRules: [v => !!v || ""],
       type_change: "",
       title_change: "",

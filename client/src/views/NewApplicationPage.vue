@@ -54,7 +54,7 @@
                         <v-col class="pb-1 pt-2" cols="10">
                           <v-text-field
                             v-model="amount"
-                            :rules="nullRules"
+                            :rules="amountRules"
                             type="number"
                             label="金額入力"
                             hide-details
@@ -240,6 +240,10 @@ export default {
     amount: 0,
     remarks: "",
     imageBlobs: [],
+    amountRules: [
+      v => !!v || "",
+      v => Number(v) >= 0 || "負の金額は入力できません"
+    ],
     nullRules: [v => !!v || ""]
   }),
   mounted() {
