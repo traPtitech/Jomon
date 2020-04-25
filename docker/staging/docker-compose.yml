@@ -14,10 +14,7 @@ services:
     build:
       context: ../../
       dockerfile: ./docker/staging/Dockerfile-server
-        - GO_BUILD_TAGS=staging
     env_file: ../../.env
-    environment:
-      GO_BUILD_TAGS: staging
     ports:
       - '1323:1323'
     volumes:
