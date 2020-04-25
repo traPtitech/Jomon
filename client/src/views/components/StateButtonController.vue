@@ -21,6 +21,7 @@
     "
   >
     <v-btn :disabled="this.detail.fix" @click="changeFix">修正</v-btn>
+    <v-btn :disabled="this.detail.fix" @click="reSubmit">再申請</v-btn>
   </div>
 </template>
 <script>
@@ -55,6 +56,19 @@ export default {
         )
         .then(response => console.log(response.status));
       alert("承認しました");
+    },
+    reSubmit() {
+      axios
+        .put(
+          "../api/applications/" +
+            this.$store.state.application_detail_paper.core.application_id +
+            "/states",
+          {
+            to_state: "submitted"
+          }
+        )
+        .then(response => console.log(response.status));
+      alert("再申請しました");
     }
   }
 };
