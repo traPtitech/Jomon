@@ -242,7 +242,7 @@ export default {
     imageBlobs: [],
     amountRules: [
       v => !!v || "",
-      v => Number(v) >= 0 || "負の金額は入力できません"
+      v => !!String(v).match("^[1-9][0-9]*$") || "金額が不正です"
     ],
     nullRules: [v => !!v || ""]
   }),
