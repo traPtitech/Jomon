@@ -9,11 +9,9 @@
       placeholder="画像を添付"
       @change="imageChange"
     ></v-file-input>
-    <img
-      v-for="(imageUrl, index) in uploadImageUrl"
-      :key="index"
-      :src="imageUrl"
-    />
+    <div v-for="(imageUrl, index) in uploadImageUrl" :key="index">
+      <v-img :src="imageUrl" max-width="80%" />
+    </div>
   </span>
 </template>
 
