@@ -266,7 +266,7 @@ paths:
           description: 指定されたコメントはない。
   "/applications/{applicationId}/states":
     put:
-      description: 指定した申請書のstateを変更のみ（新規はpost /applications で)する。reasonについてはstateを「submittedからfix_required」「submittedからrejected」「acceptedからsubmitted」にするとき必須。stateの行き来の定義は作成者は「fix_requiredからsubmitted（このときapplication更新も行なっているはず）」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからfully_repaid」の操作はここでは行えない。
+      description: 指定した申請書のstateを変更のみ（新規はpost /applications で)する。reasonについてはstateを「submittedからfix_required」「submittedからrejected」「acceptedからsubmitted」にするとき必須。stateの行き来の定義は作成者は「fix_requiredからsubmitted」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからfully_repaid」の操作はここでは行えない。
       tags:
         - States
       parameters:
