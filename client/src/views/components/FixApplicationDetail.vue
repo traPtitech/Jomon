@@ -158,10 +158,33 @@
           multiple
         >
         </v-autocomplete>
-
         <h3 class="ml-0 mr-0">申請書画像リスト</h3>
+        <div :key="path" v-for="(path, index) in this.detail.core.images">
+          <span v-if="images_change[index]">
+            <v-btn
+              rounded
+              color="primary"
+              name="delete"
+              @click="deleteImage(index)"
+            >
+              delete
+            </v-btn>
+            <v-img :src="'/api/images/' + path" max-width="80%" />
+          </span>
+          <span v-else>
+            <v-btn
+              rounded
+              color="primary"
+              name="cancel"
+              @click="cancelDeleteImage(index)"
+            >
+              cancel
+            </v-btn>
+          </span>
+        </div>
 
-        画像リスト(画像アップロード)
+        <h3 class="ml-0 mr-0">画像を追加</h3>
+        <image-uploader v-model="imageBlobs" />
       </v-card>
 
       <!-- todo focusしていないところのvalidateが機能していない -->
@@ -229,6 +252,7 @@
 <script>
 import axios from "axios";
 import Icon from "./Icon";
+import ImageUploader from "./ImageUploader";
 import { mapActions } from "vuex";
 import { mapState, mapMutations } from "vuex";
 export default {
@@ -268,6 +292,8 @@ export default {
       paid_at_change: "",
       amount_change: 0,
       repaid_to_id_change: [],
+      Images: [],
+      imageBlobs: [],
       // todo返金リスト配列
       changeRules: [v => (v !== this.detail.core.repayment_logs && !!v) || ""]
     };
@@ -279,6 +305,8 @@ export default {
     this.remarks_change = this.detail.core.current_detail.remarks;
     this.paid_at_change = this.detail.core.current_detail.paid_at;
     this.amount_change = this.detail.core.current_detail.amount;
+    this.images_change = new Array(this.detail.core.images.length);
+    this.images_change.fill(true);
     await this.getUsers();
     const trap_ids = this.detail.core.repayment_logs.map(
       log => log.repaid_to_user.trap_id
@@ -316,15 +344,30 @@ export default {
     }),
     async submit() {
       if (this.$refs.form.validate()) {
+        this.images_change.forEach((flag, index) => {
+          if (!flag) {
+            axios.delete("/api/images/" + this.detail.core.images[index]);
+          }
+        });
+        let form = new FormData();
+        let date = new Date(this.paid_at_change);
+        let details = {
+          type: this.type_object.type,
+          title: this.title_change,
+          remarks: this.remarks_change,
+          paid_at: date.toISOString(),
+          amount: Number(this.amount_change),
+          repaid_to_id: this.repaid_to_id_change
+        };
+        form.append("details", JSON.stringify(details));
+        this.imageBlobs.forEach(imageBlob => {
+          form.append("images", imageBlob);
+        });
         const response = await axios.patch(
           "/api/applications/" + this.detail.core.application_id,
+          form,
           {
-            type: this.type_object.type,
-            title: this.title_change,
-            remarks: this.remarks_change,
-            paid_at: this.paid_at_change,
-            amount: this.amount_change,
-            repaid_to_id: this.repaid_to_id_change
+            headers: { "content-type": "multipart/form-data" }
           }
         );
         this.response = response.data;
@@ -376,11 +419,20 @@ export default {
         default:
           return "タイプが間違っています";
       }
+    },
+    deleteImage(index) {
+      this.images_change[index] = false;
+      this.$forceUpdate();
+    },
+    cancelDeleteImage(index) {
+      this.images_change[index] = true;
+      this.$forceUpdate();
     }
   },
   props: {},
   components: {
-    Icon
+    Icon,
+    ImageUploader
   }
 };
 </script>
