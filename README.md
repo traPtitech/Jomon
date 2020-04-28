@@ -20,6 +20,7 @@ And you can access to `http://localhost:1323` for Jomon mock server using `swagg
 ## Staging
 1.Enter the server for Jomon staging server and run following comand in the project root.
 ```shell script
-sh scripts/staging.sh
+sudo docker build -t jomon_staging .
+sudo docker run -p 8080:8080 --env-file .env jomon_staging
 ```
-(At first,you need to clone repositry and run `docker-compose -f docker/staging/docker-compose.yml up`)
+(At first,you need to clone (or pull) repositry and set .env)
