@@ -64,6 +64,7 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 		},
 		RepaidAt: &dt,
 	}
+
 	var repaidUser RepayUser
 	err := db.Where("application_id = ?", applicationId).Where("repaid_to_user_trap_id = ?", repaidToUserTrapID).First(&repaidUser).Error
 	if err != nil {
@@ -71,6 +72,23 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 	}
 	if repaidUser.RepaidAt != nil {
 		return RepayUser{}, false, ErrAlreadyRepaid
+	}
+
+	err = db.Transaction(func(tx *gorm.DB) error {
+		err := tx.Model(&RepayUser{}).Where("application_id = ?", applicationId).Where("repaid_to_user_trap_id = ?", repaidToUserTrapID).Update(RepayUser{
+			RepaidByUserTrapID: User{
+				TrapId: repaidByUserTrapID,
+			},
+		}).Error
+		if err != nil {
+			return err
+		}
+		return tx.Model(&RepayUser{}).Where("application_id = ?", applicationId).Where("repaid_to_user_trap_id = ?", repaidToUserTrapID).Update(RepayUser{
+			RepaidAt: &dt,
+		}).Error
+	})
+	if err != nil {
+		return RepayUser{}, false, err
 	}
 
 	log := StatesLog{
@@ -96,7 +114,7 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 				return err
 			}
 		}
-		return tx.Model(&RepayUser{ApplicationID: applicationId, RepaidToUserTrapID: User{TrapId: repaidToUserTrapID}}).Updates(RepayUser{
+		return tx.Model(&RepayUser{}).Where("application_id = ?", applicationId).Where("repaid_to_user_trap_id = ?", repaidToUserTrapID).Update(RepayUser{
 			RepaidByUserTrapID: User{
 				TrapId: repaidByUserTrapID,
 			},
