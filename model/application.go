@@ -90,6 +90,7 @@ type ApplicationRepository interface {
 		applicationId uuid.UUID,
 		repaidToUserTrapID string,
 		repaidByUserTrapID string,
+		repaidAt time.Time,
 	) (RepayUser, bool, error)
 }
 

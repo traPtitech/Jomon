@@ -139,13 +139,14 @@ func (m *applicationRepositoryMock) UpdateRepayUser(
 	applicationId uuid.UUID,
 	repaidToUserTrapID string,
 	repaidByUserTrapID string,
+	repaidAt time.Time,
 ) (model.RepayUser, bool, error) {
-	ret := m.Called(applicationId, repaidToUserTrapID, repaidByUserTrapID)
+	dt := time.Now()
+	ret := m.Called(applicationId, repaidToUserTrapID, repaidByUserTrapID, dt)
 
 	m.asr.NotEqual("", repaidToUserTrapID)
 	m.asr.NotEqual("", repaidByUserTrapID)
 
-	dt := time.Now()
 	ru := model.RepayUser{
 		ApplicationID: applicationId,
 		RepaidToUserTrapID: model.User{

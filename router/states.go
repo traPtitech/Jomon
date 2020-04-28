@@ -32,7 +32,12 @@ type SuccessRepaid struct {
 	RepaidByUser model.User      `json:"repaid_by_user_trap_id"`
 	RepaidToUser model.User      `json:"repaid_to_user_trap_id"`
 	RepaidAt     *time.Time      `json:"repaid_at"`
+	CreatedAt    time.Time       `json:"created_at"`
 	ToState      model.StateType `json:"to_state"`
+}
+
+type PutRepaidAt struct {
+	RepaidAt time.Time `json:"repaid_at"`
 }
 
 func (s *Service) PutStates(c echo.Context) error {
@@ -155,6 +160,13 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
+	var putRepaidAt PutRepaidAt
+	if err := c.Bind(&putRepaidAt); err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	repaidAt := putRepaidAt.RepaidAt
+
 	application, err := s.Applications.GetApplication(applicationId, false)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
@@ -177,7 +189,7 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 		return c.NoContent(http.StatusForbidden)
 	}
 
-	updateRepayUser, allUsersRepaidCheck, err := s.Applications.UpdateRepayUser(applicationId, repaidToId, user.TrapId)
+	updateRepayUser, allUsersRepaidCheck, err := s.Applications.UpdateRepayUser(applicationId, repaidToId, user.TrapId, repaidAt)
 	switch {
 	case err == model.ErrAlreadyRepaid:
 		return c.NoContent(http.StatusBadRequest)
@@ -194,8 +206,9 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 			RepaidToUser: model.User{
 				TrapId: updateRepayUser.RepaidToUserTrapID.TrapId,
 			},
-			RepaidAt: updateRepayUser.RepaidAt,
-			ToState:  model.StateType{Type: model.FullyRepaid},
+			RepaidAt:  updateRepayUser.RepaidAt,
+			CreatedAt: updateRepayUser.CreatedAt,
+			ToState:   model.StateType{Type: model.FullyRepaid},
 		}
 	} else {
 		sucrep = &SuccessRepaid{
@@ -205,8 +218,9 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 			RepaidToUser: model.User{
 				TrapId: updateRepayUser.RepaidToUserTrapID.TrapId,
 			},
-			RepaidAt: updateRepayUser.RepaidAt,
-			ToState:  model.StateType{Type: model.Submitted},
+			RepaidAt:  updateRepayUser.RepaidAt,
+			CreatedAt: updateRepayUser.CreatedAt,
+			ToState:   model.StateType{Type: model.Submitted},
 		}
 	}
 
