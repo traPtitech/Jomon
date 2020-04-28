@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/model"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type Service struct {
@@ -25,6 +26,10 @@ func (s *Service) AuthUserMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func SetRouting(e *echo.Echo, service Service) {
+	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+		Root:  "client/dist",
+		HTML5: true,
+	}))
 	apiApplications := e.Group("/applications", service.AuthUserMiddleware)
 	{
 		apiApplications.GET("", service.GetApplicationList)
