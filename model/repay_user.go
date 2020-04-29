@@ -74,10 +74,6 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 		return RepayUser{}, false, ErrAlreadyRepaid
 	}
 
-	if err != nil {
-		return RepayUser{}, false, err
-	}
-
 	log := StatesLog{
 		ApplicationID: applicationId,
 		UpdateUserTrapID: User{
@@ -113,11 +109,7 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 				return err
 			}
 		}
-		return tx.Model(&RepayUser{}).Where("application_id = ?", applicationId).Where("repaid_to_user_trap_id = ?", repaidToUserTrapID).Update(RepayUser{
-			RepaidByUserTrapID: User{
-				TrapId: repaidByUserTrapID,
-			},
-		}).Error
+		return nil
 	})
 	if err != nil {
 		return RepayUser{}, false, err
