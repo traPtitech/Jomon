@@ -54,6 +54,7 @@ func (_ *applicationRepository) deleteRepayUserByApplicationID(db_ *gorm.DB, app
 }
 
 func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidToUserTrapID string, repaidByUserTrapID string, repaidAt time.Time) (RepayUser, bool, error) {
+	dt := time.Now()
 	ru := RepayUser{
 		ApplicationID: applicationId,
 		RepaidToUserTrapID: User{
