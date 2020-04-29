@@ -1,6 +1,7 @@
 package router
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -31,13 +32,21 @@ type ErrorState struct {
 type SuccessRepaid struct {
 	RepaidByUser model.User      `json:"repaid_by_user_trap_id"`
 	RepaidToUser model.User      `json:"repaid_to_user_trap_id"`
-	RepaidAt     *time.Time      `json:"repaid_at"`
+	RepaidAt     RepaidAt        `json:"repaid_at"`
 	CreatedAt    time.Time       `json:"created_at"`
 	ToState      model.StateType `json:"to_state"`
 }
 
 type PutRepaidAt struct {
 	RepaidAt time.Time `json:"repaid_at"`
+}
+
+type RepaidAt struct {
+	RepaidAt time.Time `json:"repaid_at"`
+}
+
+func (r RepaidAt) MarshalJSON() ([]byte, error) {
+	return json.Marshal(r.RepaidAt.Format("2006-01-02"))
 }
 
 func (s *Service) PutStates(c echo.Context) error {
@@ -205,7 +214,7 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 			RepaidToUser: model.User{
 				TrapId: updateRepayUser.RepaidToUserTrapID.TrapId,
 			},
-			RepaidAt:  updateRepayUser.RepaidAt,
+			RepaidAt:  RepaidAt{RepaidAt: *updateRepayUser.RepaidAt},
 			CreatedAt: updateRepayUser.CreatedAt,
 			ToState:   model.StateType{Type: model.FullyRepaid},
 		}
@@ -217,7 +226,7 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 			RepaidToUser: model.User{
 				TrapId: updateRepayUser.RepaidToUserTrapID.TrapId,
 			},
-			RepaidAt:  updateRepayUser.RepaidAt,
+			RepaidAt:  RepaidAt{RepaidAt: *updateRepayUser.RepaidAt},
 			CreatedAt: updateRepayUser.CreatedAt,
 			ToState:   model.StateType{Type: model.Submitted},
 		}
