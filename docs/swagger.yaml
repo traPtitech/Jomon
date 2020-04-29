@@ -340,6 +340,16 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/TrapID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                repaid_at:
+                  type: string
+                  format: date
       responses:
         "200":
           description: OK
@@ -354,7 +364,7 @@ paths:
                     $ref: "#/components/schemas/User"
                   repaid_at:
                     type: string
-                    format: date-time
+                    format: date
                   to_state:
                     $ref: "#/components/schemas/StateEnum"
         "400":
@@ -617,6 +627,9 @@ components:
     Repayment:
       type: object
       properties:
+        created_at:
+          type: string
+          format: date-time
         repaid_by_user:
           allOf:
             - $ref: "#/components/schemas/User"
@@ -626,4 +639,4 @@ components:
         repaid_at:
           type: string
           nullable: true
-          format: date-time
+          format: date

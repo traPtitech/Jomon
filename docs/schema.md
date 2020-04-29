@@ -49,6 +49,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | repaid_to_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 払い戻される人のtraPid |
 | repaid_by_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | お金を渡した人のtraPid |
 | repaid_at          | date | YES   |  | _NULL_  | |払い戻された日  |
+| created_at     | datetime | NO   |     | CURRENT_TIMESTAMP |                | repay_usersが作成された日時                                                                                              |
 
 ## applications_images
 
