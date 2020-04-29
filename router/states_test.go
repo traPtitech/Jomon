@@ -170,7 +170,7 @@ func TestPutRepaidStates(t *testing.T) {
 
 	stateReason := "This is reason."
 
-	dt := time.Now().Round(time.Second)
+	dt := time.Now().Round(time.Second).Format(time.RFC3339)
 
 	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplicationStatesLogAccepted(id, "User2", model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
 	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
@@ -207,7 +207,7 @@ func TestPutRepaidStates(t *testing.T) {
 		`, string(toStateAccepted), stateReason)
 		body2 := fmt.Sprintf(`
 		{
-			"repaid_at": "%s",
+			"repaid_at": "%s"
 		}
 		`, dt)
 		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
@@ -276,7 +276,7 @@ func TestPutRepaidStates(t *testing.T) {
 
 		body2 := fmt.Sprintf(`
 		{
-			"repaid_at": "%s",
+			"repaid_at": "%s"
 		}
 		`, dt)
 

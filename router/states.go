@@ -160,12 +160,11 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	var putRepaidAt PutRepaidAt
-	if err := c.Bind(&putRepaidAt); err != nil {
+	var pra PutRepaidAt
+	if err := c.Bind(&pra); err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
-
-	repaidAt := putRepaidAt.RepaidAt
+	repaidAt := pra.RepaidAt
 
 	application, err := s.Applications.GetApplication(applicationId, false)
 	if err != nil {
