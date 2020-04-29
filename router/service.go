@@ -3,6 +3,7 @@
 package router
 
 import (
+	"encoding/gob"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/model"
@@ -26,6 +27,8 @@ func NewService() Service {
 
 	traQClientId := os.Getenv("TRAQ_CLIENT_ID")
 
+	gob.Register(model.User{})
+
 	return Service{
 		Administrators: model.NewAdministratorRepository(),
 		Applications:   model.NewApplicationRepository(),
@@ -45,7 +48,7 @@ func (s Service) AuthUser(c echo.Context) (echo.Context, error) {
 	}
 
 	accTok, ok := sess.Values[sessionAccessTokenKey].(string)
-	if !ok || accTok != "" {
+	if !ok || accTok == "" {
 		return nil, c.NoContent(http.StatusUnauthorized)
 	}
 	c.Set(contextAccessTokenKey, accTok)
