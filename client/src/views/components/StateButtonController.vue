@@ -1,8 +1,10 @@
 <template>
-  <!-- 本番はこのファイルの
-  this.adminはthis.$store.state.me.adminへ、
-this.applicantはthis.detail.core.applicant.trap_idとすれば良い。この際は、dataを削除する-->
-  <div v-if="this.detail.core.current_state === `submitted` && this.admin">
+  <div
+    v-if="
+      this.detail.core.current_state === `submitted` &&
+        this.$store.state.me.is_admin
+    "
+  >
     <v-row>
       <v-btn v-on:click="accept()">承認 </v-btn>
       <with-reason-button class="ml-4 mr-5" to_state="fix_required" />
@@ -15,10 +17,11 @@ this.applicantはthis.detail.core.applicant.trap_idとすれば良い。この�
   <div
     v-else-if="
       this.detail.core.current_state === `fix_required` &&
-        (this.admin || this.applicant)
+        (this.$store.state.me.is_admin || this.detail.core.applicant.trap_id)
     "
   >
     <v-btn :disabled="this.detail.fix" @click="changeFix">修正</v-btn>
+    <v-btn :disabled="this.detail.fix" @click="reSubmit">再申請</v-btn>
   </div>
 </template>
 <script>
@@ -29,8 +32,6 @@ import { mapState, mapMutations } from "vuex";
 export default {
   data: function() {
     return {
-      admin: true,
-      applicant: true,
       dialog: false
     };
   },
@@ -55,6 +56,19 @@ export default {
         )
         .then(response => console.log(response.status));
       alert("承認しました");
+    },
+    reSubmit() {
+      axios
+        .put(
+          "../api/applications/" +
+            this.$store.state.application_detail_paper.core.application_id +
+            "/states",
+          {
+            to_state: "submitted"
+          }
+        )
+        .then(response => console.log(response.status));
+      alert("再申請しました");
     }
   }
 };

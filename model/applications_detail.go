@@ -150,6 +150,8 @@ func (_ *applicationRepository) putApplicationsDetail(db_ *gorm.DB, currentDetai
 		detail.PaidAt.PaidAt = *paidAt
 	}
 
+	detail.UpdatedAt = time.Time{} // zero value
+
 	err = db_.Create(&detail).Error
 	if err != nil {
 		return ApplicationsDetail{}, err
