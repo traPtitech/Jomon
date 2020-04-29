@@ -20,7 +20,7 @@ type RepayUser struct {
 	RepaidToUserTrapID User       `gorm:"embedded;embedded_prefix:repaid_to_user_" json:"repaid_to_user"`
 	RepaidByUserTrapID User       `gorm:"embedded;embedded_prefix:repaid_by_user_" json:"repaid_by_user"`
 	RepaidAt           *time.Time `gorm:"type:date" json:"repaid_at"`
-	CreatedAt          time.Time  `gotm:"type:datetime" json:"created_at"`
+	CreatedAt          time.Time  `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 }
 
 func (ru *RepayUser) GiveIsUserAdmin(admins []string) {
