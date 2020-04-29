@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	sessionDuration        = 24 * 60 * 60 * 1000
+	sessionDuration        = 24 * 60 * 60 * 7
 	sessionKey             = "sessions"
 	sessionAccessTokenKey  = "access_token"
 	sessionCodeVerifierKey = "code_verifier"

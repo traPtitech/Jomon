@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/labstack/echo/v4"
 	"net/http"
 	"net/url"
 	"strings"
@@ -38,6 +39,7 @@ func (repo *traQAuthRepository) GetAccessToken(code string, codeVerifier string)
 	if err != nil {
 		return AuthResponse{}, err
 	}
+	req.Header.Set(echo.HeaderContentType, "application/x-www-form-urlencoded")
 	httpClient := http.DefaultClient
 	res, err := httpClient.Do(req)
 	if err != nil {
