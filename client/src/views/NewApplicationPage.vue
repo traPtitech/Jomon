@@ -237,7 +237,7 @@ export default {
     traPID: [],
     valid: true,
     title: "",
-    amount: 0,
+    amount: "",
     remarks: "",
     imageBlobs: [],
     amountRules: [
