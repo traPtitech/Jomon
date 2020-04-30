@@ -11,6 +11,8 @@ require (
 	github.com/jinzhu/gorm v1.9.12
 	github.com/labstack/echo-contrib v0.9.0
 	github.com/labstack/echo/v4 v4.1.11
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/ncw/swift v1.0.50
 	github.com/srinathgs/mysqlstore v0.0.0-20200417050510-9cbb9420fc4c
 	github.com/stretchr/testify v1.4.0

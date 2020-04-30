@@ -33,7 +33,7 @@ export default {
       try {
         const response = await axios.get("/api/auth/genpkce");
         const client_id = response.data.client_id;
-        const response_type = response.data.response;
+        const response_type = response.data.response_type;
         const code_challenge = response.data.code_challenge;
         const code_challenge_method = response.data.code_challenge_method;
         redirectAuthorizationEndpoint(

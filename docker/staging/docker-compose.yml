@@ -1,0 +1,34 @@
+version: '3'
+services:
+
+  jomon-server:
+    build:
+      context: ../../
+      dockerfile: ./Dockerfile
+    env_file: ../../.env
+    entrypoint: dockerize -wait tcp://db:3306 -timeout 60s
+    command: /app/Jomon
+    environment:
+      MARIADB_USERNAME: root
+      MARIADB_PASSWORD: password
+      MARIADB_HOSTNAME: db
+      MARIADB_DATABASE: jomon
+    ports:
+      - '1323:1323'
+    volumes:
+      - '../../:/src'
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:10.3.9
+    restart: always
+    env_file: ../../.env
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: jomon
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    expose:
+      - '3306'
+    ports:
+      - '3306:3306'
