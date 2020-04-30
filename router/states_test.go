@@ -174,8 +174,8 @@ func TestPutRepaidStates(t *testing.T) {
 
 	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplicationStatesLogAccepted(id, "User2", model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
 	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
-	appRepMock.On("UpdateStatesLog", id, mock.Anything, mock.Anything, dt).Return(model.StatesLog{}, nil)
-	appRepMock.On("UpdateRepayUser", id, mock.Anything, mock.Anything, mock.Anything).Return(model.RepayUser{}, true, nil)
+	appRepMock.On("UpdateStatesLog", id, mock.Anything, mock.Anything, mock.Anything).Return(model.StatesLog{}, nil)
+	appRepMock.On("UpdateRepayUser", id, mock.Anything, mock.Anything, dt).Return(model.RepayUser{}, true, nil)
 
 	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 	adminRepMock.On("IsAdmin", userId).Return(true, nil)
