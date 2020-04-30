@@ -44,7 +44,9 @@ func NewUserRepository() UserRepository {
 }
 
 type traqUser struct {
-	Name string `json:"name"`
+	Name      string `json:"name"`
+	Bot       bool   `json:"bot"`
+	Suspended bool   `json:"suspended"`
 }
 
 const TraQBaseURL = "https://q.trap.jp/api/1.0"
@@ -91,6 +93,10 @@ func (repo *userRepository) GetUsers(token string) ([]User, error) {
 
 	users := []User{}
 	for _, traqUser := range traqUsers {
+		if traqUser.Bot || traqUser.Suspended {
+			continue
+		}
+
 		user := User{
 			TrapId: traqUser.Name,
 		}
