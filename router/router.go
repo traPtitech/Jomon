@@ -2,8 +2,8 @@ package router
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/traPtitech/Jomon/model"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/traPtitech/Jomon/model"
 )
 
 type Service struct {
@@ -30,48 +30,48 @@ func SetRouting(e *echo.Echo, service Service) {
 		Root:  "client/dist",
 		HTML5: true,
 	}))
-	api:=e.Group("/api")
-	{	
-		apiApplications :=api.Group("/applications", service.AuthUserMiddleware)
+	api := e.Group("/api")
 	{
-		apiApplications.GET("", service.GetApplicationList)
-		apiApplications.POST("", service.PostApplication)
-		apiApplications.GET("/:applicationId", service.GetApplication)
-		apiApplications.PATCH("/:applicationId", service.PatchApplication)
-	}
+		apiApplications := api.Group("/applications", service.AuthUserMiddleware)
+		{
+			apiApplications.GET("", service.GetApplicationList)
+			apiApplications.POST("", service.PostApplication)
+			apiApplications.GET("/:applicationId", service.GetApplication)
+			apiApplications.PATCH("/:applicationId", service.PatchApplication)
+		}
 
-	apiImages :=api.Group("/images", service.AuthUserMiddleware)
-	{
-		apiImages.GET("/:imageId", service.GetImages)
-		apiImages.DELETE("/:imageId", service.DeleteImages)
-	}
+		apiImages := api.Group("/images", service.AuthUserMiddleware)
+		{
+			apiImages.GET("/:imageId", service.GetImages)
+			apiImages.DELETE("/:imageId", service.DeleteImages)
+		}
 
-	apiComments :=api.Group("/applications/:applicationId/comments", service.AuthUserMiddleware)
-	{
-		apiComments.POST("", service.PostComments)
-		apiComments.PUT("/:commentId", service.PutComments)
-		apiComments.DELETE("/:commentId", service.DeleteComments)
-	}
+		apiComments := api.Group("/applications/:applicationId/comments", service.AuthUserMiddleware)
+		{
+			apiComments.POST("", service.PostComments)
+			apiComments.PUT("/:commentId", service.PutComments)
+			apiComments.DELETE("/:commentId", service.DeleteComments)
+		}
 
-	apiStatus :=api.Group("/applications/:applicationId/states", service.AuthUserMiddleware)
-	{
-		apiStatus.PUT("", service.PutStates)
-		apiStatus.PUT("/repaid/:repaidToId", service.PutRepaidStates)
-	}
+		apiStatus := api.Group("/applications/:applicationId/states", service.AuthUserMiddleware)
+		{
+			apiStatus.PUT("", service.PutStates)
+			apiStatus.PUT("/repaid/:repaidToId", service.PutRepaidStates)
+		}
 
-	apiUsers :=api.Group("/users", service.AuthUserMiddleware)
-	{
-		apiUsers.GET("", service.GetUsers)
-		apiUsers.GET("/me", service.GetMyUser)
-		apiUsers.GET("/admins", service.GetAdminUsers)
-		apiUsers.PUT("/admins", service.PutAdminUsers)
-	}
+		apiUsers := api.Group("/users", service.AuthUserMiddleware)
+		{
+			apiUsers.GET("", service.GetUsers)
+			apiUsers.GET("/me", service.GetMyUser)
+			apiUsers.GET("/admins", service.GetAdminUsers)
+			apiUsers.PUT("/admins", service.PutAdminUsers)
+		}
 
-	apiAuth :=api.Group("/auth")
-	{
-		apiAuth.GET("/callback", service.AuthCallback)
-		apiAuth.GET("/genpkce", service.GeneratePKCE)
+		apiAuth := api.Group("/auth")
+		{
+			apiAuth.GET("/callback", service.AuthCallback)
+			apiAuth.GET("/genpkce", service.GeneratePKCE)
+		}
 	}
-}
 
 }
