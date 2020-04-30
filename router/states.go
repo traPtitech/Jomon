@@ -49,7 +49,7 @@ func (r RepaidAt) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r.RepaidAt.Format("2006-01-02"))
 }
 
-func (p PutRepaidAt) UnmarshalJSON(data []byte) error {
+func (p *PutRepaidAt) UnmarshalJSON(data []byte) error {
 	var value map[string]string
 	json.Unmarshal(data, &value)
 	t, err := time.Parse("2006-01-02", value["repaid_at"])
