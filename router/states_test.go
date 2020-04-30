@@ -171,11 +171,15 @@ func TestPutRepaidStates(t *testing.T) {
 	stateReason := "This is reason."
 
 	dt := time.Now().Format("2006-01-02")
+	dttime, err := time.Parse("2006-01-02", dt) // string to time.Time
+	if err != nil {
+		panic(err)
+	}
 
 	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplicationStatesLogAccepted(id, "User2", model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
 	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
 	appRepMock.On("UpdateStatesLog", id, mock.Anything, mock.Anything, mock.Anything).Return(model.StatesLog{}, nil)
-	appRepMock.On("UpdateRepayUser", id, mock.Anything, mock.Anything, dt).Return(model.RepayUser{}, true, nil)
+	appRepMock.On("UpdateRepayUser", id, userId, "UserId", dttime).Return(model.RepayUser{}, true, nil)
 
 	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 	adminRepMock.On("IsAdmin", userId).Return(true, nil)
