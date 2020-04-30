@@ -20,6 +20,7 @@ type RepayUser struct {
 	RepaidToUserTrapID User       `gorm:"embedded;embedded_prefix:repaid_to_user_" json:"repaid_to_user"`
 	RepaidByUserTrapID User       `gorm:"embedded;embedded_prefix:repaid_by_user_" json:"repaid_by_user"`
 	RepaidAt           *time.Time `gorm:"type:date" json:"repaid_at"`
+	CreatedAt          time.Time  `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 }
 
 func (ru *RepayUser) GiveIsUserAdmin(admins []string) {
@@ -52,8 +53,7 @@ func (_ *applicationRepository) deleteRepayUserByApplicationID(db_ *gorm.DB, app
 	}).Delete(&RepayUser{}).Error
 }
 
-func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidToUserTrapID string, repaidByUserTrapID string) (RepayUser, bool, error) {
-	dt := time.Now()
+func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repaidToUserTrapID string, repaidByUserTrapID string, repaidAt time.Time) (RepayUser, bool, error) {
 	ru := RepayUser{
 		ApplicationID: applicationId,
 		RepaidToUserTrapID: User{
@@ -62,7 +62,7 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 		RepaidByUserTrapID: User{
 			TrapId: repaidByUserTrapID,
 		},
-		RepaidAt: &dt,
+		RepaidAt: &repaidAt,
 	}
 
 	var repaidUser RepayUser
@@ -88,7 +88,7 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 			RepaidByUserTrapID: User{
 				TrapId: repaidByUserTrapID,
 			},
-			RepaidAt: &dt,
+			RepaidAt: &repaidAt,
 		}).Error
 		if err != nil {
 			return err
@@ -114,6 +114,5 @@ func (repo *applicationRepository) UpdateRepayUser(applicationId uuid.UUID, repa
 	if err != nil {
 		return RepayUser{}, false, err
 	}
-
 	return ru, allUsersRepaidCheck, nil
 }

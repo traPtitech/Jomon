@@ -1,8 +1,10 @@
 package model
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateRepayUser(t *testing.T) {
@@ -36,8 +38,8 @@ func TestUpdateRepayUser(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-
-		_, _, err = repo.UpdateRepayUser(id, "UserId", "userId")
+		dt := time.Now()
+		_, _, err = repo.UpdateRepayUser(id, "UserId", "userId", dt)
 		asr.NoError(err)
 	})
 
@@ -48,8 +50,8 @@ func TestUpdateRepayUser(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-
-		_, _, err = repo.UpdateRepayUser(id, "UserId", "userId")
+		dt := time.Now()
+		_, _, err = repo.UpdateRepayUser(id, "UserId", "userId", dt)
 		asr.Error(err)
 	})
 }

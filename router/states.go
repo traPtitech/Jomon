@@ -1,6 +1,7 @@
 package router
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -31,8 +32,29 @@ type ErrorState struct {
 type SuccessRepaid struct {
 	RepaidByUser model.User      `json:"repaid_by_user_trap_id"`
 	RepaidToUser model.User      `json:"repaid_to_user_trap_id"`
-	RepaidAt     *time.Time      `json:"repaid_at"`
+	RepaidAt     RepaidAt        `json:"repaid_at"`
+	CreatedAt    time.Time       `json:"created_at"`
 	ToState      model.StateType `json:"to_state"`
+}
+
+type PutRepaidAt struct {
+	RepaidAt time.Time `json:"repaid_at"`
+}
+
+type RepaidAt struct {
+	RepaidAt time.Time `json:"repaid_at"`
+}
+
+func (r RepaidAt) MarshalJSON() ([]byte, error) {
+	return json.Marshal(r.RepaidAt.Format("2006-01-02"))
+}
+
+func (p *PutRepaidAt) UnmarshalJSON(data []byte) error {
+	var value map[string]string
+	json.Unmarshal(data, &value)
+	t, err := time.Parse("2006-01-02", value["repaid_at"])
+	p.RepaidAt = t
+	return err
 }
 
 func (s *Service) PutStates(c echo.Context) error {
@@ -155,6 +177,12 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
+	var pra PutRepaidAt
+	if err := c.Bind(&pra); err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+	repaidAt := pra.RepaidAt
+
 	application, err := s.Applications.GetApplication(applicationId, false)
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
@@ -177,7 +205,7 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 		return c.NoContent(http.StatusForbidden)
 	}
 
-	updateRepayUser, allUsersRepaidCheck, err := s.Applications.UpdateRepayUser(applicationId, repaidToId, user.TrapId)
+	updateRepayUser, allUsersRepaidCheck, err := s.Applications.UpdateRepayUser(applicationId, repaidToId, user.TrapId, repaidAt)
 	switch {
 	case err == model.ErrAlreadyRepaid:
 		return c.NoContent(http.StatusBadRequest)
@@ -194,8 +222,9 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 			RepaidToUser: model.User{
 				TrapId: updateRepayUser.RepaidToUserTrapID.TrapId,
 			},
-			RepaidAt: updateRepayUser.RepaidAt,
-			ToState:  model.StateType{Type: model.FullyRepaid},
+			RepaidAt:  RepaidAt{RepaidAt: *updateRepayUser.RepaidAt},
+			CreatedAt: updateRepayUser.CreatedAt,
+			ToState:   model.StateType{Type: model.FullyRepaid},
 		}
 	} else {
 		sucrep = &SuccessRepaid{
@@ -205,8 +234,9 @@ func (s *Service) PutRepaidStates(c echo.Context) error {
 			RepaidToUser: model.User{
 				TrapId: updateRepayUser.RepaidToUserTrapID.TrapId,
 			},
-			RepaidAt: updateRepayUser.RepaidAt,
-			ToState:  model.StateType{Type: model.Submitted},
+			RepaidAt:  RepaidAt{RepaidAt: *updateRepayUser.RepaidAt},
+			CreatedAt: updateRepayUser.CreatedAt,
+			ToState:   model.StateType{Type: model.Submitted},
 		}
 	}
 
