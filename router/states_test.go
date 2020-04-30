@@ -170,7 +170,7 @@ func TestPutRepaidStates(t *testing.T) {
 
 	stateReason := "This is reason."
 
-	dt := time.Now().Round(time.Second).Format(time.RFC3339)
+	dt := time.Now().Format("2006-01-02")
 
 	appRepMock.On("GetApplication", id, mock.Anything).Return(GenerateApplicationStatesLogAccepted(id, "User2", model.ApplicationType{Type: model.Contest}, title, remarks, amount, paidAt), nil)
 	appRepMock.On("GetApplication", mock.Anything, mock.Anything).Return(model.Application{}, gorm.ErrRecordNotFound)
