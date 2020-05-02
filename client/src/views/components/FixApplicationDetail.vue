@@ -290,7 +290,7 @@ export default {
       title_change: "",
       remarks_change: "",
       paid_at_change: "",
-      amount_change: 0,
+      amount_change: "",
       repaid_to_id_change: [],
       Images: [],
       imageBlobs: [],
