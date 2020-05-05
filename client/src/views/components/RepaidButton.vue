@@ -33,10 +33,18 @@ export default {
           "../api/applications/" +
             this.$store.state.application_detail_paper.core.application_id +
             "/states/repaid/" +
-            repaid_to_trap_id
+            repaid_to_trap_id,
+          { repaid_at: this.getNow() }
         )
         .then(response => console.log(response.status));
       alert(repaid_to_trap_id + "に払い戻ししました。");
+    },
+    getNow() {
+      let date = new Date();
+      let y = date.getFullYear();
+      let m = ("00" + (date.getMonth() + 1)).slice(-2);
+      let d = ("00" + date.getDate()).slice(-2);
+      return y + "-" + m + "-" + d;
     }
   },
   computed: {
