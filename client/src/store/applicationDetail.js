@@ -63,6 +63,7 @@ export const applicationDetail = {
       ],
       repayment_logs: [
         {
+          created_at: "",
           repaid_by_user: {
             trap_id: "",
             is_admin: false
@@ -111,7 +112,7 @@ export const applicationDetail = {
         logs.push({
           log_type: "repayment",
           content: log,
-          sort_date: new Date(log.repaid_at)
+          sort_date: new Date(log.created_at)
         });
       });
       logs.sort((a, b) => {
