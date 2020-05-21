@@ -16,7 +16,7 @@
             <v-card-text v-show="show" style="background:white" class="pt-4">
               <v-form>
                 <v-row>
-                  <v-btn @click="getApplicationList(params)">更新</v-btn>
+                  <v-btn @click="sortOthers()">更新</v-btn>
                   <v-btn @click="resetParams()">条件削除</v-btn>
                 </v-row>
                 <v-row>
@@ -52,19 +52,19 @@
                   label="年度"
                 ></v-text-field>
                 <v-select
-                  v-model="params.type"
-                  :items="['club', 'contest', 'event', 'public']"
+                  v-model="type"
+                  :items="type_items"
+                  item-text="jpn"
+                  item-value="type"
+                  return-object
                   label="申請書タイプ"
                 ></v-select>
                 <v-select
-                  v-model="params.current_state"
-                  :items="[
-                    'submitted',
-                    'rejected',
-                    'fix_required',
-                    'accepted',
-                    'fully_repaid'
-                  ]"
+                  v-model="state"
+                  :items="state_items"
+                  item-text="jpn"
+                  item-value="state"
+                  return-object
                   label="現在の状態"
                 ></v-select>
                 <v-select
@@ -164,10 +164,33 @@ export default {
       if (this.params.sort === sort.title) this.params.sort = sort.inv_title;
       else this.params.sort = sort.title;
       this.getApplicationList(this.params);
+    },
+    /**
+     * 条件をパラムに代入し、ソート
+     */
+    sortOthers() {
+      this.params.type = this.type.type;
+      this.params.current_state = this.state.state;
+      this.getApplicationList(this.params);
     }
   },
   data() {
     return {
+      type_items: [
+        { type: "club", jpn: "部費利用申請" },
+        { type: "contest", jpn: "大会等旅費補助申請" },
+        { type: "event", jpn: "イベント交通費補助申請" },
+        { type: "public", jpn: "渉外交通費補助" }
+      ],
+      type: { type: "", jpn: "" },
+      state_items: [
+        { state: "submitted", jpn: "提出済み" },
+        { state: "rejected", jpn: "却下" },
+        { state: "fix_required", jpn: "要修正" },
+        { state: "accepted", jpn: "払い戻し待ち" },
+        { state: "fully_repaid", jpn: "払い戻し完了" }
+      ],
+      state: { state: "", jpn: "" },
       header: {
         current_detail: {
           title: "タイトル",
