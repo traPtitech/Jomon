@@ -251,8 +251,8 @@
 
 <script>
 import axios from "axios";
-import Icon from "./Icon";
-import ImageUploader from "./ImageUploader";
+import Icon from "../shered/Icon";
+import ImageUploader from "../shered/ImageUploader";
 import { mapActions } from "vuex";
 import { mapState, mapMutations } from "vuex";
 export default {

@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import StateChip from "./StateChip";
+import StateChip from "../shered/StateChip";
 export default {
   name: "Applicaton",
   props: {
