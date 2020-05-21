@@ -21,7 +21,7 @@
     </v-btn>
     <v-menu open-on-hover offset-y>
       <template v-slot:activator="{ on }">
-        <v-btn color="primary" dark v-on="on">
+        <v-btn v-on="on" text>
           新規作成
         </v-btn>
       </template>
