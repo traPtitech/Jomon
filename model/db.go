@@ -42,7 +42,7 @@ func EstablishConnection() (*gorm.DB, error) {
 	}
 
 	_db, err := gorm.Open("mysql", fmt.Sprintf("%s:%s@(%s)/%s", user, pass, host, dbname)+"?charset=utf8mb4&parseTime=True&loc=Local")
-
+	_db = _db.BlockGlobalUpdate(true)
 	db = _db
 	return db, err
 }
