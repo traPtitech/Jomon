@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 }
 
 func setupDB() *gorm.DB {
-	db, err := EstablishConnection()
+	db, err := EstablishConnectionForTest()
 	if err != nil {
 		panic(err)
 	}
