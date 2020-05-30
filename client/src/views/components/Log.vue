@@ -55,21 +55,34 @@
           dense
           hide-details
           :rules="changeRules"
+          rows="1"
+          auto-grow
         >
         </v-textarea>
-        <span v-if="log.content.created_at !== log.content.updated_at"
-          >編集済</span
-        >
-        <div v-if="!comment_readonly" class="pt-2">
-          <v-btn
-            @click="
-              (comment_readonly = true), (comment_change = log.content.comment)
-            "
-            >変更を取消</v-btn
-          ><v-btn @click="putComment" :disabled="!comment_valid"
-            >変更を送信</v-btn
+        <v-row>
+          <v-col cols="10" class="pa-0">
+            <v-btn
+              @click="
+                (comment_readonly = true),
+                  (comment_change = log.content.comment)
+              "
+              v-if="!comment_readonly"
+              >変更を取消</v-btn
+            ><v-btn
+              @click="putComment"
+              :disabled="!comment_valid"
+              v-if="!comment_readonly"
+              >変更を送信</v-btn
+            ></v-col
           >
-        </div>
+          <v-col cols="2" class="pa-0">
+            <span
+              :class="grey_text"
+              v-if="log.content.created_at !== log.content.updated_at"
+              >編集済</span
+            >
+          </v-col>
+        </v-row>
       </v-form>
     </v-card>
   </v-timeline-item>
