@@ -30,23 +30,25 @@ export default {
   },
   methods: {
     ...mapActions(["getUserList"]),
-    addAdmin() {
+    async addAdmin() {
       if (this.addAdminUsers.length > 0) {
-        this.addAdminUsers.forEach(user => {
+        await this.addAdminUsers.forEach(user => {
           axios
             .put("api/users/admins", { trap_id: user, to_admin: true })
             .catch(e => console.log(e));
         });
+        this.getUserList();
       }
     },
-    removeAdmin() {
+    async removeAdmin() {
       if (this.removeAdminUsers.length > 0) {
-        this.removeAdminUsers.forEach(user => {
+        await this.removeAdminUsers.forEach(user => {
           axios
             .put("api/users/admins", { trap_id: user, to_admin: false })
             .catch(e => console.log(e));
         });
       }
+      this.getUserList();
     }
   },
   data() {
