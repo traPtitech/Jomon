@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 }
 
 func setupDB() *gorm.DB {
-	db, err := EstablishConnectionForTest()
+	db, err := EstablishConnection()
 	if err != nil {
 		panic(err)
 	}
@@ -37,6 +37,7 @@ func setupDB() *gorm.DB {
 }
 
 func deleteAllRecord(db *gorm.DB) {
+	db.BlockGlobalUpdate(false)
 	db.Delete(&Administrator{})
 	db.Delete(&ApplicationsDetail{})
 	db.Delete(&ApplicationsImage{})
