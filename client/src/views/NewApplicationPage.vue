@@ -112,6 +112,7 @@
                         <v-date-picker
                           v-model="date"
                           no-title
+                          color="primary"
                           @input="menu = false"
                         ></v-date-picker>
                       </v-menu>
@@ -199,7 +200,7 @@
             <v-spacer></v-spacer>
             <v-btn
               :to="`../../applications/` + response.application_id"
-              color="green darken-1"
+              color="primary"
               text
               @click="open_dialog = false"
               >OK</v-btn

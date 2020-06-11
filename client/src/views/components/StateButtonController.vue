@@ -6,7 +6,12 @@
     "
   >
     <v-row>
-      <v-btn v-on:click="accept()">承認 </v-btn>
+      <v-btn
+        class="primary_accent--text"
+        color="secondary"
+        v-on:click="accept()"
+        >承認
+      </v-btn>
       <with-reason-button class="ml-4 mr-5" to_state="fix_required" />
       <with-reason-button class="mr-4" to_state="rejected" />
     </v-row>
@@ -20,8 +25,20 @@
         (this.$store.state.me.is_admin || this.detail.core.applicant.trap_id)
     "
   >
-    <v-btn :disabled="this.detail.fix" @click="changeFix">修正</v-btn>
-    <v-btn :disabled="this.detail.fix" @click="reSubmit">再申請</v-btn>
+    <v-btn
+      :disabled="this.detail.fix"
+      class="primary_accent--text"
+      color="secondary"
+      @click="changeFix"
+      >修正</v-btn
+    >
+    <v-btn
+      :disabled="this.detail.fix"
+      class="primary_accent--text"
+      color="secondary"
+      @click="reSubmit"
+      >再申請</v-btn
+    >
   </div>
 </template>
 <script>
