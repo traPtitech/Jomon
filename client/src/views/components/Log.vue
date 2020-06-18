@@ -192,8 +192,8 @@
 </template>
 
 <script>
-import Icon from "./Icon";
-import StateChip from "./StateChip";
+import Icon from "../shered/Icon";
+import StateChip from "../shered/StateChip";
 import Vue from "vue";
 import axios from "axios";
 import Defference from "./ApplicationDetailDefference";

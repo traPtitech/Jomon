@@ -36,11 +36,16 @@
         </v-list-item>
       </v-list>
     </v-menu>
+    <Icon :user="this.$store.state.me.trap_id" :size="35" />
   </v-app-bar>
 </template>
 <script>
 import { mapState } from "vuex";
+import Icon from "../shered/Icon";
 export default {
+  components: {
+    Icon
+  },
   computed: {
     ...mapState(["me"])
   },

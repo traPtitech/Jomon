@@ -30,7 +30,7 @@
 </template>
 <script>
 import axios from "axios";
-import Icon from "./Icon";
+import Icon from "../shered/Icon";
 export default {
   data: () => {
     return {
