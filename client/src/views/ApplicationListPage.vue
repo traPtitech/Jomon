@@ -16,12 +16,20 @@
             <v-card-text v-show="show" style="background:white" class="pt-4">
               <v-form>
                 <v-row>
-                  <v-btn @click="sortOthers()">更新</v-btn>
-                  <v-btn @click="resetParams()">条件削除</v-btn>
+                  <v-btn color="primary" @click="sortOthers()"
+                    ><v-icon>mdi-reload</v-icon></v-btn
+                  >
+                  <v-btn color="primary" @click="resetParams()"
+                    ><v-icon>mdi-close</v-icon></v-btn
+                  >
                 </v-row>
                 <v-row>
-                  <v-btn @click="sortCreatedAt()">日付順</v-btn>
-                  <v-btn @click="sortTitle()">タイトル順</v-btn>
+                  <v-btn outlined color="primary" @click="sortCreatedAt()"
+                    >日付順</v-btn
+                  >
+                  <v-btn outlined color="primary" @click="sortTitle()"
+                    >タイトル順</v-btn
+                  >
                 </v-row>
                 <v-row>
                   <v-col cols="5">
@@ -86,17 +94,22 @@
             >
             <v-card-text class="pl-0 pr-0 pb-0">
               <v-list>
-                <v-list-item-group color="primary">
+                <v-list-item-group
+                  v-if="applicationList.length > 0"
+                  color="primary"
+                >
                   <Application :list="header" class="pb-0 pt-0"></Application>
                   <v-list-item
                     v-for="(list, index) in applicationList"
                     v-bind:key="index"
                     :to="'/applications/' + list.application_id"
                     class="pl-0 pr-0"
-                  >
-                    <Application :list="list"> </Application>
+                    ><Application :list="list"> </Application>
                   </v-list-item>
                 </v-list-item-group>
+                <div v-else>
+                  該当する申請書はありません。
+                </div>
               </v-list>
             </v-card-text>
           </v-card>

@@ -37,6 +37,7 @@ func setupDB() *gorm.DB {
 }
 
 func deleteAllRecord(db *gorm.DB) {
+	db.BlockGlobalUpdate(false)
 	db.Delete(&Administrator{})
 	db.Delete(&ApplicationsDetail{})
 	db.Delete(&ApplicationsImage{})

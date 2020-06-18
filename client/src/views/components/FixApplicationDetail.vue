@@ -120,6 +120,7 @@
                             v-on="on"
                             height="10"
                             hide-details
+                            color="primary"
                           ></v-text-field>
                         </template>
                         <v-date-picker
@@ -237,7 +238,7 @@
             <v-spacer></v-spacer>
             <v-btn
               :to="`../../applications/` + response.application_id"
-              color="green darken-1"
+              color="primary"
               text
               @click="[(open_dialog = false), deleteFix()]"
               >OK</v-btn
