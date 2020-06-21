@@ -1,10 +1,11 @@
 package model
 
 import (
-	"github.com/stretchr/testify/mock"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/mock"
 
 	"github.com/gofrs/uuid"
 	"github.com/jinzhu/gorm"
@@ -179,6 +180,9 @@ func TestGetApplicationList(t *testing.T) {
 			panic(err)
 		}
 
+		app4SubTime := time.Date(2019, 1, 10, 12, 0, 0, 0, time.Local)
+		app4Id := buildApplicationWithSubmitTime(user1, app4SubTime, ApplicationType{Type: Club}, "DDDDD", "Remarks", 10000, time.Now())
+
 		// TODO Use a appropriate function defined in model/states_log.go after implementing such a function.
 		db.Model(&app3.LatestStatesLog).Updates(StatesLog{
 			ToState: StateType{FullyRepaid},
@@ -192,8 +196,8 @@ func TestGetApplicationList(t *testing.T) {
 			apps, err := repo.GetApplicationList("", nil, nil, "", nil, nil, nil)
 			asr.NoError(err)
 
-			asr.Len(apps, 3)
-			asr.Equal([]uuid.UUID{app3Id, app2Id, app1Id}, mapToApplicationID(apps))
+			asr.Len(apps, 4)
+			asr.Equal([]uuid.UUID{app3Id, app2Id, app1Id, app4Id}, mapToApplicationID(apps))
 
 			for _, app := range apps {
 				asr.NotZero(app.LatestApplicationsDetail)
@@ -205,6 +209,17 @@ func TestGetApplicationList(t *testing.T) {
 			asr.False(apps[1].CreatedAt.Before(apps[2].CreatedAt))
 
 			asr.Equal(user1, apps[2].CreateUserTrapID.TrapId)
+		})
+
+		t.Run("filterByFinancialYear", func(t *testing.T) {
+			asr := assert.New(t)
+			financialYear := 2019
+
+			apps, err := repo.GetApplicationList("", nil, &financialYear, "", nil, nil, nil)
+			asr.NoError(err)
+
+			asr.Len(apps, 1)
+			asr.Equal(app4Id, apps[0].ID)
 		})
 
 		t.Run("filterByApplicant", func(t *testing.T) {
@@ -267,8 +282,8 @@ func TestGetApplicationList(t *testing.T) {
 				apps, err := repo.GetApplicationList("", nil, nil, "", nil, nil, &beforeApp3)
 				asr.NoError(err)
 
-				asr.Len(apps, 2)
-				asr.Equal([]uuid.UUID{app2Id, app1Id}, mapToApplicationID(apps))
+				asr.Len(apps, 3)
+				asr.Equal([]uuid.UUID{app2Id, app1Id, app4Id}, mapToApplicationID(apps))
 			})
 
 			t.Run("both", func(t *testing.T) {
@@ -289,19 +304,19 @@ func TestGetApplicationList(t *testing.T) {
 			}{
 				{
 					SortBy: "created_at",
-					Should: []uuid.UUID{app3Id, app2Id, app1Id},
+					Should: []uuid.UUID{app3Id, app2Id, app1Id, app4Id},
 				},
 				{
 					SortBy: "-created_at",
-					Should: []uuid.UUID{app1Id, app2Id, app3Id},
+					Should: []uuid.UUID{app4Id, app1Id, app2Id, app3Id},
 				},
 				{
 					SortBy: "title",
-					Should: []uuid.UUID{app2Id, app3Id, app1Id},
+					Should: []uuid.UUID{app2Id, app3Id, app1Id, app4Id},
 				},
 				{
 					SortBy: "-title",
-					Should: []uuid.UUID{app1Id, app3Id, app2Id},
+					Should: []uuid.UUID{app4Id, app1Id, app3Id, app2Id},
 				},
 			}
 
@@ -314,7 +329,7 @@ func TestGetApplicationList(t *testing.T) {
 					apps, err := repo.GetApplicationList(test.SortBy, nil, nil, "", nil, nil, nil)
 					asr.NoError(err)
 
-					asr.Len(apps, 3)
+					asr.Len(apps, 4)
 					asr.Equal(test.Should, mapToApplicationID(apps))
 				})
 			}

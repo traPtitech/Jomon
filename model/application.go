@@ -127,6 +127,12 @@ func (_ *applicationRepository) GetApplicationList(sort string, currentState *St
 		query = query.Joins("JOIN states_logs ON states_logs.id = applications.states_logs_id").Where("states_logs.to_state = ?", currentState.Type)
 	}
 
+	if financialYear != nil {
+		financialYear := time.Date(*financialYear, 1, 1, 0, 0, 0, 0, time.Local)
+		financialYearEnd := financialYear.AddDate(1, 0, 0)
+		query = query.Where("created_at >= ?", financialYear).Where("created_at < ?", financialYearEnd)
+	}
+
 	if applicant != "" {
 		query = query.Where("create_user_trap_id = ?", applicant)
 	}
