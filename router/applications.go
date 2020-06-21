@@ -137,7 +137,7 @@ func (s *Service) PostApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	if *req.Amount < 0 {
+	if *req.Amount <= 0 {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
