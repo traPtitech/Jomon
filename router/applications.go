@@ -137,6 +137,10 @@ func (s *Service) PostApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
+	if *req.Amount < 0 {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
 	user, ok := c.Get(contextUserKey).(model.User)
 	if !ok || user.TrapId == "" {
 		return c.NoContent(http.StatusUnauthorized)
