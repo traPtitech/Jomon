@@ -211,6 +211,10 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
+	if req.Amount != nil && *req.Amount <= 0 {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
 	app, err := s.Applications.GetApplication(applicationId, true)
 	if gorm.IsRecordNotFoundError(err) {
 		return c.NoContent(http.StatusNotFound)
