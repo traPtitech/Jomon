@@ -167,20 +167,20 @@ func TestGetApplicationList(t *testing.T) {
 		user2 := "User2"
 		user3 := "User3"
 
-		app1SubTime := time.Date(2020, 1, 10, 12, 0, 0, 0, time.Local)
+		app1SubTime := time.Date(2020, 4, 10, 12, 0, 0, 0, time.Local)
 		app1Id := buildApplicationWithSubmitTime(user1, app1SubTime, ApplicationType{Type: Club}, "CCCCC", "Remarks", 10000, time.Now())
 
-		app2SubTime := time.Date(2020, 1, 20, 12, 0, 0, 0, time.Local)
+		app2SubTime := time.Date(2020, 4, 20, 12, 0, 0, 0, time.Local)
 		app2Id := buildApplicationWithSubmitTime(user2, app2SubTime, ApplicationType{Type: Contest}, "AAAAA", "Remarks", 10000, time.Now())
 
-		app3SubTime := time.Date(2020, 1, 30, 12, 0, 0, 0, time.Local)
+		app3SubTime := time.Date(2020, 4, 30, 12, 0, 0, 0, time.Local)
 		app3Id := buildApplicationWithSubmitTime(user2, app3SubTime, ApplicationType{Type: Event}, "BBBBB", "Remarks", 10000, time.Now())
 		app3, err := repo.GetApplication(app3Id, true)
 		if err != nil {
 			panic(err)
 		}
 
-		app4SubTime := time.Date(2019, 1, 10, 12, 0, 0, 0, time.Local)
+		app4SubTime := time.Date(2019, 4, 10, 12, 0, 0, 0, time.Local)
 		app4Id := buildApplicationWithSubmitTime(user1, app4SubTime, ApplicationType{Type: Club}, "DDDDD", "Remarks", 10000, time.Now())
 
 		// TODO Use a appropriate function defined in model/states_log.go after implementing such a function.
