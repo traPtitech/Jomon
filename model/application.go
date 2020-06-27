@@ -119,7 +119,6 @@ func (_ *applicationRepository) GetApplication(id uuid.UUID, preload bool) (Appl
 	return app, nil
 }
 
-//noinspection GoUnusedParameter `financialYear`
 func (_ *applicationRepository) GetApplicationList(sort string, currentState *StateType, financialYear *int, applicant string, typ *ApplicationType, submittedSince *time.Time, submittedUntil *time.Time) ([]Application, error) {
 	query := db.Preload("LatestStatesLog").Preload("LatestApplicationsDetail")
 
@@ -128,7 +127,7 @@ func (_ *applicationRepository) GetApplicationList(sort string, currentState *St
 	}
 
 	if financialYear != nil {
-		financialYear := time.Date(*financialYear, 1, 1, 0, 0, 0, 0, time.Local)
+		financialYear := time.Date(*financialYear, 4, 1, 0, 0, 0, 0, time.Local)
 		financialYearEnd := financialYear.AddDate(1, 0, 0)
 		query = query.Where("created_at >= ?", financialYear).Where("created_at < ?", financialYearEnd)
 	}
