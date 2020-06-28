@@ -31,7 +31,7 @@
             :rules="nullRules"
             label="概要"
             filled
-            placeholder="概要を入力 (ex:工大祭用ポスターの印刷代)"
+            :placeholder="returnTitlePlaceholder($route.params.type)"
             ref="firstfocus"
           ></v-text-field>
         </div>
@@ -54,7 +54,7 @@
                     label="支払日"
                     filled
                     readonly
-                    placeholder="支払日を選択"
+                    placeholder="2020年5月2日"
                     v-on="on"
                     height="10"
                   ></v-text-field>
@@ -79,7 +79,7 @@
                 label="支払金額"
                 filled
                 type="number"
-                placeholder="金額を入力"
+                placeholder="100"
                 class="pa-0"
                 height="25"
               ></v-text-field
@@ -98,7 +98,8 @@
             label="返金対象者"
             filled
             :items="traPIDs"
-            placeholder="返金対象者のtraPidを入力"
+            placeholder="traPIDs"
+            hint="traQ IDの一部入力で候補が表示されます"
             required
             multiple
           >
@@ -110,7 +111,9 @@
             v-model="remarks"
             :rules="nullRules"
             filled
-            :label="returnRemarkTitle($route.params.type)"
+            :label="returnRemarksTitle($route.params.type)"
+            :placeholder="returnRemarksPlaceholder($route.params.type)"
+            :hint="returnRemarksHint($route.params.type)"
             auto-grow
           ></v-textarea>
         </div>
@@ -255,7 +258,7 @@ export default {
           return "タイプが間違っています";
       }
     },
-    returnRemarkTitle: function(type) {
+    returnRemarksTitle: function(type) {
       switch (type) {
         case "club":
           return "購入物の概要";
@@ -265,6 +268,46 @@ export default {
           return "乗車区間";
         case "public":
           return "乗車区間";
+        default:
+          return "タイプが間違っています";
+      }
+    },
+    returnTitlePlaceholder: function(type) {
+      switch (type) {
+        case "club":
+          return "工大祭用ポスターの印刷代";
+        case "contest":
+          return "ISUCON in 沖縄";
+        case "event":
+          return "コミックマーケット98";
+        case "public":
+          return "OO株式会社様との打ち合わせ";
+        default:
+          return "タイプが間違っています";
+      }
+    },
+    returnRemarksPlaceholder: function(type) {
+      switch (type) {
+        case "club":
+          return "OO印刷所にA3サイズのポスターをXX部";
+        case "contest":
+          return "大岡山から沖縄まで片道XX円の往復\n沖縄でOO民宿に二泊三日でxxx円";
+        case "event":
+        case "public":
+          return "東急大井町線急行\n大岡山 から 大井町:160円\n\n東京臨海高速鉄道臨海線\n大井町 から 東京テレポート:280円\n\n各区間往復一人分";
+        default:
+          return "タイプが間違っています";
+      }
+    },
+    returnRemarksHint: function(type) {
+      switch (type) {
+        case "club":
+          return "具体的購入物、用途等を記入";
+        case "contest":
+          return "経路、参加費、宿場等を記入";
+        case "event":
+        case "public":
+          return "駅名、駅間の料金、往復or片道、複数人の時は誰がどの区間か、記入";
         default:
           return "タイプが間違っています";
       }
