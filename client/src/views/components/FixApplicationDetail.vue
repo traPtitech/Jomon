@@ -49,7 +49,7 @@
             :rules="nullRules"
             label="概要"
             filled
-            placeholder="概要を入力 (ex:工大祭用ポスターの印刷代)"
+            :placeholder="returnTitlePlaceholder(this.type_object.type)"
           ></v-text-field>
         </div>
 
@@ -71,7 +71,7 @@
                     label="支払日"
                     filled
                     readonly
-                    placeholder="支払日を選択"
+                    placeholder="2020年5月2日"
                     v-on="on"
                     height="10"
                     color="primary"
@@ -96,7 +96,7 @@
                 :rules="amountRules"
                 type="number"
                 label="支払金額"
-                placeholder="金額を入力"
+                placeholder="100"
                 class="pa-0"
                 height="25"
               ></v-text-field
@@ -116,7 +116,8 @@
             label="返金対象者"
             filled
             :items="traPIDs"
-            placeholder="返金対象者のtraPidを入力"
+            placeholder="traQIDs"
+            hint="traQ IDの一部入力で候補が表示されます"
             required
             multiple
           >
@@ -128,7 +129,9 @@
             v-model="remarks_change"
             :rules="nullRules"
             filled
-            :label="returnRemarkTitle(this.type_object.type)"
+            :label="returnRemarksTitle(this.type_object.type)"
+            :placeholder="returnRemarksPlaceholder(this.type_object.type)"
+            :hint="returnRemarksHint(this.type_object.type)"
             auto-grow
           ></v-textarea>
         </div>
@@ -190,6 +193,11 @@ import Icon from "../shered/Icon";
 import ImageUploader from "../shered/ImageUploader";
 import { mapActions } from "vuex";
 import { mapState, mapMutations } from "vuex";
+import {
+  titlePlaceholder,
+  remarksPlaceholder,
+  remarksHint
+} from "../../use/inputFormText";
 export default {
   data: function() {
     return {
@@ -327,7 +335,7 @@ export default {
         "日"
       );
     },
-    returnRemarkTitle: function(type) {
+    returnRemarksTitle: function(type) {
       switch (type) {
         case "club":
           return "購入物の詳細";
@@ -340,6 +348,15 @@ export default {
         default:
           return "タイプが間違っています";
       }
+    },
+    returnTitlePlaceholder: function(type) {
+      return titlePlaceholder(type);
+    },
+    returnRemarksPlaceholder: function(type) {
+      return remarksPlaceholder(type);
+    },
+    returnRemarksHint: function(type) {
+      return remarksHint(type);
     },
     deleteImage(index) {
       this.images_change[index] = false;
