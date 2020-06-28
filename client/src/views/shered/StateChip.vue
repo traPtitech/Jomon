@@ -1,5 +1,5 @@
 <template>
-  <div class="text-center">
+  <span class="text-center">
     <v-chip
       :x-small="size === `x-small`"
       :small="size === `small`"
@@ -10,7 +10,7 @@
     >
       {{ state_text }}
     </v-chip>
-  </div>
+  </span>
 </template>
 
 <script>

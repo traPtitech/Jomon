@@ -2,12 +2,14 @@
   <v-container>
     <v-row class="md5">
       <v-col cols="2" class="text-lg-right">
-        <StateChip
-          v-if="list.current_state !== ''"
-          :width="10"
-          :state="list.current_state"
-          style="width:7em"
-        ></StateChip>
+        <div>
+          <StateChip
+            v-if="list.current_state !== ''"
+            :width="10"
+            :state="list.current_state"
+            style="width:7em"
+          ></StateChip>
+        </div>
       </v-col>
       <v-col cols="4">{{ list.current_detail.title }}</v-col>
       <v-col cols="4" class="text-lg-left">{{ list.applicant.trap_id }}</v-col>
