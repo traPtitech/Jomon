@@ -2,6 +2,8 @@
   <span>
     <v-file-input
       v-model="images"
+      label="画像"
+      filled
       multiple
       clearable
       chips
