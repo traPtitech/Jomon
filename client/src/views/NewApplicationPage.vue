@@ -153,62 +153,18 @@
       <v-btn :disabled="!valid" @click.stop="submit" class="ma-3"
         >作成する</v-btn
       >
-      <v-dialog persistent v-model="open_dialog">
-        <v-card class="pa-3">
-          <v-card-title class="headline"
-            >以下の内容で新規作成しました</v-card-title
-          >
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請書id</v-col>
-            <v-col cols="8" md="10">{{ response.application_id }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請書タイプ</v-col>
-            <v-col cols="8" md="10">{{ response.current_detail.type }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">タイトル</v-col>
-            <v-col cols="8" md="10">{{ response.current_detail.title }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請者</v-col>
-            <v-col cols="8" md="10">{{ response.applicant.trap_id }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請金額</v-col>
-            <v-col cols="8" md="10">{{ response.current_detail.amount }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請書作成日</v-col>
-            <v-col cols="8" md="10">{{ response.created_at }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">支払った日</v-col>
-            <v-col cols="8" md="10">{{
-              response.current_detail.paid_at
-            }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">詳細</v-col>
-            <v-col cols="8" md="10">{{ response.current_detail.title }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">返金対象者</v-col>
-            <v-col cols="8" md="10">保留</v-col>
-          </v-row>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              :to="`../../applications/` + response.application_id"
-              color="primary"
-              text
-              @click="open_dialog = false"
-              >OK</v-btn
-            >
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
     </v-form>
+    <!-- ここ作成したらokを押しても押さなくても自動遷移 -->
+    <v-snacker v-model="snacker">
+      作成できました。
+      <v-btn
+        :to="`../../applications/` * +response.application_id"
+        color="green darken-1"
+        text
+        @click="sacker = false"
+        >OK</v-btn
+      >
+    </v-snacker>
   </div>
 </template>
 
@@ -232,7 +188,7 @@ export default {
         paid_at: null
       }
     },
-    open_dialog: false,
+    snackbar: false,
     date: null,
     menu: false,
     traPID: [],
@@ -292,7 +248,7 @@ export default {
           })
           .then(
             response => (
-              (this.response = response.data), (this.open_dialog = true)
+              (this.response = response.data), (this.snackbar = true)
             )
           );
       }
