@@ -31,6 +31,7 @@
 <script>
 import axios from "axios";
 import Icon from "../shered/Icon";
+import { mapActions } from "vuex";
 export default {
   data: () => {
     return {
