@@ -82,9 +82,9 @@
                 placeholder="100"
                 class="pa-0"
                 height="25"
+                suffix="円"
               ></v-text-field
             ></v-col>
-            <v-col class="pt-0 pb-0" cols="2" sm="7">円</v-col>
           </v-row>
         </div>
 
