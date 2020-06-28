@@ -592,6 +592,7 @@ func TestPostApplication(t *testing.T) {
 	title := "夏コミの交通費をお願いします。"
 	remarks := "〇〇駅から〇〇駅への移動"
 	amount := 1000
+	amount2 := -1
 	paidAt := time.Now().Round(time.Second)
 	imgString := "SampleData"
 
@@ -859,6 +860,83 @@ func TestPostApplication(t *testing.T) {
 
 		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
 			// panic(err)
+		}
+
+		err = service.PostApplication(c)
+		asr.NoError(err)
+		asr.Equal(http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("shouldFail", func(t *testing.T) {
+		asr := assert.New(t)
+		e := echo.New()
+		ctx := context.TODO()
+
+		body := &bytes.Buffer{}
+		mpw := multipart.NewWriter(body)
+		if err := mpw.SetBoundary(MultipartBoundary); err != nil {
+			panic(err)
+		}
+
+		part := make(textproto.MIMEHeader)
+		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, "details"))
+		part.Set("Content-Type", "application/json")
+		writer, err := mpw.CreatePart(part)
+		if err != nil {
+			panic(err)
+		}
+		_, err = writer.Write([]byte(fmt.Sprintf(`
+		{
+			"type": "club",
+			"title": "%s",
+			"remarks": "%s",
+			"paid_at": "%s",
+			"amount": %d,
+			"repaid_to_id": [
+				"User1"
+			]
+		}
+		`, title, remarks, paidAt.Format(time.RFC3339), amount2)))
+		if err != nil {
+			panic(err)
+		}
+
+		part = make(textproto.MIMEHeader)
+		part.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="image.png"`, "images"))
+		part.Set("Content-Type", "image/png")
+		writer, err = mpw.CreatePart(part)
+		if err != nil {
+			panic(err)
+		}
+		_, err = writer.Write([]byte(imgString))
+		if err != nil {
+			panic(err)
+		}
+
+		if err = mpw.Close(); err != nil {
+			panic(err)
+		}
+
+		req := httptest.NewRequest(http.MethodPost, "/api/applications", body)
+		req.Header.Set(echo.HeaderContentType, fmt.Sprintf("multipart/form-data; boundary=%s", MultipartBoundary))
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/applications")
+		userRepMock.SetNormalUser(c)
+
+		route, pathParam, err := router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			//panic(err)
+		}
+
+		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			//panic(err)
 		}
 
 		err = service.PostApplication(c)

@@ -137,6 +137,10 @@ func (s *Service) PostApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
+	if *req.Amount <= 0 {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
 	user, ok := c.Get(contextUserKey).(model.User)
 	if !ok || user.TrapId == "" {
 		return c.NoContent(http.StatusUnauthorized)
@@ -204,6 +208,10 @@ func (s *Service) PatchApplication(c echo.Context) error {
 	}
 
 	if req.Type == nil && req.Title == "" && req.Remarks == "" && req.Amount == nil && req.PaidAt == nil && (len(req.RepaidToId) == 0) && (len(form.File["images"]) == 0) {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	if req.Amount != nil && *req.Amount <= 0 {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
