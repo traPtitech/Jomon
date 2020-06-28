@@ -45,7 +45,7 @@ export default {
     itemPrint(item) {
       switch (item) {
         case "type":
-          return "申請書様式";
+          return "申請様式";
         case "title":
           return "タイトル";
         case "remarks":
