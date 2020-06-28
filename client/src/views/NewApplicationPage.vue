@@ -258,7 +258,7 @@ export default {
     returnRemarkTitle: function(type) {
       switch (type) {
         case "club":
-          return "購入したものの概要";
+          return "購入物の概要";
         case "contest":
           return "旅程";
         case "event":

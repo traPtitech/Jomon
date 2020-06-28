@@ -1,7 +1,7 @@
 <template>
   <div class="application-list">
     <v-container>
-      <v-row>
+      <v-row justify="space-around">
         <!-- 絞り込み検索欄 -->
         <v-col cols="12" md="3">
           <v-card width="1200px" class="mx-auto mt-5" color="primary">
@@ -16,18 +16,36 @@
             <v-card-text v-show="show" style="background:white" class="pt-4">
               <v-form>
                 <v-row>
-                  <v-btn color="primary" @click="sortOthers()"
+                  <v-btn
+                    color="primary"
+                    @click="sortOthers()"
+                    width="70"
+                    class="ma-1"
                     ><v-icon>mdi-reload</v-icon></v-btn
                   >
-                  <v-btn color="primary" @click="resetParams()"
+                  <v-btn
+                    color="primary"
+                    @click="resetParams()"
+                    width="70"
+                    class="ma-1"
                     ><v-icon>mdi-close</v-icon></v-btn
                   >
                 </v-row>
                 <v-row>
-                  <v-btn outlined color="primary" @click="sortCreatedAt()"
+                  <v-btn
+                    outlined
+                    color="primary"
+                    @click="sortCreatedAt()"
+                    width="150"
+                    class="ma-1"
                     >日付順</v-btn
                   >
-                  <v-btn outlined color="primary" @click="sortTitle()"
+                  <v-btn
+                    outlined
+                    color="primary"
+                    @click="sortTitle()"
+                    width="150"
+                    class="ma-1"
                     >タイトル順</v-btn
                   >
                 </v-row>
@@ -65,7 +83,7 @@
                   item-text="jpn"
                   item-value="type"
                   return-object
-                  label="申請書タイプ"
+                  label="申請タイプ"
                 ></v-select>
                 <v-select
                   v-model="state"
@@ -86,11 +104,11 @@
             </v-card-text>
           </v-card>
         </v-col>
-        <!-- 申請書一覧 -->
+        <!-- 申請一覧 -->
         <v-col cols="12" md="7">
           <v-card width="1200px" class="mx-auto mt-5" color="primary">
             <v-card-title style="color:white;font-weight:bold;font-size:1.5em"
-              >申請書一覧</v-card-title
+              >申請一覧</v-card-title
             >
             <v-card-text class="pl-0 pr-0 pb-0">
               <v-list>
@@ -108,7 +126,7 @@
                   </v-list-item>
                 </v-list-item-group>
                 <div v-else>
-                  該当する申請書はありません。
+                  該当する申請はありません。
                 </div>
               </v-list>
             </v-card-text>
@@ -141,7 +159,6 @@ export default {
       switch (this.$vuetify.breakpoint.name) {
         case "xs":
         case "sm":
-        case "md":
           return false;
         default:
           return true;
