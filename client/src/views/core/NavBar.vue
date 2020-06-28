@@ -21,7 +21,7 @@
     </v-btn>
     <v-menu open-on-hover offset-y>
       <template v-slot:activator="{ on }">
-        <v-btn color="primary" dark v-on="on">
+        <v-btn v-on="on" text>
           新規作成
         </v-btn>
       </template>
@@ -36,11 +36,16 @@
         </v-list-item>
       </v-list>
     </v-menu>
+    <Icon :user="this.$store.state.me.trap_id" :size="35" />
   </v-app-bar>
 </template>
 <script>
 import { mapState } from "vuex";
+import Icon from "../shered/Icon";
 export default {
+  components: {
+    Icon
+  },
   computed: {
     ...mapState(["me"])
   },

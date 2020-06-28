@@ -16,12 +16,20 @@
             <v-card-text v-show="show" style="background:white" class="pt-4">
               <v-form>
                 <v-row>
-                  <v-btn @click="getApplicationList(params)">更新</v-btn>
-                  <v-btn @click="resetParams()">条件削除</v-btn>
+                  <v-btn color="primary" @click="sortOthers()"
+                    ><v-icon>mdi-reload</v-icon></v-btn
+                  >
+                  <v-btn color="primary" @click="resetParams()"
+                    ><v-icon>mdi-close</v-icon></v-btn
+                  >
                 </v-row>
                 <v-row>
-                  <v-btn @click="sortCreatedAt()">日付順</v-btn>
-                  <v-btn @click="sortTitle()">タイトル順</v-btn>
+                  <v-btn outlined color="primary" @click="sortCreatedAt()"
+                    >日付順</v-btn
+                  >
+                  <v-btn outlined color="primary" @click="sortTitle()"
+                    >タイトル順</v-btn
+                  >
                 </v-row>
                 <v-row>
                   <v-col cols="5">
@@ -52,19 +60,19 @@
                   label="年度"
                 ></v-text-field>
                 <v-select
-                  v-model="params.type"
-                  :items="['club', 'contest', 'event', 'public']"
+                  v-model="type"
+                  :items="type_items"
+                  item-text="jpn"
+                  item-value="type"
+                  return-object
                   label="申請書タイプ"
                 ></v-select>
                 <v-select
-                  v-model="params.current_state"
-                  :items="[
-                    'submitted',
-                    'rejected',
-                    'fix_required',
-                    'accepted',
-                    'fully_repaid'
-                  ]"
+                  v-model="state"
+                  :items="state_items"
+                  item-text="jpn"
+                  item-value="state"
+                  return-object
                   label="現在の状態"
                 ></v-select>
                 <v-select
@@ -86,17 +94,22 @@
             >
             <v-card-text class="pl-0 pr-0 pb-0">
               <v-list>
-                <v-list-item-group color="primary">
+                <v-list-item-group
+                  v-if="applicationList.length > 0"
+                  color="primary"
+                >
                   <Application :list="header" class="pb-0 pt-0"></Application>
                   <v-list-item
                     v-for="(list, index) in applicationList"
                     v-bind:key="index"
                     :to="'/applications/' + list.application_id"
                     class="pl-0 pr-0"
-                  >
-                    <Application :list="list"> </Application>
+                    ><Application :list="list"> </Application>
                   </v-list-item>
                 </v-list-item-group>
+                <div v-else>
+                  該当する申請書はありません。
+                </div>
               </v-list>
             </v-card-text>
           </v-card>
@@ -164,10 +177,33 @@ export default {
       if (this.params.sort === sort.title) this.params.sort = sort.inv_title;
       else this.params.sort = sort.title;
       this.getApplicationList(this.params);
+    },
+    /**
+     * 条件をパラムに代入し、ソート
+     */
+    sortOthers() {
+      this.params.type = this.type.type;
+      this.params.current_state = this.state.state;
+      this.getApplicationList(this.params);
     }
   },
   data() {
     return {
+      type_items: [
+        { type: "club", jpn: "部費利用申請" },
+        { type: "contest", jpn: "大会等旅費補助申請" },
+        { type: "event", jpn: "イベント交通費補助申請" },
+        { type: "public", jpn: "渉外交通費補助" }
+      ],
+      type: { type: "", jpn: "" },
+      state_items: [
+        { state: "submitted", jpn: "提出済み" },
+        { state: "rejected", jpn: "却下" },
+        { state: "fix_required", jpn: "要修正" },
+        { state: "accepted", jpn: "払い戻し待ち" },
+        { state: "fully_repaid", jpn: "払い戻し完了" }
+      ],
+      state: { state: "", jpn: "" },
       header: {
         current_detail: {
           title: "タイトル",

@@ -60,6 +60,10 @@ func TestPutState(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	toStateSubmitted, err := model.StateType{Type: model.Submitted}.MarshalJSON()
+	if err != nil {
+		panic(err)
+	}
 
 	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
 
@@ -138,6 +142,389 @@ func TestPutState(t *testing.T) {
 		}
 
 		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PutStates(c)
+		asr.NoError(err)
+		asr.Equal(http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("shouldFail", func(t *testing.T) {
+		asr := assert.New(t)
+		e := echo.New()
+		ctx := context.TODO()
+		body := fmt.Sprintf(`
+		{
+			"to_state": %s,
+			"reason": "%s"
+		}
+		`, string(toStateSubmitted), stateReason)
+		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, "application/json")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId/states")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
+
+		route, pathParam, err := router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PutStates(c)
+
+		asr = assert.New(t)
+		e = echo.New()
+		ctx = context.TODO()
+		body = fmt.Sprintf(`
+		{
+			"to_state": %s,
+			"reason": ""
+		}
+		`, string(toStateFixRequired))
+		req = httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, "application/json")
+		rec = httptest.NewRecorder()
+		c = e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId/states")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
+
+		route, pathParam, err = router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput = &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PutStates(c)
+		asr.NoError(err)
+		asr.Equal(http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("shouldFail", func(t *testing.T) {
+		asr := assert.New(t)
+		e := echo.New()
+		ctx := context.TODO()
+		body := fmt.Sprintf(`
+		{
+			"to_state": %s,
+			"reason": "%s"
+		}
+		`, string(toStateFixRequired), stateReason)
+		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, "application/json")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId/states")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
+
+		route, pathParam, err := router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PutStates(c)
+
+		asr = assert.New(t)
+		e = echo.New()
+		ctx = context.TODO()
+		body = fmt.Sprintf(`
+		{
+			"to_state": %s,
+			"reason": "%s"
+		}
+		`, string(toStateSubmitted), stateReason)
+		req = httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, "application/json")
+		rec = httptest.NewRecorder()
+		c = e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId/states")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
+
+		route, pathParam, err = router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput = &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PutStates(c)
+		asr.NoError(err)
+		asr.Equal(http.StatusBadRequest, rec.Code)
+	})
+
+	userRepMock = NewUserRepositoryMock("User2", "AdminUserId")
+
+	service = Service{
+		Administrators: adminRepMock,
+		Applications:   appRepMock,
+		Users:          userRepMock,
+	}
+	t.Run("shouldSuccess", func(t *testing.T) {
+		asr := assert.New(t)
+		e := echo.New()
+		ctx := context.TODO()
+		body := fmt.Sprintf(`
+		{
+			"to_state": %s,
+			"reason": "%s"
+		}
+		`, string(toStateFixRequired), stateReason)
+		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, "application/json")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId/states")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
+
+		route, pathParam, err := router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PutStates(c)
+
+		asr = assert.New(t)
+		e = echo.New()
+		ctx = context.TODO()
+		body = fmt.Sprintf(`
+		{
+			"to_state": %s,
+			"reason": "%s"
+		}
+		`, string(toStateSubmitted), stateReason)
+		req = httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, "application/json")
+		rec = httptest.NewRecorder()
+		c = e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId/states")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
+
+		route, pathParam, err = router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput = &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PutStates(c)
+		asr.NoError(err)
+		asr.Equal(http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("shouldFail", func(t *testing.T) {
+		asr := assert.New(t)
+		e := echo.New()
+		ctx := context.TODO()
+		body := fmt.Sprintf(`
+		{
+			"to_state": %s,
+			"reason": "%s"
+		}
+		`, string(toStateFixRequired), stateReason)
+		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, "application/json")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId/states")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
+
+		route, pathParam, err := router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PutStates(c)
+
+		asr = assert.New(t)
+		e = echo.New()
+		ctx = context.TODO()
+		body = fmt.Sprintf(`
+		{
+			"to_state": %s,
+			"reason": "%s"
+		}
+		`, string(toStateSubmitted), stateReason)
+		req = httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, "application/json")
+		rec = httptest.NewRecorder()
+		c = e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId/states")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
+
+		route, pathParam, err = router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput = &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PutStates(c)
+		asr.NoError(err)
+		asr.Equal(http.StatusBadRequest, rec.Code)
+	})
+	userRepMock = NewUserRepositoryMock("AnotherId", "AdminUserId")
+
+	service = Service{
+		Administrators: adminRepMock,
+		Applications:   appRepMock,
+		Users:          userRepMock,
+	}
+	t.Run("shouldSuccess", func(t *testing.T) {
+		asr := assert.New(t)
+		e := echo.New()
+		ctx := context.TODO()
+		body := fmt.Sprintf(`
+		{
+			"to_state": %s,
+			"reason": "%s"
+		}
+		`, string(toStateFixRequired), stateReason)
+		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, "application/json")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId/states")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
+
+		route, pathParam, err := router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PutStates(c)
+
+		asr = assert.New(t)
+		e = echo.New()
+		ctx = context.TODO()
+		body = fmt.Sprintf(`
+		{
+			"to_state": %s,
+			"reason": "%s"
+		}
+		`, string(toStateSubmitted), stateReason)
+		req = httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, "application/json")
+		rec = httptest.NewRecorder()
+		c = e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId/states")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
+
+		route, pathParam, err = router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput = &openapi3filter.RequestValidationInput{
 			Request:    req,
 			PathParams: pathParam,
 			Route:      route,

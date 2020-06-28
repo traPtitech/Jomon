@@ -2,7 +2,7 @@
   <v-row justify="center">
     <v-dialog v-model="dialog" max-width="600px">
       <template v-slot:activator="{ on }">
-        <v-btn color="primary" dark v-on="on">{{
+        <v-btn class="primary_accent--text" color="secondary" dark v-on="on">{{
           toStateName(to_state)
         }}</v-btn>
       </template>
@@ -34,14 +34,8 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="dialog = false"
-              >戻る</v-btn
-            >
-            <v-btn
-              :disabled="!valid"
-              color="blue darken-1"
-              text
-              @click="postreason"
+            <v-btn color="primary" text @click="dialog = false">戻る</v-btn>
+            <v-btn :disabled="!valid" color="primary" text @click="postreason"
               >{{ this.toStateName(to_state) }}にする</v-btn
             >
           </v-card-actions>

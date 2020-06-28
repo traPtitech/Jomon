@@ -12,15 +12,15 @@
               v-model="comment"
               :rules="nullRules"
               outlined
-              label="Leave a comment"
+              label="コメントを書いてください"
             ></v-textarea>
             <v-btn
               :disabled="!valid"
-              color="success"
+              color="primary"
               class="mr-4"
               @click="postcomment"
             >
-              Comment
+              コメントする
             </v-btn>
           </v-form>
         </v-card>
@@ -30,8 +30,7 @@
 </template>
 <script>
 import axios from "axios";
-import Icon from "./Icon";
-import { mapActions } from "vuex";
+import Icon from "../shered/Icon";
 export default {
   data: () => {
     return {

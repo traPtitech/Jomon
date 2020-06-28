@@ -103,7 +103,7 @@
 </template>
 
 <script>
-import Icon from "./Icon";
+import Icon from "../shered/Icon";
 import { mapState } from "vuex";
 export default {
   computed: {

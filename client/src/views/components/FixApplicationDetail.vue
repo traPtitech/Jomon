@@ -120,6 +120,7 @@
                             v-on="on"
                             height="10"
                             hide-details
+                            color="primary"
                           ></v-text-field>
                         </template>
                         <v-date-picker
@@ -237,7 +238,7 @@
             <v-spacer></v-spacer>
             <v-btn
               :to="`../../applications/` + response.application_id"
-              color="green darken-1"
+              color="primary"
               text
               @click="[(open_dialog = false), deleteFix()]"
               >OK</v-btn
@@ -251,8 +252,8 @@
 
 <script>
 import axios from "axios";
-import Icon from "./Icon";
-import ImageUploader from "./ImageUploader";
+import Icon from "../shered/Icon";
+import ImageUploader from "../shered/ImageUploader";
 import { mapActions } from "vuex";
 import { mapState, mapMutations } from "vuex";
 export default {

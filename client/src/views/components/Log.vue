@@ -205,8 +205,8 @@
 </template>
 
 <script>
-import Icon from "./Icon";
-import StateChip from "./StateChip";
+import Icon from "../shered/Icon";
+import StateChip from "../shered/StateChip";
 import Vue from "vue";
 import { mapActions } from "vuex";
 import axios from "axios";

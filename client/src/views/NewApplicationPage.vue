@@ -112,6 +112,7 @@
                         <v-date-picker
                           v-model="date"
                           no-title
+                          color="primary"
                           @input="menu = false"
                         ></v-date-picker>
                       </v-menu>
@@ -199,7 +200,7 @@
             <v-spacer></v-spacer>
             <v-btn
               :to="`../../applications/` + response.application_id"
-              color="green darken-1"
+              color="primary"
               text
               @click="open_dialog = false"
               >OK</v-btn
@@ -213,8 +214,8 @@
 
 <script>
 import axios from "axios";
-import Icon from "./components/Icon";
-import ImageUploader from "./components/ImageUploader";
+import Icon from "./shered/Icon";
+import ImageUploader from "./shered/ImageUploader";
 import { mapActions, mapGetters } from "vuex";
 export default {
   data: () => ({
