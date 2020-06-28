@@ -132,7 +132,7 @@
     <v-snackbar v-model="snackbar">
       作成できました
       <v-btn
-        :to="`../../applications/` + response.application_id"
+        :to="`/applications/` + response.application_id"
         color="green darken-1"
         text
         @click="sackbar = false"
