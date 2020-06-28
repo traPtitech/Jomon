@@ -7,16 +7,8 @@
   >
     <v-row>
       <v-btn v-on:click="accept()">承認 </v-btn>
-      <with-reason-button
-        class="ml-4 mr-5"
-        to_state="fix_required"
-        @get="$emit(`get`)"
-      />
-      <with-reason-button
-        class="mr-4"
-        to_state="rejected"
-        @get="this.$emit('get')"
-      />
+      <with-reason-button class="ml-4 mr-5" to_state="fix_required" />
+      <with-reason-button class="mr-4" to_state="rejected" />
     </v-row>
   </div>
   <div v-else-if="this.detail.core.current_state === `accepted`">
