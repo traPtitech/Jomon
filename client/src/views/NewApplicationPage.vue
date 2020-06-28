@@ -130,12 +130,12 @@
     </v-form>
     <!-- ここ作成したらokを押しても押さなくても自動遷移 -->
     <v-snackbar v-model="snackbar">
-      作成できました。
+      作成できました
       <v-btn
         :to="`../../applications/` + response.application_id"
         color="green darken-1"
         text
-        @click="sacker = false"
+        @click="sackbar = false"
         >OK</v-btn
       >
     </v-snackbar>
