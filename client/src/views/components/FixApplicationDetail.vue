@@ -198,6 +198,8 @@ import {
   remarksPlaceholder,
   remarksHint
 } from "../../use/inputFormText";
+import { remarksTitle } from "../../use/applicationDetail";
+import { dayPrint } from "../../use/dataFormat";
 export default {
   data: function() {
     return {
@@ -325,29 +327,10 @@ export default {
       return `${year}年${month.replace(/^0/, "")}月${day.replace(/^0/, "")}日`;
     },
     returnDate: function(date) {
-      const normalizedDate = new Date(date);
-      return (
-        normalizedDate.getFullYear() +
-        "年" +
-        (normalizedDate.getMonth() + 1) +
-        "月" +
-        normalizedDate.getDate() +
-        "日"
-      );
+      return dayPrint(date);
     },
     returnRemarksTitle: function(type) {
-      switch (type) {
-        case "club":
-          return "購入物の詳細";
-        case "contest":
-          return "旅程";
-        case "event":
-          return "乗車区間";
-        case "public":
-          return "乗車区間";
-        default:
-          return "タイプが間違っています";
-      }
+      return remarksTitle(type);
     },
     returnTitlePlaceholder: function(type) {
       return titlePlaceholder(type);

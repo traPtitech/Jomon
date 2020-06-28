@@ -8,7 +8,7 @@
           </v-col>
 
           <v-col cols="12" sm="4" class="pt-0 pb-0">
-            <div>申請日: {{ returnDate(new Date()) }}</div>
+            <div>申請日: {{ returnToday() }}</div>
             <v-divider></v-divider>
             <div>
               申請者:<Icon :user="this.$store.state.me.trap_id" :size="20" />{{
@@ -152,6 +152,8 @@ import {
   remarksPlaceholder,
   remarksHint
 } from "../use/inputFormText";
+import { remarksTitle, applicationType } from "../use/applicationDetail";
+import { dayPrint } from "../use/dataFormat";
 export default {
   data: () => ({
     response: {
@@ -238,44 +240,15 @@ export default {
       const [year, month, day] = date.split("-");
       return `${year}年${month.replace(/^0/, "")}月${day.replace(/^0/, "")}日`;
     },
-    returnDate: function(date) {
-      const normalizedDate = new Date(date);
-      return (
-        normalizedDate.getFullYear() +
-        "年" +
-        (normalizedDate.getMonth() + 1) +
-        "月" +
-        normalizedDate.getDate() +
-        "日"
-      );
+    returnToday: function() {
+      const date = new Date();
+      return dayPrint(date);
     },
     returnType: function(type) {
-      switch (type) {
-        case "club":
-          return "部費利用";
-        case "contest":
-          return "大会等旅費補助";
-        case "event":
-          return "イベント交通費補助";
-        case "public":
-          return "渉外交通費補助";
-        default:
-          return "タイプが間違っています";
-      }
+      return applicationType(type);
     },
     returnRemarksTitle: function(type) {
-      switch (type) {
-        case "club":
-          return "購入物の概要";
-        case "contest":
-          return "旅程";
-        case "event":
-          return "乗車区間";
-        case "public":
-          return "乗車区間";
-        default:
-          return "タイプが間違っています";
-      }
+      return remarksTitle(type);
     },
     returnTitlePlaceholder: function(type) {
       return titlePlaceholder(type);

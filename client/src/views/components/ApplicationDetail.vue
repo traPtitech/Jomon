@@ -84,7 +84,7 @@
 
       <div>
         <div class="grey--text">
-          {{ returnRemarkTitle(this.detail.core.current_detail.type) }}
+          {{ returnRemarksTitle(this.detail.core.current_detail.type) }}
         </div>
         <div class="headline">
           <p
@@ -113,49 +113,21 @@
 <script>
 import Icon from "../shered/Icon";
 import { mapState } from "vuex";
+import { remarksTitle, applicationType } from "../../use/applicationDetail";
+import { dayPrint } from "../../use/dataFormat";
 export default {
   computed: {
     ...mapState({ detail: "application_detail_paper" })
   },
   methods: {
     returnDate: function(date) {
-      const normalizedDate = new Date(date);
-      return (
-        normalizedDate.getFullYear() +
-        "年" +
-        (normalizedDate.getMonth() + 1) +
-        "月" +
-        normalizedDate.getDate() +
-        "日"
-      );
+      return dayPrint(date);
     },
     returnType: function(type) {
-      switch (type) {
-        case "club":
-          return "部費利用";
-        case "contest":
-          return "大会等旅費補助";
-        case "event":
-          return "イベント交通費補助";
-        case "public":
-          return "渉外交通費補助";
-        default:
-          return "タイプが間違っています";
-      }
+      return applicationType(type);
     },
-    returnRemarkTitle: function(type) {
-      switch (type) {
-        case "club":
-          return "購入物の詳細";
-        case "contest":
-          return "旅程";
-        case "event":
-          return "乗車区間";
-        case "public":
-          return "乗車区間";
-        default:
-          return "タイプが間違っています";
-      }
+    returnRemarksTitle: function(type) {
+      return remarksTitle(type);
     }
   },
   props: {},
