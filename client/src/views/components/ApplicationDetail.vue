@@ -1,105 +1,113 @@
 <!-- 受け取ったデータを基に申請書詳細ページの下半分にログ、コメント等配置 -->
 <template>
-  <div class="app-detail-paper">
+  <v-container>
     <v-card class="ml-2 mr-2 mt-2 pa-3" tile>
       <v-row class="ml-4 mr-4" :justify="`space-between`">
-        <h1>{{ returnType(this.detail.core.current_detail.type) }}申請書</h1>
-        <div>
-          <div>申請書ID: {{ this.detail.core.application_id }}</div>
+        <v-col cols="12" sm="8" class="pt-0 pb-0">
+          <h1>{{ returnType(this.detail.core.current_detail.type) }}申請</h1>
+        </v-col>
+
+        <v-col cols="12" sm="4" class="pt-0 pb-0">
+          <div>申請日: {{ returnDate(this.detail.core.created_at) }}</div>
           <v-divider></v-divider>
-        </div>
+          <div>
+            申請者:<Icon
+              :user="this.detail.core.applicant.trap_id"
+              :size="20"
+            />{{ this.detail.core.applicant.trap_id }}
+          </div>
+          <div>
+            <v-divider></v-divider>
+          </div>
+        </v-col>
       </v-row>
 
       <template>
-        <v-divider></v-divider>
+        <v-divider class="mt-1"></v-divider>
       </template>
-      <h1>タイトル:{{ this.detail.core.current_detail.title }}</h1>
 
       <div>
-        <v-container class="pa-0">
-          <v-row>
-            <!-- 以下は左列 -->
-            <v-col cols="12" md="6">
-              <v-row no-gutters>
-                <v-col cols="4" md="6">
-                  <v-card height="100%" class="pa-2" outlined tile>
-                    申請者trapid
-                  </v-card>
-                </v-col>
-                <v-col cols="8" md="6">
-                  <v-card height="100%" class="pa-2" outlined tile>
-                    <Icon
-                      :user="this.detail.core.applicant.trap_id"
-                      :size="20"
-                    />{{ this.detail.core.applicant.trap_id }}
-                  </v-card>
-                </v-col>
-              </v-row>
-              <v-row no-gutters>
-                <v-col cols="4" md="6">
-                  <v-card height="100%" class="pa-2" outlined tile>
-                    申請金額
-                  </v-card>
-                </v-col>
-                <v-col>
-                  <v-card height="100%" class="pa-2" outlined tile>
-                    {{ this.detail.core.current_detail.amount }}円
-                  </v-card>
-                </v-col>
-              </v-row>
-            </v-col>
-            <!-- 以上左列以下右列 -->
-            <v-col cols="12" md="6">
-              <v-row no-gutters>
-                <v-col cols="4" md="6">
-                  <v-card height="100%" class="pa-2" outlined tile>
-                    申請書作成日
-                  </v-card>
-                </v-col>
-                <v-col height="100%" cols="8" md="6">
-                  <v-card height="100%" class="pa-2" outlined tile>
-                    {{ returnDate(this.detail.core.created_at) }}
-                  </v-card>
-                </v-col>
-              </v-row>
-              <v-row no-gutters>
-                <v-col cols="4" md="6">
-                  <v-card height="100%" class="pa-2" outlined tile>
-                    支払った日
-                  </v-card>
-                </v-col>
-                <v-col cols="8" md="6">
-                  <v-card height="100%" class="pa-2" outlined tile>
-                    {{ returnDate(this.detail.core.current_detail.paid_at) }}
-                  </v-card>
-                </v-col>
-              </v-row>
-            </v-col>
-            <!-- 以上右列 -->
-          </v-row>
-        </v-container>
+        <div class="grey--text">
+          概要
+        </div>
+        <div class="headline">
+          {{ this.detail.core.current_detail.title }}
+        </div>
+        <v-divider></v-divider>
       </div>
 
-      <h3>
-        {{ returnRemarkTitle(this.detail.core.current_detail.type) }}:{{
-          this.detail.core.current_detail.remarks
-        }}
-      </h3>
-      <h3>払い戻し対象者</h3>
-      <!-- 以下のkeyは多分よろしくない -->
-      <li
-        :key="user.repaid_to_user.trap_id"
-        v-for="user in this.detail.core.repayment_logs"
-      >
-        <Icon :user="user.repaid_to_user.trap_id" :size="25" />
-        {{ user.repaid_to_user.trap_id }}
-      </li>
-      <h3>申請書画像リスト</h3>
-      <div :key="path" v-for="path in this.detail.core.images">
-        <v-img :src="'/api/images/' + path" max-width="80%" />
+      <div>
+        <div class="grey--text">
+          支払日
+        </div>
+        <v-row>
+          <v-col cols="12" sm="5" class="pt-0 pb-0">
+            <div class="headline">
+              {{ returnDate(this.detail.core.current_detail.paid_at) }}
+            </div>
+            <v-divider></v-divider>
+          </v-col>
+        </v-row>
+      </div>
+
+      <div>
+        <div class="grey--text">
+          支払金額
+        </div>
+        <v-row>
+          <v-col cols="12" sm="5" class="pt-0 pb-0">
+            <div class="headline">
+              {{ this.detail.core.current_detail.amount }}円
+            </div>
+            <v-divider></v-divider>
+          </v-col>
+        </v-row>
+      </div>
+
+      <div>
+        <div class="grey--text">
+          払い戻し対象者
+        </div>
+        <v-row>
+          <v-col cols="12" sm="5" class="pt-0 pb-0">
+            <div
+              :key="user.repaid_to_user.trap_id"
+              v-for="user in this.detail.core.repayment_logs"
+            >
+              <Icon :user="user.repaid_to_user.trap_id" :size="25" />
+              {{ user.repaid_to_user.trap_id }}
+            </div>
+            <v-divider></v-divider>
+          </v-col>
+        </v-row>
+      </div>
+
+      <div>
+        <div class="grey--text">
+          {{ returnRemarkTitle(this.detail.core.current_detail.type) }}
+        </div>
+        <div class="headline">
+          <p
+            style="white-space:pre-wrap;"
+            v-text="this.detail.core.current_detail.remarks"
+          ></p>
+        </div>
+        <v-divider></v-divider>
+      </div>
+
+      <div>
+        <div class="grey--text">
+          画像
+        </div>
+        <div :key="path" v-for="path in this.detail.core.images">
+          <v-img :src="'/api/images/' + path" max-width="80%" />
+        </div>
+        <div v-if="this.detail.core.images.length == 0">
+          画像はありません
+        </div>
       </div>
     </v-card>
-  </div>
+  </v-container>
 </template>
 
 <script>
@@ -138,7 +146,7 @@ export default {
     returnRemarkTitle: function(type) {
       switch (type) {
         case "club":
-          return "購入したものの概要";
+          return "購入物の詳細";
         case "contest":
           return "旅程";
         case "event":
