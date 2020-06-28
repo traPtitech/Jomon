@@ -60,13 +60,8 @@
         >
         </v-textarea>
         <v-row>
-          <v-col cols="10" class="pa-0">
-            <v-btn
-              @click="
-                (comment_readonly = true),
-                  (comment_change = log.content.comment)
-              "
-              v-if="!comment_readonly"
+          <v-col cols="9" class="pa-1 ml-5">
+            <v-btn @click="cancelChange()" v-if="!comment_readonly" class="mr-1"
               >変更を取消</v-btn
             ><v-btn
               @click="putComment"
@@ -75,7 +70,7 @@
               >変更を送信</v-btn
             ></v-col
           >
-          <v-col cols="2" class="pa-0">
+          <v-col cols="2" class="pa-1">
             <span
               :class="grey_text"
               v-if="log.content.created_at !== log.content.updated_at"
@@ -332,6 +327,10 @@ export default {
       this.getApplicationDetail(
         this.$store.state.application_detail_paper.core.application_id
       );
+    },
+    cancelChange() {
+      this.comment_readonly = true;
+      this.comment_change = this.log.content.comment;
     }
   }
 };
