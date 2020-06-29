@@ -135,7 +135,7 @@
         :to="`/applications/` + response.application_id"
         color="green darken-1"
         text
-        @click="sackbar = false"
+        @click="snackbar = false"
         >OK</v-btn
       >
     </v-snackbar>
@@ -227,11 +227,10 @@ export default {
           .post("/api/applications", form, {
             headers: { "content-type": "multipart/form-data" }
           })
-          .then(
-            response => (
-              (this.response = response.data), (this.snackbar = true)
-            )
-          );
+          .then(response => {
+            this.response = response.data;
+            this.snackbar = true;
+          });
       }
     },
     formatDate(date) {
