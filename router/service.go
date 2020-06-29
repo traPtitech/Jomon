@@ -4,12 +4,13 @@ package router
 
 import (
 	"encoding/gob"
+	"net/http"
+	"os"
+
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/model"
 	storagePkg "github.com/traPtitech/Jomon/storage"
-	"net/http"
-	"os"
 )
 
 func NewService() Service {

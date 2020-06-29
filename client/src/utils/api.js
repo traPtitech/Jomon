@@ -1,7 +1,7 @@
 // import axios from "axios";
 
 // axios.defaults.withCredentials = true
-export const traQBaseURL = "https://q.trap.jp/api/1.0";
+export const traQBaseURL = "https://q.trap.jp/api/v3";
 // axios.defaults.baseURL = "http://localhost:8080";
 //   process.env.NODE_ENV === "development"
 //     ? "http://localhost:3000"

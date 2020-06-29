@@ -43,13 +43,13 @@ func NewUserRepository() UserRepository {
 	}
 }
 
+// v3ではdefaultでsuspendedは取得しない
 type traqUser struct {
-	Name      string `json:"name"`
-	Bot       bool   `json:"bot"`
-	Suspended bool   `json:"suspended"`
+	Name string `json:"name"`
+	Bot  bool   `json:"bot"`
 }
 
-const TraQBaseURL = "https://q.trap.jp/api/1.0"
+const TraQBaseURL = "https://q.trap.jp/api/v3"
 
 type TraqRepository interface {
 	sendReq(req *http.Request) ([]byte, error)
@@ -93,7 +93,7 @@ func (repo *userRepository) GetUsers(token string) ([]User, error) {
 
 	users := []User{}
 	for _, traqUser := range traqUsers {
-		if traqUser.Bot || traqUser.Suspended {
+		if traqUser.Bot {
 			continue
 		}
 

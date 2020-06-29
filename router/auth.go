@@ -2,13 +2,14 @@ package router
 
 import (
 	"crypto/sha256"
+	"math/rand"
+	"net/http"
+	"time"
+
 	"github.com/dvsekhvalnov/jose2go/base64url"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
-	"math/rand"
-	"net/http"
-	"time"
 )
 
 const (
