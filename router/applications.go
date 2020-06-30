@@ -232,6 +232,8 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		for i := range req.RepaidToId {
 			isDiffID = isDiffID && (req.RepaidToId[i] == app.RepayUsers[i].RepaidToUserTrapID.TrapId)
 		}
+	} else {
+		isDiffID = false
 	}
 
 	if *req.Type == app.LatestApplicationsDetail.Type &&
