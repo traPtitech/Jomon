@@ -3,6 +3,7 @@ package router
 import (
 	"encoding/json"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -220,6 +221,27 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		return c.NoContent(http.StatusNotFound)
 	} else if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	sort.StringSlice(req.RepaidToId).Sort()
+	sort.Slice(app.RepayUsers, func(i, j int) bool {
+		return app.RepayUsers[i].RepaidToUserTrapID.TrapId < app.RepayUsers[j].RepaidToUserTrapID.TrapId
+	})
+	isDiffID := true
+	if len(req.RepaidToId) == len(app.RepayUsers) {
+		for i := range req.RepaidToId {
+			isDiffID = isDiffID && (req.RepaidToId[i] == app.RepayUsers[i].RepaidToUserTrapID.TrapId)
+		}
+	}
+
+	if *req.Type == app.LatestApplicationsDetail.Type &&
+		req.Title == app.LatestApplicationsDetail.Title &&
+		req.Remarks == app.LatestApplicationsDetail.Remarks &&
+		*req.Amount == app.LatestApplicationsDetail.Amount &&
+		(*req.PaidAt).Equal(app.LatestApplicationsDetail.PaidAt.PaidAt) &&
+		isDiffID &&
+		(len(form.File["images"]) == len(app.ApplicationsImages)) {
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	user, ok := c.Get(contextUserKey).(model.User)
