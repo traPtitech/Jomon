@@ -1,215 +1,145 @@
 <template>
-  <div class="new-applicatoin">
+  <v-container>
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-card class="ml-2 mr-2 mt-2 pa-3" tile>
         <v-row class="ml-4 mr-4" :justify="`space-between`">
-          <h1>{{ returnType($route.params.type) }}申請書</h1>
-          <div>
-            <div>申請書ID: 自動入力されます</div>
+          <v-col cols="12" sm="8" class="pt-0 pb-0">
+            <h1>{{ returnType($route.params.type) }}申請</h1>
+          </v-col>
+
+          <v-col cols="12" sm="4" class="pt-0 pb-0">
+            <div>申請日: {{ returnToday() }}</div>
             <v-divider></v-divider>
-          </div>
+            <div>
+              申請者:<Icon :user="this.$store.state.me.trap_id" :size="20" />{{
+                this.$store.state.me.trap_id
+              }}
+            </div>
+            <div>
+              <v-divider></v-divider>
+            </div>
+          </v-col>
         </v-row>
 
         <template>
-          <v-divider></v-divider>
+          <v-divider class="mt-1 mb-2"></v-divider>
         </template>
-        <v-row class="ml-0 mr-0">
-          <h1>タイトル:</h1>
+
+        <div>
           <v-text-field
             v-model="title"
             :rules="nullRules"
-            label="入力してください"
+            label="概要"
+            filled
+            :placeholder="returnTitlePlaceholder($route.params.type)"
             ref="firstfocus"
           ></v-text-field>
-        </v-row>
+        </div>
 
         <div>
-          <v-container class="pa-0">
-            <v-row>
-              <!-- 以下は左列 -->
-              <v-col cols="12" md="6">
-                <v-row no-gutters>
-                  <v-col cols="4" md="6">
-                    <v-card height="100%" class="pa-2" outlined tile>
-                      申請者trapid
-                    </v-card>
-                  </v-col>
-                  <v-col cols="8" md="6">
-                    <v-card height="100%" class="pa-2" outlined tile>
-                      <Icon :user="this.$store.state.me.trap_id" :size="20" />{{
-                        this.$store.state.me.trap_id
-                      }}
-                    </v-card>
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col cols="4" md="6">
-                    <v-card height="100%" class="pa-2" outlined tile>
-                      申請金額
-                    </v-card>
-                  </v-col>
-                  <v-col cols="8" md="6">
-                    <v-card height="100%" class="pa-0" outlined tile>
-                      <v-row class="pr-2 pl-2" align="center">
-                        <v-col class="pb-1 pt-2" cols="10">
-                          <v-text-field
-                            v-model="amount"
-                            :rules="amountRules"
-                            type="number"
-                            label="金額入力"
-                            hide-details
-                            class="pa-0"
-                            height="25"
-                          ></v-text-field
-                        ></v-col>
-                        <v-col class="pt-0 pb-0" cols="2">円</v-col>
-                      </v-row>
-                    </v-card>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <!-- 以上左列以下右列 -->
-              <v-col cols="12" md="6">
-                <v-row no-gutters>
-                  <v-col cols="4" md="6">
-                    <v-card height="100%" class="pa-2" outlined tile>
-                      申請書作成日
-                    </v-card>
-                  </v-col>
-                  <v-col height="100%" cols="8" md="6">
-                    <v-card class="pa-2" outlined tile>
-                      {{ returnDate(new Date()) }}
-                    </v-card>
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col cols="4" md="6">
-                    <v-card height="100%" class="pa-2" outlined tile>
-                      支払った日
-                    </v-card>
-                  </v-col>
-                  <v-col cols="8" md="6">
-                    <v-card height="100%" class="pa-2" outlined tile>
-                      <v-menu
-                        v-model="menu"
-                        :close-on-content-click="false"
-                        transition="scale-transition"
-                        offset-y
-                        max-width="290px"
-                        min-width="290px"
-                      >
-                        <template v-slot:activator="{ on }">
-                          <v-text-field
-                            v-model="computedDateFormatted"
-                            :rules="nullRules"
-                            readonly
-                            label="支払日選択"
-                            v-on="on"
-                            height="10"
-                            hide-details
-                          ></v-text-field>
-                        </template>
-                        <v-date-picker
-                          v-model="date"
-                          no-title
-                          color="primary"
-                          @input="menu = false"
-                        ></v-date-picker>
-                      </v-menu>
-                    </v-card>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <!-- 以上右列 -->
-            </v-row>
-          </v-container>
+          <v-row>
+            <v-col cols="10" sm="5" class="pb-0 pt-0">
+              <v-menu
+                v-model="menu"
+                :close-on-content-click="false"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    v-model="computedDateFormatted"
+                    :rules="nullRules"
+                    label="支払日"
+                    filled
+                    readonly
+                    placeholder="2020年5月2日"
+                    v-on="on"
+                    height="10"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="date"
+                  no-title
+                  color="primary"
+                  @input="menu = false"
+                ></v-date-picker>
+              </v-menu>
+            </v-col>
+          </v-row>
         </div>
-        <v-row class="ml-0 mr-0">
-          <h3>{{ returnRemarkTitle($route.params.type) }}:</h3>
+
+        <div>
+          <v-row align="center">
+            <v-col cols="10" sm="5" class="pb-0 pt-0">
+              <v-text-field
+                v-model="amount"
+                :rules="amountRules"
+                label="支払金額"
+                filled
+                type="number"
+                placeholder="100"
+                class="pa-0"
+                height="25"
+                suffix="円"
+              ></v-text-field
+            ></v-col>
+          </v-row>
+        </div>
+
+        <div>
+          <v-autocomplete
+            ref="traPID"
+            v-model="traPID"
+            :rules="[
+              () => !(traPID.length == 0) || '返金対象者は一人以上必要です'
+            ]"
+            label="返金対象者"
+            filled
+            :items="traPIDs"
+            placeholder="traQIDs"
+            hint="traQ IDの一部入力で候補が表示されます"
+            required
+            multiple
+          >
+          </v-autocomplete>
+        </div>
+
+        <div>
           <v-textarea
             v-model="remarks"
             :rules="nullRules"
-            label="入力してください"
+            filled
+            :label="returnRemarksTitle($route.params.type)"
+            :placeholder="returnRemarksPlaceholder($route.params.type)"
+            :hint="returnRemarksHint($route.params.type)"
             auto-grow
           ></v-textarea>
-        </v-row>
-        <h3 class="ml-0 mr-0">払い戻し対象者</h3>
-        <v-autocomplete
-          ref="traPID"
-          v-model="traPID"
-          :rules="[() => !!traPID || '返金対象者は一人以上必要です']"
-          :items="traPIDs"
-          label="返金対象者のtraPidを入力..."
-          required
-          multiple
-        >
-        </v-autocomplete>
+        </div>
 
-        <h3 class="ml-0 mr-0">申請書画像リスト</h3>
-        <image-uploader v-model="imageBlobs" />
+        <div>
+          <image-uploader v-model="imageBlobs" />
+        </div>
       </v-card>
 
       <!-- todo focusしていないところのvalidateが機能していない -->
       <v-btn :disabled="!valid" @click.stop="submit" class="ma-3"
         >作成する</v-btn
       >
-      <v-dialog persistent v-model="open_dialog">
-        <v-card class="pa-3">
-          <v-card-title class="headline"
-            >以下の内容で新規作成しました</v-card-title
-          >
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請書id</v-col>
-            <v-col cols="8" md="10">{{ response.application_id }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請書タイプ</v-col>
-            <v-col cols="8" md="10">{{ response.current_detail.type }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">タイトル</v-col>
-            <v-col cols="8" md="10">{{ response.current_detail.title }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請者</v-col>
-            <v-col cols="8" md="10">{{ response.applicant.trap_id }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請金額</v-col>
-            <v-col cols="8" md="10">{{ response.current_detail.amount }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請書作成日</v-col>
-            <v-col cols="8" md="10">{{ response.created_at }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">支払った日</v-col>
-            <v-col cols="8" md="10">{{
-              response.current_detail.paid_at
-            }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">詳細</v-col>
-            <v-col cols="8" md="10">{{ response.current_detail.title }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">返金対象者</v-col>
-            <v-col cols="8" md="10">保留</v-col>
-          </v-row>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              :to="`../../applications/` + response.application_id"
-              color="primary"
-              text
-              @click="open_dialog = false"
-              >OK</v-btn
-            >
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
     </v-form>
-  </div>
+    <!-- ここ作成したらokを押しても押さなくても自動遷移 -->
+    <v-snackbar v-model="snackbar">
+      作成できました
+      <v-btn
+        :to="`/applications/` + response.application_id"
+        color="green darken-1"
+        text
+        @click="snackbar = false"
+        >OK</v-btn
+      >
+    </v-snackbar>
+  </v-container>
 </template>
 
 <script>
@@ -217,6 +147,13 @@ import axios from "axios";
 import Icon from "./shered/Icon";
 import ImageUploader from "./shered/ImageUploader";
 import { mapActions, mapGetters } from "vuex";
+import {
+  titlePlaceholder,
+  remarksPlaceholder,
+  remarksHint
+} from "../use/inputFormText";
+import { remarksTitle, applicationType } from "../use/applicationDetail";
+import { dayPrint } from "../use/dataFormat";
 export default {
   data: () => ({
     response: {
@@ -232,7 +169,7 @@ export default {
         paid_at: null
       }
     },
-    open_dialog: false,
+    snackbar: false,
     date: null,
     menu: false,
     traPID: [],
@@ -242,10 +179,10 @@ export default {
     remarks: "",
     imageBlobs: [],
     amountRules: [
-      v => !!v || "",
+      v => !!v || "必須の項目です",
       v => !!String(v).match("^[1-9][0-9]*$") || "金額が不正です"
     ],
-    nullRules: [v => !!v || ""]
+    nullRules: [v => !!v || "必須の項目です"]
   }),
   mounted() {
     this.$refs.firstfocus.focus();
@@ -290,11 +227,10 @@ export default {
           .post("/api/applications", form, {
             headers: { "content-type": "multipart/form-data" }
           })
-          .then(
-            response => (
-              (this.response = response.data), (this.open_dialog = true)
-            )
-          );
+          .then(response => {
+            this.response = response.data;
+            this.snackbar = true;
+          });
       }
     },
     formatDate(date) {
@@ -303,44 +239,24 @@ export default {
       const [year, month, day] = date.split("-");
       return `${year}年${month.replace(/^0/, "")}月${day.replace(/^0/, "")}日`;
     },
-    returnDate: function(date) {
-      const normalizedDate = new Date(date);
-      return (
-        normalizedDate.getFullYear() +
-        "年" +
-        (normalizedDate.getMonth() + 1) +
-        "月" +
-        normalizedDate.getDate() +
-        "日"
-      );
+    returnToday: function() {
+      const date = new Date();
+      return dayPrint(date);
     },
     returnType: function(type) {
-      switch (type) {
-        case "club":
-          return "部費利用";
-        case "contest":
-          return "大会等旅費補助";
-        case "event":
-          return "イベント交通費補助";
-        case "public":
-          return "渉外交通費補助";
-        default:
-          return "タイプが間違っています";
-      }
+      return applicationType(type);
     },
-    returnRemarkTitle: function(type) {
-      switch (type) {
-        case "club":
-          return "購入したものの概要";
-        case "contest":
-          return "旅程";
-        case "event":
-          return "乗車区間";
-        case "public":
-          return "乗車区間";
-        default:
-          return "タイプが間違っています";
-      }
+    returnRemarksTitle: function(type) {
+      return remarksTitle(type);
+    },
+    returnTitlePlaceholder: function(type) {
+      return titlePlaceholder(type);
+    },
+    returnRemarksPlaceholder: function(type) {
+      return remarksPlaceholder(type);
+    },
+    returnRemarksHint: function(type) {
+      return remarksHint(type);
     }
   },
   props: {},

@@ -20,6 +20,8 @@
   </div>
 </template>
 <script>
+import { applicationType } from "../../use/applicationDetail";
+import { numberFormat, dayPrint } from "../../use/dataFormat";
 export default {
   name: "ApplicationDetailDefference",
   props: {
@@ -32,20 +34,15 @@ export default {
   },
   methods: {
     numberFormat(price) {
-      return price.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
+      return numberFormat(price);
     },
     dayPrint(time) {
-      let d = new Date(time);
-      let year = d.getFullYear();
-      let month = d.getMonth() + 1;
-      let day = d.getDate();
-      let res = year + "年" + month + "月" + day + "日";
-      return res;
+      return dayPrint(time);
     },
     itemPrint(item) {
       switch (item) {
         case "type":
-          return "申請書様式";
+          return "申請様式";
         case "title":
           return "タイトル";
         case "remarks":
@@ -59,18 +56,7 @@ export default {
     dataPrint(item, data) {
       switch (item) {
         case "type":
-          switch (data) {
-            case "club":
-              return "部費利用申請";
-            case "contest":
-              return "大会等旅費補助申請";
-            case "event":
-              return "イベント交通費補助申請";
-            case "public":
-              return "渉外交通費補助申請";
-            default:
-              return "error";
-          }
+          return applicationType(data) + "申請";
         case "title":
           return data;
         case "remarks":

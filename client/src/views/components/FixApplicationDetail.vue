@@ -1,191 +1,170 @@
 <template>
   <!-- repuid_to_userについては実際のサーバーでうまくいくか確認する。おそらくリスト取得がフォーカス後なのでうまくいかない -->
-  <div class="fix-applicatoin">
+  <v-container>
     <v-form ref="form" v-model="valid" lazy-validation>
       <v-card class="ml-2 mr-2 mt-2 pa-3" tile>
         <v-row class="ml-4 mr-4" :justify="`space-between`">
-          <v-select
-            v-model="type_object"
-            :items="types"
-            item-text="jpn"
-            item-value="type"
-            label="Select"
-            persistent-hint
-            return-object
-            single-line
-            dense
-          ></v-select>
-          <h1>申請書</h1>
+          <v-col cols="12" sm="8" class="pt-0 pb-0">
+            <h1>
+              <v-row>
+                <v-col cols="8">
+                  <v-select
+                    v-model="type_object"
+                    :items="types"
+                    item-text="jpn"
+                    item-value="type"
+                    label="Select"
+                    persistent-hint
+                    return-object
+                    single-line
+                    dense
+                  ></v-select></v-col
+                ><v-col cols="4">申請</v-col></v-row
+              >
+            </h1>
+          </v-col>
 
-          <div>
-            <div>申請書ID: {{ this.detail.core.application_id }}</div>
+          <v-col cols="12" sm="4" class="pt-0 pb-0">
+            <div>申請日: {{ returnDate(this.detail.core.created_at) }}</div>
             <v-divider></v-divider>
-          </div>
+            <div>
+              申請者:
+              <Icon :user="this.detail.core.applicant.trap_id" :size="20" />{{
+                this.detail.core.applicant.trap_id
+              }}
+            </div>
+            <div>
+              <v-divider></v-divider>
+            </div>
+          </v-col>
         </v-row>
 
         <template>
-          <v-divider></v-divider>
+          <v-divider class="mt-1 mb-2"></v-divider>
         </template>
-        <v-row class="ml-0 mr-0">
-          <h1>タイトル:</h1>
+
+        <div>
           <v-text-field
             v-model="title_change"
             :rules="nullRules"
-            label="入力してください"
+            label="概要"
+            filled
+            :placeholder="returnTitlePlaceholder(this.type_object.type)"
           ></v-text-field>
-        </v-row>
+        </div>
 
         <div>
-          <v-container class="pa-0">
-            <v-row>
-              <!-- 以下は左列 -->
-              <v-col cols="12" md="6">
-                <v-row no-gutters>
-                  <v-col cols="4" md="6">
-                    <v-card height="100%" class="pa-2" outlined tile>
-                      申請者trapid
-                    </v-card>
-                  </v-col>
-                  <v-col cols="8" md="6">
-                    <v-card height="100%" class="pa-2" outlined tile>
-                      <Icon
-                        :user="this.detail.core.applicant.trap_id"
-                        :size="20"
-                      />{{ this.detail.core.applicant.trap_id }}
-                    </v-card>
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col cols="4" md="6">
-                    <v-card height="100%" class="pa-2" outlined tile>
-                      申請金額
-                    </v-card>
-                  </v-col>
-                  <v-col cols="8" md="6">
-                    <v-card height="100%" class="pa-0" outlined tile>
-                      <v-row class="pr-2 pl-2" align="center">
-                        <v-col class="pb-1 pt-2" cols="10">
-                          <v-text-field
-                            v-model="amount_change"
-                            :rules="amountRules"
-                            type="number"
-                            label="金額入力"
-                            hide-details
-                            class="pa-0"
-                            height="25"
-                          ></v-text-field
-                        ></v-col>
-                        <v-col class="pt-0 pb-0" cols="2">円</v-col>
-                      </v-row>
-                    </v-card>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <!-- 以上左列以下右列 -->
-              <v-col cols="12" md="6">
-                <v-row no-gutters>
-                  <v-col cols="4" md="6">
-                    <v-card height="100%" class="pa-2" outlined tile>
-                      申請書作成日
-                    </v-card>
-                  </v-col>
-                  <v-col height="100%" cols="8" md="6">
-                    <v-card class="pa-2" outlined tile>
-                      {{ returnDate(this.detail.core.created_at) }}
-                    </v-card>
-                  </v-col>
-                </v-row>
-                <v-row no-gutters>
-                  <v-col cols="4" md="6">
-                    <v-card height="100%" class="pa-2" outlined tile>
-                      支払った日
-                    </v-card>
-                  </v-col>
-                  <v-col cols="8" md="6">
-                    <v-card height="100%" class="pa-2" outlined tile>
-                      <v-menu
-                        v-model="menu"
-                        :close-on-content-click="false"
-                        transition="scale-transition"
-                        offset-y
-                        max-width="290px"
-                        min-width="290px"
-                      >
-                        <template v-slot:activator="{ on }">
-                          <v-text-field
-                            v-model="computedDateFormatted"
-                            :rules="nullRules"
-                            readonly
-                            label="支払日選択"
-                            v-on="on"
-                            height="10"
-                            hide-details
-                            color="primary"
-                          ></v-text-field>
-                        </template>
-                        <v-date-picker
-                          v-model="paid_at_change"
-                          no-title
-                          @input="menu = false"
-                        ></v-date-picker>
-                      </v-menu>
-                    </v-card>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <!-- 以上右列 -->
-            </v-row>
-          </v-container>
+          <v-row>
+            <v-col cols="10" sm="5" class="pb-0 pt-0">
+              <v-menu
+                v-model="menu"
+                :close-on-content-click="false"
+                transition="scale-transition"
+                offset-y
+                max-width="290px"
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    v-model="computedDateFormatted"
+                    :rules="nullRules"
+                    label="支払日"
+                    filled
+                    readonly
+                    placeholder="2020年5月2日"
+                    v-on="on"
+                    height="10"
+                    color="primary"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="paid_at_change"
+                  no-title
+                  color="primary"
+                  @input="menu = false"
+                ></v-date-picker>
+              </v-menu>
+            </v-col>
+          </v-row>
         </div>
-        <v-row class="ml-0 mr-0">
-          <h3>{{ returnRemarkTitle(this.type_object.type) }}:</h3>
+
+        <div>
+          <v-row align="center">
+            <v-col cols="10" sm="5" class="pb-0 pt-0">
+              <v-text-field
+                v-model="amount_change"
+                :rules="amountRules"
+                type="number"
+                label="支払金額"
+                placeholder="100"
+                class="pa-0"
+                height="25"
+                suffix="円"
+              ></v-text-field
+            ></v-col>
+          </v-row>
+        </div>
+
+        <div>
+          <v-autocomplete
+            ref="traPID"
+            v-model="repaid_to_id_change"
+            :rules="[
+              () =>
+                !(repaid_to_id_change == 0) || '返金対象者は一人以上必要です'
+            ]"
+            label="返金対象者"
+            filled
+            :items="traPIDs"
+            placeholder="traQIDs"
+            hint="traQ IDの一部入力で候補が表示されます"
+            required
+            multiple
+          >
+          </v-autocomplete>
+        </div>
+
+        <div>
           <v-textarea
             v-model="remarks_change"
             :rules="nullRules"
-            label="入力してください"
+            filled
+            :label="returnRemarksTitle(this.type_object.type)"
+            :placeholder="returnRemarksPlaceholder(this.type_object.type)"
+            :hint="returnRemarksHint(this.type_object.type)"
             auto-grow
           ></v-textarea>
-        </v-row>
-        <h3 class="ml-0 mr-0">払い戻し対象者</h3>
-        <v-autocomplete
-          ref="traPID"
-          v-model="repaid_to_id_change"
-          :rules="[
-            () => !!repaid_to_id_change || '返金対象者は一人以上必要です'
-          ]"
-          :items="traPIDs"
-          label="返金対象者のtraPidを入力..."
-          required
-          multiple
-        >
-        </v-autocomplete>
-        <h3 class="ml-0 mr-0">申請書画像リスト</h3>
-        <div :key="path" v-for="(path, index) in this.detail.core.images">
-          <span v-if="images_change[index]">
-            <v-btn
-              rounded
-              color="primary"
-              name="delete"
-              @click="deleteImage(index)"
-            >
-              delete
-            </v-btn>
-            <v-img :src="'/api/images/' + path" max-width="80%" />
-          </span>
-          <span v-else>
-            <v-btn
-              rounded
-              color="primary"
-              name="cancel"
-              @click="cancelDeleteImage(index)"
-            >
-              cancel
-            </v-btn>
-          </span>
         </div>
 
-        <h3 class="ml-0 mr-0">画像を追加</h3>
-        <image-uploader v-model="imageBlobs" />
+        <div>
+          <h3 class="ml-0 mr-0">画像</h3>
+          <div :key="path" v-for="(path, index) in this.detail.core.images">
+            <span v-if="images_change[index]">
+              <v-btn
+                rounded
+                color="primary"
+                name="delete"
+                @click="deleteImage(index)"
+              >
+                delete
+              </v-btn>
+              <v-img :src="'/api/images/' + path" max-width="80%" />
+            </span>
+            <span v-else>
+              <v-btn
+                rounded
+                color="primary"
+                name="cancel"
+                @click="cancelDeleteImage(index)"
+              >
+                cancel
+              </v-btn>
+            </span>
+          </div>
+
+          <h3 class="ml-0 mr-0">画像を追加</h3>
+          <image-uploader v-model="imageBlobs" />
+        </div>
       </v-card>
 
       <!-- todo focusしていないところのvalidateが機能していない -->
@@ -193,61 +172,19 @@
       <v-btn :disabled="!valid" @click.stop="submit" class="ma-3"
         >修正する</v-btn
       ><v-btn class="ma-3" @click="deleteFix">取り消す</v-btn>
-      <v-dialog persistent v-model="open_dialog">
-        <v-card class="pa-3">
-          <v-card-title class="headline">以下の内容で修正しました</v-card-title>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請書id</v-col>
-            <v-col cols="8" md="10">{{ response.application_id }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請書タイプ</v-col>
-            <v-col cols="8" md="10">{{ response.current_detail.type }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">タイトル</v-col>
-            <v-col cols="8" md="10">{{ response.current_detail.title }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請者</v-col>
-            <v-col cols="8" md="10">{{ response.applicant.trap_id }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請金額</v-col>
-            <v-col cols="8" md="10">{{ response.current_detail.amount }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">申請書作成日</v-col>
-            <v-col cols="8" md="10">{{ response.created_at }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">支払った日</v-col>
-            <v-col cols="8" md="10">{{
-              response.current_detail.paid_at
-            }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">詳細</v-col>
-            <v-col cols="8" md="10">{{ response.current_detail.title }}</v-col>
-          </v-row>
-          <v-row :justify="`space-between`">
-            <v-col cols="4" md="2">返金対象者</v-col>
-            <v-col cols="8" md="10">保留</v-col>
-          </v-row>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              :to="`../../applications/` + response.application_id"
-              color="primary"
-              text
-              @click="[(open_dialog = false), deleteFix()]"
-              >OK</v-btn
-            >
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
     </v-form>
-  </div>
+    <!-- ここ作成したらokを押しても押さなくても自動遷移 -->
+    <v-snackbar v-model="snackbar">
+      変更できました
+      <v-btn
+        :to="`/applications/` + response.application_id"
+        color="green darken-1"
+        text
+        @click="afterChange()"
+        >OK</v-btn
+      >
+    </v-snackbar>
+  </v-container>
 </template>
 
 <script>
@@ -256,6 +193,13 @@ import Icon from "../shered/Icon";
 import ImageUploader from "../shered/ImageUploader";
 import { mapActions } from "vuex";
 import { mapState, mapMutations } from "vuex";
+import {
+  titlePlaceholder,
+  remarksPlaceholder,
+  remarksHint
+} from "../../use/inputFormText";
+import { remarksTitle } from "../../use/applicationDetail";
+import { dayPrint } from "../../use/dataFormat";
 export default {
   data: function() {
     return {
@@ -279,7 +223,7 @@ export default {
         { jpn: "イベント交通費補助", type: "event" },
         { jpn: "渉外交通費補助", type: "public" }
       ],
-      open_dialog: false,
+      snackbar: false,
       menu: false,
       valid: true,
       amountRules: [
@@ -373,7 +317,7 @@ export default {
         );
         this.response = response.data;
         await this.getApplicationDetail(this.$route.params.id);
-        this.open_dialog = true;
+        this.snackbar = true;
       }
     },
     formatDate(date) {
@@ -383,43 +327,19 @@ export default {
       return `${year}年${month.replace(/^0/, "")}月${day.replace(/^0/, "")}日`;
     },
     returnDate: function(date) {
-      const normalizedDate = new Date(date);
-      return (
-        normalizedDate.getFullYear() +
-        "年" +
-        (normalizedDate.getMonth() + 1) +
-        "月" +
-        normalizedDate.getDate() +
-        "日"
-      );
+      return dayPrint(date);
     },
-    returnType: function(type) {
-      switch (type) {
-        case "club":
-          return "部費利用";
-        case "contest":
-          return "大会等旅費補助";
-        case "event":
-          return "イベント交通費補助";
-        case "public":
-          return "渉外交通費補助";
-        default:
-          return "タイプが間違っています";
-      }
+    returnRemarksTitle: function(type) {
+      return remarksTitle(type);
     },
-    returnRemarkTitle: function(type) {
-      switch (type) {
-        case "club":
-          return "購入したものの概要";
-        case "contest":
-          return "旅程";
-        case "event":
-          return "乗車区間";
-        case "public":
-          return "乗車区間";
-        default:
-          return "タイプが間違っています";
-      }
+    returnTitlePlaceholder: function(type) {
+      return titlePlaceholder(type);
+    },
+    returnRemarksPlaceholder: function(type) {
+      return remarksPlaceholder(type);
+    },
+    returnRemarksHint: function(type) {
+      return remarksHint(type);
     },
     deleteImage(index) {
       this.images_change[index] = false;
@@ -428,6 +348,10 @@ export default {
     cancelDeleteImage(index) {
       this.images_change[index] = true;
       this.$forceUpdate();
+    },
+    afterChange() {
+      this.snackbar = false;
+      this.deleteFix();
     }
   },
   props: {},

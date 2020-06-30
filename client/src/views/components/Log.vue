@@ -73,7 +73,7 @@
       </v-form>
     </v-card>
   </v-timeline-item>
-  <!-- 以下は申請書の状態変化ログ -->
+  <!-- 以下は申請の状態変化ログ -->
   <v-timeline-item
     v-else-if="log.log_type === `state`"
     color="red lighten-2"
@@ -87,7 +87,7 @@
         </strong>
         が
         <span :class="larger_size">
-          申請書の状態を
+          申請の状態を
           <StateChip :state="log.content.to_state" />に変更しました。
         </span>
         <span :class="smaller_size">
@@ -105,7 +105,7 @@
       </v-card-text>
     </v-card>
   </v-timeline-item>
-  <!-- 以下は申請書の変更ログ -->
+  <!-- 以下は申請の変更ログ -->
   <div v-else-if="log.log_type === `application`" class="ma-2">
     <v-timeline-item color="purple lighten-2">
       <template v-slot:icon>
@@ -232,7 +232,7 @@ export default {
     defferenceRecord(pre, now) {
       let defference_record =
         pre.type !== now.type
-          ? "申請書:" + pre.type + "から" + now.type + "\n"
+          ? "申請:" + pre.type + "から" + now.type + "\n"
           : "";
       defference_record +=
         pre.title !== now.title
