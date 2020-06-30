@@ -31,6 +31,7 @@
 <script>
 import axios from "axios";
 import Icon from "../shered/Icon";
+import { mapActions } from "vuex";
 export default {
   data: () => {
     return {
@@ -48,6 +49,7 @@ export default {
         this.$refs.form.reset();
       }
     },
+    ...mapActions(["getApplicationDetail"]),
     postcomment() {
       if (this.$refs.form.validate()) {
         axios
@@ -61,6 +63,9 @@ export default {
           )
           .then(response => console.log(response.status));
         this.$refs.form.reset();
+        this.getApplicationDetail(
+          this.$store.state.application_detail_paper.core.application_id
+        );
       }
     }
   }

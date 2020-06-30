@@ -47,6 +47,7 @@
 <script>
 import axios from "axios";
 import Vue from "vue";
+import { mapActions } from "vuex";
 export default {
   data: () => ({
     valid: true,
@@ -68,14 +69,15 @@ export default {
     }
   },
   methods: {
+    ...mapActions(["getApplicationDetail"]),
     blur() {
       if (this.reason === "" || this.reason === undefined) {
         this.$refs.form.reset();
       }
     },
-    postreason() {
+    async postreason() {
       if (this.$refs.form.validate()) {
-        axios
+        await axios
           .put(
             "../api/applications/" +
               this.$store.state.application_detail_paper.core.application_id +
@@ -88,6 +90,9 @@ export default {
           .then(response => console.log(response.status));
         this.$refs.form.reset();
         this.dialog = false;
+        this.getApplicationDetail(
+          this.$store.state.application_detail_paper.core.application_id
+        );
       }
     },
     toStateName: function(to_state) {

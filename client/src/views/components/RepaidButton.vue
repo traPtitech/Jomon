@@ -22,13 +22,15 @@
 <script>
 import axios from "axios";
 import WithReasonButton from "./StateWithReasonButton";
+import { mapActions } from "vuex";
 export default {
   components: {
     WithReasonButton
   },
   methods: {
-    putRepaid(repaid_to_trap_id) {
-      axios
+    ...mapActions(["getApplicationDetail"]),
+    async putRepaid(repaid_to_trap_id) {
+      await axios
         .put(
           "../api/applications/" +
             this.$store.state.application_detail_paper.core.application_id +
@@ -37,6 +39,9 @@ export default {
         )
         .then(response => console.log(response.status));
       alert(repaid_to_trap_id + "に払い戻ししました。");
+      this.getApplicationDetail(
+        this.$store.state.application_detail_paper.core.application_id
+      );
     }
   },
   computed: {

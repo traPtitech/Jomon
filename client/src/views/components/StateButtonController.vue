@@ -45,7 +45,7 @@
 import axios from "axios";
 import WithReasonButton from "./StateWithReasonButton";
 import RepaidButton from "./RepaidButton";
-import { mapState, mapMutations } from "vuex";
+import { mapState, mapMutations, mapActions } from "vuex";
 export default {
   data: function() {
     return {
@@ -61,8 +61,9 @@ export default {
   },
   methods: {
     ...mapMutations(["changeFix"]),
-    accept() {
-      axios
+    ...mapActions(["getApplicationDetail"]),
+    async accept() {
+      await axios
         .put(
           "../api/applications/" +
             this.$store.state.application_detail_paper.core.application_id +
@@ -73,9 +74,12 @@ export default {
         )
         .then(response => console.log(response.status));
       alert("承認しました");
+      this.getApplicationDetail(
+        this.$store.state.application_detail_paper.core.application_id
+      );
     },
-    reSubmit() {
-      axios
+    async reSubmit() {
+      await axios
         .put(
           "../api/applications/" +
             this.$store.state.application_detail_paper.core.application_id +
@@ -86,6 +90,9 @@ export default {
         )
         .then(response => console.log(response.status));
       alert("再申請しました");
+      this.getApplicationDetail(
+        this.$store.state.application_detail_paper.core.application_id
+      );
     }
   }
 };

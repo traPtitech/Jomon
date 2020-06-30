@@ -55,21 +55,29 @@
           dense
           hide-details
           :rules="changeRules"
+          rows="1"
+          auto-grow
         >
         </v-textarea>
-        <span v-if="log.content.created_at !== log.content.updated_at"
-          >編集済</span
-        >
-        <div v-if="!comment_readonly" class="pt-2">
-          <v-btn
-            @click="
-              (comment_readonly = true), (comment_change = log.content.comment)
-            "
-            >変更を取消</v-btn
-          ><v-btn @click="putComment" :disabled="!comment_valid"
-            >変更を送信</v-btn
+        <v-row>
+          <v-col cols="9" class="pa-1 ml-5">
+            <v-btn @click="cancelChange()" v-if="!comment_readonly" class="mr-1"
+              >変更を取消</v-btn
+            ><v-btn
+              @click="putComment"
+              :disabled="!comment_valid"
+              v-if="!comment_readonly"
+              >変更を送信</v-btn
+            ></v-col
           >
-        </div>
+          <v-col cols="2" class="pa-1">
+            <span
+              :class="grey_text"
+              v-if="log.content.created_at !== log.content.updated_at"
+              >編集済</span
+            >
+          </v-col>
+        </v-row>
       </v-form>
     </v-card>
   </v-timeline-item>
@@ -195,6 +203,7 @@
 import Icon from "../shered/Icon";
 import StateChip from "../shered/StateChip";
 import Vue from "vue";
+import { mapActions } from "vuex";
 import axios from "axios";
 import Defference from "./ApplicationDetailDefference";
 export default {
@@ -229,6 +238,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(["getApplicationDetail"]),
     defferenceRecord(pre, now) {
       let defference_record =
         pre.type !== now.type
@@ -286,8 +296,8 @@ export default {
     commentChange() {
       this.comment_readonly = false;
     },
-    deleteComment() {
-      axios
+    async deleteComment() {
+      await axios
         .delete(
           "../api/applications/" +
             this.$store.state.application_detail_paper.core.application_id +
@@ -296,9 +306,12 @@ export default {
         )
         .then(response => console.log(response.status));
       alert("コメントを削除しました。");
+      this.getApplicationDetail(
+        this.$store.state.application_detail_paper.core.application_id
+      );
     },
-    putComment() {
-      axios
+    async putComment() {
+      await axios
         .put(
           "../api/applications/" +
             this.$store.state.application_detail_paper.core.application_id +
@@ -310,6 +323,12 @@ export default {
         )
         .then(response => console.log(response.status));
       alert("コメントを変更しました");
+      this.comment_readonly = true;
+      this.getApplicationDetail(
+        this.$store.state.application_detail_paper.core.application_id
+      );
+    },
+    cancelChange() {
       this.comment_readonly = true;
       this.comment_change = this.log.content.comment;
     }
