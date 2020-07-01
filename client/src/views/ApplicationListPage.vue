@@ -151,7 +151,7 @@ export default {
     ...mapState(["applicationList", "userList"])
   },
   methods: {
-    ...mapActions(["getApplicationList"]),
+    ...mapActions(["getApplicationList", "getUserList"]),
     /**
      * 絞り込み画面表示の初期値を画面のサイズによって変える
      */
@@ -250,8 +250,10 @@ export default {
       yearRule: [value => !value || /^[0-9]{4}$/.test(value) || "Invalid Year."]
     };
   },
-  created() {
-    this.getApplicationList({});
+  async created() {
+    const p1 = this.getApplicationList({});
+    const p2 = this.getUserList();
+    await Promise.all([p1, p2]);
     this.show = this.defaultShow();
   },
   components: {
