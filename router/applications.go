@@ -227,13 +227,13 @@ func (s *Service) PatchApplication(c echo.Context) error {
 	sort.Slice(app.RepayUsers, func(i, j int) bool {
 		return app.RepayUsers[i].RepaidToUserTrapID.TrapId < app.RepayUsers[j].RepaidToUserTrapID.TrapId
 	})
-	isDiffID := true
+	isSameID := true
 	if len(req.RepaidToId) == len(app.RepayUsers) {
 		for i := range req.RepaidToId {
-			isDiffID = isDiffID && (req.RepaidToId[i] == app.RepayUsers[i].RepaidToUserTrapID.TrapId)
+			isSameID = isSameID && (req.RepaidToId[i] == app.RepayUsers[i].RepaidToUserTrapID.TrapId)
 		}
 	} else {
-		isDiffID = false
+		isSameID = false
 	}
 
 	if *req.Type == app.LatestApplicationsDetail.Type &&
@@ -241,7 +241,7 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		req.Remarks == app.LatestApplicationsDetail.Remarks &&
 		*req.Amount == app.LatestApplicationsDetail.Amount &&
 		(*req.PaidAt).Equal(app.LatestApplicationsDetail.PaidAt.PaidAt) &&
-		isDiffID &&
+		isSameID &&
 		(len(form.File["images"]) == len(app.ApplicationsImages)) {
 		return c.NoContent(http.StatusBadRequest)
 	}
