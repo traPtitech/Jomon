@@ -235,7 +235,7 @@ func (s *Service) PatchApplication(c echo.Context) error {
 	} else {
 		isSameID = false
 	}
-
+	// 画像が異なるかどうかはクライアントで判定、ここでは画像の枚数だけ確認
 	if *req.Type == app.LatestApplicationsDetail.Type &&
 		req.Title == app.LatestApplicationsDetail.Title &&
 		req.Remarks == app.LatestApplicationsDetail.Remarks &&
