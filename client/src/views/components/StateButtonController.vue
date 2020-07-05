@@ -1,5 +1,5 @@
 <template>
-  <div v-if="displayAcceptBottom()">
+  <div v-if="displayAcceptBottom">
     <v-row>
       <v-btn
         class="primary_accent--text"
@@ -11,10 +11,10 @@
       <with-reason-button class="mr-4" to_state="rejected" />
     </v-row>
   </div>
-  <div v-else-if="displayRepaidBottom()">
+  <div v-else-if="displayRepaidBottom">
     <repaid-button />
   </div>
-  <div v-else-if="displayFixResubmitBottom()">
+  <div v-else-if="displayFixResubmitBottom">
     <v-btn
       :disabled="this.detail.fix"
       class="primary_accent--text"
@@ -47,7 +47,26 @@ export default {
     RepaidButton
   },
   computed: {
-    ...mapState({ detail: "application_detail_paper" })
+    ...mapState({ detail: "application_detail_paper" }),
+    displayAcceptBottom() {
+      return (
+        this.detail.core.current_state === `submitted` &&
+        this.$store.state.me.is_admin
+      );
+    },
+    displayRepaidBottom() {
+      return (
+        this.detail.core.current_state === `accepted` &&
+        this.$store.state.me.is_admin
+      );
+    },
+    displayFixResubmitBottom() {
+      return (
+        this.detail.core.current_state === `fix_required` &&
+        (this.$store.state.me.is_admin ||
+          this.$store.state.me.trap_id === this.detail.core.applicant.trap_id)
+      );
+    }
   },
   methods: {
     ...mapMutations(["changeFix"]),
@@ -66,25 +85,6 @@ export default {
       alert("承認しました");
       this.getApplicationDetail(
         this.$store.state.application_detail_paper.core.application_id
-      );
-    },
-    displayAcceptBottom() {
-      return (
-        this.detail.core.current_state === `submitted` &&
-        this.$store.state.me.is_admin
-      );
-    },
-    displayRepaidBottom() {
-      return (
-        this.detail.core.current_state === `accepted` &&
-        this.$store.state.me.is_admin
-      );
-    },
-    displayFixResubmitBottom() {
-      return (
-        this.detail.core.current_state === `fix_required` &&
-        (this.$store.state.me.is_admin ||
-          this.$store.state.me.trap_id === this.detail.core.applicant.trap_id)
       );
     },
     async reSubmit() {
