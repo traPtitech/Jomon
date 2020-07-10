@@ -2,7 +2,7 @@
   <div
     v-if="
       this.detail.core.current_state === `submitted` &&
-        this.$store.state.me.is_admin
+      this.$store.state.me.is_admin
     "
   >
     <v-row>
@@ -22,7 +22,7 @@
   <div
     v-else-if="
       this.detail.core.current_state === `fix_required` &&
-        (this.$store.state.me.is_admin || this.detail.core.applicant.trap_id)
+      (this.$store.state.me.is_admin || this.detail.core.applicant.trap_id)
     "
   >
     <v-btn
@@ -47,7 +47,7 @@ import WithReasonButton from "./StateWithReasonButton";
 import RepaidButton from "./RepaidButton";
 import { mapState, mapMutations, mapActions } from "vuex";
 export default {
-  data: function() {
+  data: function () {
     return {
       dialog: false
     };

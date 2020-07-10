@@ -5,7 +5,9 @@
         <!-- 絞り込み検索欄 -->
         <v-col cols="12" md="3">
           <v-card width="1200px" class="mx-auto mt-5" color="primary">
-            <v-card-title style="color:white;font-weight:bold;font-size:1.5em">
+            <v-card-title
+              style="color: white; font-weight: bold; font-size: 1.5em;"
+            >
               絞り込み
               <v-btn icon @click="show = !show">
                 <v-icon>{{
@@ -13,7 +15,7 @@
                 }}</v-icon>
               </v-btn>
             </v-card-title>
-            <v-card-text v-show="show" style="background:white" class="pt-4">
+            <v-card-text v-show="show" style="background: white;" class="pt-4">
               <v-form>
                 <v-row>
                   <v-btn
@@ -107,7 +109,8 @@
         <!-- 申請一覧 -->
         <v-col cols="12" md="7">
           <v-card width="1200px" class="mx-auto mt-5" color="primary">
-            <v-card-title style="color:white;font-weight:bold;font-size:1.5em"
+            <v-card-title
+              style="color: white; font-weight: bold; font-size: 1.5em;"
               >申請一覧</v-card-title
             >
             <v-card-text class="pl-0 pr-0 pb-0">
