@@ -48,7 +48,7 @@ export default {
   methods: {
     ...mapMutations(["deleteFix"]),
     ...mapActions(["getApplicationDetail"]),
-    returnState: function(state) {
+    returnState: function (state) {
       switch (state) {
         case "submitted":
           return "承認待ち";

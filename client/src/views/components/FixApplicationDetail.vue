@@ -201,7 +201,7 @@ import {
 import { remarksTitle } from "../../use/applicationDetail";
 import { dayPrint } from "../../use/dataFormat";
 export default {
-  data: function() {
+  data: function () {
     return {
       response: {
         application_id: null,
@@ -326,19 +326,19 @@ export default {
       const [year, month, day] = date.split("-");
       return `${year}年${month.replace(/^0/, "")}月${day.replace(/^0/, "")}日`;
     },
-    returnDate: function(date) {
+    returnDate: function (date) {
       return dayPrint(date);
     },
-    returnRemarksTitle: function(type) {
+    returnRemarksTitle: function (type) {
       return remarksTitle(type);
     },
-    returnTitlePlaceholder: function(type) {
+    returnTitlePlaceholder: function (type) {
       return titlePlaceholder(type);
     },
-    returnRemarksPlaceholder: function(type) {
+    returnRemarksPlaceholder: function (type) {
       return remarksPlaceholder(type);
     },
-    returnRemarksHint: function(type) {
+    returnRemarksHint: function (type) {
       return remarksHint(type);
     },
     deleteImage(index) {

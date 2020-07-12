@@ -88,7 +88,7 @@
         </div>
         <div class="headline">
           <p
-            style="white-space:pre-wrap;"
+            style="white-space: pre-wrap;"
             v-text="this.detail.core.current_detail.remarks"
           ></p>
         </div>
@@ -120,13 +120,13 @@ export default {
     ...mapState({ detail: "application_detail_paper" })
   },
   methods: {
-    returnDate: function(date) {
+    returnDate: function (date) {
       return dayPrint(date);
     },
-    returnType: function(type) {
+    returnType: function (type) {
       return applicationType(type);
     },
-    returnRemarksTitle: function(type) {
+    returnRemarksTitle: function (type) {
       return remarksTitle(type);
     }
   },
