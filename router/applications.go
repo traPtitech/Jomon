@@ -262,6 +262,11 @@ func (s *Service) PatchApplication(c echo.Context) error {
 				CurrentState:   &app.LatestState,
 			})
 		}
+	} else if app.LatestState.Type != model.Submitted && app.LatestState.Type != model.FixRequired {
+		return c.JSON(http.StatusForbidden, &PatchErrorMessage{
+			IsUserAccepted: true,
+			CurrentState:   &app.LatestState,
+		})
 	}
 
 	err = s.Applications.PatchApplication(applicationId, user.TrapId, req.Type, req.Title, req.Remarks, req.Amount, req.PaidAt, req.RepaidToId)
