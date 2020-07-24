@@ -13,17 +13,6 @@
         />
       </v-col>
       <v-col>
-        <with-reason-button
-          v-if="
-            repaidtotrapid.length ===
-              this.$store.state.application_detail_paper.core.repayment_logs
-                .length
-          "
-          class="mr-4"
-          to_state="submitted"
-        />
-      </v-col>
-      <v-col>
         <v-dialog v-model="dialog" scrollable max-width="500px">
           <template v-slot:activator="{ on }">
             <v-btn color="primary" dark v-on="on">払い戻し完了者の選択</v-btn>
