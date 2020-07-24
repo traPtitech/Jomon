@@ -3,6 +3,7 @@ package router
 import (
 	"encoding/json"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -222,6 +223,29 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
+	sort.StringSlice(req.RepaidToId).Sort()
+	sort.Slice(app.RepayUsers, func(i, j int) bool {
+		return app.RepayUsers[i].RepaidToUserTrapID.TrapId < app.RepayUsers[j].RepaidToUserTrapID.TrapId
+	})
+	isSameID := true
+	if len(req.RepaidToId) == len(app.RepayUsers) {
+		for i := range req.RepaidToId {
+			isSameID = isSameID && (req.RepaidToId[i] == app.RepayUsers[i].RepaidToUserTrapID.TrapId)
+		}
+	} else {
+		isSameID = false
+	}
+	// 画像が異なるかどうかはクライアントで判定、ここでは画像の枚数だけ確認
+	if *req.Type == app.LatestApplicationsDetail.Type &&
+		req.Title == app.LatestApplicationsDetail.Title &&
+		req.Remarks == app.LatestApplicationsDetail.Remarks &&
+		*req.Amount == app.LatestApplicationsDetail.Amount &&
+		(*req.PaidAt).Equal(app.LatestApplicationsDetail.PaidAt.PaidAt) &&
+		isSameID &&
+		(len(form.File["images"]) == len(app.ApplicationsImages)) {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
 	user, ok := c.Get(contextUserKey).(model.User)
 	if !ok || user.TrapId == "" {
 		return c.NoContent(http.StatusUnauthorized)
@@ -238,6 +262,11 @@ func (s *Service) PatchApplication(c echo.Context) error {
 				CurrentState:   &app.LatestState,
 			})
 		}
+	} else if app.LatestState.Type != model.Submitted && app.LatestState.Type != model.FixRequired {
+		return c.JSON(http.StatusForbidden, &PatchErrorMessage{
+			IsUserAccepted: true,
+			CurrentState:   &app.LatestState,
+		})
 	}
 
 	err = s.Applications.PatchApplication(applicationId, user.TrapId, req.Type, req.Title, req.Remarks, req.Amount, req.PaidAt, req.RepaidToId)

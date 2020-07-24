@@ -59,10 +59,10 @@ export default {
     to_state: String
   },
   watch: {
-    dialog: function() {
+    dialog: function () {
       if (this.dialog) {
         let self = this;
-        Vue.nextTick().then(function() {
+        Vue.nextTick().then(function () {
           self.$refs.reason.focus();
         });
       }
@@ -95,7 +95,7 @@ export default {
         );
       }
     },
-    toStateName: function(to_state) {
+    toStateName: function (to_state) {
       switch (to_state) {
         case "submitted":
           return "提出済み";

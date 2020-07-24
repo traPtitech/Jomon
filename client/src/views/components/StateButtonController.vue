@@ -37,7 +37,7 @@ import WithReasonButton from "./StateWithReasonButton";
 import RepaidButton from "./RepaidButton";
 import { mapState, mapMutations, mapActions } from "vuex";
 export default {
-  data: function() {
+  data: function () {
     return {
       dialog: false
     };

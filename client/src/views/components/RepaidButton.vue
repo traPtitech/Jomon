@@ -3,7 +3,7 @@
     <with-reason-button
       v-if="
         repaidtotrapid.length ===
-          this.$store.state.application_detail_paper.core.repayment_logs.length
+        this.$store.state.application_detail_paper.core.repayment_logs.length
       "
       class="mr-4"
       to_state="submitted"
