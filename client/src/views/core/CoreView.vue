@@ -1,6 +1,6 @@
 <!-- メイン描画画面制御 -->
 <template>
-  <v-content>
+  <v-main>
     <router-view />
-  </v-content>
+  </v-main>
 </template>

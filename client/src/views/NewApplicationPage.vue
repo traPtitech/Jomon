@@ -238,23 +238,23 @@ export default {
       const [year, month, day] = date.split("-");
       return `${year}年${month.replace(/^0/, "")}月${day.replace(/^0/, "")}日`;
     },
-    returnToday: function() {
+    returnToday: function () {
       const date = new Date();
       return dayPrint(date);
     },
-    returnType: function(type) {
+    returnType: function (type) {
       return applicationType(type);
     },
-    returnRemarksTitle: function(type) {
+    returnRemarksTitle: function (type) {
       return remarksTitle(type);
     },
-    returnTitlePlaceholder: function(type) {
+    returnTitlePlaceholder: function (type) {
       return titlePlaceholder(type);
     },
-    returnRemarksPlaceholder: function(type) {
+    returnRemarksPlaceholder: function (type) {
       return remarksPlaceholder(type);
     },
-    returnRemarksHint: function(type) {
+    returnRemarksHint: function (type) {
       return remarksHint(type);
     }
   },

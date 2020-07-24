@@ -13,7 +13,7 @@ export default {
     };
   },
   computed: {
-    cPicture: function() {
+    cPicture: function () {
       return this.failed_image
         ? "https://q.trap.jp/api/v3/public/icon/traP" //userがtraPIDではない時traPIconを表記
         : "https://q.trap.jp/api/v3/public/icon/" + this.user;

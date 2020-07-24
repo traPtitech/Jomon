@@ -1,10 +1,12 @@
 package router
 
 import (
+	crand "crypto/rand"
 	"crypto/sha256"
+	"encoding/binary"
+	"log"
 	"math/rand"
 	"net/http"
-	"time"
 
 	"github.com/dvsekhvalnov/jose2go/base64url"
 	"github.com/gorilla/sessions"
@@ -95,7 +97,8 @@ func (s Service) GeneratePKCE(c echo.Context) error {
 	return c.JSON(http.StatusOK, params)
 }
 
-var randSrc = rand.NewSource(time.Now().UnixNano())
+var src cryptoSource
+var randSrc = rand.New(src)
 
 const (
 	// omit `.` and `~` to improve performance
@@ -124,4 +127,20 @@ func generateCodeVerifier() []byte {
 func getCodeChallenge(cv []byte) string {
 	bytesCodeChallenge := sha256.Sum256(cv)
 	return base64url.Encode(bytesCodeChallenge[:])
+}
+
+type cryptoSource struct{}
+
+func (s cryptoSource) Seed(seed int64) {}
+
+func (s cryptoSource) Int63() int64 {
+	return int64(s.Uint64() & ^uint64(1<<63))
+}
+
+func (s cryptoSource) Uint64() (v uint64) {
+	err := binary.Read(crand.Reader, binary.BigEndian, &v)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return v
 }

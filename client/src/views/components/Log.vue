@@ -134,7 +134,7 @@
       </v-row>
     </v-timeline-item>
     <v-card>
-      <div style="white-space: pre-line" class="pa-2 ma-0">
+      <div style="white-space: pre-line;" class="pa-2 ma-0">
         <defference
           v-if="log.content.pre_log.type !== log.content.log.type"
           item="type"
@@ -172,7 +172,7 @@
   <v-timeline-item
     v-else-if="
       log.log_type === `repayment` &&
-        !(log.content.repaid_at === `` || log.content.repaid_at === null)
+      !(log.content.repaid_at === `` || log.content.repaid_at === null)
     "
     class="mb-4"
     color="grey"
@@ -211,7 +211,7 @@ import { mapActions } from "vuex";
 import axios from "axios";
 import Defference from "./ApplicationDetailDefference";
 export default {
-  data: function() {
+  data: function () {
     return {
       smaller_size: "hidden-lg-and-up",
       larger_size: "hidden-md-and-down",
@@ -232,10 +232,10 @@ export default {
     Defference
   },
   watch: {
-    comment_readonly: function() {
+    comment_readonly: function () {
       if (!this.comment_readonly) {
         let self = this;
-        Vue.nextTick().then(function() {
+        Vue.nextTick().then(function () {
           self.$refs.comment.focus();
         });
       }
