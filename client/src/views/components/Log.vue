@@ -189,11 +189,15 @@
         <strong :class="strong_text">
           {{ log.content.repaid_to_user.trap_id }}
         </strong>
-        に 払い戻し
+        に
+        <strong :class="strong_text">
+          {{ datePrint(log.content.repaid_at) }}
+        </strong>
+        に払い戻し
         <span :class="larger_size">をしました。</span>
       </v-col>
       <v-col class="text-right" cols="2">
-        {{ dayPrint(log.content.repaid_at) }}
+        {{ dayPrint(log.content.created_at) }}
       </v-col>
     </v-row>
   </v-timeline-item>
@@ -292,6 +296,16 @@ export default {
         let res = year + "/" + month + "/" + day;
         return res;
       }
+    },
+    datePrint(date) {
+      let res;
+      let d = new Date(date);
+      let year = d.getFullYear();
+      let month = d.getMonth() + 1;
+      let day = d.getDate();
+      res = year + "/" + month + "/" + day;
+
+      return res;
     },
     commentChange() {
       this.comment_readonly = false;

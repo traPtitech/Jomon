@@ -199,7 +199,6 @@ export default {
     }
   },
 
-  // todo 返金対象者周りのポスト等
   async created() {
     await this.getUsers();
   },

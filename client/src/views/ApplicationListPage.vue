@@ -20,7 +20,7 @@
                 <v-row>
                   <v-btn
                     color="primary"
-                    @click="sortOthers()"
+                    @click="getApplicationList(params)"
                     width="70"
                     class="ma-1"
                     ><v-icon>mdi-reload</v-icon></v-btn
@@ -80,7 +80,7 @@
                   label="年度"
                 ></v-text-field>
                 <v-select
-                  v-model="type"
+                  v-model="params.type"
                   :items="type_items"
                   item-text="jpn"
                   item-value="type"
@@ -88,7 +88,7 @@
                   label="申請タイプ"
                 ></v-select>
                 <v-select
-                  v-model="state"
+                  v-model="params.current_state"
                   :items="state_items"
                   item-text="jpn"
                   item-value="state"
@@ -154,7 +154,7 @@ export default {
     ...mapState(["applicationList", "userList"])
   },
   methods: {
-    ...mapActions(["getApplicationList"]),
+    ...mapActions(["getApplicationList", "getUserList"]),
     /**
      * 絞り込み画面表示の初期値を画面のサイズによって変える
      */
@@ -196,14 +196,6 @@ export default {
     sortTitle() {
       if (this.params.sort === sort.title) this.params.sort = sort.inv_title;
       else this.params.sort = sort.title;
-      this.getApplicationList(this.params);
-    },
-    /**
-     * 条件をパラムに代入し、ソート
-     */
-    sortOthers() {
-      this.params.type = this.type.type;
-      this.params.current_state = this.state.state;
       this.getApplicationList(this.params);
     }
   },
@@ -253,8 +245,10 @@ export default {
       yearRule: [value => !value || /^[0-9]{4}$/.test(value) || "Invalid Year."]
     };
   },
-  created() {
-    this.getApplicationList({});
+  async created() {
+    const p1 = this.getApplicationList({});
+    const p2 = this.getUserList();
+    await Promise.all([p1, p2]);
     this.show = this.defaultShow();
   },
   components: {
