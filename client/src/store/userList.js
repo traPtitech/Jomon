@@ -1,5 +1,6 @@
 import axios from "axios";
 import Vue from "vue";
+
 export const userList = {
   state: [
     {
@@ -34,8 +35,7 @@ export const userList = {
   },
   getters: {
     trap_ids: state => {
-      const trap_ids = state.map(data => data.trap_id);
-      return trap_ids;
+      return state.map(data => data.trap_id);
     },
     adminList: state => {
       let admin = [];

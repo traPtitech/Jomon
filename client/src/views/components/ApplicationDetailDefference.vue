@@ -12,8 +12,8 @@
           <v-col cols="11"> {{ dataPrint(this.item, this.pre) }}</v-col>
         </v-row>
         <v-row :style="{ background: green }">
-          <v-col cols="1">+</v-col
-          ><v-col cols="11"> {{ dataPrint(this.item, this.now) }}</v-col>
+          <v-col cols="1">+ </v-col>
+          <v-col cols="11"> {{ dataPrint(this.item, this.now) }}</v-col>
         </v-row>
       </v-col>
     </v-row>
@@ -22,6 +22,7 @@
 <script>
 import { applicationType } from "../../use/applicationDetail";
 import { numberFormat, dayPrint } from "../../use/dataFormat";
+
 export default {
   name: "ApplicationDetailDefference",
   props: {

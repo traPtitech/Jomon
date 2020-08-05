@@ -18,9 +18,10 @@
                     return-object
                     single-line
                     dense
-                  ></v-select></v-col
-                ><v-col cols="4">申請</v-col></v-row
-              >
+                  ></v-select>
+                </v-col>
+                <v-col cols="4">申請</v-col>
+              </v-row>
             </h1>
           </v-col>
 
@@ -29,9 +30,8 @@
             <v-divider></v-divider>
             <div>
               申請者:
-              <Icon :user="this.detail.core.applicant.trap_id" :size="20" />{{
-                this.detail.core.applicant.trap_id
-              }}
+              <Icon :user="this.detail.core.applicant.trap_id" :size="20" />
+              {{ this.detail.core.applicant.trap_id }}
             </div>
             <div>
               <v-divider></v-divider>
@@ -100,8 +100,8 @@
                 class="pa-0"
                 height="25"
                 suffix="円"
-              ></v-text-field
-            ></v-col>
+              ></v-text-field>
+            </v-col>
           </v-row>
         </div>
 
@@ -111,7 +111,7 @@
             v-model="repaid_to_id_change"
             :rules="[
               () =>
-                !(repaid_to_id_change == 0) || '返金対象者は一人以上必要です'
+                !(repaid_to_id_change === 0) || '返金対象者は一人以上必要です'
             ]"
             label="返金対象者"
             filled
@@ -148,7 +148,7 @@
               >
                 delete
               </v-btn>
-              <v-img :src="'/api/images/' + path" max-width="80%" />
+              <v-img :src="`/api/images/${path}`" max-width="80%" />
             </span>
             <span v-else>
               <v-btn
@@ -170,8 +170,9 @@
       <!-- todo focusしていないところのvalidateが機能していない -->
 
       <v-btn :disabled="!valid" @click.stop="submit" class="ma-3"
-        >修正する</v-btn
-      ><v-btn class="ma-3" @click="deleteFix">取り消す</v-btn>
+        >修正する
+      </v-btn>
+      <v-btn class="ma-3" @click="deleteFix">取り消す</v-btn>
     </v-form>
     <!-- ここ作成したらokを押しても押さなくても自動遷移 -->
     <v-snackbar v-model="snackbar">
@@ -181,8 +182,8 @@
         color="green darken-1"
         text
         @click="afterChange()"
-        >OK</v-btn
-      >
+        >OK
+      </v-btn>
     </v-snackbar>
   </v-container>
 </template>
@@ -200,6 +201,7 @@ import {
 } from "../../use/inputFormText";
 import { remarksTitle } from "../../use/applicationDetail";
 import { dayPrint } from "../../use/dataFormat";
+
 export default {
   data: function () {
     return {
@@ -273,7 +275,7 @@ export default {
       };
     },
     traPIDs() {
-      let trap_ids = new Array();
+      let trap_ids = [];
       for (let i = 0; i < this.$store.state.userList.length - 1; i++) {
         trap_ids[i] = this.$store.state.userList[i].trap_id;
       }

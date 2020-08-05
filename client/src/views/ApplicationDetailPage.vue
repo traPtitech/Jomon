@@ -24,6 +24,7 @@ import FixApplicationPaper from "./components/FixApplicationDetail";
 import ApplicationLogs from "./components/ApplicationDetailLogs";
 import StateButtonController from "./components/StateButtonController";
 import { mapState, mapActions, mapMutations } from "vuex";
+
 export default {
   data() {
     return {

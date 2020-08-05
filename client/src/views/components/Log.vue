@@ -13,9 +13,9 @@
           <span :class="larger_size">がコメントしました。</span>
           <span :class="smaller_size">のコメント</span>
         </v-col>
-        <v-col class="pa-0" cols="2">{{
-          dayPrint(log.content.created_at)
-        }}</v-col>
+        <v-col class="pa-0" cols="2"
+          >{{ dayPrint(log.content.created_at) }}
+        </v-col>
         <v-col
           v-if="log.content.user.trap_id === this.$store.state.me.trap_id"
           class="pa-0"
@@ -62,14 +62,15 @@
         <v-row>
           <v-col cols="9" class="pa-1 ml-5">
             <v-btn @click="cancelChange()" v-if="!comment_readonly" class="mr-1"
-              >変更を取消</v-btn
-            ><v-btn
+              >変更を取消
+            </v-btn>
+            <v-btn
               @click="putComment"
               :disabled="!comment_valid"
               v-if="!comment_readonly"
-              >変更を送信</v-btn
-            ></v-col
-          >
+              >変更を送信
+            </v-btn>
+          </v-col>
           <v-col cols="2" class="pa-1">
             <span
               :class="grey_text"
@@ -128,9 +129,9 @@
           が修正
           <span :class="larger_size">しました。</span>
         </v-col>
-        <v-col class="text-right" cols="2">{{
-          dayPrint(log.content.log.updated_at)
-        }}</v-col>
+        <v-col class="text-right" cols="2"
+          >{{ dayPrint(log.content.log.updated_at) }}
+        </v-col>
       </v-row>
     </v-timeline-item>
     <v-card>
@@ -210,6 +211,7 @@ import Vue from "vue";
 import { mapActions } from "vuex";
 import axios from "axios";
 import Defference from "./ApplicationDetailDefference";
+
 export default {
   data: function () {
     return {
@@ -287,14 +289,12 @@ export default {
         //一か月以内
         let month = d.getMonth() + 1;
         let day = d.getDate();
-        let res = month + "/" + day;
-        return res;
+        return month + "/" + day;
       } else {
         let year = d.getFullYear();
         let month = d.getMonth() + 1;
         let day = d.getDate();
-        let res = year + "/" + month + "/" + day;
-        return res;
+        return year + "/" + month + "/" + day;
       }
     },
     datePrint(date) {

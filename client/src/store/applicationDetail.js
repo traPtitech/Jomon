@@ -1,4 +1,5 @@
 import axios from "axios";
+
 export const applicationDetail = {
   state: {
     fix: false,

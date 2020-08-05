@@ -11,10 +11,9 @@
           <div>申請日: {{ returnDate(this.detail.core.created_at) }}</div>
           <v-divider></v-divider>
           <div>
-            申請者:<Icon
-              :user="this.detail.core.applicant.trap_id"
-              :size="20"
-            />{{ this.detail.core.applicant.trap_id }}
+            申請者:
+            <Icon :user="this.detail.core.applicant.trap_id" :size="20" />
+            {{ this.detail.core.applicant.trap_id }}
           </div>
           <div>
             <v-divider></v-divider>
@@ -100,9 +99,9 @@
           画像
         </div>
         <div :key="path" v-for="path in this.detail.core.images">
-          <v-img :src="'/api/images/' + path" max-width="80%" />
+          <v-img :src="`/api/images/'${path}`" max-width="80%" />
         </div>
-        <div v-if="this.detail.core.images.length == 0">
+        <div v-if="this.detail.core.images.length === 0">
           画像はありません
         </div>
       </div>
@@ -115,6 +114,7 @@ import Icon from "../shered/Icon";
 import { mapState } from "vuex";
 import { remarksTitle, applicationType } from "../../use/applicationDetail";
 import { dayPrint } from "../../use/dataFormat";
+
 export default {
   computed: {
     ...mapState({ detail: "application_detail_paper" })

@@ -9,7 +9,8 @@
           OKを押すとtraQに飛びます。<br />
           「承認」を押すとログインできます。
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions
+          >q
           <v-spacer></v-spacer>
           <v-btn color="green darken-1" @click="login">OK</v-btn>
         </v-card-actions>
@@ -21,7 +22,8 @@
 <script>
 import { mapMutations, mapState } from "vuex";
 import axios from "axios";
-import { redirectAuthorizationEndpoint } from "./../../utils/api";
+import { redirectAuthorizationEndpoint } from "../../utils/api";
+
 export default {
   computed: {
     ...mapState(["token"])

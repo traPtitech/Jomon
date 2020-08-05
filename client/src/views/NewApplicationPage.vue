@@ -11,9 +11,9 @@
             <div>申請日: {{ returnToday() }}</div>
             <v-divider></v-divider>
             <div>
-              申請者:<Icon :user="this.$store.state.me.trap_id" :size="20" />{{
-                this.$store.state.me.trap_id
-              }}
+              申請者:
+              <Icon :user="this.$store.state.me.trap_id" :size="20" />
+              {{ this.$store.state.me.trap_id }}
             </div>
             <div>
               <v-divider></v-divider>
@@ -83,8 +83,8 @@
                 class="pa-0"
                 height="25"
                 suffix="円"
-              ></v-text-field
-            ></v-col>
+              ></v-text-field>
+            </v-col>
           </v-row>
         </div>
 
@@ -93,7 +93,7 @@
             ref="traPID"
             v-model="traPID"
             :rules="[
-              () => !(traPID.length == 0) || '返金対象者は一人以上必要です'
+              () => !(traPID.length === 0) || '返金対象者は一人以上必要です'
             ]"
             label="返金対象者"
             filled
@@ -125,8 +125,8 @@
 
       <!-- todo focusしていないところのvalidateが機能していない -->
       <v-btn :disabled="!valid" @click.stop="submit" class="ma-3"
-        >作成する</v-btn
-      >
+        >作成する
+      </v-btn>
     </v-form>
     <!-- ここ作成したらokを押しても押さなくても自動遷移 -->
     <v-snackbar v-model="snackbar">
@@ -136,8 +136,8 @@
         color="green darken-1"
         text
         @click="snackbar = false"
-        >OK</v-btn
-      >
+        >OK
+      </v-btn>
     </v-snackbar>
   </v-container>
 </template>
@@ -154,6 +154,7 @@ import {
 } from "../use/inputFormText";
 import { remarksTitle, applicationType } from "../use/applicationDetail";
 import { dayPrint } from "../use/dataFormat";
+
 export default {
   data: () => ({
     response: {

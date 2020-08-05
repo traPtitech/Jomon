@@ -20,6 +20,7 @@
 
 <script>
 import StateChip from "../shered/StateChip";
+
 export default {
   name: "Applicaton",
   props: {

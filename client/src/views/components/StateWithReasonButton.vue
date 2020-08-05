@@ -2,9 +2,9 @@
   <v-row justify="center">
     <v-dialog v-model="dialog" max-width="600px">
       <template v-slot:activator="{ on }">
-        <v-btn class="primary_accent--text" color="secondary" dark v-on="on">{{
-          toStateName(to_state)
-        }}</v-btn>
+        <v-btn class="primary_accent--text" color="secondary" dark v-on="on"
+          >{{ toStateName(to_state) }}
+        </v-btn>
       </template>
 
       <v-card>
@@ -36,8 +36,8 @@
             <v-spacer></v-spacer>
             <v-btn color="primary" text @click="dialog = false">戻る</v-btn>
             <v-btn :disabled="!valid" color="primary" text @click="postreason"
-              >{{ this.toStateName(to_state) }}にする</v-btn
-            >
+              >{{ this.toStateName(to_state) }}にする
+            </v-btn>
           </v-card-actions>
         </v-form>
       </v-card>
@@ -48,6 +48,7 @@
 import axios from "axios";
 import Vue from "vue";
 import { mapActions } from "vuex";
+
 export default {
   data: () => ({
     valid: true,

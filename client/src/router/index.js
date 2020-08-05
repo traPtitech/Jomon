@@ -36,4 +36,15 @@ const router = new VueRouter({
   routes
 });
 
+router.beforeEach(async (_to, _from, next) => {
+  if (!store.state.me) {
+    await store.dispatch.getMe();
+  }
+  if (!store.state.me) {
+    sessionStorage.setItem(`destination`, to.fullPath);
+    redirect2AuthEndpoint();
+  }
+  next();
+});
+
 export default router;

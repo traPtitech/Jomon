@@ -10,9 +10,9 @@
             >
               絞り込み
               <v-btn icon @click="show = !show">
-                <v-icon>{{
-                  show ? "mdi-chevron-up" : "mdi-chevron-down"
-                }}</v-icon>
+                <v-icon
+                  >{{ show ? "mdi-chevron-up" : "mdi-chevron-down" }}
+                </v-icon>
               </v-btn>
             </v-card-title>
             <v-card-text v-show="show" style="background: white;" class="pt-4">
@@ -23,15 +23,17 @@
                     @click="getApplicationList(params)"
                     width="70"
                     class="ma-1"
-                    ><v-icon>mdi-reload</v-icon></v-btn
                   >
+                    <v-icon>mdi-reload</v-icon>
+                  </v-btn>
                   <v-btn
                     color="primary"
                     @click="resetParams()"
                     width="70"
                     class="ma-1"
-                    ><v-icon>mdi-close</v-icon></v-btn
                   >
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
                 </v-row>
                 <v-row>
                   <v-btn
@@ -40,16 +42,16 @@
                     @click="sortCreatedAt()"
                     width="150"
                     class="ma-1"
-                    >日付順</v-btn
-                  >
+                    >日付順
+                  </v-btn>
                   <v-btn
                     outlined
                     color="primary"
                     @click="sortTitle()"
                     width="150"
                     class="ma-1"
-                    >タイトル順</v-btn
-                  >
+                    >タイトル順
+                  </v-btn>
                 </v-row>
                 <v-row>
                   <v-col cols="5">
@@ -111,8 +113,8 @@
           <v-card width="1200px" class="mx-auto mt-5" color="primary">
             <v-card-title
               style="color: white; font-weight: bold; font-size: 1.5em;"
-              >申請一覧</v-card-title
-            >
+              >申請一覧
+            </v-card-title>
             <v-card-text class="pl-0 pr-0 pb-0">
               <v-list>
                 <v-list-item-group
@@ -125,7 +127,8 @@
                     v-bind:key="index"
                     :to="'/applications/' + list.application_id"
                     class="pl-0 pr-0"
-                    ><Application :list="list"> </Application>
+                  >
+                    <Application :list="list"></Application>
                   </v-list-item>
                 </v-list-item-group>
                 <div v-else>
@@ -142,6 +145,7 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import Application from "./components/Application";
+
 let sort = {
   created_at: "created_at",
   inv_created_at: "-created_at",

@@ -20,15 +20,15 @@
       class="primary_accent--text"
       color="secondary"
       @click="changeFix"
-      >修正</v-btn
-    >
+      >修正
+    </v-btn>
     <v-btn
       :disabled="this.detail.fix"
       class="primary_accent--text"
       color="secondary"
       @click="reSubmit"
-      >再申請</v-btn
-    >
+      >再申請
+    </v-btn>
   </div>
 </template>
 <script>
@@ -36,6 +36,7 @@ import axios from "axios";
 import WithReasonButton from "./StateWithReasonButton";
 import RepaidButton from "./RepaidButton";
 import { mapState, mapMutations, mapActions } from "vuex";
+
 export default {
   data: function () {
     return {

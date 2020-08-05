@@ -42,6 +42,7 @@
 <script>
 import { mapState } from "vuex";
 import Icon from "../shered/Icon";
+
 export default {
   components: {
     Icon

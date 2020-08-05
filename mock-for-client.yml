@@ -13,7 +13,7 @@ services:
   jomon-client:
     build: ./client
     ports:
-      - '3000:8080'
+      - '5000:8080'
     volumes:
       - './client/app'
     tty: true

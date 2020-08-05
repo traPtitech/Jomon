@@ -19,6 +19,7 @@
 import Log from "./Log";
 import NewComment from "./TimelineNewComment";
 import { mapGetters } from "vuex";
+
 export default {
   props: {},
   computed: {

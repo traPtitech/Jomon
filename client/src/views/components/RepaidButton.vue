@@ -5,8 +5,8 @@
         <with-reason-button
           v-if="
             repaidtotrapid.length ===
-              this.$store.state.application_detail_paper.core.repayment_logs
-                .length
+            this.$store.state.application_detail_paper.core.repayment_logs
+              .length
           "
           class="mr-4"
           to_state="submitted"
@@ -65,6 +65,7 @@
 import axios from "axios";
 import WithReasonButton from "./StateWithReasonButton";
 import { mapActions } from "vuex";
+
 export default {
   data: () => ({
     date: new Date().toISOString().substr(0, 10),
