@@ -2,21 +2,18 @@
   <v-app>
     <nav-bar />
     <core-view />
-    <core-login-dialog />
   </v-app>
 </template>
 
 <script>
 import NavBar from "./views/core/NavBar";
 import CoreView from "./views/core/CoreView";
-import CoreLoginDialog from "./views/core/LoginDialog";
 
 export default {
   name: "App",
   components: {
     NavBar,
-    CoreView,
-    CoreLoginDialog
+    CoreView
   },
   created() {
     this.$store.dispatch("getMe");

@@ -4,6 +4,8 @@ import ApplicationListPage from "../views/ApplicationListPage.vue";
 import ApplicationDetailPage from "../views/ApplicationDetailPage.vue";
 import AdminPage from "../views/AdminPage";
 import NewApplicationPage from "../views/NewApplicationPage.vue";
+import store from "../store";
+import { redirectAuthEndpoint } from "../utils/api";
 
 Vue.use(VueRouter);
 
@@ -36,13 +38,13 @@ const router = new VueRouter({
   routes
 });
 
-router.beforeEach(async (_to, _from, next) => {
+router.beforeEach(async (to, _from, next) => {
   if (!store.state.me) {
     await store.dispatch.getMe();
   }
   if (!store.state.me) {
     sessionStorage.setItem(`destination`, to.fullPath);
-    redirect2AuthEndpoint();
+    await redirectAuthEndpoint();
   }
   next();
 });
