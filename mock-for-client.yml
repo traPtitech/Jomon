@@ -1,6 +1,5 @@
 version: '3'
 services:
-
   jomon-server:
     image: swaggermock/swagger-mock
     environment:
@@ -9,12 +8,3 @@ services:
       - '1323:8080'
     volumes:
       - './docs:/docs'
-
-  jomon-client:
-    build: ./client
-    ports:
-      - '5000:8080'
-    volumes:
-      - './client/app'
-    tty: true
-    entrypoint: npm run serve

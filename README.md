@@ -7,12 +7,12 @@ This is an accounting support system ,"Jomon".
 ### Server test
 1. Run following command in the project root.
 ```shell script
-docker-compose -f server-test.yml run --rm jomon-server
+make server-test
 ```
 ### Client
 1. Run following command in the project root.
 ```shell script
-docker-compose -f mock-for-client.yml up
+make client
 ```
 Now you can access to `http://localhost:3000` for Jomon client page.
 And you can access to `http://localhost:1323` for Jomon mock server using `swagger.yaml`.
