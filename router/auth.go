@@ -47,7 +47,11 @@ func (s Service) AuthCallback(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	codeVerifier := sess.Values[sessionCodeVerifierKey].(string)
+	codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
+	if !ok {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
 	res, err := s.TraQAuth.GetAccessToken(code, codeVerifier)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
