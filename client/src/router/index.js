@@ -39,12 +39,13 @@ const router = new VueRouter({
 });
 
 router.beforeEach(async (to, _from, next) => {
-  if (!store.state.me) {
-    await store.dispatch.getMe();
-  }
-  if (!store.state.me) {
-    sessionStorage.setItem(`destination`, to.fullPath);
-    await redirectAuthEndpoint();
+  if (store.state.me.trap_id === "") {
+    try {
+      await store.dispatch.getMe();
+    } catch (_) {
+      sessionStorage.setItem(`destination`, to.fullPath);
+      await redirectAuthEndpoint();
+    }
   }
   next();
 });

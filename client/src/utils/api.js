@@ -14,11 +14,10 @@ export async function redirectAuthEndpoint() {
     const authorizationEndpointUrl = new URL(`${traQBaseURL}/oauth2/authorize`);
 
     authorizationEndpointUrl.search = new URLSearchParams({
-      responseType: "code",
-      clientId: data.clientId,
-      state: data.state,
-      codeChallenge: data.codeChallenge,
-      codeChallengeMethod: data.codeChallengeMethod
+      response_type: "code",
+      client_id: data.client_id,
+      code_challenge: data.code_challenge,
+      code_challenge_method: data.code_challenge_method
     }).toString();
 
     window.location.assign(authorizationEndpointUrl.toString());
