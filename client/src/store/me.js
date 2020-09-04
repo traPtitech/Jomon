@@ -13,7 +13,7 @@ export const me = {
     }
   },
   actions: {
-    async getMe() {
+    async getMe(commit) {
       try {
         const response = await axios.get("/api/users/me");
         commit("setMe", response.data);
