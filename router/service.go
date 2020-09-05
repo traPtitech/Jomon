@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/model"
@@ -46,6 +47,12 @@ func (s Service) AuthUser(c echo.Context) (echo.Context, error) {
 	sess, err := session.Get(sessionKey, c)
 	if err != nil {
 		return nil, c.NoContent(http.StatusInternalServerError)
+	}
+
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   sessionDuration,
+		HttpOnly: true,
 	}
 
 	accTok, ok := sess.Values[sessionAccessTokenKey].(string)

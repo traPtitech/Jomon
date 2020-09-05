@@ -47,6 +47,12 @@ func (s Service) AuthCallback(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   sessionDuration,
+		HttpOnly: true,
+	}
+
 	codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
 	if !ok {
 		return c.NoContent(http.StatusInternalServerError)
@@ -57,11 +63,6 @@ func (s Service) AuthCallback(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   sessionDuration,
-		HttpOnly: true,
-	}
 	sess.Values[sessionAccessTokenKey] = res.AccessToken
 	sess.Values[sessionRefreshTokenKey] = res.RefreshToken
 
@@ -82,6 +83,12 @@ func (s Service) GeneratePKCE(c echo.Context) error {
 	sess, err := session.Get(sessionKey, c)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   sessionDuration,
+		HttpOnly: true,
 	}
 
 	bytesCodeVerifier := generateCodeVerifier()
