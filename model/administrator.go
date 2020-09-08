@@ -44,7 +44,7 @@ func (_ administratorRepository) GetAdministratorList() ([]string, error) {
 
 func (_ administratorRepository) AddAdministrator(userId string) error {
 	admin := Administrator{TrapID: userId}
-	return db.FirstOrCreate(&admin).Error
+	return db.Create(&admin).Error
 }
 
 func (_ administratorRepository) RemoveAdministrator(userId string) error {
