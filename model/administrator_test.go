@@ -42,17 +42,4 @@ func TestAdministrator(t *testing.T) {
 		user.GiveIsUserAdmin(admins)
 		asr.False(user.IsAdmin)
 	})
-
-	t.Run("shouldFail", func(t *testing.T) {
-		asr := assert.New(t)
-
-		user := User{
-			TrapId: generateRandomUserName(),
-		}
-		err := adminRepo.AddAdministrator(user.TrapId)
-		asr.NoError(err)
-
-		err = adminRepo.AddAdministrator(user.TrapId)
-		asr.Error(err)
-	})
 }
