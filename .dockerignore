@@ -1,0 +1,10 @@
+.*
+Jomon
+docker
+Dockerfile
+*.yaml
+README.md
+Makefile
+node_modules
+uploads
+docs

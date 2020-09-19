@@ -1,11 +1,14 @@
 FROM node:lts-alpine AS build
 WORKDIR /app
-RUN apk add --no-cache git && \
-    apk --update add tzdata && \
-    cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
-    apk del tzdata && \
-    rm -rf /var/cache/apk/*
 
-COPY package*.json ./
+ENV TZ Asia/Tokyo
+
+RUN apk --update --no-cache add git
+RUN apk --update --no-cache add tzdata && \
+    cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
+    apk del tzdata
+
+COPY package.json package-lock.json ./
 RUN npm ci
+
 COPY . .
