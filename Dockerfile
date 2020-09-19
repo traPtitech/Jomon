@@ -5,30 +5,35 @@ WORKDIR /github.com/traPtitech/Jomon
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY . .
+COPY ./storage ./storage
+COPY ./main.go ./
+COPY ./router ./router
+COPY ./model ./model
 
-RUN go build -o /Jomon
+RUN go build -o /Jomon -ldflags "-s -w"
 
 ## build frontend
 FROM node:13.12.0-alpine as client-build
 WORKDIR /github.com/traPtitech/Jomon/client
-COPY ./client .
+COPY ./client/package.json ./client/package-lock.json ./
 RUN npm ci
+COPY ./client .
 RUN npm run build
 
 ## run
 
 FROM alpine:3.9
-ENV DOCKERIZE_VERSION v0.6.1
-RUN apk add --update --no-cache ca-certificates git openssl curl \
-    && wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+ENV TZ Asia/Tokyo
+
+RUN apk --update --no-cache add tzdata \
+  && cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
+  && apk del tzdata
+RUN apk --update --no-cache add ca-certificates \
+  && update-ca-certificates \
+  && rm -rf /usr/share/ca-certificates /etc/ssl/certs
+
 WORKDIR /app
-RUN apk --update add tzdata ca-certificates && \
-  cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
-  rm -rf /var/cache/apk/*
 COPY --from=server-build /Jomon ./
 COPY --from=client-build /github.com/traPtitech/Jomon/client/dist ./client/dist/
+
 ENTRYPOINT ./Jomon
- 
