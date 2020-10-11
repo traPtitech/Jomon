@@ -135,7 +135,7 @@
       </v-row>
     </v-timeline-item>
     <v-card>
-      <div style="white-space: pre-line;" class="pa-2 ma-0">
+      <div style="white-space: pre-line" class="pa-2 ma-0">
         <defference
           v-if="log.content.pre_log.type !== log.content.log.type"
           item="type"

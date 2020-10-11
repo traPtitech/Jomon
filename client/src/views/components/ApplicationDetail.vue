@@ -26,9 +26,7 @@
       </template>
 
       <div>
-        <div class="grey--text">
-          概要
-        </div>
+        <div class="grey--text">概要</div>
         <div class="headline">
           {{ this.detail.core.current_detail.title }}
         </div>
@@ -36,9 +34,7 @@
       </div>
 
       <div>
-        <div class="grey--text">
-          支払日
-        </div>
+        <div class="grey--text">支払日</div>
         <v-row>
           <v-col cols="12" sm="5" class="pt-0 pb-0">
             <div class="headline">
@@ -50,9 +46,7 @@
       </div>
 
       <div>
-        <div class="grey--text">
-          支払金額
-        </div>
+        <div class="grey--text">支払金額</div>
         <v-row>
           <v-col cols="12" sm="5" class="pt-0 pb-0">
             <div class="headline">
@@ -64,9 +58,7 @@
       </div>
 
       <div>
-        <div class="grey--text">
-          払い戻し対象者
-        </div>
+        <div class="grey--text">払い戻し対象者</div>
         <v-row>
           <v-col cols="12" sm="5" class="pt-0 pb-0">
             <div
@@ -87,7 +79,7 @@
         </div>
         <div class="headline">
           <p
-            style="white-space: pre-wrap;"
+            style="white-space: pre-wrap"
             v-text="this.detail.core.current_detail.remarks"
           ></p>
         </div>
@@ -95,15 +87,11 @@
       </div>
 
       <div>
-        <div class="grey--text">
-          画像
-        </div>
+        <div class="grey--text">画像</div>
         <div :key="path" v-for="path in this.detail.core.images">
           <v-img :src="`/api/images/'${path}`" max-width="80%" />
         </div>
-        <div v-if="this.detail.core.images.length === 0">
-          画像はありません
-        </div>
+        <div v-if="this.detail.core.images.length === 0">画像はありません</div>
       </div>
     </v-card>
   </v-container>

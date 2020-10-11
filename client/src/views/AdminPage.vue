@@ -16,9 +16,7 @@
     ></v-autocomplete>
     <v-btn @click="addAdmin()">設定</v-btn>
   </div>
-  <div v-else>
-    権限がありません
-  </div>
+  <div v-else>権限がありません</div>
 </template>
 
 <script>

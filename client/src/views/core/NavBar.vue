@@ -16,14 +16,10 @@
     </div>
     <v-spacer></v-spacer>
 
-    <v-btn v-if="me.is_admin" to="/admin" text>
-      管理ページ
-    </v-btn>
+    <v-btn v-if="me.is_admin" to="/admin" text> 管理ページ </v-btn>
     <v-menu open-on-hover offset-y>
       <template v-slot:activator="{ on }">
-        <v-btn v-on="on" text>
-          新規作成
-        </v-btn>
+        <v-btn v-on="on" text> 新規作成 </v-btn>
       </template>
 
       <v-list>

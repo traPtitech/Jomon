@@ -7,7 +7,7 @@
             v-if="list.current_state !== ''"
             :width="10"
             :state="list.current_state"
-            style="width: 7em;"
+            style="width: 7em"
           ></StateChip>
         </div>
       </v-col>
