@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/dvsekhvalnov/jose2go v0.0.0-20180829124132-7f401d37b68a
 	github.com/getkin/kin-openapi v0.2.1-0.20200220094608-fd25549e5e82
-	github.com/go-sql-driver/mysql v1.4.1
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/gorilla/sessions v1.2.0
 	github.com/jinzhu/gorm v1.9.12
