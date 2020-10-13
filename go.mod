@@ -13,6 +13,6 @@ require (
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/ncw/swift v1.0.52
 	github.com/srinathgs/mysqlstore v0.0.0-20200417050510-9cbb9420fc4c
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.6.1
 	golang.org/x/tools v0.0.0-20190608022120-eacb66d2a7c3
 )
