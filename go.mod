@@ -7,7 +7,7 @@ require (
 	github.com/getkin/kin-openapi v0.2.1-0.20200220094608-fd25549e5e82
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gofrs/uuid v3.2.0+incompatible
-	github.com/gorilla/sessions v1.2.0
+	github.com/gorilla/sessions v1.2.1
 	github.com/jinzhu/gorm v1.9.12
 	github.com/labstack/echo-contrib v0.9.0
 	github.com/labstack/echo/v4 v4.1.11
