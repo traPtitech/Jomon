@@ -1,19 +1,15 @@
 <template>
   <v-app-bar app color="primary" dark>
-    <div class="d-flex align-center">
+      <router-link to="/">
       <v-img
-        alt="Vuetify Logo"
+        alt="Jomon Logo"
         class="shrink-mr-2"
         contain
-        src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
+        src="@/assets/logo.svg"
         transition="scale-transition"
-        width="40"
+        width="144"
       />
-
-      <router-link to="/">
-        <v-toolbar-title class="white--text">Jomon</v-toolbar-title>
       </router-link>
-    </div>
     <v-spacer></v-spacer>
 
     <v-btn v-if="me.is_admin" to="/admin" text> 管理ページ </v-btn>
