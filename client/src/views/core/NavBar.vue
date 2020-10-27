@@ -1,6 +1,6 @@
 <template>
   <v-app-bar app color="primary" dark>
-      <router-link to="/">
+    <router-link to="/">
       <v-img
         alt="Jomon Logo"
         class="shrink-mr-2"
@@ -9,7 +9,7 @@
         transition="scale-transition"
         width="144"
       />
-      </router-link>
+    </router-link>
     <v-spacer></v-spacer>
 
     <v-btn v-if="me.is_admin" to="/admin" text> 管理ページ </v-btn>
