@@ -1,5 +1,5 @@
 export default {
-  primary: "#7B397b", //ヘッダーの色等
+  primary: "#011A27", //ヘッダーの色等
   secondary: "#f0daee",
   primary_accent: "#52254f",
   secondary_accent: "#e0bfde",
