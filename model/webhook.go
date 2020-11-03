@@ -53,7 +53,7 @@ func (repo *webhookRepository) WebhookEventHandler(c echo.Context, reqBody, resB
 }
 
 func RequestWebhook(message, secret, channelID, webhookID string, embed int) error {
-	u, err := url.Parse("https://q.trap.jp/api/1.0/webhooks")
+	u, err := url.Parse("https://q.trap.jp/api/v3/webhooks")
 	if err != nil {
 		return err
 	}
