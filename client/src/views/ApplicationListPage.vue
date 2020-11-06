@@ -21,17 +21,11 @@
                   <v-btn
                     color="primary"
                     @click="getApplicationList(params)"
-                    width="70"
                     class="ma-1"
                   >
                     <v-icon>mdi-reload</v-icon>
                   </v-btn>
-                  <v-btn
-                    color="primary"
-                    @click="resetParams()"
-                    width="70"
-                    class="ma-1"
-                  >
+                  <v-btn color="primary" @click="resetParams()" class="ma-1">
                     <v-icon>mdi-close</v-icon>
                   </v-btn>
                 </v-row>
@@ -40,7 +34,6 @@
                     outlined
                     color="primary"
                     @click="sortCreatedAt()"
-                    width="150"
                     class="ma-1"
                     >日付順
                   </v-btn>
@@ -48,7 +41,6 @@
                     outlined
                     color="primary"
                     @click="sortTitle()"
-                    width="150"
                     class="ma-1"
                     >タイトル順
                   </v-btn>
@@ -61,15 +53,10 @@
                       :rules="dayRule"
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="2">
-                    <v-text-field
-                      v-model="params.submitted_until"
-                      placeholder="～"
-                      disabled
-                    ></v-text-field>
-                  </v-col>
+                  <v-col cols="2"> 〜 </v-col>
                   <v-col cols="5">
                     <v-text-field
+                      v-model="params.submitted_until"
                       placeholder="2019-01-01"
                       :rules="dayRule"
                     ></v-text-field>
@@ -140,6 +127,7 @@
     </v-container>
   </div>
 </template>
+
 <script>
 import { mapState, mapActions } from "vuex";
 import Application from "./components/Application";
