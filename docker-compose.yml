@@ -14,8 +14,6 @@ services:
     build:
       context: ./
       dockerfile: ./development/Dockerfile
-      args:
-        - GO_BUILD_TAGS=debug
     entrypoint: dockerize -wait tcp://db:3306 -timeout 60s
     command: task -w
     environment:
@@ -23,7 +21,6 @@ services:
       MARIADB_PASSWORD: password
       MARIADB_HOSTNAME: db
       MARIADB_DATABASE: jomon
-      GO_BUILD_TAGS: debug
     ports:
       - '1323:1323'
     volumes:
