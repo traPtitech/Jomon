@@ -98,7 +98,7 @@
 </template>
 
 <script>
-import Icon from "../shered/Icon";
+import Icon from "../shared/Icon";
 import { mapState } from "vuex";
 import { remarksTitle, applicationType } from "../../use/applicationDetail";
 import { dayPrint } from "../../use/dataFormat";

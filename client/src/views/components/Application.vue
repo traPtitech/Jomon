@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import StateChip from "../shered/StateChip";
+import StateChip from "../shared/StateChip";
 
 export default {
   name: "Applicaton",
