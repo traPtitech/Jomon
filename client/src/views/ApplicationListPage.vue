@@ -10,14 +10,14 @@
             >
               絞り込み
               <v-btn icon @click="show = !show">
-                <v-icon
+                <v-icon color="white"
                   >{{ show ? "mdi-chevron-up" : "mdi-chevron-down" }}
                 </v-icon>
               </v-btn>
             </v-card-title>
             <v-card-text v-show="show" style="background: white" class="pt-4">
               <v-form>
-                <v-row>
+                <div>
                   <v-btn
                     color="primary"
                     @click="getApplicationList(params)"
@@ -28,8 +28,8 @@
                   <v-btn color="primary" @click="resetParams()" class="ma-1">
                     <v-icon>mdi-close</v-icon>
                   </v-btn>
-                </v-row>
-                <v-row>
+                </div>
+                <div>
                   <v-btn
                     outlined
                     color="primary"
@@ -44,24 +44,20 @@
                     class="ma-1"
                     >タイトル順
                   </v-btn>
-                </v-row>
-                <v-row>
-                  <v-col cols="5">
-                    <v-text-field
-                      v-model="params.submitted_since"
-                      placeholder="2019-01-01"
-                      :rules="dayRule"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="2"> 〜 </v-col>
-                  <v-col cols="5">
-                    <v-text-field
-                      v-model="params.submitted_until"
-                      placeholder="2019-01-01"
-                      :rules="dayRule"
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
+                </div>
+                <div :class="$style.date_range">
+                  <v-text-field
+                    v-model="params.submitted_since"
+                    placeholder="2019-01-01"
+                    :rules="dayRule"
+                  ></v-text-field>
+                  <span :class="$style.tilde">〜</span>
+                  <v-text-field
+                    v-model="params.submitted_until"
+                    placeholder="2019-01-01"
+                    :rules="dayRule"
+                  ></v-text-field>
+                </div>
                 <v-text-field
                   v-model="params.financial_year"
                   :rules="yearRule"
@@ -246,3 +242,14 @@ export default {
   }
 };
 </script>
+
+<style module>
+.date_range {
+  display: grid;
+  grid-template-columns: 3fr 1fr 3fr;
+  align-items: baseline;
+}
+.tilde {
+  text-align: center;
+}
+</style>
