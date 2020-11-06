@@ -89,7 +89,7 @@
       <div>
         <div class="grey--text">画像</div>
         <div :key="path" v-for="path in this.detail.core.images">
-          <v-img :src="`/api/images/'${path}`" max-width="80%" />
+          <v-img :src="`/api/images/${path}`" max-width="80%" />
         </div>
         <div v-if="this.detail.core.images.length === 0">画像はありません</div>
       </div>
