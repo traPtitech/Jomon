@@ -1,19 +1,20 @@
 <template>
   <v-app>
     <nav-bar />
-    <core-view />
+
+    <v-main>
+      <router-view />
+    </v-main>
   </v-app>
 </template>
 
 <script>
 import NavBar from "./views/core/NavBar";
-import CoreView from "./views/core/CoreView";
 
 export default {
   name: "App",
   components: {
-    NavBar,
-    CoreView
+    NavBar
   },
   created() {
     this.$store.dispatch("getMe");
