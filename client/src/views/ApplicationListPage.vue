@@ -69,7 +69,6 @@
                   :items="type_items"
                   item-text="jpn"
                   item-value="type"
-                  return-object
                   label="申請タイプ"
                 ></v-select>
                 <v-select
@@ -77,7 +76,6 @@
                   :items="state_items"
                   item-text="jpn"
                   item-value="state"
-                  return-object
                   label="現在の状態"
                 ></v-select>
                 <v-select
