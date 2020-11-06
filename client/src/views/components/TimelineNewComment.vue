@@ -30,7 +30,7 @@
 </template>
 <script>
 import axios from "axios";
-import Icon from "../shered/Icon";
+import Icon from "../shared/Icon";
 import { mapActions } from "vuex";
 
 export default {

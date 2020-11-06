@@ -144,8 +144,8 @@
 
 <script>
 import axios from "axios";
-import Icon from "./shered/Icon";
-import ImageUploader from "./shered/ImageUploader";
+import Icon from "./shared/Icon";
+import ImageUploader from "./shared/ImageUploader";
 import { mapActions, mapGetters } from "vuex";
 import {
   titlePlaceholder,

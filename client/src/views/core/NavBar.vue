@@ -33,7 +33,7 @@
 </template>
 <script>
 import { mapState } from "vuex";
-import Icon from "../shered/Icon";
+import Icon from "../shared/Icon";
 
 export default {
   components: {
