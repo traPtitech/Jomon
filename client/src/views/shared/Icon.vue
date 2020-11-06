@@ -5,15 +5,8 @@
 </template>
 
 <script>
-import store from "@store";
-
 export default {
   name: "Icon",
-  data: () => {
-    return {
-      failed_image: false
-    };
-  },
   computed: {
     iconSrc: function () {
       return this.user !== ""
