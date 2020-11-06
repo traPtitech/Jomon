@@ -1,8 +1,18 @@
+up:
+	@docker-compose up -d --build
+
+.PHONY: down
+down:
+	@docker-compose down -v
+
 .PHONY: server-test
 server-test:
 	docker-compose -f server-test.yml run --rm jomon-server
 
 .PHONY: client
 client:
-	docker-compose -f mock-for-client.yml up -d
 	cd client; npm run lint; npm run serve
+
+.PHONY: mock
+mock:
+	docker-compose -f mock.yml run --rm jomon-mock

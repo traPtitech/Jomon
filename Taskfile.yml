@@ -15,4 +15,4 @@ tasks:
   build:
     dir: /src
     cmds:
-      - go build -tags $GO_BUILD_TAGS -o /app/Jomon
+      - go build -tags debug -o /app/Jomon
