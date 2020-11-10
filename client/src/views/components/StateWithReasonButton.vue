@@ -1,5 +1,5 @@
 <template>
-  <v-row justify="center">
+  <div :class="$style.container">
     <v-dialog v-model="dialog" max-width="600px">
       <template v-slot:activator="{ on }">
         <v-btn class="primary_accent--text" color="secondary" dark v-on="on"
@@ -42,7 +42,7 @@
         </v-form>
       </v-card>
     </v-dialog>
-  </v-row>
+  </div>
 </template>
 <script>
 import axios from "axios";
@@ -111,3 +111,9 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" module scoped>
+.container {
+  justify-content: center;
+}
+</style>

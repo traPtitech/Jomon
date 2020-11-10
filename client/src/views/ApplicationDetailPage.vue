@@ -4,13 +4,12 @@
 <template>
   <div v-if="this.loading">loading</div>
   <div v-else class="application-detail">
-    <!-- <div>ID: {{ $route.params.id }}</div> -->
-    <v-row :justify="`space-between`">
-      <h3 class="ml-4">
-        現在の状態:{{ returnState(this.detail.core.current_state) }}
-      </h3>
-      <state-button-controller class="mr-4 ml-10" />
-    </v-row>
+    <div :class="$style.banner_container">
+      <div :class="$style.current_state">
+        <h3>現在の状態:{{ returnState(this.detail.core.current_state) }}</h3>
+      </div>
+      <state-button-controller />
+    </div>
     <!-- todo storeのfixで制御する、このページのcreatedでstoreのfixはfalseに。 -->
     <application-paper v-if="!this.detail.fix" />
     <fix-application-paper v-else />
@@ -68,3 +67,15 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" module scoped>
+.current_state {
+  // TODO: 文字の高さを中央揃えに
+  margin: 4px;
+}
+.banner_container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+</style>
