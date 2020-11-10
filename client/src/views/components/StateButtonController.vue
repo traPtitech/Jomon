@@ -1,6 +1,6 @@
 <template>
   <div v-if="displayAcceptBottom" :class="$style.button_container">
-    <simple-button :label="'承認'" v-on:click="accept()" />
+    <simple-button :label="'承認'" @click="accept()" />
     <with-reason-button to_state="fix_required" />
     <with-reason-button to_state="rejected" />
   </div>
@@ -9,8 +9,8 @@
     <repaid-button />
   </div>
   <div v-else-if="displayFixResubmitBottom" :class="$style.button_container">
-    <simple-button :label="'修正'" v-on:click="changeFix" />
-    <simple-button :label="'再申請'" v-on:click="reSubmit" />
+    <simple-button :label="'修正'" @click="changeFix" />
+    <simple-button :label="'再申請'" @click="reSubmit" />
   </div>
 </template>
 <script>

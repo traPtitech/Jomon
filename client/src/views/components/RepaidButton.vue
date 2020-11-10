@@ -2,9 +2,7 @@
   <div>
     <v-dialog v-model="dialog" scrollable max-width="500px">
       <template v-slot:activator="{ on }">
-        <v-btn color="primary" dark v-on="on"
-          >払い戻し済みのユーザーを選択</v-btn
-        >
+        <simple-button :label="'払い戻し済みのユーザーを選択'" v-on="on" />
       </template>
       <v-card :class="$style.modal">
         <v-menu
@@ -50,8 +48,12 @@
 <script>
 import axios from "axios";
 import { mapActions } from "vuex";
+import SimpleButton from "/@/views/shared/SimpleButton";
 
 export default {
+  components: {
+    SimpleButton
+  },
   data: () => ({
     date: new Date().toISOString().substr(0, 10),
     menu: false,

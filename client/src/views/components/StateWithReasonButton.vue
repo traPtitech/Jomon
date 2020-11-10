@@ -2,9 +2,13 @@
   <div :class="$style.container">
     <v-dialog v-model="dialog" max-width="600px">
       <template v-slot:activator="{ on }">
-        <v-btn class="primary_accent--text" color="secondary" dark v-on="on"
-          >{{ toStateName(to_state) }}
-        </v-btn>
+        <simple-button
+          :label="
+            toStateName(to_state) + (to_state === 'submitted' ? 'に戻す' : '')
+          "
+          :variant="to_state === 'submitted' ? 'warning' : 'error'"
+          v-on="on"
+        />
       </template>
 
       <v-card>
@@ -34,10 +38,17 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="primary" text @click="dialog = false">戻る</v-btn>
-            <v-btn :disabled="!valid" color="primary" text @click="postreason"
-              >{{ this.toStateName(to_state) }}にする
-            </v-btn>
+            <simple-button
+              :label="'戻る'"
+              :variant="'secondary'"
+              @click="dialog = false"
+            />
+            <simple-button
+              :label="this.toStateName(to_state) + 'にする'"
+              :variant="'secondary'"
+              :disabled="!valid"
+              @click="postReason"
+            />
           </v-card-actions>
         </v-form>
       </v-card>
@@ -48,8 +59,12 @@
 import axios from "axios";
 import Vue from "vue";
 import { mapActions } from "vuex";
+import SimpleButton from "/@/views/shared/SimpleButton";
 
 export default {
+  components: {
+    SimpleButton
+  },
   data: () => ({
     valid: true,
     dialog: false,
@@ -76,7 +91,7 @@ export default {
         this.$refs.form.reset();
       }
     },
-    async postreason() {
+    async postReason() {
       if (this.$refs.form.validate()) {
         await axios
           .put(
@@ -107,6 +122,9 @@ export default {
         default:
           return "状態が間違っています";
       }
+    },
+    print: obj => {
+      console.log(obj);
     }
   }
 };

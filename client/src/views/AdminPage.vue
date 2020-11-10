@@ -7,14 +7,22 @@
       label="管理権限を削除"
       multiple
     ></v-autocomplete>
-    <simple-button :label="'設定'" v-on:click="removeAdmin()"></simple-button>
+    <simple-button
+      :label="'設定'"
+      :variant="'warning'"
+      @click="removeAdmin()"
+    ></simple-button>
     <v-autocomplete
       v-model="addAdminUsers"
       :items="notAdminList"
       label="管理権限を追加"
       multiple
     ></v-autocomplete>
-    <simple-button :label="'設定'" v-on:click="addAdmin()"></simple-button>
+    <simple-button
+      :label="'設定'"
+      :variant="'warning'"
+      @click="addAdmin()"
+    ></simple-button>
   </div>
   <div v-else>権限がありません</div>
 </template>
