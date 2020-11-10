@@ -4,7 +4,7 @@
       <v-col>
         <with-reason-button
           v-if="
-            repaidtotrapid.length ===
+            repaidToTraPId.length ===
             this.$store.state.application_detail_paper.core.repayment_logs
               .length
           "
@@ -15,9 +15,11 @@
       <v-col>
         <v-dialog v-model="dialog" scrollable max-width="500px">
           <template v-slot:activator="{ on }">
-            <v-btn color="primary" dark v-on="on">払い戻し完了者の選択</v-btn>
+            <v-btn color="primary" dark v-on="on"
+              >払い戻し済みのユーザーを選択</v-btn
+            >
           </template>
-          <v-card>
+          <v-card :class="$style.modal">
             <v-menu
               v-model="menu"
               :close-on-content-click="false"
@@ -44,9 +46,13 @@
             <v-autocomplete
               ref="traPID"
               v-model="traPID"
-              :rules="[() => !!traPID || '払い戻し完了者は一人以上必要です']"
-              :items="repaidtotrapid"
-              label="払い戻し完了者のtraPidを入力..."
+              :rules="[
+                () =>
+                  !!traPID ||
+                  '払い戻し済みのユーザーが一人以上選ばれている必要があります'
+              ]"
+              :items="repaidToTraPId"
+              label="払い戻しが完了したユーザーを選択"
               required
               multiple
             >
@@ -56,7 +62,7 @@
         </v-dialog>
       </v-col>
     </v-row>
-    <span v-if="repaidtotrapid.length === 0">
+    <span v-if="repaidToTraPId.length === 0">
       何かがおかしいです。一度リロードしなおしてみて下さい。
     </span>
   </div>
@@ -103,7 +109,7 @@ export default {
     }
   },
   computed: {
-    repaidtotrapid() {
+    repaidToTraPId() {
       let trap_ids = [];
       this.$store.state.application_detail_paper.core.repayment_logs.forEach(
         log => {
@@ -117,3 +123,9 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" module>
+.modal {
+  padding: 8px;
+}
+</style>
