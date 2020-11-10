@@ -18,9 +18,6 @@ export default {
   },
   created() {
     this.$store.dispatch("getMe");
-  },
-  data: () => ({
-    //
-  })
+  }
 };
 </script>

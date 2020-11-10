@@ -1,40 +1,23 @@
 <template>
-  <div v-if="displayAcceptBottom">
-    <v-row>
-      <v-btn
-        class="primary_accent--text"
-        color="secondary"
-        v-on:click="accept()"
-        >承認
-      </v-btn>
-      <with-reason-button class="ml-4 mr-5" to_state="fix_required" />
-      <with-reason-button class="mr-4" to_state="rejected" />
-    </v-row>
+  <div v-if="displayAcceptBottom" :class="$style.button_container">
+    <simple-button :label="'承認'" v-on:click="accept()" />
+    <with-reason-button to_state="fix_required" />
+    <with-reason-button to_state="rejected" />
   </div>
-  <div v-else-if="displayRepaidBottom">
+  <div v-else-if="displayRepaidBottom" :class="$style.button_container">
+    <with-reason-button to_state="submitted" />
     <repaid-button />
   </div>
-  <div v-else-if="displayFixResubmitBottom">
-    <v-btn
-      :disabled="this.detail.fix"
-      class="primary_accent--text"
-      color="secondary"
-      @click="changeFix"
-      >修正
-    </v-btn>
-    <v-btn
-      :disabled="this.detail.fix"
-      class="primary_accent--text"
-      color="secondary"
-      @click="reSubmit"
-      >再申請
-    </v-btn>
+  <div v-else-if="displayFixResubmitBottom" :class="$style.button_container">
+    <simple-button :label="'修正'" v-on:click="changeFix" />
+    <simple-button :label="'再申請'" v-on:click="reSubmit" />
   </div>
 </template>
 <script>
 import axios from "axios";
 import WithReasonButton from "./StateWithReasonButton";
 import RepaidButton from "./RepaidButton";
+import SimpleButton from "/@/views/shared/SimpleButton";
 import { mapState, mapMutations, mapActions } from "vuex";
 
 export default {
@@ -45,7 +28,8 @@ export default {
   },
   components: {
     WithReasonButton,
-    RepaidButton
+    RepaidButton,
+    SimpleButton
   },
   computed: {
     ...mapState({ detail: "application_detail_paper" }),
@@ -107,3 +91,9 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" module scoped>
+.button_container {
+  display: flex;
+}
+</style>
