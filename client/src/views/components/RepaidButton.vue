@@ -1,67 +1,47 @@
 <template>
   <div>
-    <v-row>
-      <v-col>
-        <with-reason-button
-          v-if="
-            repaidToTraPId.length ===
-            this.$store.state.application_detail_paper.core.repayment_logs
-              .length
-          "
-          class="mr-4"
-          to_state="submitted"
-        />
-      </v-col>
-      <v-col>
-        <v-dialog v-model="dialog" scrollable max-width="500px">
+    <v-dialog v-model="dialog" scrollable max-width="500px">
+      <template v-slot:activator="{ on }">
+        <v-btn color="primary" dark v-on="on"
+          >払い戻し済みのユーザーを選択</v-btn
+        >
+      </template>
+      <v-card :class="$style.modal">
+        <v-menu
+          :class="$style.user_select"
+          v-model="menu"
+          :close-on-content-click="false"
+          :nudge-right="40"
+          transition="scale-transition"
+          offset-y
+        >
           <template v-slot:activator="{ on }">
-            <v-btn color="primary" dark v-on="on"
-              >払い戻し済みのユーザーを選択</v-btn
-            >
+            <v-text-field
+              v-model="date"
+              label="払い戻し完了日"
+              readonly
+              v-on="on"
+            ></v-text-field>
           </template>
-          <v-card :class="$style.modal">
-            <v-menu
-              v-model="menu"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              lazy
-              transition="scale-transition"
-              offset-y
-              full-width
-              min-width="290px"
-            >
-              <template v-slot:activator="{ on }">
-                <v-text-field
-                  v-model="date"
-                  label="払い戻し日"
-                  readonly
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="date"
-                @input="menu = false"
-              ></v-date-picker>
-            </v-menu>
-            <v-autocomplete
-              ref="traPID"
-              v-model="traPID"
-              :rules="[
-                () =>
-                  !!traPID ||
-                  '払い戻し済みのユーザーが一人以上選ばれている必要があります'
-              ]"
-              :items="repaidToTraPId"
-              label="払い戻しが完了したユーザーを選択"
-              required
-              multiple
-            >
-            </v-autocomplete>
-            <v-btn color="primary" @click="putRepaid(traPID, date)">OK</v-btn>
-          </v-card>
-        </v-dialog>
-      </v-col>
-    </v-row>
+          <v-date-picker v-model="date" @input="menu = false"></v-date-picker>
+        </v-menu>
+        <v-autocomplete
+          ref="traPID"
+          v-model="traPID"
+          :rules="[
+            () =>
+              !!traPID ||
+              '払い戻し済みのユーザーが一人以上選ばれている必要があります'
+          ]"
+          :items="repaidToTraPId"
+          label="払い戻し済みのユーザーを選択"
+          required
+          multiple
+        >
+        </v-autocomplete>
+        <v-btn color="primary" @click="putRepaid(traPID, date)">OK</v-btn>
+      </v-card>
+    </v-dialog>
     <span v-if="repaidToTraPId.length === 0">
       何かがおかしいです。一度リロードしなおしてみて下さい。
     </span>
@@ -69,7 +49,6 @@
 </template>
 <script>
 import axios from "axios";
-import WithReasonButton from "./StateWithReasonButton";
 import { mapActions } from "vuex";
 
 export default {
@@ -79,9 +58,6 @@ export default {
     dialog: false,
     traPID: []
   }),
-  components: {
-    WithReasonButton
-  },
   methods: {
     ...mapActions(["getApplicationDetail"]),
     async putRepaid(traPIDs, date) {
@@ -124,8 +100,11 @@ export default {
 };
 </script>
 
-<style lang="scss" module>
+<style lang="scss" module scoped>
 .modal {
   padding: 8px;
+}
+.user_select {
+  min-width: 280px;
 }
 </style>
