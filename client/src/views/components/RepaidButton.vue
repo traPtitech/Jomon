@@ -4,25 +4,9 @@
       <template v-slot:activator="{ on }">
         <simple-button :label="'払い戻し済みのユーザーを選択'" v-on="on" />
       </template>
-      <v-card :class="$style.modal">
-        <v-menu
-          :class="$style.user_select"
-          v-model="menu"
-          :close-on-content-click="false"
-          :nudge-right="40"
-          transition="scale-transition"
-          offset-y
-        >
-          <template v-slot:activator="{ on }">
-            <v-text-field
-              v-model="date"
-              label="払い戻し完了日"
-              readonly
-              v-on="on"
-            />
-          </template>
-          <v-date-picker v-model="date" @input="menu = false" />
-        </v-menu>
+      <v-card :class="$style.container">
+        <h3>払い戻し日</h3>
+        <v-date-picker v-model="date" full-width flat @input="menu = false" />
         <v-autocomplete
           ref="traPID"
           v-model="traPID"
@@ -107,10 +91,8 @@ export default {
 </script>
 
 <style lang="scss" module>
-.modal {
-  padding: 8px;
-}
-.user_select {
+.container {
   min-width: 280px;
+  padding: 8px;
 }
 </style>
