@@ -1,13 +1,20 @@
 const https = require("https");
+
 const keepAliveAgent = new https.Agent({ keepAlive: true });
-const { DEV_SERVER_PROXY_HOST } = require("./dev.config");
 
 module.exports = {
+  css: {
+    loaderOptions: {
+      scss: {
+        additionalData: '@import "src/styles/index.scss";'
+      }
+    }
+  },
   transpileDependencies: ["vuetify"],
   devServer: {
     proxy: {
       "/api": {
-        target: DEV_SERVER_PROXY_HOST,
+        target: "https://jomon-dev.tokyotech.org",
         changeOrigin: true,
         agent: keepAliveAgent
       }

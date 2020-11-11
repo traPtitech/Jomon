@@ -7,14 +7,22 @@
       label="管理権限を削除"
       multiple
     ></v-autocomplete>
-    <v-btn @click="removeAdmin()">設定</v-btn>
+    <simple-button
+      :label="'設定'"
+      :variant="'warning'"
+      @click="removeAdmin()"
+    ></simple-button>
     <v-autocomplete
       v-model="addAdminUsers"
       :items="notAdminList"
       label="管理権限を追加"
       multiple
     ></v-autocomplete>
-    <v-btn @click="addAdmin()">設定</v-btn>
+    <simple-button
+      :label="'設定'"
+      :variant="'warning'"
+      @click="addAdmin()"
+    ></simple-button>
   </div>
   <div v-else>権限がありません</div>
 </template>
@@ -22,8 +30,12 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import axios from "axios";
+import SimpleButton from "@/views/shared/SimpleButton";
 
 export default {
+  components: {
+    SimpleButton
+  },
   computed: {
     ...mapGetters(["adminList", "notAdminList"])
   },

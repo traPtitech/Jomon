@@ -29,7 +29,7 @@
             icon
             color="error"
             :disabled="!comment_readonly"
-            v-on:click="deleteComment()"
+            @click="deleteComment()"
           >
             <v-icon>mdi-delete</v-icon>
           </v-btn>
