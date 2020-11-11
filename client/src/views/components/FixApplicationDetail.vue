@@ -138,7 +138,11 @@
 
         <div>
           <h3 class="ml-0 mr-0">画像</h3>
-          <div :key="path" v-for="(path, index) in this.detail.core.images">
+          <div
+            :class="$style.image"
+            :key="path"
+            v-for="(path, index) in this.detail.core.images"
+          >
             <span v-if="images_change[index]">
               <v-btn
                 rounded
@@ -363,3 +367,11 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" module>
+.image {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+</style>
