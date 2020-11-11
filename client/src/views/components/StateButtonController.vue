@@ -17,7 +17,7 @@
 import axios from "axios";
 import WithReasonButton from "./StateWithReasonButton";
 import RepaidButton from "./RepaidButton";
-import SimpleButton from "/@/views/shared/SimpleButton";
+import SimpleButton from "@/views/shared/SimpleButton";
 import { mapState, mapMutations, mapActions } from "vuex";
 
 export default {
@@ -92,7 +92,7 @@ export default {
 };
 </script>
 
-<style lang="scss" module scoped>
+<style lang="scss" module>
 .button_container {
   display: flex;
 }

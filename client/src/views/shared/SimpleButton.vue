@@ -25,8 +25,7 @@ export default {
 };
 </script>
 
-<style lang="scss" module scoped>
-@import "../../styles/index.scss"; // TODO: なんかGlobal変数使えん
+<style lang="scss" module>
 .container {
   display: flex;
   padding: 6px 16px;

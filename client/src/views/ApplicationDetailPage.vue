@@ -68,7 +68,7 @@ export default {
 };
 </script>
 
-<style lang="scss" module scoped>
+<style lang="scss" module>
 .current_state {
   // TODO: 文字の高さを中央揃えに
   margin: 4px;

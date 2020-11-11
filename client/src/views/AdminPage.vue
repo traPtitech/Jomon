@@ -30,7 +30,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import axios from "axios";
-import SimpleButton from "/@/views/shared/SimpleButton";
+import SimpleButton from "@/views/shared/SimpleButton";
 
 export default {
   components: {

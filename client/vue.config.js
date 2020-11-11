@@ -1,23 +1,20 @@
 const https = require("https");
-const path = require("path");
-const { DEV_SERVER_PROXY_HOST } = require("./dev.config");
 
 const keepAliveAgent = new https.Agent({ keepAlive: true });
 
 module.exports = {
-  configureWebpack: {
-    resolve: {
-      alias: {
-        "/@": path.resolve(__dirname, "src").replace(/\\/g, "/")
-      },
-      extensions: [".js", ".vue", ".json"]
+  css: {
+    loaderOptions: {
+      scss: {
+        additionalData: '@import "src/styles/index.scss";'
+      }
     }
   },
   transpileDependencies: ["vuetify"],
   devServer: {
     proxy: {
       "/api": {
-        target: DEV_SERVER_PROXY_HOST,
+        target: "https://jomon-dev.tokyotech.org",
         changeOrigin: true,
         agent: keepAliveAgent
       }

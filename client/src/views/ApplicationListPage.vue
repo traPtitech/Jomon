@@ -241,7 +241,7 @@ export default {
 };
 </script>
 
-<style lang="scss" module scoped>
+<style lang="scss" module>
 .date_range {
   display: grid;
   grid-template-columns: 3fr 1fr 3fr;

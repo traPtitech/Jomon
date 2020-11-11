@@ -52,7 +52,7 @@
 <script>
 import axios from "axios";
 import { mapActions } from "vuex";
-import SimpleButton from "/@/views/shared/SimpleButton";
+import SimpleButton from "@/views/shared/SimpleButton";
 
 export default {
   components: {
@@ -106,7 +106,7 @@ export default {
 };
 </script>
 
-<style lang="scss" module scoped>
+<style lang="scss" module>
 .modal {
   padding: 8px;
 }

@@ -59,7 +59,7 @@
 import axios from "axios";
 import Vue from "vue";
 import { mapActions } from "vuex";
-import SimpleButton from "/@/views/shared/SimpleButton";
+import SimpleButton from "@/views/shared/SimpleButton";
 
 export default {
   components: {
@@ -130,7 +130,7 @@ export default {
 };
 </script>
 
-<style lang="scss" module scoped>
+<style lang="scss" module>
 .container {
   justify-content: center;
 }
