@@ -19,25 +19,29 @@
               label="払い戻し完了日"
               readonly
               v-on="on"
-            ></v-text-field>
+            />
           </template>
-          <v-date-picker v-model="date" @input="menu = false"></v-date-picker>
+          <v-date-picker v-model="date" @input="menu = false" />
         </v-menu>
         <v-autocomplete
           ref="traPID"
           v-model="traPID"
           :rules="[
-            () =>
-              !!traPID ||
+            traPID =>
+              traPID.length > 0 ||
               '払い戻し済みのユーザーが一人以上選ばれている必要があります'
           ]"
           :items="repaidToTraPId"
           label="払い戻し済みのユーザーを選択"
           required
           multiple
-        >
-        </v-autocomplete>
-        <v-btn color="primary" @click="putRepaid(traPID, date)">OK</v-btn>
+        />
+        <simple-button
+          :label="'OK'"
+          :disabled="traPID.length === 0"
+          :variant="'secondary'"
+          @click="putRepaid(traPID, date)"
+        />
       </v-card>
     </v-dialog>
     <span v-if="repaidToTraPId.length === 0">
