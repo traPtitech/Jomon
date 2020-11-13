@@ -134,6 +134,13 @@ func (s *Service) PostApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
+	tStr := req.PaidAt.Format("2006-01-02")
+	t, err := StrToDate(tStr)
+	if err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+	req.PaidAt = &t
+
 	if req.Type == nil || req.Title == "" || req.Remarks == "" || req.Amount == nil || req.PaidAt == nil || len(req.RepaidToId) == 0 {
 		return c.NoContent(http.StatusBadRequest)
 	}
@@ -207,6 +214,13 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		// TODO
 		return c.NoContent(http.StatusBadRequest)
 	}
+
+	tStr := req.PaidAt.Format("2006-01-02")
+	t, err := StrToDate(tStr)
+	if err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+	req.PaidAt = &t
 
 	if req.Type == nil && req.Title == "" && req.Remarks == "" && req.Amount == nil && req.PaidAt == nil && (len(req.RepaidToId) == 0) && (len(form.File["images"]) == 0) {
 		return c.NoContent(http.StatusBadRequest)
