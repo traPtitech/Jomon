@@ -256,7 +256,7 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		*req.Amount == app.LatestApplicationsDetail.Amount &&
 		(*req.PaidAt).Equal(app.LatestApplicationsDetail.PaidAt.PaidAt) &&
 		isSameID &&
-		(len(form.File["images"]) == len(app.ApplicationsImages)) {
+		(len(form.File["images"]) == 0) {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
