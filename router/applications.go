@@ -134,6 +134,15 @@ func (s *Service) PostApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
+	if req.PaidAt != nil {
+		tStr := req.PaidAt.Format("2006-01-02")
+		t, err := StrToDate(tStr)
+		if err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+		req.PaidAt = &t
+	}
+
 	if req.Type == nil || req.Title == "" || req.Remarks == "" || req.Amount == nil || req.PaidAt == nil || len(req.RepaidToId) == 0 {
 		return c.NoContent(http.StatusBadRequest)
 	}
@@ -208,6 +217,15 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
+	if req.PaidAt != nil {
+		tStr := req.PaidAt.Format("2006-01-02")
+		t, err := StrToDate(tStr)
+		if err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+		req.PaidAt = &t
+	}
+
 	if req.Type == nil && req.Title == "" && req.Remarks == "" && req.Amount == nil && req.PaidAt == nil && (len(req.RepaidToId) == 0) && (len(form.File["images"]) == 0) {
 		return c.NoContent(http.StatusBadRequest)
 	}
@@ -242,7 +260,7 @@ func (s *Service) PatchApplication(c echo.Context) error {
 		*req.Amount == app.LatestApplicationsDetail.Amount &&
 		(*req.PaidAt).Equal(app.LatestApplicationsDetail.PaidAt.PaidAt) &&
 		isSameID &&
-		(len(form.File["images"]) == len(app.ApplicationsImages)) {
+		(len(form.File["images"]) == 0) {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
