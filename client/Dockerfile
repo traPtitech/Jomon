@@ -3,7 +3,6 @@ WORKDIR /app
 
 ENV TZ Asia/Tokyo
 
-RUN apk update
 RUN apk --update --no-cache add git
 RUN apk --update --no-cache add tzdata && \
     cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
