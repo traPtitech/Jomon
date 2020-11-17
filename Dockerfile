@@ -25,6 +25,7 @@ RUN npm run build
 FROM alpine:3.9
 ENV TZ Asia/Tokyo
 
+RUN apk update
 RUN apk --update --no-cache add tzdata \
   && cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
   && apk del tzdata
