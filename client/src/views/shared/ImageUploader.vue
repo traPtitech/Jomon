@@ -12,7 +12,7 @@
       @change="imageChange"
     ></v-file-input>
     <div v-for="(imageUrl, index) in uploadImageUrl" :key="index">
-      <v-img :src="imageUrl" max-width="80%" />
+      <v-img :src="imageUrl" max-width="50%" />
     </div>
   </span>
 </template>

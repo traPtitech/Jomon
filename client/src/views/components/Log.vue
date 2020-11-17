@@ -117,9 +117,6 @@
   <!-- 以下は申請の変更ログ -->
   <div v-else-if="log.log_type === `application`" class="ma-2">
     <v-timeline-item color="purple lighten-2">
-      <template v-slot:icon>
-        <span>Application </span>
-      </template>
       <v-row justify="space-between">
         <v-col cols="10" :class="grey_text">
           <Icon :user="log.content.log.update_user.trap_id" :size="25" />
