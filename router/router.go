@@ -13,6 +13,7 @@ type Service struct {
 	Images         model.ApplicationsImageRepository
 	Users          model.UserRepository
 	TraQAuth       model.TraQAuthRepository
+	Webhook        model.WebhookRepository
 }
 
 func (s *Service) AuthUserMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
@@ -35,7 +36,7 @@ func SetRouting(e *echo.Echo, service Service) {
 		apiApplications := api.Group("/applications", service.AuthUserMiddleware)
 		{
 			apiApplications.GET("", service.GetApplicationList)
-			apiApplications.POST("", service.PostApplication)
+			apiApplications.POST("", service.PostApplication, middleware.BodyDump(service.Webhook.WebhookEventHandler))
 			apiApplications.GET("/:applicationId", service.GetApplication)
 			apiApplications.PATCH("/:applicationId", service.PatchApplication)
 		}

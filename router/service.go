@@ -28,6 +28,9 @@ func NewService() Service {
 	}
 
 	traQClientId := os.Getenv("TRAQ_CLIENT_ID")
+	webhookSecret := os.Getenv("WEBHOOK_SECRET")
+	webhookChannelId := os.Getenv("WEBHOOK_CHANNEL_ID")
+	webhookId := os.Getenv("WEBHOOK_ID")
 
 	gob.Register(model.User{})
 
@@ -38,6 +41,7 @@ func NewService() Service {
 		Images:         model.NewApplicationsImageRepository(&swift),
 		Users:          model.NewUserRepository(),
 		TraQAuth:       model.NewTraQAuthRepository(traQClientId),
+		Webhook:        model.NewWebhookRepository(webhookSecret, webhookChannelId, webhookId),
 	}
 }
 
