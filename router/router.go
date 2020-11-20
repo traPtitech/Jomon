@@ -1,6 +1,8 @@
 package router
 
 import (
+	"strings"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/traPtitech/Jomon/model"
@@ -31,12 +33,22 @@ func SetRouting(e *echo.Echo, service Service) {
 		Root:  "client/dist",
 		HTML5: true,
 	}))
+	e.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
+		Skipper: func(c echo.Context) bool {
+			if strings.HasPrefix(c.Request().URL.String(), "/api/applications") && c.Request().Method == "POST" {
+				return false
+			}
+			return true
+		},
+		Handler: service.Webhook.WebhookEventHandler,
+	}))
+
 	api := e.Group("/api")
 	{
 		apiApplications := api.Group("/applications", service.AuthUserMiddleware)
 		{
 			apiApplications.GET("", service.GetApplicationList)
-			apiApplications.POST("", service.PostApplication, middleware.BodyDump(service.Webhook.WebhookEventHandler))
+			apiApplications.POST("", service.PostApplication)
 			apiApplications.GET("/:applicationId", service.GetApplication)
 			apiApplications.PATCH("/:applicationId", service.PatchApplication)
 		}

@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/jinzhu/gorm"
+	"strings"
 	"time"
+
+	"github.com/jinzhu/gorm"
 
 	"github.com/gofrs/uuid"
 )
@@ -64,6 +66,15 @@ func (ty *ApplicationType) UnmarshalJSON(data []byte) error {
 
 type PaidAt struct {
 	PaidAt time.Time `gorm:"type:date;not null"`
+}
+
+func (pa *PaidAt) UnmarshalJSON(data []byte) error {
+	t, err := time.Parse("2006-01-02", strings.Trim(string(data), `"`))
+	if err != nil {
+		return err
+	}
+	pa.PaidAt = t
+	return nil
 }
 
 func (p PaidAt) MarshalJSON() ([]byte, error) {

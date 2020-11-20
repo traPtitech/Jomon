@@ -49,7 +49,7 @@ func (repo *webhookRepository) WebhookEventHandler(c echo.Context, reqBody, resB
 	content += "\n"
 	content += resApp.LatestApplicationsDetail.Remarks
 
-	_ = RequestWebhook(content, repo.secret, repo.channelId, repo.id, 1)
+	RequestWebhook(content, repo.secret, repo.channelId, repo.id, 1)
 }
 
 func RequestWebhook(message, secret, channelID, webhookID string, embed int) error {
