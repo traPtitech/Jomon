@@ -5,7 +5,6 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -49,39 +48,33 @@ func (repo *webhookRepository) WebhookEventHandler(c echo.Context, reqBody, resB
 	content += "\n"
 	content += resApp.LatestApplicationsDetail.Remarks
 
-	RequestWebhook(content, repo.secret, repo.channelId, repo.id, 1)
-}
-
-func RequestWebhook(message, secret, channelID, webhookID string, embed int) error {
 	u, err := url.Parse("https://q.trap.jp/api/v3/webhooks")
 	if err != nil {
-		return err
+		return
 	}
 
-	u.Path = path.Join(u.Path, webhookID)
+	u.Path = path.Join(u.Path, repo.id)
 	query := u.Query()
-	query.Set("embed", strconv.Itoa(embed))
+	query.Set("embed", strconv.Itoa(1))
 	u.RawQuery = query.Encode()
 
-	req, err := http.NewRequest(http.MethodPost, u.String(), strings.NewReader(message))
+	req, err := http.NewRequest(http.MethodPost, u.String(), strings.NewReader(content))
 	if err != nil {
-		return err
+		return
 	}
 	req.Header.Set(echo.HeaderContentType, echo.MIMETextPlain)
-	req.Header.Set("X-TRAQ-Signature", calcSignature(message, secret))
-	if channelID != "" {
-		req.Header.Set("X-TRAQ-Channel-Id", channelID)
+	req.Header.Set("X-TRAQ-Signature", calcSignature(content, repo.secret))
+	if repo.channelId != "" {
+		req.Header.Set("X-TRAQ-Channel-Id", repo.channelId)
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return
 	}
 	if res.StatusCode >= 400 {
-		return errors.New(http.StatusText(res.StatusCode))
+		return
 	}
-	return nil
-
 }
 
 func calcSignature(message, secret string) string {
