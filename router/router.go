@@ -1,6 +1,7 @@
 package router
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -35,7 +36,7 @@ func SetRouting(e *echo.Echo, service Service) {
 	}))
 	e.Use(middleware.BodyDumpWithConfig(middleware.BodyDumpConfig{
 		Skipper: func(c echo.Context) bool {
-			if strings.HasPrefix(c.Request().URL.String(), "/api/applications") && c.Request().Method == "POST" {
+			if strings.HasPrefix(c.Request().URL.String(), "/api/applications") && c.Request().Method == "POST" && c.Response().Status == http.StatusOK {
 				return false
 			}
 			return true
