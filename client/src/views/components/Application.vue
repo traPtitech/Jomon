@@ -3,12 +3,12 @@
     <v-row class="md5">
       <v-col cols="2" class="text-lg-right">
         <div>
-          <StateChip
+          <state-chip
             v-if="list.current_state !== ''"
             :width="10"
             :state="list.current_state"
             style="width: 7em"
-          ></StateChip>
+          ></state-chip>
         </div>
       </v-col>
       <v-col cols="4">{{ list.current_detail.title }}</v-col>

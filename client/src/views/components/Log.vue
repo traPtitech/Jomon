@@ -97,10 +97,10 @@
         が
         <span :class="larger_size">
           申請の状態を
-          <StateChip :state="log.content.to_state" />に変更しました。
+          <state-chip :state="log.content.to_state" />に変更しました。
         </span>
         <span :class="smaller_size">
-          <StateChip :state="log.content.to_state" size="small" />に変更
+          <state-chip :state="log.content.to_state" size="small" />に変更
         </span>
       </v-col>
       <v-col class="text-right" cols="2">

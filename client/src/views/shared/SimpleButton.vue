@@ -6,7 +6,6 @@
 
 <script>
 export default {
-  name: "SimpleButton",
   props: {
     label: {
       type: String,
