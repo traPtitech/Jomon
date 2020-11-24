@@ -4,11 +4,12 @@ package router
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/traPtitech/Jomon/model"
 	storagePkg "github.com/traPtitech/Jomon/storage"
-	"os"
 )
 
 //noinspection GoDuplicate
@@ -24,6 +25,10 @@ func NewService() Service {
 		panic(err)
 	}
 
+	webhookSecret := os.Getenv("WEBHOOK_SECRET")
+	webhookChannelId := os.Getenv("WEBHOOK_CHANNEL_ID")
+	webhookId := os.Getenv("WEBHOOK_ID")
+
 	s := Service{
 		Administrators: model.NewAdministratorRepository(),
 		Applications:   model.NewApplicationRepository(),
@@ -38,6 +43,7 @@ func NewService() Service {
 			},
 		},
 		TraQAuth: model.NewTraQAuthRepository(""),
+		Webhook:  model.NewWebhookRepository(webhookSecret, webhookChannelId, webhookId),
 	}
 
 	_ = s.Administrators.AddAdministrator("MyUser")

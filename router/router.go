@@ -31,6 +31,7 @@ func SetRouting(e *echo.Echo, service Service) {
 		Root:  "client/dist",
 		HTML5: true,
 	}))
+
 	api := e.Group("/api")
 	{
 		apiApplications := api.Group("/applications", service.AuthUserMiddleware)
