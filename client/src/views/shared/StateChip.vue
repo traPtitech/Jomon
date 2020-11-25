@@ -1,39 +1,38 @@
 <template>
-  <span class="text-center">
+  <div :class="$style.container">
     <v-chip
       :x-small="size === `x-small`"
       :small="size === `small`"
       :large="size === `large`"
       :x-large="size === `x-large`"
-      :class="chip"
+      :class="chip_style"
       label
     >
-      {{ state_text }}
+      {{ state_ja }}
     </v-chip>
-  </span>
+  </div>
 </template>
 
 <script>
 export default {
-  name: "StateChip",
   computed: {
-    state_text() {
+    state_ja() {
       switch (this.state) {
         case "submitted":
-          return "提出済";
-        case "rejected":
-          return "却下";
+          return "承認待ち";
         case "fix_required":
           return "要修正";
         case "accepted":
-          return "許可済";
+          return "承認済み";
         case "fully_repaid":
-          return "払戻完";
+          return "返済完了";
+        case "rejected":
+          return "却下";
         default:
-          return "error";
+          return "ERROR";
       }
     },
-    chip() {
+    chip_style() {
       switch (this.state) {
         case "submitted":
           return "yellow black--text";
@@ -53,8 +52,7 @@ export default {
 
   props: {
     state: {
-      type: String,
-      default: "fail"
+      type: String
     },
     size: {
       type: String,
@@ -63,3 +61,10 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" module>
+.container {
+  min-width: 120px;
+  margin: 0 4px;
+}
+</style>

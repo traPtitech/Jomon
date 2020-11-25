@@ -1,28 +1,26 @@
 <template>
-  <v-container>
-    <v-row class="md5">
-      <v-col cols="2" class="text-lg-right">
-        <div>
-          <state-chip
-            v-if="list.current_state !== ''"
-            :width="10"
-            :state="list.current_state"
-            style="width: 7em"
-          ></state-chip>
-        </div>
-      </v-col>
-      <v-col cols="4">{{ list.current_detail.title }}</v-col>
-      <v-col cols="4" class="text-lg-left">{{ list.applicant.trap_id }}</v-col>
-      <v-col cols="2">{{ list.current_detail.amount }}</v-col>
-    </v-row>
-  </v-container>
+  <v-row>
+    <v-col cols="2" class="text-lg-right">
+      <div>
+        <state-chip
+          v-if="list.current_state !== ''"
+          :state="list.current_state"
+        ></state-chip>
+      </div>
+    </v-col>
+    <v-col cols="4">{{ list.current_detail.title }}</v-col>
+    <v-col cols="4" class="text-lg-left">{{ list.applicant.trap_id }}</v-col>
+    <v-col cols="2">{{ list.current_detail.amount }}</v-col>
+  </v-row>
 </template>
 
 <script>
 import StateChip from "../shared/StateChip";
 
 export default {
-  name: "Applicaton",
+  components: {
+    StateChip
+  },
   props: {
     list: {
       application_id: String,
@@ -45,9 +43,6 @@ export default {
       },
       current_state: String
     }
-  },
-  components: {
-    StateChip
   }
 };
 </script>

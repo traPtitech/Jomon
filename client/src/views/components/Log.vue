@@ -123,8 +123,7 @@
           <strong :class="strong_text">
             {{ log.content.log.update_user.trap_id }}
           </strong>
-          が修正
-          <span :class="larger_size">しました。</span>
+          が修正しました。
         </v-col>
         <v-col class="text-right" cols="2"
           >{{ dayPrint(log.content.log.updated_at) }}
