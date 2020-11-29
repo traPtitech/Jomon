@@ -64,7 +64,6 @@ export default {
 
 <style lang="scss" module>
 .container {
-  min-width: 120px;
   margin: 0 4px;
 }
 </style>

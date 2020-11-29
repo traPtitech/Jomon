@@ -1,24 +1,28 @@
 <!-- 受け取ったデータを基に申請詳細ページの下半分にログ、コメント等配置 -->
 <template>
-  <v-card :class="$style.card" outlined tile>
-    <v-row :class="$style.title_container">
-      <div :class="$style.title">
-        <h1>{{ returnType(this.detail.core.current_detail.type) }}申請</h1>
-        <state-chip :state="this.detail.core.current_state" />
+  <div :class="$style.container">
+    <div :class="$style.title_container">
+      <div :class="$style.header">
+        <div :class="$style.title">
+          <h1>{{ returnType(this.detail.core.current_detail.type) }}申請</h1>
+          <state-chip :state="this.detail.core.current_state" />
+        </div>
+        <state-button-controller />
       </div>
-      <v-col>
-        <div>申請日: {{ returnDate(this.detail.core.created_at) }}</div>
+    </div>
+
+    <div>
+      <div>申請日: {{ returnDate(this.detail.core.created_at) }}</div>
+      <v-divider></v-divider>
+      <div>
+        申請者:
+        <Icon :user="this.detail.core.applicant.trap_id" :size="24" />
+        {{ this.detail.core.applicant.trap_id }}
+      </div>
+      <div>
         <v-divider></v-divider>
-        <div>
-          申請者:
-          <Icon :user="this.detail.core.applicant.trap_id" :size="24" />
-          {{ this.detail.core.applicant.trap_id }}
-        </div>
-        <div>
-          <v-divider></v-divider>
-        </div>
-      </v-col>
-    </v-row>
+      </div>
+    </div>
 
     <div>
       <div class="grey--text">概要</div>
@@ -83,21 +87,22 @@
 
     <div>
       <div class="grey--text">画像</div>
-      <div
-        :class="$style.image"
-        :key="path"
-        v-for="path in this.detail.core.images"
-      >
-        <v-img :src="`/api/images/${path}`" />
+      <div :class="$style.image_container">
+        <img
+          :key="path"
+          v-for="path in this.detail.core.images"
+          :src="`/api/images/${path}`"
+        />
       </div>
       <div v-if="this.detail.core.images.length === 0">画像はありません</div>
     </div>
-  </v-card>
+  </div>
 </template>
 
 <script>
 import Icon from "@/views/shared/Icon";
 import StateChip from "@/views/shared/StateChip";
+import StateButtonController from "@/views/components/StateButtonController";
 import { mapState } from "vuex";
 import { remarksTitle, applicationType } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
@@ -105,7 +110,8 @@ import { dayPrint } from "@/use/dataFormat";
 export default {
   components: {
     Icon,
-    StateChip
+    StateChip,
+    StateButtonController
   },
   computed: {
     ...mapState({ detail: "application_detail_paper" })
@@ -125,22 +131,25 @@ export default {
 </script>
 
 <style lang="scss" module>
-.card {
-  margin: 24px;
+.container {
+  height: fit-content;
+  margin: 12px;
   padding: 8px;
-  max-width: 1200px;
+  border: 1px solid #cccccc;
 }
-.title_container {
-  margin: 8px;
+.header {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
 }
 .title {
   display: flex;
   align-items: center;
 }
-.image {
+
+.image_container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
   gap: 16px;
 }
 </style>

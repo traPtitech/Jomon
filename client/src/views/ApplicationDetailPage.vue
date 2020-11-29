@@ -1,32 +1,25 @@
 <!-- 申請ページ描画画面制御 -->
-<!-- コンポーネント配置とaxiosで受け取ったjsonを分割し各コンポーネントに渡す-->
-<!-- todo 返金の操作ボタン -->
 <template>
-  <div v-if="this.loading">loading</div>
-  <div v-else class="application-detail">
+  <div v-if="this.loading">loading...</div>
+  <div v-else :class="$style.container">
     <!-- todo storeのfixで制御する、このページのcreatedでstoreのfixはfalseに。 -->
-    <div>
-      <application-paper v-if="!this.detail.fix" />
-      <fix-application-paper v-else />
-      <state-button-controller />
-    </div>
+    <application-paper :class="$style.paper" v-if="!this.detail.fix" />
+    <fix-application-paper :class="$style.paper" v-else />
     <application-logs />
   </div>
 </template>
 
 <script>
-import ApplicationPaper from "./components/ApplicationDetail";
-import FixApplicationPaper from "./components/FixApplicationDetail";
-import ApplicationLogs from "./components/ApplicationDetailLogs";
-import StateButtonController from "./components/StateButtonController";
+import ApplicationPaper from "@/views/components/ApplicationDetail";
+import FixApplicationPaper from "@/views/components/FixApplicationDetail";
+import ApplicationLogs from "@/views/components/ApplicationDetailLogs";
 import { mapState, mapActions, mapMutations } from "vuex";
 
 export default {
   components: {
     ApplicationPaper,
     FixApplicationPaper,
-    ApplicationLogs,
-    StateButtonController
+    ApplicationLogs
   },
   data() {
     return {
@@ -47,3 +40,20 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" module>
+.container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+.paper {
+  max-width: 60vw;
+}
+@media (max-width: $breakpoint) {
+  .paper {
+    max-width: 100%;
+  }
+}
+</style>
