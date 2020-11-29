@@ -58,18 +58,16 @@
 
     <div>
       <div class="grey--text">払い戻し対象者</div>
-      <v-row>
-        <v-col cols="12" sm="5" class="pt-0 pb-0">
-          <div
-            :key="user.repaid_to_user.trap_id"
-            v-for="user in this.detail.core.repayment_logs"
-          >
-            <Icon :user="user.repaid_to_user.trap_id" :size="25" />
-            {{ user.repaid_to_user.trap_id }}
-          </div>
-          <v-divider></v-divider>
-        </v-col>
-      </v-row>
+      <div :class="$style.target_container">
+        <div
+          :key="user.repaid_to_user.trap_id"
+          v-for="user in this.detail.core.repayment_logs"
+        >
+          <Icon :user="user.repaid_to_user.trap_id" :size="25" />
+          {{ user.repaid_to_user.trap_id }}
+        </div>
+      </div>
+      <v-divider></v-divider>
     </div>
 
     <div>
@@ -146,7 +144,11 @@ export default {
   display: flex;
   align-items: center;
 }
-
+.target_container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 16px;
+}
 .image_container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
