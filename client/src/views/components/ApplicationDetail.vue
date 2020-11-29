@@ -13,12 +13,14 @@
 
     <div :class="$style.section">
       <div :class="$style.section_title">申請日</div>
-      <div>{{ returnDate(this.detail.core.created_at) }}</div>
+      <div :class="$style.section_item">
+        {{ returnDate(this.detail.core.created_at) }}
+      </div>
     </div>
 
     <div :class="$style.section">
       <div :class="$style.section_title">申請者</div>
-      <div>
+      <div :class="$style.section_item">
         <Icon :user="this.detail.core.applicant.trap_id" :size="24" />
         {{ this.detail.core.applicant.trap_id }}
       </div>
@@ -26,21 +28,23 @@
 
     <div :class="$style.section">
       <div :class="$style.section_title">概要</div>
-      <div>
+      <div :class="$style.section_item">
         {{ this.detail.core.current_detail.title }}
       </div>
     </div>
 
     <div :class="$style.section">
       <div :class="$style.section_title">支払日</div>
-      <div>
+      <div :class="$style.section_item">
         {{ returnDate(this.detail.core.current_detail.paid_at) }}
       </div>
     </div>
 
     <div :class="$style.section">
       <div :class="$style.section_title">支払金額</div>
-      <div>{{ this.detail.core.current_detail.amount }}円</div>
+      <div :class="$style.section_item">
+        {{ this.detail.core.current_detail.amount }}円
+      </div>
     </div>
 
     <div :class="$style.section">
@@ -60,7 +64,9 @@
       <div :class="$style.section_title">
         {{ returnRemarksTitle(this.detail.core.current_detail.type) }}
       </div>
-      <div>{{ this.detail.core.current_detail.remarks }}</div>
+      <div :class="$style.section_item">
+        {{ this.detail.core.current_detail.remarks }}
+      </div>
     </div>
 
     <!-- 最後のsectionなのでスタイルを当てなくてもOK -->
@@ -126,11 +132,14 @@ export default {
   align-items: center;
 }
 .section {
-  margin: 8px 0;
+  margin: 16px 0;
   border-bottom: 1px solid $color-grey;
 }
 .section_title {
   color: $color-text-primary-disabled;
+}
+.section_item {
+  margin-left: 8px;
 }
 .target_container {
   display: grid;
