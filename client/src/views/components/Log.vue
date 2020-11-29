@@ -201,8 +201,8 @@
 </template>
 
 <script>
-import Icon from "../shared/Icon";
-import StateChip from "../shared/StateChip";
+import Icon from "@/views/shared/Icon";
+import StateChip from "@/views/shared/StateChip";
 import Vue from "vue";
 import { mapActions } from "vuex";
 import axios from "axios";
