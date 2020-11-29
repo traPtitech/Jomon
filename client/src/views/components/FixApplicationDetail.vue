@@ -194,17 +194,17 @@
 
 <script>
 import axios from "axios";
-import Icon from "../shared/Icon";
-import ImageUploader from "../shared/ImageUploader";
+import Icon from "@/views/shared/Icon";
+import ImageUploader from "@/views/shared/ImageUploader";
 import { mapActions } from "vuex";
 import { mapState, mapMutations } from "vuex";
 import {
   titlePlaceholder,
   remarksPlaceholder,
   remarksHint
-} from "../../use/inputFormText";
-import { remarksTitle } from "../../use/applicationDetail";
-import { dayPrint } from "../../use/dataFormat";
+} from "@/use/inputFormText";
+import { remarksTitle } from "@/use/applicationDetail";
+import { dayPrint } from "@/use/dataFormat";
 
 export default {
   data: function () {

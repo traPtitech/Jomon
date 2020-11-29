@@ -20,8 +20,8 @@
   </div>
 </template>
 <script>
-import { applicationType } from "../../use/applicationDetail";
-import { numberFormat, dayPrint } from "../../use/dataFormat";
+import { applicationType } from "@/use/applicationDetail";
+import { numberFormat, dayPrint } from "@/use/dataFormat";
 
 export default {
   name: "ApplicationDetailDefference",

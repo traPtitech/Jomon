@@ -151,9 +151,9 @@ import {
   titlePlaceholder,
   remarksPlaceholder,
   remarksHint
-} from "../use/inputFormText";
-import { remarksTitle, applicationType } from "../use/applicationDetail";
-import { dayPrint } from "../use/dataFormat";
+} from "@/use/inputFormText";
+import { remarksTitle, applicationType } from "@/use/applicationDetail";
+import { dayPrint } from "@/use/dataFormat";
 
 export default {
   data: () => ({

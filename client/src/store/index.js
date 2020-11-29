@@ -1,9 +1,9 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import { me } from "./me";
-import { applicationList } from "./applicationList";
-import { applicationDetail } from "./applicationDetail";
-import { userList } from "./userList";
+import { me } from "@/store/me";
+import { applicationList } from "@/store/applicationList";
+import { applicationDetail } from "@/store/applicationDetail";
+import { userList } from "@/store/userList";
 
 Vue.use(Vuex);
 export default new Vuex.Store({

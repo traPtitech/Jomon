@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import StateChip from "../shared/StateChip";
+import StateChip from "@/views/shared/StateChip";
 
 export default {
   components: {

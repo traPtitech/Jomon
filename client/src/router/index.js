@@ -1,11 +1,11 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import ApplicationListPage from "../views/ApplicationListPage.vue";
-import ApplicationDetailPage from "../views/ApplicationDetailPage.vue";
-import AdminPage from "../views/AdminPage";
-import NewApplicationPage from "../views/NewApplicationPage.vue";
-import store from "../store";
-import { redirectAuthEndpoint } from "../utils/api";
+import ApplicationListPage from "@/views/ApplicationListPage.vue";
+import ApplicationDetailPage from "@/views/ApplicationDetailPage.vue";
+import AdminPage from "@/views/AdminPage";
+import NewApplicationPage from "@/views/NewApplicationPage.vue";
+import store from "@/store";
+import { redirectAuthEndpoint } from "@/use/api";
 
 Vue.use(VueRouter);
 
