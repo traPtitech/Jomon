@@ -11,80 +11,67 @@
       </div>
     </div>
 
-    <div>
-      <div>申請日: {{ returnDate(this.detail.core.created_at) }}</div>
-      <v-divider></v-divider>
-      <div>
-        申請者:
+    <div :class="$style.section">
+      <div :class="$style.section_title">申請日</div>
+      <div :class="$style.section_item">
+        {{ returnDate(this.detail.core.created_at) }}
+      </div>
+    </div>
+
+    <div :class="$style.section">
+      <div :class="$style.section_title">申請者</div>
+      <div :class="$style.section_item">
         <Icon :user="this.detail.core.applicant.trap_id" :size="24" />
         {{ this.detail.core.applicant.trap_id }}
       </div>
-      <div>
-        <v-divider></v-divider>
-      </div>
     </div>
 
-    <div>
-      <div class="grey--text">概要</div>
-      <div class="headline">
+    <div :class="$style.section">
+      <div :class="$style.section_title">概要</div>
+      <div :class="$style.section_item">
         {{ this.detail.core.current_detail.title }}
       </div>
-      <v-divider></v-divider>
     </div>
 
-    <div>
-      <div class="grey--text">支払日</div>
-      <v-row>
-        <v-col cols="12" sm="5" class="pt-0 pb-0">
-          <div class="headline">
-            {{ returnDate(this.detail.core.current_detail.paid_at) }}
-          </div>
-          <v-divider></v-divider>
-        </v-col>
-      </v-row>
+    <div :class="$style.section">
+      <div :class="$style.section_title">支払日</div>
+      <div :class="$style.section_item">
+        {{ returnDate(this.detail.core.current_detail.paid_at) }}
+      </div>
     </div>
 
-    <div>
-      <div class="grey--text">支払金額</div>
-      <v-row>
-        <v-col cols="12" sm="5" class="pt-0 pb-0">
-          <div class="headline">
-            {{ this.detail.core.current_detail.amount }}円
-          </div>
-          <v-divider></v-divider>
-        </v-col>
-      </v-row>
+    <div :class="$style.section">
+      <div :class="$style.section_title">支払金額</div>
+      <div :class="$style.section_item">
+        {{ this.detail.core.current_detail.amount }}円
+      </div>
     </div>
 
-    <div>
-      <div class="grey--text">払い戻し対象者</div>
+    <div :class="$style.section">
+      <div :class="$style.section_title">払い戻し対象者</div>
       <div :class="$style.target_container">
         <div
           :key="user.repaid_to_user.trap_id"
           v-for="user in this.detail.core.repayment_logs"
         >
-          <Icon :user="user.repaid_to_user.trap_id" :size="25" />
+          <Icon :user="user.repaid_to_user.trap_id" :size="24" />
           {{ user.repaid_to_user.trap_id }}
         </div>
       </div>
-      <v-divider></v-divider>
     </div>
 
-    <div>
-      <div class="grey--text">
+    <div :class="$style.section">
+      <div :class="$style.section_title">
         {{ returnRemarksTitle(this.detail.core.current_detail.type) }}
       </div>
-      <div class="headline">
-        <p
-          style="white-space: pre-wrap"
-          v-text="this.detail.core.current_detail.remarks"
-        ></p>
+      <div :class="$style.section_item">
+        {{ this.detail.core.current_detail.remarks }}
       </div>
-      <v-divider></v-divider>
     </div>
 
+    <!-- 最後のsectionなのでスタイルを当てなくてもOK -->
     <div>
-      <div class="grey--text">画像</div>
+      <div :class="$style.section_title">画像</div>
       <div :class="$style.image_container">
         <img
           :key="path"
@@ -133,7 +120,7 @@ export default {
   height: fit-content;
   margin: 12px;
   padding: 8px;
-  border: 1px solid #cccccc;
+  border: 1px solid $color-grey;
 }
 .header {
   display: flex;
@@ -144,14 +131,26 @@ export default {
   display: flex;
   align-items: center;
 }
+.section {
+  margin: 16px 0;
+  border-bottom: 1px solid $color-grey;
+}
+.section_title {
+  color: $color-text-primary-disabled;
+}
+.section_item {
+  margin-left: 8px;
+}
 .target_container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   gap: 16px;
+  padding: 8px;
 }
 .image_container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
   gap: 16px;
+  padding: 8px;
 }
 </style>
