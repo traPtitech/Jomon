@@ -10,16 +10,21 @@
 $color-primary: #2f9393;
 $color-primary-hover: #4f9393;
 $color-primary-disabled: #6f9393;
+$color-primary-accent: #52254f;
 
 $color-secondary: #011A27;
 $color-secondary-hover:  #00103a;
 $color-secondary-disabled: #00669c;
+$color-secondary-accent: #e0bfde;
 
+$color-grey: #cccccc;
+$color-info: #00d3ee;
+$color-success: #5cb860;
 $color-warning: #F0810F;
 $color-error: #f33a2d;
 
 $color-text-primary: #ffffff;
-$color-text-primary-disabled:#ffffff5b;
+$color-text-primary-disabled:#888888;
 
 $color-text-secondary:  #011A27;
 $color-text-secondary-disabled: #011A275b;
@@ -29,3 +34,5 @@ $color-text-white: #eeeeee;
 $color-background: #eeeeee;
 
 $breakpoint: 768px;
+
+
