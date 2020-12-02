@@ -138,34 +138,31 @@
 
         <div>
           <h3 class="ml-0 mr-0">画像</h3>
-          <div
-            :class="$style.image"
-            :key="path"
-            v-for="(path, index) in this.detail.core.images"
-          >
-            <span v-if="images_change[index]">
-              <v-btn
-                rounded
-                color="primary"
-                name="delete"
-                @click="deleteImage(index)"
-              >
-                delete
-              </v-btn>
-              <v-img :src="`/api/images/${path}`" max-width="80%" />
-            </span>
-            <span v-else>
-              <v-btn
-                rounded
-                color="primary"
-                name="cancel"
-                @click="cancelDeleteImage(index)"
-              >
-                cancel
-              </v-btn>
-            </span>
+          <div :class="$style.image_container">
+            <div :key="path" v-for="(path, index) in this.detail.core.images">
+              <span v-if="images_change[index]">
+                <img :src="`/api/images/${path}`" />
+                <v-btn
+                  rounded
+                  color="primary"
+                  name="delete"
+                  @click="deleteImage(index)"
+                >
+                  delete
+                </v-btn>
+              </span>
+              <span v-else>
+                <v-btn
+                  rounded
+                  color="primary"
+                  name="cancel"
+                  @click="cancelDeleteImage(index)"
+                >
+                  cancel
+                </v-btn>
+              </span>
+            </div>
           </div>
-
           <h3 class="ml-0 mr-0">画像を追加</h3>
           <image-uploader v-model="imageBlobs" />
         </div>
@@ -369,9 +366,35 @@ export default {
 </script>
 
 <style lang="scss" module>
-.image {
+.container {
+  height: fit-content;
+  margin: 12px;
+  padding: 8px;
+  border: 1px solid $color-grey;
+}
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.title {
+  display: flex;
+  align-items: center;
+}
+.section {
+  margin: 16px 0;
+  border-bottom: 1px solid $color-grey;
+}
+.section_title {
+  color: $color-text-primary-disabled;
+}
+.section_item {
+  margin-left: 8px;
+}
+.image_container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
   gap: 16px;
+  padding: 8px;
 }
 </style>
