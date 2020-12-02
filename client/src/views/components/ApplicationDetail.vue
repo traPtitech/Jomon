@@ -1,14 +1,12 @@
 <!-- 受け取ったデータを基に申請詳細ページの下半分にログ、コメント等配置 -->
 <template>
   <div :class="$style.container">
-    <div :class="$style.title_container">
-      <div :class="$style.header">
-        <div :class="$style.title">
-          <h1>{{ returnType(this.detail.core.current_detail.type) }}申請</h1>
-          <state-chip :state="this.detail.core.current_state" />
-        </div>
-        <state-button-controller />
+    <div :class="$style.header">
+      <div :class="$style.title">
+        <h1>{{ returnType(this.detail.core.current_detail.type) }}申請</h1>
+        <state-chip :state="this.detail.core.current_state" />
       </div>
+      <state-button-controller />
     </div>
 
     <div :class="$style.section">

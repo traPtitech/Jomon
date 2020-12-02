@@ -1,31 +1,25 @@
 <template>
-  <!-- repuid_to_userについては実際のサーバーでうまくいくか確認する。おそらくリスト取得がフォーカス後なのでうまくいかない -->
-  <v-container>
+  <div :class="$style.container">
     <v-form ref="form" v-model="valid" lazy-validation>
-      <v-card class="ml-2 mr-2 mt-2 pa-3" tile>
-        <v-row class="ml-4 mr-4" :justify="`space-between`">
-          <v-col cols="12" sm="8" class="pt-0 pb-0">
-            <h1>
-              <v-row>
-                <v-col cols="8">
-                  <v-select
-                    v-model="type_object"
-                    :items="types"
-                    item-text="jpn"
-                    item-value="type"
-                    label="Select"
-                    persistent-hint
-                    return-object
-                    single-line
-                    dense
-                  ></v-select>
-                </v-col>
-                <v-col cols="4">申請</v-col>
-              </v-row>
-            </h1>
-          </v-col>
+      <div>
+        <div :class="$style.header"> 
+          <h1 :class="$style.title">
+            <v-select
+              v-model="type_object"
+              :items="types"
+              item-text="jpn"
+              item-value="type"
+              label="Select"
+              persistent-hint
+              return-object
+              single-line
+              dense
+              :class="$style.selector"
+            ></v-select>
+            申請
+          </h1>
 
-          <v-col cols="12" sm="4" class="pt-0 pb-0">
+          <div>
             <div>申請日: {{ returnDate(this.detail.core.created_at) }}</div>
             <v-divider></v-divider>
             <div>
@@ -36,8 +30,8 @@
             <div>
               <v-divider></v-divider>
             </div>
-          </v-col>
-        </v-row>
+          </div>
+        </div>
 
         <template>
           <v-divider class="mt-1 mb-2"></v-divider>
@@ -166,7 +160,7 @@
           <h3 class="ml-0 mr-0">画像を追加</h3>
           <image-uploader v-model="imageBlobs" />
         </div>
-      </v-card>
+      </div>
 
       <!-- todo focusしていないところのvalidateが機能していない -->
 
@@ -186,7 +180,7 @@
         >OK
       </v-btn>
     </v-snackbar>
-  </v-container>
+  </div>
 </template>
 
 <script>
@@ -379,7 +373,9 @@ export default {
 }
 .title {
   display: flex;
-  align-items: center;
+}
+.selector {
+  flex: 0;
 }
 .section {
   margin: 16px 0;
