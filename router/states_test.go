@@ -52,15 +52,15 @@ func TestPutState(t *testing.T) {
 	adminRepMock.On("IsAdmin", "AnotherId").Return(false, nil)
 	adminRepMock.On("IsAdmin", "AdminUserId").Return(true, nil)
 
-	toStateAccepted, err := model.StateType{Type: model.Accepted}.MarshalJSON()
+	toStateAccepted, err := (&model.StateType{Type: model.Accepted}).MarshalJSON()
 	if err != nil {
 		panic(err)
 	}
-	toStateFixRequired, err := model.StateType{Type: model.FixRequired}.MarshalJSON()
+	toStateFixRequired, err := (&model.StateType{Type: model.FixRequired}).MarshalJSON()
 	if err != nil {
 		panic(err)
 	}
-	toStateSubmitted, err := model.StateType{Type: model.Submitted}.MarshalJSON()
+	toStateSubmitted, err := (&model.StateType{Type: model.Submitted}).MarshalJSON()
 	if err != nil {
 		panic(err)
 	}
@@ -571,7 +571,7 @@ func TestPutRepaidStates(t *testing.T) {
 	adminRepMock := NewAdministratorRepositoryMock("AdminUserId")
 	adminRepMock.On("IsAdmin", userId).Return(true, nil)
 
-	toStateAccepted, err := model.StateType{Type: model.Accepted}.MarshalJSON()
+	toStateAccepted, err := (&model.StateType{Type: model.Accepted}).MarshalJSON()
 	if err != nil {
 		panic(err)
 	}

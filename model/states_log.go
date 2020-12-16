@@ -3,8 +3,9 @@ package model
 import (
 	"encoding/json"
 	"errors"
-	"github.com/jinzhu/gorm"
 	"time"
+
+	"github.com/jinzhu/gorm"
 
 	"github.com/gofrs/uuid"
 )
@@ -54,7 +55,7 @@ func (ty *StateType) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (ty StateType) MarshalJSON() ([]byte, error) {
+func (ty *StateType) MarshalJSON() ([]byte, error) {
 	switch ty.Type {
 	case Submitted:
 		return json.Marshal("submitted")
