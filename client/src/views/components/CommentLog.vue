@@ -103,7 +103,7 @@ export default {
             "/comments/" +
             this.log.content.comment_id
         )
-        .then(response => console.log(response.status));
+        .catch(e => alert(e));
       alert("コメントを削除しました。");
       this.getApplicationDetail(
         this.$store.state.application_detail_paper.core.application_id
@@ -120,7 +120,10 @@ export default {
             comment: this.comment_change
           }
         )
-        .then(response => console.log(response.status));
+        .catch(e => {
+          alert(e);
+          return;
+        });
       alert("コメントを変更しました");
       this.comment_readonly = true;
       this.getApplicationDetail(

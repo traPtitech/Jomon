@@ -44,14 +44,10 @@ export const applicationList = {
           delete params[key];
         }
       });
-      try {
-        const response = await axios.get("/api/applications", {
-          params
-        });
-        commit("setApplicationList", response.data);
-      } catch (err) {
-        console.log(err);
-      }
+      const response = await axios.get("/api/applications", {
+        params
+      });
+      commit("setApplicationList", response.data);
     }
   }
 };

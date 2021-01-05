@@ -46,7 +46,7 @@ export default {
         await this.addAdminUsers.forEach(user => {
           axios
             .put("api/users/admins", { trap_id: user, to_admin: true })
-            .catch(e => console.log(e));
+            .catch(e => alert(e));
         });
         this.getUserList();
       }
@@ -56,7 +56,7 @@ export default {
         await this.removeAdminUsers.forEach(user => {
           axios
             .put("api/users/admins", { trap_id: user, to_admin: false })
-            .catch(e => console.log(e));
+            .catch(e => alert(e));
         });
       }
       this.getUserList();

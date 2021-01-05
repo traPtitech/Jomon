@@ -18,7 +18,6 @@ export const me = {
         const response = await axios.get("/api/users/me");
         commit("setMe", response.data);
       } catch (err) {
-        console.log(err);
         throw err;
       }
     }
