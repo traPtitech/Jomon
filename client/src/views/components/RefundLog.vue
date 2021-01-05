@@ -20,7 +20,6 @@
 
 <script>
 import Icon from "@/views/shared/Icon";
-import { mapActions } from "vuex";
 
 export default {
   props: {

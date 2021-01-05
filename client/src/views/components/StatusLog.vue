@@ -1,10 +1,12 @@
 <template>
   <v-timeline-item color="red lighten-2" large>
-    <icon :user="log.content.update_user.trap_id" :size="25" />
-    {{ log.content.update_user.trap_id }}
-    が 申請の状態を
-    <state-chip :state="log.content.to_state" />に変更しました。
-    {{ dayPrint(log.content.created_at) }}
+    <div :class="$style.text">
+      <icon :user="log.content.update_user.trap_id" :size="25" />
+      {{ log.content.update_user.trap_id }}
+      が申請の状態を
+      <state-chip :state="log.content.to_state" />に変更しました。
+      {{ dayPrint(log.content.created_at) }}
+    </div>
     <v-card v-if="log.content.reason !== ''">
       <v-card-text> 理由: {{ log.content.reason }} </v-card-text>
     </v-card>
@@ -14,7 +16,6 @@
 <script>
 import Icon from "@/views/shared/Icon";
 import StateChip from "@/views/shared/StateChip";
-import { mapActions } from "vuex";
 
 export default {
   props: {
@@ -53,3 +54,12 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" module>
+.text {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
+  align-items: center;
+}
+</style>
