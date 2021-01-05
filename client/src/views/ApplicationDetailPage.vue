@@ -1,4 +1,3 @@
-<!-- 申請ページ描画画面制御 -->
 <template>
   <div v-if="this.loading">loading...</div>
   <div v-else :class="$style.container">

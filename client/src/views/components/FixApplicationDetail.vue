@@ -2,7 +2,7 @@
   <div :class="$style.container">
     <v-form ref="form" v-model="valid" lazy-validation>
       <div>
-        <div :class="$style.header"> 
+        <div :class="$style.header">
           <h1 :class="$style.title">
             <v-select
               v-model="type_object"
@@ -21,120 +21,85 @@
 
           <div>
             <div>申請日: {{ returnDate(this.detail.core.created_at) }}</div>
-            <v-divider></v-divider>
             <div>
               申請者:
               <Icon :user="this.detail.core.applicant.trap_id" :size="20" />
               {{ this.detail.core.applicant.trap_id }}
             </div>
-            <div>
-              <v-divider></v-divider>
-            </div>
           </div>
         </div>
 
-        <template>
-          <v-divider class="mt-1 mb-2"></v-divider>
-        </template>
+        <v-text-field
+          v-model="title_change"
+          :rules="nullRules"
+          label="概要"
+          filled
+          :placeholder="returnTitlePlaceholder(this.type_object.type)"
+        ></v-text-field>
+
+        <v-menu
+          v-model="menu"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          offset-y
+        >
+          <template v-slot:activator="{ on }">
+            <v-text-field
+              v-model="computedDateFormatted"
+              :rules="nullRules"
+              label="支払日"
+              filled
+              readonly
+              placeholder="2020年5月2日"
+              v-on="on"
+            ></v-text-field>
+          </template>
+          <v-date-picker
+            v-model="paid_at_change"
+            no-title
+            @input="menu = false"
+          ></v-date-picker>
+        </v-menu>
+
+        <v-text-field
+          v-model="amount_change"
+          :rules="amountRules"
+          type="number"
+          label="支払金額"
+          placeholder="100"
+          suffix="円"
+        ></v-text-field>
+
+        <v-autocomplete
+          ref="traPID"
+          v-model="repaid_to_id_change"
+          :rules="[
+            () => !(repaid_to_id_change === 0) || '返金対象者は一人以上必要です'
+          ]"
+          label="返金対象者"
+          filled
+          :items="traPIDs"
+          placeholder="traQIDs"
+          hint="traQ IDの一部入力で候補が表示されます"
+          required
+          multiple
+        />
+
+        <v-textarea
+          v-model="remarks_change"
+          :rules="nullRules"
+          filled
+          :label="returnRemarksTitle(this.type_object.type)"
+          :placeholder="returnRemarksPlaceholder(this.type_object.type)"
+          :hint="returnRemarksHint(this.type_object.type)"
+          auto-grow
+        ></v-textarea>
 
         <div>
-          <v-text-field
-            v-model="title_change"
-            :rules="nullRules"
-            label="概要"
-            filled
-            :placeholder="returnTitlePlaceholder(this.type_object.type)"
-          ></v-text-field>
-        </div>
-
-        <div>
-          <v-row>
-            <v-col cols="10" sm="5" class="pb-0 pt-0">
-              <v-menu
-                v-model="menu"
-                :close-on-content-click="false"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-text-field
-                    v-model="computedDateFormatted"
-                    :rules="nullRules"
-                    label="支払日"
-                    filled
-                    readonly
-                    placeholder="2020年5月2日"
-                    v-on="on"
-                    height="10"
-                    color="primary"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="paid_at_change"
-                  no-title
-                  color="primary"
-                  @input="menu = false"
-                ></v-date-picker>
-              </v-menu>
-            </v-col>
-          </v-row>
-        </div>
-
-        <div>
-          <v-row align="center">
-            <v-col cols="10" sm="5" class="pb-0 pt-0">
-              <v-text-field
-                v-model="amount_change"
-                :rules="amountRules"
-                type="number"
-                label="支払金額"
-                placeholder="100"
-                class="pa-0"
-                height="25"
-                suffix="円"
-              ></v-text-field>
-            </v-col>
-          </v-row>
-        </div>
-
-        <div>
-          <v-autocomplete
-            ref="traPID"
-            v-model="repaid_to_id_change"
-            :rules="[
-              () =>
-                !(repaid_to_id_change === 0) || '返金対象者は一人以上必要です'
-            ]"
-            label="返金対象者"
-            filled
-            :items="traPIDs"
-            placeholder="traQIDs"
-            hint="traQ IDの一部入力で候補が表示されます"
-            required
-            multiple
-          >
-          </v-autocomplete>
-        </div>
-
-        <div>
-          <v-textarea
-            v-model="remarks_change"
-            :rules="nullRules"
-            filled
-            :label="returnRemarksTitle(this.type_object.type)"
-            :placeholder="returnRemarksPlaceholder(this.type_object.type)"
-            :hint="returnRemarksHint(this.type_object.type)"
-            auto-grow
-          ></v-textarea>
-        </div>
-
-        <div>
-          <h3 class="ml-0 mr-0">画像</h3>
+          <h3>画像</h3>
           <div :class="$style.image_container">
             <div :key="path" v-for="(path, index) in this.detail.core.images">
-              <span v-if="images_change[index]">
+              <div v-if="images_change[index]">
                 <img :src="`/api/images/${path}`" />
                 <v-btn
                   rounded
@@ -144,8 +109,8 @@
                 >
                   delete
                 </v-btn>
-              </span>
-              <span v-else>
+              </div>
+              <div v-else>
                 <v-btn
                   rounded
                   color="primary"
@@ -154,20 +119,18 @@
                 >
                   cancel
                 </v-btn>
-              </span>
+              </div>
             </div>
           </div>
-          <h3 class="ml-0 mr-0">画像を追加</h3>
+          <h3>画像を追加</h3>
           <image-uploader v-model="imageBlobs" />
         </div>
       </div>
 
-      <!-- todo focusしていないところのvalidateが機能していない -->
-
-      <v-btn :disabled="!valid" @click.stop="submit" class="ma-3"
-        >修正する
-      </v-btn>
-      <v-btn class="ma-3" @click="deleteFix">取り消す</v-btn>
+      <div class="$style.button_container">
+        <simple-button :label="`修正する`" @click.stop="submit" />
+        <simple-button :label="`取り消す`" @click="deleteFix" />
+      </div>
     </v-form>
     <!-- ここ作成したらokを押しても押さなくても自動遷移 -->
     <v-snackbar v-model="snackbar">
@@ -187,6 +150,7 @@
 import axios from "axios";
 import Icon from "@/views/shared/Icon";
 import ImageUploader from "@/views/shared/ImageUploader";
+import SimpleButton from "@/views/shared/SimpleButton";
 import { mapActions } from "vuex";
 import { mapState, mapMutations } from "vuex";
 import {
@@ -198,6 +162,11 @@ import { remarksTitle } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
 
 export default {
+  components: {
+    Icon,
+    ImageUploader,
+    SimpleButton
+  },
   data: function () {
     return {
       response: {
@@ -350,11 +319,6 @@ export default {
       this.snackbar = false;
       this.deleteFix();
     }
-  },
-  props: {},
-  components: {
-    Icon,
-    ImageUploader
   }
 };
 </script>
@@ -373,6 +337,7 @@ export default {
 }
 .title {
   display: flex;
+  flex: 1;
 }
 .selector {
   flex: 0;
