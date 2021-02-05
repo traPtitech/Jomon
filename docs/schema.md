@@ -38,13 +38,13 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 
 ## request_status
 #### 依頼の状態
-状態の変更があるたびにレコードを作成。`accepted`は対応する依頼のレコード全ての``client`に対して
+状態の変更があるたびにレコードを作成。`accepted`は対応する依頼のレコード全ての`client`に対して
 
 | Field      | Type        | Null | Key | Default           | Extra          | 説明など                           |
 | ---------- | ----------- | ---- | --- | ----------------- | -------------- | ---------------------------------- |
 | id         | int(11)     | NO   | PRI | NULL              | auto_increment | コメントID                         |
 | request_id | varchar(36) | NO   | MUL | NULL              | index          | 依頼への参照**Parents:request.id** |
-| status     | enum        | NO   |     | NULL              |                |   1(submitted) ,2(fix_required), 3(accepted), 4(fully_repaid), 5(rejected)    |
+| status     | enum        | NO   |     | NULL              |                |  submitted ,fix_required, accepted, fully_paid, rejected    |
 | created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |                | コメントが作成された日時           |
 
 ## file
