@@ -33,7 +33,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | amount     | int(11)     | NO   |       | NULL    |       | 申請金額                           |
 | client     | varchar(64) | NO   |       | NULL    |       | 入金元or出金先(amountの正負で判定) |
 | request_id | varchar(36) | YES  | MUL | NULL    |   index    | 依頼への参照(NULLのときは依頼なし)**Parents:request.id** |
-| created_at           | datetime            |  NO    |  index     |   CURRENT_TIMESTAMP      |       |                           トランザクションが作成された時間         |
+| created_at           | datetime            |  NO    |       |   CURRENT_TIMESTAMP      | index      |                           トランザクションが作成された時間         |
 
 
 ## request_status
@@ -53,7 +53,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | Field      | Type     | Null | Key  | Default           | Extra | 説明など                           |
 | ---------- | -------- | ---- | ---- | ----------------- | ----- | ---------------------------------- |
 | id         | char(36) | NO   | PRI  | NULL              |       | uuid                               |
-| request_id | char(36) | NO   | MULL | NULL              |       | 依頼への参照**Parents:request.id** |
+| request_id | char(36) | NO   | MUL | NULL              |       | 依頼への参照**Parents:request.id** |
 | mime_type  | text     | NO   |      | NULL              |       | フォーマット                       |
 | created_at | datetime | NO   |      | CURRENT_TIMESTAMP |       | 登録された日時                     |
 | deleted_at | datetime    | YES  |     | NULL              |                             | 削除された日時           |
