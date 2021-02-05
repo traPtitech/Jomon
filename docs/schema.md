@@ -19,7 +19,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | id         | varchar(36) | NO   | PRI | NULL    |       | uuid                               |
 | created_by | varchar(32) | NO   |     | NULL    |       | traP ID                            |
 | amount     | int(11)     | NO   |     | NULL    |       | 申請金額                           |
-| client     | varchar(64) | NO   |     | NULL    |       | 入金元or出金先(amountの正負で判定) |
+| target     | varchar(64) | NO   |     | NULL    |       | 入金元or出金先(amountの正負で判定) |
 |     created_at       |    datetime         |   NO   |     |     CURRENT_TIMESTAMP    |       |               依頼が作成された時間                     |
 
 
@@ -31,7 +31,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | ---------- | ----------- | ---- | ----- | ------- | ----- | ---------------------------------- |
 | id         | char(36)    | NO   | PRI   | NULL    |       | uuid                               |
 | amount     | int(11)     | NO   |       | NULL    |       | 申請金額                           |
-| client     | varchar(64) | NO   |       | NULL    |       | 入金元or出金先(amountの正負で判定) |
+| target     | varchar(64) | NO   |       | NULL    |       | 入金元or出金先(amountの正負で判定) |
 | request_id | varchar(36) | YES  | MUL | NULL    |   index    | 依頼への参照(NULLのときは依頼なし)**Parents:request.id** |
 | created_at           | datetime            |  NO    |       |   CURRENT_TIMESTAMP      | index      |                           トランザクションが作成された時間         |
 
