@@ -19,7 +19,6 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | id         | varchar(36) | NO   | PRI | NULL    |       | uuid                               |
 | created_by | varchar(32) | NO   |     | NULL    |       | traP ID                            |
 | amount     | int(11)     | NO   |     | NULL    |       | 申請金額                           |
-| target     | varchar(64) | NO   |     | NULL    |       | 入金元or出金先(amountの正負で判定) |
 |     created_at       |    datetime         |   NO   |     |     CURRENT_TIMESTAMP    |       |               依頼が作成された時間                     |
 
 
@@ -38,14 +37,16 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 
 ## request_status
 #### 依頼の状態
-状態の変更があるたびにレコードを作成。`accepted`は対応する依頼のレコード全ての`client`に対して
+状態の変更があるたびにレコードを作成。対応する依頼のレコード全ての`target`に対して`request_target`のpaid_atが挿入されていたら`fully_repaid`に変更
 
 | Field      | Type        | Null | Key | Default           | Extra          | 説明など                           |
 | ---------- | ----------- | ---- | --- | ----------------- | -------------- | ---------------------------------- |
-| id         | int(11)     | NO   | PRI | NULL              | auto_increment | コメントID                         |
+| id         | int(11)     | NO   | PRI | NULL              | auto_increment | 状態ID                         |
 | request_id | varchar(36) | NO   | MUL | NULL              | index          | 依頼への参照**Parents:request.id** |
-| status     | enum        | NO   |     | NULL              |                |  submitted ,fix_required, accepted, fully_paid, rejected    |
-| created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |                | コメントが作成された日時           |
+| created_by      | varchar(32) | NO   |  | NULL  |           | 状態を変えた人のtraPid |
+| status     | enum        | NO   |     | NULL              |                |                                    |
+| reason     |text | NO  |     | NULL                 |                |  |
+| created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |                | 状態が更新された日時            |
 
 ## file
 #### 依頼idに対応するファイル
@@ -71,3 +72,14 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |                             | コメントが作成された日時           |
 | updated_at | datetime    | NO   |     | CURRENT_TIMESTAMP | on update CURRENT_TIMESTAMP | コメントが更新された日時           |
 | deleted_at | datetime    | YES  |     | NULL              |                             | コメントが削除された日時           |
+
+## request_target
+#### 依頼のtarget
+
+| Field                  | Type        | Null | Key | Default           | Extra          | 説明など                    |
+| ---------------------- | ----------- | ---- | --- | ----------------- | -------------- | --------------------------- |
+| id                     | int(11)     | NO   | PRI | NULL            | auto_increment |                             |
+| request_id         | char(36)    | NO   | MUL | NULL            |                | 依頼への参照**Parents:request.id**                  |
+| target | varchar(64) | NO   |  | NULL            |                | 入金元or出金先      |
+| paid_at              | date        | YES  |     | NULL            |                | 払う/払われた日              |
+| created_at             | datetime    | NO   |     | CURRENT_TIMESTAMP |                | request_targetが作成された日時 |
