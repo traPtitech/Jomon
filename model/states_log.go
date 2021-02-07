@@ -3,8 +3,9 @@ package model
 import (
 	"encoding/json"
 	"errors"
-	"github.com/jinzhu/gorm"
 	"time"
+
+	"github.com/jinzhu/gorm"
 
 	"github.com/gofrs/uuid"
 )
@@ -129,6 +130,24 @@ func (_ *applicationRepository) updateStatesLogTransaction(db *gorm.DB, applicat
 }
 
 func (_ *applicationRepository) createStatesLog(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapId string) (StatesLog, error) {
+	log := StatesLog{
+		ApplicationID: applicationId,
+		UpdateUserTrapID: User{
+			TrapId: updateUserTrapId,
+		},
+		ToState: StateType{Type: Submitted},
+		Reason:  "",
+	}
+
+	err := db_.Create(&log).Error
+
+	if err != nil {
+		return StatesLog{}, err
+	}
+
+	return log, nil
+}
+func (_ *applicationRepository) createRequestStatus(db_ *gorm.DB, applicationId uuid.UUID, updateUserTrapId string) (StatesLog, error) {
 	log := StatesLog{
 		ApplicationID: applicationId,
 		UpdateUserTrapID: User{
