@@ -11,7 +11,7 @@ import (
 const userNameChrs = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 var randSrc = rand.NewSource(0)
-var repo = &applicationRepository{}
+var repo = &requestRepository{}
 var commentRepo = &commentRepository{}
 var adminRepo = &administratorRepository{}
 

@@ -24,8 +24,8 @@ func TestCreateRequest(t *testing.T) {
 
 		state, err := repo.createRequestStatus(db, id, "userId")
 		asr.NoError(err)
-		asr.Equal(state.ApplicationID, id)
-		asr.Equal(state.ToState.Type, Submitted)
+		asr.Equal(state.RequestID, id)
+		asr.Equal(state.Status, Submitted)
 	})
 
 	t.Run("shouldFail", func(t *testing.T) {
@@ -45,9 +45,9 @@ func TestBuildRequest(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appId, err := repo.BuildRequest("User1", Request{}, "Title", "Remarks", 1000, time.Now(), []string{"User1"})
+		appID, err := repo.BuildRequest("User1", "Title", "Remarks", 1000, time.Now(), []string{"User1"})
 		asr.NoError(err)
-		asr.NotEqual(appId, uuid.Nil)
+		asr.NotEqual(appID, uuid.Nil)
 	})
 }
 
@@ -57,26 +57,26 @@ func TestGetRequest(t *testing.T) {
 	sm := new(storageMock)
 	sm.On("Save", mock.Anything, mock.Anything).Return(nil)
 
-	imageRepo := NewApplicationsImageRepository(sm)
+	fileRepo := NewRequestFileRepository(sm)
 
 	t.Run("shouldSuccess?giveAdmin=true&preload=true", func(t *testing.T) {
 		asr := assert.New(t)
 
 		user := generateRandomUserName()
 
-		appId, err := repo.BuildApplication(user, ApplicationType{Type: Contest}, "Title", "Remarks", 1000, time.Now(), []string{user})
+		appID, err := repo.BuildRequest(user, "Title", "Remarks", 1000, time.Now(), []string{user})
 		if err != nil {
 			panic(err)
 		}
 
-		comment, err := commentRepo.CreateComment(appId, "This is comment.", user)
+		comment, err := commentRepo.CreateComment(appID, "This is comment.", user)
 
-		img, err := imageRepo.CreateFile(appId, strings.NewReader("TestData"), "image/png")
+		img, err := fileRepo.CreateFile(appID, strings.NewReader("TestData"), "image/png")
 
-		app, err := repo.GetRequest(appId, true)
+		app, err := repo.GetRequest(appID, true)
 
 		asr.NoError(err)
-		asr.Equal(appId, app.ID)
+		asr.Equal(appID, app.ID)
 
 		asr.Equal(app.ApplicationsDetailsID, app.LatestApplicationsDetail.ID)
 		asr.Equal(app.StatesLogsID, app.LatestStatesLog.ID)
@@ -102,15 +102,15 @@ func TestGetRequest(t *testing.T) {
 
 		user := generateRandomUserName()
 
-		appId, err := repo.BuildApplication(user, ApplicationType{Type: Contest}, "Title", "Remarks", 1000, time.Now(), []string{user})
+		appID, err := repo.BuildRequest(user, "Title", "Remarks", 1000, time.Now(), []string{user})
 		if err != nil {
 			panic(err)
 		}
 
-		app, err := repo.GetApplication(appId, false)
+		app, err := repo.GetRequest(appID, false)
 
 		asr.NoError(err)
-		asr.Equal(appId, app.ID)
+		asr.Equal(appID, app.ID)
 
 	})
 
@@ -122,7 +122,7 @@ func TestGetRequest(t *testing.T) {
 			panic(err)
 		}
 
-		_, err = repo.GetApplication(id, true)
+		_, err = repo.GetRequest(id, true)
 		asr.Error(err)
 		asr.True(gorm.IsRecordNotFoundError(err))
 	})
@@ -134,21 +134,19 @@ func TestPatchRequest(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		typ := ApplicationType{Type: Club}
 		title := "Title"
 		remarks := "Remarks"
 		amount := 1000
 		paidAt := time.Now()
-		appId, err := repo.BuildApplication("User", typ, title, remarks, amount, paidAt, []string{"User"})
+		appId, err := repo.BuildRequest("User", title, remarks, amount, paidAt, []string{"User"})
 		if err != nil {
 			panic(err)
 		}
 
-		newType := ApplicationType{Type: Contest}
-		err = repo.PatchApplication(appId, "User", &newType, "", "", nil, nil, []string{})
+		err = repo.PatchRequest(appId, "User", "", "", nil, nil, []string{})
 		asr.NoError(err)
 
-		app, err := repo.GetApplication(appId, true)
+		app, err := repo.GetRequest(appId, true)
 		if err != nil {
 			panic(err)
 		}
@@ -171,7 +169,7 @@ func TestPatchRequest(t *testing.T) {
 			panic(err)
 		}
 
-		err = repo.PatchApplication(id, generateRandomUserName(), nil, "", "", nil, nil, []string{})
+		err = repo.PatchRequest(id, generateRandomUserName(), nil, "", "", nil, nil, []string{})
 		asr.Error(err)
 		asr.True(gorm.IsRecordNotFoundError(err))
 	})
@@ -187,20 +185,20 @@ func TestGetRequestList(t *testing.T) {
 		user3 := "User3"
 
 		app1SubTime := time.Date(2020, 4, 10, 12, 0, 0, 0, time.Local)
-		app1Id := buildApplicationWithSubmitTime(user1, app1SubTime, ApplicationType{Type: Club}, "CCCCC", "Remarks", 10000, time.Now())
+		app1Id := buildRequestWithSubmitTime(user1, app1SubTime, ApplicationType{Type: Club}, "CCCCC", "Remarks", 10000, time.Now())
 
 		app2SubTime := time.Date(2020, 4, 20, 12, 0, 0, 0, time.Local)
-		app2Id := buildApplicationWithSubmitTime(user2, app2SubTime, ApplicationType{Type: Contest}, "AAAAA", "Remarks", 10000, time.Now())
+		app2Id := buildRequestWithSubmitTime(user2, app2SubTime, ApplicationType{Type: Contest}, "AAAAA", "Remarks", 10000, time.Now())
 
 		app3SubTime := time.Date(2020, 4, 30, 12, 0, 0, 0, time.Local)
-		app3Id := buildApplicationWithSubmitTime(user2, app3SubTime, ApplicationType{Type: Event}, "BBBBB", "Remarks", 10000, time.Now())
+		app3Id := buildRequestWithSubmitTime(user2, app3SubTime, ApplicationType{Type: Event}, "BBBBB", "Remarks", 10000, time.Now())
 		app3, err := repo.GetApplication(app3Id, true)
 		if err != nil {
 			panic(err)
 		}
 
 		app4SubTime := time.Date(2019, 4, 10, 12, 0, 0, 0, time.Local)
-		app4Id := buildApplicationWithSubmitTime(user1, app4SubTime, ApplicationType{Type: Club}, "DDDDD", "Remarks", 10000, time.Now())
+		app4Id := buildRequestWithSubmitTime(user1, app4SubTime, ApplicationType{Type: Club}, "DDDDD", "Remarks", 10000, time.Now())
 
 		// TODO Use a appropriate function defined in model/states_log.go after implementing such a function.
 		db.Model(&app3.LatestStatesLog).Updates(StatesLog{
@@ -380,19 +378,13 @@ func buildRequestWithSubmitTime(createUserTrapID string, submittedAt time.Time, 
 		panic(err)
 	}
 
-	detail, err := repo.createApplicationsDetail(db, id, createUserTrapID, typ, title, remarks, amount, paidAt)
+	state, err := repo.createRequestStatus(db, id, createUserTrapID)
 	if err != nil {
 		panic(err)
 	}
 
-	state, err := repo.createStatesLog(db, id, createUserTrapID)
-	if err != nil {
-		panic(err)
-	}
-
-	err = db.Model(Application{}).Where(&Application{ID: id}).Updates(Application{
-		ApplicationsDetailsID: detail.ID,
-		StatesLogsID:          state.ID,
+	err = db.Model(Request{}).Where(&Application{ID: id}).Updates(Request{
+		RequestStatusID: state.ID,
 	}).Error
 
 	if err != nil {

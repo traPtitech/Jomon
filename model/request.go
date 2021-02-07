@@ -11,7 +11,7 @@ import (
 type Request struct {
 	ID                  uuid.UUID       `gorm:"type:char(36);primary_key" json:"id"`
 	LatestRequestStatus RequestStatus   `gorm:"foreignkey:StatesLogsID" json:"-"`
-	LatestStatus        StatusType      `gorm:"-" json:"current_state"`
+	LatestStatus        Status          `gorm:"-" json:"current_state"`
 	RequestStatusID     int             `gorm:"type:int(11);not null" json:"-"`
 	CreatedBy           TrapUser        `gorm:"embedded;embedded_prefix:created_by;" json:"applicant"`
 	CreatedAt           time.Time       `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
@@ -26,41 +26,35 @@ func (app *Request) GiveIsUserAdmin(admins []string) {
 		return
 	}
 
-	app.CreateUserTrapID.GiveIsUserAdmin(admins)
-	app.LatestApplicationsDetail.GiveIsUserAdmin(admins)
-	app.LatestStatesLog.GiveIsUserAdmin(admins)
+	app.CreatedBy.GiveIsUserAdmin(admins)
+	app.LatestRequestStatus.GiveIsUserAdmin(admins)
 
-	for i := range app.ApplicationsDetails {
-		app.ApplicationsDetails[i].GiveIsUserAdmin(admins)
-	}
-
-	for i := range app.StatesLogs {
-		app.StatesLogs[i].GiveIsUserAdmin(admins)
+	for i := range app.RequestStatus {
+		app.RequestStatus[i].GiveIsUserAdmin(admins)
 	}
 
 	for i := range app.Comments {
 		app.Comments[i].GiveIsUserAdmin(admins)
 	}
 
-	for i := range app.RepayUsers {
-		app.RepayUsers[i].GiveIsUserAdmin(admins)
+	for i := range app.RequestTargets {
+		app.RequestTargets[i].GiveIsUserAdmin(admins)
 	}
 }
 
+// RequestRepository 依頼のリポジトリ
 type RequestRepository interface {
-	GetRequest(id uuid.UUID, preload bool) (Application, error)
+	GetRequest(id uuid.UUID, preload bool) (Request, error)
 	GetRequestList(
 		sort string,
 		currentState *StateType,
 		financialYear *int,
 		applicant string,
-		typ *ApplicationType,
 		submittedSince *time.Time,
 		submittedUntil *time.Time,
-	) ([]Application, error)
+	) ([]Request, error)
 	BuildRequest(
-		createUserTrapID string,
-		typ ApplicationType,
+		createdBy string,
 		title string,
 		remarks string,
 		amount int,
@@ -68,27 +62,25 @@ type RequestRepository interface {
 		repayUsers []string,
 	) (uuid.UUID, error)
 	PatchRequest(
-		appId uuid.UUID,
-		updateUserTrapId string,
-		typ *ApplicationType,
+		appID uuid.UUID,
+		updateUserTrapID string,
 		title string,
 		remarks string,
 		amount *int,
 		paidAt *time.Time,
-		repayUsers []string,
+		targets []string,
 	) error
 	UpdateRequestStatus(
-		applicationId uuid.UUID,
-		updateUserTrapId string,
+		applicationID uuid.UUID,
+		updateUserTrapID string,
 		reason string,
-		toState StateType,
-	) (StatesLog, error)
+		status Status,
+	) (RequestStatus, error)
 	UpdateRequestTarget(
-		applicationId uuid.UUID,
-		repaidToUserTrapID string,
-		repaidByUserTrapID string,
+		applicationID uuid.UUID,
+		target string,
 		repaidAt time.Time,
-	) (RepayUser, bool, error)
+	) (RequestTarget, bool, error)
 }
 
 type requestRepository struct{}
@@ -97,7 +89,7 @@ func NewRequestRepository() RequestRepository {
 	return &requestRepository{}
 }
 
-func (_ *requestRepository) GetApplication(id uuid.UUID, preload bool) (Application, error) {
+func (*requestRepository) GetRequest(id uuid.UUID, preload bool) (Request, error) {
 	var req Request
 	query := db
 	if preload {
@@ -108,15 +100,13 @@ func (_ *requestRepository) GetApplication(id uuid.UUID, preload bool) (Applicat
 
 	err := query.First(&req, Application{ID: id}).Error
 	if err != nil {
-		return Application{}, err
+		return Request{}, err
 	}
-
-	req.LatestRequestStatus = req.LatestRequestStatus.Status
 
 	return req, nil
 }
 
-func (_ *requestRepository) GetApplicationList(sort string, currentState *StateType, financialYear *int, applicant string, typ *ApplicationType, submittedSince *time.Time, submittedUntil *time.Time) ([]Application, error) {
+func (*requestRepository) GetRequestList(sort string, currentState *StateType, financialYear *int, applicant string, typ *ApplicationType, submittedSince *time.Time, submittedUntil *time.Time) ([]Application, error) {
 	query := db.Preload("LatestStatesLog").Preload("LatestApplicationsDetail")
 
 	if currentState != nil {
@@ -170,35 +160,29 @@ func (_ *requestRepository) GetApplicationList(sort string, currentState *StateT
 	return apps, nil
 }
 
-func (repo *requestRepository) BuildApplication(createUserTrapID string, typ ApplicationType, title string, remarks string, amount int, paidAt time.Time, repayUsers []string) (uuid.UUID, error) {
+func (repo *requestRepository) BuildRequest(createdBy string, title string, remarks string, amount int, paidAt time.Time, targets []string) (uuid.UUID, error) {
 	var id uuid.UUID
 
 	err := db.Transaction(func(tx *gorm.DB) error {
-		_id, err := repo.createApplication(tx, createUserTrapID)
+		_id, err := repo.createRequest(tx, createdBy)
 		if err != nil {
 			return err
 		}
 		id = _id
 
-		detail, err := repo.createApplicationsDetail(tx, id, createUserTrapID, typ, title, remarks, amount, paidAt)
+		state, err := repo.createRequestStatus(tx, id, createdBy)
 		if err != nil {
 			return err
 		}
 
-		state, err := repo.createStatesLog(tx, id, createUserTrapID)
-		if err != nil {
-			return err
-		}
-
-		for _, userId := range repayUsers {
-			if err = repo.createRepayUser(tx, id, userId); err != nil {
+		for _, userID := range targets {
+			if err = repo.createRequestTarget(tx, id, userID); err != nil {
 				return err
 			}
 		}
 
-		return tx.Model(Application{}).Where(&Application{ID: id}).Updates(Application{
-			ApplicationsDetailsID: detail.ID,
-			StatesLogsID:          state.ID,
+		return tx.Model(Request{}).Where(&Request{ID: id}).Updates(Request{
+			RequestStatusID: state.ID,
 		}).Error
 	})
 	if err != nil {
@@ -208,37 +192,30 @@ func (repo *requestRepository) BuildApplication(createUserTrapID string, typ App
 	return id, nil
 }
 
-func (repo *requestRepository) PatchApplication(appId uuid.UUID, updateUserTrapId string, typ *ApplicationType, title string, remarks string, amount *int, paidAt *time.Time, repayUsers []string) error {
+func (repo *requestRepository) PatchRequest(appID uuid.UUID, updateUserTrapID string, title string, remarks string, amount *int, paidAt *time.Time, repayUsers []string) error {
 	return db.Transaction(func(tx *gorm.DB) error {
-		app, err := repo.GetApplication(appId, false)
-		if err != nil {
-			return err
-		}
-
-		detail, err := repo.putApplicationsDetail(tx, app.ApplicationsDetailsID, updateUserTrapId, typ, title, remarks, amount, paidAt)
+		app, err := repo.GetRequest(appID, false)
 		if err != nil {
 			return err
 		}
 
 		if len(repayUsers) > 0 {
-			if err = repo.deleteRepayUserByApplicationID(tx, appId); err != nil {
+			if err = repo.deleteRepayUserByApplicationID(tx, appID); err != nil {
 				return err
 			}
 
-			for _, userId := range repayUsers {
-				if err = repo.createRepayUser(tx, appId, userId); err != nil {
+			for _, userID := range repayUsers {
+				if err = repo.createRequestTarget(tx, appID, userID); err != nil {
 					return err
 				}
 			}
 		}
 
-		return tx.Model(&Application{ID: appId}).Updates(Application{
-			ApplicationsDetailsID: detail.ID,
-		}).Error
+		return tx.Model(&Application{ID: appID}).Updates(Application{}).Error
 	})
 }
 
-func (_ *requestRepository) createRequest(db_ *gorm.DB, createUserTrapID string) (uuid.UUID, error) {
+func (*requestRepository) createRequest(db *gorm.DB, createUserTrapID string) (uuid.UUID, error) {
 	id, err := uuid.NewV4()
 	if err != nil {
 		return uuid.Nil, err
@@ -246,10 +223,10 @@ func (_ *requestRepository) createRequest(db_ *gorm.DB, createUserTrapID string)
 
 	app := Request{
 		ID:        id,
-		CreatedBy: TrapUser{TrapId: createUserTrapID},
+		CreatedBy: TrapUser{TrapID: createUserTrapID},
 	}
 
-	err = db_.Create(&app).Error
+	err = db.Create(&app).Error
 	if err != nil {
 		return uuid.Nil, err
 	}

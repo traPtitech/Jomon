@@ -10,14 +10,6 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-const (
-	Submitted   int = 1
-	FixRequired int = 2
-	Accepted    int = 3
-	FullyRepaid int = 4
-	Rejected    int = 5
-)
-
 type StatesLog struct {
 	ID               int       `gorm:"type:int(11) AUTO_INCREMENT;primary_key" json:"-"`
 	ApplicationID    uuid.UUID `gorm:"type:char(36);not null" json:"-"`
