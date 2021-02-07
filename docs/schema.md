@@ -10,6 +10,18 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | ---------------- | -------- | ---- | --- | ------- | ----- | -------- |
 | trap_id     | varchar(32) | NO   | PRI | _NULL_  |
 
+## transaction
+#### 入出金
+実際にすでに行われた入出金をすべて記録。
+
+| Field      | Type        | Null | Key   | Default | Extra | 説明など                           |
+| ---------- | ----------- | ---- | ----- | ------- | ----- | ---------------------------------- |
+| id         | char(36)    | NO   | PRI   | NULL    |       | uuid                               |
+| amount     | int(11)     | NO   |       | NULL    |       | 申請金額                           |
+| target     | varchar(64) | NO   |       | NULL    |       | 入金元or出金先(amountの正負で判定) |
+| request_id | varchar(36) | YES  | MUL | NULL    |   index    | 依頼への参照(NULLのときは依頼なし)**Parents:request.id** |
+| created_at           | datetime            |  NO    |       |   CURRENT_TIMESTAMP      | index      |                           トランザクションが作成された時間         |
+
 ## request
 #### 依頼
 新規、変更ごとに新しいレコードを作成。依頼の削除はできず、一度作ったら状態で管理
@@ -23,7 +35,7 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 
 ## request_status
 #### 依頼の状態
-状態の変更があるたびにレコードを作成。対応する依頼のレコード全ての`target`に対して`request_target`のpaid_atが挿入されていたら`fully_repaid`に変更
+状態の変更があるたびにレコードを作成。対応する依頼のレコード全ての`target`に対して`request_target`のpaid_atが挿入されていたら`fully_repaid`に変更。新規の依頼ごとに新しいレコードを作成。requestが作られた段階で作られる。reasonはstatusを「submittedからfix_required」「submittedからrejected」「acceptedからsubmitted」にするときに必要。作成者は「fix_requiredからsubmitted」にでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted(ただし、すでに払う/払われている人がいた場合、この操作は不可)」の操作が可能。
 
 | Field      | Type        | Null | Key | Default           | Extra          | 説明など                           |
 | ---------- | ----------- | ---- | --- | ----------------- | -------------- | ---------------------------------- |
@@ -33,20 +45,6 @@ jomonのadmin (会計の人：申請書更新等の権限)（adminのログは�
 | status     | enum        | NO   |     | NULL              |                |                                    |
 | reason     |text | NO  |     | NULL                 |                |  |
 | created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |                | 状態が更新された日時            |
-
-
-## transaction
-#### 入出金
-実際にすでに行われた入出金をすべて記録。新規ごとに新しいレコードを作成。requestが作られた段階で作られる。reasonはstatusを「submittedからfix_required」「submittedからrejected」「acceptedからsubmitted」にするときに必要。作成者は「fix_requiredからsubmitted」にでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted(ただし、すでに払う/払われている人がいた場合、この操作は不可)」の操作が可能。
-
-| Field      | Type        | Null | Key   | Default | Extra | 説明など                           |
-| ---------- | ----------- | ---- | ----- | ------- | ----- | ---------------------------------- |
-| id         | char(36)    | NO   | PRI   | NULL    |       | uuid                               |
-| amount     | int(11)     | NO   |       | NULL    |       | 申請金額                           |
-| target     | varchar(64) | NO   |       | NULL    |       | 入金元or出金先(amountの正負で判定) |
-| request_id | varchar(36) | YES  | MUL | NULL    |   index    | 依頼への参照(NULLのときは依頼なし)**Parents:request.id** |
-| created_at           | datetime            |  NO    |       |   CURRENT_TIMESTAMP      | index      |                           トランザクションが作成された時間         |
-
 
 ## request_target
 #### 依頼のtarget
