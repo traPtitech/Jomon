@@ -54,14 +54,14 @@ func TestCreateApplicationsImage(t *testing.T) {
 
 		sampleText := "sampleData"
 
-		appId, err := repo.createRequest(db, "")
+		reqID, err := repo.createRequest(db, "")
 		if err != nil {
 			panic(err)
 		}
 
 		mimeType := "image/png"
 
-		im, err := imageRepo.CreateFile(appId, strings.NewReader(sampleText), mimeType)
+		im, err := imageRepo.CreateFile(reqID, strings.NewReader(sampleText), mimeType)
 		asr.NoError(err)
 		asr.Equal(fmt.Sprintf("%s.png", im.ID.String()), actualFilename)
 		asr.Equal(sampleText, actualReaderString)
@@ -81,12 +81,12 @@ func TestGetApplicationsImage(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appId, err := repo.createRequest(db, "")
+		reqID, err := repo.createRequest(db, "")
 		if err != nil {
 			panic(err)
 		}
 
-		createdIm, err := imageRepo.CreateFile(appId, strings.NewReader(""), "image/png")
+		createdIm, err := imageRepo.CreateFile(reqID, strings.NewReader(""), "image/png")
 		if err != nil {
 			panic(err)
 		}
@@ -125,12 +125,12 @@ func TestDeleteApplicationsImage(t *testing.T) {
 
 		imageRepo := NewFileRepository(sm)
 
-		appId, err := repo.createRequest(db, "")
+		reqID, err := repo.createRequest(db, "")
 		if err != nil {
 			panic(err)
 		}
 
-		im, err := imageRepo.CreateFile(appId, strings.NewReader(""), "image/png")
+		im, err := imageRepo.CreateFile(reqID, strings.NewReader(""), "image/png")
 		if err != nil {
 			panic(err)
 		}

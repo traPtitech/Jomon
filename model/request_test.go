@@ -177,20 +177,20 @@ func TestGetRequestList(t *testing.T) {
 		user3 := "User3"
 
 		app1SubTime := time.Date(2020, 4, 10, 12, 0, 0, 0, time.Local)
-		app1Id := buildRequestWithSubmitTime(user1, app1SubTime, ApplicationType{Type: Club}, "CCCCC", "Remarks", 10000, time.Now())
+		app1Id := buildRequestWithSubmitTime(user1, app1SubTime, "CCCCC", "Remarks", 10000, time.Now())
 
 		app2SubTime := time.Date(2020, 4, 20, 12, 0, 0, 0, time.Local)
-		app2Id := buildRequestWithSubmitTime(user2, app2SubTime, ApplicationType{Type: Contest}, "AAAAA", "Remarks", 10000, time.Now())
+		app2Id := buildRequestWithSubmitTime(user2, app2SubTime, "AAAAA", "Remarks", 10000, time.Now())
 
 		app3SubTime := time.Date(2020, 4, 30, 12, 0, 0, 0, time.Local)
-		app3Id := buildRequestWithSubmitTime(user2, app3SubTime, ApplicationType{Type: Event}, "BBBBB", "Remarks", 10000, time.Now())
+		app3Id := buildRequestWithSubmitTime(user2, app3SubTime, "BBBBB", "Remarks", 10000, time.Now())
 		app3, err := repo.GetRequest(app3Id, true)
 		if err != nil {
 			panic(err)
 		}
 
 		app4SubTime := time.Date(2019, 4, 10, 12, 0, 0, 0, time.Local)
-		app4Id := buildRequestWithSubmitTime(user1, app4SubTime, ApplicationType{Type: Club}, "DDDDD", "Remarks", 10000, time.Now())
+		app4Id := buildRequestWithSubmitTime(user1, app4SubTime, "DDDDD", "Remarks", 10000, time.Now())
 
 		// TODO Use a appropriate function defined in model/states_log.go after implementing such a function.
 		db.Model(&app3.LatestRequestStatus).Updates(RequestStatus{
@@ -345,7 +345,7 @@ func mapToRequestID(apps []Request) []uuid.UUID {
 	return appIds
 }
 
-func buildRequestWithSubmitTime(createUserTrapID string, submittedAt time.Time, typ ApplicationType, title string, remarks string, amount int, paidAt time.Time) uuid.UUID {
+func buildRequestWithSubmitTime(createUserTrapID string, submittedAt time.Time, title string, remarks string, amount int, paidAt time.Time) uuid.UUID {
 	id, err := uuid.NewV4()
 	if err != nil {
 		panic(err)

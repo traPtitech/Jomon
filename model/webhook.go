@@ -12,24 +12,29 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 )
 
-type WebhookApplication struct {
-	ApplicationID uuid.UUID                `json:"application_id"`
-	CurrentDetail WebhookApplicationDetail `json:"current_detail"`
+// WebhookRequest Response of BodyDump
+type WebhookRequest struct {
+	RequestID     uuid.UUID            `json:"request_id"`
+	CurrentDetail WebhookRequestDetail `json:"current_detail"`
 }
 
-type WebhookApplicationDetail struct {
-	UpdateUser TrapUser `json:"update_user"`
-	Type       string   `json:"type"`
-	Title      string   `json:"title"`
-	Remarks    string   `json:"remarks"`
-	Amount     int      `json:"amount"`
-	PaidAt     PaidAt   `json:"paid_at"`
+// WebhookRequestDetail Detail of Response of BodyDump
+type WebhookRequestDetail struct {
+	UpdateUser TrapUser  `json:"update_user"`
+	Type       string    `json:"type"`
+	Title      string    `json:"title"`
+	Remarks    string    `json:"remarks"`
+	Amount     int       `json:"amount"`
+	PaidAt     time.Time `json:"paid_at"`
 }
+
+// WebhookRepository Repo of Webhook
 type WebhookRepository interface {
 	WebhookEventHandler(c echo.Context, reqBody, resBody []byte)
 }
@@ -40,6 +45,7 @@ type webhookRepository struct {
 	id        string
 }
 
+// NewWebhookRepository Make WebhookRepository
 func NewWebhookRepository(secret string, channelID string, id string) WebhookRepository {
 	return &webhookRepository{
 		secret:    secret,
@@ -49,7 +55,7 @@ func NewWebhookRepository(secret string, channelID string, id string) WebhookRep
 }
 
 func (repo *webhookRepository) WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
-	resApp := new(WebhookApplication)
+	resApp := new(WebhookRequest)
 	err := json.Unmarshal(resBody, resApp)
 	if err != nil {
 		return
@@ -57,8 +63,8 @@ func (repo *webhookRepository) WebhookEventHandler(c echo.Context, reqBody, resB
 	var content string
 
 	content = "## 申請書が作成されました" + "\n"
-	content += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.CurrentDetail.Title, "https://jomon.trap.jp", resApp.ApplicationID) + "\n"
-	content += fmt.Sprintf("- 支払日: %s", resApp.CurrentDetail.PaidAt.PaidAt.Format("2006-01-02")) + "\n"
+	content += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.CurrentDetail.Title, "https://jomon.trap.jp", resApp.RequestID) + "\n"
+	content += fmt.Sprintf("- 支払日: %s", resApp.CurrentDetail.PaidAt.Format("2006-01-02")) + "\n"
 	content += fmt.Sprintf("- 支払金額: %s", strconv.Itoa(resApp.CurrentDetail.Amount)) + "\n"
 	content += "\n"
 	content += resApp.CurrentDetail.Remarks
@@ -66,6 +72,7 @@ func (repo *webhookRepository) WebhookEventHandler(c echo.Context, reqBody, resB
 	_ = RequestWebhook(content, repo.secret, repo.channelID, repo.id, 1)
 }
 
+// RequestWebhook send request to traQ api
 func RequestWebhook(message, secret, channelID, webhookID string, embed int) error {
 	u, err := url.Parse("https://q.trap.jp/api/v3/webhooks")
 	if err != nil {

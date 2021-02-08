@@ -6,6 +6,7 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+// Comment struct of Comment
 type Comment struct {
 	ID            int        `gorm:"type:int(11) AUTO_INCREMENT;primary_key" json:"comment_id"`
 	ApplicationID uuid.UUID  `gorm:"type:char(36);not null" json:"-"`
@@ -16,6 +17,7 @@ type Comment struct {
 	DeletedAt     *time.Time `json:"-"`
 }
 
+// GiveIsUserAdmin check whether comment is admin or not
 func (com *Comment) GiveIsUserAdmin(admins []string) {
 	if com == nil {
 		return
@@ -24,23 +26,25 @@ func (com *Comment) GiveIsUserAdmin(admins []string) {
 	com.UserTrapID.GiveIsUserAdmin(admins)
 }
 
+// CommentRepository Repo of Comment
 type CommentRepository interface {
-	GetComment(applicationId uuid.UUID, commentId int) (Comment, error)
-	CreateComment(applicationId uuid.UUID, commentText string, userId string) (Comment, error)
-	PutComment(applicationId uuid.UUID, commentId int, commentText string) (Comment, error)
-	DeleteComment(applicationId uuid.UUID, commentId int) error
+	GetComment(requestID uuid.UUID, commentID int) (Comment, error)
+	CreateComment(requestID uuid.UUID, commentText string, userID string) (Comment, error)
+	PutComment(requestID uuid.UUID, commentID int, commentText string) (Comment, error)
+	DeleteComment(requestID uuid.UUID, commentID int) error
 }
 
 type commentRepository struct{}
 
+// NewCommentRepository Make CommentRepository
 func NewCommentRepository() CommentRepository {
 	return &commentRepository{}
 }
 
-func (_ *commentRepository) GetComment(applicationId uuid.UUID, commentId int) (Comment, error) {
+func (*commentRepository) GetComment(requestID uuid.UUID, commentID int) (Comment, error) {
 	comment := Comment{
-		ID:            commentId,
-		ApplicationID: applicationId,
+		ID:            commentID,
+		ApplicationID: requestID,
 	}
 
 	if err := db.First(&comment).Error; err != nil {
@@ -49,10 +53,10 @@ func (_ *commentRepository) GetComment(applicationId uuid.UUID, commentId int) (
 	return comment, nil
 }
 
-func (_ *commentRepository) CreateComment(applicationId uuid.UUID, commentText string, userId string) (Comment, error) {
+func (*commentRepository) CreateComment(requestID uuid.UUID, commentText string, userID string) (Comment, error) {
 	comment := Comment{
-		ApplicationID: applicationId,
-		UserTrapID:    TrapUser{TrapID: userId},
+		ApplicationID: requestID,
+		UserTrapID:    TrapUser{TrapID: userID},
 		Comment:       commentText,
 	}
 
@@ -63,10 +67,10 @@ func (_ *commentRepository) CreateComment(applicationId uuid.UUID, commentText s
 	return comment, nil
 }
 
-func (_ *commentRepository) PutComment(applicationId uuid.UUID, commentId int, commentText string) (Comment, error) {
+func (*commentRepository) PutComment(requestID uuid.UUID, commentID int, commentText string) (Comment, error) {
 	comment := Comment{
-		ID:            commentId,
-		ApplicationID: applicationId,
+		ID:            commentID,
+		ApplicationID: requestID,
 	}
 
 	if err := db.Model(&comment).Update("Comment", commentText).Error; err != nil {
@@ -76,10 +80,10 @@ func (_ *commentRepository) PutComment(applicationId uuid.UUID, commentId int, c
 	return comment, nil
 }
 
-func (_ *commentRepository) DeleteComment(applicationId uuid.UUID, commentId int) error {
+func (*commentRepository) DeleteComment(requestID uuid.UUID, commentID int) error {
 	comment := Comment{
-		ID:            commentId,
-		ApplicationID: applicationId,
+		ID:            commentID,
+		ApplicationID: requestID,
 	}
 
 	if err := db.Delete(&comment).Error; err != nil {

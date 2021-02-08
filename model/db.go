@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 )
 
@@ -19,6 +18,7 @@ var allTables = []interface{}{
 	Comment{},
 }
 
+// EstablishConnection Establish Connection
 func EstablishConnection() (*gorm.DB, error) {
 	user := os.Getenv("MARIADB_USERNAME")
 	if user == "" {
@@ -46,6 +46,7 @@ func EstablishConnection() (*gorm.DB, error) {
 	return db, err
 }
 
+// Migrate Migration
 func Migrate() error {
 	if err := db.AutoMigrate(allTables...).Error; err != nil {
 		return err
