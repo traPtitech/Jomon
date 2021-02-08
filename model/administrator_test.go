@@ -25,8 +25,8 @@ func TestAdministrator(t *testing.T) {
 		asr.NoError(err)
 		asr.True(flag)
 
-		testId := user.TrapID + "0"
-		flag, err = adminRepo.IsAdmin(testId)
+		testID := user.TrapID + "0"
+		flag, err = adminRepo.IsAdmin(testID)
 		asr.NoError(err)
 		asr.False(flag)
 

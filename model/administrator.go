@@ -2,25 +2,28 @@ package model
 
 import "github.com/jinzhu/gorm"
 
+// Administrator struct of Administrator
 type Administrator struct {
 	TrapID string `gorm:"type:varchar(32);primary_key"`
 }
 
+// AdministratorRepository Repo of Administrator
 type AdministratorRepository interface {
-	IsAdmin(userId string) (bool, error)
+	IsAdmin(userID string) (bool, error)
 	GetAdministratorList() ([]string, error)
-	AddAdministrator(userId string) error
-	RemoveAdministrator(userId string) error
+	AddAdministrator(userID string) error
+	RemoveAdministrator(userID string) error
 }
 
 type administratorRepository struct{}
 
+// NewAdministratorRepository Make AdministratorRepository
 func NewAdministratorRepository() AdministratorRepository {
 	return &administratorRepository{}
 }
 
-func (_ administratorRepository) IsAdmin(userId string) (bool, error) {
-	ad := &Administrator{TrapID: userId}
+func (administratorRepository) IsAdmin(userID string) (bool, error) {
+	ad := &Administrator{TrapID: userID}
 	err := db.First(ad).Error
 	if err == nil {
 		return true, nil
@@ -31,7 +34,7 @@ func (_ administratorRepository) IsAdmin(userId string) (bool, error) {
 	}
 }
 
-func (_ administratorRepository) GetAdministratorList() ([]string, error) {
+func (administratorRepository) GetAdministratorList() ([]string, error) {
 	var admin []string
 
 	err := db.Model(&Administrator{}).Pluck("trap_id", &admin).Error
@@ -42,12 +45,12 @@ func (_ administratorRepository) GetAdministratorList() ([]string, error) {
 	return admin, nil
 }
 
-func (_ administratorRepository) AddAdministrator(userId string) error {
-	admin := Administrator{TrapID: userId}
+func (administratorRepository) AddAdministrator(userID string) error {
+	admin := Administrator{TrapID: userID}
 	return db.FirstOrCreate(&admin).Error
 }
 
-func (_ administratorRepository) RemoveAdministrator(userId string) error {
-	admin := Administrator{TrapID: userId}
+func (administratorRepository) RemoveAdministrator(userID string) error {
+	admin := Administrator{TrapID: userID}
 	return db.Delete(&admin).Error
 }
