@@ -3,10 +3,11 @@ package model
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/labstack/echo/v4"
 )
 
 type AuthResponse struct {
@@ -21,17 +22,17 @@ type TraQAuthRepository interface {
 }
 
 type traQAuthRepository struct {
-	clientId string
+	clientID string
 }
 
-func NewTraQAuthRepository(clientId string) TraQAuthRepository {
-	return &traQAuthRepository{clientId: clientId}
+func NewTraQAuthRepository(clientID string) TraQAuthRepository {
+	return &traQAuthRepository{clientID: clientID}
 }
 
 func (repo *traQAuthRepository) GetAccessToken(code string, codeVerifier string) (AuthResponse, error) {
 	form := url.Values{}
 	form.Set("grant_type", "authorization_code")
-	form.Set("client_id", repo.clientId)
+	form.Set("client_id", repo.clientID)
 	form.Set("code", code)
 	form.Set("code_verifier", codeVerifier)
 	reqBody := strings.NewReader(form.Encode())
@@ -58,5 +59,5 @@ func (repo *traQAuthRepository) GetAccessToken(code string, codeVerifier string)
 }
 
 func (repo *traQAuthRepository) GetClientId() string {
-	return repo.clientId
+	return repo.clientID
 }
