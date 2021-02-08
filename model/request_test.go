@@ -57,7 +57,7 @@ func TestGetRequest(t *testing.T) {
 	sm := new(storageMock)
 	sm.On("Save", mock.Anything, mock.Anything).Return(nil)
 
-	fileRepo := NewRequestFileRepository(sm)
+	fileRepo := NewFileRepository(sm)
 
 	t.Run("shouldSuccess?giveAdmin=true&preload=true", func(t *testing.T) {
 		asr := assert.New(t)
@@ -78,18 +78,15 @@ func TestGetRequest(t *testing.T) {
 		asr.NoError(err)
 		asr.Equal(appID, app.ID)
 
-		asr.Equal(app.ApplicationsDetailsID, app.LatestApplicationsDetail.ID)
-		asr.Equal(app.StatesLogsID, app.LatestStatesLog.ID)
-		asr.Len(app.ApplicationsDetails, 1)
-		asr.Equal(app.LatestApplicationsDetail, app.ApplicationsDetails[0])
-		asr.Len(app.StatesLogs, 1)
-		asr.Equal(app.LatestStatesLog, app.StatesLogs[0])
-		asr.Len(app.RepayUsers, 1)
-		asr.Len(app.ApplicationsImages, 1)
+		asr.Equal(app.RequestStatusID, app.LatestRequestStatus.ID)
+		asr.Len(app.RequestStatus, 1)
+		asr.Equal(app.LatestRequestStatus, app.RequestStatus[0])
+		asr.Len(app.RequestTargets, 1)
+		asr.Len(app.Files, 1)
 
-		asr.Equal(img.ID, app.ApplicationsImages[0].ID)
-		asr.Equal(img.MimeType, app.ApplicationsImages[0].MimeType)
-		asr.WithinDuration(img.CreatedAt, app.ApplicationsImages[0].CreatedAt, 1*time.Second)
+		asr.Equal(img.ID, app.Files[0].ID)
+		asr.Equal(img.MimeType, app.Files[0].MimeType)
+		asr.WithinDuration(img.CreatedAt, app.Files[0].CreatedAt, 1*time.Second)
 
 		asr.Equal(comment.ID, app.Comments[0].ID)
 		asr.Equal(comment.Comment, app.Comments[0].Comment)
@@ -138,27 +135,22 @@ func TestPatchRequest(t *testing.T) {
 		remarks := "Remarks"
 		amount := 1000
 		paidAt := time.Now()
-		appId, err := repo.BuildRequest("User", title, remarks, amount, paidAt, []string{"User"})
+		appID, err := repo.BuildRequest("User", title, remarks, amount, paidAt, []string{"User"})
 		if err != nil {
 			panic(err)
 		}
 
-		err = repo.PatchRequest(appId, "User", "", "", nil, nil, []string{})
+		err = repo.PatchRequest(appID, "User", "", "", nil, nil, []string{"OtherUser"})
 		asr.NoError(err)
 
-		app, err := repo.GetRequest(appId, true)
+		app, err := repo.GetRequest(appID, true)
 		if err != nil {
 			panic(err)
 		}
 
-		asr.Len(app.ApplicationsDetails, 2)
-		asr.Equal(app.LatestApplicationsDetail, app.ApplicationsDetails[1])
-
-		asr.Equal(newType, app.LatestApplicationsDetail.Type)
-		asr.Equal(title, app.LatestApplicationsDetail.Title)
-		asr.Equal(remarks, app.LatestApplicationsDetail.Remarks)
-		asr.Equal(amount, app.LatestApplicationsDetail.Amount)
-		asr.Equal(paidAt.Truncate(time.Hour*24), app.LatestApplicationsDetail.PaidAt.PaidAt)
+		asr.Equal(title, app.Title)
+		asr.Equal(remarks, app.Content)
+		asr.Equal(amount, app.Amount)
 	})
 
 	t.Run("shouldFail", func(t *testing.T) {
@@ -169,7 +161,7 @@ func TestPatchRequest(t *testing.T) {
 			panic(err)
 		}
 
-		err = repo.PatchRequest(id, generateRandomUserName(), nil, "", "", nil, nil, []string{})
+		err = repo.PatchRequest(id, generateRandomUserName(), "", "", nil, nil, []string{})
 		asr.Error(err)
 		asr.True(gorm.IsRecordNotFoundError(err))
 	})
@@ -192,7 +184,7 @@ func TestGetRequestList(t *testing.T) {
 
 		app3SubTime := time.Date(2020, 4, 30, 12, 0, 0, 0, time.Local)
 		app3Id := buildRequestWithSubmitTime(user2, app3SubTime, ApplicationType{Type: Event}, "BBBBB", "Remarks", 10000, time.Now())
-		app3, err := repo.GetApplication(app3Id, true)
+		app3, err := repo.GetRequest(app3Id, true)
 		if err != nil {
 			panic(err)
 		}
@@ -201,8 +193,8 @@ func TestGetRequestList(t *testing.T) {
 		app4Id := buildRequestWithSubmitTime(user1, app4SubTime, ApplicationType{Type: Club}, "DDDDD", "Remarks", 10000, time.Now())
 
 		// TODO Use a appropriate function defined in model/states_log.go after implementing such a function.
-		db.Model(&app3.LatestStatesLog).Updates(StatesLog{
-			ToState: StateType{FullyRepaid},
+		db.Model(&app3.LatestRequestStatus).Updates(RequestStatus{
+			Status: FullyRepaid,
 		})
 
 		t.Parallel()
@@ -210,29 +202,28 @@ func TestGetRequestList(t *testing.T) {
 		t.Run("allNil", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := repo.GetApplicationList("", nil, nil, "", nil, nil, nil)
+			apps, err := repo.GetRequestList("", nil, nil, "", nil, nil)
 			asr.NoError(err)
 
 			asr.Len(apps, 4)
-			asr.Equal([]uuid.UUID{app3Id, app2Id, app1Id, app4Id}, mapToApplicationID(apps))
+			asr.Equal([]uuid.UUID{app3Id, app2Id, app1Id, app4Id}, mapToRequestID(apps))
 
 			for _, app := range apps {
-				asr.NotZero(app.LatestApplicationsDetail)
-				asr.NotZero(app.LatestStatesLog)
-				asr.NotZero(app.LatestState)
+				asr.NotZero(app.LatestRequestStatus)
+				asr.NotZero(app.LatestStatus)
 			}
 
 			asr.False(apps[0].CreatedAt.Before(apps[1].CreatedAt))
 			asr.False(apps[1].CreatedAt.Before(apps[2].CreatedAt))
 
-			asr.Equal(user1, apps[2].CreateUserTrapID.TrapId)
+			asr.Equal(user1, apps[2].CreatedBy.TrapID)
 		})
 
 		t.Run("filterByFinancialYear", func(t *testing.T) {
 			asr := assert.New(t)
 			financialYear := 2019
 
-			apps, err := repo.GetApplicationList("", nil, &financialYear, "", nil, nil, nil)
+			apps, err := repo.GetRequestList("", nil, &financialYear, "", nil, nil)
 			asr.NoError(err)
 
 			asr.Len(apps, 1)
@@ -242,7 +233,7 @@ func TestGetRequestList(t *testing.T) {
 		t.Run("filterByApplicant", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := repo.GetApplicationList("", nil, nil, user2, nil, nil, nil)
+			apps, err := repo.GetRequestList("", nil, nil, user2, nil, nil)
 			asr.NoError(err)
 
 			asr.Len(apps, 2)
@@ -251,27 +242,18 @@ func TestGetRequestList(t *testing.T) {
 		t.Run("filterByCurrentState", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := repo.GetApplicationList("", &StateType{FullyRepaid}, nil, "", nil, nil, nil)
+			fr := FullyRepaid
+			apps, err := repo.GetRequestList("", &fr, nil, "", nil, nil)
 			asr.NoError(err)
 
 			asr.Len(apps, 1)
 			asr.Equal(app3Id, apps[0].ID)
 		})
 
-		t.Run("filterByApplicationType", func(t *testing.T) {
-			asr := assert.New(t)
-
-			apps, err := repo.GetApplicationList("", nil, nil, "", &ApplicationType{Type: Contest}, nil, nil)
-			asr.NoError(err)
-
-			asr.Len(apps, 1)
-			asr.Equal(apps[0].ID, app2Id)
-		})
-
 		t.Run("emptyResult", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := repo.GetApplicationList("", nil, nil, user3, nil, nil, nil)
+			apps, err := repo.GetRequestList("", nil, nil, user3, nil, nil)
 			asr.NoError(err)
 
 			asr.Empty(apps)
@@ -286,7 +268,7 @@ func TestGetRequestList(t *testing.T) {
 			t.Run("Since", func(t *testing.T) {
 				asr := assert.New(t)
 
-				apps, err := repo.GetApplicationList("", nil, nil, "", nil, &beforeApp3, nil)
+				apps, err := repo.GetRequestList("", nil, nil, "", nil, &beforeApp3)
 				asr.NoError(err)
 
 				asr.Len(apps, 1)
@@ -296,17 +278,17 @@ func TestGetRequestList(t *testing.T) {
 			t.Run("until", func(t *testing.T) {
 				asr := assert.New(t)
 
-				apps, err := repo.GetApplicationList("", nil, nil, "", nil, nil, &beforeApp3)
+				apps, err := repo.GetRequestList("", nil, nil, "", nil, &beforeApp3)
 				asr.NoError(err)
 
 				asr.Len(apps, 3)
-				asr.Equal([]uuid.UUID{app2Id, app1Id, app4Id}, mapToApplicationID(apps))
+				asr.Equal([]uuid.UUID{app2Id, app1Id, app4Id}, mapToRequestID(apps))
 			})
 
 			t.Run("both", func(t *testing.T) {
 				asr := assert.New(t)
 
-				apps, err := repo.GetApplicationList("", nil, nil, "", nil, &beforeApp2, &beforeApp3)
+				apps, err := repo.GetRequestList("", nil, nil, "", &beforeApp2, &beforeApp3)
 				asr.NoError(err)
 
 				asr.Len(apps, 1)
@@ -343,18 +325,18 @@ func TestGetRequestList(t *testing.T) {
 				t.Run(test.SortBy, func(t *testing.T) {
 					asr := assert.New(t)
 
-					apps, err := repo.GetApplicationList(test.SortBy, nil, nil, "", nil, nil, nil)
+					apps, err := repo.GetRequestList(test.SortBy, nil, nil, "", nil, nil)
 					asr.NoError(err)
 
 					asr.Len(apps, 4)
-					asr.Equal(test.Should, mapToApplicationID(apps))
+					asr.Equal(test.Should, mapToRequestID(apps))
 				})
 			}
 		})
 	})
 }
 
-func mapToRequestID(apps []Application) []uuid.UUID {
+func mapToRequestID(apps []Request) []uuid.UUID {
 	appIds := make([]uuid.UUID, len(apps))
 	for i := range apps {
 		appIds[i] = apps[i].ID
@@ -369,10 +351,10 @@ func buildRequestWithSubmitTime(createUserTrapID string, submittedAt time.Time, 
 		panic(err)
 	}
 
-	err = db.Create(&Application{
-		ID:               id,
-		CreateUserTrapID: User{TrapId: createUserTrapID},
-		CreatedAt:        submittedAt,
+	err = db.Create(&Request{
+		ID:        id,
+		CreatedBy: TrapUser{TrapID: createUserTrapID},
+		CreatedAt: submittedAt,
 	}).Error
 	if err != nil {
 		panic(err)
@@ -383,7 +365,7 @@ func buildRequestWithSubmitTime(createUserTrapID string, submittedAt time.Time, 
 		panic(err)
 	}
 
-	err = db.Model(Request{}).Where(&Application{ID: id}).Updates(Request{
+	err = db.Model(Request{}).Where(&Request{ID: id}).Updates(Request{
 		RequestStatusID: state.ID,
 	}).Error
 

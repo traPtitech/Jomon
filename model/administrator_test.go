@@ -10,22 +10,22 @@ func TestAdministrator(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		user := User{
-			TrapId: generateRandomUserName(),
+		user := TrapUser{
+			TrapID: generateRandomUserName(),
 		}
-		err := adminRepo.AddAdministrator(user.TrapId)
+		err := adminRepo.AddAdministrator(user.TrapID)
 		asr.NoError(err)
 
 		admins, err := adminRepo.GetAdministratorList()
 		asr.NoError(err)
 		asr.Len(admins, 1)
-		asr.Equal(user.TrapId, admins[0])
+		asr.Equal(user.TrapID, admins[0])
 
-		flag, err := adminRepo.IsAdmin(user.TrapId)
+		flag, err := adminRepo.IsAdmin(user.TrapID)
 		asr.NoError(err)
 		asr.True(flag)
 
-		testId := user.TrapId + "0"
+		testId := user.TrapID + "0"
 		flag, err = adminRepo.IsAdmin(testId)
 		asr.NoError(err)
 		asr.False(flag)
@@ -33,7 +33,7 @@ func TestAdministrator(t *testing.T) {
 		user.GiveIsUserAdmin(admins)
 		asr.True(user.IsAdmin)
 
-		err = adminRepo.RemoveAdministrator(user.TrapId)
+		err = adminRepo.RemoveAdministrator(user.TrapID)
 		asr.NoError(err)
 
 		admins, err = adminRepo.GetAdministratorList()

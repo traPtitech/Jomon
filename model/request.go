@@ -8,46 +8,47 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+// Request struct of Request
 type Request struct {
 	ID                  uuid.UUID       `gorm:"type:char(36);primary_key" json:"id"`
 	LatestRequestStatus RequestStatus   `gorm:"foreignkey:StatesLogsID" json:"-"`
 	LatestStatus        Status          `gorm:"-" json:"current_state"`
 	RequestStatusID     int             `gorm:"type:int(11);not null" json:"-"`
+	Amount              int             `gorm:"type:int(11);not null" json:"amount"`
+	Title               string          `gorm:"type:text;not null" json:"title"`
+	Content             string          `gorm:"type:text;not null" json:"content"`
 	CreatedBy           TrapUser        `gorm:"embedded;embedded_prefix:created_by;" json:"applicant"`
 	CreatedAt           time.Time       `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt           time.Time       `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
 	RequestStatus       []RequestStatus `json:"request_status"`
 	Files               []File          `json:"files"`
 	Comments            []Comment       `json:"comments"`
 	RequestTargets      []RequestTarget `json:"request_targets"`
 }
 
-func (app *Request) GiveIsUserAdmin(admins []string) {
-	if app == nil {
+// GiveIsUserAdmin check whether request is admin or not
+func (req *Request) GiveIsUserAdmin(admins []string) {
+	if req == nil {
 		return
 	}
 
-	app.CreatedBy.GiveIsUserAdmin(admins)
-	app.LatestRequestStatus.GiveIsUserAdmin(admins)
+	req.CreatedBy.GiveIsUserAdmin(admins)
+	req.LatestRequestStatus.GiveIsUserAdmin(admins)
 
-	for i := range app.RequestStatus {
-		app.RequestStatus[i].GiveIsUserAdmin(admins)
+	for i := range req.RequestStatus {
+		req.RequestStatus[i].GiveIsUserAdmin(admins)
 	}
 
-	for i := range app.Comments {
-		app.Comments[i].GiveIsUserAdmin(admins)
-	}
-
-	for i := range app.RequestTargets {
-		app.RequestTargets[i].GiveIsUserAdmin(admins)
+	for i := range req.Comments {
+		req.Comments[i].GiveIsUserAdmin(admins)
 	}
 }
 
 // RequestRepository 依頼のリポジトリ
 type RequestRepository interface {
 	GetRequest(id uuid.UUID, preload bool) (Request, error)
-	GetRequestList(
-		sort string,
-		currentState *StateType,
+	GetRequestList(sort string,
+		currentStatus *Status,
 		financialYear *int,
 		applicant string,
 		submittedSince *time.Time,
@@ -63,7 +64,7 @@ type RequestRepository interface {
 	) (uuid.UUID, error)
 	PatchRequest(
 		appID uuid.UUID,
-		updateUserTrapID string,
+		createdBy string,
 		title string,
 		remarks string,
 		amount *int,
@@ -77,14 +78,16 @@ type RequestRepository interface {
 		status Status,
 	) (RequestStatus, error)
 	UpdateRequestTarget(
-		applicationID uuid.UUID,
+		requestID uuid.UUID,
 		target string,
-		repaidAt time.Time,
+		createdBy string,
+		paidAt time.Time,
 	) (RequestTarget, bool, error)
 }
 
 type requestRepository struct{}
 
+// NewRequestRepository Make RequestRepository
 func NewRequestRepository() RequestRepository {
 	return &requestRepository{}
 }
@@ -98,7 +101,7 @@ func (*requestRepository) GetRequest(id uuid.UUID, preload bool) (Request, error
 		query = query.Preload("LatestRequestStatus")
 	}
 
-	err := query.First(&req, Application{ID: id}).Error
+	err := query.First(&req, Request{ID: id}).Error
 	if err != nil {
 		return Request{}, err
 	}
@@ -106,11 +109,11 @@ func (*requestRepository) GetRequest(id uuid.UUID, preload bool) (Request, error
 	return req, nil
 }
 
-func (*requestRepository) GetRequestList(sort string, currentState *StateType, financialYear *int, applicant string, typ *ApplicationType, submittedSince *time.Time, submittedUntil *time.Time) ([]Application, error) {
-	query := db.Preload("LatestStatesLog").Preload("LatestApplicationsDetail")
+func (*requestRepository) GetRequestList(sort string, currentStatus *Status, financialYear *int, applicant string, submittedSince *time.Time, submittedUntil *time.Time) ([]Request, error) {
+	query := db.Preload("LatestRequestStatus")
 
-	if currentState != nil {
-		query = query.Joins("JOIN states_logs ON states_logs.id = applications.states_logs_id").Where("states_logs.to_state = ?", currentState.Type)
+	if currentStatus != nil {
+		query = query.Joins("JOIN request_status ON request_status.request_id = request.id").Where("request_status.status = ?", currentStatus)
 	}
 
 	if financialYear != nil {
@@ -120,11 +123,7 @@ func (*requestRepository) GetRequestList(sort string, currentState *StateType, f
 	}
 
 	if applicant != "" {
-		query = query.Where("create_user_trap_id = ?", applicant)
-	}
-
-	if typ != nil {
-		query = query.Joins("JOIN applications_details ON applications_details.id = applications.applications_details_id").Where("applications_details.type = ?", typ.Type)
+		query = query.Where("created_by = ?", applicant)
 	}
 
 	if submittedSince != nil {
@@ -141,20 +140,20 @@ func (*requestRepository) GetRequestList(sort string, currentState *StateType, f
 	case "-created_at":
 		query = query.Order("created_at")
 	case "title":
-		query = query.Joins("JOIN applications_details ON applications_details.id = applications.applications_details_id").Order("applications_details.title")
+		query = query.Order("title")
 	case "-title":
-		query = query.Joins("JOIN applications_details ON applications_details.id = applications.applications_details_id").Order("applications_details.title desc")
+		query = query.Order("title desc")
 	}
 
 	//noinspection GoPreferNilSlice
-	apps := []Application{}
+	apps := []Request{}
 	err := query.Find(&apps).Error
 	if err != nil {
 		return nil, err
 	}
 
 	for i := range apps {
-		apps[i].LatestState = apps[i].LatestStatesLog.ToState
+		apps[i].LatestStatus = apps[i].LatestRequestStatus.Status
 	}
 
 	return apps, nil
@@ -192,26 +191,47 @@ func (repo *requestRepository) BuildRequest(createdBy string, title string, rema
 	return id, nil
 }
 
-func (repo *requestRepository) PatchRequest(appID uuid.UUID, updateUserTrapID string, title string, remarks string, amount *int, paidAt *time.Time, repayUsers []string) error {
+func (repo *requestRepository) PatchRequest(reqID uuid.UUID, createdBy string, title string, content string, amount *int, paidAt *time.Time, requestTargets []string) error {
 	return db.Transaction(func(tx *gorm.DB) error {
-		app, err := repo.GetRequest(appID, false)
+		req, err := repo.GetRequest(reqID, false)
 		if err != nil {
 			return err
 		}
 
-		if len(repayUsers) > 0 {
-			if err = repo.deleteRepayUserByApplicationID(tx, appID); err != nil {
+		req.ID, err = uuid.NewV4() // zero value of int is 0
+		if err != nil {
+			return err
+		}
+
+		req.CreatedBy.TrapID = createdBy
+
+		if title != "" {
+			req.Title = title
+		}
+
+		if content != "" {
+			req.Content = content
+		}
+
+		if amount != nil {
+			req.Amount = *amount
+		}
+
+		req.UpdatedAt = time.Time{} // zero value
+
+		if len(requestTargets) > 0 {
+			if err = repo.deleteRequestTargetByRequestID(tx, reqID); err != nil {
 				return err
 			}
 
-			for _, userID := range repayUsers {
-				if err = repo.createRequestTarget(tx, appID, userID); err != nil {
+			for _, userID := range requestTargets {
+				if err = repo.createRequestTarget(tx, reqID, userID); err != nil {
 					return err
 				}
 			}
 		}
 
-		return tx.Model(&Application{ID: appID}).Updates(Application{}).Error
+		return tx.Model(&Request{ID: reqID}).Updates(Request{}).Error
 	})
 }
 

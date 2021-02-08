@@ -39,12 +39,11 @@ func setupDB() *gorm.DB {
 func deleteAllRecord(db *gorm.DB) {
 	db.BlockGlobalUpdate(false)
 	db.Delete(&Administrator{})
-	db.Delete(&ApplicationsDetail{})
-	db.Delete(&ApplicationsImage{})
+	db.Delete(&File{})
 	db.Unscoped().Delete(&Comment{})
-	db.Delete(&RepayUser{})
-	db.Delete(&StatesLog{})
-	db.Delete(&Application{})
+	db.Delete(&RequestTarget{})
+	db.Delete(&RequestStatus{})
+	db.Delete(&Request{})
 }
 
 func generateRandomUserName() string {

@@ -16,7 +16,7 @@ func TestCreateComment(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appId, err := repo.createApplication(db, userId)
+		appId, err := repo.createRequest(db, userId)
 		if err != nil {
 			panic(err)
 		}
@@ -25,7 +25,7 @@ func TestCreateComment(t *testing.T) {
 		asr.NoError(err)
 		asr.Equal(comment.ApplicationID, appId)
 		asr.Equal(comment.Comment, commentText)
-		asr.Equal(comment.UserTrapID.TrapId, userId)
+		asr.Equal(comment.UserTrapID.TrapID, userId)
 
 		commentText2 := "This is comment 2."
 
@@ -64,7 +64,7 @@ func TestPutComment(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appId, err := repo.createApplication(db, userId)
+		appId, err := repo.createRequest(db, userId)
 		if err != nil {
 			panic(err)
 		}
@@ -80,7 +80,7 @@ func TestPutComment(t *testing.T) {
 		asr.NoError(err)
 		asr.Equal(comment.Comment, newCommentText)
 
-		app, err := repo.GetApplication(appId, true)
+		app, err := repo.GetRequest(appId, true)
 		asr.NoError(err)
 		asr.NotEqual(app.Comments[0].Comment, commentText)
 		asr.Equal(app.Comments[0].Comment, newCommentText)
@@ -89,7 +89,7 @@ func TestPutComment(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appId, err := repo.createApplication(db, userId)
+		appId, err := repo.createRequest(db, userId)
 		if err != nil {
 			panic(err)
 		}
@@ -112,7 +112,7 @@ func TestPutComment(t *testing.T) {
 		asr.NoError(err)
 		asr.Equal(comment.Comment, newCommentText2)
 
-		app, err := repo.GetApplication(appId, true)
+		app, err := repo.GetRequest(appId, true)
 		asr.NoError(err)
 		asr.Len(app.Comments, 2)
 		asr.NotEqual(app.Comments[1].Comment, commentText2)
@@ -129,7 +129,7 @@ func TestDeleteComment(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appId, err := repo.createApplication(db, userId)
+		appId, err := repo.createRequest(db, userId)
 		if err != nil {
 			panic(err)
 		}
@@ -142,7 +142,7 @@ func TestDeleteComment(t *testing.T) {
 		err = commentRepo.DeleteComment(appId, comment.ID)
 		asr.NoError(err)
 
-		app, err := repo.GetApplication(appId, true)
+		app, err := repo.GetRequest(appId, true)
 		asr.NoError(err)
 		asr.Empty(app.Comments)
 	})
@@ -150,7 +150,7 @@ func TestDeleteComment(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appId, err := repo.createApplication(db, userId)
+		appId, err := repo.createRequest(db, userId)
 		if err != nil {
 			panic(err)
 		}
@@ -170,7 +170,7 @@ func TestDeleteComment(t *testing.T) {
 		err = commentRepo.DeleteComment(appId, comment.ID)
 		asr.NoError(err)
 
-		app, err := repo.GetApplication(appId, true)
+		app, err := repo.GetRequest(appId, true)
 		asr.NoError(err)
 		asr.Len(app.Comments, 1)
 		asr.Equal(app.Comments[0].Comment, commentText)

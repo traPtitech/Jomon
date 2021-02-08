@@ -23,12 +23,12 @@ type WebhookApplication struct {
 }
 
 type WebhookApplicationDetail struct {
-	UpdateUser User   `json:"update_user"`
-	Type       string `json:"type"`
-	Title      string `json:"title"`
-	Remarks    string `json:"remarks"`
-	Amount     int    `json:"amount"`
-	PaidAt     PaidAt `json:"paid_at"`
+	UpdateUser TrapUser `json:"update_user"`
+	Type       string   `json:"type"`
+	Title      string   `json:"title"`
+	Remarks    string   `json:"remarks"`
+	Amount     int      `json:"amount"`
+	PaidAt     PaidAt   `json:"paid_at"`
 }
 type WebhookRepository interface {
 	WebhookEventHandler(c echo.Context, reqBody, resBody []byte)
@@ -36,14 +36,14 @@ type WebhookRepository interface {
 
 type webhookRepository struct {
 	secret    string
-	channelId string
+	channelID string
 	id        string
 }
 
-func NewWebhookRepository(secret string, channelId string, id string) WebhookRepository {
+func NewWebhookRepository(secret string, channelID string, id string) WebhookRepository {
 	return &webhookRepository{
 		secret:    secret,
-		channelId: channelId,
+		channelID: channelID,
 		id:        id,
 	}
 }
@@ -63,7 +63,7 @@ func (repo *webhookRepository) WebhookEventHandler(c echo.Context, reqBody, resB
 	content += "\n"
 	content += resApp.CurrentDetail.Remarks
 
-	_ = RequestWebhook(content, repo.secret, repo.channelId, repo.id, 1)
+	_ = RequestWebhook(content, repo.secret, repo.channelID, repo.id, 1)
 }
 
 func RequestWebhook(message, secret, channelID, webhookID string, embed int) error {

@@ -3,14 +3,15 @@ package model
 import (
 	"bytes"
 	"fmt"
-	"github.com/gofrs/uuid"
-	"github.com/jinzhu/gorm"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"io"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gofrs/uuid"
+	"github.com/jinzhu/gorm"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 type storageMock struct {
@@ -49,18 +50,18 @@ func TestCreateApplicationsImage(t *testing.T) {
 			actualReaderString = buf.String()
 		}).Return(nil).Once()
 
-		imageRepo := NewApplicationsImageRepository(sm)
+		imageRepo := NewFileRepository(sm)
 
 		sampleText := "sampleData"
 
-		appId, err := repo.createApplication(db, "")
+		appId, err := repo.createRequest(db, "")
 		if err != nil {
 			panic(err)
 		}
 
 		mimeType := "image/png"
 
-		im, err := imageRepo.CreateApplicationsImage(appId, strings.NewReader(sampleText), mimeType)
+		im, err := imageRepo.CreateFile(appId, strings.NewReader(sampleText), mimeType)
 		asr.NoError(err)
 		asr.Equal(fmt.Sprintf("%s.png", im.ID.String()), actualFilename)
 		asr.Equal(sampleText, actualReaderString)
@@ -75,25 +76,25 @@ func TestGetApplicationsImage(t *testing.T) {
 	sm := new(storageMock)
 	sm.On("Save", mock.Anything, mock.Anything).Return(nil)
 
-	imageRepo := NewApplicationsImageRepository(sm)
+	imageRepo := NewFileRepository(sm)
 
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appId, err := repo.createApplication(db, "")
+		appId, err := repo.createRequest(db, "")
 		if err != nil {
 			panic(err)
 		}
 
-		createdIm, err := imageRepo.CreateApplicationsImage(appId, strings.NewReader(""), "image/png")
+		createdIm, err := imageRepo.CreateFile(appId, strings.NewReader(""), "image/png")
 		if err != nil {
 			panic(err)
 		}
 
-		getIm, err := imageRepo.GetApplicationsImage(createdIm.ID)
+		getIm, err := imageRepo.GetFile(createdIm.ID)
 		asr.NoError(err)
 		asr.Equal(createdIm.ID, getIm.ID)
-		asr.Equal(createdIm.ApplicationID, getIm.ApplicationID)
+		asr.Equal(createdIm.RequestID, getIm.RequestID)
 		asr.Equal(createdIm.MimeType, getIm.MimeType)
 		asr.WithinDuration(createdIm.CreatedAt, getIm.CreatedAt, 1*time.Second)
 	})
@@ -106,7 +107,7 @@ func TestGetApplicationsImage(t *testing.T) {
 			panic(err)
 		}
 
-		_, err = imageRepo.GetApplicationsImage(id)
+		_, err = imageRepo.GetFile(id)
 		asr.Error(err)
 		asr.True(gorm.IsRecordNotFoundError(err))
 	})
@@ -122,22 +123,22 @@ func TestDeleteApplicationsImage(t *testing.T) {
 		sm.On("Save", mock.Anything, mock.Anything).Return(nil)
 		sm.On("Delete", mock.Anything).Return(nil).Once()
 
-		imageRepo := NewApplicationsImageRepository(sm)
+		imageRepo := NewFileRepository(sm)
 
-		appId, err := repo.createApplication(db, "")
+		appId, err := repo.createRequest(db, "")
 		if err != nil {
 			panic(err)
 		}
 
-		im, err := imageRepo.CreateApplicationsImage(appId, strings.NewReader(""), "image/png")
+		im, err := imageRepo.CreateFile(appId, strings.NewReader(""), "image/png")
 		if err != nil {
 			panic(err)
 		}
 
-		err = imageRepo.DeleteApplicationsImage(im)
+		err = imageRepo.DeleteFile(im)
 		asr.NoError(err)
 
-		_, err = imageRepo.GetApplicationsImage(im.ID)
+		_, err = imageRepo.GetFile(im.ID)
 		asr.Error(err)
 		asr.True(gorm.IsRecordNotFoundError(err))
 	})

@@ -14,7 +14,7 @@ type traqRepositoryMock struct {
 	token string
 }
 
-var myUserId = "MyUserId"
+var myUserID = "MyUserId"
 
 func NewTraqRepositoryMock(token string) *traqRepositoryMock {
 	m := new(traqRepositoryMock)
@@ -34,7 +34,7 @@ func NewTraqRepositoryMock(token string) *traqRepositoryMock {
 		{
 			"name": "%s"
 		}
-	]`, myUserId)), nil)
+	]`, myUserID)), nil)
 
 	getMyUserReq, err := http.NewRequest("GET", TraQBaseURL+"/users/me", nil)
 	if err != nil {
@@ -45,7 +45,7 @@ func NewTraqRepositoryMock(token string) *traqRepositoryMock {
 	m.On("sendReq", getMyUserReq).Return([]byte(fmt.Sprintf(`
 	{
 		"name": "%s"
-	}`, myUserId)), nil)
+	}`, myUserID)), nil)
 
 	return m
 }
@@ -86,7 +86,7 @@ func TestGetMyUser(t *testing.T) {
 
 		user, err := userRepo.GetMyUser(token)
 		asr.NoError(err)
-		asr.Equal(user.TrapId, myUserId)
+		asr.Equal(user.TrapID, myUserID)
 	})
 }
 
@@ -102,7 +102,7 @@ func TestExistsUser(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		exist, err := userRepo.ExistsUser(token, myUserId)
+		exist, err := userRepo.ExistsUser(token, myUserID)
 		asr.NoError(err)
 		asr.True(exist)
 	})

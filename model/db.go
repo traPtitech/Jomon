@@ -12,11 +12,10 @@ var db *gorm.DB
 
 var allTables = []interface{}{
 	Administrator{},
-	Application{},
-	ApplicationsDetail{},
-	RepayUser{},
-	ApplicationsImage{},
-	StatesLog{},
+	Request{},
+	RequestTarget{},
+	File{},
+	RequestStatus{},
 	Comment{},
 }
 
@@ -52,10 +51,9 @@ func Migrate() error {
 		return err
 	}
 
-	db.Model(&ApplicationsDetail{}).AddForeignKey("application_id", "applications(id)", "RESTRICT", "RESTRICT")
-	db.Model(&RepayUser{}).AddForeignKey("application_id", "applications(id)", "RESTRICT", "RESTRICT")
-	db.Model(&ApplicationsImage{}).AddForeignKey("application_id", "applications(id)", "RESTRICT", "RESTRICT")
-	db.Model(&StatesLog{}).AddForeignKey("application_id", "applications(id)", "RESTRICT", "RESTRICT")
+	db.Model(&RequestTarget{}).AddForeignKey("application_id", "applications(id)", "RESTRICT", "RESTRICT")
+	db.Model(&File{}).AddForeignKey("application_id", "applications(id)", "RESTRICT", "RESTRICT")
+	db.Model(&RequestStatus{}).AddForeignKey("application_id", "applications(id)", "RESTRICT", "RESTRICT")
 	db.Model(&Comment{}).AddForeignKey("application_id", "applications(id)", "RESTRICT", "RESTRICT")
 
 	return nil

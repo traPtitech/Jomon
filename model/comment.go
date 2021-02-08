@@ -9,7 +9,7 @@ import (
 type Comment struct {
 	ID            int        `gorm:"type:int(11) AUTO_INCREMENT;primary_key" json:"comment_id"`
 	ApplicationID uuid.UUID  `gorm:"type:char(36);not null" json:"-"`
-	UserTrapID    User       `gorm:"embedded;embedded_prefix:user_" json:"user"`
+	UserTrapID    TrapUser   `gorm:"embedded;embedded_prefix:user_" json:"trap_user"`
 	Comment       string     `gorm:"type:text;not null" json:"comment"`
 	CreatedAt     time.Time  `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt     time.Time  `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"updated_at"`
@@ -52,7 +52,7 @@ func (_ *commentRepository) GetComment(applicationId uuid.UUID, commentId int) (
 func (_ *commentRepository) CreateComment(applicationId uuid.UUID, commentText string, userId string) (Comment, error) {
 	comment := Comment{
 		ApplicationID: applicationId,
-		UserTrapID:    User{TrapId: userId},
+		UserTrapID:    TrapUser{TrapID: userId},
 		Comment:       commentText,
 	}
 

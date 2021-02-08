@@ -43,7 +43,7 @@ func (repo *requestRepository) UpdateRequestStatus(requestID uuid.UUID, createdB
 	rs := RequestStatus{
 		RequestID: requestID,
 		CreatedBy: TrapUser{
-			TrapId: createdBy,
+			TrapID: createdBy,
 		},
 		Status: status,
 		Reason: reason,
@@ -72,7 +72,7 @@ func (*requestRepository) createRequestStatus(db *gorm.DB, requestID uuid.UUID, 
 	rs := RequestStatus{
 		RequestID: requestID,
 		CreatedBy: TrapUser{
-			TrapId: createdBy,
+			TrapID: createdBy,
 		},
 		Status: Submitted,
 		Reason: "",

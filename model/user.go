@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// TrapUser traP User struct
 type TrapUser struct {
 	TrapID  string `gorm:"type:varchar(32);not null;" json:"trap_id"`
 	IsAdmin bool   `gorm:"-" json:"is_admin"`
@@ -21,23 +22,25 @@ func (user *TrapUser) GiveIsUserAdmin(admins []string) {
 	user.IsAdmin = false
 
 	for _, admin := range admins {
-		if user.TrapId == admin {
+		if user.TrapID == admin {
 			user.IsAdmin = true
 			break
 		}
 	}
 }
 
+// UserRepository Repo of User
 type UserRepository interface {
-	GetUsers(token string) ([]User, error)
-	GetMyUser(token string) (User, error)
-	ExistsUser(token string, trapId string) (bool, error)
+	GetUsers(token string) ([]TrapUser, error)
+	GetMyUser(token string) (TrapUser, error)
+	ExistsUser(token string, trapID string) (bool, error)
 }
 
 type userRepository struct {
 	traqRepository TraqRepository
 }
 
+// NewUserRepository Make UserRepository
 func NewUserRepository() UserRepository {
 	return &userRepository{
 		traqRepository: NewTraqRepository(),
@@ -50,19 +53,22 @@ type traqUser struct {
 	Bot  bool   `json:"bot"`
 }
 
+// TraQBaseURL traQURL
 const TraQBaseURL = "https://q.trap.jp/api/v3"
 
+// TraqRepository Repo of traQ
 type TraqRepository interface {
 	sendReq(req *http.Request) ([]byte, error)
 }
 
 type traqRepository struct{}
 
+// NewTraqRepository Make TraqRepository
 func NewTraqRepository() TraqRepository {
 	return &traqRepository{}
 }
 
-func (_ *traqRepository) sendReq(req *http.Request) ([]byte, error) {
+func (*traqRepository) sendReq(req *http.Request) ([]byte, error) {
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -75,7 +81,7 @@ func (_ *traqRepository) sendReq(req *http.Request) ([]byte, error) {
 	return ioutil.ReadAll(res.Body)
 }
 
-func (repo *userRepository) GetUsers(token string) ([]User, error) {
+func (repo *userRepository) GetUsers(token string) ([]TrapUser, error) {
 	req, err := http.NewRequest("GET", TraQBaseURL+"/users", nil)
 	if err != nil {
 		return nil, err
@@ -92,14 +98,14 @@ func (repo *userRepository) GetUsers(token string) ([]User, error) {
 		return nil, err
 	}
 
-	users := []User{}
+	users := []TrapUser{}
 	for _, traqUser := range traqUsers {
 		if traqUser.Bot {
 			continue
 		}
 
-		user := User{
-			TrapId: traqUser.Name,
+		user := TrapUser{
+			TrapID: traqUser.Name,
 		}
 		users = append(users, user)
 	}
@@ -107,36 +113,36 @@ func (repo *userRepository) GetUsers(token string) ([]User, error) {
 	return users, nil
 }
 
-func (repo *userRepository) GetMyUser(token string) (User, error) {
+func (repo *userRepository) GetMyUser(token string) (TrapUser, error) {
 	req, err := http.NewRequest("GET", TraQBaseURL+"/users/me", nil)
 	if err != nil {
-		return User{}, err
+		return TrapUser{}, err
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 
 	body, err := repo.traqRepository.sendReq(req)
 	if err != nil {
-		return User{}, err
+		return TrapUser{}, err
 	}
 
 	traqUser := traqUser{}
 	if err = json.Unmarshal(body, &traqUser); err != nil {
-		return User{}, err
+		return TrapUser{}, err
 	}
 
-	return User{
-		TrapId: traqUser.Name,
+	return TrapUser{
+		TrapID: traqUser.Name,
 	}, nil
 }
 
-func (repo *userRepository) ExistsUser(token string, trapId string) (bool, error) {
+func (repo *userRepository) ExistsUser(token string, trapID string) (bool, error) {
 	users, err := repo.GetUsers(token)
 	if err != nil {
 		return false, err
 	}
 
 	for _, user := range users {
-		if trapId == user.TrapId {
+		if trapID == user.TrapID {
 			return true, nil
 		}
 	}
