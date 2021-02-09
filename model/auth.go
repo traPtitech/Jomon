@@ -10,21 +10,24 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// AuthResponse Response of Auth
 type AuthResponse struct {
 	AccessToken  string `json:"access_token"`
 	ExpiresIn    int    `json:"expires_in"`
 	RefreshToken string `json:"refresh_token"`
 }
 
+// TraQAuthRepository Repo to traQAuth
 type TraQAuthRepository interface {
 	GetAccessToken(code string, codeVerifier string) (AuthResponse, error)
-	GetClientId() string
+	GetClientID() string
 }
 
 type traQAuthRepository struct {
 	clientID string
 }
 
+// NewTraQAuthRepository Make TraQAuthRepository
 func NewTraQAuthRepository(clientID string) TraQAuthRepository {
 	return &traQAuthRepository{clientID: clientID}
 }
@@ -58,6 +61,6 @@ func (repo *traQAuthRepository) GetAccessToken(code string, codeVerifier string)
 	return authRes, nil
 }
 
-func (repo *traQAuthRepository) GetClientId() string {
+func (repo *traQAuthRepository) GetClientID() string {
 	return repo.clientID
 }

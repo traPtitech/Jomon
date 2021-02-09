@@ -45,9 +45,9 @@ func TestBuildRequest(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		appID, err := repo.BuildRequest("User1", "Title", "Remarks", 1000, time.Now(), []string{"User1"})
+		reqID, err := repo.BuildRequest("User1", "Title", "Remarks", 1000, time.Now(), []string{"User1"})
 		asr.NoError(err)
-		asr.NotEqual(appID, uuid.Nil)
+		asr.NotEqual(reqID, uuid.Nil)
 	})
 }
 
@@ -64,19 +64,19 @@ func TestGetRequest(t *testing.T) {
 
 		user := generateRandomUserName()
 
-		appID, err := repo.BuildRequest(user, "Title", "Remarks", 1000, time.Now(), []string{user})
+		reqID, err := repo.BuildRequest(user, "Title", "Remarks", 1000, time.Now(), []string{user})
 		if err != nil {
 			panic(err)
 		}
 
-		comment, err := commentRepo.CreateComment(appID, "This is comment.", user)
+		comment, err := commentRepo.CreateComment(reqID, "This is comment.", user)
 
-		img, err := fileRepo.CreateFile(appID, strings.NewReader("TestData"), "image/png")
+		img, err := fileRepo.CreateFile(reqID, strings.NewReader("TestData"), "image/png")
 
-		app, err := repo.GetRequest(appID, true)
+		app, err := repo.GetRequest(reqID, true)
 
 		asr.NoError(err)
-		asr.Equal(appID, app.ID)
+		asr.Equal(reqID, app.ID)
 
 		asr.Equal(app.RequestStatusID, app.LatestRequestStatus.ID)
 		asr.Len(app.RequestStatus, 1)
@@ -99,15 +99,15 @@ func TestGetRequest(t *testing.T) {
 
 		user := generateRandomUserName()
 
-		appID, err := repo.BuildRequest(user, "Title", "Remarks", 1000, time.Now(), []string{user})
+		reqID, err := repo.BuildRequest(user, "Title", "Remarks", 1000, time.Now(), []string{user})
 		if err != nil {
 			panic(err)
 		}
 
-		app, err := repo.GetRequest(appID, false)
+		app, err := repo.GetRequest(reqID, false)
 
 		asr.NoError(err)
-		asr.Equal(appID, app.ID)
+		asr.Equal(reqID, app.ID)
 
 	})
 
@@ -135,15 +135,15 @@ func TestPatchRequest(t *testing.T) {
 		remarks := "Remarks"
 		amount := 1000
 		paidAt := time.Now()
-		appID, err := repo.BuildRequest("User", title, remarks, amount, paidAt, []string{"User"})
+		reqID, err := repo.BuildRequest("User", title, remarks, amount, paidAt, []string{"User"})
 		if err != nil {
 			panic(err)
 		}
 
-		err = repo.PatchRequest(appID, "User", "", "", nil, nil, []string{"OtherUser"})
+		err = repo.PatchRequest(reqID, "User", "", "", nil, nil, []string{"OtherUser"})
 		asr.NoError(err)
 
-		app, err := repo.GetRequest(appID, true)
+		app, err := repo.GetRequest(reqID, true)
 		if err != nil {
 			panic(err)
 		}
