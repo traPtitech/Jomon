@@ -192,10 +192,11 @@ func TestGetRequestList(t *testing.T) {
 		app4SubTime := time.Date(2019, 4, 10, 12, 0, 0, 0, time.Local)
 		app4Id := buildRequestWithSubmitTime(user1, app4SubTime, "DDDDD", "Remarks", 10000, time.Now())
 
-		// TODO Use a appropriate function defined in model/states_log.go after implementing such a function.
-		db.Model(&app3.LatestRequestStatus).Updates(RequestStatus{
-			Status: FullyRepaid,
-		})
+		fr := FullyPaid
+		_, err = repo.UpdateRequestStatus(app3.LatestRequestStatus.RequestID, app3.LatestRequestStatus.CreatedBy.TrapID, app3.LatestRequestStatus.Reason, fr)
+		if err != nil {
+			panic(err)
+		}
 
 		t.Parallel()
 
@@ -242,8 +243,8 @@ func TestGetRequestList(t *testing.T) {
 		t.Run("filterByCurrentState", func(t *testing.T) {
 			asr := assert.New(t)
 
-			fr := FullyRepaid
-			apps, err := repo.GetRequestList("", &fr, nil, "", nil, nil)
+			fp := FullyPaid
+			apps, err := repo.GetRequestList("", &fp, nil, "", nil, nil)
 			asr.NoError(err)
 
 			asr.Len(apps, 1)

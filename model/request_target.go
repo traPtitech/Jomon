@@ -69,7 +69,7 @@ func (repo *requestRepository) UpdateRequestTarget(requestID uuid.UUID, target s
 		CreatedBy: TrapUser{
 			TrapID: createdBy,
 		},
-		Status: FullyRepaid,
+		Status: FullyPaid,
 		Reason: "",
 	}
 	allUsersRepaidCheck := true

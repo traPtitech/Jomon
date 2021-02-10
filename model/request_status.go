@@ -16,7 +16,7 @@ const (
 	Submitted   Status = "submitted"
 	FixRequired Status = "fix_required"
 	Accepted    Status = "accepted"
-	FullyRepaid Status = "fully_repaid"
+	FullyPaid   Status = "fully_paid"
 	Rejected    Status = "rejected"
 )
 
