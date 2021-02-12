@@ -1,5 +1,5 @@
 <template>
-  <span>
+  <div>
     <v-file-input
       v-model="images"
       label="画像"
@@ -14,7 +14,7 @@
     <div v-for="(imageUrl, index) in uploadImageUrl" :key="index">
       <v-img :src="imageUrl" max-width="50%" />
     </div>
-  </span>
+  </div>
 </template>
 
 <script>

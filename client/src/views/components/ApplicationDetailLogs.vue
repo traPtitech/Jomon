@@ -1,22 +1,29 @@
-<!-- 親コンポーネントから受け取ったjsonを基に申請logを描画 -->
-<!-- ここへのlogのjsonは日付の古い方を前にして突っ込んでください。--->
 <template>
-  <div class="app-detail-log">
-    <template>
-      <v-container style="max-width: 800px">
-        <h1>申請ログ</h1>
-        <v-timeline dense clipped>
-          <Log v-for="(log, index) in this.logs" :key="index" :log="log" />
-          <v-divider class="m pb-1" />
-        </v-timeline>
-        <NewComment />
-      </v-container>
-    </template>
+  <div :class="$style.container">
+    <h1>申請ログ</h1>
+    <v-timeline dense clipped>
+      <div v-for="(log, index) in this.logs" :key="index">
+        <comment-log v-if="log.log_type === `comment`" :log="log" />
+        <status-log v-else-if="log.log_type === `state`" :log="log" />
+        <change-log v-else-if="log.log_type === `application`" :log="log" />
+        <refund-log
+          v-else-if="
+            log.log_type === `repayment` &&
+            !(log.content.repaid_at === `` || log.content.repaid_at === null)
+          "
+          :log="log"
+        />
+      </div>
+    </v-timeline>
+    <new-comment />
   </div>
 </template>
 
 <script>
-import Log from "./Log";
+import CommentLog from "./CommentLog";
+import StatusLog from "./StatusLog";
+import ChangeLog from "./ChangeLog";
+import RefundLog from "./RefundLog";
 import NewComment from "./TimelineNewComment";
 import { mapGetters } from "vuex";
 
@@ -26,8 +33,16 @@ export default {
     ...mapGetters(["logs"])
   },
   components: {
-    Log,
+    CommentLog,
+    StatusLog,
+    ChangeLog,
+    RefundLog,
     NewComment
   }
 };
 </script>
+
+<style lang="scss" module>
+.container {
+}
+</style>

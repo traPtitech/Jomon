@@ -66,7 +66,10 @@ export default {
             to_state: "accepted"
           }
         )
-        .then(response => console.log(response.status));
+        .catch(e => {
+          alert(e);
+          return;
+        });
       alert("承認しました");
       this.getApplicationDetail(
         this.$store.state.application_detail_paper.core.application_id
@@ -82,7 +85,10 @@ export default {
             to_state: "submitted"
           }
         )
-        .then(response => console.log(response.status));
+        .catch(e => {
+          alert(e);
+          return;
+        });
       alert("再申請しました");
       this.getApplicationDetail(
         this.$store.state.application_detail_paper.core.application_id

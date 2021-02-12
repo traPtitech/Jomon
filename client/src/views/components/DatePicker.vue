@@ -30,11 +30,8 @@
 
 <script>
 export default {
-	props: {
-		
-	}
+  props: {}
 };
 </script>
 
-<style lang="scss" module>
-</style>
+<style lang="scss" module></style>

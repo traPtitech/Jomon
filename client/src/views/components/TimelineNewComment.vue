@@ -62,7 +62,10 @@ export default {
               comment: this.comment
             }
           )
-          .then(response => console.log(response.status));
+          .catch(e => {
+            alert(e);
+            return;
+          });
         this.$refs.form.reset();
         this.getApplicationDetail(
           this.$store.state.application_detail_paper.core.application_id
