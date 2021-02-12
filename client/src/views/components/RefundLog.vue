@@ -1,7 +1,7 @@
 <!-- ここはログの最小単位の表示を制御-->
 <template>
-  <v-timeline-item color="grey">
-    <Icon :user="log.content.repaid_by_user.trap_id" :size="25" />
+  <v-timeline-item color="grey" :class="$style.text">
+    <icon :user="log.content.repaid_by_user.trap_id" :size="25" />
     <strong>
       {{ log.content.repaid_by_user.trap_id }}
     </strong>
@@ -66,3 +66,9 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" module>
+.text {
+  color: $color-grey;
+}
+</style>

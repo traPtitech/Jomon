@@ -46,13 +46,13 @@ import Defference from "./ApplicationDetailDefference";
 import FormattedDate from "./FormattedDate";
 
 export default {
-  props: {
-    log: Object
-  },
   components: {
     Icon,
     Defference,
     FormattedDate
+  },
+  props: {
+    log: Object
   }
 };
 </script>
@@ -61,5 +61,6 @@ export default {
   display: flex;
   flex-wrap: wrap;
   max-width: 100%;
+  color: $color-grey;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <v-timeline-item color="red lighten-2" large>
+  <v-timeline-item color="red" large>
     <div :class="$style.text">
       <icon :user="log.content.update_user.trap_id" :size="25" />
       {{ log.content.update_user.trap_id }}
@@ -61,5 +61,6 @@ export default {
   flex-wrap: wrap;
   max-width: 100%;
   align-items: center;
+  color: $color-grey;
 }
 </style>
