@@ -25,7 +25,7 @@ type RequestStatus struct {
 	ID        int       `gorm:"type:int(11) AUTO_INCREMENT;primary_key" json:"-"`
 	RequestID uuid.UUID `gorm:"type:char(36);not null" json:"-"`
 	CreatedBy TrapUser  `gorm:"embedded;embedded_prefix:created_by_" json:"created_by_"`
-	Status    Status    `gorm:"embedded" json:"status"`
+	Status    Status    `gorm:"type:enum('submitted', 'fix_required', 'accepted', 'fully_paid', 'rejected');not null" json:"status"`
 	Reason    string    `gorm:"type:text;not null" json:"reason"`
 	CreatedAt time.Time `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 }

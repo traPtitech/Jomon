@@ -235,7 +235,7 @@ func (repo *requestRepository) PatchRequest(reqID uuid.UUID, createdBy string, t
 	})
 }
 
-func (*requestRepository) createRequest(db *gorm.DB, createUserTrapID string) (uuid.UUID, error) {
+func (*requestRepository) createRequest(db *gorm.DB, createdBy string) (uuid.UUID, error) {
 	id, err := uuid.NewV4()
 	if err != nil {
 		return uuid.Nil, err
@@ -243,7 +243,7 @@ func (*requestRepository) createRequest(db *gorm.DB, createUserTrapID string) (u
 
 	app := Request{
 		ID:        id,
-		CreatedBy: TrapUser{TrapID: createUserTrapID},
+		CreatedBy: TrapUser{TrapID: createdBy},
 	}
 
 	err = db.Create(&app).Error

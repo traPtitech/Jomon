@@ -346,7 +346,7 @@ func mapToRequestID(apps []Request) []uuid.UUID {
 	return appIds
 }
 
-func buildRequestWithSubmitTime(createUserTrapID string, submittedAt time.Time, title string, remarks string, amount int, paidAt time.Time) uuid.UUID {
+func buildRequestWithSubmitTime(createdBy string, submittedAt time.Time, title string, remarks string, amount int, paidAt time.Time) uuid.UUID {
 	id, err := uuid.NewV4()
 	if err != nil {
 		panic(err)
@@ -354,14 +354,14 @@ func buildRequestWithSubmitTime(createUserTrapID string, submittedAt time.Time, 
 
 	err = db.Create(&Request{
 		ID:        id,
-		CreatedBy: TrapUser{TrapID: createUserTrapID},
+		CreatedBy: TrapUser{TrapID: createdBy},
 		CreatedAt: submittedAt,
 	}).Error
 	if err != nil {
 		panic(err)
 	}
 
-	state, err := repo.createRequestStatus(db, id, createUserTrapID)
+	state, err := repo.createRequestStatus(db, id, createdBy)
 	if err != nil {
 		panic(err)
 	}
