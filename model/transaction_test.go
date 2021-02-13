@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -20,12 +21,12 @@ func TestCreateTransaction(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		id, err := repo.createRequest(db, "userId")
+		id, err := transactionRepo.createRequest(db, "userId")
 		if err != nil {
 			panic(err)
 		}
 
-		transactionID, err := repo.CreateTransaction(db, 100, "target1", id)
+		transactionID, err := transactionRepo.CreateTransaction(100, "target1", id)
 		asr.NoError(err)
 		asr.NotEqual(transactionID, uuid.Nil)
 	})
@@ -33,7 +34,7 @@ func TestCreateTransaction(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		transactionID, err := repo.CreateTransaction(db, 100, "target1", nil)
+		transactionID, err := transactionRepo.CreateTransaction(100, "target1", nil)
 		asr.NoError(err)
 		asr.NotEqual(transactionID, uuid.Nil)
 	})
@@ -46,7 +47,7 @@ func TestCreateTransaction(t *testing.T) {
 			panic(err)
 		}
 
-		_, err = repo.CreateTransaction(db, 100, "target1", id)
+		_, err = transactionRepo.CreateTransaction(100, "target1", id)
 		asr.Error(err)
 	})
 }
@@ -57,12 +58,12 @@ func TestGetTransaction(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		asr := assert.New(t)
 
-		trnsID, err := repo.CreateTransaction(db, 100, "target1", nil)
+		trnsID, err := transactionRepo.CreateTransaction(100, "target1", nil)
 		if err != nil {
 			panic(err)
 		}
 
-		getTrns, err := repo.GetTransaction(trnsID)
+		getTrns, err := transactionRepo.GetTransaction(trnsID)
 
 		asr.NoError(err)
 		asr.Equal(getTrns.ID, trnsID)
@@ -70,6 +71,49 @@ func TestGetTransaction(t *testing.T) {
 		asr.Equal(getTrns.Target, "target1")
 	})
 }
+
+func TestPatchTransaction(t *testing.T) {
+	t.Parallel()
+
+	t.Run("shouldSuccess", func(t *testing.T) {
+		asr := assert.New(t)
+
+		amount := 1000
+		amount2 := 10000
+		target := "target1"
+		// TODO targetを配列に変更
+		trnsID, err := transactionRepo.CreateTransaction(amount, target, nil)
+		if err != nil {
+			panic(err)
+		}
+
+		err = transactionRepo.PatchTransaction(trnsID, amount2, "", nil)
+		asr.NoError(err)
+
+		trns, err := transactionRepo.GetTransaction(trnsID)
+		if err != nil {
+			panic(err)
+		}
+
+		asr.Equal(amount2, trns.Amount)
+		asr.Equal(target, trns.Target)
+	})
+
+	t.Run("shouldFail", func(t *testing.T) {
+		asr := assert.New(t)
+
+		id, err := uuid.NewV4()
+		if err != nil {
+			panic(err)
+		}
+
+		err = transactionRepo.PatchTransaction(id, nil, generateRandomUserName(), nil)
+		asr.Error(err)
+		asr.True(gorm.IsRecordNotFoundError(err))
+	})
+
+}
+
 func TestGetTransactionList(t *testing.T) {
 	t.Run("shouldSuccess", func(t *testing.T) {
 		deleteAllRecord(db)
@@ -78,7 +122,7 @@ func TestGetTransactionList(t *testing.T) {
 		target2 := "Target2"
 		target3 := "Target3"
 
-		id, err := repo.createRequest(db, "userId")
+		id, err := transactionRepo.createRequest(db, "userId")
 		if err != nil {
 			panic(err)
 		}
@@ -91,7 +135,7 @@ func TestGetTransactionList(t *testing.T) {
 
 		app3SubTime := time.Date(2020, 4, 30, 12, 0, 0, 0, time.Local)
 		app3Id := createTransactionWithCreatedTime(100, target3, id, app3SubTime)
-		app3, err := repo.GetTransaction(app3Id)
+		app3, err := transactionRepo.GetTransaction(app3Id)
 		if err != nil {
 			panic(err)
 		}
@@ -100,7 +144,7 @@ func TestGetTransactionList(t *testing.T) {
 		app4Id := createTransactionWithCreatedTime(100, target1, id, app4SubTime)
 
 		fr := FullyPaid
-		_, err = repo.UpdateRequestStatus(app3.LatestRequestStatus.RequestID, app3.LatestRequestStatus.CreatedBy.TrapID, app3.LatestRequestStatus.Reason, fr)
+		_, err = transactionRepo.UpdateRequestStatus(app3.LatestRequestStatus.RequestID, app3.LatestRequestStatus.CreatedBy.TrapID, app3.LatestRequestStatus.Reason, fr)
 		if err != nil {
 			panic(err)
 		}
@@ -110,7 +154,7 @@ func TestGetTransactionList(t *testing.T) {
 		t.Run("allNil", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := repo.GetRequestList("", nil, nil, "", nil, nil)
+			apps, err := transactionRepo.GetRequestList("", nil, nil, "", nil, nil)
 			asr.NoError(err)
 
 			asr.Len(apps, 4)
@@ -131,7 +175,7 @@ func TestGetTransactionList(t *testing.T) {
 			asr := assert.New(t)
 			financialYear := 2019
 
-			apps, err := repo.GetTransactionList("", nil, &financialYear, "", nil, nil)
+			apps, err := transactionRepo.GetTransactionList("", nil, &financialYear, "", nil, nil)
 			asr.NoError(err)
 
 			asr.Len(apps, 1)
@@ -141,7 +185,7 @@ func TestGetTransactionList(t *testing.T) {
 		t.Run("filterByApplicant", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := repo.GetTransactionList("", nil, nil, target2, nil, nil)
+			apps, err := transactionRepo.GetTransactionList("", nil, nil, target2, nil, nil)
 			asr.NoError(err)
 
 			asr.Len(apps, 2)
@@ -151,7 +195,7 @@ func TestGetTransactionList(t *testing.T) {
 			asr := assert.New(t)
 
 			fp := FullyPaid
-			apps, err := repo.GetTransactionList("", &fp, nil, "", nil, nil)
+			apps, err := transactionRepo.GetTransactionList("", &fp, nil, "", nil, nil)
 			asr.NoError(err)
 
 			asr.Len(apps, 1)
@@ -161,7 +205,7 @@ func TestGetTransactionList(t *testing.T) {
 		t.Run("emptyResult", func(t *testing.T) {
 			asr := assert.New(t)
 
-			apps, err := repo.GetTransactionList("", nil, nil, target3, nil, nil)
+			apps, err := transactionRepo.GetTransactionList("", nil, nil, target3, nil, nil)
 			asr.NoError(err)
 
 			asr.Empty(apps)
@@ -176,7 +220,7 @@ func TestGetTransactionList(t *testing.T) {
 			t.Run("Since", func(t *testing.T) {
 				asr := assert.New(t)
 
-				apps, err := repo.GetTransactionList("", nil, nil, "", nil, &beforeApp3)
+				apps, err := transactionRepo.GetTransactionList("", nil, nil, "", nil, &beforeApp3)
 				asr.NoError(err)
 
 				asr.Len(apps, 1)
@@ -186,7 +230,7 @@ func TestGetTransactionList(t *testing.T) {
 			t.Run("until", func(t *testing.T) {
 				asr := assert.New(t)
 
-				apps, err := repo.GetTransactionList("", nil, nil, "", nil, &beforeApp3)
+				apps, err := transactionRepo.GetTransactionList("", nil, nil, "", nil, &beforeApp3)
 				asr.NoError(err)
 
 				asr.Len(apps, 3)
@@ -196,7 +240,7 @@ func TestGetTransactionList(t *testing.T) {
 			t.Run("both", func(t *testing.T) {
 				asr := assert.New(t)
 
-				apps, err := repo.GetTransactionList("", nil, nil, "", &beforeApp2, &beforeApp3)
+				apps, err := transactionRepo.GetTransactionList("", nil, nil, "", &beforeApp2, &beforeApp3)
 				asr.NoError(err)
 
 				asr.Len(apps, 1)
@@ -233,7 +277,7 @@ func TestGetTransactionList(t *testing.T) {
 				t.Run(test.SortBy, func(t *testing.T) {
 					asr := assert.New(t)
 
-					apps, err := repo.GetTransactionList(test.SortBy, nil, nil, "", nil, nil)
+					apps, err := transactionRepo.GetTransactionList(test.SortBy, nil, nil, "", nil, nil)
 					asr.NoError(err)
 
 					asr.Len(apps, 4)

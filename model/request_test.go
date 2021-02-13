@@ -90,7 +90,7 @@ func TestGetRequest(t *testing.T) {
 
 		asr.Equal(comment.ID, app.Comments[0].ID)
 		asr.Equal(comment.Comment, app.Comments[0].Comment)
-		asr.Equal(comment.UserTrapID, app.Comments[0].UserTrapID)
+		asr.Equal(comment.CreatedBy, app.Comments[0].CreatedBy)
 		asr.Len(app.Comments, 1)
 	})
 

@@ -12,6 +12,7 @@ const userNameChrs = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 var randSrc = rand.NewSource(0)
 var repo = &requestRepository{}
+var transactionRepo = &transactionRepository{}
 var commentRepo = &commentRepository{}
 var adminRepo = &administratorRepository{}
 
