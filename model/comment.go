@@ -8,13 +8,13 @@ import (
 
 // Comment struct of Comment
 type Comment struct {
-	ID            int        `gorm:"type:int(11) AUTO_INCREMENT;primary_key" json:"comment_id"`
-	ApplicationID uuid.UUID  `gorm:"type:char(36);not null" json:"-"`
-	UserTrapID    TrapUser   `gorm:"embedded;embedded_prefix:user_" json:"trap_user"`
-	Comment       string     `gorm:"type:text;not null" json:"comment"`
-	CreatedAt     time.Time  `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt     time.Time  `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"updated_at"`
-	DeletedAt     *time.Time `json:"-"`
+	ID        int        `gorm:"type:int(11) AUTO_INCREMENT;primary_key" json:"comment_id"`
+	RequestID uuid.UUID  `gorm:"type:char(36);not null;index" json:"-"`
+	CreatedBy TrapUser   `gorm:"embedded;embedded_prefix:created_by_" json:"trap_user"`
+	Comment   string     `gorm:"type:text;not null" json:"comment"`
+	CreatedAt time.Time  `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt time.Time  `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" json:"updated_at"`
+	DeletedAt *time.Time `json:"-"`
 }
 
 // GiveIsUserAdmin check whether comment is admin or not
@@ -23,7 +23,7 @@ func (com *Comment) GiveIsUserAdmin(admins []string) {
 		return
 	}
 
-	com.UserTrapID.GiveIsUserAdmin(admins)
+	com.CreatedBy.GiveIsUserAdmin(admins)
 }
 
 // CommentRepository Repo of Comment
@@ -43,8 +43,8 @@ func NewCommentRepository() CommentRepository {
 
 func (*commentRepository) GetComment(requestID uuid.UUID, commentID int) (Comment, error) {
 	comment := Comment{
-		ID:            commentID,
-		ApplicationID: requestID,
+		ID:        commentID,
+		RequestID: requestID,
 	}
 
 	if err := db.First(&comment).Error; err != nil {
@@ -55,9 +55,9 @@ func (*commentRepository) GetComment(requestID uuid.UUID, commentID int) (Commen
 
 func (*commentRepository) CreateComment(requestID uuid.UUID, commentText string, userID string) (Comment, error) {
 	comment := Comment{
-		ApplicationID: requestID,
-		UserTrapID:    TrapUser{TrapID: userID},
-		Comment:       commentText,
+		RequestID: requestID,
+		CreatedBy: TrapUser{TrapID: userID},
+		Comment:   commentText,
 	}
 
 	if err := db.Create(&comment).Error; err != nil {
@@ -69,8 +69,8 @@ func (*commentRepository) CreateComment(requestID uuid.UUID, commentText string,
 
 func (*commentRepository) PutComment(requestID uuid.UUID, commentID int, commentText string) (Comment, error) {
 	comment := Comment{
-		ID:            commentID,
-		ApplicationID: requestID,
+		ID:        commentID,
+		RequestID: requestID,
 	}
 
 	if err := db.Model(&comment).Update("Comment", commentText).Error; err != nil {
@@ -82,8 +82,8 @@ func (*commentRepository) PutComment(requestID uuid.UUID, commentID int, comment
 
 func (*commentRepository) DeleteComment(requestID uuid.UUID, commentID int) error {
 	comment := Comment{
-		ID:            commentID,
-		ApplicationID: requestID,
+		ID:        commentID,
+		RequestID: requestID,
 	}
 
 	if err := db.Delete(&comment).Error; err != nil {

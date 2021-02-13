@@ -11,13 +11,13 @@ import (
 // Request struct of Request
 type Request struct {
 	ID                  uuid.UUID       `gorm:"type:char(36);primary_key" json:"id"`
-	LatestRequestStatus RequestStatus   `gorm:"foreignkey:StatesLogsID" json:"-"`
+	LatestRequestStatus RequestStatus   `gorm:"foreignkey:RequestStatusID" json:"-"`
 	LatestStatus        Status          `gorm:"-" json:"current_state"`
 	RequestStatusID     int             `gorm:"type:int(11);not null" json:"-"`
 	Amount              int             `gorm:"type:int(11);not null" json:"amount"`
 	Title               string          `gorm:"type:text;not null" json:"title"`
 	Content             string          `gorm:"type:text;not null" json:"content"`
-	CreatedBy           TrapUser        `gorm:"embedded;embedded_prefix:created_by;" json:"applicant"`
+	CreatedBy           TrapUser        `gorm:"embedded;embedded_prefix:created_by_;" json:"applicant"`
 	CreatedAt           time.Time       `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt           time.Time       `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
 	RequestStatus       []RequestStatus `json:"request_status"`

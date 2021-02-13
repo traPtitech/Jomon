@@ -23,9 +23,9 @@ func TestCreateComment(t *testing.T) {
 
 		comment, err := commentRepo.CreateComment(reqID, commentText, userID)
 		asr.NoError(err)
-		asr.Equal(comment.ApplicationID, reqID)
+		asr.Equal(comment.RequestID, reqID)
 		asr.Equal(comment.Comment, commentText)
-		asr.Equal(comment.UserTrapID.TrapID, userID)
+		asr.Equal(comment.CreatedBy.TrapID, userID)
 
 		commentText2 := "This is comment 2."
 

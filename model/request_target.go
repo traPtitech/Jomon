@@ -19,9 +19,9 @@ var (
 // RequestTarget target
 type RequestTarget struct {
 	ID        int        `gorm:"type:int(11) AUTO_INCREMENT;primary_key" json:"-"`
-	RequestID uuid.UUID  `gorm:"type:char(36);not null" json:"-"`
-	Target    string     `gorm:"embedded;embedded_prefix:repaid_to_user_" json:"repaid_to_user"`
-	CreatedBy TrapUser   `gorm:"embedded;embedded_prefix:repaid_by_user_" json:"repaid_by_user"`
+	RequestID uuid.UUID  `gorm:"type:char(36);not null;index" json:"-"`
+	Target    string     `gorm:"embedded;embedded_prefix:target_" json:"repaid_to_user"`
+	CreatedBy TrapUser   `gorm:"embedded;embedded_prefix:created_by_" json:"repaid_by_user"`
 	PaidAt    *time.Time `gorm:"type:date" json:"repaid_at"`
 	CreatedAt time.Time  `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
 }
