@@ -122,7 +122,7 @@ func TestGetTransactionList(t *testing.T) {
 		target2 := "Target2"
 		target3 := "Target3"
 
-		id, err := transactionRepo.createRequest(db, "userId")
+		id, err := repo.createRequest(db, "userId")
 		if err != nil {
 			panic(err)
 		}
@@ -143,8 +143,8 @@ func TestGetTransactionList(t *testing.T) {
 		app4SubTime := time.Date(2019, 4, 10, 12, 0, 0, 0, time.Local)
 		app4Id := createTransactionWithCreatedTime(100, target1, id, app4SubTime)
 
-		fr := FullyPaid
-		_, err = transactionRepo.UpdateRequestStatus(app3.LatestRequestStatus.RequestID, app3.LatestRequestStatus.CreatedBy.TrapID, app3.LatestRequestStatus.Reason, fr)
+		amount2 := 1000
+		_ = transactionRepo.PatchTransaction(app3.ID, &amount2, []string{}, nil)
 		if err != nil {
 			panic(err)
 		}

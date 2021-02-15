@@ -50,7 +50,7 @@ func NewTransactionRepository() RequestRepository {
 func (*transactionRepository) GetTransaction(id uuid.UUID) (Transaction, error) {
 	var trns Transaction
 
-	err := db.First(&trns, Request{ID: id}).Error
+	err := db.Order("created_at").Find(&trns, Request{ID: id}).Error
 	if err != nil {
 		return Transaction{}, err
 	}
@@ -122,47 +122,31 @@ func (repo *transactionRepository) CreateTransaction(amount int, targets []strin
 	return id, nil
 }
 
-func (repo *transactionRepository) PatchTransaction(reqID uuid.UUID, createdBy string, title string, content string, amount *int, paidAt *time.Time, requestTargets []string) error {
+func (repo *transactionRepository) PatchTransaction(trnsID uuid.UUID, amount *int, transactionTargets []string, requestID *uuid.UUID) error {
 	return db.Transaction(func(tx *gorm.DB) error {
-		req, err := repo.GetTransaction(reqID)
+		trns, err := repo.GetTransaction(trnsID)
 		if err != nil {
 			return err
 		}
 
-		req.ID, err = uuid.NewV4() // zero value of int is 0
+		trns.ID, err = uuid.NewV4() // zero value of int is 0
 		if err != nil {
 			return err
-		}
-
-		req.CreatedBy.TrapID = createdBy
-
-		if title != "" {
-			req.Title = title
-		}
-
-		if content != "" {
-			req.Content = content
 		}
 
 		if amount != nil {
-			req.Amount = *amount
+			trns.Amount = *amount
 		}
 
-		req.UpdatedAt = time.Time{} // zero value
-
-		if len(requestTargets) > 0 {
-			if err = repo.deleteRequestTargetByRequestID(tx, reqID); err != nil {
-				return err
-			}
-
-			for _, userID := range requestTargets {
-				if err = repo.createRequestTarget(tx, reqID, userID); err != nil {
+		if len(transactionTargets) > 0 {
+			for _, userID := range transactionTargets {
+				if err = repo.createTransactionTarget(tx, trnsID, userID); err != nil {
 					return err
 				}
 			}
 		}
 
-		return tx.Model(&Request{ID: reqID}).Updates(Request{}).Error
+		return tx.Model(&Transaction{ID: trnsID}).Updates(Transaction{}).Error
 	})
 }
 
