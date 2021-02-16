@@ -242,9 +242,9 @@ paths:
         "400":
             description: リクエストがおかしい。
     post:
-      description: トランザクションを新規作成する。
+      description: 依頼を新規作成する。
       tags:
-        - Transactions
+        - Requests
       requestBody:
         required: true
         content:
@@ -260,7 +260,7 @@ paths:
                 $ref: "#/components/schemas/DetailedApplication"
 
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばtargetが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
+          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
           content:
             application/json:
               schema:
@@ -268,9 +268,9 @@ paths:
                 items:
                   type: string
                   example: "ammout"
-  "/transactions/{transactionID}":
+  "/requests/{requestID}":
     parameters:
-    - name: transactionID
+    - name: requestID
       in: path
       required: true
       schema:
@@ -279,7 +279,7 @@ paths:
     get:
       description: 指定したトランザクションの詳細を取得する。
       tags:
-        - Transactions
+        - Requests
       responses:
         "200":
           description: あったら返す。
@@ -288,9 +288,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/DetailedApplication"
         "404":
-          description: 指定されたTransactionはない。
+          description: 指定された依頼はない。
     put:
-      description: 指定したTransactionを修正する(transaction_detailに新しいレコードを作る)。修正できるのはadmin。ここのbodyの内容を新たな情報とする。
+      description: 指定した依頼を修正する(transaction_detailに新しいレコードを作る)。修正できるのは作成者。ここのbodyの内容を新たな情報とする。
       tags:
         - Transactions
       requestBody:
@@ -307,7 +307,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/DetailedApplication"
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばtargetが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
+          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
           content:
             application/json:
               schema:
@@ -328,7 +328,7 @@ paths:
                   current_state:
                     $ref: "#/components/schemas/StateEnum"
         "404":
-          description: 指定されたトランザクションはない。
+          description: 指定された依頼はない。
   "/applications/{applicationId}/comments":
     post:
       description: 指定した申請書にコメントを新規作成する。
