@@ -329,13 +329,13 @@ paths:
                     $ref: "#/components/schemas/StateEnum"
         "404":
           description: 指定された依頼はない。
-  "/applications/{applicationId}/comments":
+  "/requests/{requestID}/comments":
     post:
-      description: 指定した申請書にコメントを新規作成する。
+      description: 指定した依頼にコメントを新規作成する。
       tags:
         - Comments
       parameters:
-        - name: applicationId
+        - name: requestID
           in: path
           required: true
           schema:
@@ -356,21 +356,21 @@ paths:
           description: OK
           content:
             application/json:
-             schema:
-              $ref: "#/components/schemas/Comment"
+              schema:
+                $ref: "#/components/schemas/Comment"
         "400":
           description: リクエストに形式上または内容の不備がある。例えばコメント欄が空欄。
         "404":
-          description: 指定されたコメントはない。
-  "/applications/{applicationId}/comments/{commentId}":
+          description: 指定された依頼はない。
+  "/requests/{requestID}/comments/{commentID}":
     parameters:
-    - name: applicationId
+    - name: requestID
       in: path
       required: true
       schema:
         type: string
         format: uuid
-    - name: commentId
+    - name: commentID
       in: path
       required: true
       schema:
@@ -413,13 +413,13 @@ paths:
           description: 編集権限がない人(コメント作成者以外)による操作。
         "404":
           description: 指定されたコメントはない。
-  "/applications/{applicationId}/states":
+  "/requests/{requestID}/status":
     put:
-      description: 指定した申請書のstateを変更のみ（新規はpost /applications で)する。reasonについてはstateを「submittedからfix_required」「submittedからrejected」「acceptedからsubmitted」にするとき必須。stateの行き来の定義は作成者は「fix_requiredからsubmitted」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからfully_repaid」の操作はここでは行えない。
+      description: 指定した申請書のstatusを変更のみ(新規はpost /requests)する。reasonは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「fix_requiredからsubmitted」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからfully_repaid」の操作はここでは行えない。
       tags:
-        - States
+        - Status
       parameters:
-        - name: applicationId
+        - name: requestID
           in: path
           required: true
           schema:
@@ -458,7 +458,7 @@ paths:
                     type: string
                     example: "rejected"
         "400":
-          description: リクエストに形式上または内容の不備がある。または行き来できないstate。
+          description: リクエストに形式上または内容の不備がある。または行き来できないstatus。
           content:
             application/json:
               schema:
@@ -471,58 +471,10 @@ paths:
                     type: string
                     example: "fully_repaid"
         "404":
-          description: 指定された申請書はない。
-  "/applications/{applicationId}/states/repaid/{repaidToId}":
-    put:
-      description: 指定した申請書、支払い対象者についての返金状態を変更する。ただし操作できるのはadminかつstateが"accepted"の時のみ。db上では全員に返却されたときに「2(accepted)から3(fully_repaid)」の操作を行う。
-      tags:
-        - States
-      parameters:
-        - name: applicationId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: repaidToId
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/TrapID"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                repaid_at:
-                  type: string
-                  format: date
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  repaid_by_user:
-                    $ref: "#/components/schemas/User"
-                  repaid_to_user:
-                    $ref: "#/components/schemas/User"
-                  repaid_at:
-                    type: string
-                    format: date
-                  to_state:
-                    $ref: "#/components/schemas/StateEnum"
-        "400":
-          description: すでに返金済みのユーザー。
-        "404":
-          description: 指定された申請書または返金対象者はない。
-  "/images/{imageId}":
+          description: 指定された依頼はない。
+  "/files/{fileID}":
     parameters:
-    - name: imageId
+    - name: imageID
       in: path
       required: true
       schema:
@@ -530,11 +482,11 @@ paths:
         format: uuid
     get:
       tags:
-        - Applications
-      description: 指定された画像ファイルを返す
+        - Requests
+      description: 指定されたファイルを返す
       responses:
         "200":
-          description: 該当する画像ファイルが存在した 返す
+          description: 該当するファイルが存在した 返す
           content:
             image/png:
               schema:
@@ -542,9 +494,8 @@ paths:
                 format: binary
         "404":
           description: Not Found
-
     delete:
-      description: 指定した画像idの画像ファイルを削除する。
+      description: 指定したidのファイルを削除する。
       tags:
         - Applications
       responses:
@@ -554,34 +505,7 @@ paths:
           description: 編集権限がない人(作成者、admin以外)による操作。
         "404":
           description: 該当する画像はない。
-  "/users":
-    get:
-      description: ユーザーの一覧を返す
-      tags:
-        - Users
-      responses:
-        "200":
-          description: 取得に成功した。返す
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/User"
-
-  "/users/me":
-    get:
-      tags:
-        - Users
-      description: 自分のユーザー情報を取得します
-      responses:
-        '200':
-          description: 正常に取得できました。
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
-  "/users/admins":
+  "/admins":
     get:
       description: adminユーザーの一覧を返す。
       tags:
@@ -595,8 +519,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/User"
-    put:
-      description: adminユーザーを変更する。
+    post:
+      description: adminユーザーを追加する。
       tags:
         - Users
       requestBody:
@@ -622,9 +546,102 @@ paths:
         "403":
           description: admin以外の人
         "404":
-          description: adminを変更しようとした対象者は存在しない
+          description: adminを追加しようとした対象者は存在しない
         "409":
-          description: 既に指定したadminの状態である
+          description: 既にadminである
+    delete:
+      description: adminユーザーを削除する。
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trap_id:
+                    $ref: "#/components/schemas/TrapID"
+                  to_admin:
+                    type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: リクエストに形式上の不備がある。
+        "403":
+          description: admin以外の人
+        "404":
+          description: adminを削除しようとした対象者は存在しない
+        "409":
+          description: 既にadminでない
+  "/tags":
+    get:
+      description: タグの一覧を返す。
+      tags:
+        - Tags
+      responses:
+        "200":
+          description: 取得に成功した。返す
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tag"
+    post:
+      description: タグを追加する。
+      tags:
+        - Tags
+      responses:
+        "200":
+          description: 追加に成功した。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tag"
+  "/tags/{tagID}":
+    get:
+      description: 指定したタグが付与されている依頼、トランザクションを返す。
+      tags:
+        - Tags
+      responses:
+        "200":
+          description: 取得に成功した。返す
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tag"
+        "404":
+          description: Not Found
+    put:
+      description: タグの情報を変更する。
+      tags:
+        - Tags
+      responses:
+        "200":
+          description: 変更に成功した。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tag"
+        "404":
+          description: Not Found
+    delete:
+      description: タグを削除する
+      tags:
+        - Tags
+      responses:
+        "200":
+          description: 削除に成功した。
+        "404":
+          description: Not Found
 
 components:
   schemas:
