@@ -88,7 +88,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/CompactApplication"
+                  $ref: "#/components/schemas/Request"
         "400":
             description: リクエストがおかしい。
     post:
@@ -107,7 +107,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DetailedApplication"
+                $ref: "#/components/schemas/Request"
 
         "400":
           description: リクエストに形式上または内容の不備がある。例えばtargetが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
@@ -136,7 +136,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DetailedApplication"
+                $ref: "#/components/schemas/Request"
         "404":
           description: 指定されたTransactionはない。
     put:
@@ -155,7 +155,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DetailedApplication"
+                $ref: "#/components/schemas/Request"
         "400":
           description: リクエストに形式上または内容の不備がある。例えばtargetが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
           content:
@@ -176,7 +176,7 @@ paths:
                     type: boolean
                     example: false
                   current_state:
-                    $ref: "#/components/schemas/StatusEnum"
+                    $ref: "#/components/schemas/Status"
         "404":
           description: 指定されたトランザクションはない。
   '/requests':
@@ -238,7 +238,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/CompactApplication"
+                  $ref: "#/components/schemas/Request"
         "400":
             description: リクエストがおかしい。
     post:
@@ -257,7 +257,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DetailedApplication"
+                $ref: "#/components/schemas/Request"
 
         "400":
           description: リクエストに形式上または内容の不備がある。例えばtitleが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
@@ -286,7 +286,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DetailedApplication"
+                $ref: "#/components/schemas/RequestDetail"
         "404":
           description: 指定された依頼はない。
     put:
@@ -305,7 +305,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DetailedApplication"
+                $ref: "#/components/schemas/Request"
         "400":
           description: リクエストに形式上または内容の不備がある。例えばtitleが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
           content:
@@ -326,7 +326,7 @@ paths:
                     type: boolean
                     example: false
                   current_state:
-                    $ref: "#/components/schemas/StatusEnum"
+                    $ref: "#/components/schemas/Status"
         "404":
           description: 指定された依頼はない。
   "/requests/{requestID}/comments":
@@ -447,7 +447,7 @@ paths:
                 type: object
                 properties:
                   user:
-                    $ref: "#/components/schemas/User"
+                    $ref: "#/components/schemas/TrapID"
                   updated_at:
                     type: string
                     format: date-time
@@ -476,7 +476,7 @@ paths:
     get:
       description: adminユーザーの一覧を返す。
       tags:
-        - Users
+        - Admins
       responses:
         "200":
           description: 取得に成功した。返す
@@ -485,11 +485,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/User"
+                  $ref: "#/components/schemas/TrapID"
     post:
       description: adminユーザーを追加する。
       tags:
-        - Users
+        - Admins
       requestBody:
         required: true
         content:
@@ -507,7 +507,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/TrapID"
         "400":
           description: リクエストに形式上の不備がある。
         "403":
@@ -519,7 +519,7 @@ paths:
     delete:
       description: adminユーザーを削除する。
       tags:
-        - Users
+        - Admins
       requestBody:
         required: true
         content:
@@ -537,7 +537,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/TrapID"
         "400":
           description: リクエストに形式上の不備がある。
         "403":
@@ -591,7 +591,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Tag"
+                  $ref: "#/components/schemas/TaggedThings"
         "404":
           description: Not Found
     put:
@@ -661,7 +661,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Group"
+                  $ref: "#/components/schemas/GroupedThings"
         "404":
           description: Not Found
     put:
@@ -680,7 +680,7 @@ paths:
     delete:
       description: グループを削除する
       tags:
-        - Tags
+        - Groups
       responses:
         "200":
           description: 削除に成功した。
@@ -721,9 +721,10 @@ paths:
                 type: object
                 properties:
                   file:
-                    format: binary
+                    $ref: "#/components/schemas/File"
                   name:
                     format: string
+                    example: "hoge.png"
         "404":
           description: Not Found
     delete:
@@ -740,7 +741,7 @@ paths:
 
 components:
   schemas:
-    StatusEnum:
+    Status:
       type: string
       enum: [submitted, fix_required, accepted, fully_repaid, rejected]
     TrapID:
@@ -748,60 +749,94 @@ components:
       pattern: "^[0-9a-zA-Z_]{1,32}$"
       example: "nagatech"
     Tag:
-      type: string
-      example: "hoge"
+      type: object
+      properties:
+        name:
+          type: string
+          example: "2021講習会"
+        description:
+          type: string
+          example: "2021年度講習会予算"
     Group:
-      type: string
-      example: "hoge"
+      type: object
+      properties:
+        name:
+          type: string
+          example: "SysAd"
+        description:
+          type: string
+          example: "SysAd班の予算"
+        budget:
+          type: integer
+          example: 250000
+    GroupedThings:
+      type: array
+      items:
+        type: string
+        format: uuid
+    TaggedThings:
+      type: array
+      items:
+        type: string
+        format: uuid
     File:
       type: string
       format: binary
-    CompactApplication:
+    Target:
+      type: string
+      example: "東京工業大学デジタル創作同好会traP"
+    Request:
       type: object
       properties:
-        application_id:
+        id:
+          type: string
+          format: uuid
+        created_by:
+          $ref: "#/components/schemas/TrapID"
+        amount:
+          type: integer
+          example: 1200
+        title:
+          type: string
+          example: "夏コミの交通費をお願いします。"
+        content:
+          type: string
+          example: "〇〇駅から〇〇駅への移動"
+        group_id:
           type: string
           format: uuid
         created_at:
           type: string
           format: date-time
-        applicant:
-          $ref: "#/components/schemas/User"
-        current_detail:
-          $ref: "#/components/schemas/ApplicationLog"
-        current_state:
-          $ref: "#/components/schemas/StatusEnum"
-    DetailedApplication:
+        updated_at:
+          type: string
+          format: date-time
+    RequestDetail:
       allOf:
-        - $ref: "#/components/schemas/CompactApplication"
+        - $ref: "#/components/schemas/Request"
         - type: object
           properties:
-            images:
-              type: array
-              items:
-                type: string
-                format: uuid
             comments:
               type: array
               items:
                 $ref: "#/components/schemas/Comment"
-            state_logs:
+            files:
               type: array
               items:
-                $ref: "#/components/schemas/State"
-            application_detail_logs:
+                $ref: "#/components/schemas/File"
+            tags:
               type: array
               items:
-                $ref: "#/components/schemas/ApplicationLog"
-            repayment_logs:
-              type: array
-              items:
-                $ref: "#/components/schemas/Repayment"
+                $ref: "#/components/schemas/Tag"
+            group:
+              $ref: "#/components/schemas/Group"
+            status:
+              $ref: "#/components/schemas/Status"
     ApplicationLog:
       type: object
       properties:
         update_user:
-          $ref: "#/components/schemas/User"
+          $ref: "#/components/schemas/TrapID"
         title:
           type: string
           example: "夏コミの交通費をお願いします。"
@@ -849,13 +884,6 @@ components:
           items:
             type: string
             format: binary
-    User:
-      type: object
-      properties:
-        trap_id:
-          $ref: "#/components/schemas/TrapID"
-        is_admin:
-          type: boolean
     Comment:
       type: object
       properties:
@@ -863,7 +891,7 @@ components:
           type: integer
           description: コメント変更削除に対応するため
         user:
-          $ref: "#/components/schemas/User"
+          $ref: "#/components/schemas/TrapID"
         comment:
           type: string
           example: "コメント内容"
@@ -877,9 +905,9 @@ components:
       type: object
       properties:
         update_user:
-          $ref: "#/components/schemas/User"
+          $ref: "#/components/schemas/TrapID"
         to_state:
-          $ref: "#/components/schemas/StatusEnum"
+          $ref: "#/components/schemas/Status"
         reason:
           type: string
           default: null
@@ -895,10 +923,10 @@ components:
           format: date-time
         repaid_by_user:
           allOf:
-            - $ref: "#/components/schemas/User"
+            - $ref: "#/components/schemas/TrapID"
           nullable: true
         repaid_to_user:
-          $ref: "#/components/schemas/User"
+          $ref: "#/components/schemas/TrapID"
         repaid_at:
           type: string
           nullable: true
