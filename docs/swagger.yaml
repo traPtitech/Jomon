@@ -176,7 +176,7 @@ paths:
                     type: boolean
                     example: false
                   current_state:
-                    $ref: "#/components/schemas/StateEnum"
+                    $ref: "#/components/schemas/StatusEnum"
         "404":
           description: 指定されたトランザクションはない。
   '/requests':
@@ -326,7 +326,7 @@ paths:
                     type: boolean
                     example: false
                   current_state:
-                    $ref: "#/components/schemas/StateEnum"
+                    $ref: "#/components/schemas/StatusEnum"
         "404":
           description: 指定された依頼はない。
   "/requests/{requestID}/comments":
@@ -691,12 +691,15 @@ paths:
       description: ファイルをアップロードする。
       tags:
         - Files
-      content:
-        multipart/form-data:
-          schema:
-            file:
-              type: string
-              format: binary
+      responses:
+        "200":
+          description: 変更に成功した。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/File"
+        "404":
+          description: Not Found
   "/files/{fileID}":
     parameters:
     - name: fileID
@@ -715,8 +718,12 @@ paths:
           content:
             multipart/form-data:
               schema:
-                type: string
-                format: binary
+                type: object
+                properties:
+                  file:
+                    format: binary
+                  name:
+                    format: string
         "404":
           description: Not Found
     delete:
@@ -731,20 +738,24 @@ paths:
         "404":
           description: 該当する画像はない。
 
-
-
 components:
   schemas:
-    TypeEnum:
-      type: string
-      enum: [club, contest, event, public]
-    StateEnum:
+    StatusEnum:
       type: string
       enum: [submitted, fix_required, accepted, fully_repaid, rejected]
     TrapID:
       type: string
       pattern: "^[0-9a-zA-Z_]{1,32}$"
       example: "nagatech"
+    Tag:
+      type: string
+      example: "hoge"
+    Group:
+      type: string
+      example: "hoge"
+    File:
+      type: string
+      format: binary
     CompactApplication:
       type: object
       properties:
@@ -759,7 +770,7 @@ components:
         current_detail:
           $ref: "#/components/schemas/ApplicationLog"
         current_state:
-          $ref: "#/components/schemas/StateEnum"
+          $ref: "#/components/schemas/StatusEnum"
     DetailedApplication:
       allOf:
         - $ref: "#/components/schemas/CompactApplication"
@@ -791,8 +802,6 @@ components:
       properties:
         update_user:
           $ref: "#/components/schemas/User"
-        type:
-          $ref: "#/components/schemas/TypeEnum"
         title:
           type: string
           example: "夏コミの交通費をお願いします。"
@@ -815,8 +824,6 @@ components:
         details:
           type: object
           properties:
-            type:
-              $ref: "#/components/schemas/TypeEnum"
             title:
               type: string
               example: "夏コミの交通費をお願いします。"
@@ -872,7 +879,7 @@ components:
         update_user:
           $ref: "#/components/schemas/User"
         to_state:
-          $ref: "#/components/schemas/StateEnum"
+          $ref: "#/components/schemas/StatusEnum"
         reason:
           type: string
           default: null
