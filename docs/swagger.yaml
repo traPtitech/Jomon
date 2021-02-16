@@ -98,7 +98,7 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: "#/components/schemas/PostApplication"
       responses:
@@ -146,7 +146,7 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: "#/components/schemas/PostApplication"
       responses:
@@ -248,7 +248,7 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: "#/components/schemas/PostApplication"
       responses:
@@ -296,7 +296,7 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: "#/components/schemas/PostApplication"
       responses:
@@ -472,39 +472,6 @@ paths:
                     example: "fully_repaid"
         "404":
           description: 指定された依頼はない。
-  "/files/{fileID}":
-    parameters:
-    - name: imageID
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-    get:
-      tags:
-        - Requests
-      description: 指定されたファイルを返す
-      responses:
-        "200":
-          description: 該当するファイルが存在した 返す
-          content:
-            image/png:
-              schema:
-                type: string
-                format: binary
-        "404":
-          description: Not Found
-    delete:
-      description: 指定したidのファイルを削除する。
-      tags:
-        - Applications
-      responses:
-        "204":
-          description: 正常に取り消すことができた。
-        "403":
-          description: 編集権限がない人(作成者、admin以外)による操作。
-        "404":
-          description: 該当する画像はない。
   "/admins":
     get:
       description: adminユーザーの一覧を返す。
@@ -605,6 +572,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/Tag"
   "/tags/{tagID}":
+    parameters:
+      - name: tagID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
     get:
       description: 指定したタグが付与されている依頼、トランザクションを返す。
       tags:
@@ -642,6 +616,122 @@ paths:
           description: 削除に成功した。
         "404":
           description: Not Found
+  "/groups":
+    get:
+      description: グループの一覧を返す。
+      tags:
+        - Groups
+      responses:
+        "200":
+          description: 取得に成功した。返す
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Group"
+    post:
+      description: グループを追加する。
+      tags:
+        - Groups
+      responses:
+        "200":
+          description: 追加に成功した。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+  "/groups/{groupID}":
+    parameters:
+      - name: groupID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      description: 指定したグループが付与されている依頼、トランザクションを返す。
+      tags:
+        - Groups
+      responses:
+        "200":
+          description: 取得に成功した。返す
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Group"
+        "404":
+          description: Not Found
+    put:
+      description: グループの情報を変更する。
+      tags:
+        - Groups
+      responses:
+        "200":
+          description: 変更に成功した。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        "404":
+          description: Not Found
+    delete:
+      description: グループを削除する
+      tags:
+        - Tags
+      responses:
+        "200":
+          description: 削除に成功した。
+        "404":
+          description: Not Found
+  "/files":
+    post:
+      description: ファイルをアップロードする。
+      tags:
+        - Files
+      content:
+        multipart/form-data:
+          schema:
+            file:
+              type: string
+              format: binary
+  "/files/{fileID}":
+    parameters:
+    - name: fileID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    get:
+      tags:
+        - Files
+      description: 指定されたファイルを返す
+      responses:
+        "200":
+          description: 該当するファイルが存在した 返す
+          content:
+            multipart/form-data:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not Found
+    delete:
+      description: 指定したidのファイルを削除する。
+      tags:
+        - Files
+      responses:
+        "204":
+          description: 正常に取り消すことができた。
+        "403":
+          description: 編集権限がない人(作成者、admin以外)による操作。
+        "404":
+          description: 該当する画像はない。
+
+
 
 components:
   schemas:
