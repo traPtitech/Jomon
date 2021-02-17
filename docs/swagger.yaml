@@ -43,17 +43,11 @@ paths:
           schema:
             type: string
         - name: target
-          description: 誰との取引か
+          description: 入金元、あるいは出金先
           required: false
           in: query
           schema:
             type: string
-        - name: year
-          description: 何年度のトランザクションか
-          required: false
-          in: query
-          schema:
-            type: integer
         - name: since
           description: いつからのトランザクションか
           required: false
@@ -82,7 +76,7 @@ paths:
             type: string
       responses:
         "200":
-          description: 取得できた。返す。該当するものがなくても空配列を返す。
+          description: 該当するものがない場合は空配列を返却。
           content:
             application/json:
               schema:
@@ -90,7 +84,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Request"
         "400":
-            description: リクエストがおかしい。
+            description: 不正なリクエスト。
     post:
       description: トランザクションを新規作成する。
       tags:
@@ -103,7 +97,7 @@ paths:
               $ref: "#/components/schemas/PostApplication"
       responses:
         "201":
-          description: 作成した。結果を返す。
+          description: 作成に成功。
           content:
             application/json:
               schema:
@@ -140,9 +134,10 @@ paths:
         "404":
           description: 指定されたTransactionはない。
     put:
-      description: 指定したTransactionを修正する(transaction_detailに新しいレコードを作る)。修正できるのはadmin。ここのbodyの内容を新たな情報とする。
+      description: 指定したTransactionを修正する。
       tags:
         - Transactions
+        - Admins
       requestBody:
         required: true
         content:
@@ -167,16 +162,6 @@ paths:
                   example: "ammout"
         "403":
           description: 編集権限がない人による操作。
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  is_user_accepted:
-                    type: boolean
-                    example: false
-                  current_state:
-                    $ref: "#/components/schemas/Status"
         "404":
           description: 指定されたトランザクションはない。
   '/requests':
@@ -240,7 +225,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Request"
         "400":
-            description: リクエストがおかしい。
+            description: 不正なリクエスト。
     post:
       description: 依頼を新規作成する。
       tags:
@@ -290,9 +275,10 @@ paths:
         "404":
           description: 指定された依頼はない。
     put:
-      description: 指定した依頼を修正する(transaction_detailに新しいレコードを作る)。修正できるのは作成者。ここのbodyの内容を新たな情報とする。
+      description: 指定した依頼を修正する。
       tags:
-        - Transactions
+        - Requests
+        - Authors
       requestBody:
         required: true
         content:
@@ -418,6 +404,8 @@ paths:
       description: 指定した申請書のstatusを変更のみ(新規はpost /requests)する。reasonは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「fix_requiredからsubmitted」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからfully_repaid」の操作はここでは行えない。
       tags:
         - Status
+        - Admins
+        - Authors
       parameters:
         - name: requestID
           in: path
@@ -511,11 +499,9 @@ paths:
         "400":
           description: リクエストに形式上の不備がある。
         "403":
-          description: admin以外の人
+          description: adminではない人による操作。
         "404":
           description: adminを追加しようとした対象者は存在しない
-        "409":
-          description: 既にadminである
     delete:
       description: adminユーザーを削除する。
       tags:
@@ -544,8 +530,6 @@ paths:
           description: admin以外の人
         "404":
           description: adminを削除しようとした対象者は存在しない
-        "409":
-          description: 既にadminでない
   "/tags":
     get:
       description: タグの一覧を返す。
@@ -582,7 +566,8 @@ paths:
     get:
       description: 指定したタグが付与されている依頼、トランザクションを返す。
       tags:
-        - Tags
+        - Transactions
+        - Requests
       responses:
         "200":
           description: 取得に成功した。返す
@@ -621,6 +606,7 @@ paths:
       description: グループの一覧を返す。
       tags:
         - Groups
+        - Admins
       responses:
         "200":
           description: 取得に成功した。返す
@@ -634,6 +620,7 @@ paths:
       description: グループを追加する。
       tags:
         - Groups
+        - Admins
       responses:
         "200":
           description: 追加に成功した。
@@ -653,6 +640,7 @@ paths:
       description: 指定したグループが付与されている依頼、トランザクションを返す。
       tags:
         - Groups
+        - Admins
       responses:
         "200":
           description: 取得に成功した。返す
@@ -668,6 +656,7 @@ paths:
       description: グループの情報を変更する。
       tags:
         - Groups
+        - Admins
       responses:
         "200":
           description: 変更に成功した。
@@ -681,6 +670,7 @@ paths:
       description: グループを削除する
       tags:
         - Groups
+        - Admins
       responses:
         "200":
           description: 削除に成功した。
@@ -731,6 +721,8 @@ paths:
       description: 指定したidのファイルを削除する。
       tags:
         - Files
+        - Admins
+        - Authors
       responses:
         "204":
           description: 正常に取り消すことができた。
@@ -765,7 +757,7 @@ components:
           example: "SysAd"
         description:
           type: string
-          example: "SysAd班の予算"
+          example: "SysAd班"
         budget:
           type: integer
           example: 250000
