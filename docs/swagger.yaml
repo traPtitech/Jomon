@@ -1,14 +1,14 @@
 openapi: 3.0.0
 servers:
   - description: SwaggerHub API Auto Mocking
-    url: '/api'
+    url: "/api"
 info:
   version: "1.0.0"
   title: Jomon API
   description: >-
     JomonのAPIです。
 paths:
-  '/auth/genpkce':
+  "/auth/genpkce":
     get:
       description: PKCEを取得する｡
       tags:
@@ -29,15 +29,14 @@ paths:
                     type: string
                   response_type:
                     type: string
-  '/transactions':
+  "/transactions":
     get:
       description: トランザクション一覧を取得する。
       tags:
         - Transactions
       parameters:
         - name: sort
-          description:
-            並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at")
+          description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at")
           required: false
           in: query
           schema:
@@ -82,9 +81,9 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Request"
+                  $ref: "#/components/schemas/Transaction"
         "400":
-            description: 不正なリクエスト。
+          description: 不正なリクエスト。
     post:
       description: トランザクションを新規作成する。
       tags:
@@ -94,14 +93,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostApplication"
+              $ref: "#/components/schemas/PostTransaction"
       responses:
         "201":
           description: 作成に成功。
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Request"
+                $ref: "#/components/schemas/Transaction"
 
         "400":
           description: リクエストに形式上または内容の不備がある。例えばtargetが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
@@ -111,15 +110,15 @@ paths:
                 type: array
                 items:
                   type: string
-                  example: "ammout"
+                  example: "amount"
   "/transactions/{transactionID}":
     parameters:
-    - name: transactionID
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
+      - name: transactionID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
     get:
       description: 指定したトランザクションの詳細を取得する。
       tags:
@@ -130,7 +129,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Request"
+                $ref: "#/components/schemas/Transaction"
         "404":
           description: 指定されたTransactionはない。
     put:
@@ -143,14 +142,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostApplication"
+              $ref: "#/components/schemas/PostTransaction"
       responses:
         "200":
           description: 修正できた。返す。
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Request"
+                $ref: "#/components/schemas/Transaction"
         "400":
           description: リクエストに形式上または内容の不備がある。例えばtargetが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
           content:
@@ -159,20 +158,19 @@ paths:
                 type: array
                 items:
                   type: string
-                  example: "ammout"
+                  example: "amount"
         "403":
           description: 編集権限がない人による操作。
         "404":
           description: 指定されたトランザクションはない。
-  '/requests':
+  "/requests":
     get:
       description: 依頼一覧を取得する。
       tags:
         - Requests
       parameters:
         - name: sort
-          description:
-            並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", タイトルの昇順 "title", タイトルの降順 "-title")
+          description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", タイトルの昇順 "title", タイトルの降順 "-title")
           required: false
           in: query
           schema:
@@ -225,7 +223,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Request"
         "400":
-            description: 不正なリクエスト。
+          description: 不正なリクエスト。
     post:
       description: 依頼を新規作成する。
       tags:
@@ -235,7 +233,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostApplication"
+              $ref: "#/components/schemas/PostRequest"
       responses:
         "201":
           description: 作成した。結果を返す。
@@ -252,15 +250,15 @@ paths:
                 type: array
                 items:
                   type: string
-                  example: "ammout"
+                  example: "amount"
   "/requests/{requestID}":
     parameters:
-    - name: requestID
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
+      - name: requestID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
     get:
       description: 指定したトランザクションの詳細を取得する。
       tags:
@@ -284,7 +282,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostApplication"
+              $ref: "#/components/schemas/PostRequest"
       responses:
         "200":
           description: 修正できた。返す。
@@ -300,19 +298,9 @@ paths:
                 type: array
                 items:
                   type: string
-                  example: "ammout"
+                  example: "amount"
         "403":
           description: 編集権限がない人による操作。
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  is_user_accepted:
-                    type: boolean
-                    example: false
-                  current_state:
-                    $ref: "#/components/schemas/Status"
         "404":
           description: 指定された依頼はない。
   "/requests/{requestID}/comments":
@@ -350,17 +338,17 @@ paths:
           description: 指定された依頼はない。
   "/requests/{requestID}/comments/{commentID}":
     parameters:
-    - name: requestID
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-    - name: commentID
-      in: path
-      required: true
-      schema:
-        type: integer
+      - name: requestID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: commentID
+        in: path
+        required: true
+        schema:
+          type: integer
     put:
       description: コメントを変更する。
       tags:
@@ -420,9 +408,8 @@ paths:
             schema:
               type: object
               properties:
-                to_state:
-                  type: string
-                  example: "accepted"
+                status:
+                  $ref: "#/components/schemas/StatusEnum"
                 reason:
                   type: string
                   example: "良いですね。"
@@ -439,25 +426,11 @@ paths:
                   updated_at:
                     type: string
                     format: date-time
-                  current_state:
+                  status:
                     type: string
                     example: "accepted"
-                  past_state:
-                    type: string
-                    example: "rejected"
         "400":
           description: リクエストに形式上または内容の不備がある。または行き来できないstatus。
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  current_state:
-                    type: string
-                    example: "rejected"
-                  to_state:
-                    type: string
-                    example: "fully_repaid"
         "404":
           description: 指定された依頼はない。
   "/admins":
@@ -481,14 +454,14 @@ paths:
       requestBody:
         required: true
         content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  trap_id:
-                    $ref: "#/components/schemas/TrapID"
-                  to_admin:
-                    type: boolean
+          application/json:
+            schema:
+              type: object
+              properties:
+                trap_id:
+                  $ref: "#/components/schemas/TrapID"
+                to_admin:
+                  type: boolean
       responses:
         "200":
           description: OK
@@ -509,14 +482,14 @@ paths:
       requestBody:
         required: true
         content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  trap_id:
-                    $ref: "#/components/schemas/TrapID"
-                  to_admin:
-                    type: boolean
+          application/json:
+            schema:
+              type: object
+              properties:
+                trap_id:
+                  $ref: "#/components/schemas/TrapID"
+                to_admin:
+                  type: boolean
       responses:
         "200":
           description: OK
@@ -548,6 +521,12 @@ paths:
       description: タグを追加する。
       tags:
         - Tags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostTag"
       responses:
         "200":
           description: 追加に成功した。
@@ -583,6 +562,12 @@ paths:
       description: タグの情報を変更する。
       tags:
         - Tags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostTag"
       responses:
         "200":
           description: 変更に成功した。
@@ -621,6 +606,12 @@ paths:
       tags:
         - Groups
         - Admins
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostGroup"
       responses:
         "200":
           description: 追加に成功した。
@@ -657,6 +648,12 @@ paths:
       tags:
         - Groups
         - Admins
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostGroup"
       responses:
         "200":
           description: 変更に成功した。
@@ -681,23 +678,36 @@ paths:
       description: ファイルをアップロードする。
       tags:
         - Files
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  $ref: "#/components/schemas/File"
+                name:
+                  type: string
+                  example: "hoge.png"
       responses:
         "200":
           description: 変更に成功した。
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/File"
+                type: string
+                format: uuid
         "404":
           description: Not Found
   "/files/{fileID}":
     parameters:
-    - name: fileID
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
+      - name: fileID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
     get:
       tags:
         - Files
@@ -733,7 +743,7 @@ paths:
 
 components:
   schemas:
-    Status:
+    StatusEnum:
       type: string
       enum: [submitted, fix_required, accepted, fully_repaid, rejected]
     TrapID:
@@ -743,13 +753,52 @@ components:
     Tag:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
         name:
           type: string
           example: "2021講習会"
         description:
           type: string
-          example: "2021年度講習会予算"
+          example: "2021年度講習会"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    PostTag:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "2020講習会"
+        description:
+          type: string
+          example: "2020年度講習会"
     Group:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "SysAd"
+        description:
+          type: string
+          example: "SysAd班"
+        budget:
+          type: integer
+          example: 250000
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    PostGroup:
       type: object
       properties:
         name:
@@ -776,7 +825,7 @@ components:
       format: binary
     Target:
       type: string
-      example: "東京工業大学デジタル創作同好会traP"
+      example: "AtCoder株式会社"
     Request:
       type: object
       properties:
@@ -794,9 +843,15 @@ components:
         content:
           type: string
           example: "〇〇駅から〇〇駅への移動"
+        target:
+          type: array
+          items:
+            $ref: "#/components/schemas/Target"
         group_id:
           type: string
           format: uuid
+        status:
+          $ref: "#/components/schemas/Status"
         created_at:
           type: string
           format: date-time
@@ -822,66 +877,73 @@ components:
                 $ref: "#/components/schemas/Tag"
             group:
               $ref: "#/components/schemas/Group"
-            status:
-              $ref: "#/components/schemas/Status"
-    ApplicationLog:
+    Transaction:
       type: object
       properties:
-        update_user:
-          $ref: "#/components/schemas/TrapID"
-        title:
+        id:
           type: string
-          example: "夏コミの交通費をお願いします。"
-        remarks:
-          type: string
-          example: "〇〇駅から〇〇駅への移動"
+          format: uuid
+        target:
+          $ref: "#/components/schemas/Target"
         amount:
           type: integer
-          minimum: 1
           example: 1200
-        paid_at:
+        request_id:
           type: string
-          format: date
+          format: uuid
+        group_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
         updated_at:
           type: string
           format: date-time
-    PostApplication:
+    PostTransaction:
       type: object
       properties:
-        details:
-          type: object
-          properties:
-            title:
-              type: string
-              example: "夏コミの交通費をお願いします。"
-            remarks:
-              type: string
-              example: "〇〇駅から〇〇駅への移動"
-            paid_at:
-              type: string
-              format: date-time
-            amount:
-              type: integer
-              minimum: 1
-              maximum: 2147483647
-              example: 1200
-            repaid_to_id:
-              type: array
-              items:
-                $ref: "#/components/schemas/TrapID"
-              uniqueItems: true
-              minItems: 1
-        images:
+        target:
+          $ref: "#/components/schemas/Target"
+        amount:
+          type: integer
+          example: 1200
+        request_id:
+          type: string
+          format: uuid
+        group_id:
+          type: string
+          format: uuid
+    PostRequest:
+      type: object
+      properties:
+        created_by:
+          $ref: "#/components/schemas/TrapID"
+        amount:
+          type: integer
+          example: 1200
+        title:
+          type: string
+          example: "夏コミの交通費をお願いします。"
+        content:
+          type: string
+          example: "〇〇駅から〇〇駅への移動"
+        files:
           type: array
           items:
-            type: string
-            format: binary
+            $ref: "#/components/schemas/File"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+        group:
+          $ref: "#/components/schemas/Group"
     Comment:
       type: object
       properties:
-        comment_id:
-          type: integer
-          description: コメント変更削除に対応するため
+        id:
+          type: string
+          format: uuid
         user:
           $ref: "#/components/schemas/TrapID"
         comment:
@@ -893,13 +955,13 @@ components:
         updated_at:
           type: string
           format: date-time
-    State:
+    Status:
       type: object
       properties:
-        update_user:
+        created_by:
           $ref: "#/components/schemas/TrapID"
-        to_state:
-          $ref: "#/components/schemas/Status"
+        status:
+          $ref: "#/components/schemas/StatusEnum"
         reason:
           type: string
           default: null
@@ -907,19 +969,3 @@ components:
         created_at:
           type: string
           format: date-time
-    Repayment:
-      type: object
-      properties:
-        created_at:
-          type: string
-          format: date-time
-        repaid_by_user:
-          allOf:
-            - $ref: "#/components/schemas/TrapID"
-          nullable: true
-        repaid_to_user:
-          $ref: "#/components/schemas/TrapID"
-        repaid_at:
-          type: string
-          nullable: true
-          format: date
