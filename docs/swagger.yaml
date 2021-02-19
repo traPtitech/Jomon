@@ -382,7 +382,7 @@ paths:
         - Comments
       responses:
         "204":
-          description: 正常に取り消すことができました。。
+          description: 正常に取り消すことができました。
         "403":
           description: 編集権限がない人(コメント作成者以外)による操作。
         "404":
