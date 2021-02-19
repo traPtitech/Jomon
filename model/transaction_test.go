@@ -91,7 +91,7 @@ func TestPatchTransaction(t *testing.T) {
 			panic(err)
 		}
 
-		err = transactionRepo.PatchTransaction(trnsID, &amount2, []string{""}, nil)
+		err = transactionRepo.PatchTransaction(trnsID, &amount2, []string{}, nil)
 		asr.NoError(err)
 
 		trns, err := transactionRepo.GetTransaction(trnsID)
