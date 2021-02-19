@@ -11,15 +11,22 @@ import (
 // Transaction struct of Transaction
 type Transaction struct {
 	ID        uuid.UUID `gorm:"type:char(36);primary_key" json:"id"`
-	Amount    int       `gorm:"type:int(11);not null" json:"amount"`
-	Target    string    `gorm:"type:varchar(64);not null" json:"target"`
-	RequestID uuid.UUID `gorm:"char(36);index" json:"request_id`
 	CreatedAt time.Time `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP;index" json:"created_at"`
+}
+
+type TransactionDetail struct {
+	ID            uuid.UUID `gorm:"type:char(36);primary_key" json:"id"`
+	TransactionID uuid.UUID `gorm:"type:char(36);index" json:"transaction_id"`
+	Amount        int       `gorm:"type:int(11);not null" json:"amount"`
+	Target        string    `gorm:"type:varchar(64);not null" json:"target"`
+	RequestID     uuid.UUID `gorm:"char(36);index" json:"request_id`
+	CreatedAt     time.Time `gorm:"type:datetime;not null;default:CURRENT_TIMESTAMP;index" json:"created_at"`
 }
 
 // TransactionRepository トランザクションのリポジトリ
 type TransactionRepository interface {
 	GetTransaction(id uuid.UUID) (Transaction, error)
+	GetTransactionDetail(transactionID uuid.UUID) (TransactionDetail, error)
 	GetTransactionList(sort string,
 		currentStatus *Status,
 		financialYear *int,
@@ -50,12 +57,23 @@ func NewTransactionRepository() RequestRepository {
 func (*transactionRepository) GetTransaction(id uuid.UUID) (Transaction, error) {
 	var trns Transaction
 
-	err := db.Order("created_at").Find(&trns, Request{ID: id}).Error
+	err := db.Order("created_at").Find(&trns, Transaction{ID: id}).Error
 	if err != nil {
 		return Transaction{}, err
 	}
 
 	return trns, nil
+}
+
+func (*transactionRepository) GetTransactionDetail(transactionID uuid.UUID) (TransactionDetail, error) {
+	var trnsDetail TransactionDetail
+
+	err := db.Order("created_at").Find(&trnsDetail, TransactionDetail{TransactionID: transactionID}).Error
+	if err != nil {
+		return TransactionDetail{}, err
+	}
+
+	return trnsDetail, nil
 }
 
 func (*transactionRepository) GetTransactionList(sort string, financialYear *int, applicant string, submittedSince *time.Time, submittedUntil *time.Time) ([]Transaction, error) {
@@ -108,8 +126,17 @@ func (repo *transactionRepository) CreateTransaction(amount int, targets []strin
 	}
 
 	err = db.Transaction(func(tx *gorm.DB) error {
+		trns := Transaction{
+			ID: id,
+		}
+
+		err := db.Create(&trns).Error
+		if err != nil {
+			return err
+		}
+
 		for _, target := range targets {
-			if err = repo.createTransaction(tx, id, amount, target, *requestID); err != nil {
+			if err = repo.createTransaction(tx, id, amount, target, requestID); err != nil {
 				return err
 			}
 		}
@@ -129,36 +156,56 @@ func (repo *transactionRepository) PatchTransaction(trnsID uuid.UUID, amount *in
 			return err
 		}
 
-		trns.ID, err = uuid.NewV4() // zero value of int is 0
+		trnsDetail, err := repo.GetTransactionDetail(trns.ID)
+		if err != nil {
+			return err
+		}
+
+		trnsDetail.ID, err = uuid.NewV4() // zero value of int is 0
 		if err != nil {
 			return err
 		}
 
 		if amount != nil {
-			trns.Amount = *amount
+			trnsDetail.Amount = *amount
+		}
+
+		if requestID != nil {
+			trnsDetail.RequestID = *requestID
 		}
 
 		if len(transactionTargets) > 0 {
-			for _, userID := range transactionTargets {
-				if err = repo.createTransactionTarget(tx, trnsID, userID); err != nil {
+			for _, target := range transactionTargets {
+				trnsDetail.Target = target
+				err = db.Create(&trnsDetail).Error
+				if err != nil {
 					return err
 				}
 			}
 		}
 
-		return tx.Model(&Transaction{ID: trnsID}).Updates(Transaction{}).Error
+		return nil
 	})
 }
 
-func (*transactionRepository) createTransaction(db *gorm.DB, id uuid.UUID, amount int, target string, requestID uuid.UUID) error {
-	trns := Transaction{
-		ID:        id,
-		Amount:    amount,
-		Target:    target,
-		RequestID: requestID,
+func (*transactionRepository) createTransaction(db *gorm.DB, id uuid.UUID, amount int, target string, requestID *uuid.UUID) error {
+	trnsDetailID, err := uuid.NewV4()
+	if err != nil {
+		return err
 	}
 
-	err := db.Create(&trns).Error
+	trnsDetail := TransactionDetail{
+		ID:            trnsDetailID,
+		TransactionID: id,
+		Amount:        amount,
+		Target:        target,
+	}
+
+	if requestID != nil {
+		trnsDetail.RequestID = *requestID
+	}
+
+	err = db.Create(&trnsDetail).Error
 	if err != nil {
 		return err
 	}
