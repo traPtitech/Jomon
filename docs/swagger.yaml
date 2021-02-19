@@ -751,23 +751,19 @@ components:
       pattern: "^[0-9a-zA-Z_]{1,32}$"
       example: "nagatech"
     Tag:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: "2021講習会"
-        description:
-          type: string
-          example: "2021年度講習会"
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
+      allOf:
+        - $ref: "#/components/schemas/PostTag"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
     PostTag:
       type: object
       properties:
@@ -778,26 +774,19 @@ components:
           type: string
           example: "2020年度講習会"
     Group:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: "SysAd"
-        description:
-          type: string
-          example: "SysAd班"
-        budget:
-          type: integer
-          example: 250000
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
+      allOf:
+        - $ref: "#/components/schemas/PostGroup"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
     PostGroup:
       type: object
       properties:
@@ -825,39 +814,23 @@ components:
       format: binary
     Target:
       type: string
-      example: "AtCoder株式会社"
+      example: "hoge株式会社"
     Request:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        created_by:
-          $ref: "#/components/schemas/TrapID"
-        amount:
-          type: integer
-          example: 1200
-        title:
-          type: string
-          example: "夏コミの交通費をお願いします。"
-        content:
-          type: string
-          example: "〇〇駅から〇〇駅への移動"
-        target:
-          type: array
-          items:
-            $ref: "#/components/schemas/Target"
-        group_id:
-          type: string
-          format: uuid
-        status:
-          $ref: "#/components/schemas/Status"
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
+      allOf:
+        - $ref: "#/components/schemas/PostRequest"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            status:
+              $ref: "#/components/schemas/Status"
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
     RequestDetail:
       allOf:
         - $ref: "#/components/schemas/Request"
@@ -878,28 +851,19 @@ components:
             group:
               $ref: "#/components/schemas/Group"
     Transaction:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        target:
-          $ref: "#/components/schemas/Target"
-        amount:
-          type: integer
-          example: 1200
-        request_id:
-          type: string
-          format: uuid
-        group_id:
-          type: string
-          format: uuid
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
+      allOf:
+        - $ref: "#/components/schemas/PostTransaction"
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
     PostTransaction:
       type: object
       properties:
