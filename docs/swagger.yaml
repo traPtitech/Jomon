@@ -100,7 +100,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Transaction"
+                $ref: "#/components/schemas/TransactionDetail"
 
         "400":
           description: リクエストに形式上または内容の不備がある。例えばtargetが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
@@ -129,7 +129,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Transaction"
+                $ref: "#/components/schemas/TransactionDetail"
         "404":
           description: 指定されたTransactionはない。
     put:
@@ -149,7 +149,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Transaction"
+                $ref: "#/components/schemas/TransactionDetail"
         "400":
           description: リクエストに形式上または内容の不備がある。例えばtargetが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
           content:
@@ -240,7 +240,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Request"
+                $ref: "#/components/schemas/RequestDetail"
 
         "400":
           description: リクエストに形式上または内容の不備がある。例えばtitleが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
@@ -289,7 +289,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Request"
+                $ref: "#/components/schemas/RequestDetail"
         "400":
           description: リクエストに形式上または内容の不備がある。例えばtitleが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
           content:
@@ -419,16 +419,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  user:
-                    $ref: "#/components/schemas/TrapID"
-                  updated_at:
-                    type: string
-                    format: date-time
-                  status:
-                    type: string
-                    example: "accepted"
+                $ref: "#/components/schemas/Status"
         "400":
           description: リクエストに形式上または内容の不備がある。または行き来できないstatus。
         "404":
@@ -460,8 +451,6 @@ paths:
               properties:
                 trap_id:
                   $ref: "#/components/schemas/TrapID"
-                to_admin:
-                  type: boolean
       responses:
         "200":
           description: OK
@@ -488,8 +477,6 @@ paths:
               properties:
                 trap_id:
                   $ref: "#/components/schemas/TrapID"
-                to_admin:
-                  type: boolean
       responses:
         "200":
           description: OK
@@ -553,9 +540,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/TaggedThings"
+                allOf:
+                  - $ref: "#/components/schemas/Tag"
+                  - type: object
+                    properties:
+                      tagged_things:
+                        $ref: "#/components/schemas/TaggedThings"
         "404":
           description: Not Found
     put:
@@ -591,7 +581,6 @@ paths:
       description: グループの一覧を返す。
       tags:
         - Groups
-        - Admins
       responses:
         "200":
           description: 取得に成功した。返す
@@ -631,18 +620,67 @@ paths:
       description: 指定したグループが付与されている依頼、トランザクションを返す。
       tags:
         - Groups
-        - Admins
       responses:
         "200":
           description: 取得に成功した。返す
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/GroupedThings"
+                allOf:
+                  - $ref: "#/components/schemas/Group"
+                  - type: object
+                    properties:
+                      transactions:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      requests:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      users:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/TrapID"
         "404":
           description: Not Found
+    post:
+      description: ユーザーをグループに追加する。
+      tags:
+        - Groups
+        - Admins
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrapID"
+      responses:
+        "200":
+          description: 追加に成功した。
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Group"
+                  - type: object
+                    properties:
+                      transactions:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      requests:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      users:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/TrapID"
     put:
       description: グループの情報を変更する。
       tags:
@@ -660,7 +698,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Group"
+                allOf:
+                  - $ref: "#/components/schemas/Group"
+                  - type: object
+                    properties:
+                      transactions:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      requests:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      users:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/TrapID"
         "404":
           description: Not Found
     delete:
@@ -816,68 +871,118 @@ components:
       type: string
       example: "hoge株式会社"
     Request:
-      allOf:
-        - $ref: "#/components/schemas/PostRequest"
-        - type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-            status:
-              $ref: "#/components/schemas/Status"
-            created_at:
-              type: string
-              format: date-time
-            updated_at:
-              type: string
-              format: date-time
-    RequestDetail:
-      allOf:
-        - $ref: "#/components/schemas/Request"
-        - type: object
-          properties:
-            comments:
-              type: array
-              items:
-                $ref: "#/components/schemas/Comment"
-            files:
-              type: array
-              items:
-                $ref: "#/components/schemas/File"
-            tags:
-              type: array
-              items:
-                $ref: "#/components/schemas/Tag"
-            group:
-              $ref: "#/components/schemas/Group"
-    Transaction:
-      allOf:
-        - $ref: "#/components/schemas/PostTransaction"
-        - type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-            created_at:
-              type: string
-              format: date-time
-            updated_at:
-              type: string
-              format: date-time
-    PostTransaction:
       type: object
       properties:
-        target:
-          $ref: "#/components/schemas/Target"
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [submitted, fix_required, accepted, fully_repaid, rejected]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        created_by:
+          $ref: "#/components/schemas/TrapID"
         amount:
           type: integer
           example: 1200
-        request_id:
+        title:
+          type: string
+          example: "SysAd講習会の開催費用"
+        content:
+          type: string
+          example: "サーバー代 1200円"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+        group:
+          $ref: "#/components/schemas/Group"
+    RequestDetail:
+      type: object
+      properties:
+        id:
           type: string
           format: uuid
-        group_id:
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/File"
+        statuses:
+          type: array
+          items:
+            $ref: "#/components/schemas/Status"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+        group:
+          $ref: "#/components/schemas/Group"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Transaction:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+        - $ref: "#/components/schemas/PostTransaction"
+    TransactionDetail:
+      type: object
+      properties:
+        id:
           type: string
           format: uuid
+        amount:
+          type: integer
+          example: 1200
+        target:
+          $ref: "#/components/schemas/Target"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+        group:
+          $ref: "#/components/schemas/Group"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    PostTransaction:
+      type: object
+      properties:
+        amount:
+          type: integer
+          example: 1200
+        target:
+          $ref: "#/components/schemas/Target"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/PostTag"
+        group:
+          $ref: "#/components/schemas/PostGroup"
     PostRequest:
       type: object
       properties:
@@ -888,10 +993,10 @@ components:
           example: 1200
         title:
           type: string
-          example: "夏コミの交通費をお願いします。"
+          example: "SysAd講習会の開催費用"
         content:
           type: string
-          example: "〇〇駅から〇〇駅への移動"
+          example: "サーバー代 1200円"
         files:
           type: array
           items:
@@ -899,9 +1004,9 @@ components:
         tags:
           type: array
           items:
-            $ref: "#/components/schemas/Tag"
+            $ref: "#/components/schemas/PostTag"
         group:
-          $ref: "#/components/schemas/Group"
+          $ref: "#/components/schemas/PostGroup"
     Comment:
       type: object
       properties:
