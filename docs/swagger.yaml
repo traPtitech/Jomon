@@ -544,8 +544,16 @@ paths:
                   - $ref: "#/components/schemas/Tag"
                   - type: object
                     properties:
-                      tagged_things:
-                        $ref: "#/components/schemas/TaggedThings"
+                      transactions:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      requests:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
         "404":
           description: Not Found
     put:
@@ -564,7 +572,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Tag"
+                allOf:
+                  - $ref: "#/components/schemas/Tag"
+                  - type: object
+                    properties:
+                      transactions:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      requests:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
         "404":
           description: Not Found
     delete:
@@ -854,16 +875,6 @@ components:
         budget:
           type: integer
           example: 250000
-    GroupedThings:
-      type: array
-      items:
-        type: string
-        format: uuid
-    TaggedThings:
-      type: array
-      items:
-        type: string
-        format: uuid
     File:
       type: string
       format: binary
