@@ -4,7 +4,7 @@
     <strong>An accounting support system</strong>
   </p>
   <p>
-    <a href="https://traPtitech.github.io/Jomon/dist/index.html">This</a> is a page about Jomon API.
+    <a href="https://apis.trap.jp/?urls.primaryName=Jomon#/">Jomon API</a>
   <p>
 </div>
 
