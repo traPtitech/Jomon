@@ -35,44 +35,13 @@ paths:
       tags:
         - Transactions
       parameters:
-        - name: sort
-          description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at")
-          required: false
-          in: query
-          schema:
-            type: string
-        - name: target
-          description: 入金元、あるいは出金先
-          required: false
-          in: query
-          schema:
-            type: string
-        - name: since
-          description: いつからのトランザクションか
-          required: false
-          in: query
-          schema:
-            type: string
-            format: date
-        - name: until
-          description: いつまでのトランザクションか
-          required: false
-          in: query
-          schema:
-            type: string
-            format: date
-        - name: tag
-          description: タグ(複数の場合カンマ区切り)
-          required: false
-          in: query
-          schema:
-            type: string
-        - name: group
-          description: グループ
-          required: false
-          in: query
-          schema:
-            type: string
+        - $ref: "#/components/parameters/sortQuery"
+        - $ref: "#/components/parameters/targetQuery"
+        - $ref: "#/components/parameters/yearQuery"
+        - $ref: "#/components/parameters/sinceQuery"
+        - $ref: "#/components/parameters/untilQuery"
+        - $ref: "#/components/parameters/tagQuery"
+        - $ref: "#/components/parameters/groupQuery"
       responses:
         "200":
           description: 該当するものがない場合は空配列を返却。
@@ -83,7 +52,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Transaction"
         "400":
-          description: 不正なリクエスト。
+          $ref: "#/components/responses/400"
     post:
       description: トランザクションを新規作成する。
       tags:
@@ -103,14 +72,7 @@ paths:
                 $ref: "#/components/schemas/TransactionDetail"
 
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばtargetが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
-                  example: "amount"
+          $ref: "#/components/responses/400"
   "/transactions/{transactionID}":
     parameters:
       - name: transactionID
@@ -131,7 +93,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/TransactionDetail"
         "404":
-          description: 指定されたTransactionはない。
+          $ref: "#/components/responses/404"
     put:
       description: 指定したTransactionを修正する。
       tags:
@@ -145,74 +107,30 @@ paths:
               $ref: "#/components/schemas/PostTransaction"
       responses:
         "200":
-          description: 修正できた。返す。
+          description: OK 修正後のトランザクションを返却する。
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/TransactionDetail"
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばtargetが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
-                  example: "amount"
+          $ref: "#/components/responses/400"
         "403":
-          description: 編集権限がない人による操作。
+          $ref: "#/components/responses/403"
         "404":
-          description: 指定されたトランザクションはない。
+          $ref: "#/components/responses/404"
   "/requests":
     get:
       description: 依頼一覧を取得する。
       tags:
         - Requests
       parameters:
-        - name: sort
-          description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", タイトルの昇順 "title", タイトルの降順 "-title")
-          required: false
-          in: query
-          schema:
-            type: string
-        - name: target
-          description: 誰との取引か
-          required: false
-          in: query
-          schema:
-            type: string
-        - name: year
-          description: 何年度の依頼か
-          required: false
-          in: query
-          schema:
-            type: integer
-        - name: since
-          description: いつからの依頼か
-          required: false
-          in: query
-          schema:
-            type: string
-            format: date
-        - name: until
-          description: いつまでの依頼か
-          required: false
-          in: query
-          schema:
-            type: string
-            format: date
-        - name: tag
-          description: タグ(複数の場合カンマ区切り)
-          required: false
-          in: query
-          schema:
-            type: string
-        - name: group
-          description: グループ
-          required: false
-          in: query
-          schema:
-            type: string
+        - $ref: "#/components/parameters/sortQuery"
+        - $ref: "#/components/parameters/targetQuery"
+        - $ref: "#/components/parameters/yearQuery"
+        - $ref: "#/components/parameters/sinceQuery"
+        - $ref: "#/components/parameters/untilQuery"
+        - $ref: "#/components/parameters/tagQuery"
+        - $ref: "#/components/parameters/groupQuery"
       responses:
         "200":
           description: 取得できた。返す。該当するものがなくても空配列を返す。
@@ -223,7 +141,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Request"
         "400":
-          description: 不正なリクエスト。
+          $ref: "#/components/responses/400"
     post:
       description: 依頼を新規作成する。
       tags:
@@ -243,14 +161,7 @@ paths:
                 $ref: "#/components/schemas/RequestDetail"
 
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
-                  example: "amount"
+          $ref: "#/components/responses/400"
   "/requests/{requestID}":
     parameters:
       - name: requestID
@@ -271,7 +182,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/RequestDetail"
         "404":
-          description: 指定された依頼はない。
+          $ref: "#/components/responses/404"
     put:
       description: 指定した依頼を修正する。
       tags:
@@ -291,18 +202,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/RequestDetail"
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばtitleが空欄であるなど。内容に不備がある場合には、不備があるkeyを配列にして返す。
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
-                  example: "amount"
+          $ref: "#/components/responses/400"
         "403":
-          description: 編集権限がない人による操作。
+          $ref: "#/components/responses/403"
         "404":
-          description: 指定された依頼はない。
+          $ref: "#/components/responses/404"
   "/requests/{requestID}/comments":
     post:
       description: 指定した依頼にコメントを新規作成する。
@@ -333,9 +237,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Comment"
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばコメント欄が空欄。
+          $ref: "#/components/responses/400"
         "404":
-          description: 指定された依頼はない。
+          $ref: "#/components/responses/404"
   "/requests/{requestID}/comments/{commentID}":
     parameters:
       - name: requestID
@@ -371,11 +275,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/Comment"
         "400":
-          description: リクエストに形式上または内容の不備がある。例えばコメント欄が空欄。
+          $ref: "#/components/responses/400"
         "403":
-          description: 編集権限がない人(コメント作成者以外)による操作。
+          $ref: "#/components/responses/403"
         "404":
-          description: 指定された申請書はない。
+          $ref: "#/components/responses/404"
     delete:
       description: 指定したコメントを削除する。
       tags:
@@ -384,9 +288,9 @@ paths:
         "204":
           description: 正常に取り消すことができました。
         "403":
-          description: 編集権限がない人(コメント作成者以外)による操作。
+          $ref: "#/components/responses/403"
         "404":
-          description: 指定されたコメントはない。
+          $ref: "#/components/responses/404"
   "/requests/{requestID}/status":
     put:
       description: 指定した申請書のstatusを変更のみ(新規はpost /requests)する。reasonは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「fix_requiredからsubmitted」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからfully_repaid」の操作はここでは行えない。
@@ -421,9 +325,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Status"
         "400":
-          description: リクエストに形式上または内容の不備がある。または行き来できないstatus。
+          $ref: "#/components/responses/400"
         "404":
-          description: 指定された依頼はない。
+          $ref: "#/components/responses/404"
   "/admins":
     get:
       description: adminユーザーの一覧を返す。
@@ -447,10 +351,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                trap_id:
-                  $ref: "#/components/schemas/TrapID"
+              $ref: "#/components/schemas/TrapID"
       responses:
         "200":
           description: OK
@@ -459,24 +360,22 @@ paths:
               schema:
                 $ref: "#/components/schemas/TrapID"
         "400":
-          description: リクエストに形式上の不備がある。
+          $ref: "#/components/responses/400"
         "403":
-          description: adminではない人による操作。
+          $ref: "#/components/responses/403"
         "404":
-          description: adminを追加しようとした対象者は存在しない
+          $ref: "#/components/responses/404"
+  "/admins/{userID}":
     delete:
       description: adminユーザーを削除する。
       tags:
         - Admins
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                trap_id:
-                  $ref: "#/components/schemas/TrapID"
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/TrapID"
       responses:
         "200":
           description: OK
@@ -485,11 +384,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/TrapID"
         "400":
-          description: リクエストに形式上の不備がある。
+          $ref: "#/components/responses/400"
         "403":
-          description: admin以外の人
+          $ref: "#/components/responses/403"
         "404":
-          description: adminを削除しようとした対象者は存在しない
+          $ref: "#/components/responses/404"
   "/tags":
     get:
       description: タグの一覧を返す。
@@ -529,33 +428,6 @@ paths:
         schema:
           type: string
           format: uuid
-    get:
-      description: 指定したタグが付与されている依頼、トランザクションを返す。
-      tags:
-        - Transactions
-        - Requests
-      responses:
-        "200":
-          description: 取得に成功した。返す
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/Tag"
-                  - type: object
-                    properties:
-                      transactions:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
-                      requests:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
-        "404":
-          description: Not Found
     put:
       description: タグの情報を変更する。
       tags:
@@ -587,7 +459,7 @@ paths:
                           type: string
                           format: uuid
         "404":
-          description: Not Found
+          $ref: "#/components/responses/404"
     delete:
       description: タグを削除する
       tags:
@@ -596,7 +468,7 @@ paths:
         "200":
           description: 削除に成功した。
         "404":
-          description: Not Found
+          $ref: "#/components/responses/404"
   "/groups":
     get:
       description: グループの一覧を返す。
@@ -638,7 +510,7 @@ paths:
           type: string
           format: uuid
     get:
-      description: 指定したグループが付与されている依頼、トランザクションを返す。
+      description: 指定したグループに所属しているユーザーを返す。
       tags:
         - Groups
       responses:
@@ -647,26 +519,11 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/Group"
-                  - type: object
-                    properties:
-                      transactions:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
-                      requests:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
-                      users:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/TrapID"
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrapID"
         "404":
-          description: Not Found
+          $ref: "#/components/responses/404"
     post:
       description: ユーザーをグループに追加する。
       tags:
@@ -738,7 +595,7 @@ paths:
                         items:
                           $ref: "#/components/schemas/TrapID"
         "404":
-          description: Not Found
+          $ref: "#/components/responses/404"
     delete:
       description: グループを削除する
       tags:
@@ -748,7 +605,7 @@ paths:
         "200":
           description: 削除に成功した。
         "404":
-          description: Not Found
+          $ref: "#/components/responses/404"
   "/files":
     post:
       description: ファイルをアップロードする。
@@ -757,15 +614,9 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              type: object
-              properties:
-                file:
-                  $ref: "#/components/schemas/File"
-                name:
-                  type: string
-                  example: "hoge.png"
+              $ref: "#/components/schemas/PostFile"
       responses:
         "200":
           description: 変更に成功した。
@@ -774,8 +625,8 @@ paths:
               schema:
                 type: string
                 format: uuid
-        "404":
-          description: Not Found
+        "400":
+          $ref: "#/components/responses/400"
   "/files/{fileID}":
     parameters:
       - name: fileID
@@ -794,15 +645,9 @@ paths:
           content:
             multipart/form-data:
               schema:
-                type: object
-                properties:
-                  file:
-                    $ref: "#/components/schemas/File"
-                  name:
-                    format: string
-                    example: "hoge.png"
+                $ref: "#/components/schemas/File"
         "404":
-          description: Not Found
+          $ref: "#/components/responses/404"
     delete:
       description: 指定したidのファイルを削除する。
       tags:
@@ -813,33 +658,36 @@ paths:
         "204":
           description: 正常に取り消すことができた。
         "403":
-          description: 編集権限がない人(作成者、admin以外)による操作。
+          $ref: "#/components/responses/403"
         "404":
-          description: 該当する画像はない。
+          $ref: "#/components/responses/404"
 
 components:
   schemas:
     StatusEnum:
       type: string
-      enum: [submitted, fix_required, accepted, fully_repaid, rejected]
+      enum: [submitted, fix_required, accepted, completed, rejected]
     TrapID:
       type: string
-      pattern: "^[0-9a-zA-Z_]{1,32}$"
-      example: "nagatech"
+      format: uuid
     Tag:
-      allOf:
-        - $ref: "#/components/schemas/PostTag"
-        - type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-            created_at:
-              type: string
-              format: date-time
-            updated_at:
-              type: string
-              format: date-time
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "2020講習会"
+        description:
+          type: string
+          example: "2020年度講習会"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
     PostTag:
       type: object
       properties:
@@ -850,19 +698,26 @@ components:
           type: string
           example: "2020年度講習会"
     Group:
-      allOf:
-        - $ref: "#/components/schemas/PostGroup"
-        - type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-            created_at:
-              type: string
-              format: date-time
-            updated_at:
-              type: string
-              format: date-time
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "SysAd"
+        description:
+          type: string
+          example: "SysAd班"
+        budget:
+          type: integer
+          example: 250000
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
     PostGroup:
       type: object
       properties:
@@ -875,9 +730,27 @@ components:
         budget:
           type: integer
           example: 250000
+    PostFile:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+        name:
+          type: string
+          example: "hoge.png"
+        request_id:
+          type: string
+          format: uuid
     File:
-      type: string
-      format: binary
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+        name:
+          type: string
+          example: "hoge.png"
     Target:
       type: string
       example: "hoge株式会社"
@@ -926,7 +799,8 @@ components:
         files:
           type: array
           items:
-            $ref: "#/components/schemas/File"
+            type: string
+            format: uuid
         statuses:
           type: array
           items:
@@ -943,20 +817,51 @@ components:
         updated_at:
           type: string
           format: date-time
+    PostRequest:
+      type: object
+      properties:
+        created_by:
+          $ref: "#/components/schemas/TrapID"
+        amount:
+          type: integer
+          example: 1200
+        title:
+          type: string
+          example: "SysAd講習会の開催費用"
+        content:
+          type: string
+          example: "サーバー代 1200円"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/PostTag"
+        group:
+          $ref: "#/components/schemas/PostGroup"
     Transaction:
-      allOf:
-        - type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-            created_at:
-              type: string
-              format: date-time
-            updated_at:
-              type: string
-              format: date-time
-        - $ref: "#/components/schemas/PostTransaction"
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+          example: 1200
+        target:
+          $ref: "#/components/schemas/Target"
+        tags:
+          type: array
+          items:
+            type: string
+            format: uuid
+        group:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
     TransactionDetail:
       type: object
       properties:
@@ -971,9 +876,11 @@ components:
         tags:
           type: array
           items:
-            $ref: "#/components/schemas/Tag"
+            type: string
+            format: uuid
         group:
-          $ref: "#/components/schemas/Group"
+          type: string
+          format: uuid
         created_at:
           type: string
           format: date-time
@@ -991,33 +898,11 @@ components:
         tags:
           type: array
           items:
-            $ref: "#/components/schemas/PostTag"
+            type: string
+            format: uuid
         group:
-          $ref: "#/components/schemas/PostGroup"
-    PostRequest:
-      type: object
-      properties:
-        created_by:
-          $ref: "#/components/schemas/TrapID"
-        amount:
-          type: integer
-          example: 1200
-        title:
           type: string
-          example: "SysAd講習会の開催費用"
-        content:
-          type: string
-          example: "サーバー代 1200円"
-        files:
-          type: array
-          items:
-            $ref: "#/components/schemas/File"
-        tags:
-          type: array
-          items:
-            $ref: "#/components/schemas/PostTag"
-        group:
-          $ref: "#/components/schemas/PostGroup"
+          format: uuid
     Comment:
       type: object
       properties:
@@ -1049,3 +934,63 @@ components:
         created_at:
           type: string
           format: date-time
+  responses:
+    400:
+      description: 不正なリクエスト。
+    403:
+      description: 編集権限がない人による操作。
+    404:
+      description: 指定したリソースは存在しない。
+
+  parameters:
+    sortQuery:
+      name: sort
+      description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", タイトルの昇順 "title", タイトルの降順 "-title")
+      required: false
+      in: query
+      schema:
+        type: string
+    targetQuery:
+      name: target
+      description: 誰との取引か
+      required: false
+      in: query
+      schema:
+        type: string
+    yearQuery:
+      name: year
+      description: 何年度の依頼か
+      required: false
+      in: query
+      schema:
+        type: integer
+    sinceQuery:
+      name: since
+      description: いつからの依頼か
+      required: false
+      in: query
+      schema:
+        type: string
+        format: date
+    untilQuery:
+      name: until
+      description: いつまでの依頼か
+      required: false
+      in: query
+      schema:
+        type: string
+        format: date
+    tagQuery:
+      name: tag
+      description: タグ(複数の場合カンマ区切り)
+      required: false
+      in: query
+      schema:
+        type: string
+    groupQuery:
+      name: group
+      description: グループ
+      required: false
+      in: query
+      schema:
+        type: string
