@@ -8,21 +8,41 @@ jomon の admin (会計の人：申請書更新等の権限)（admin のログ�
 
 | Field   | Type        | Null | Key | Default | Extra | 説明など |
 | ------- | ----------- | ---- | --- | ------- | ----- | -------- |
-| trap_id | varchar(32) | NO   | PRI | _NULL_  |
+| trap_id | varchar(32) | NO   | PRI | NULL    |
 
 ## transactions
 
-#### 入出金
+#### トランザクション
 
-実際にすでに行われた入出金をすべて記録。
+| Field      | Type     | Null | Key | Default           | Extra | 説明など                         |
+| ---------- | -------- | ---- | --- | ----------------- | ----- | -------------------------------- |
+| id         | char(36) | NO   | PRI | NULL              |       | uuid                             |
+| created_at | datetime | NO   |     | CURRENT_TIMESTAMP | index | トランザクションが作成された時間 |
 
-| Field      | Type        | Null | Key | Default           | Extra | 説明など                                                  |
-| ---------- | ----------- | ---- | --- | ----------------- | ----- | --------------------------------------------------------- |
-| id         | char(36)    | NO   | PRI | NULL              |       | uuid                                                      |
-| amount     | int(11)     | NO   |     | NULL              |       | 申請金額                                                  |
-| target     | varchar(64) | NO   |     | NULL              |       | 入金元 or 出金先(amount の正負で判定)                     |
-| request_id | varchar(36) | YES  | MUL | NULL              | index | 依頼への参照(NULL のときは依頼なし)**Parents:request.id** |
-| created_at | datetime    | NO   |     | CURRENT_TIMESTAMP | index | トランザクションが作成された時間                          |
+## transaction_details
+
+#### トランザクションの詳細
+
+| Field          | Type        | Null | Key | Default           | Extra | 説明など                                                                    |
+| -------------- | ----------- | ---- | --- | ----------------- | ----- | --------------------------------------------------------------------------- |
+| id             | char(36)    | NO   | PRI | NULL              |       | uuid                                                                        |
+| transaction_id | char(36)    | NO   | MUL | NULL              | index |                                                                             |
+| amount         | int(11)     | NO   |     | NULL              |       | 申請金額                                                                    |
+| target         | varchar(64) | NO   |     | NULL              |       | 入金元 or 出金先(amount の正負で判定)                                       |
+| request_id     | char(36)    | YES  | MUL | NULL              | index | 依頼への参照(NULL のときは依頼なし)**Parents:request.id**                   |
+| group_id       | char(36)    | YES  | MUL | NULL              | index | グループへの参照(NULL のときはグループに所属していない)**Parents:group.id** |
+| created_at     | datetime    | NO   |     | CURRENT_TIMESTAMP | index | トランザクションが作成/修正された時間                                       |
+
+## transaction_tags
+
+#### トランザクションのタグ
+
+| Field          | Type     | Null | Key | Default           | Extra | 説明など                                           |
+| -------------- | -------- | ---- | --- | ----------------- | ----- | -------------------------------------------------- |
+| id             | char(36) | NO   | PRI | NULL              |       | 状態 ID uuid                                       |
+| transaction_id | char(36) | NO   | MUL | NULL              | index | トランザクションへの参照**Parents:transaction.id** |
+| tag_id         | char(36) | NO   | MUL | NULL              | index | タグへの参照**Parents:tag.id**                     |
+| created_at     | datetime | NO   |     | CURRENT_TIMESTAMP |       | タグが追加された日時                               |
 
 ## requests
 
@@ -64,6 +84,17 @@ jomon の admin (会計の人：申請書更新等の権限)（admin のログ�
 | paid_at    | date        | YES  |     | NULL              |                | 払う/払われた日                    |
 | created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |                | request_target が作成された日時    |
 
+## request_tags
+
+#### 依頼のタグ
+
+| Field      | Type     | Null | Key | Default           | Extra | 説明など                           |
+| ---------- | -------- | ---- | --- | ----------------- | ----- | ---------------------------------- |
+| id         | char(36) | NO   | PRI | NULL              |       | 状態 ID uuid                       |
+| request_id | char(36) | NO   | MUL | NULL              | index | 依頼への参照**Parents:request.id** |
+| tag_id     | char(36) | NO   | MUL | NULL              | index | タグへの参照**Parents:tag.id**     |
+| created_at | datetime | NO   |     | CURRENT_TIMESTAMP |       | タグが追加された日時               |
+
 ## files
 
 #### 依頼 id に対応するファイル
@@ -89,3 +120,51 @@ jomon の admin (会計の人：申請書更新等の権限)（admin のログ�
 | created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |                             | コメントが作成された日時           |
 | updated_at | datetime    | NO   |     | CURRENT_TIMESTAMP | on update CURRENT_TIMESTAMP | コメントが更新された日時           |
 | deleted_at | datetime    | YES  |     | NULL              |                             | コメントが削除された日時           |
+
+## groups
+
+#### グループ
+
+| Field       | Type        | Null | Key | Default           | Extra                       | 説明など                                                           |
+| ----------- | ----------- | ---- | --- | ----------------- | --------------------------- | ------------------------------------------------------------------ |
+| id          | char(36)    | NO   | PRI | NULL              |                             | uuid                                                               |
+| created_at  | datetime    | NO   |     | CURRENT_TIMESTAMP |                             | 登録された日時                                                     |
+| updated_at  | datetime    | NO   |     | CURRENT_TIMESTAMP | on update CURRENT_TIMESTAMP | 変更された日時                                                     |
+| deleted_at  | datetime    | YES  |     | NULL              |                             | 削除された日時                                                     |
+| name        | varchar(64) | NO   |     | NULL              |                             | グループ名                                                         |
+| description | text        | NO   |     | NULL              |                             | グループの説明                                                     |
+| budget      | int(11)     | YES  |     | NULL              |                             | 予算額 (あえて非正規化してる) 履歴は group_budget テーブルを参照。 |
+
+## group_budgets
+
+#### グループの予算
+
+| Field      | Type     | Null | Key | Default           | Extra | 説明など       |
+| ---------- | -------- | ---- | --- | ----------------- | ----- | -------------- |
+| id         | char(36) | NO   | PRI | NULL              |       | uuid           |
+| created_at | datetime | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時 |
+| amount     | int(11)  | NO   |     | NULL              |       | 予算額         |
+
+## group_users
+
+#### グループのユーザー
+
+| Field      | Type        | Null | Key | Default           | Extra | 説明など       |
+| ---------- | ----------- | ---- | --- | ----------------- | ----- | -------------- |
+| id         | char(36)    | NO   | PRI | NULL              |       | uuid           |
+| created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時 |
+| group_id   | char(36)    | NO   |     | NULL              | index | uuid           |
+| user_id    | varchar(32) | NO   |     | NULL              |       | traPID         |
+
+## tags
+
+#### タグ
+
+| Field       | Type        | Null | Key | Default           | Extra                       | 説明など       |
+| ----------- | ----------- | ---- | --- | ----------------- | --------------------------- | -------------- |
+| id          | char(36)    | NO   | PRI | NULL              |                             | uuid           |
+| created_at  | datetime    | NO   |     | CURRENT_TIMESTAMP |                             | 登録された日時 |
+| updated_at  | datetime    | NO   |     | CURRENT_TIMESTAMP | on update CURRENT_TIMESTAMP | 変更された日時 |
+| deleted_at  | datetime    | YES  |     | NULL              |                             | 削除された日時 |
+| name        | varchar(64) | NO   |     | NULL              |                             | タグ名         |
+| description | text        | NO   |     | NULL              |                             | タグの説明     |
