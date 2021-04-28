@@ -762,7 +762,7 @@ components:
           format: uuid
         status:
           type: string
-          enum: [submitted, fix_required, accepted, fully_repaid, rejected]
+          enum: [submitted, fix_required, accepted, completed, rejected]
         created_at:
           type: string
           format: date-time
