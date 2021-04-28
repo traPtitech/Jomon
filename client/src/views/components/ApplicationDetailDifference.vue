@@ -1,5 +1,5 @@
 <template>
-  <div class="defference">
+  <div class="difference">
     <v-row class="pa-5">
       <v-col cols="2" class="pl-0">
         <v-row>
@@ -24,7 +24,7 @@ import { applicationType } from "@/use/applicationDetail";
 import { numberFormat, dayPrint } from "@/use/dataFormat";
 
 export default {
-  name: "ApplicationDetailDefference",
+  name: "ApplicationDetailDifference",
   props: {
     item: String,
     pre: null,
