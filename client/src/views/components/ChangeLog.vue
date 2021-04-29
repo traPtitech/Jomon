@@ -6,31 +6,31 @@
       <formatted-date :date="log.content.log.updated_at" />
     </div>
     <v-card>
-      <defference
+      <difference
         v-if="log.content.pre_log.type !== log.content.log.type"
         item="type"
         :pre="log.content.pre_log.type"
         :now="log.content.log.type"
       />
-      <defference
+      <difference
         v-if="log.content.pre_log.title !== log.content.log.title"
         item="title"
         :pre="log.content.pre_log.title"
         :now="log.content.log.title"
       />
-      <defference
+      <difference
         v-if="log.content.pre_log.remarks !== log.content.log.remarks"
         item="remarks"
         :pre="log.content.pre_log.remarks"
         :now="log.content.log.remarks"
       />
-      <defference
+      <difference
         v-if="log.content.pre_log.amount !== log.content.log.amount"
         item="amount"
         :pre="log.content.pre_log.amount"
         :now="log.content.log.amount"
       />
-      <defference
+      <difference
         v-if="log.content.pre_log.paid_at !== log.content.log.paid_at"
         item="paid_at"
         :pre="log.content.pre_log.paid_at"
@@ -42,13 +42,13 @@
 
 <script>
 import Icon from "@/views/shared/Icon";
-import Defference from "./ApplicationDetailDefference";
+import Difference from "./ApplicationDetailDifference";
 import FormattedDate from "./FormattedDate";
 
 export default {
   components: {
     Icon,
-    Defference,
+    Difference,
     FormattedDate
   },
   props: {
@@ -61,6 +61,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   max-width: 100%;
+  margin-bottom: 8px;
   color: $color-grey;
 }
 </style>
