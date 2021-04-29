@@ -54,7 +54,7 @@ paths:
         "400":
           $ref: "#/components/responses/400"
     post:
-      description: トランザクションを新規作成する。
+      description: トランザクションを新規作成する。管理者権限が必要。
       tags:
         - Transactions
       requestBody:
@@ -73,6 +73,7 @@ paths:
 
         "400":
           $ref: "#/components/responses/400"
+
   "/transactions/{transactionID}":
     parameters:
       - name: transactionID
@@ -95,10 +96,9 @@ paths:
         "404":
           $ref: "#/components/responses/404"
     put:
-      description: 指定したTransactionを修正する。
+      description: 指定したTransactionを修正する。管理者権限が必要。
       tags:
         - Transactions
-        - Admins
       requestBody:
         required: true
         content:
@@ -184,10 +184,9 @@ paths:
         "404":
           $ref: "#/components/responses/404"
     put:
-      description: 指定した依頼を修正する。
+      description: 指定した依頼を修正する。作成者権限が必要。
       tags:
         - Requests
-        - Authors
       requestBody:
         required: true
         content:
@@ -211,7 +210,7 @@ paths:
     post:
       description: 指定した依頼にコメントを新規作成する。
       tags:
-        - Comments
+        - Requests
       parameters:
         - name: requestID
           in: path
@@ -256,7 +255,7 @@ paths:
     put:
       description: コメントを変更する。
       tags:
-        - Comments
+        - Requests
       requestBody:
         required: true
         content:
@@ -283,7 +282,7 @@ paths:
     delete:
       description: 指定したコメントを削除する。
       tags:
-        - Comments
+        - Requests
       responses:
         "204":
           description: 正常に取り消すことができました。
@@ -293,11 +292,9 @@ paths:
           $ref: "#/components/responses/404"
   "/requests/{requestID}/status":
     put:
-      description: 指定した依頼のstatusを変更のみ(新規はpost /requests)する。reasonは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「fix_requiredからsubmitted」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからfully_repaid」の操作はここでは行えない。
+      description: 指定した依頼のstatusを変更のみ(新規はpost /requests)する。reasonは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「fix_requiredからsubmitted」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからfully_repaid」の操作はここでは行えない。管理者権限または作成者権限が必要。
       tags:
-        - Status
-        - Admins
-        - Authors
+        - Requests
       parameters:
         - name: requestID
           in: path
@@ -330,7 +327,7 @@ paths:
           $ref: "#/components/responses/404"
   "/admins":
     get:
-      description: adminユーザーの一覧を返す。
+      description: adminユーザーの一覧を返す。管理者権限が必要。
       tags:
         - Admins
       responses:
@@ -343,7 +340,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/TrapID"
     post:
-      description: adminユーザーを追加する。
+      description: adminユーザーを追加する。管理者権限が必要。
       tags:
         - Admins
       requestBody:
@@ -367,7 +364,7 @@ paths:
           $ref: "#/components/responses/404"
   "/admins/{userID}":
     delete:
-      description: adminユーザーを削除する。
+      description: adminユーザーを削除する。管理者権限が必要。
       tags:
         - Admins
       parameters:
@@ -382,7 +379,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TrapID"
+                type: object
+                properties:
+                  id:
+                    $ref: "#/components/schemas/TrapID"
         "400":
           $ref: "#/components/responses/400"
         "403":
@@ -400,9 +400,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Tag"
+                type: object
+                properties:
+                  tags:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Tag"
     post:
       description: タグを追加する。
       tags:
@@ -428,6 +431,32 @@ paths:
         schema:
           type: string
           format: uuid
+    get:
+      description: タグの情報を取得する。
+      tags:
+        - Tags
+      responses:
+        "200":
+          description: 取得に成功した。
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Tag"
+                  - type: object
+                    properties:
+                      transactions:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      requests:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+        "404":
+          $ref: "#/components/responses/404"
     put:
       description: タグの情報を変更する。
       tags:
@@ -480,14 +509,16 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Group"
+                type: object
+                properties:
+                  groups:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Group"
     post:
-      description: グループを追加する。
+      description: グループを追加する。管理者権限が必要。
       tags:
         - Groups
-        - Admins
       requestBody:
         required: true
         content:
@@ -519,22 +550,27 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/TrapID"
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TrapID"
         "404":
           $ref: "#/components/responses/404"
     post:
-      description: ユーザーをグループに追加する。
+      description: ユーザーをグループに追加する。管理者権限が必要。
       tags:
         - Groups
-        - Admins
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TrapID"
+              type: object
+              properties:
+                id:
+                  $ref: "#/components/schemas/TrapID"
       responses:
         "200":
           description: 追加に成功した。
@@ -560,10 +596,9 @@ paths:
                         items:
                           $ref: "#/components/schemas/TrapID"
     put:
-      description: グループの情報を変更する。
+      description: グループの情報を変更する。管理者権限が必要。
       tags:
         - Groups
-        - Admins
       requestBody:
         required: true
         content:
@@ -597,10 +632,9 @@ paths:
         "404":
           $ref: "#/components/responses/404"
     delete:
-      description: グループを削除する
+      description: グループを削除する。管理者権限が必要。
       tags:
         - Groups
-        - Admins
       responses:
         "200":
           description: 削除に成功した。
@@ -623,8 +657,11 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                format: uuid
+                type: object
+                properties:
+                  file_id:
+                    type: string
+                    format: uuid
         "400":
           $ref: "#/components/responses/400"
   "/files/{fileID}":
@@ -649,11 +686,9 @@ paths:
         "404":
           $ref: "#/components/responses/404"
     delete:
-      description: 指定したidのファイルを削除する。
+      description: 指定したidのファイルを削除する。管理者権限または作成者権限が必要。
       tags:
         - Files
-        - Admins
-        - Authors
       responses:
         "204":
           description: 正常に取り消すことができた。
