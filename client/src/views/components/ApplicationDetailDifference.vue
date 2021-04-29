@@ -1,14 +1,14 @@
 <template>
   <div :class="$style.container">
-    <h3>{{ itemPrint(this.item) }}</h3>
+    <h3>{{ changedItem }}</h3>
     <div>
       <div :class="$style.before">
         <div :class="$style.mark">−</div>
-        {{ dataPrint(this.item, this.pre) }}
+        <div v-html="renderedBefore" />
       </div>
       <div :class="$style.after">
         <div :class="$style.mark">+</div>
-        {{ dataPrint(this.item, this.now) }}
+        <div v-html="renderedAfter" />
       </div>
     </div>
   </div>
@@ -16,6 +16,7 @@
 <script>
 import { applicationType } from "@/use/applicationDetail";
 import { numberFormat, dayPrint } from "@/use/dataFormat";
+import { render } from "@/use/markdown";
 
 export default {
   name: "ApplicationDetailDifference",
@@ -25,16 +26,10 @@ export default {
     now: null
   },
   data: () => {
-    return { red: "#ffeef0", green: "#e6ffed" };
+    return { changedItem: "", renderedBefore: "", renderedAfter: "" };
   },
-  methods: {
-    numberFormat(price) {
-      return numberFormat(price);
-    },
-    dayPrint(time) {
-      return dayPrint(time);
-    },
-    itemPrint(item) {
+  async mounted() {
+    this.changedItem = (item => {
       switch (item) {
         case "type":
           return "申請様式";
@@ -47,8 +42,8 @@ export default {
         case "paid_at":
           return "支払日";
       }
-    },
-    dataPrint(item, data) {
+    })(this.item);
+    const preRender = (item, data) => {
       switch (item) {
         case "type":
           return applicationType(data) + "申請";
@@ -57,13 +52,15 @@ export default {
         case "remarks":
           return data;
         case "amount":
-          return this.numberFormat(data) + "円";
+          return numberFormat(data) + "円";
         case "paid_at":
-          return this.dayPrint(data);
+          return dayPrint(data);
         default:
           return "error";
       }
-    }
+    };
+    this.renderedBefore = await render(preRender(this.item, this.pre));
+    this.renderedAfter = await render(preRender(this.item, this.now));
   }
 };
 </script>

@@ -62,9 +62,7 @@
       <div :class="$style.section_title">
         {{ returnRemarksTitle(this.detail.core.current_detail.type) }}
       </div>
-      <div :class="$style.section_item">
-        {{ this.detail.core.current_detail.remarks }}
-      </div>
+      <div :class="$style.section_item" v-html="rendered" />
     </div>
 
     <!-- 最後のsectionなのでスタイルを当てなくてもOK -->
@@ -89,6 +87,7 @@ import StateButtonController from "@/views/components/StateButtonController";
 import { mapState } from "vuex";
 import { remarksTitle, applicationType } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
+import { render } from "@/use/markdown";
 
 export default {
   components: {
@@ -109,6 +108,14 @@ export default {
     returnRemarksTitle: function (type) {
       return remarksTitle(type);
     }
+  },
+  data: function () {
+    return {
+      rendered: ""
+    };
+  },
+  async mounted() {
+    this.rendered = await render(this.detail.core.current_detail.remarks);
   }
 };
 </script>
