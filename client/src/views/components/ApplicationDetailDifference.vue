@@ -1,22 +1,16 @@
 <template>
-  <div class="difference">
-    <v-row class="pa-5">
-      <v-col cols="2" class="pl-0">
-        <v-row>
-          <v-col>{{ itemPrint(this.item) }}</v-col>
-        </v-row>
-      </v-col>
-      <v-col cols="10" class="pa-2">
-        <v-row :style="{ background: red }">
-          <v-col cols="1">-</v-col>
-          <v-col cols="11"> {{ dataPrint(this.item, this.pre) }}</v-col>
-        </v-row>
-        <v-row :style="{ background: green }">
-          <v-col cols="1">+ </v-col>
-          <v-col cols="11"> {{ dataPrint(this.item, this.now) }}</v-col>
-        </v-row>
-      </v-col>
-    </v-row>
+  <div :class="$style.container">
+    <h3>{{ itemPrint(this.item) }}</h3>
+    <div>
+      <div :class="$style.before">
+        <div :class="$style.mark">−</div>
+        {{ dataPrint(this.item, this.pre) }}
+      </div>
+      <div :class="$style.after">
+        <div :class="$style.mark">+</div>
+        {{ dataPrint(this.item, this.now) }}
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -73,3 +67,24 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" module>
+.container {
+  padding: 8px;
+}
+.before {
+  background: #ffeef0;
+  display: flex;
+  padding: 8px;
+}
+.after {
+  background: #e6ffed;
+  display: flex;
+  padding: 8px;
+}
+.mark {
+  width: 8px;
+  margin-right: 8px;
+  text-align: center;
+}
+</style>

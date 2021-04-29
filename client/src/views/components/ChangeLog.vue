@@ -61,6 +61,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   max-width: 100%;
+  margin-bottom: 8px;
   color: $color-grey;
 }
 </style>
