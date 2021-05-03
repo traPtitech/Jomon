@@ -171,7 +171,7 @@ paths:
           type: string
           format: uuid
     get:
-      description: 指定したトランザクションの詳細を取得する。
+      description: 指定した依頼の詳細を取得する。
       tags:
         - Requests
       responses:
