@@ -550,12 +550,24 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  users:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/TrapID"
+                allOf:
+                  - $ref: "#/components/schemas/Group"
+                  - type: object
+                    properties:
+                      transactions:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      requests:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      users:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/TrapID"
         "404":
           $ref: "#/components/responses/404"
     post:
