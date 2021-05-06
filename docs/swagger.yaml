@@ -571,7 +571,7 @@ paths:
         "404":
           $ref: "#/components/responses/404"
     post:
-      description: ユーザーをグループに追加する。管理者権限が必要。
+      description: ユーザーをグループに追加する。管理者権限またはグループオーナー権限が必要。
       tags:
         - Groups
       requestBody:
@@ -607,8 +607,12 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/TrapID"
+                      owners:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/TrapID"
     put:
-      description: グループの情報を変更する。管理者権限が必要。
+      description: グループの情報を変更する。管理者権限またはグループオーナー権限が必要。
       tags:
         - Groups
       requestBody:
@@ -641,10 +645,14 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/TrapID"
+                      owners:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/TrapID"
         "404":
           $ref: "#/components/responses/404"
     delete:
-      description: グループを削除する。管理者権限が必要。
+      description: グループを削除する。管理者権限またはグループオーナー権限が必要。
       tags:
         - Groups
       responses:
@@ -777,6 +785,10 @@ components:
         budget:
           type: integer
           example: 250000
+        owners:
+          type: array
+          items:
+            $ref: "#components/schemas/TrapID"
     PostFile:
       type: object
       properties:
