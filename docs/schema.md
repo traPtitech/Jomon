@@ -143,6 +143,7 @@ jomon の admin (会計の人：申請書更新等の権限)（admin のログ�
 | ---------- | -------- | ---- | --- | ----------------- | ----- | -------------- |
 | id         | char(36) | NO   | PRI | NULL              |       | uuid           |
 | created_at | datetime | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時 |
+| group_id   | char(36) | NO   | MUL | NULL              | index | uuid           |
 | amount     | int(11)  | NO   |     | NULL              |       | 予算額         |
 
 ## group_users
@@ -153,8 +154,19 @@ jomon の admin (会計の人：申請書更新等の権限)（admin のログ�
 | ---------- | ----------- | ---- | --- | ----------------- | ----- | -------------- |
 | id         | char(36)    | NO   | PRI | NULL              |       | uuid           |
 | created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時 |
-| group_id   | char(36)    | NO   |     | NULL              | index | uuid           |
+| group_id   | char(36)    | NO   | MUL | NULL              | index | uuid           |
 | user_id    | varchar(32) | NO   |     | NULL              |       | traPID         |
+
+## group_owners
+
+#### グループのオーナー
+
+| Field      | Type        | Null | Key | Default           | Extra | 説明など       |
+| ---------- | ----------- | ---- | --- | ----------------- | ----- | -------------- |
+| id         | char(36)    | NO   | PRI | NULL              |       | uuid           |
+| created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時 |
+| group_id   | char(36)    | NO   | MUL | NULL              | index | uuid           |
+| owner      | varchar(32) | NO   | MUL | NULL              |       | traPID         |
 
 ## tags
 
