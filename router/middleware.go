@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	log "github.com/traPtitech/Jomon/logger"
+	log "github.com/traPtitech/Jomon/logging"
 	"go.uber.org/zap"
 )
 
