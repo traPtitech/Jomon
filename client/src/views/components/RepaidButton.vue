@@ -63,7 +63,7 @@ export default {
                 repaid_at: date
               }
             )
-            .then(response => console.log(traPID, response.status));
+            .catch(e => alert(e));
         })
       ).then(() => {
         this.traPID = [];

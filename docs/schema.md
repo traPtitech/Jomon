@@ -1,90 +1,193 @@
 # DB schema
 
-**Jomon**のDBです。外部キー制約は **（※）** を除いて全て`ON UPDATE reference_option`,`ON DELETE reference_option`共にデフォルト(`RESTRICT`)です。申請書リスト取得時の処理を高めるために、appolicationsに'applications_details_id','states_logs_id'を追加したことで相互参照が起こります。よって以上二つ(※）については内容としてはMULですが、DMSによっては制限しないことにします。
+**Jomon**の DB です。外部キー制約は全て`ON UPDATE reference_option`,`ON DELETE reference_option`共にデフォルト(`RESTRICT`)
 
 ## administrators
 
-jomonのadmin (会計の人：申請書更新等の権限)（adminのログはとりません）(権限剥奪の場合はレコードを削除します）
+jomon の admin (会計の人：申請書更新等の権限)（admin のログはとりません）(権限剥奪の場合はレコードを削除します）
 
-| Field            | Type     | Null | Key | Default | Extra | 説明など |
-| ---------------- | -------- | ---- | --- | ------- | ----- | -------- |
-| trap_id     | varchar(32) | NO   | PRI | _NULL_  |
+| Field   | Type        | Null | Key | Default | Extra | 説明など |
+| ------- | ----------- | ---- | --- | ------- | ----- | -------- |
+| trap_id | varchar(32) | NO   | PRI | NULL    |       |          |
 
-## applications
+## transactions
 
-同一の経費精算書類の情報を持ちます。削除はできません。
+#### トランザクション
 
-| Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
-| ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| id          | char(36) | NO   | PRI | _NULL_  |  |uuid|
-| applications_details_id          | int(11) | NO   | MUL | _NULL_  || 経費申請詳細の最新id**Parents:applications_details.id** **（※）** |
-| states_logs_id          | int(11) | NO   | MUL | _NULL_  || 状態の最新id**Parents:states_logs.id**　**（※）**  |
-| create_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 申請者のtraPid |
-| created_at       | datetime  | NO   |     | CURRENT_TIMESTAMP |       | 申請書が作成された日時 |
+| Field      | Type     | Null | Key | Default           | Extra | 説明など                         |
+| ---------- | -------- | ---- | --- | ----------------- | ----- | -------------------------------- |
+| id         | char(36) | NO   | PRI | NULL              |       | uuid                             |
+| created_at | datetime | NO   |     | CURRENT_TIMESTAMP | index | トランザクションが作成された時間 |
 
-## applications_details
+## transaction_details
 
-経費精算申請（新規、変更ごとに新しいレコードが作られます。申請の削除はできず、一度作ったら必ずいずれかのstateに当てはまります。)
+#### トランザクションの詳細
 
-| Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
-| ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| id          | int(11) | NO   | PRI | _NULL_  | auto_increment |
-|application_id|char(36)|NO|MUL|_NULL_||経費精算申請ごとにつくid **parents:applications.id**|
-| update_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 変更者（初めは申請者）のtraPid |
-| type             | tinyint(4)   | NO   |     | _NULL_            |                | どのタイプの申請か (1(Club), 2(Contest), 3(Event), 4(Public)) |
-| title        | text      | NO  |     | _NULL_||        申請の目的、概要(大会名など) |
-| remarks       | text      | NO  |     | _NULL_ |           |   備考（購入したものの概要、旅程、乗車区間など） |
-| amount | int(11)    | NO  |     | _NULL_    |         |申請金額    |
-| paid_at       | date  | NO   |     |  |       | お金を使った日  |
-| updated_at       | datetime  | NO   |     | CURRENT_TIMESTAMP |       | 申請書が作成（変更）された日時  |
+| Field          | Type        | Null | Key | Default           | Extra | 説明など                                                                     |
+| -------------- | ----------- | ---- | --- | ----------------- | ----- | ---------------------------------------------------------------------------- |
+| id             | char(36)    | NO   | PRI | NULL              |       | uuid                                                                         |
+| transaction_id | char(36)    | NO   | MUL | NULL              | index |                                                                              |
+| amount         | int(11)     | NO   |     | NULL              |       | 申請金額                                                                     |
+| target         | varchar(64) | NO   |     | NULL              |       | 入金元 or 出金先(amount の正負で判定)                                        |
+| request_id     | char(36)    | YES  | MUL | NULL              | index | 依頼への参照(NULL のときは依頼なし)**Parents:requests.id**                   |
+| group_id       | char(36)    | YES  | MUL | NULL              | index | グループへの参照(NULL のときはグループに所属していない)**Parents:groups.id** |
+| created_at     | datetime    | NO   |     | CURRENT_TIMESTAMP | index | トランザクションが作成/修正された時間                                        |
 
-## repay_users
+## transaction_tags
 
-申請idにつき、誰に返金されるか(現在usertableがないためtraPidはtraQ(できればportal)のapiをたたきます。)(変更時には対応する申請書の対応する返金対象者のレコードをUpdateし、その申請書の全てのレコードのrepaid_atが入っていたら全員返金済みとします。)
+#### トランザクションのタグ
 
-| Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
-| ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| id          | int(11) | NO   | PRI | _NULL_  |auto_increment|  |
-| application_id          | char(36) | NO   | MUL | _NULL_  || 申請書のid |
-| repaid_to_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | 払い戻される人のtraPid |
-| repaid_by_user_trap_id      | varchar(32) | NO   | MUL | _NULL_  |           | お金を渡した人のtraPid |
-| repaid_at          | date | YES   |  | _NULL_  | |払い戻された日  |
-| created_at     | datetime | NO   |     | CURRENT_TIMESTAMP |                | repay_usersが作成された日時                                                                                              |
+| Field          | Type     | Null | Key | Default           | Extra | 説明など                                            |
+| -------------- | -------- | ---- | --- | ----------------- | ----- | --------------------------------------------------- |
+| id             | char(36) | NO   | PRI | NULL              |       | 状態 ID uuid                                        |
+| transaction_id | char(36) | NO   | MUL | NULL              | index | トランザクションへの参照**Parents:transactions.id** |
+| tag_id         | char(36) | NO   | MUL | NULL              | index | タグへの参照**Parents:tag.id**                      |
+| created_at     | datetime | NO   |     | CURRENT_TIMESTAMP |       | タグが追加された日時                                |
 
-## applications_images
+## requests
 
-申請idにつき、対応する画像　(画像変更ログは残りません。)(変更時には対応する`application_id`のレコードすべてを削除して、新しいレコードを追加します。)
+#### 依頼
 
-| Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
-| ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| id          |char(36) | NO   | PRI | _NULL_  || uuid |
-| application_id          | char(36) | NO   | MULL | _NULL_  || 申請書のid |
-| mime_type | text | NO | |_NULL_ || 画像のフォーマット |
-| created_at       | datetime  | NO   |     | CURRENT_TIMESTAMP |       | 画像が登録された日時 |
+新規、変更ごとに新しいレコードを作成。依頼の削除はできず、一度作ったら状態で管理
 
-## states_logs
+| Field      | Type        | Null | Key | Default           | Extra | 説明など             |
+| ---------- | ----------- | ---- | --- | ----------------- | ----- | -------------------- |
+| id         | varchar(36) | NO   | PRI | NULL              |       | uuid                 |
+| created_by | varchar(32) | NO   |     | NULL              |       | traP ID              |
+| amount     | int(11)     | NO   |     | NULL              |       | 申請金額             |
+| created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |       | 依頼が作成された時間 |
 
-状態の記録（状態の変更があるたびにレコードを追加します。）(初めて申請書が作られたときも0をレコードとして入れます。）（理由の変更、削除はできません。)(stateの`3`は`repaid_users`に依存していて、全員が`true`となった時に変えてください。)
+## request_statuses
 
-| Field            | Type       | Null | Key | Default           | Extra          | 説明など                                                                                                       |
-| ---------------- | ---------- | ---- | --- | ----------------- | -------------- | -------------------------------------------------------------------------------------------------------------- |
-| id          | int(11) | NO   | PRI | _NULL_  |auto_increment|  |
-| application_id          | char(36) | NO   | MUL | _NULL_  || 申請書のid **parents:applications.id**|
-| update_user_trap_id      | varchar(32) | NO   |  | _NULL_  |           | 状態を変えた人のtraPid |
-| to_state     | tinyint(4) | NO   |     | 0                 |                | どの状態へ変えたか (1(submitted) ,2(fix_required), 3(accepted), 4(fully_repaid), 5(rejected))                                                                                 |
-| reason     |text | NO  |     | _NULL_                 |                | 状態を変えたとき状態の変え方によってコメントをつけられたり付けられなかったりします。（swagger参照) |
-| created_at       | datetime  | NO   |     | CURRENT_TIMESTAMP |                | 状態が更新された日時                                                                                                  |
+#### 依頼の状態
+
+状態の変更があるたびにレコードを作成。対応する依頼のレコード全ての`target`に対して`request_target`の paid_at が挿入されていたら`fully_repaid`に変更。新規の依頼ごとに新しいレコードを作成。request が作られた段階で作られる。reason は status を「submitted から fix_required」「submitted から rejected」「accepted から submitted」にするときに必要。作成者は「fix_required から submitted」にでき、admin は「submitted から rejected」「submitted から required」「fix_required から submitted」「submitted から accepted」「accepted から submitted(ただし、すでに払う/払われている人がいた場合、この操作は不可)」の操作が可能。
+
+| Field      | Type        | Null | Key | Default           | Extra          | 説明など                            |
+| ---------- | ----------- | ---- | --- | ----------------- | -------------- | ----------------------------------- |
+| id         | int(11)     | NO   | PRI | NULL              | auto_increment | 状態 ID                             |
+| request_id | varchar(36) | NO   | MUL | NULL              | index          | 依頼への参照**Parents:requests.id** |
+| created_by | varchar(32) | NO   |     | NULL              |                | 状態を変えた人の traPid             |
+| status     | enum        | NO   |     | NULL              |                |                                     |
+| reason     | text        | NO   |     | NULL              |                |                                     |
+| created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |                | 状態が更新された日時                |
+
+## request_targets
+
+#### 依頼の target
+
+| Field      | Type        | Null | Key | Default           | Extra          | 説明など                            |
+| ---------- | ----------- | ---- | --- | ----------------- | -------------- | ----------------------------------- |
+| id         | int(11)     | NO   | PRI | NULL              | auto_increment |                                     |
+| request_id | char(36)    | NO   | MUL | NULL              |                | 依頼への参照**Parents:requests.id** |
+| target     | varchar(64) | NO   |     | NULL              |                | 入金元 or 出金先                    |
+| paid_at    | date        | YES  |     | NULL              |                | 払う/払われた日                     |
+| created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |                | request_target が作成された日時     |
+
+## request_tags
+
+#### 依頼のタグ
+
+| Field      | Type     | Null | Key | Default           | Extra | 説明など                            |
+| ---------- | -------- | ---- | --- | ----------------- | ----- | ----------------------------------- |
+| id         | char(36) | NO   | PRI | NULL              |       | 状態 ID uuid                        |
+| request_id | char(36) | NO   | MUL | NULL              | index | 依頼への参照**Parents:requests.id** |
+| tag_id     | char(36) | NO   | MUL | NULL              | index | タグへの参照**Parents:tags.id**     |
+| created_at | datetime | NO   |     | CURRENT_TIMESTAMP |       | タグが追加された日時                |
+
+## request_files
+
+#### 依頼 id に対応するファイル
+
+| Field      | Type     | Null | Key | Default           | Extra | 説明など                             |
+| ---------- | -------- | ---- | --- | ----------------- | ----- | ------------------------------------ |
+| id         | char(36) | NO   | PRI | NULL              |       | uuid                                 |
+| request_id | char(36) | NO   | MUL | NULL              | index | 依頼への参照**Parents:requests.id**  |
+| file_id    | char(36) | NO   | MUL | NULL              |       | ファイルへの参照**Parents:files.id** |
+| created_at | datetime | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時                       |
+
+## files
+
+#### ファイル
+
+| Field      | Type     | Null | Key | Default           | Extra | 説明など       |
+| ---------- | -------- | ---- | --- | ----------------- | ----- | -------------- |
+| id         | char(36) | NO   | PRI | NULL              |       | uuid           |
+| mime_type  | text     | NO   |     | NULL              |       | フォーマット   |
+| created_at | datetime | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時 |
+| deleted_at | datetime | YES  |     | NULL              |       | 削除された日時 |
 
 ## comments
 
-申請書ごとのコメント（コメントの変更、削除は対応するレコードを変更することで行います。そのため変更前の状態履歴は残りません。）
+#### 依頼ごとのコメント
 
-| Field            | Type      | Null | Key | Default           | Extra          | 説明など                                            |
-| ---------------- | --------- | ---- | --- | ----------------- | -------------- | --------------------------------------------------- |
-| id      | int(11)   | NO   | PRI | _NULL_            | auto_increment | コメントIＤ |
-| application_id | char(36)  | NO   | MUL | _NULL_            |                | どの申請書へのコメントか **Parents:applications.id**                          |
-| user_trap_id      | varchar(32)  | NO  | MUL | _NULL_            |                | コメントした人の traPID                                     |
-| comment       |  text    | NO  |     | _NULL_            |       |コメント内容そのもの                                       |
-| created_at     | datetime | NO   |     | CURRENT_TIMESTAMP |                | コメントが作成された日時                                                                                              |
-| updated_at     | datetime |  NO  |     | CURRENT_TIMESTAMP |    on update CURRENT_TIMESTAMP            | コメントが更新された日時                                                                                              |
-| deleted_at     | datetime |  YES  |     | NULL |                | コメントが削除された日時                                                                                              |
+| Field      | Type        | Null | Key | Default           | Extra                       | 説明など                            |
+| ---------- | ----------- | ---- | --- | ----------------- | --------------------------- | ----------------------------------- |
+| id         | int(11)     | NO   | PRI | NULL              | auto_increment              | コメント ID                         |
+| request_id | varchar(36) | NO   | MUL | NULL              | index                       | 依頼への参照**Parents:requests.id** |
+| created_by | varchar(32) | NO   |     | NULL              |                             |                                     |
+| comment    | text        | NO   |     | NULL              |                             | コメント内容                        |
+| created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |                             | コメントが作成された日時            |
+| updated_at | datetime    | NO   |     | CURRENT_TIMESTAMP | on update CURRENT_TIMESTAMP | コメントが更新された日時            |
+| deleted_at | datetime    | YES  |     | NULL              |                             | コメントが削除された日時            |
+
+## groups
+
+#### グループ
+
+| Field       | Type        | Null | Key | Default           | Extra                       | 説明など                                                           |
+| ----------- | ----------- | ---- | --- | ----------------- | --------------------------- | ------------------------------------------------------------------ |
+| id          | char(36)    | NO   | PRI | NULL              |                             | uuid                                                               |
+| created_at  | datetime    | NO   |     | CURRENT_TIMESTAMP |                             | 登録された日時                                                     |
+| updated_at  | datetime    | NO   |     | CURRENT_TIMESTAMP | on update CURRENT_TIMESTAMP | 変更された日時                                                     |
+| deleted_at  | datetime    | YES  |     | NULL              |                             | 削除された日時                                                     |
+| name        | varchar(64) | NO   |     | NULL              |                             | グループ名                                                         |
+| description | text        | NO   |     | NULL              |                             | グループの説明                                                     |
+| budget      | int(11)     | YES  |     | NULL              |                             | 予算額 (あえて非正規化してる) 履歴は group_budget テーブルを参照。 |
+
+## group_budgets
+
+#### グループの予算
+
+| Field      | Type     | Null | Key | Default           | Extra | 説明など       |
+| ---------- | -------- | ---- | --- | ----------------- | ----- | -------------- |
+| id         | char(36) | NO   | PRI | NULL              |       | uuid           |
+| created_at | datetime | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時 |
+| group_id   | char(36) | NO   | MUL | NULL              | index | uuid           |
+| amount     | int(11)  | NO   |     | NULL              |       | 予算額         |
+| comment    | text     | YES  |     | NULL              |       | コメント       |
+
+## group_users
+
+#### グループのユーザー
+
+| Field      | Type        | Null | Key | Default           | Extra | 説明など       |
+| ---------- | ----------- | ---- | --- | ----------------- | ----- | -------------- |
+| id         | char(36)    | NO   | PRI | NULL              |       | uuid           |
+| created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時 |
+| group_id   | char(36)    | NO   | MUL | NULL              | index | uuid           |
+| user_id    | varchar(32) | NO   |     | NULL              |       | traPID         |
+
+## group_owners
+
+#### グループのオーナー
+
+| Field      | Type        | Null | Key | Default           | Extra | 説明など       |
+| ---------- | ----------- | ---- | --- | ----------------- | ----- | -------------- |
+| id         | char(36)    | NO   | PRI | NULL              |       | uuid           |
+| created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時 |
+| group_id   | char(36)    | NO   | MUL | NULL              | index | uuid           |
+| owner      | varchar(32) | NO   | MUL | NULL              |       | traPID         |
+
+## tags
+
+#### タグ
+
+| Field       | Type        | Null | Key | Default           | Extra                       | 説明など       |
+| ----------- | ----------- | ---- | --- | ----------------- | --------------------------- | -------------- |
+| id          | char(36)    | NO   | PRI | NULL              |                             | uuid           |
+| created_at  | datetime    | NO   |     | CURRENT_TIMESTAMP |                             | 登録された日時 |
+| updated_at  | datetime    | NO   |     | CURRENT_TIMESTAMP | on update CURRENT_TIMESTAMP | 変更された日時 |
+| deleted_at  | datetime    | YES  |     | NULL              |                             | 削除された日時 |
+| name        | varchar(64) | NO   |     | NULL              |                             | タグ名         |
+| description | text        | NO   |     | NULL              |                             | タグの説明     |

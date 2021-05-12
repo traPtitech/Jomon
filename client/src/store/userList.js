@@ -18,12 +18,8 @@ export const userList = {
   },
   actions: {
     async getUserList({ commit }) {
-      try {
-        const response = await axios.get("/api/users");
-        commit("setUserList", response.data);
-      } catch (err) {
-        console.log(err);
-      }
+      const response = await axios.get("/api/users");
+      commit("setUserList", response.data);
     }
   },
   getters: {

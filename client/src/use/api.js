@@ -8,20 +8,15 @@ export const traQBaseURL = "https://q.trap.jp/api/v3";
 //     : process.env.VUE_APP_API_ENDPOINT;
 
 export async function redirectAuthEndpoint() {
-  try {
-    const data = (await axios.get("/api/auth/genpkce")).data;
+  const data = (await axios.get("/api/auth/genpkce")).data;
+  const authorizationEndpointUrl = new URL(`${traQBaseURL}/oauth2/authorize`);
 
-    const authorizationEndpointUrl = new URL(`${traQBaseURL}/oauth2/authorize`);
+  authorizationEndpointUrl.search = new URLSearchParams({
+    response_type: "code",
+    client_id: data.client_id,
+    code_challenge: data.code_challenge,
+    code_challenge_method: data.code_challenge_method
+  }).toString();
 
-    authorizationEndpointUrl.search = new URLSearchParams({
-      response_type: "code",
-      client_id: data.client_id,
-      code_challenge: data.code_challenge,
-      code_challenge_method: data.code_challenge_method
-    }).toString();
-
-    window.location.assign(authorizationEndpointUrl.toString());
-  } catch (err) {
-    console.log(err);
-  }
+  window.location.assign(authorizationEndpointUrl.toString());
 }

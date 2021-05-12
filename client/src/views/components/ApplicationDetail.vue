@@ -1,14 +1,12 @@
 <!-- 受け取ったデータを基に申請詳細ページの下半分にログ、コメント等配置 -->
 <template>
   <div :class="$style.container">
-    <div :class="$style.title_container">
-      <div :class="$style.header">
-        <div :class="$style.title">
-          <h1>{{ returnType(this.detail.core.current_detail.type) }}申請</h1>
-          <state-chip :state="this.detail.core.current_state" />
-        </div>
-        <state-button-controller />
+    <div :class="$style.header">
+      <div :class="$style.title">
+        <h1>{{ returnType(this.detail.core.current_detail.type) }}申請</h1>
+        <state-chip :state="this.detail.core.current_state" />
       </div>
+      <state-button-controller />
     </div>
 
     <div :class="$style.section">
@@ -64,9 +62,7 @@
       <div :class="$style.section_title">
         {{ returnRemarksTitle(this.detail.core.current_detail.type) }}
       </div>
-      <div :class="$style.section_item">
-        {{ this.detail.core.current_detail.remarks }}
-      </div>
+      <div :class="$style.section_item" v-html="rendered" />
     </div>
 
     <!-- 最後のsectionなのでスタイルを当てなくてもOK -->
@@ -91,6 +87,7 @@ import StateButtonController from "@/views/components/StateButtonController";
 import { mapState } from "vuex";
 import { remarksTitle, applicationType } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
+import { render } from "@/use/markdown";
 
 export default {
   components: {
@@ -111,6 +108,14 @@ export default {
     returnRemarksTitle: function (type) {
       return remarksTitle(type);
     }
+  },
+  data: function () {
+    return {
+      rendered: ""
+    };
+  },
+  async mounted() {
+    this.rendered = await render(this.detail.core.current_detail.remarks);
   }
 };
 </script>
@@ -119,8 +124,9 @@ export default {
 .container {
   height: fit-content;
   margin: 12px;
-  padding: 8px;
-  border: 1px solid $color-grey;
+  padding: 12px;
+  box-shadow: 0 3px 1px -2px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%),
+    0 1px 5px 0 rgb(0 0 0 / 12%);
 }
 .header {
   display: flex;

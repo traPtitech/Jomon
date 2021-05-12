@@ -44,7 +44,6 @@ router.beforeEach(async (to, _from, next) => {
       await store.dispatch("getMe");
     } catch (err) {
       sessionStorage.setItem(`destination`, to.fullPath);
-      console.log(err);
       await redirectAuthEndpoint();
     }
   }

@@ -1,11 +1,10 @@
-<!-- 申請ページ描画画面制御 -->
 <template>
   <div v-if="this.loading">loading...</div>
   <div v-else :class="$style.container">
     <!-- todo storeのfixで制御する、このページのcreatedでstoreのfixはfalseに。 -->
     <application-paper :class="$style.paper" v-if="!this.detail.fix" />
     <fix-application-paper :class="$style.paper" v-else />
-    <application-logs />
+    <application-logs :class="$style.log" />
   </div>
 </template>
 
@@ -47,9 +46,14 @@ export default {
   justify-content: center;
   flex-wrap: wrap;
   max-width: 100%;
+  padding: 16px;
 }
 .paper {
-  max-width: 60vw;
+  width: 720px;
+}
+.log {
+  min-width: 360px;
+  max-width: 480px;
 }
 @media (max-width: $breakpoint) {
   .paper {

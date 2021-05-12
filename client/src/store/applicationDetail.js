@@ -141,12 +141,8 @@ export const applicationDetail = {
   },
   actions: {
     async getApplicationDetail({ commit }, applicationId) {
-      try {
-        const response = await axios.get("/api/applications/" + applicationId);
-        commit("setApplicationDetail", response.data);
-      } catch (err) {
-        console.log(err);
-      }
+      const response = await axios.get("/api/applications/" + applicationId);
+      commit("setApplicationDetail", response.data);
     }
   }
 };

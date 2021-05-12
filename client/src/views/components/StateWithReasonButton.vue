@@ -103,7 +103,10 @@ export default {
               reason: this.reason
             }
           )
-          .then(response => console.log(response.status));
+          .catch(e => {
+            alert(e);
+            return;
+          });
         this.$refs.form.reset();
         this.dialog = false;
         this.getApplicationDetail(
@@ -122,9 +125,6 @@ export default {
         default:
           return "状態が間違っています";
       }
-    },
-    print: obj => {
-      console.log(obj);
     }
   }
 };
