@@ -97,16 +97,18 @@ jomon の admin (会計の人：申請書更新等の権限)（admin のログ�
 
 ## request_files
 
-| Field      | Type     | Null | Key | Default | Extra | 説明など                             |
-| ---------- | -------- | ---- | --- | ------- | ----- | ------------------------------------ |
-| id         | char(36) | NO   | PRI | NULL    |       | uuid                                 |
-| request_id | char(36) | NO   | MUL | NULL    | index | 依頼への参照**Parents:requests.id**  |
-| file_id    | char(36) | NO   | MUL | NULL    |       | ファイルへの参照**Parents:files.id** |
-| created_at | datetime | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時 |
+#### 依頼 id に対応するファイル
+
+| Field      | Type     | Null | Key | Default           | Extra | 説明など                             |
+| ---------- | -------- | ---- | --- | ----------------- | ----- | ------------------------------------ |
+| id         | char(36) | NO   | PRI | NULL              |       | uuid                                 |
+| request_id | char(36) | NO   | MUL | NULL              | index | 依頼への参照**Parents:requests.id**  |
+| file_id    | char(36) | NO   | MUL | NULL              |       | ファイルへの参照**Parents:files.id** |
+| created_at | datetime | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時                       |
 
 ## files
 
-#### 依頼 id に対応するファイル
+#### ファイル
 
 | Field      | Type     | Null | Key | Default           | Extra | 説明など       |
 | ---------- | -------- | ---- | --- | ----------------- | ----- | -------------- |
