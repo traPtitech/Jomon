@@ -102,18 +102,18 @@ jomon の admin (会計の人：申請書更新等の権限)（admin のログ�
 | id         | char(36) | NO   | PRI | NULL    |       | uuid                                 |
 | request_id | char(36) | NO   | MUL | NULL    | index | 依頼への参照**Parents:requests.id**  |
 | file_id    | char(36) | NO   | MUL | NULL    |       | ファイルへの参照**Parents:files.id** |
+| created_at | datetime | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時 |
 
 ## files
 
 #### 依頼 id に対応するファイル
 
-| Field      | Type     | Null | Key | Default           | Extra | 説明など                           |
-| ---------- | -------- | ---- | --- | ----------------- | ----- | ---------------------------------- |
-| id         | char(36) | NO   | PRI | NULL              |       | uuid                               |
-| request_id | char(36) | NO   | MUL | NULL              | index | 依頼への参照**Parents:request.id** |
-| mime_type  | text     | NO   |     | NULL              |       | フォーマット                       |
-| created_at | datetime | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時                     |
-| deleted_at | datetime | YES  |     | NULL              |       | 削除された日時                     |
+| Field      | Type     | Null | Key | Default           | Extra | 説明など       |
+| ---------- | -------- | ---- | --- | ----------------- | ----- | -------------- |
+| id         | char(36) | NO   | PRI | NULL              |       | uuid           |
+| mime_type  | text     | NO   |     | NULL              |       | フォーマット   |
+| created_at | datetime | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時 |
+| deleted_at | datetime | YES  |     | NULL              |       | 削除された日時 |
 
 ## comments
 
