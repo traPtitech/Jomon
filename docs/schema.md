@@ -155,6 +155,7 @@ jomon の admin (会計の人：申請書更新等の権限)（admin のログ�
 | created_at | datetime | NO   |     | CURRENT_TIMESTAMP |       | 登録された日時 |
 | group_id   | char(36) | NO   | MUL | NULL              | index | uuid           |
 | amount     | int(11)  | NO   |     | NULL              |       | 予算額         |
+| comment    | text     | YES  |     | NULL              |       | コメント       |
 
 ## group_users
 
