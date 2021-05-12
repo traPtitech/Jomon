@@ -1,6 +1,0 @@
-README.md
-Dockerfile
-.dockerignore
-node_modules
-dist
-src

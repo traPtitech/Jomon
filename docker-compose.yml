@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   proxy:
     image: nginx
@@ -8,7 +8,6 @@ services:
       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - jomon-server
-      - jomon-client
 
   jomon-server:
     build:
@@ -22,20 +21,11 @@ services:
       MARIADB_HOSTNAME: db
       MARIADB_DATABASE: jomon
     ports:
-      - '1323:1323'
+      - "1323:1323"
     volumes:
-      - './:/src'
+      - "./:/src"
     depends_on:
       - db
-
-  jomon-client:
-    build: ./client
-    volumes:
-      - './client/src:/app/src:cached'
-    tty: true
-    environment:
-    - CHOKIDAR_USEPOLLING=true
-    entrypoint: npm run serve
 
   db:
     image: mariadb:10.3.9
@@ -46,6 +36,6 @@ services:
       TZ: Asia/Tokyo
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
     expose:
-      - '3306'
+      - "3306"
     ports:
-      - '3306:3306'
+      - "3306:3306"
