@@ -7,6 +7,9 @@ import (
 	"gorm.io/gorm"
 )
 
+type CommentRepository interface {
+}
+
 type Comment struct {
 	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
 	RequestID uuid.UUID `gorm:"type:varchar(36);not null;index"`

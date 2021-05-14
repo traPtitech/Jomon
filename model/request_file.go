@@ -6,6 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
+type RequestFileRepository interface {
+}
+
 type RequestFile struct {
 	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
 	RequestID uuid.UUID `gorm:"type:char(36);not null;index"`

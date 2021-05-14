@@ -65,6 +65,9 @@ func (s *Status) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type RequestStatusRepository interface {
+}
+
 type RequestStatus struct {
 	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
 	RequestID uuid.UUID `gorm:"type:char(36);not null;index"`

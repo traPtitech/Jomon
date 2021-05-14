@@ -6,6 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
+type GroupBudgetRepository interface {
+}
+
 type GroupBudget struct {
 	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
 	GroupID   uuid.UUID `gorm:"type:char(36);not null;index"`

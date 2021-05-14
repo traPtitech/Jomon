@@ -7,6 +7,9 @@ import (
 	"gorm.io/gorm"
 )
 
+type GroupRepository interface {
+}
+
 type Group struct {
 	ID          uuid.UUID `gorm:"type:char(36);primaryKey"`
 	Name        string    `gorm:"type:varchar(64);not null"`
