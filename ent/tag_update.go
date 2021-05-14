@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -89,34 +90,26 @@ func (tu *TagUpdate) ClearDeletedAt() *TagUpdate {
 	return tu
 }
 
-// AddRequestTagIDs adds the "request_tag" edge to the RequestTag entity by IDs.
-func (tu *TagUpdate) AddRequestTagIDs(ids ...int) *TagUpdate {
-	tu.mutation.AddRequestTagIDs(ids...)
+// SetRequestTagID sets the "request_tag" edge to the RequestTag entity by ID.
+func (tu *TagUpdate) SetRequestTagID(id int) *TagUpdate {
+	tu.mutation.SetRequestTagID(id)
 	return tu
 }
 
-// AddRequestTag adds the "request_tag" edges to the RequestTag entity.
-func (tu *TagUpdate) AddRequestTag(r ...*RequestTag) *TagUpdate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
-	}
-	return tu.AddRequestTagIDs(ids...)
+// SetRequestTag sets the "request_tag" edge to the RequestTag entity.
+func (tu *TagUpdate) SetRequestTag(r *RequestTag) *TagUpdate {
+	return tu.SetRequestTagID(r.ID)
 }
 
-// AddTransactionTagIDs adds the "transaction_tag" edge to the TransactionTag entity by IDs.
-func (tu *TagUpdate) AddTransactionTagIDs(ids ...int) *TagUpdate {
-	tu.mutation.AddTransactionTagIDs(ids...)
+// SetTransactionTagID sets the "transaction_tag" edge to the TransactionTag entity by ID.
+func (tu *TagUpdate) SetTransactionTagID(id int) *TagUpdate {
+	tu.mutation.SetTransactionTagID(id)
 	return tu
 }
 
-// AddTransactionTag adds the "transaction_tag" edges to the TransactionTag entity.
-func (tu *TagUpdate) AddTransactionTag(t ...*TransactionTag) *TagUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return tu.AddTransactionTagIDs(ids...)
+// SetTransactionTag sets the "transaction_tag" edge to the TransactionTag entity.
+func (tu *TagUpdate) SetTransactionTag(t *TransactionTag) *TagUpdate {
+	return tu.SetTransactionTagID(t.ID)
 }
 
 // Mutation returns the TagMutation object of the builder.
@@ -124,46 +117,16 @@ func (tu *TagUpdate) Mutation() *TagMutation {
 	return tu.mutation
 }
 
-// ClearRequestTag clears all "request_tag" edges to the RequestTag entity.
+// ClearRequestTag clears the "request_tag" edge to the RequestTag entity.
 func (tu *TagUpdate) ClearRequestTag() *TagUpdate {
 	tu.mutation.ClearRequestTag()
 	return tu
 }
 
-// RemoveRequestTagIDs removes the "request_tag" edge to RequestTag entities by IDs.
-func (tu *TagUpdate) RemoveRequestTagIDs(ids ...int) *TagUpdate {
-	tu.mutation.RemoveRequestTagIDs(ids...)
-	return tu
-}
-
-// RemoveRequestTag removes "request_tag" edges to RequestTag entities.
-func (tu *TagUpdate) RemoveRequestTag(r ...*RequestTag) *TagUpdate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
-	}
-	return tu.RemoveRequestTagIDs(ids...)
-}
-
-// ClearTransactionTag clears all "transaction_tag" edges to the TransactionTag entity.
+// ClearTransactionTag clears the "transaction_tag" edge to the TransactionTag entity.
 func (tu *TagUpdate) ClearTransactionTag() *TagUpdate {
 	tu.mutation.ClearTransactionTag()
 	return tu
-}
-
-// RemoveTransactionTagIDs removes the "transaction_tag" edge to TransactionTag entities by IDs.
-func (tu *TagUpdate) RemoveTransactionTagIDs(ids ...int) *TagUpdate {
-	tu.mutation.RemoveTransactionTagIDs(ids...)
-	return tu
-}
-
-// RemoveTransactionTag removes "transaction_tag" edges to TransactionTag entities.
-func (tu *TagUpdate) RemoveTransactionTag(t ...*TransactionTag) *TagUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return tu.RemoveTransactionTagIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -173,12 +136,18 @@ func (tu *TagUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(tu.hooks) == 0 {
+		if err = tu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = tu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*TagMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = tu.check(); err != nil {
+				return 0, err
 			}
 			tu.mutation = mutation
 			affected, err = tu.sqlSave(ctx)
@@ -215,6 +184,17 @@ func (tu *TagUpdate) ExecX(ctx context.Context) {
 	if err := tu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (tu *TagUpdate) check() error {
+	if _, ok := tu.mutation.RequestTagID(); tu.mutation.RequestTagCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"request_tag\"")
+	}
+	if _, ok := tu.mutation.TransactionTagID(); tu.mutation.TransactionTagCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"transaction_tag\"")
+	}
+	return nil
 }
 
 func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -278,8 +258,8 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.RequestTagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
 			Table:   tag.RequestTagTable,
 			Columns: []string{tag.RequestTagColumn},
 			Bidi:    false,
@@ -289,32 +269,13 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 					Column: requesttag.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.RemovedRequestTagIDs(); len(nodes) > 0 && !tu.mutation.RequestTagCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   tag.RequestTagTable,
-			Columns: []string{tag.RequestTagColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: requesttag.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := tu.mutation.RequestTagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
 			Table:   tag.RequestTagTable,
 			Columns: []string{tag.RequestTagColumn},
 			Bidi:    false,
@@ -332,8 +293,8 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.TransactionTagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
 			Table:   tag.TransactionTagTable,
 			Columns: []string{tag.TransactionTagColumn},
 			Bidi:    false,
@@ -343,32 +304,13 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 					Column: transactiontag.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.RemovedTransactionTagIDs(); len(nodes) > 0 && !tu.mutation.TransactionTagCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   tag.TransactionTagTable,
-			Columns: []string{tag.TransactionTagColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: transactiontag.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := tu.mutation.TransactionTagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
 			Table:   tag.TransactionTagTable,
 			Columns: []string{tag.TransactionTagColumn},
 			Bidi:    false,
@@ -463,34 +405,26 @@ func (tuo *TagUpdateOne) ClearDeletedAt() *TagUpdateOne {
 	return tuo
 }
 
-// AddRequestTagIDs adds the "request_tag" edge to the RequestTag entity by IDs.
-func (tuo *TagUpdateOne) AddRequestTagIDs(ids ...int) *TagUpdateOne {
-	tuo.mutation.AddRequestTagIDs(ids...)
+// SetRequestTagID sets the "request_tag" edge to the RequestTag entity by ID.
+func (tuo *TagUpdateOne) SetRequestTagID(id int) *TagUpdateOne {
+	tuo.mutation.SetRequestTagID(id)
 	return tuo
 }
 
-// AddRequestTag adds the "request_tag" edges to the RequestTag entity.
-func (tuo *TagUpdateOne) AddRequestTag(r ...*RequestTag) *TagUpdateOne {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
-	}
-	return tuo.AddRequestTagIDs(ids...)
+// SetRequestTag sets the "request_tag" edge to the RequestTag entity.
+func (tuo *TagUpdateOne) SetRequestTag(r *RequestTag) *TagUpdateOne {
+	return tuo.SetRequestTagID(r.ID)
 }
 
-// AddTransactionTagIDs adds the "transaction_tag" edge to the TransactionTag entity by IDs.
-func (tuo *TagUpdateOne) AddTransactionTagIDs(ids ...int) *TagUpdateOne {
-	tuo.mutation.AddTransactionTagIDs(ids...)
+// SetTransactionTagID sets the "transaction_tag" edge to the TransactionTag entity by ID.
+func (tuo *TagUpdateOne) SetTransactionTagID(id int) *TagUpdateOne {
+	tuo.mutation.SetTransactionTagID(id)
 	return tuo
 }
 
-// AddTransactionTag adds the "transaction_tag" edges to the TransactionTag entity.
-func (tuo *TagUpdateOne) AddTransactionTag(t ...*TransactionTag) *TagUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return tuo.AddTransactionTagIDs(ids...)
+// SetTransactionTag sets the "transaction_tag" edge to the TransactionTag entity.
+func (tuo *TagUpdateOne) SetTransactionTag(t *TransactionTag) *TagUpdateOne {
+	return tuo.SetTransactionTagID(t.ID)
 }
 
 // Mutation returns the TagMutation object of the builder.
@@ -498,46 +432,16 @@ func (tuo *TagUpdateOne) Mutation() *TagMutation {
 	return tuo.mutation
 }
 
-// ClearRequestTag clears all "request_tag" edges to the RequestTag entity.
+// ClearRequestTag clears the "request_tag" edge to the RequestTag entity.
 func (tuo *TagUpdateOne) ClearRequestTag() *TagUpdateOne {
 	tuo.mutation.ClearRequestTag()
 	return tuo
 }
 
-// RemoveRequestTagIDs removes the "request_tag" edge to RequestTag entities by IDs.
-func (tuo *TagUpdateOne) RemoveRequestTagIDs(ids ...int) *TagUpdateOne {
-	tuo.mutation.RemoveRequestTagIDs(ids...)
-	return tuo
-}
-
-// RemoveRequestTag removes "request_tag" edges to RequestTag entities.
-func (tuo *TagUpdateOne) RemoveRequestTag(r ...*RequestTag) *TagUpdateOne {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
-	}
-	return tuo.RemoveRequestTagIDs(ids...)
-}
-
-// ClearTransactionTag clears all "transaction_tag" edges to the TransactionTag entity.
+// ClearTransactionTag clears the "transaction_tag" edge to the TransactionTag entity.
 func (tuo *TagUpdateOne) ClearTransactionTag() *TagUpdateOne {
 	tuo.mutation.ClearTransactionTag()
 	return tuo
-}
-
-// RemoveTransactionTagIDs removes the "transaction_tag" edge to TransactionTag entities by IDs.
-func (tuo *TagUpdateOne) RemoveTransactionTagIDs(ids ...int) *TagUpdateOne {
-	tuo.mutation.RemoveTransactionTagIDs(ids...)
-	return tuo
-}
-
-// RemoveTransactionTag removes "transaction_tag" edges to TransactionTag entities.
-func (tuo *TagUpdateOne) RemoveTransactionTag(t ...*TransactionTag) *TagUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return tuo.RemoveTransactionTagIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -554,12 +458,18 @@ func (tuo *TagUpdateOne) Save(ctx context.Context) (*Tag, error) {
 		node *Tag
 	)
 	if len(tuo.hooks) == 0 {
+		if err = tuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = tuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*TagMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = tuo.check(); err != nil {
+				return nil, err
 			}
 			tuo.mutation = mutation
 			node, err = tuo.sqlSave(ctx)
@@ -596,6 +506,17 @@ func (tuo *TagUpdateOne) ExecX(ctx context.Context) {
 	if err := tuo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (tuo *TagUpdateOne) check() error {
+	if _, ok := tuo.mutation.RequestTagID(); tuo.mutation.RequestTagCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"request_tag\"")
+	}
+	if _, ok := tuo.mutation.TransactionTagID(); tuo.mutation.TransactionTagCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"transaction_tag\"")
+	}
+	return nil
 }
 
 func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
@@ -676,8 +597,8 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 	}
 	if tuo.mutation.RequestTagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
 			Table:   tag.RequestTagTable,
 			Columns: []string{tag.RequestTagColumn},
 			Bidi:    false,
@@ -687,32 +608,13 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 					Column: requesttag.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.RemovedRequestTagIDs(); len(nodes) > 0 && !tuo.mutation.RequestTagCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   tag.RequestTagTable,
-			Columns: []string{tag.RequestTagColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: requesttag.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := tuo.mutation.RequestTagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
 			Table:   tag.RequestTagTable,
 			Columns: []string{tag.RequestTagColumn},
 			Bidi:    false,
@@ -730,8 +632,8 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 	}
 	if tuo.mutation.TransactionTagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
 			Table:   tag.TransactionTagTable,
 			Columns: []string{tag.TransactionTagColumn},
 			Bidi:    false,
@@ -741,32 +643,13 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 					Column: transactiontag.FieldID,
 				},
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.RemovedTransactionTagIDs(); len(nodes) > 0 && !tuo.mutation.TransactionTagCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   tag.TransactionTagTable,
-			Columns: []string{tag.TransactionTagColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: transactiontag.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := tuo.mutation.TransactionTagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
 			Table:   tag.TransactionTagTable,
 			Columns: []string{tag.TransactionTagColumn},
 			Bidi:    false,

@@ -26,11 +26,17 @@ func (Request) Fields() []ent.Field {
 // Edges of the Request.
 func (Request) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("status", RequestStatus.Type),
-		edge.To("target", RequestTarget.Type),
-		edge.To("file", RequestFile.Type),
-		edge.To("tag", RequestTag.Type),
-		edge.To("transaction_detail", TransactionDetail.Type),
-		edge.To("comment", Comment.Type),
+		edge.From("status", RequestStatus.Type).
+			Ref("request"),
+		edge.From("target", RequestTarget.Type).
+			Ref("request"),
+		edge.From("file", RequestFile.Type).
+			Ref("request"),
+		edge.From("tag", RequestTag.Type).
+			Ref("request"),
+		edge.From("transaction_detail", TransactionDetail.Type).
+			Ref("request"),
+		edge.From("comment", Comment.Type).
+			Ref("request"),
 	}
 }

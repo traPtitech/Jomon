@@ -30,6 +30,7 @@ type TransactionQuery struct {
 	// eager-loading edges.
 	withDetail *TransactionDetailQuery
 	withTag    *TransactionTagQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -80,7 +81,7 @@ func (tq *TransactionQuery) QueryDetail() *TransactionDetailQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
 			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, transaction.DetailTable, transaction.DetailColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, transaction.DetailTable, transaction.DetailColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -102,7 +103,7 @@ func (tq *TransactionQuery) QueryTag() *TransactionTagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
 			sqlgraph.To(transactiontag.Table, transactiontag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, transaction.TagTable, transaction.TagColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, transaction.TagTable, transaction.TagColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -385,12 +386,19 @@ func (tq *TransactionQuery) prepareQuery(ctx context.Context) error {
 func (tq *TransactionQuery) sqlAll(ctx context.Context) ([]*Transaction, error) {
 	var (
 		nodes       = []*Transaction{}
+		withFKs     = tq.withFKs
 		_spec       = tq.querySpec()
 		loadedTypes = [2]bool{
 			tq.withDetail != nil,
 			tq.withTag != nil,
 		}
 	)
+	if tq.withDetail != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, transaction.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Transaction{config: tq.config}
 		nodes = append(nodes, node)
@@ -412,30 +420,31 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context) ([]*Transaction, error) 
 	}
 
 	if query := tq.withDetail; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Transaction)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Transaction)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
+			if nodes[i].transaction_detail_transaction == nil {
+				continue
+			}
+			fk := *nodes[i].transaction_detail_transaction
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.withFKs = true
-		query.Where(predicate.TransactionDetail(func(s *sql.Selector) {
-			s.Where(sql.InValues(transaction.DetailColumn, fks...))
-		}))
+		query.Where(transactiondetail.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.transaction_detail
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "transaction_detail" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "transaction_detail" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "transaction_detail_transaction" returned %v`, n.ID)
 			}
-			node.Edges.Detail = n
+			for i := range nodes {
+				nodes[i].Edges.Detail = n
+			}
 		}
 	}
 
@@ -447,7 +456,6 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context) ([]*Transaction, error) 
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.Tag = []*TransactionTag{}
 		}
-		query.withFKs = true
 		query.Where(predicate.TransactionTag(func(s *sql.Selector) {
 			s.Where(sql.InValues(transaction.TagColumn, fks...))
 		}))
@@ -456,13 +464,10 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context) ([]*Transaction, error) 
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.transaction_tag
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "transaction_tag" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			fk := n.TransactionID
+			node, ok := nodeids[fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "transaction_tag" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "transaction_id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.Tag = append(node.Edges.Tag, n)
 		}

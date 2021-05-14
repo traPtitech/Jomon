@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -75,6 +74,14 @@ func (fu *FileUpdate) SetRequestFileID(id int) *FileUpdate {
 	return fu
 }
 
+// SetNillableRequestFileID sets the "request_file" edge to the RequestFile entity by ID if the given value is not nil.
+func (fu *FileUpdate) SetNillableRequestFileID(id *int) *FileUpdate {
+	if id != nil {
+		fu = fu.SetRequestFileID(*id)
+	}
+	return fu
+}
+
 // SetRequestFile sets the "request_file" edge to the RequestFile entity.
 func (fu *FileUpdate) SetRequestFile(r *RequestFile) *FileUpdate {
 	return fu.SetRequestFileID(r.ID)
@@ -98,18 +105,12 @@ func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(fu.hooks) == 0 {
-		if err = fu.check(); err != nil {
-			return 0, err
-		}
 		affected, err = fu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*FileMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = fu.check(); err != nil {
-				return 0, err
 			}
 			fu.mutation = mutation
 			affected, err = fu.sqlSave(ctx)
@@ -146,14 +147,6 @@ func (fu *FileUpdate) ExecX(ctx context.Context) {
 	if err := fu.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (fu *FileUpdate) check() error {
-	if _, ok := fu.mutation.RequestFileID(); fu.mutation.RequestFileCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"request_file\"")
-	}
-	return nil
 }
 
 func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -301,6 +294,14 @@ func (fuo *FileUpdateOne) SetRequestFileID(id int) *FileUpdateOne {
 	return fuo
 }
 
+// SetNillableRequestFileID sets the "request_file" edge to the RequestFile entity by ID if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableRequestFileID(id *int) *FileUpdateOne {
+	if id != nil {
+		fuo = fuo.SetRequestFileID(*id)
+	}
+	return fuo
+}
+
 // SetRequestFile sets the "request_file" edge to the RequestFile entity.
 func (fuo *FileUpdateOne) SetRequestFile(r *RequestFile) *FileUpdateOne {
 	return fuo.SetRequestFileID(r.ID)
@@ -331,18 +332,12 @@ func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 		node *File
 	)
 	if len(fuo.hooks) == 0 {
-		if err = fuo.check(); err != nil {
-			return nil, err
-		}
 		node, err = fuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*FileMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = fuo.check(); err != nil {
-				return nil, err
 			}
 			fuo.mutation = mutation
 			node, err = fuo.sqlSave(ctx)
@@ -379,14 +374,6 @@ func (fuo *FileUpdateOne) ExecX(ctx context.Context) {
 	if err := fuo.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (fuo *FileUpdateOne) check() error {
-	if _, ok := fuo.mutation.RequestFileID(); fuo.mutation.RequestFileCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"request_file\"")
-	}
-	return nil
 }
 
 func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) {

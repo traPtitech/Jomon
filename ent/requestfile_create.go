@@ -22,6 +22,12 @@ type RequestFileCreate struct {
 	hooks    []Hook
 }
 
+// SetRequestID sets the "request_id" field.
+func (rfc *RequestFileCreate) SetRequestID(i int) *RequestFileCreate {
+	rfc.mutation.SetRequestID(i)
+	return rfc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (rfc *RequestFileCreate) SetCreatedAt(t time.Time) *RequestFileCreate {
 	rfc.mutation.SetCreatedAt(t)
@@ -36,12 +42,6 @@ func (rfc *RequestFileCreate) SetNillableCreatedAt(t *time.Time) *RequestFileCre
 	return rfc
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (rfc *RequestFileCreate) SetRequestID(id int) *RequestFileCreate {
-	rfc.mutation.SetRequestID(id)
-	return rfc
-}
-
 // SetRequest sets the "request" edge to the Request entity.
 func (rfc *RequestFileCreate) SetRequest(r *Request) *RequestFileCreate {
 	return rfc.SetRequestID(r.ID)
@@ -50,14 +50,6 @@ func (rfc *RequestFileCreate) SetRequest(r *Request) *RequestFileCreate {
 // SetFileID sets the "file" edge to the File entity by ID.
 func (rfc *RequestFileCreate) SetFileID(id int) *RequestFileCreate {
 	rfc.mutation.SetFileID(id)
-	return rfc
-}
-
-// SetNillableFileID sets the "file" edge to the File entity by ID if the given value is not nil.
-func (rfc *RequestFileCreate) SetNillableFileID(id *int) *RequestFileCreate {
-	if id != nil {
-		rfc = rfc.SetFileID(*id)
-	}
 	return rfc
 }
 
@@ -126,11 +118,17 @@ func (rfc *RequestFileCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (rfc *RequestFileCreate) check() error {
+	if _, ok := rfc.mutation.RequestID(); !ok {
+		return &ValidationError{Name: "request_id", err: errors.New("ent: missing required field \"request_id\"")}
+	}
 	if _, ok := rfc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
 	}
 	if _, ok := rfc.mutation.RequestID(); !ok {
 		return &ValidationError{Name: "request", err: errors.New("ent: missing required edge \"request\"")}
+	}
+	if _, ok := rfc.mutation.FileID(); !ok {
+		return &ValidationError{Name: "file", err: errors.New("ent: missing required edge \"file\"")}
 	}
 	return nil
 }
@@ -170,7 +168,7 @@ func (rfc *RequestFileCreate) createSpec() (*RequestFile, *sqlgraph.CreateSpec) 
 	if nodes := rfc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requestfile.RequestTable,
 			Columns: []string{requestfile.RequestColumn},
 			Bidi:    false,
@@ -184,7 +182,7 @@ func (rfc *RequestFileCreate) createSpec() (*RequestFile, *sqlgraph.CreateSpec) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_file = &nodes[0]
+		_node.RequestID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := rfc.mutation.FileIDs(); len(nodes) > 0 {

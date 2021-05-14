@@ -31,7 +31,13 @@ func (Tag) Fields() []ent.Field {
 // Edges of the Tag.
 func (Tag) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("request_tag", RequestTag.Type),
-		edge.To("transaction_tag", TransactionTag.Type),
+		edge.From("request_tag", RequestTag.Type).
+			Ref("tag").
+			Unique().
+			Required(),
+		edge.From("transaction_tag", TransactionTag.Type).
+			Ref("tag").
+			Unique().
+			Required(),
 	}
 }

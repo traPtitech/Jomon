@@ -17,6 +17,7 @@ type Comment struct {
 func (Comment) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("created_by"),
+		field.Int("request_id"),
 		field.String("comment"),
 		field.Time("created_at").
 			Default(time.Now),
@@ -31,8 +32,8 @@ func (Comment) Fields() []ent.Field {
 // Edges of the Comment.
 func (Comment) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("request", Request.Type).
-			Ref("comment").
+		edge.To("request", Request.Type).
+			Field("request_id").
 			Unique().
 			Required(),
 	}

@@ -21,7 +21,8 @@ type Transaction struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TransactionQuery when eager-loading is set.
-	Edges TransactionEdges `json:"edges"`
+	Edges                          TransactionEdges `json:"edges"`
+	transaction_detail_transaction *int
 }
 
 // TransactionEdges holds the relations/edges for other nodes in the graph.
@@ -67,6 +68,8 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case transaction.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
+		case transaction.ForeignKeys[0]: // transaction_detail_transaction
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Transaction", columns[i])
 		}
@@ -93,6 +96,13 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				t.CreatedAt = value.Time
+			}
+		case transaction.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field transaction_detail_transaction", value)
+			} else if value.Valid {
+				t.transaction_detail_transaction = new(int)
+				*t.transaction_detail_transaction = int(value.Int64)
 			}
 		}
 	}

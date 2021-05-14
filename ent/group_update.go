@@ -363,7 +363,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if gu.mutation.GroupBudgetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.GroupBudgetTable,
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
@@ -379,7 +379,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := gu.mutation.RemovedGroupBudgetIDs(); len(nodes) > 0 && !gu.mutation.GroupBudgetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.GroupBudgetTable,
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
@@ -398,7 +398,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := gu.mutation.GroupBudgetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.GroupBudgetTable,
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
@@ -417,7 +417,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if gu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.UserTable,
 			Columns: []string{group.UserColumn},
 			Bidi:    false,
@@ -433,7 +433,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := gu.mutation.RemovedUserIDs(); len(nodes) > 0 && !gu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.UserTable,
 			Columns: []string{group.UserColumn},
 			Bidi:    false,
@@ -452,7 +452,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := gu.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.UserTable,
 			Columns: []string{group.UserColumn},
 			Bidi:    false,
@@ -471,7 +471,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if gu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.OwnerTable,
 			Columns: []string{group.OwnerColumn},
 			Bidi:    false,
@@ -487,7 +487,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := gu.mutation.RemovedOwnerIDs(); len(nodes) > 0 && !gu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.OwnerTable,
 			Columns: []string{group.OwnerColumn},
 			Bidi:    false,
@@ -506,7 +506,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := gu.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.OwnerTable,
 			Columns: []string{group.OwnerColumn},
 			Bidi:    false,
@@ -898,7 +898,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if guo.mutation.GroupBudgetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.GroupBudgetTable,
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
@@ -914,7 +914,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if nodes := guo.mutation.RemovedGroupBudgetIDs(); len(nodes) > 0 && !guo.mutation.GroupBudgetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.GroupBudgetTable,
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
@@ -933,7 +933,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if nodes := guo.mutation.GroupBudgetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.GroupBudgetTable,
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
@@ -952,7 +952,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if guo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.UserTable,
 			Columns: []string{group.UserColumn},
 			Bidi:    false,
@@ -968,7 +968,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if nodes := guo.mutation.RemovedUserIDs(); len(nodes) > 0 && !guo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.UserTable,
 			Columns: []string{group.UserColumn},
 			Bidi:    false,
@@ -987,7 +987,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if nodes := guo.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.UserTable,
 			Columns: []string{group.UserColumn},
 			Bidi:    false,
@@ -1006,7 +1006,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if guo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.OwnerTable,
 			Columns: []string{group.OwnerColumn},
 			Bidi:    false,
@@ -1022,7 +1022,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if nodes := guo.mutation.RemovedOwnerIDs(); len(nodes) > 0 && !guo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.OwnerTable,
 			Columns: []string{group.OwnerColumn},
 			Bidi:    false,
@@ -1041,7 +1041,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if nodes := guo.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   group.OwnerTable,
 			Columns: []string{group.OwnerColumn},
 			Bidi:    false,

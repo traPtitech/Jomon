@@ -20,19 +20,19 @@ const (
 	// Table holds the table name of the transaction in the database.
 	Table = "transactions"
 	// DetailTable is the table the holds the detail relation/edge.
-	DetailTable = "transaction_details"
+	DetailTable = "transactions"
 	// DetailInverseTable is the table name for the TransactionDetail entity.
 	// It exists in this package in order to avoid circular dependency with the "transactiondetail" package.
 	DetailInverseTable = "transaction_details"
 	// DetailColumn is the table column denoting the detail relation/edge.
-	DetailColumn = "transaction_detail"
+	DetailColumn = "transaction_detail_transaction"
 	// TagTable is the table the holds the tag relation/edge.
 	TagTable = "transaction_tags"
 	// TagInverseTable is the table name for the TransactionTag entity.
 	// It exists in this package in order to avoid circular dependency with the "transactiontag" package.
 	TagInverseTable = "transaction_tags"
 	// TagColumn is the table column denoting the tag relation/edge.
-	TagColumn = "transaction_tag"
+	TagColumn = "transaction_id"
 )
 
 // Columns holds all SQL columns for transaction fields.
@@ -41,10 +41,21 @@ var Columns = []string{
 	FieldCreatedAt,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "transactions"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"transaction_detail_transaction",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

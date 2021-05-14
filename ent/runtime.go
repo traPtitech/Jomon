@@ -20,6 +20,7 @@ import (
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
+	"github.com/traPtitech/Jomon/ent/transactiontag"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -29,11 +30,11 @@ func init() {
 	commentFields := schema.Comment{}.Fields()
 	_ = commentFields
 	// commentDescCreatedAt is the schema descriptor for created_at field.
-	commentDescCreatedAt := commentFields[2].Descriptor()
+	commentDescCreatedAt := commentFields[3].Descriptor()
 	// comment.DefaultCreatedAt holds the default value on creation for the created_at field.
 	comment.DefaultCreatedAt = commentDescCreatedAt.Default.(func() time.Time)
 	// commentDescUpdatedAt is the schema descriptor for updated_at field.
-	commentDescUpdatedAt := commentFields[3].Descriptor()
+	commentDescUpdatedAt := commentFields[4].Descriptor()
 	// comment.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	comment.DefaultUpdatedAt = commentDescUpdatedAt.Default.(func() time.Time)
 	fileFields := schema.File{}.Fields()
@@ -55,19 +56,19 @@ func init() {
 	groupbudgetFields := schema.GroupBudget{}.Fields()
 	_ = groupbudgetFields
 	// groupbudgetDescCreatedAt is the schema descriptor for created_at field.
-	groupbudgetDescCreatedAt := groupbudgetFields[2].Descriptor()
+	groupbudgetDescCreatedAt := groupbudgetFields[3].Descriptor()
 	// groupbudget.DefaultCreatedAt holds the default value on creation for the created_at field.
 	groupbudget.DefaultCreatedAt = groupbudgetDescCreatedAt.Default.(func() time.Time)
 	groupownerFields := schema.GroupOwner{}.Fields()
 	_ = groupownerFields
 	// groupownerDescCreatedAt is the schema descriptor for created_at field.
-	groupownerDescCreatedAt := groupownerFields[1].Descriptor()
+	groupownerDescCreatedAt := groupownerFields[2].Descriptor()
 	// groupowner.DefaultCreatedAt holds the default value on creation for the created_at field.
 	groupowner.DefaultCreatedAt = groupownerDescCreatedAt.Default.(func() time.Time)
 	groupuserFields := schema.GroupUser{}.Fields()
 	_ = groupuserFields
 	// groupuserDescCreatedAt is the schema descriptor for created_at field.
-	groupuserDescCreatedAt := groupuserFields[1].Descriptor()
+	groupuserDescCreatedAt := groupuserFields[2].Descriptor()
 	// groupuser.DefaultCreatedAt holds the default value on creation for the created_at field.
 	groupuser.DefaultCreatedAt = groupuserDescCreatedAt.Default.(func() time.Time)
 	requestFields := schema.Request{}.Fields()
@@ -79,25 +80,25 @@ func init() {
 	requestfileFields := schema.RequestFile{}.Fields()
 	_ = requestfileFields
 	// requestfileDescCreatedAt is the schema descriptor for created_at field.
-	requestfileDescCreatedAt := requestfileFields[0].Descriptor()
+	requestfileDescCreatedAt := requestfileFields[1].Descriptor()
 	// requestfile.DefaultCreatedAt holds the default value on creation for the created_at field.
 	requestfile.DefaultCreatedAt = requestfileDescCreatedAt.Default.(func() time.Time)
 	requeststatusFields := schema.RequestStatus{}.Fields()
 	_ = requeststatusFields
 	// requeststatusDescCreatedAt is the schema descriptor for created_at field.
-	requeststatusDescCreatedAt := requeststatusFields[3].Descriptor()
+	requeststatusDescCreatedAt := requeststatusFields[4].Descriptor()
 	// requeststatus.DefaultCreatedAt holds the default value on creation for the created_at field.
 	requeststatus.DefaultCreatedAt = requeststatusDescCreatedAt.Default.(func() time.Time)
 	requesttagFields := schema.RequestTag{}.Fields()
 	_ = requesttagFields
 	// requesttagDescCreatedAt is the schema descriptor for created_at field.
-	requesttagDescCreatedAt := requesttagFields[0].Descriptor()
+	requesttagDescCreatedAt := requesttagFields[1].Descriptor()
 	// requesttag.DefaultCreatedAt holds the default value on creation for the created_at field.
 	requesttag.DefaultCreatedAt = requesttagDescCreatedAt.Default.(func() time.Time)
 	requesttargetFields := schema.RequestTarget{}.Fields()
 	_ = requesttargetFields
 	// requesttargetDescCreatedAt is the schema descriptor for created_at field.
-	requesttargetDescCreatedAt := requesttargetFields[2].Descriptor()
+	requesttargetDescCreatedAt := requesttargetFields[3].Descriptor()
 	// requesttarget.DefaultCreatedAt holds the default value on creation for the created_at field.
 	requesttarget.DefaultCreatedAt = requesttargetDescCreatedAt.Default.(func() time.Time)
 	tagFields := schema.Tag{}.Fields()
@@ -123,11 +124,17 @@ func init() {
 	// transactiondetail.DefaultAmount holds the default value on creation for the amount field.
 	transactiondetail.DefaultAmount = transactiondetailDescAmount.Default.(int)
 	// transactiondetailDescTarget is the schema descriptor for target field.
-	transactiondetailDescTarget := transactiondetailFields[1].Descriptor()
+	transactiondetailDescTarget := transactiondetailFields[3].Descriptor()
 	// transactiondetail.DefaultTarget holds the default value on creation for the target field.
 	transactiondetail.DefaultTarget = transactiondetailDescTarget.Default.(string)
 	// transactiondetailDescCreatedAt is the schema descriptor for created_at field.
-	transactiondetailDescCreatedAt := transactiondetailFields[2].Descriptor()
+	transactiondetailDescCreatedAt := transactiondetailFields[4].Descriptor()
 	// transactiondetail.DefaultCreatedAt holds the default value on creation for the created_at field.
 	transactiondetail.DefaultCreatedAt = transactiondetailDescCreatedAt.Default.(func() time.Time)
+	transactiontagFields := schema.TransactionTag{}.Fields()
+	_ = transactiontagFields
+	// transactiontagDescCreatedAt is the schema descriptor for created_at field.
+	transactiontagDescCreatedAt := transactiontagFields[1].Descriptor()
+	// transactiontag.DefaultCreatedAt holds the default value on creation for the created_at field.
+	transactiontag.DefaultCreatedAt = transactiontagDescCreatedAt.Default.(func() time.Time)
 }

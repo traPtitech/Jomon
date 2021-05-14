@@ -18,12 +18,13 @@ type RequestFile struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// RequestID holds the value of the "request_id" field.
+	RequestID int `json:"request_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RequestFileQuery when eager-loading is set.
-	Edges        RequestFileEdges `json:"edges"`
-	request_file *int
+	Edges RequestFileEdges `json:"edges"`
 }
 
 // RequestFileEdges holds the relations/edges for other nodes in the graph.
@@ -70,12 +71,10 @@ func (*RequestFile) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case requestfile.FieldID:
+		case requestfile.FieldID, requestfile.FieldRequestID:
 			values[i] = new(sql.NullInt64)
 		case requestfile.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case requestfile.ForeignKeys[0]: // request_file
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type RequestFile", columns[i])
 		}
@@ -97,18 +96,17 @@ func (rf *RequestFile) assignValues(columns []string, values []interface{}) erro
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			rf.ID = int(value.Int64)
+		case requestfile.FieldRequestID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field request_id", values[i])
+			} else if value.Valid {
+				rf.RequestID = int(value.Int64)
+			}
 		case requestfile.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				rf.CreatedAt = value.Time
-			}
-		case requestfile.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field request_file", value)
-			} else if value.Valid {
-				rf.request_file = new(int)
-				*rf.request_file = int(value.Int64)
 			}
 		}
 	}
@@ -148,6 +146,8 @@ func (rf *RequestFile) String() string {
 	var builder strings.Builder
 	builder.WriteString("RequestFile(")
 	builder.WriteString(fmt.Sprintf("id=%v", rf.ID))
+	builder.WriteString(", request_id=")
+	builder.WriteString(fmt.Sprintf("%v", rf.RequestID))
 	builder.WriteString(", created_at=")
 	builder.WriteString(rf.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')

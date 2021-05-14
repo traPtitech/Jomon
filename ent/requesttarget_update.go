@@ -35,6 +35,13 @@ func (rtu *RequestTargetUpdate) SetTarget(s string) *RequestTargetUpdate {
 	return rtu
 }
 
+// SetRequestID sets the "request_id" field.
+func (rtu *RequestTargetUpdate) SetRequestID(i int) *RequestTargetUpdate {
+	rtu.mutation.ResetRequestID()
+	rtu.mutation.SetRequestID(i)
+	return rtu
+}
+
 // SetPaidAt sets the "paid_at" field.
 func (rtu *RequestTargetUpdate) SetPaidAt(t time.Time) *RequestTargetUpdate {
 	rtu.mutation.SetPaidAt(t)
@@ -66,12 +73,6 @@ func (rtu *RequestTargetUpdate) SetNillableCreatedAt(t *time.Time) *RequestTarge
 	if t != nil {
 		rtu.SetCreatedAt(*t)
 	}
-	return rtu
-}
-
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (rtu *RequestTargetUpdate) SetRequestID(id int) *RequestTargetUpdate {
-	rtu.mutation.SetRequestID(id)
 	return rtu
 }
 
@@ -204,7 +205,7 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	if rtu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requesttarget.RequestTable,
 			Columns: []string{requesttarget.RequestColumn},
 			Bidi:    false,
@@ -220,7 +221,7 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	if nodes := rtu.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requesttarget.RequestTable,
 			Columns: []string{requesttarget.RequestColumn},
 			Bidi:    false,
@@ -261,6 +262,13 @@ func (rtuo *RequestTargetUpdateOne) SetTarget(s string) *RequestTargetUpdateOne 
 	return rtuo
 }
 
+// SetRequestID sets the "request_id" field.
+func (rtuo *RequestTargetUpdateOne) SetRequestID(i int) *RequestTargetUpdateOne {
+	rtuo.mutation.ResetRequestID()
+	rtuo.mutation.SetRequestID(i)
+	return rtuo
+}
+
 // SetPaidAt sets the "paid_at" field.
 func (rtuo *RequestTargetUpdateOne) SetPaidAt(t time.Time) *RequestTargetUpdateOne {
 	rtuo.mutation.SetPaidAt(t)
@@ -292,12 +300,6 @@ func (rtuo *RequestTargetUpdateOne) SetNillableCreatedAt(t *time.Time) *RequestT
 	if t != nil {
 		rtuo.SetCreatedAt(*t)
 	}
-	return rtuo
-}
-
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (rtuo *RequestTargetUpdateOne) SetRequestID(id int) *RequestTargetUpdateOne {
-	rtuo.mutation.SetRequestID(id)
 	return rtuo
 }
 
@@ -454,7 +456,7 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 	if rtuo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requesttarget.RequestTable,
 			Columns: []string{requesttarget.RequestColumn},
 			Bidi:    false,
@@ -470,7 +472,7 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 	if nodes := rtuo.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requesttarget.RequestTable,
 			Columns: []string{requesttarget.RequestColumn},
 			Bidi:    false,

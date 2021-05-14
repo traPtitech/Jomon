@@ -188,7 +188,7 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if tu.mutation.DetailCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   transaction.DetailTable,
 			Columns: []string{transaction.DetailColumn},
 			Bidi:    false,
@@ -204,7 +204,7 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := tu.mutation.DetailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   transaction.DetailTable,
 			Columns: []string{transaction.DetailColumn},
 			Bidi:    false,
@@ -223,7 +223,7 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if tu.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   transaction.TagTable,
 			Columns: []string{transaction.TagColumn},
 			Bidi:    false,
@@ -239,7 +239,7 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := tu.mutation.RemovedTagIDs(); len(nodes) > 0 && !tu.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   transaction.TagTable,
 			Columns: []string{transaction.TagColumn},
 			Bidi:    false,
@@ -258,7 +258,7 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := tu.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   transaction.TagTable,
 			Columns: []string{transaction.TagColumn},
 			Bidi:    false,
@@ -476,7 +476,7 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	if tuo.mutation.DetailCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   transaction.DetailTable,
 			Columns: []string{transaction.DetailColumn},
 			Bidi:    false,
@@ -492,7 +492,7 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	if nodes := tuo.mutation.DetailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   transaction.DetailTable,
 			Columns: []string{transaction.DetailColumn},
 			Bidi:    false,
@@ -511,7 +511,7 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	if tuo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   transaction.TagTable,
 			Columns: []string{transaction.TagColumn},
 			Bidi:    false,
@@ -527,7 +527,7 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	if nodes := tuo.mutation.RemovedTagIDs(); len(nodes) > 0 && !tuo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   transaction.TagTable,
 			Columns: []string{transaction.TagColumn},
 			Bidi:    false,
@@ -546,7 +546,7 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	if nodes := tuo.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   transaction.TagTable,
 			Columns: []string{transaction.TagColumn},
 			Bidi:    false,

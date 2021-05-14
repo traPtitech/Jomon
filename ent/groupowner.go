@@ -19,12 +19,13 @@ type GroupOwner struct {
 	ID int `json:"id,omitempty"`
 	// Owner holds the value of the "owner" field.
 	Owner string `json:"owner,omitempty"`
+	// GroupID holds the value of the "group_id" field.
+	GroupID int `json:"group_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupOwnerQuery when eager-loading is set.
-	Edges       GroupOwnerEdges `json:"edges"`
-	group_owner *int
+	Edges GroupOwnerEdges `json:"edges"`
 }
 
 // GroupOwnerEdges holds the relations/edges for other nodes in the graph.
@@ -55,14 +56,12 @@ func (*GroupOwner) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case groupowner.FieldID:
+		case groupowner.FieldID, groupowner.FieldGroupID:
 			values[i] = new(sql.NullInt64)
 		case groupowner.FieldOwner:
 			values[i] = new(sql.NullString)
 		case groupowner.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case groupowner.ForeignKeys[0]: // group_owner
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type GroupOwner", columns[i])
 		}
@@ -90,18 +89,17 @@ func (_go *GroupOwner) assignValues(columns []string, values []interface{}) erro
 			} else if value.Valid {
 				_go.Owner = value.String
 			}
+		case groupowner.FieldGroupID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field group_id", values[i])
+			} else if value.Valid {
+				_go.GroupID = int(value.Int64)
+			}
 		case groupowner.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_go.CreatedAt = value.Time
-			}
-		case groupowner.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field group_owner", value)
-			} else if value.Valid {
-				_go.group_owner = new(int)
-				*_go.group_owner = int(value.Int64)
 			}
 		}
 	}
@@ -138,6 +136,8 @@ func (_go *GroupOwner) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", _go.ID))
 	builder.WriteString(", owner=")
 	builder.WriteString(_go.Owner)
+	builder.WriteString(", group_id=")
+	builder.WriteString(fmt.Sprintf("%v", _go.GroupID))
 	builder.WriteString(", created_at=")
 	builder.WriteString(_go.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')

@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -32,6 +33,34 @@ func (tdc *TransactionDetailCreate) SetAmount(i int) *TransactionDetailCreate {
 func (tdc *TransactionDetailCreate) SetNillableAmount(i *int) *TransactionDetailCreate {
 	if i != nil {
 		tdc.SetAmount(*i)
+	}
+	return tdc
+}
+
+// SetRequestID sets the "request_id" field.
+func (tdc *TransactionDetailCreate) SetRequestID(i int) *TransactionDetailCreate {
+	tdc.mutation.SetRequestID(i)
+	return tdc
+}
+
+// SetNillableRequestID sets the "request_id" field if the given value is not nil.
+func (tdc *TransactionDetailCreate) SetNillableRequestID(i *int) *TransactionDetailCreate {
+	if i != nil {
+		tdc.SetRequestID(*i)
+	}
+	return tdc
+}
+
+// SetGroupID sets the "group_id" field.
+func (tdc *TransactionDetailCreate) SetGroupID(i int) *TransactionDetailCreate {
+	tdc.mutation.SetGroupID(i)
+	return tdc
+}
+
+// SetNillableGroupID sets the "group_id" field if the given value is not nil.
+func (tdc *TransactionDetailCreate) SetNillableGroupID(i *int) *TransactionDetailCreate {
+	if i != nil {
+		tdc.SetGroupID(*i)
 	}
 	return tdc
 }
@@ -75,23 +104,14 @@ func (tdc *TransactionDetailCreate) SetTransaction(t *Transaction) *TransactionD
 	return tdc.SetTransactionID(t.ID)
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (tdc *TransactionDetailCreate) SetRequestID(id int) *TransactionDetailCreate {
-	tdc.mutation.SetRequestID(id)
-	return tdc
-}
-
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (tdc *TransactionDetailCreate) SetNillableRequestID(id *int) *TransactionDetailCreate {
-	if id != nil {
-		tdc = tdc.SetRequestID(*id)
-	}
-	return tdc
-}
-
 // SetRequest sets the "request" edge to the Request entity.
 func (tdc *TransactionDetailCreate) SetRequest(r *Request) *TransactionDetailCreate {
 	return tdc.SetRequestID(r.ID)
+}
+
+// SetGroup sets the "group" edge to the Group entity.
+func (tdc *TransactionDetailCreate) SetGroup(g *Group) *TransactionDetailCreate {
+	return tdc.SetGroupID(g.ID)
 }
 
 // Mutation returns the TransactionDetailMutation object of the builder.
@@ -228,7 +248,7 @@ func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.
 	if nodes := tdc.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   transactiondetail.TransactionTable,
 			Columns: []string{transactiondetail.TransactionColumn},
 			Bidi:    false,
@@ -242,13 +262,12 @@ func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.transaction_detail = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tdc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   transactiondetail.RequestTable,
 			Columns: []string{transactiondetail.RequestColumn},
 			Bidi:    false,
@@ -262,7 +281,27 @@ func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_transaction_detail = &nodes[0]
+		_node.RequestID = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tdc.mutation.GroupIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   transactiondetail.GroupTable,
+			Columns: []string{transactiondetail.GroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.GroupID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -598,7 +598,7 @@ func HasRequestTag() predicate.Tag {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RequestTagTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, RequestTagTable, RequestTagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, RequestTagTable, RequestTagColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -610,7 +610,7 @@ func HasRequestTagWith(preds ...predicate.RequestTag) predicate.Tag {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RequestTagInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, RequestTagTable, RequestTagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, RequestTagTable, RequestTagColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -626,7 +626,7 @@ func HasTransactionTag() predicate.Tag {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TransactionTagTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TransactionTagTable, TransactionTagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, TransactionTagTable, TransactionTagColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -638,7 +638,7 @@ func HasTransactionTagWith(preds ...predicate.TransactionTag) predicate.Tag {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TransactionTagInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TransactionTagTable, TransactionTagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, TransactionTagTable, TransactionTagColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

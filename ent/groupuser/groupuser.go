@@ -13,6 +13,8 @@ const (
 	FieldID = "id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// FieldGroupID holds the string denoting the group_id field in the database.
+	FieldGroupID = "group_id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// EdgeGroup holds the string denoting the group edge name in mutations.
@@ -25,31 +27,21 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	GroupInverseTable = "groups"
 	// GroupColumn is the table column denoting the group relation/edge.
-	GroupColumn = "group_user"
+	GroupColumn = "group_id"
 )
 
 // Columns holds all SQL columns for groupuser fields.
 var Columns = []string{
 	FieldID,
 	FieldUserID,
+	FieldGroupID,
 	FieldCreatedAt,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "group_users"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"group_user",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

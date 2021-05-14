@@ -17,6 +17,7 @@ type GroupBudget struct {
 func (GroupBudget) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("amount"),
+		field.Int("group_id"),
 		field.Text("comment").
 			Nillable().
 			Optional(),
@@ -28,8 +29,8 @@ func (GroupBudget) Fields() []ent.Field {
 // Edges of the GroupBudget.
 func (GroupBudget) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("group", Group.Type).
-			Ref("group_budget").
+		edge.To("group", Group.Type).
+			Field("group_id").
 			Unique().
 			Required(),
 	}

@@ -27,6 +27,12 @@ func (cc *CommentCreate) SetCreatedBy(s string) *CommentCreate {
 	return cc
 }
 
+// SetRequestID sets the "request_id" field.
+func (cc *CommentCreate) SetRequestID(i int) *CommentCreate {
+	cc.mutation.SetRequestID(i)
+	return cc
+}
+
 // SetComment sets the "comment" field.
 func (cc *CommentCreate) SetComment(s string) *CommentCreate {
 	cc.mutation.SetComment(s)
@@ -72,12 +78,6 @@ func (cc *CommentCreate) SetNillableDeletedAt(t *time.Time) *CommentCreate {
 	if t != nil {
 		cc.SetDeletedAt(*t)
 	}
-	return cc
-}
-
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (cc *CommentCreate) SetRequestID(id int) *CommentCreate {
-	cc.mutation.SetRequestID(id)
 	return cc
 }
 
@@ -152,6 +152,9 @@ func (cc *CommentCreate) defaults() {
 func (cc *CommentCreate) check() error {
 	if _, ok := cc.mutation.CreatedBy(); !ok {
 		return &ValidationError{Name: "created_by", err: errors.New("ent: missing required field \"created_by\"")}
+	}
+	if _, ok := cc.mutation.RequestID(); !ok {
+		return &ValidationError{Name: "request_id", err: errors.New("ent: missing required field \"request_id\"")}
 	}
 	if _, ok := cc.mutation.Comment(); !ok {
 		return &ValidationError{Name: "comment", err: errors.New("ent: missing required field \"comment\"")}
@@ -235,7 +238,7 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 	if nodes := cc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   comment.RequestTable,
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,
@@ -249,7 +252,7 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_comment = &nodes[0]
+		_node.RequestID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

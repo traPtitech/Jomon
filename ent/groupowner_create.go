@@ -27,6 +27,12 @@ func (goc *GroupOwnerCreate) SetOwner(s string) *GroupOwnerCreate {
 	return goc
 }
 
+// SetGroupID sets the "group_id" field.
+func (goc *GroupOwnerCreate) SetGroupID(i int) *GroupOwnerCreate {
+	goc.mutation.SetGroupID(i)
+	return goc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (goc *GroupOwnerCreate) SetCreatedAt(t time.Time) *GroupOwnerCreate {
 	goc.mutation.SetCreatedAt(t)
@@ -38,12 +44,6 @@ func (goc *GroupOwnerCreate) SetNillableCreatedAt(t *time.Time) *GroupOwnerCreat
 	if t != nil {
 		goc.SetCreatedAt(*t)
 	}
-	return goc
-}
-
-// SetGroupID sets the "group" edge to the Group entity by ID.
-func (goc *GroupOwnerCreate) SetGroupID(id int) *GroupOwnerCreate {
-	goc.mutation.SetGroupID(id)
 	return goc
 }
 
@@ -115,6 +115,9 @@ func (goc *GroupOwnerCreate) check() error {
 	if _, ok := goc.mutation.Owner(); !ok {
 		return &ValidationError{Name: "owner", err: errors.New("ent: missing required field \"owner\"")}
 	}
+	if _, ok := goc.mutation.GroupID(); !ok {
+		return &ValidationError{Name: "group_id", err: errors.New("ent: missing required field \"group_id\"")}
+	}
 	if _, ok := goc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
 	}
@@ -167,7 +170,7 @@ func (goc *GroupOwnerCreate) createSpec() (*GroupOwner, *sqlgraph.CreateSpec) {
 	if nodes := goc.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   groupowner.GroupTable,
 			Columns: []string{groupowner.GroupColumn},
 			Bidi:    false,
@@ -181,7 +184,7 @@ func (goc *GroupOwnerCreate) createSpec() (*GroupOwner, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.group_owner = &nodes[0]
+		_node.GroupID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -695,7 +695,7 @@ func HasGroupBudget() predicate.Group {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GroupBudgetTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, GroupBudgetTable, GroupBudgetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, GroupBudgetTable, GroupBudgetColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -707,7 +707,7 @@ func HasGroupBudgetWith(preds ...predicate.GroupBudget) predicate.Group {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GroupBudgetInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, GroupBudgetTable, GroupBudgetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, GroupBudgetTable, GroupBudgetColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -723,7 +723,7 @@ func HasUser() predicate.Group {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(UserTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, UserTable, UserColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -735,7 +735,7 @@ func HasUserWith(preds ...predicate.GroupUser) predicate.Group {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(UserInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, UserTable, UserColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -751,7 +751,7 @@ func HasOwner() predicate.Group {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(OwnerTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, OwnerTable, OwnerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, OwnerTable, OwnerColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -763,7 +763,7 @@ func HasOwnerWith(preds ...predicate.GroupOwner) predicate.Group {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(OwnerInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, OwnerTable, OwnerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, OwnerTable, OwnerColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -18,13 +18,13 @@ type RequestTag struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// RequestID holds the value of the "request_id" field.
+	RequestID int `json:"request_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RequestTagQuery when eager-loading is set.
-	Edges           RequestTagEdges `json:"edges"`
-	request_tag     *int
-	tag_request_tag *int
+	Edges RequestTagEdges `json:"edges"`
 }
 
 // RequestTagEdges holds the relations/edges for other nodes in the graph.
@@ -71,14 +71,10 @@ func (*RequestTag) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case requesttag.FieldID:
+		case requesttag.FieldID, requesttag.FieldRequestID:
 			values[i] = new(sql.NullInt64)
 		case requesttag.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case requesttag.ForeignKeys[0]: // request_tag
-			values[i] = new(sql.NullInt64)
-		case requesttag.ForeignKeys[1]: // tag_request_tag
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type RequestTag", columns[i])
 		}
@@ -100,25 +96,17 @@ func (rt *RequestTag) assignValues(columns []string, values []interface{}) error
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			rt.ID = int(value.Int64)
+		case requesttag.FieldRequestID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field request_id", values[i])
+			} else if value.Valid {
+				rt.RequestID = int(value.Int64)
+			}
 		case requesttag.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				rt.CreatedAt = value.Time
-			}
-		case requesttag.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field request_tag", value)
-			} else if value.Valid {
-				rt.request_tag = new(int)
-				*rt.request_tag = int(value.Int64)
-			}
-		case requesttag.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field tag_request_tag", value)
-			} else if value.Valid {
-				rt.tag_request_tag = new(int)
-				*rt.tag_request_tag = int(value.Int64)
 			}
 		}
 	}
@@ -158,6 +146,8 @@ func (rt *RequestTag) String() string {
 	var builder strings.Builder
 	builder.WriteString("RequestTag(")
 	builder.WriteString(fmt.Sprintf("id=%v", rt.ID))
+	builder.WriteString(", request_id=")
+	builder.WriteString(fmt.Sprintf("%v", rt.RequestID))
 	builder.WriteString(", created_at=")
 	builder.WriteString(rt.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')

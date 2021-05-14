@@ -18,6 +18,12 @@ func (TransactionDetail) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("amount").
 			Default(0),
+		field.Int("request_id").
+			Nillable().
+			Optional(),
+		field.Int("group_id").
+			Nillable().
+			Optional(),
 		field.String("target").
 			Default(""),
 		field.Time("created_at").
@@ -28,15 +34,14 @@ func (TransactionDetail) Fields() []ent.Field {
 // Edges of the TransactionDetail.
 func (TransactionDetail) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("transaction", Transaction.Type).
-			Ref("detail").
+		edge.To("transaction", Transaction.Type).
 			Unique().
 			Required(),
-		edge.From("request", Request.Type).
-			Ref("transaction_detail").
+		edge.To("request", Request.Type).
+			Field("request_id").
 			Unique(),
-		//edge.From("group", Group.Type).
-		//	Ref("tag").
-		//	Unique(),
+		edge.To("group", Group.Type).
+			Field("group_id").
+			Unique(),
 	}
 }

@@ -88,7 +88,7 @@ func (rq *RequestQuery) QueryStatus() *RequestStatusQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(requeststatus.Table, requeststatus.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.StatusTable, request.StatusColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, request.StatusTable, request.StatusColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -110,7 +110,7 @@ func (rq *RequestQuery) QueryTarget() *RequestTargetQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(requesttarget.Table, requesttarget.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.TargetTable, request.TargetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, request.TargetTable, request.TargetColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -132,7 +132,7 @@ func (rq *RequestQuery) QueryFile() *RequestFileQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(requestfile.Table, requestfile.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.FileTable, request.FileColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, request.FileTable, request.FileColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -154,7 +154,7 @@ func (rq *RequestQuery) QueryTag() *RequestTagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(requesttag.Table, requesttag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.TagTable, request.TagColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, request.TagTable, request.TagColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -176,7 +176,7 @@ func (rq *RequestQuery) QueryTransactionDetail() *TransactionDetailQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.TransactionDetailTable, request.TransactionDetailColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, request.TransactionDetailTable, request.TransactionDetailColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -198,7 +198,7 @@ func (rq *RequestQuery) QueryComment() *CommentQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(comment.Table, comment.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.CommentTable, request.CommentColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, request.CommentTable, request.CommentColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -567,7 +567,6 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.Status = []*RequestStatus{}
 		}
-		query.withFKs = true
 		query.Where(predicate.RequestStatus(func(s *sql.Selector) {
 			s.Where(sql.InValues(request.StatusColumn, fks...))
 		}))
@@ -576,13 +575,10 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.request_status
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_status" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			fk := n.RequestID
+			node, ok := nodeids[fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_status" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.Status = append(node.Edges.Status, n)
 		}
@@ -596,7 +592,6 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.Target = []*RequestTarget{}
 		}
-		query.withFKs = true
 		query.Where(predicate.RequestTarget(func(s *sql.Selector) {
 			s.Where(sql.InValues(request.TargetColumn, fks...))
 		}))
@@ -605,13 +600,10 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.request_target
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_target" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			fk := n.RequestID
+			node, ok := nodeids[fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_target" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.Target = append(node.Edges.Target, n)
 		}
@@ -625,7 +617,6 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.File = []*RequestFile{}
 		}
-		query.withFKs = true
 		query.Where(predicate.RequestFile(func(s *sql.Selector) {
 			s.Where(sql.InValues(request.FileColumn, fks...))
 		}))
@@ -634,13 +625,10 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.request_file
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_file" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			fk := n.RequestID
+			node, ok := nodeids[fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_file" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.File = append(node.Edges.File, n)
 		}
@@ -654,7 +642,6 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.Tag = []*RequestTag{}
 		}
-		query.withFKs = true
 		query.Where(predicate.RequestTag(func(s *sql.Selector) {
 			s.Where(sql.InValues(request.TagColumn, fks...))
 		}))
@@ -663,13 +650,10 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.request_tag
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_tag" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			fk := n.RequestID
+			node, ok := nodeids[fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_tag" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.Tag = append(node.Edges.Tag, n)
 		}
@@ -683,7 +667,6 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.TransactionDetail = []*TransactionDetail{}
 		}
-		query.withFKs = true
 		query.Where(predicate.TransactionDetail(func(s *sql.Selector) {
 			s.Where(sql.InValues(request.TransactionDetailColumn, fks...))
 		}))
@@ -692,13 +675,13 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.request_transaction_detail
+			fk := n.RequestID
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_transaction_detail" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "request_id" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_transaction_detail" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.TransactionDetail = append(node.Edges.TransactionDetail, n)
 		}
@@ -712,7 +695,6 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.Comment = []*Comment{}
 		}
-		query.withFKs = true
 		query.Where(predicate.Comment(func(s *sql.Selector) {
 			s.Where(sql.InValues(request.CommentColumn, fks...))
 		}))
@@ -721,13 +703,10 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.request_comment
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_comment" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			fk := n.RequestID
+			node, ok := nodeids[fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_comment" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.Comment = append(node.Edges.Comment, n)
 		}

@@ -477,6 +477,42 @@ func (m *CommentMutation) ResetCreatedBy() {
 	m.created_by = nil
 }
 
+// SetRequestID sets the "request_id" field.
+func (m *CommentMutation) SetRequestID(i int) {
+	m.request = &i
+}
+
+// RequestID returns the value of the "request_id" field in the mutation.
+func (m *CommentMutation) RequestID() (r int, exists bool) {
+	v := m.request
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestID returns the old "request_id" field's value of the Comment entity.
+// If the Comment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CommentMutation) OldRequestID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldRequestID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldRequestID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestID: %w", err)
+	}
+	return oldValue.RequestID, nil
+}
+
+// ResetRequestID resets all changes to the "request_id" field.
+func (m *CommentMutation) ResetRequestID() {
+	m.request = nil
+}
+
 // SetComment sets the "comment" field.
 func (m *CommentMutation) SetComment(s string) {
 	m.comment = &s
@@ -634,11 +670,6 @@ func (m *CommentMutation) ResetDeletedAt() {
 	delete(m.clearedFields, comment.FieldDeletedAt)
 }
 
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *CommentMutation) SetRequestID(id int) {
-	m.request = &id
-}
-
 // ClearRequest clears the "request" edge to the Request entity.
 func (m *CommentMutation) ClearRequest() {
 	m.clearedrequest = true
@@ -647,14 +678,6 @@ func (m *CommentMutation) ClearRequest() {
 // RequestCleared reports if the "request" edge to the Request entity was cleared.
 func (m *CommentMutation) RequestCleared() bool {
 	return m.clearedrequest
-}
-
-// RequestID returns the "request" edge ID in the mutation.
-func (m *CommentMutation) RequestID() (id int, exists bool) {
-	if m.request != nil {
-		return *m.request, true
-	}
-	return
 }
 
 // RequestIDs returns the "request" edge IDs in the mutation.
@@ -687,9 +710,12 @@ func (m *CommentMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CommentMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.created_by != nil {
 		fields = append(fields, comment.FieldCreatedBy)
+	}
+	if m.request != nil {
+		fields = append(fields, comment.FieldRequestID)
 	}
 	if m.comment != nil {
 		fields = append(fields, comment.FieldComment)
@@ -713,6 +739,8 @@ func (m *CommentMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case comment.FieldCreatedBy:
 		return m.CreatedBy()
+	case comment.FieldRequestID:
+		return m.RequestID()
 	case comment.FieldComment:
 		return m.Comment()
 	case comment.FieldCreatedAt:
@@ -732,6 +760,8 @@ func (m *CommentMutation) OldField(ctx context.Context, name string) (ent.Value,
 	switch name {
 	case comment.FieldCreatedBy:
 		return m.OldCreatedBy(ctx)
+	case comment.FieldRequestID:
+		return m.OldRequestID(ctx)
 	case comment.FieldComment:
 		return m.OldComment(ctx)
 	case comment.FieldCreatedAt:
@@ -755,6 +785,13 @@ func (m *CommentMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedBy(v)
+		return nil
+	case comment.FieldRequestID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestID(v)
 		return nil
 	case comment.FieldComment:
 		v, ok := value.(string)
@@ -791,13 +828,16 @@ func (m *CommentMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CommentMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CommentMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -844,6 +884,9 @@ func (m *CommentMutation) ResetField(name string) error {
 	switch name {
 	case comment.FieldCreatedBy:
 		m.ResetCreatedBy()
+		return nil
+	case comment.FieldRequestID:
+		m.ResetRequestID()
 		return nil
 	case comment.FieldComment:
 		m.ResetComment()
@@ -2467,6 +2510,42 @@ func (m *GroupBudgetMutation) ResetAmount() {
 	m.addamount = nil
 }
 
+// SetGroupID sets the "group_id" field.
+func (m *GroupBudgetMutation) SetGroupID(i int) {
+	m.group = &i
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *GroupBudgetMutation) GroupID() (r int, exists bool) {
+	v := m.group
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the GroupBudget entity.
+// If the GroupBudget object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupBudgetMutation) OldGroupID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *GroupBudgetMutation) ResetGroupID() {
+	m.group = nil
+}
+
 // SetComment sets the "comment" field.
 func (m *GroupBudgetMutation) SetComment(s string) {
 	m.comment = &s
@@ -2552,11 +2631,6 @@ func (m *GroupBudgetMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetGroupID sets the "group" edge to the Group entity by id.
-func (m *GroupBudgetMutation) SetGroupID(id int) {
-	m.group = &id
-}
-
 // ClearGroup clears the "group" edge to the Group entity.
 func (m *GroupBudgetMutation) ClearGroup() {
 	m.clearedgroup = true
@@ -2565,14 +2639,6 @@ func (m *GroupBudgetMutation) ClearGroup() {
 // GroupCleared reports if the "group" edge to the Group entity was cleared.
 func (m *GroupBudgetMutation) GroupCleared() bool {
 	return m.clearedgroup
-}
-
-// GroupID returns the "group" edge ID in the mutation.
-func (m *GroupBudgetMutation) GroupID() (id int, exists bool) {
-	if m.group != nil {
-		return *m.group, true
-	}
-	return
 }
 
 // GroupIDs returns the "group" edge IDs in the mutation.
@@ -2605,9 +2671,12 @@ func (m *GroupBudgetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GroupBudgetMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.amount != nil {
 		fields = append(fields, groupbudget.FieldAmount)
+	}
+	if m.group != nil {
+		fields = append(fields, groupbudget.FieldGroupID)
 	}
 	if m.comment != nil {
 		fields = append(fields, groupbudget.FieldComment)
@@ -2625,6 +2694,8 @@ func (m *GroupBudgetMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case groupbudget.FieldAmount:
 		return m.Amount()
+	case groupbudget.FieldGroupID:
+		return m.GroupID()
 	case groupbudget.FieldComment:
 		return m.Comment()
 	case groupbudget.FieldCreatedAt:
@@ -2640,6 +2711,8 @@ func (m *GroupBudgetMutation) OldField(ctx context.Context, name string) (ent.Va
 	switch name {
 	case groupbudget.FieldAmount:
 		return m.OldAmount(ctx)
+	case groupbudget.FieldGroupID:
+		return m.OldGroupID(ctx)
 	case groupbudget.FieldComment:
 		return m.OldComment(ctx)
 	case groupbudget.FieldCreatedAt:
@@ -2659,6 +2732,13 @@ func (m *GroupBudgetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAmount(v)
+		return nil
+	case groupbudget.FieldGroupID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
 		return nil
 	case groupbudget.FieldComment:
 		v, ok := value.(string)
@@ -2749,6 +2829,9 @@ func (m *GroupBudgetMutation) ResetField(name string) error {
 	switch name {
 	case groupbudget.FieldAmount:
 		m.ResetAmount()
+		return nil
+	case groupbudget.FieldGroupID:
+		m.ResetGroupID()
 		return nil
 	case groupbudget.FieldComment:
 		m.ResetComment()
@@ -2967,6 +3050,42 @@ func (m *GroupOwnerMutation) ResetOwner() {
 	m.owner = nil
 }
 
+// SetGroupID sets the "group_id" field.
+func (m *GroupOwnerMutation) SetGroupID(i int) {
+	m.group = &i
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *GroupOwnerMutation) GroupID() (r int, exists bool) {
+	v := m.group
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the GroupOwner entity.
+// If the GroupOwner object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupOwnerMutation) OldGroupID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *GroupOwnerMutation) ResetGroupID() {
+	m.group = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *GroupOwnerMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -3003,11 +3122,6 @@ func (m *GroupOwnerMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetGroupID sets the "group" edge to the Group entity by id.
-func (m *GroupOwnerMutation) SetGroupID(id int) {
-	m.group = &id
-}
-
 // ClearGroup clears the "group" edge to the Group entity.
 func (m *GroupOwnerMutation) ClearGroup() {
 	m.clearedgroup = true
@@ -3016,14 +3130,6 @@ func (m *GroupOwnerMutation) ClearGroup() {
 // GroupCleared reports if the "group" edge to the Group entity was cleared.
 func (m *GroupOwnerMutation) GroupCleared() bool {
 	return m.clearedgroup
-}
-
-// GroupID returns the "group" edge ID in the mutation.
-func (m *GroupOwnerMutation) GroupID() (id int, exists bool) {
-	if m.group != nil {
-		return *m.group, true
-	}
-	return
 }
 
 // GroupIDs returns the "group" edge IDs in the mutation.
@@ -3056,9 +3162,12 @@ func (m *GroupOwnerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GroupOwnerMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.owner != nil {
 		fields = append(fields, groupowner.FieldOwner)
+	}
+	if m.group != nil {
+		fields = append(fields, groupowner.FieldGroupID)
 	}
 	if m.created_at != nil {
 		fields = append(fields, groupowner.FieldCreatedAt)
@@ -3073,6 +3182,8 @@ func (m *GroupOwnerMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case groupowner.FieldOwner:
 		return m.Owner()
+	case groupowner.FieldGroupID:
+		return m.GroupID()
 	case groupowner.FieldCreatedAt:
 		return m.CreatedAt()
 	}
@@ -3086,6 +3197,8 @@ func (m *GroupOwnerMutation) OldField(ctx context.Context, name string) (ent.Val
 	switch name {
 	case groupowner.FieldOwner:
 		return m.OldOwner(ctx)
+	case groupowner.FieldGroupID:
+		return m.OldGroupID(ctx)
 	case groupowner.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
@@ -3104,6 +3217,13 @@ func (m *GroupOwnerMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetOwner(v)
 		return nil
+	case groupowner.FieldGroupID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
+		return nil
 	case groupowner.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -3118,13 +3238,16 @@ func (m *GroupOwnerMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *GroupOwnerMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *GroupOwnerMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -3162,6 +3285,9 @@ func (m *GroupOwnerMutation) ResetField(name string) error {
 	switch name {
 	case groupowner.FieldOwner:
 		m.ResetOwner()
+		return nil
+	case groupowner.FieldGroupID:
+		m.ResetGroupID()
 		return nil
 	case groupowner.FieldCreatedAt:
 		m.ResetCreatedAt()
@@ -3377,6 +3503,42 @@ func (m *GroupUserMutation) ResetUserID() {
 	m.user_id = nil
 }
 
+// SetGroupID sets the "group_id" field.
+func (m *GroupUserMutation) SetGroupID(i int) {
+	m.group = &i
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *GroupUserMutation) GroupID() (r int, exists bool) {
+	v := m.group
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the GroupUser entity.
+// If the GroupUser object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupUserMutation) OldGroupID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *GroupUserMutation) ResetGroupID() {
+	m.group = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *GroupUserMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -3413,11 +3575,6 @@ func (m *GroupUserMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetGroupID sets the "group" edge to the Group entity by id.
-func (m *GroupUserMutation) SetGroupID(id int) {
-	m.group = &id
-}
-
 // ClearGroup clears the "group" edge to the Group entity.
 func (m *GroupUserMutation) ClearGroup() {
 	m.clearedgroup = true
@@ -3426,14 +3583,6 @@ func (m *GroupUserMutation) ClearGroup() {
 // GroupCleared reports if the "group" edge to the Group entity was cleared.
 func (m *GroupUserMutation) GroupCleared() bool {
 	return m.clearedgroup
-}
-
-// GroupID returns the "group" edge ID in the mutation.
-func (m *GroupUserMutation) GroupID() (id int, exists bool) {
-	if m.group != nil {
-		return *m.group, true
-	}
-	return
 }
 
 // GroupIDs returns the "group" edge IDs in the mutation.
@@ -3466,9 +3615,12 @@ func (m *GroupUserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GroupUserMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.user_id != nil {
 		fields = append(fields, groupuser.FieldUserID)
+	}
+	if m.group != nil {
+		fields = append(fields, groupuser.FieldGroupID)
 	}
 	if m.created_at != nil {
 		fields = append(fields, groupuser.FieldCreatedAt)
@@ -3483,6 +3635,8 @@ func (m *GroupUserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case groupuser.FieldUserID:
 		return m.UserID()
+	case groupuser.FieldGroupID:
+		return m.GroupID()
 	case groupuser.FieldCreatedAt:
 		return m.CreatedAt()
 	}
@@ -3496,6 +3650,8 @@ func (m *GroupUserMutation) OldField(ctx context.Context, name string) (ent.Valu
 	switch name {
 	case groupuser.FieldUserID:
 		return m.OldUserID(ctx)
+	case groupuser.FieldGroupID:
+		return m.OldGroupID(ctx)
 	case groupuser.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
@@ -3514,6 +3670,13 @@ func (m *GroupUserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUserID(v)
 		return nil
+	case groupuser.FieldGroupID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
+		return nil
 	case groupuser.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -3528,13 +3691,16 @@ func (m *GroupUserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *GroupUserMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *GroupUserMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -3572,6 +3738,9 @@ func (m *GroupUserMutation) ResetField(name string) error {
 	switch name {
 	case groupuser.FieldUserID:
 		m.ResetUserID()
+		return nil
+	case groupuser.FieldGroupID:
+		m.ResetGroupID()
 		return nil
 	case groupuser.FieldCreatedAt:
 		m.ResetCreatedAt()
@@ -4685,6 +4854,42 @@ func (m *RequestFileMutation) ID() (id int, exists bool) {
 	return *m.id, true
 }
 
+// SetRequestID sets the "request_id" field.
+func (m *RequestFileMutation) SetRequestID(i int) {
+	m.request = &i
+}
+
+// RequestID returns the value of the "request_id" field in the mutation.
+func (m *RequestFileMutation) RequestID() (r int, exists bool) {
+	v := m.request
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestID returns the old "request_id" field's value of the RequestFile entity.
+// If the RequestFile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RequestFileMutation) OldRequestID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldRequestID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldRequestID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestID: %w", err)
+	}
+	return oldValue.RequestID, nil
+}
+
+// ResetRequestID resets all changes to the "request_id" field.
+func (m *RequestFileMutation) ResetRequestID() {
+	m.request = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *RequestFileMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -4721,11 +4926,6 @@ func (m *RequestFileMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *RequestFileMutation) SetRequestID(id int) {
-	m.request = &id
-}
-
 // ClearRequest clears the "request" edge to the Request entity.
 func (m *RequestFileMutation) ClearRequest() {
 	m.clearedrequest = true
@@ -4734,14 +4934,6 @@ func (m *RequestFileMutation) ClearRequest() {
 // RequestCleared reports if the "request" edge to the Request entity was cleared.
 func (m *RequestFileMutation) RequestCleared() bool {
 	return m.clearedrequest
-}
-
-// RequestID returns the "request" edge ID in the mutation.
-func (m *RequestFileMutation) RequestID() (id int, exists bool) {
-	if m.request != nil {
-		return *m.request, true
-	}
-	return
 }
 
 // RequestIDs returns the "request" edge IDs in the mutation.
@@ -4813,7 +5005,10 @@ func (m *RequestFileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RequestFileMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
+	if m.request != nil {
+		fields = append(fields, requestfile.FieldRequestID)
+	}
 	if m.created_at != nil {
 		fields = append(fields, requestfile.FieldCreatedAt)
 	}
@@ -4825,6 +5020,8 @@ func (m *RequestFileMutation) Fields() []string {
 // schema.
 func (m *RequestFileMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case requestfile.FieldRequestID:
+		return m.RequestID()
 	case requestfile.FieldCreatedAt:
 		return m.CreatedAt()
 	}
@@ -4836,6 +5033,8 @@ func (m *RequestFileMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *RequestFileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case requestfile.FieldRequestID:
+		return m.OldRequestID(ctx)
 	case requestfile.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
@@ -4847,6 +5046,13 @@ func (m *RequestFileMutation) OldField(ctx context.Context, name string) (ent.Va
 // type.
 func (m *RequestFileMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case requestfile.FieldRequestID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestID(v)
+		return nil
 	case requestfile.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -4861,13 +5067,16 @@ func (m *RequestFileMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *RequestFileMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *RequestFileMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -4903,6 +5112,9 @@ func (m *RequestFileMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *RequestFileMutation) ResetField(name string) error {
 	switch name {
+	case requestfile.FieldRequestID:
+		m.ResetRequestID()
+		return nil
 	case requestfile.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
@@ -5137,6 +5349,42 @@ func (m *RequestStatusMutation) ResetCreatedBy() {
 	m.created_by = nil
 }
 
+// SetRequestID sets the "request_id" field.
+func (m *RequestStatusMutation) SetRequestID(i int) {
+	m.request = &i
+}
+
+// RequestID returns the value of the "request_id" field in the mutation.
+func (m *RequestStatusMutation) RequestID() (r int, exists bool) {
+	v := m.request
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestID returns the old "request_id" field's value of the RequestStatus entity.
+// If the RequestStatus object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RequestStatusMutation) OldRequestID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldRequestID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldRequestID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestID: %w", err)
+	}
+	return oldValue.RequestID, nil
+}
+
+// ResetRequestID resets all changes to the "request_id" field.
+func (m *RequestStatusMutation) ResetRequestID() {
+	m.request = nil
+}
+
 // SetStatus sets the "status" field.
 func (m *RequestStatusMutation) SetStatus(r requeststatus.Status) {
 	m.status = &r
@@ -5245,11 +5493,6 @@ func (m *RequestStatusMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *RequestStatusMutation) SetRequestID(id int) {
-	m.request = &id
-}
-
 // ClearRequest clears the "request" edge to the Request entity.
 func (m *RequestStatusMutation) ClearRequest() {
 	m.clearedrequest = true
@@ -5258,14 +5501,6 @@ func (m *RequestStatusMutation) ClearRequest() {
 // RequestCleared reports if the "request" edge to the Request entity was cleared.
 func (m *RequestStatusMutation) RequestCleared() bool {
 	return m.clearedrequest
-}
-
-// RequestID returns the "request" edge ID in the mutation.
-func (m *RequestStatusMutation) RequestID() (id int, exists bool) {
-	if m.request != nil {
-		return *m.request, true
-	}
-	return
 }
 
 // RequestIDs returns the "request" edge IDs in the mutation.
@@ -5298,9 +5533,12 @@ func (m *RequestStatusMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RequestStatusMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.created_by != nil {
 		fields = append(fields, requeststatus.FieldCreatedBy)
+	}
+	if m.request != nil {
+		fields = append(fields, requeststatus.FieldRequestID)
 	}
 	if m.status != nil {
 		fields = append(fields, requeststatus.FieldStatus)
@@ -5321,6 +5559,8 @@ func (m *RequestStatusMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case requeststatus.FieldCreatedBy:
 		return m.CreatedBy()
+	case requeststatus.FieldRequestID:
+		return m.RequestID()
 	case requeststatus.FieldStatus:
 		return m.Status()
 	case requeststatus.FieldReason:
@@ -5338,6 +5578,8 @@ func (m *RequestStatusMutation) OldField(ctx context.Context, name string) (ent.
 	switch name {
 	case requeststatus.FieldCreatedBy:
 		return m.OldCreatedBy(ctx)
+	case requeststatus.FieldRequestID:
+		return m.OldRequestID(ctx)
 	case requeststatus.FieldStatus:
 		return m.OldStatus(ctx)
 	case requeststatus.FieldReason:
@@ -5359,6 +5601,13 @@ func (m *RequestStatusMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedBy(v)
+		return nil
+	case requeststatus.FieldRequestID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestID(v)
 		return nil
 	case requeststatus.FieldStatus:
 		v, ok := value.(requeststatus.Status)
@@ -5388,13 +5637,16 @@ func (m *RequestStatusMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *RequestStatusMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *RequestStatusMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -5432,6 +5684,9 @@ func (m *RequestStatusMutation) ResetField(name string) error {
 	switch name {
 	case requeststatus.FieldCreatedBy:
 		m.ResetCreatedBy()
+		return nil
+	case requeststatus.FieldRequestID:
+		m.ResetRequestID()
 		return nil
 	case requeststatus.FieldStatus:
 		m.ResetStatus()
@@ -5618,6 +5873,42 @@ func (m *RequestTagMutation) ID() (id int, exists bool) {
 	return *m.id, true
 }
 
+// SetRequestID sets the "request_id" field.
+func (m *RequestTagMutation) SetRequestID(i int) {
+	m.request = &i
+}
+
+// RequestID returns the value of the "request_id" field in the mutation.
+func (m *RequestTagMutation) RequestID() (r int, exists bool) {
+	v := m.request
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestID returns the old "request_id" field's value of the RequestTag entity.
+// If the RequestTag object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RequestTagMutation) OldRequestID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldRequestID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldRequestID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestID: %w", err)
+	}
+	return oldValue.RequestID, nil
+}
+
+// ResetRequestID resets all changes to the "request_id" field.
+func (m *RequestTagMutation) ResetRequestID() {
+	m.request = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *RequestTagMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -5654,11 +5945,6 @@ func (m *RequestTagMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *RequestTagMutation) SetRequestID(id int) {
-	m.request = &id
-}
-
 // ClearRequest clears the "request" edge to the Request entity.
 func (m *RequestTagMutation) ClearRequest() {
 	m.clearedrequest = true
@@ -5667,14 +5953,6 @@ func (m *RequestTagMutation) ClearRequest() {
 // RequestCleared reports if the "request" edge to the Request entity was cleared.
 func (m *RequestTagMutation) RequestCleared() bool {
 	return m.clearedrequest
-}
-
-// RequestID returns the "request" edge ID in the mutation.
-func (m *RequestTagMutation) RequestID() (id int, exists bool) {
-	if m.request != nil {
-		return *m.request, true
-	}
-	return
 }
 
 // RequestIDs returns the "request" edge IDs in the mutation.
@@ -5746,7 +6024,10 @@ func (m *RequestTagMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RequestTagMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
+	if m.request != nil {
+		fields = append(fields, requesttag.FieldRequestID)
+	}
 	if m.created_at != nil {
 		fields = append(fields, requesttag.FieldCreatedAt)
 	}
@@ -5758,6 +6039,8 @@ func (m *RequestTagMutation) Fields() []string {
 // schema.
 func (m *RequestTagMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case requesttag.FieldRequestID:
+		return m.RequestID()
 	case requesttag.FieldCreatedAt:
 		return m.CreatedAt()
 	}
@@ -5769,6 +6052,8 @@ func (m *RequestTagMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *RequestTagMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case requesttag.FieldRequestID:
+		return m.OldRequestID(ctx)
 	case requesttag.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
@@ -5780,6 +6065,13 @@ func (m *RequestTagMutation) OldField(ctx context.Context, name string) (ent.Val
 // type.
 func (m *RequestTagMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case requesttag.FieldRequestID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestID(v)
+		return nil
 	case requesttag.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -5794,13 +6086,16 @@ func (m *RequestTagMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *RequestTagMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *RequestTagMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -5836,6 +6131,9 @@ func (m *RequestTagMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *RequestTagMutation) ResetField(name string) error {
 	switch name {
+	case requesttag.FieldRequestID:
+		m.ResetRequestID()
+		return nil
 	case requesttag.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
@@ -6069,6 +6367,42 @@ func (m *RequestTargetMutation) ResetTarget() {
 	m.target = nil
 }
 
+// SetRequestID sets the "request_id" field.
+func (m *RequestTargetMutation) SetRequestID(i int) {
+	m.request = &i
+}
+
+// RequestID returns the value of the "request_id" field in the mutation.
+func (m *RequestTargetMutation) RequestID() (r int, exists bool) {
+	v := m.request
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestID returns the old "request_id" field's value of the RequestTarget entity.
+// If the RequestTarget object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RequestTargetMutation) OldRequestID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldRequestID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldRequestID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestID: %w", err)
+	}
+	return oldValue.RequestID, nil
+}
+
+// ResetRequestID resets all changes to the "request_id" field.
+func (m *RequestTargetMutation) ResetRequestID() {
+	m.request = nil
+}
+
 // SetPaidAt sets the "paid_at" field.
 func (m *RequestTargetMutation) SetPaidAt(t time.Time) {
 	m.paid_at = &t
@@ -6154,11 +6488,6 @@ func (m *RequestTargetMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *RequestTargetMutation) SetRequestID(id int) {
-	m.request = &id
-}
-
 // ClearRequest clears the "request" edge to the Request entity.
 func (m *RequestTargetMutation) ClearRequest() {
 	m.clearedrequest = true
@@ -6167,14 +6496,6 @@ func (m *RequestTargetMutation) ClearRequest() {
 // RequestCleared reports if the "request" edge to the Request entity was cleared.
 func (m *RequestTargetMutation) RequestCleared() bool {
 	return m.clearedrequest
-}
-
-// RequestID returns the "request" edge ID in the mutation.
-func (m *RequestTargetMutation) RequestID() (id int, exists bool) {
-	if m.request != nil {
-		return *m.request, true
-	}
-	return
 }
 
 // RequestIDs returns the "request" edge IDs in the mutation.
@@ -6207,9 +6528,12 @@ func (m *RequestTargetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RequestTargetMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.target != nil {
 		fields = append(fields, requesttarget.FieldTarget)
+	}
+	if m.request != nil {
+		fields = append(fields, requesttarget.FieldRequestID)
 	}
 	if m.paid_at != nil {
 		fields = append(fields, requesttarget.FieldPaidAt)
@@ -6227,6 +6551,8 @@ func (m *RequestTargetMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case requesttarget.FieldTarget:
 		return m.Target()
+	case requesttarget.FieldRequestID:
+		return m.RequestID()
 	case requesttarget.FieldPaidAt:
 		return m.PaidAt()
 	case requesttarget.FieldCreatedAt:
@@ -6242,6 +6568,8 @@ func (m *RequestTargetMutation) OldField(ctx context.Context, name string) (ent.
 	switch name {
 	case requesttarget.FieldTarget:
 		return m.OldTarget(ctx)
+	case requesttarget.FieldRequestID:
+		return m.OldRequestID(ctx)
 	case requesttarget.FieldPaidAt:
 		return m.OldPaidAt(ctx)
 	case requesttarget.FieldCreatedAt:
@@ -6261,6 +6589,13 @@ func (m *RequestTargetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTarget(v)
+		return nil
+	case requesttarget.FieldRequestID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestID(v)
 		return nil
 	case requesttarget.FieldPaidAt:
 		v, ok := value.(time.Time)
@@ -6283,13 +6618,16 @@ func (m *RequestTargetMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *RequestTargetMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *RequestTargetMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -6336,6 +6674,9 @@ func (m *RequestTargetMutation) ResetField(name string) error {
 	switch name {
 	case requesttarget.FieldTarget:
 		m.ResetTarget()
+		return nil
+	case requesttarget.FieldRequestID:
+		m.ResetRequestID()
 		return nil
 	case requesttarget.FieldPaidAt:
 		m.ResetPaidAt()
@@ -6435,11 +6776,9 @@ type TagMutation struct {
 	updated_at             *time.Time
 	deleted_at             *time.Time
 	clearedFields          map[string]struct{}
-	request_tag            map[int]struct{}
-	removedrequest_tag     map[int]struct{}
+	request_tag            *int
 	clearedrequest_tag     bool
-	transaction_tag        map[int]struct{}
-	removedtransaction_tag map[int]struct{}
+	transaction_tag        *int
 	clearedtransaction_tag bool
 	done                   bool
 	oldValue               func(context.Context) (*Tag, error)
@@ -6718,14 +7057,9 @@ func (m *TagMutation) ResetDeletedAt() {
 	delete(m.clearedFields, tag.FieldDeletedAt)
 }
 
-// AddRequestTagIDs adds the "request_tag" edge to the RequestTag entity by ids.
-func (m *TagMutation) AddRequestTagIDs(ids ...int) {
-	if m.request_tag == nil {
-		m.request_tag = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.request_tag[ids[i]] = struct{}{}
-	}
+// SetRequestTagID sets the "request_tag" edge to the RequestTag entity by id.
+func (m *TagMutation) SetRequestTagID(id int) {
+	m.request_tag = &id
 }
 
 // ClearRequestTag clears the "request_tag" edge to the RequestTag entity.
@@ -6738,28 +7072,20 @@ func (m *TagMutation) RequestTagCleared() bool {
 	return m.clearedrequest_tag
 }
 
-// RemoveRequestTagIDs removes the "request_tag" edge to the RequestTag entity by IDs.
-func (m *TagMutation) RemoveRequestTagIDs(ids ...int) {
-	if m.removedrequest_tag == nil {
-		m.removedrequest_tag = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.removedrequest_tag[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedRequestTag returns the removed IDs of the "request_tag" edge to the RequestTag entity.
-func (m *TagMutation) RemovedRequestTagIDs() (ids []int) {
-	for id := range m.removedrequest_tag {
-		ids = append(ids, id)
+// RequestTagID returns the "request_tag" edge ID in the mutation.
+func (m *TagMutation) RequestTagID() (id int, exists bool) {
+	if m.request_tag != nil {
+		return *m.request_tag, true
 	}
 	return
 }
 
 // RequestTagIDs returns the "request_tag" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RequestTagID instead. It exists only for internal usage by the builders.
 func (m *TagMutation) RequestTagIDs() (ids []int) {
-	for id := range m.request_tag {
-		ids = append(ids, id)
+	if id := m.request_tag; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -6768,17 +7094,11 @@ func (m *TagMutation) RequestTagIDs() (ids []int) {
 func (m *TagMutation) ResetRequestTag() {
 	m.request_tag = nil
 	m.clearedrequest_tag = false
-	m.removedrequest_tag = nil
 }
 
-// AddTransactionTagIDs adds the "transaction_tag" edge to the TransactionTag entity by ids.
-func (m *TagMutation) AddTransactionTagIDs(ids ...int) {
-	if m.transaction_tag == nil {
-		m.transaction_tag = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.transaction_tag[ids[i]] = struct{}{}
-	}
+// SetTransactionTagID sets the "transaction_tag" edge to the TransactionTag entity by id.
+func (m *TagMutation) SetTransactionTagID(id int) {
+	m.transaction_tag = &id
 }
 
 // ClearTransactionTag clears the "transaction_tag" edge to the TransactionTag entity.
@@ -6791,28 +7111,20 @@ func (m *TagMutation) TransactionTagCleared() bool {
 	return m.clearedtransaction_tag
 }
 
-// RemoveTransactionTagIDs removes the "transaction_tag" edge to the TransactionTag entity by IDs.
-func (m *TagMutation) RemoveTransactionTagIDs(ids ...int) {
-	if m.removedtransaction_tag == nil {
-		m.removedtransaction_tag = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.removedtransaction_tag[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedTransactionTag returns the removed IDs of the "transaction_tag" edge to the TransactionTag entity.
-func (m *TagMutation) RemovedTransactionTagIDs() (ids []int) {
-	for id := range m.removedtransaction_tag {
-		ids = append(ids, id)
+// TransactionTagID returns the "transaction_tag" edge ID in the mutation.
+func (m *TagMutation) TransactionTagID() (id int, exists bool) {
+	if m.transaction_tag != nil {
+		return *m.transaction_tag, true
 	}
 	return
 }
 
 // TransactionTagIDs returns the "transaction_tag" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TransactionTagID instead. It exists only for internal usage by the builders.
 func (m *TagMutation) TransactionTagIDs() (ids []int) {
-	for id := range m.transaction_tag {
-		ids = append(ids, id)
+	if id := m.transaction_tag; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -6821,7 +7133,6 @@ func (m *TagMutation) TransactionTagIDs() (ids []int) {
 func (m *TagMutation) ResetTransactionTag() {
 	m.transaction_tag = nil
 	m.clearedtransaction_tag = false
-	m.removedtransaction_tag = nil
 }
 
 // Op returns the operation name.
@@ -7029,17 +7340,13 @@ func (m *TagMutation) AddedEdges() []string {
 func (m *TagMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case tag.EdgeRequestTag:
-		ids := make([]ent.Value, 0, len(m.request_tag))
-		for id := range m.request_tag {
-			ids = append(ids, id)
+		if id := m.request_tag; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	case tag.EdgeTransactionTag:
-		ids := make([]ent.Value, 0, len(m.transaction_tag))
-		for id := range m.transaction_tag {
-			ids = append(ids, id)
+		if id := m.transaction_tag; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -7047,12 +7354,6 @@ func (m *TagMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TagMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removedrequest_tag != nil {
-		edges = append(edges, tag.EdgeRequestTag)
-	}
-	if m.removedtransaction_tag != nil {
-		edges = append(edges, tag.EdgeTransactionTag)
-	}
 	return edges
 }
 
@@ -7060,18 +7361,6 @@ func (m *TagMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *TagMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case tag.EdgeRequestTag:
-		ids := make([]ent.Value, 0, len(m.removedrequest_tag))
-		for id := range m.removedrequest_tag {
-			ids = append(ids, id)
-		}
-		return ids
-	case tag.EdgeTransactionTag:
-		ids := make([]ent.Value, 0, len(m.removedtransaction_tag))
-		for id := range m.removedtransaction_tag {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
@@ -7104,6 +7393,12 @@ func (m *TagMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *TagMutation) ClearEdge(name string) error {
 	switch name {
+	case tag.EdgeRequestTag:
+		m.ClearRequestTag()
+		return nil
+	case tag.EdgeTransactionTag:
+		m.ClearTransactionTag()
+		return nil
 	}
 	return fmt.Errorf("unknown Tag unique edge %s", name)
 }
@@ -7575,6 +7870,8 @@ type TransactionDetailMutation struct {
 	clearedtransaction bool
 	request            *int
 	clearedrequest     bool
+	group              *int
+	clearedgroup       bool
 	done               bool
 	oldValue           func(context.Context) (*TransactionDetail, error)
 	predicates         []predicate.TransactionDetail
@@ -7715,6 +8012,104 @@ func (m *TransactionDetailMutation) ResetAmount() {
 	m.addamount = nil
 }
 
+// SetRequestID sets the "request_id" field.
+func (m *TransactionDetailMutation) SetRequestID(i int) {
+	m.request = &i
+}
+
+// RequestID returns the value of the "request_id" field in the mutation.
+func (m *TransactionDetailMutation) RequestID() (r int, exists bool) {
+	v := m.request
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRequestID returns the old "request_id" field's value of the TransactionDetail entity.
+// If the TransactionDetail object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionDetailMutation) OldRequestID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldRequestID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldRequestID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRequestID: %w", err)
+	}
+	return oldValue.RequestID, nil
+}
+
+// ClearRequestID clears the value of the "request_id" field.
+func (m *TransactionDetailMutation) ClearRequestID() {
+	m.request = nil
+	m.clearedFields[transactiondetail.FieldRequestID] = struct{}{}
+}
+
+// RequestIDCleared returns if the "request_id" field was cleared in this mutation.
+func (m *TransactionDetailMutation) RequestIDCleared() bool {
+	_, ok := m.clearedFields[transactiondetail.FieldRequestID]
+	return ok
+}
+
+// ResetRequestID resets all changes to the "request_id" field.
+func (m *TransactionDetailMutation) ResetRequestID() {
+	m.request = nil
+	delete(m.clearedFields, transactiondetail.FieldRequestID)
+}
+
+// SetGroupID sets the "group_id" field.
+func (m *TransactionDetailMutation) SetGroupID(i int) {
+	m.group = &i
+}
+
+// GroupID returns the value of the "group_id" field in the mutation.
+func (m *TransactionDetailMutation) GroupID() (r int, exists bool) {
+	v := m.group
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGroupID returns the old "group_id" field's value of the TransactionDetail entity.
+// If the TransactionDetail object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionDetailMutation) OldGroupID(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldGroupID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldGroupID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGroupID: %w", err)
+	}
+	return oldValue.GroupID, nil
+}
+
+// ClearGroupID clears the value of the "group_id" field.
+func (m *TransactionDetailMutation) ClearGroupID() {
+	m.group = nil
+	m.clearedFields[transactiondetail.FieldGroupID] = struct{}{}
+}
+
+// GroupIDCleared returns if the "group_id" field was cleared in this mutation.
+func (m *TransactionDetailMutation) GroupIDCleared() bool {
+	_, ok := m.clearedFields[transactiondetail.FieldGroupID]
+	return ok
+}
+
+// ResetGroupID resets all changes to the "group_id" field.
+func (m *TransactionDetailMutation) ResetGroupID() {
+	m.group = nil
+	delete(m.clearedFields, transactiondetail.FieldGroupID)
+}
+
 // SetTarget sets the "target" field.
 func (m *TransactionDetailMutation) SetTarget(s string) {
 	m.target = &s
@@ -7826,11 +8221,6 @@ func (m *TransactionDetailMutation) ResetTransaction() {
 	m.clearedtransaction = false
 }
 
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *TransactionDetailMutation) SetRequestID(id int) {
-	m.request = &id
-}
-
 // ClearRequest clears the "request" edge to the Request entity.
 func (m *TransactionDetailMutation) ClearRequest() {
 	m.clearedrequest = true
@@ -7838,15 +8228,7 @@ func (m *TransactionDetailMutation) ClearRequest() {
 
 // RequestCleared reports if the "request" edge to the Request entity was cleared.
 func (m *TransactionDetailMutation) RequestCleared() bool {
-	return m.clearedrequest
-}
-
-// RequestID returns the "request" edge ID in the mutation.
-func (m *TransactionDetailMutation) RequestID() (id int, exists bool) {
-	if m.request != nil {
-		return *m.request, true
-	}
-	return
+	return m.RequestIDCleared() || m.clearedrequest
 }
 
 // RequestIDs returns the "request" edge IDs in the mutation.
@@ -7865,6 +8247,32 @@ func (m *TransactionDetailMutation) ResetRequest() {
 	m.clearedrequest = false
 }
 
+// ClearGroup clears the "group" edge to the Group entity.
+func (m *TransactionDetailMutation) ClearGroup() {
+	m.clearedgroup = true
+}
+
+// GroupCleared reports if the "group" edge to the Group entity was cleared.
+func (m *TransactionDetailMutation) GroupCleared() bool {
+	return m.GroupIDCleared() || m.clearedgroup
+}
+
+// GroupIDs returns the "group" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// GroupID instead. It exists only for internal usage by the builders.
+func (m *TransactionDetailMutation) GroupIDs() (ids []int) {
+	if id := m.group; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetGroup resets all changes to the "group" edge.
+func (m *TransactionDetailMutation) ResetGroup() {
+	m.group = nil
+	m.clearedgroup = false
+}
+
 // Op returns the operation name.
 func (m *TransactionDetailMutation) Op() Op {
 	return m.op
@@ -7879,9 +8287,15 @@ func (m *TransactionDetailMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TransactionDetailMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 5)
 	if m.amount != nil {
 		fields = append(fields, transactiondetail.FieldAmount)
+	}
+	if m.request != nil {
+		fields = append(fields, transactiondetail.FieldRequestID)
+	}
+	if m.group != nil {
+		fields = append(fields, transactiondetail.FieldGroupID)
 	}
 	if m.target != nil {
 		fields = append(fields, transactiondetail.FieldTarget)
@@ -7899,6 +8313,10 @@ func (m *TransactionDetailMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case transactiondetail.FieldAmount:
 		return m.Amount()
+	case transactiondetail.FieldRequestID:
+		return m.RequestID()
+	case transactiondetail.FieldGroupID:
+		return m.GroupID()
 	case transactiondetail.FieldTarget:
 		return m.Target()
 	case transactiondetail.FieldCreatedAt:
@@ -7914,6 +8332,10 @@ func (m *TransactionDetailMutation) OldField(ctx context.Context, name string) (
 	switch name {
 	case transactiondetail.FieldAmount:
 		return m.OldAmount(ctx)
+	case transactiondetail.FieldRequestID:
+		return m.OldRequestID(ctx)
+	case transactiondetail.FieldGroupID:
+		return m.OldGroupID(ctx)
 	case transactiondetail.FieldTarget:
 		return m.OldTarget(ctx)
 	case transactiondetail.FieldCreatedAt:
@@ -7933,6 +8355,20 @@ func (m *TransactionDetailMutation) SetField(name string, value ent.Value) error
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAmount(v)
+		return nil
+	case transactiondetail.FieldRequestID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRequestID(v)
+		return nil
+	case transactiondetail.FieldGroupID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGroupID(v)
 		return nil
 	case transactiondetail.FieldTarget:
 		v, ok := value.(string)
@@ -7992,7 +8428,14 @@ func (m *TransactionDetailMutation) AddField(name string, value ent.Value) error
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *TransactionDetailMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(transactiondetail.FieldRequestID) {
+		fields = append(fields, transactiondetail.FieldRequestID)
+	}
+	if m.FieldCleared(transactiondetail.FieldGroupID) {
+		fields = append(fields, transactiondetail.FieldGroupID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -8005,6 +8448,14 @@ func (m *TransactionDetailMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *TransactionDetailMutation) ClearField(name string) error {
+	switch name {
+	case transactiondetail.FieldRequestID:
+		m.ClearRequestID()
+		return nil
+	case transactiondetail.FieldGroupID:
+		m.ClearGroupID()
+		return nil
+	}
 	return fmt.Errorf("unknown TransactionDetail nullable field %s", name)
 }
 
@@ -8014,6 +8465,12 @@ func (m *TransactionDetailMutation) ResetField(name string) error {
 	switch name {
 	case transactiondetail.FieldAmount:
 		m.ResetAmount()
+		return nil
+	case transactiondetail.FieldRequestID:
+		m.ResetRequestID()
+		return nil
+	case transactiondetail.FieldGroupID:
+		m.ResetGroupID()
 		return nil
 	case transactiondetail.FieldTarget:
 		m.ResetTarget()
@@ -8027,12 +8484,15 @@ func (m *TransactionDetailMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TransactionDetailMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.transaction != nil {
 		edges = append(edges, transactiondetail.EdgeTransaction)
 	}
 	if m.request != nil {
 		edges = append(edges, transactiondetail.EdgeRequest)
+	}
+	if m.group != nil {
+		edges = append(edges, transactiondetail.EdgeGroup)
 	}
 	return edges
 }
@@ -8049,13 +8509,17 @@ func (m *TransactionDetailMutation) AddedIDs(name string) []ent.Value {
 		if id := m.request; id != nil {
 			return []ent.Value{*id}
 		}
+	case transactiondetail.EdgeGroup:
+		if id := m.group; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TransactionDetailMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	return edges
 }
 
@@ -8069,12 +8533,15 @@ func (m *TransactionDetailMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TransactionDetailMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedtransaction {
 		edges = append(edges, transactiondetail.EdgeTransaction)
 	}
 	if m.clearedrequest {
 		edges = append(edges, transactiondetail.EdgeRequest)
+	}
+	if m.clearedgroup {
+		edges = append(edges, transactiondetail.EdgeGroup)
 	}
 	return edges
 }
@@ -8087,6 +8554,8 @@ func (m *TransactionDetailMutation) EdgeCleared(name string) bool {
 		return m.clearedtransaction
 	case transactiondetail.EdgeRequest:
 		return m.clearedrequest
+	case transactiondetail.EdgeGroup:
+		return m.clearedgroup
 	}
 	return false
 }
@@ -8100,6 +8569,9 @@ func (m *TransactionDetailMutation) ClearEdge(name string) error {
 		return nil
 	case transactiondetail.EdgeRequest:
 		m.ClearRequest()
+		return nil
+	case transactiondetail.EdgeGroup:
+		m.ClearGroup()
 		return nil
 	}
 	return fmt.Errorf("unknown TransactionDetail unique edge %s", name)
@@ -8115,6 +8587,9 @@ func (m *TransactionDetailMutation) ResetEdge(name string) error {
 	case transactiondetail.EdgeRequest:
 		m.ResetRequest()
 		return nil
+	case transactiondetail.EdgeGroup:
+		m.ResetGroup()
+		return nil
 	}
 	return fmt.Errorf("unknown TransactionDetail edge %s", name)
 }
@@ -8125,6 +8600,7 @@ type TransactionTagMutation struct {
 	op                 Op
 	typ                string
 	id                 *int
+	created_at         *time.Time
 	clearedFields      map[string]struct{}
 	transaction        *int
 	clearedtransaction bool
@@ -8214,9 +8690,76 @@ func (m *TransactionTagMutation) ID() (id int, exists bool) {
 	return *m.id, true
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by id.
-func (m *TransactionTagMutation) SetTransactionID(id int) {
-	m.transaction = &id
+// SetTransactionID sets the "transaction_id" field.
+func (m *TransactionTagMutation) SetTransactionID(i int) {
+	m.transaction = &i
+}
+
+// TransactionID returns the value of the "transaction_id" field in the mutation.
+func (m *TransactionTagMutation) TransactionID() (r int, exists bool) {
+	v := m.transaction
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTransactionID returns the old "transaction_id" field's value of the TransactionTag entity.
+// If the TransactionTag object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionTagMutation) OldTransactionID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldTransactionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldTransactionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTransactionID: %w", err)
+	}
+	return oldValue.TransactionID, nil
+}
+
+// ResetTransactionID resets all changes to the "transaction_id" field.
+func (m *TransactionTagMutation) ResetTransactionID() {
+	m.transaction = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *TransactionTagMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *TransactionTagMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the TransactionTag entity.
+// If the TransactionTag object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionTagMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *TransactionTagMutation) ResetCreatedAt() {
+	m.created_at = nil
 }
 
 // ClearTransaction clears the "transaction" edge to the Transaction entity.
@@ -8227,14 +8770,6 @@ func (m *TransactionTagMutation) ClearTransaction() {
 // TransactionCleared reports if the "transaction" edge to the Transaction entity was cleared.
 func (m *TransactionTagMutation) TransactionCleared() bool {
 	return m.clearedtransaction
-}
-
-// TransactionID returns the "transaction" edge ID in the mutation.
-func (m *TransactionTagMutation) TransactionID() (id int, exists bool) {
-	if m.transaction != nil {
-		return *m.transaction, true
-	}
-	return
 }
 
 // TransactionIDs returns the "transaction" edge IDs in the mutation.
@@ -8306,7 +8841,13 @@ func (m *TransactionTagMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TransactionTagMutation) Fields() []string {
-	fields := make([]string, 0, 0)
+	fields := make([]string, 0, 2)
+	if m.transaction != nil {
+		fields = append(fields, transactiontag.FieldTransactionID)
+	}
+	if m.created_at != nil {
+		fields = append(fields, transactiontag.FieldCreatedAt)
+	}
 	return fields
 }
 
@@ -8314,6 +8855,12 @@ func (m *TransactionTagMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *TransactionTagMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case transactiontag.FieldTransactionID:
+		return m.TransactionID()
+	case transactiontag.FieldCreatedAt:
+		return m.CreatedAt()
+	}
 	return nil, false
 }
 
@@ -8321,6 +8868,12 @@ func (m *TransactionTagMutation) Field(name string) (ent.Value, bool) {
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
 func (m *TransactionTagMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case transactiontag.FieldTransactionID:
+		return m.OldTransactionID(ctx)
+	case transactiontag.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
 	return nil, fmt.Errorf("unknown TransactionTag field %s", name)
 }
 
@@ -8329,6 +8882,20 @@ func (m *TransactionTagMutation) OldField(ctx context.Context, name string) (ent
 // type.
 func (m *TransactionTagMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case transactiontag.FieldTransactionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTransactionID(v)
+		return nil
+	case transactiontag.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown TransactionTag field %s", name)
 }
@@ -8336,13 +8903,16 @@ func (m *TransactionTagMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *TransactionTagMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *TransactionTagMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -8350,6 +8920,8 @@ func (m *TransactionTagMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *TransactionTagMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown TransactionTag numeric field %s", name)
 }
 
@@ -8375,6 +8947,14 @@ func (m *TransactionTagMutation) ClearField(name string) error {
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
 func (m *TransactionTagMutation) ResetField(name string) error {
+	switch name {
+	case transactiontag.FieldTransactionID:
+		m.ResetTransactionID()
+		return nil
+	case transactiontag.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown TransactionTag field %s", name)
 }
 

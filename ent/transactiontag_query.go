@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -29,7 +30,6 @@ type TransactionTagQuery struct {
 	// eager-loading edges.
 	withTransaction *TransactionQuery
 	withTag         *TagQuery
-	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -80,7 +80,7 @@ func (ttq *TransactionTagQuery) QueryTransaction() *TransactionQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transactiontag.Table, transactiontag.FieldID, selector),
 			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, transactiontag.TransactionTable, transactiontag.TransactionColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, transactiontag.TransactionTable, transactiontag.TransactionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(ttq.driver.Dialect(), step)
 		return fromU, nil
@@ -102,7 +102,7 @@ func (ttq *TransactionTagQuery) QueryTag() *TagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transactiontag.Table, transactiontag.FieldID, selector),
 			sqlgraph.To(tag.Table, tag.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, transactiontag.TagTable, transactiontag.TagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, transactiontag.TagTable, transactiontag.TagColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(ttq.driver.Dialect(), step)
 		return fromU, nil
@@ -323,6 +323,19 @@ func (ttq *TransactionTagQuery) WithTag(opts ...func(*TagQuery)) *TransactionTag
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		TransactionID int `json:"transaction_id,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.TransactionTag.Query().
+//		GroupBy(transactiontag.FieldTransactionID).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
+//
 func (ttq *TransactionTagQuery) GroupBy(field string, fields ...string) *TransactionTagGroupBy {
 	group := &TransactionTagGroupBy{config: ttq.config}
 	group.fields = append([]string{field}, fields...)
@@ -337,6 +350,17 @@ func (ttq *TransactionTagQuery) GroupBy(field string, fields ...string) *Transac
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		TransactionID int `json:"transaction_id,omitempty"`
+//	}
+//
+//	client.TransactionTag.Query().
+//		Select(transactiontag.FieldTransactionID).
+//		Scan(ctx, &v)
+//
 func (ttq *TransactionTagQuery) Select(field string, fields ...string) *TransactionTagSelect {
 	ttq.fields = append([]string{field}, fields...)
 	return &TransactionTagSelect{TransactionTagQuery: ttq}
@@ -361,19 +385,12 @@ func (ttq *TransactionTagQuery) prepareQuery(ctx context.Context) error {
 func (ttq *TransactionTagQuery) sqlAll(ctx context.Context) ([]*TransactionTag, error) {
 	var (
 		nodes       = []*TransactionTag{}
-		withFKs     = ttq.withFKs
 		_spec       = ttq.querySpec()
 		loadedTypes = [2]bool{
 			ttq.withTransaction != nil,
 			ttq.withTag != nil,
 		}
 	)
-	if ttq.withTransaction != nil || ttq.withTag != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, transactiontag.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &TransactionTag{config: ttq.config}
 		nodes = append(nodes, node)
@@ -398,10 +415,7 @@ func (ttq *TransactionTagQuery) sqlAll(ctx context.Context) ([]*TransactionTag, 
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*TransactionTag)
 		for i := range nodes {
-			if nodes[i].transaction_tag == nil {
-				continue
-			}
-			fk := *nodes[i].transaction_tag
+			fk := nodes[i].TransactionID
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -415,7 +429,7 @@ func (ttq *TransactionTagQuery) sqlAll(ctx context.Context) ([]*TransactionTag, 
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "transaction_tag" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "transaction_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Transaction = n
@@ -424,31 +438,30 @@ func (ttq *TransactionTagQuery) sqlAll(ctx context.Context) ([]*TransactionTag, 
 	}
 
 	if query := ttq.withTag; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*TransactionTag)
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*TransactionTag)
 		for i := range nodes {
-			if nodes[i].tag_transaction_tag == nil {
-				continue
-			}
-			fk := *nodes[i].tag_transaction_tag
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
 		}
-		query.Where(tag.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.Tag(func(s *sql.Selector) {
+			s.Where(sql.InValues(transactiontag.TagColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.transaction_tag_tag
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "transaction_tag_tag" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "tag_transaction_tag" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "transaction_tag_tag" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Tag = n
-			}
+			node.Edges.Tag = n
 		}
 	}
 

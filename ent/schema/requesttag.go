@@ -16,6 +16,7 @@ type RequestTag struct {
 // Fields of the RequestTag.
 func (RequestTag) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("request_id"),
 		field.Time("created_at").
 			Default(time.Now),
 	}
@@ -24,13 +25,11 @@ func (RequestTag) Fields() []ent.Field {
 // Edges of the RequestTag.
 func (RequestTag) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("request", Request.Type).
-			Ref("tag").
+		edge.To("request", Request.Type).
+			Field("request_id").
 			Unique().
 			Required(),
-		edge.From("tag", Tag.Type).
-			Ref("request_tag").
-			Unique().
-			Required(),
+		edge.To("tag", Tag.Type).
+			Unique(),
 	}
 }

@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -30,6 +29,7 @@ type TagQuery struct {
 	// eager-loading edges.
 	withRequestTag     *RequestTagQuery
 	withTransactionTag *TransactionTagQuery
+	withFKs            bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -80,7 +80,7 @@ func (tq *TagQuery) QueryRequestTag() *RequestTagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, selector),
 			sqlgraph.To(requesttag.Table, requesttag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, tag.RequestTagTable, tag.RequestTagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, tag.RequestTagTable, tag.RequestTagColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -102,7 +102,7 @@ func (tq *TagQuery) QueryTransactionTag() *TransactionTagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, selector),
 			sqlgraph.To(transactiontag.Table, transactiontag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, tag.TransactionTagTable, tag.TransactionTagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, tag.TransactionTagTable, tag.TransactionTagColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -385,12 +385,19 @@ func (tq *TagQuery) prepareQuery(ctx context.Context) error {
 func (tq *TagQuery) sqlAll(ctx context.Context) ([]*Tag, error) {
 	var (
 		nodes       = []*Tag{}
+		withFKs     = tq.withFKs
 		_spec       = tq.querySpec()
 		loadedTypes = [2]bool{
 			tq.withRequestTag != nil,
 			tq.withTransactionTag != nil,
 		}
 	)
+	if tq.withRequestTag != nil || tq.withTransactionTag != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, tag.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Tag{config: tq.config}
 		nodes = append(nodes, node)
@@ -412,60 +419,60 @@ func (tq *TagQuery) sqlAll(ctx context.Context) ([]*Tag, error) {
 	}
 
 	if query := tq.withRequestTag; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Tag)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Tag)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.RequestTag = []*RequestTag{}
+			if nodes[i].request_tag_tag == nil {
+				continue
+			}
+			fk := *nodes[i].request_tag_tag
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.withFKs = true
-		query.Where(predicate.RequestTag(func(s *sql.Selector) {
-			s.Where(sql.InValues(tag.RequestTagColumn, fks...))
-		}))
+		query.Where(requesttag.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.tag_request_tag
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "tag_request_tag" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "tag_request_tag" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_tag_tag" returned %v`, n.ID)
 			}
-			node.Edges.RequestTag = append(node.Edges.RequestTag, n)
+			for i := range nodes {
+				nodes[i].Edges.RequestTag = n
+			}
 		}
 	}
 
 	if query := tq.withTransactionTag; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Tag)
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Tag)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.TransactionTag = []*TransactionTag{}
+			if nodes[i].transaction_tag_tag == nil {
+				continue
+			}
+			fk := *nodes[i].transaction_tag_tag
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.withFKs = true
-		query.Where(predicate.TransactionTag(func(s *sql.Selector) {
-			s.Where(sql.InValues(tag.TransactionTagColumn, fks...))
-		}))
+		query.Where(transactiontag.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.tag_transaction_tag
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "tag_transaction_tag" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "tag_transaction_tag" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "transaction_tag_tag" returned %v`, n.ID)
 			}
-			node.Edges.TransactionTag = append(node.Edges.TransactionTag, n)
+			for i := range nodes {
+				nodes[i].Edges.TransactionTag = n
+			}
 		}
 	}
 

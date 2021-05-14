@@ -30,6 +30,13 @@ func (rtu *RequestTagUpdate) Where(ps ...predicate.RequestTag) *RequestTagUpdate
 	return rtu
 }
 
+// SetRequestID sets the "request_id" field.
+func (rtu *RequestTagUpdate) SetRequestID(i int) *RequestTagUpdate {
+	rtu.mutation.ResetRequestID()
+	rtu.mutation.SetRequestID(i)
+	return rtu
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (rtu *RequestTagUpdate) SetCreatedAt(t time.Time) *RequestTagUpdate {
 	rtu.mutation.SetCreatedAt(t)
@@ -44,12 +51,6 @@ func (rtu *RequestTagUpdate) SetNillableCreatedAt(t *time.Time) *RequestTagUpdat
 	return rtu
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (rtu *RequestTagUpdate) SetRequestID(id int) *RequestTagUpdate {
-	rtu.mutation.SetRequestID(id)
-	return rtu
-}
-
 // SetRequest sets the "request" edge to the Request entity.
 func (rtu *RequestTagUpdate) SetRequest(r *Request) *RequestTagUpdate {
 	return rtu.SetRequestID(r.ID)
@@ -58,6 +59,14 @@ func (rtu *RequestTagUpdate) SetRequest(r *Request) *RequestTagUpdate {
 // SetTagID sets the "tag" edge to the Tag entity by ID.
 func (rtu *RequestTagUpdate) SetTagID(id int) *RequestTagUpdate {
 	rtu.mutation.SetTagID(id)
+	return rtu
+}
+
+// SetNillableTagID sets the "tag" edge to the Tag entity by ID if the given value is not nil.
+func (rtu *RequestTagUpdate) SetNillableTagID(id *int) *RequestTagUpdate {
+	if id != nil {
+		rtu = rtu.SetTagID(*id)
+	}
 	return rtu
 }
 
@@ -145,9 +154,6 @@ func (rtu *RequestTagUpdate) check() error {
 	if _, ok := rtu.mutation.RequestID(); rtu.mutation.RequestCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"request\"")
 	}
-	if _, ok := rtu.mutation.TagID(); rtu.mutation.TagCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"tag\"")
-	}
 	return nil
 }
 
@@ -179,7 +185,7 @@ func (rtu *RequestTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if rtu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requesttag.RequestTable,
 			Columns: []string{requesttag.RequestColumn},
 			Bidi:    false,
@@ -195,7 +201,7 @@ func (rtu *RequestTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := rtu.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requesttag.RequestTable,
 			Columns: []string{requesttag.RequestColumn},
 			Bidi:    false,
@@ -213,8 +219,8 @@ func (rtu *RequestTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if rtu.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   requesttag.TagTable,
 			Columns: []string{requesttag.TagColumn},
 			Bidi:    false,
@@ -229,8 +235,8 @@ func (rtu *RequestTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := rtu.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   requesttag.TagTable,
 			Columns: []string{requesttag.TagColumn},
 			Bidi:    false,
@@ -265,6 +271,13 @@ type RequestTagUpdateOne struct {
 	mutation *RequestTagMutation
 }
 
+// SetRequestID sets the "request_id" field.
+func (rtuo *RequestTagUpdateOne) SetRequestID(i int) *RequestTagUpdateOne {
+	rtuo.mutation.ResetRequestID()
+	rtuo.mutation.SetRequestID(i)
+	return rtuo
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (rtuo *RequestTagUpdateOne) SetCreatedAt(t time.Time) *RequestTagUpdateOne {
 	rtuo.mutation.SetCreatedAt(t)
@@ -279,12 +292,6 @@ func (rtuo *RequestTagUpdateOne) SetNillableCreatedAt(t *time.Time) *RequestTagU
 	return rtuo
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (rtuo *RequestTagUpdateOne) SetRequestID(id int) *RequestTagUpdateOne {
-	rtuo.mutation.SetRequestID(id)
-	return rtuo
-}
-
 // SetRequest sets the "request" edge to the Request entity.
 func (rtuo *RequestTagUpdateOne) SetRequest(r *Request) *RequestTagUpdateOne {
 	return rtuo.SetRequestID(r.ID)
@@ -293,6 +300,14 @@ func (rtuo *RequestTagUpdateOne) SetRequest(r *Request) *RequestTagUpdateOne {
 // SetTagID sets the "tag" edge to the Tag entity by ID.
 func (rtuo *RequestTagUpdateOne) SetTagID(id int) *RequestTagUpdateOne {
 	rtuo.mutation.SetTagID(id)
+	return rtuo
+}
+
+// SetNillableTagID sets the "tag" edge to the Tag entity by ID if the given value is not nil.
+func (rtuo *RequestTagUpdateOne) SetNillableTagID(id *int) *RequestTagUpdateOne {
+	if id != nil {
+		rtuo = rtuo.SetTagID(*id)
+	}
 	return rtuo
 }
 
@@ -387,9 +402,6 @@ func (rtuo *RequestTagUpdateOne) check() error {
 	if _, ok := rtuo.mutation.RequestID(); rtuo.mutation.RequestCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"request\"")
 	}
-	if _, ok := rtuo.mutation.TagID(); rtuo.mutation.TagCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"tag\"")
-	}
 	return nil
 }
 
@@ -438,7 +450,7 @@ func (rtuo *RequestTagUpdateOne) sqlSave(ctx context.Context) (_node *RequestTag
 	if rtuo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requesttag.RequestTable,
 			Columns: []string{requesttag.RequestColumn},
 			Bidi:    false,
@@ -454,7 +466,7 @@ func (rtuo *RequestTagUpdateOne) sqlSave(ctx context.Context) (_node *RequestTag
 	if nodes := rtuo.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requesttag.RequestTable,
 			Columns: []string{requesttag.RequestColumn},
 			Bidi:    false,
@@ -472,8 +484,8 @@ func (rtuo *RequestTagUpdateOne) sqlSave(ctx context.Context) (_node *RequestTag
 	}
 	if rtuo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   requesttag.TagTable,
 			Columns: []string{requesttag.TagColumn},
 			Bidi:    false,
@@ -488,8 +500,8 @@ func (rtuo *RequestTagUpdateOne) sqlSave(ctx context.Context) (_node *RequestTag
 	}
 	if nodes := rtuo.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   requesttag.TagTable,
 			Columns: []string{requesttag.TagColumn},
 			Bidi:    false,

@@ -13,6 +13,8 @@ const (
 	FieldID = "id"
 	// FieldAmount holds the string denoting the amount field in the database.
 	FieldAmount = "amount"
+	// FieldGroupID holds the string denoting the group_id field in the database.
+	FieldGroupID = "group_id"
 	// FieldComment holds the string denoting the comment field in the database.
 	FieldComment = "comment"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -27,32 +29,22 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	GroupInverseTable = "groups"
 	// GroupColumn is the table column denoting the group relation/edge.
-	GroupColumn = "group_group_budget"
+	GroupColumn = "group_id"
 )
 
 // Columns holds all SQL columns for groupbudget fields.
 var Columns = []string{
 	FieldID,
 	FieldAmount,
+	FieldGroupID,
 	FieldComment,
 	FieldCreatedAt,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "group_budgets"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"group_group_budget",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

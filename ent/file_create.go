@@ -61,6 +61,14 @@ func (fc *FileCreate) SetRequestFileID(id int) *FileCreate {
 	return fc
 }
 
+// SetNillableRequestFileID sets the "request_file" edge to the RequestFile entity by ID if the given value is not nil.
+func (fc *FileCreate) SetNillableRequestFileID(id *int) *FileCreate {
+	if id != nil {
+		fc = fc.SetRequestFileID(*id)
+	}
+	return fc
+}
+
 // SetRequestFile sets the "request_file" edge to the RequestFile entity.
 func (fc *FileCreate) SetRequestFile(r *RequestFile) *FileCreate {
 	return fc.SetRequestFileID(r.ID)
@@ -131,9 +139,6 @@ func (fc *FileCreate) check() error {
 	}
 	if _, ok := fc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
-	}
-	if _, ok := fc.mutation.RequestFileID(); !ok {
-		return &ValidationError{Name: "request_file", err: errors.New("ent: missing required edge \"request_file\"")}
 	}
 	return nil
 }

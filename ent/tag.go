@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/traPtitech/Jomon/ent/requesttag"
 	"github.com/traPtitech/Jomon/ent/tag"
+	"github.com/traPtitech/Jomon/ent/transactiontag"
 )
 
 // Tag is the model entity for the Tag schema.
@@ -28,33 +30,45 @@ type Tag struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TagQuery when eager-loading is set.
-	Edges TagEdges `json:"edges"`
+	Edges               TagEdges `json:"edges"`
+	request_tag_tag     *int
+	transaction_tag_tag *int
 }
 
 // TagEdges holds the relations/edges for other nodes in the graph.
 type TagEdges struct {
 	// RequestTag holds the value of the request_tag edge.
-	RequestTag []*RequestTag `json:"request_tag,omitempty"`
+	RequestTag *RequestTag `json:"request_tag,omitempty"`
 	// TransactionTag holds the value of the transaction_tag edge.
-	TransactionTag []*TransactionTag `json:"transaction_tag,omitempty"`
+	TransactionTag *TransactionTag `json:"transaction_tag,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
 }
 
 // RequestTagOrErr returns the RequestTag value or an error if the edge
-// was not loaded in eager-loading.
-func (e TagEdges) RequestTagOrErr() ([]*RequestTag, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TagEdges) RequestTagOrErr() (*RequestTag, error) {
 	if e.loadedTypes[0] {
+		if e.RequestTag == nil {
+			// The edge request_tag was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: requesttag.Label}
+		}
 		return e.RequestTag, nil
 	}
 	return nil, &NotLoadedError{edge: "request_tag"}
 }
 
 // TransactionTagOrErr returns the TransactionTag value or an error if the edge
-// was not loaded in eager-loading.
-func (e TagEdges) TransactionTagOrErr() ([]*TransactionTag, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TagEdges) TransactionTagOrErr() (*TransactionTag, error) {
 	if e.loadedTypes[1] {
+		if e.TransactionTag == nil {
+			// The edge transaction_tag was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: transactiontag.Label}
+		}
 		return e.TransactionTag, nil
 	}
 	return nil, &NotLoadedError{edge: "transaction_tag"}
@@ -71,6 +85,10 @@ func (*Tag) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullString)
 		case tag.FieldCreatedAt, tag.FieldUpdatedAt, tag.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
+		case tag.ForeignKeys[0]: // request_tag_tag
+			values[i] = new(sql.NullInt64)
+		case tag.ForeignKeys[1]: // transaction_tag_tag
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Tag", columns[i])
 		}
@@ -122,6 +140,20 @@ func (t *Tag) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				t.DeletedAt = new(time.Time)
 				*t.DeletedAt = value.Time
+			}
+		case tag.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field request_tag_tag", value)
+			} else if value.Valid {
+				t.request_tag_tag = new(int)
+				*t.request_tag_tag = int(value.Int64)
+			}
+		case tag.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field transaction_tag_tag", value)
+			} else if value.Valid {
+				t.transaction_tag_tag = new(int)
+				*t.transaction_tag_tag = int(value.Int64)
 			}
 		}
 	}

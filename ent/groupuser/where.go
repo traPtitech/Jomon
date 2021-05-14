@@ -100,6 +100,13 @@ func UserID(v string) predicate.GroupUser {
 	})
 }
 
+// GroupID applies equality check predicate on the "group_id" field. It's identical to GroupIDEQ.
+func GroupID(v int) predicate.GroupUser {
+	return predicate.GroupUser(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldGroupID), v))
+	})
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.GroupUser {
 	return predicate.GroupUser(func(s *sql.Selector) {
@@ -218,6 +225,54 @@ func UserIDContainsFold(v string) predicate.GroupUser {
 	})
 }
 
+// GroupIDEQ applies the EQ predicate on the "group_id" field.
+func GroupIDEQ(v int) predicate.GroupUser {
+	return predicate.GroupUser(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldGroupID), v))
+	})
+}
+
+// GroupIDNEQ applies the NEQ predicate on the "group_id" field.
+func GroupIDNEQ(v int) predicate.GroupUser {
+	return predicate.GroupUser(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldGroupID), v))
+	})
+}
+
+// GroupIDIn applies the In predicate on the "group_id" field.
+func GroupIDIn(vs ...int) predicate.GroupUser {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.GroupUser(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldGroupID), v...))
+	})
+}
+
+// GroupIDNotIn applies the NotIn predicate on the "group_id" field.
+func GroupIDNotIn(vs ...int) predicate.GroupUser {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.GroupUser(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldGroupID), v...))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.GroupUser {
 	return predicate.GroupUser(func(s *sql.Selector) {
@@ -300,7 +355,7 @@ func HasGroup() predicate.GroupUser {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GroupTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, GroupTable, GroupColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -312,7 +367,7 @@ func HasGroupWith(preds ...predicate.Group) predicate.GroupUser {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GroupInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, GroupTable, GroupColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

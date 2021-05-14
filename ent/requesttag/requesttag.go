@@ -11,6 +11,8 @@ const (
 	Label = "request_tag"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldRequestID holds the string denoting the request_id field in the database.
+	FieldRequestID = "request_id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// EdgeRequest holds the string denoting the request edge name in mutations.
@@ -25,38 +27,27 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "request" package.
 	RequestInverseTable = "requests"
 	// RequestColumn is the table column denoting the request relation/edge.
-	RequestColumn = "request_tag"
+	RequestColumn = "request_id"
 	// TagTable is the table the holds the tag relation/edge.
-	TagTable = "request_tags"
+	TagTable = "tags"
 	// TagInverseTable is the table name for the Tag entity.
 	// It exists in this package in order to avoid circular dependency with the "tag" package.
 	TagInverseTable = "tags"
 	// TagColumn is the table column denoting the tag relation/edge.
-	TagColumn = "tag_request_tag"
+	TagColumn = "request_tag_tag"
 )
 
 // Columns holds all SQL columns for requesttag fields.
 var Columns = []string{
 	FieldID,
+	FieldRequestID,
 	FieldCreatedAt,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "request_tags"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"request_tag",
-	"tag_request_tag",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

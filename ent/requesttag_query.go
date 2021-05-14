@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -29,7 +30,6 @@ type RequestTagQuery struct {
 	// eager-loading edges.
 	withRequest *RequestQuery
 	withTag     *TagQuery
-	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -80,7 +80,7 @@ func (rtq *RequestTagQuery) QueryRequest() *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requesttag.Table, requesttag.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, requesttag.RequestTable, requesttag.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, requesttag.RequestTable, requesttag.RequestColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rtq.driver.Dialect(), step)
 		return fromU, nil
@@ -102,7 +102,7 @@ func (rtq *RequestTagQuery) QueryTag() *TagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requesttag.Table, requesttag.FieldID, selector),
 			sqlgraph.To(tag.Table, tag.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, requesttag.TagTable, requesttag.TagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, requesttag.TagTable, requesttag.TagColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rtq.driver.Dialect(), step)
 		return fromU, nil
@@ -327,12 +327,12 @@ func (rtq *RequestTagQuery) WithTag(opts ...func(*TagQuery)) *RequestTagQuery {
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		RequestID int `json:"request_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.RequestTag.Query().
-//		GroupBy(requesttag.FieldCreatedAt).
+//		GroupBy(requesttag.FieldRequestID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -354,11 +354,11 @@ func (rtq *RequestTagQuery) GroupBy(field string, fields ...string) *RequestTagG
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		RequestID int `json:"request_id,omitempty"`
 //	}
 //
 //	client.RequestTag.Query().
-//		Select(requesttag.FieldCreatedAt).
+//		Select(requesttag.FieldRequestID).
 //		Scan(ctx, &v)
 //
 func (rtq *RequestTagQuery) Select(field string, fields ...string) *RequestTagSelect {
@@ -385,19 +385,12 @@ func (rtq *RequestTagQuery) prepareQuery(ctx context.Context) error {
 func (rtq *RequestTagQuery) sqlAll(ctx context.Context) ([]*RequestTag, error) {
 	var (
 		nodes       = []*RequestTag{}
-		withFKs     = rtq.withFKs
 		_spec       = rtq.querySpec()
 		loadedTypes = [2]bool{
 			rtq.withRequest != nil,
 			rtq.withTag != nil,
 		}
 	)
-	if rtq.withRequest != nil || rtq.withTag != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, requesttag.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &RequestTag{config: rtq.config}
 		nodes = append(nodes, node)
@@ -422,10 +415,7 @@ func (rtq *RequestTagQuery) sqlAll(ctx context.Context) ([]*RequestTag, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*RequestTag)
 		for i := range nodes {
-			if nodes[i].request_tag == nil {
-				continue
-			}
-			fk := *nodes[i].request_tag
+			fk := nodes[i].RequestID
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -439,7 +429,7 @@ func (rtq *RequestTagQuery) sqlAll(ctx context.Context) ([]*RequestTag, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_tag" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Request = n
@@ -448,31 +438,30 @@ func (rtq *RequestTagQuery) sqlAll(ctx context.Context) ([]*RequestTag, error) {
 	}
 
 	if query := rtq.withTag; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*RequestTag)
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*RequestTag)
 		for i := range nodes {
-			if nodes[i].tag_request_tag == nil {
-				continue
-			}
-			fk := *nodes[i].tag_request_tag
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
 		}
-		query.Where(tag.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.Tag(func(s *sql.Selector) {
+			s.Where(sql.InValues(requesttag.TagColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.request_tag_tag
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "request_tag_tag" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "tag_request_tag" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_tag_tag" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Tag = n
-			}
+			node.Edges.Tag = n
 		}
 	}
 

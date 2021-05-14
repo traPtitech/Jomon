@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -29,9 +30,24 @@ func (ttu *TransactionTagUpdate) Where(ps ...predicate.TransactionTag) *Transact
 	return ttu
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (ttu *TransactionTagUpdate) SetTransactionID(id int) *TransactionTagUpdate {
-	ttu.mutation.SetTransactionID(id)
+// SetTransactionID sets the "transaction_id" field.
+func (ttu *TransactionTagUpdate) SetTransactionID(i int) *TransactionTagUpdate {
+	ttu.mutation.ResetTransactionID()
+	ttu.mutation.SetTransactionID(i)
+	return ttu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (ttu *TransactionTagUpdate) SetCreatedAt(t time.Time) *TransactionTagUpdate {
+	ttu.mutation.SetCreatedAt(t)
+	return ttu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ttu *TransactionTagUpdate) SetNillableCreatedAt(t *time.Time) *TransactionTagUpdate {
+	if t != nil {
+		ttu.SetCreatedAt(*t)
+	}
 	return ttu
 }
 
@@ -43,6 +59,14 @@ func (ttu *TransactionTagUpdate) SetTransaction(t *Transaction) *TransactionTagU
 // SetTagID sets the "tag" edge to the Tag entity by ID.
 func (ttu *TransactionTagUpdate) SetTagID(id int) *TransactionTagUpdate {
 	ttu.mutation.SetTagID(id)
+	return ttu
+}
+
+// SetNillableTagID sets the "tag" edge to the Tag entity by ID if the given value is not nil.
+func (ttu *TransactionTagUpdate) SetNillableTagID(id *int) *TransactionTagUpdate {
+	if id != nil {
+		ttu = ttu.SetTagID(*id)
+	}
 	return ttu
 }
 
@@ -130,9 +154,6 @@ func (ttu *TransactionTagUpdate) check() error {
 	if _, ok := ttu.mutation.TransactionID(); ttu.mutation.TransactionCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"transaction\"")
 	}
-	if _, ok := ttu.mutation.TagID(); ttu.mutation.TagCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"tag\"")
-	}
 	return nil
 }
 
@@ -154,10 +175,17 @@ func (ttu *TransactionTagUpdate) sqlSave(ctx context.Context) (n int, err error)
 			}
 		}
 	}
+	if value, ok := ttu.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: transactiontag.FieldCreatedAt,
+		})
+	}
 	if ttu.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   transactiontag.TransactionTable,
 			Columns: []string{transactiontag.TransactionColumn},
 			Bidi:    false,
@@ -173,7 +201,7 @@ func (ttu *TransactionTagUpdate) sqlSave(ctx context.Context) (n int, err error)
 	if nodes := ttu.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   transactiontag.TransactionTable,
 			Columns: []string{transactiontag.TransactionColumn},
 			Bidi:    false,
@@ -191,8 +219,8 @@ func (ttu *TransactionTagUpdate) sqlSave(ctx context.Context) (n int, err error)
 	}
 	if ttu.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   transactiontag.TagTable,
 			Columns: []string{transactiontag.TagColumn},
 			Bidi:    false,
@@ -207,8 +235,8 @@ func (ttu *TransactionTagUpdate) sqlSave(ctx context.Context) (n int, err error)
 	}
 	if nodes := ttu.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   transactiontag.TagTable,
 			Columns: []string{transactiontag.TagColumn},
 			Bidi:    false,
@@ -243,9 +271,24 @@ type TransactionTagUpdateOne struct {
 	mutation *TransactionTagMutation
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (ttuo *TransactionTagUpdateOne) SetTransactionID(id int) *TransactionTagUpdateOne {
-	ttuo.mutation.SetTransactionID(id)
+// SetTransactionID sets the "transaction_id" field.
+func (ttuo *TransactionTagUpdateOne) SetTransactionID(i int) *TransactionTagUpdateOne {
+	ttuo.mutation.ResetTransactionID()
+	ttuo.mutation.SetTransactionID(i)
+	return ttuo
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (ttuo *TransactionTagUpdateOne) SetCreatedAt(t time.Time) *TransactionTagUpdateOne {
+	ttuo.mutation.SetCreatedAt(t)
+	return ttuo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ttuo *TransactionTagUpdateOne) SetNillableCreatedAt(t *time.Time) *TransactionTagUpdateOne {
+	if t != nil {
+		ttuo.SetCreatedAt(*t)
+	}
 	return ttuo
 }
 
@@ -257,6 +300,14 @@ func (ttuo *TransactionTagUpdateOne) SetTransaction(t *Transaction) *Transaction
 // SetTagID sets the "tag" edge to the Tag entity by ID.
 func (ttuo *TransactionTagUpdateOne) SetTagID(id int) *TransactionTagUpdateOne {
 	ttuo.mutation.SetTagID(id)
+	return ttuo
+}
+
+// SetNillableTagID sets the "tag" edge to the Tag entity by ID if the given value is not nil.
+func (ttuo *TransactionTagUpdateOne) SetNillableTagID(id *int) *TransactionTagUpdateOne {
+	if id != nil {
+		ttuo = ttuo.SetTagID(*id)
+	}
 	return ttuo
 }
 
@@ -351,9 +402,6 @@ func (ttuo *TransactionTagUpdateOne) check() error {
 	if _, ok := ttuo.mutation.TransactionID(); ttuo.mutation.TransactionCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"transaction\"")
 	}
-	if _, ok := ttuo.mutation.TagID(); ttuo.mutation.TagCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"tag\"")
-	}
 	return nil
 }
 
@@ -392,10 +440,17 @@ func (ttuo *TransactionTagUpdateOne) sqlSave(ctx context.Context) (_node *Transa
 			}
 		}
 	}
+	if value, ok := ttuo.mutation.CreatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: transactiontag.FieldCreatedAt,
+		})
+	}
 	if ttuo.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   transactiontag.TransactionTable,
 			Columns: []string{transactiontag.TransactionColumn},
 			Bidi:    false,
@@ -411,7 +466,7 @@ func (ttuo *TransactionTagUpdateOne) sqlSave(ctx context.Context) (_node *Transa
 	if nodes := ttuo.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   transactiontag.TransactionTable,
 			Columns: []string{transactiontag.TransactionColumn},
 			Bidi:    false,
@@ -429,8 +484,8 @@ func (ttuo *TransactionTagUpdateOne) sqlSave(ctx context.Context) (_node *Transa
 	}
 	if ttuo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   transactiontag.TagTable,
 			Columns: []string{transactiontag.TagColumn},
 			Bidi:    false,
@@ -445,8 +500,8 @@ func (ttuo *TransactionTagUpdateOne) sqlSave(ctx context.Context) (_node *Transa
 	}
 	if nodes := ttuo.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   transactiontag.TagTable,
 			Columns: []string{transactiontag.TagColumn},
 			Bidi:    false,

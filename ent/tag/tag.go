@@ -28,19 +28,19 @@ const (
 	// Table holds the table name of the tag in the database.
 	Table = "tags"
 	// RequestTagTable is the table the holds the request_tag relation/edge.
-	RequestTagTable = "request_tags"
+	RequestTagTable = "tags"
 	// RequestTagInverseTable is the table name for the RequestTag entity.
 	// It exists in this package in order to avoid circular dependency with the "requesttag" package.
 	RequestTagInverseTable = "request_tags"
 	// RequestTagColumn is the table column denoting the request_tag relation/edge.
-	RequestTagColumn = "tag_request_tag"
+	RequestTagColumn = "request_tag_tag"
 	// TransactionTagTable is the table the holds the transaction_tag relation/edge.
-	TransactionTagTable = "transaction_tags"
+	TransactionTagTable = "tags"
 	// TransactionTagInverseTable is the table name for the TransactionTag entity.
 	// It exists in this package in order to avoid circular dependency with the "transactiontag" package.
 	TransactionTagInverseTable = "transaction_tags"
 	// TransactionTagColumn is the table column denoting the transaction_tag relation/edge.
-	TransactionTagColumn = "tag_transaction_tag"
+	TransactionTagColumn = "transaction_tag_tag"
 )
 
 // Columns holds all SQL columns for tag fields.
@@ -53,10 +53,22 @@ var Columns = []string{
 	FieldDeletedAt,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "tags"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"request_tag_tag",
+	"transaction_tag_tag",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

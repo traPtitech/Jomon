@@ -3,6 +3,8 @@
 package transactiontag
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/traPtitech/Jomon/ent/predicate"
@@ -91,13 +93,151 @@ func IDLTE(id int) predicate.TransactionTag {
 	})
 }
 
+// TransactionID applies equality check predicate on the "transaction_id" field. It's identical to TransactionIDEQ.
+func TransactionID(v int) predicate.TransactionTag {
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTransactionID), v))
+	})
+}
+
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.TransactionTag {
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// TransactionIDEQ applies the EQ predicate on the "transaction_id" field.
+func TransactionIDEQ(v int) predicate.TransactionTag {
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTransactionID), v))
+	})
+}
+
+// TransactionIDNEQ applies the NEQ predicate on the "transaction_id" field.
+func TransactionIDNEQ(v int) predicate.TransactionTag {
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTransactionID), v))
+	})
+}
+
+// TransactionIDIn applies the In predicate on the "transaction_id" field.
+func TransactionIDIn(vs ...int) predicate.TransactionTag {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTransactionID), v...))
+	})
+}
+
+// TransactionIDNotIn applies the NotIn predicate on the "transaction_id" field.
+func TransactionIDNotIn(vs ...int) predicate.TransactionTag {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTransactionID), v...))
+	})
+}
+
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.TransactionTag {
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.TransactionTag {
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.TransactionTag {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.TransactionTag {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
+	})
+}
+
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.TransactionTag {
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.TransactionTag {
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.TransactionTag {
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCreatedAt), v))
+	})
+}
+
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.TransactionTag {
+	return predicate.TransactionTag(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+	})
+}
+
 // HasTransaction applies the HasEdge predicate on the "transaction" edge.
 func HasTransaction() predicate.TransactionTag {
 	return predicate.TransactionTag(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TransactionTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, TransactionTable, TransactionColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, TransactionTable, TransactionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -109,7 +249,7 @@ func HasTransactionWith(preds ...predicate.Transaction) predicate.TransactionTag
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TransactionInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, TransactionTable, TransactionColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, TransactionTable, TransactionColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -125,7 +265,7 @@ func HasTag() predicate.TransactionTag {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TagTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, TagTable, TagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, TagTable, TagColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -137,7 +277,7 @@ func HasTagWith(preds ...predicate.Tag) predicate.TransactionTag {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TagInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, TagTable, TagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, TagTable, TagColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -27,6 +27,12 @@ func (gbc *GroupBudgetCreate) SetAmount(i int) *GroupBudgetCreate {
 	return gbc
 }
 
+// SetGroupID sets the "group_id" field.
+func (gbc *GroupBudgetCreate) SetGroupID(i int) *GroupBudgetCreate {
+	gbc.mutation.SetGroupID(i)
+	return gbc
+}
+
 // SetComment sets the "comment" field.
 func (gbc *GroupBudgetCreate) SetComment(s string) *GroupBudgetCreate {
 	gbc.mutation.SetComment(s)
@@ -52,12 +58,6 @@ func (gbc *GroupBudgetCreate) SetNillableCreatedAt(t *time.Time) *GroupBudgetCre
 	if t != nil {
 		gbc.SetCreatedAt(*t)
 	}
-	return gbc
-}
-
-// SetGroupID sets the "group" edge to the Group entity by ID.
-func (gbc *GroupBudgetCreate) SetGroupID(id int) *GroupBudgetCreate {
-	gbc.mutation.SetGroupID(id)
 	return gbc
 }
 
@@ -129,6 +129,9 @@ func (gbc *GroupBudgetCreate) check() error {
 	if _, ok := gbc.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New("ent: missing required field \"amount\"")}
 	}
+	if _, ok := gbc.mutation.GroupID(); !ok {
+		return &ValidationError{Name: "group_id", err: errors.New("ent: missing required field \"group_id\"")}
+	}
 	if _, ok := gbc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
 	}
@@ -189,7 +192,7 @@ func (gbc *GroupBudgetCreate) createSpec() (*GroupBudget, *sqlgraph.CreateSpec) 
 	if nodes := gbc.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   groupbudget.GroupTable,
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
@@ -203,7 +206,7 @@ func (gbc *GroupBudgetCreate) createSpec() (*GroupBudget, *sqlgraph.CreateSpec) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.group_group_budget = &nodes[0]
+		_node.GroupID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

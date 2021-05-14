@@ -27,7 +27,6 @@ type CommentQuery struct {
 	predicates []predicate.Comment
 	// eager-loading edges.
 	withRequest *RequestQuery
-	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -78,7 +77,7 @@ func (cq *CommentQuery) QueryRequest() *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(comment.Table, comment.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, comment.RequestTable, comment.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, comment.RequestTable, comment.RequestColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -349,18 +348,11 @@ func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
 func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 	var (
 		nodes       = []*Comment{}
-		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
 		loadedTypes = [1]bool{
 			cq.withRequest != nil,
 		}
 	)
-	if cq.withRequest != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, comment.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Comment{config: cq.config}
 		nodes = append(nodes, node)
@@ -385,10 +377,7 @@ func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Comment)
 		for i := range nodes {
-			if nodes[i].request_comment == nil {
-				continue
-			}
-			fk := *nodes[i].request_comment
+			fk := nodes[i].RequestID
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -402,7 +391,7 @@ func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_comment" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Request = n

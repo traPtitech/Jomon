@@ -19,6 +19,8 @@ type Comment struct {
 	ID int `json:"id,omitempty"`
 	// CreatedBy holds the value of the "created_by" field.
 	CreatedBy string `json:"created_by,omitempty"`
+	// RequestID holds the value of the "request_id" field.
+	RequestID int `json:"request_id,omitempty"`
 	// Comment holds the value of the "comment" field.
 	Comment string `json:"comment,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -29,8 +31,7 @@ type Comment struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CommentQuery when eager-loading is set.
-	Edges           CommentEdges `json:"edges"`
-	request_comment *int
+	Edges CommentEdges `json:"edges"`
 }
 
 // CommentEdges holds the relations/edges for other nodes in the graph.
@@ -61,14 +62,12 @@ func (*Comment) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case comment.FieldID:
+		case comment.FieldID, comment.FieldRequestID:
 			values[i] = new(sql.NullInt64)
 		case comment.FieldCreatedBy, comment.FieldComment:
 			values[i] = new(sql.NullString)
 		case comment.FieldCreatedAt, comment.FieldUpdatedAt, comment.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
-		case comment.ForeignKeys[0]: // request_comment
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Comment", columns[i])
 		}
@@ -96,6 +95,12 @@ func (c *Comment) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				c.CreatedBy = value.String
 			}
+		case comment.FieldRequestID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field request_id", values[i])
+			} else if value.Valid {
+				c.RequestID = int(value.Int64)
+			}
 		case comment.FieldComment:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field comment", values[i])
@@ -120,13 +125,6 @@ func (c *Comment) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				c.DeletedAt = new(time.Time)
 				*c.DeletedAt = value.Time
-			}
-		case comment.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field request_comment", value)
-			} else if value.Valid {
-				c.request_comment = new(int)
-				*c.request_comment = int(value.Int64)
 			}
 		}
 	}
@@ -163,6 +161,8 @@ func (c *Comment) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
 	builder.WriteString(", created_by=")
 	builder.WriteString(c.CreatedBy)
+	builder.WriteString(", request_id=")
+	builder.WriteString(fmt.Sprintf("%v", c.RequestID))
 	builder.WriteString(", comment=")
 	builder.WriteString(c.Comment)
 	builder.WriteString(", created_at=")

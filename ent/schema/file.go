@@ -30,7 +30,6 @@ func (File) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("request_file", RequestFile.Type).
 			Ref("file").
-			Unique().
-			Required(),
+			Unique(),
 	}
 }

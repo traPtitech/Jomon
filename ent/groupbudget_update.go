@@ -42,6 +42,13 @@ func (gbu *GroupBudgetUpdate) AddAmount(i int) *GroupBudgetUpdate {
 	return gbu
 }
 
+// SetGroupID sets the "group_id" field.
+func (gbu *GroupBudgetUpdate) SetGroupID(i int) *GroupBudgetUpdate {
+	gbu.mutation.ResetGroupID()
+	gbu.mutation.SetGroupID(i)
+	return gbu
+}
+
 // SetComment sets the "comment" field.
 func (gbu *GroupBudgetUpdate) SetComment(s string) *GroupBudgetUpdate {
 	gbu.mutation.SetComment(s)
@@ -73,12 +80,6 @@ func (gbu *GroupBudgetUpdate) SetNillableCreatedAt(t *time.Time) *GroupBudgetUpd
 	if t != nil {
 		gbu.SetCreatedAt(*t)
 	}
-	return gbu
-}
-
-// SetGroupID sets the "group" edge to the Group entity by ID.
-func (gbu *GroupBudgetUpdate) SetGroupID(id int) *GroupBudgetUpdate {
-	gbu.mutation.SetGroupID(id)
 	return gbu
 }
 
@@ -218,7 +219,7 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if gbu.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   groupbudget.GroupTable,
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
@@ -234,7 +235,7 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := gbu.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   groupbudget.GroupTable,
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
@@ -282,6 +283,13 @@ func (gbuo *GroupBudgetUpdateOne) AddAmount(i int) *GroupBudgetUpdateOne {
 	return gbuo
 }
 
+// SetGroupID sets the "group_id" field.
+func (gbuo *GroupBudgetUpdateOne) SetGroupID(i int) *GroupBudgetUpdateOne {
+	gbuo.mutation.ResetGroupID()
+	gbuo.mutation.SetGroupID(i)
+	return gbuo
+}
+
 // SetComment sets the "comment" field.
 func (gbuo *GroupBudgetUpdateOne) SetComment(s string) *GroupBudgetUpdateOne {
 	gbuo.mutation.SetComment(s)
@@ -313,12 +321,6 @@ func (gbuo *GroupBudgetUpdateOne) SetNillableCreatedAt(t *time.Time) *GroupBudge
 	if t != nil {
 		gbuo.SetCreatedAt(*t)
 	}
-	return gbuo
-}
-
-// SetGroupID sets the "group" edge to the Group entity by ID.
-func (gbuo *GroupBudgetUpdateOne) SetGroupID(id int) *GroupBudgetUpdateOne {
-	gbuo.mutation.SetGroupID(id)
 	return gbuo
 }
 
@@ -482,7 +484,7 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 	if gbuo.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   groupbudget.GroupTable,
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
@@ -498,7 +500,7 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 	if nodes := gbuo.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   groupbudget.GroupTable,
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,

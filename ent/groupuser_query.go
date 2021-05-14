@@ -27,7 +27,6 @@ type GroupUserQuery struct {
 	predicates []predicate.GroupUser
 	// eager-loading edges.
 	withGroup *GroupQuery
-	withFKs   bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -78,7 +77,7 @@ func (guq *GroupUserQuery) QueryGroup() *GroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groupuser.Table, groupuser.FieldID, selector),
 			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, groupuser.GroupTable, groupuser.GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, groupuser.GroupTable, groupuser.GroupColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(guq.driver.Dialect(), step)
 		return fromU, nil
@@ -349,18 +348,11 @@ func (guq *GroupUserQuery) prepareQuery(ctx context.Context) error {
 func (guq *GroupUserQuery) sqlAll(ctx context.Context) ([]*GroupUser, error) {
 	var (
 		nodes       = []*GroupUser{}
-		withFKs     = guq.withFKs
 		_spec       = guq.querySpec()
 		loadedTypes = [1]bool{
 			guq.withGroup != nil,
 		}
 	)
-	if guq.withGroup != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, groupuser.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &GroupUser{config: guq.config}
 		nodes = append(nodes, node)
@@ -385,10 +377,7 @@ func (guq *GroupUserQuery) sqlAll(ctx context.Context) ([]*GroupUser, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*GroupUser)
 		for i := range nodes {
-			if nodes[i].group_user == nil {
-				continue
-			}
-			fk := *nodes[i].group_user
+			fk := nodes[i].GroupID
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -402,7 +391,7 @@ func (guq *GroupUserQuery) sqlAll(ctx context.Context) ([]*GroupUser, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_user" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "group_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Group = n

@@ -17,6 +17,7 @@ type RequestTarget struct {
 func (RequestTarget) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("target"),
+		field.Int("request_id"),
 		field.Time("paid_at").
 			Nillable().
 			Optional(),
@@ -28,8 +29,8 @@ func (RequestTarget) Fields() []ent.Field {
 // Edges of the RequestTarget.
 func (RequestTarget) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("request", Request.Type).
-			Ref("target").
+		edge.To("request", Request.Type).
+			Field("request_id").
 			Unique().
 			Required(),
 	}

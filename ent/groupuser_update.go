@@ -35,6 +35,13 @@ func (guu *GroupUserUpdate) SetUserID(s string) *GroupUserUpdate {
 	return guu
 }
 
+// SetGroupID sets the "group_id" field.
+func (guu *GroupUserUpdate) SetGroupID(i int) *GroupUserUpdate {
+	guu.mutation.ResetGroupID()
+	guu.mutation.SetGroupID(i)
+	return guu
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (guu *GroupUserUpdate) SetCreatedAt(t time.Time) *GroupUserUpdate {
 	guu.mutation.SetCreatedAt(t)
@@ -46,12 +53,6 @@ func (guu *GroupUserUpdate) SetNillableCreatedAt(t *time.Time) *GroupUserUpdate 
 	if t != nil {
 		guu.SetCreatedAt(*t)
 	}
-	return guu
-}
-
-// SetGroupID sets the "group" edge to the Group entity by ID.
-func (guu *GroupUserUpdate) SetGroupID(id int) *GroupUserUpdate {
-	guu.mutation.SetGroupID(id)
 	return guu
 }
 
@@ -171,7 +172,7 @@ func (guu *GroupUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if guu.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   groupuser.GroupTable,
 			Columns: []string{groupuser.GroupColumn},
 			Bidi:    false,
@@ -187,7 +188,7 @@ func (guu *GroupUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := guu.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   groupuser.GroupTable,
 			Columns: []string{groupuser.GroupColumn},
 			Bidi:    false,
@@ -228,6 +229,13 @@ func (guuo *GroupUserUpdateOne) SetUserID(s string) *GroupUserUpdateOne {
 	return guuo
 }
 
+// SetGroupID sets the "group_id" field.
+func (guuo *GroupUserUpdateOne) SetGroupID(i int) *GroupUserUpdateOne {
+	guuo.mutation.ResetGroupID()
+	guuo.mutation.SetGroupID(i)
+	return guuo
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (guuo *GroupUserUpdateOne) SetCreatedAt(t time.Time) *GroupUserUpdateOne {
 	guuo.mutation.SetCreatedAt(t)
@@ -239,12 +247,6 @@ func (guuo *GroupUserUpdateOne) SetNillableCreatedAt(t *time.Time) *GroupUserUpd
 	if t != nil {
 		guuo.SetCreatedAt(*t)
 	}
-	return guuo
-}
-
-// SetGroupID sets the "group" edge to the Group entity by ID.
-func (guuo *GroupUserUpdateOne) SetGroupID(id int) *GroupUserUpdateOne {
-	guuo.mutation.SetGroupID(id)
 	return guuo
 }
 
@@ -388,7 +390,7 @@ func (guuo *GroupUserUpdateOne) sqlSave(ctx context.Context) (_node *GroupUser, 
 	if guuo.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   groupuser.GroupTable,
 			Columns: []string{groupuser.GroupColumn},
 			Bidi:    false,
@@ -404,7 +406,7 @@ func (guuo *GroupUserUpdateOne) sqlSave(ctx context.Context) (_node *GroupUser, 
 	if nodes := guuo.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   groupuser.GroupTable,
 			Columns: []string{groupuser.GroupColumn},
 			Bidi:    false,

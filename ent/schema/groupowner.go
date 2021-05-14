@@ -17,6 +17,7 @@ type GroupOwner struct {
 func (GroupOwner) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("owner"),
+		field.Int("group_id"),
 		field.Time("created_at").
 			Default(time.Now),
 	}
@@ -25,8 +26,8 @@ func (GroupOwner) Fields() []ent.Field {
 // Edges of the GroupOwner.
 func (GroupOwner) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("group", Group.Type).
-			Ref("owner").
+		edge.To("group", Group.Type).
+			Field("group_id").
 			Unique().
 			Required(),
 	}

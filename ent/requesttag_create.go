@@ -22,6 +22,12 @@ type RequestTagCreate struct {
 	hooks    []Hook
 }
 
+// SetRequestID sets the "request_id" field.
+func (rtc *RequestTagCreate) SetRequestID(i int) *RequestTagCreate {
+	rtc.mutation.SetRequestID(i)
+	return rtc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (rtc *RequestTagCreate) SetCreatedAt(t time.Time) *RequestTagCreate {
 	rtc.mutation.SetCreatedAt(t)
@@ -36,12 +42,6 @@ func (rtc *RequestTagCreate) SetNillableCreatedAt(t *time.Time) *RequestTagCreat
 	return rtc
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (rtc *RequestTagCreate) SetRequestID(id int) *RequestTagCreate {
-	rtc.mutation.SetRequestID(id)
-	return rtc
-}
-
 // SetRequest sets the "request" edge to the Request entity.
 func (rtc *RequestTagCreate) SetRequest(r *Request) *RequestTagCreate {
 	return rtc.SetRequestID(r.ID)
@@ -50,6 +50,14 @@ func (rtc *RequestTagCreate) SetRequest(r *Request) *RequestTagCreate {
 // SetTagID sets the "tag" edge to the Tag entity by ID.
 func (rtc *RequestTagCreate) SetTagID(id int) *RequestTagCreate {
 	rtc.mutation.SetTagID(id)
+	return rtc
+}
+
+// SetNillableTagID sets the "tag" edge to the Tag entity by ID if the given value is not nil.
+func (rtc *RequestTagCreate) SetNillableTagID(id *int) *RequestTagCreate {
+	if id != nil {
+		rtc = rtc.SetTagID(*id)
+	}
 	return rtc
 }
 
@@ -118,14 +126,14 @@ func (rtc *RequestTagCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (rtc *RequestTagCreate) check() error {
+	if _, ok := rtc.mutation.RequestID(); !ok {
+		return &ValidationError{Name: "request_id", err: errors.New("ent: missing required field \"request_id\"")}
+	}
 	if _, ok := rtc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
 	}
 	if _, ok := rtc.mutation.RequestID(); !ok {
 		return &ValidationError{Name: "request", err: errors.New("ent: missing required edge \"request\"")}
-	}
-	if _, ok := rtc.mutation.TagID(); !ok {
-		return &ValidationError{Name: "tag", err: errors.New("ent: missing required edge \"tag\"")}
 	}
 	return nil
 }
@@ -165,7 +173,7 @@ func (rtc *RequestTagCreate) createSpec() (*RequestTag, *sqlgraph.CreateSpec) {
 	if nodes := rtc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requesttag.RequestTable,
 			Columns: []string{requesttag.RequestColumn},
 			Bidi:    false,
@@ -179,13 +187,13 @@ func (rtc *RequestTagCreate) createSpec() (*RequestTag, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_tag = &nodes[0]
+		_node.RequestID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := rtc.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   requesttag.TagTable,
 			Columns: []string{requesttag.TagColumn},
 			Bidi:    false,
@@ -199,7 +207,6 @@ func (rtc *RequestTagCreate) createSpec() (*RequestTag, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.tag_request_tag = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

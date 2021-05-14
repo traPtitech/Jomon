@@ -37,21 +37,21 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "groupbudget" package.
 	GroupBudgetInverseTable = "group_budgets"
 	// GroupBudgetColumn is the table column denoting the group_budget relation/edge.
-	GroupBudgetColumn = "group_group_budget"
+	GroupBudgetColumn = "group_id"
 	// UserTable is the table the holds the user relation/edge.
 	UserTable = "group_users"
 	// UserInverseTable is the table name for the GroupUser entity.
 	// It exists in this package in order to avoid circular dependency with the "groupuser" package.
 	UserInverseTable = "group_users"
 	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "group_user"
+	UserColumn = "group_id"
 	// OwnerTable is the table the holds the owner relation/edge.
 	OwnerTable = "group_owners"
 	// OwnerInverseTable is the table name for the GroupOwner entity.
 	// It exists in this package in order to avoid circular dependency with the "groupowner" package.
 	OwnerInverseTable = "group_owners"
 	// OwnerColumn is the table column denoting the owner relation/edge.
-	OwnerColumn = "group_owner"
+	OwnerColumn = "group_id"
 )
 
 // Columns holds all SQL columns for group fields.

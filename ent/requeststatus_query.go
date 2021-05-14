@@ -27,7 +27,6 @@ type RequestStatusQuery struct {
 	predicates []predicate.RequestStatus
 	// eager-loading edges.
 	withRequest *RequestQuery
-	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -78,7 +77,7 @@ func (rsq *RequestStatusQuery) QueryRequest() *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requeststatus.Table, requeststatus.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, requeststatus.RequestTable, requeststatus.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, requeststatus.RequestTable, requeststatus.RequestColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rsq.driver.Dialect(), step)
 		return fromU, nil
@@ -349,18 +348,11 @@ func (rsq *RequestStatusQuery) prepareQuery(ctx context.Context) error {
 func (rsq *RequestStatusQuery) sqlAll(ctx context.Context) ([]*RequestStatus, error) {
 	var (
 		nodes       = []*RequestStatus{}
-		withFKs     = rsq.withFKs
 		_spec       = rsq.querySpec()
 		loadedTypes = [1]bool{
 			rsq.withRequest != nil,
 		}
 	)
-	if rsq.withRequest != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, requeststatus.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &RequestStatus{config: rsq.config}
 		nodes = append(nodes, node)
@@ -385,10 +377,7 @@ func (rsq *RequestStatusQuery) sqlAll(ctx context.Context) ([]*RequestStatus, er
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*RequestStatus)
 		for i := range nodes {
-			if nodes[i].request_status == nil {
-				continue
-			}
-			fk := *nodes[i].request_status
+			fk := nodes[i].RequestID
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -402,7 +391,7 @@ func (rsq *RequestStatusQuery) sqlAll(ctx context.Context) ([]*RequestStatus, er
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_status" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Request = n

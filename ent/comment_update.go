@@ -35,6 +35,13 @@ func (cu *CommentUpdate) SetCreatedBy(s string) *CommentUpdate {
 	return cu
 }
 
+// SetRequestID sets the "request_id" field.
+func (cu *CommentUpdate) SetRequestID(i int) *CommentUpdate {
+	cu.mutation.ResetRequestID()
+	cu.mutation.SetRequestID(i)
+	return cu
+}
+
 // SetComment sets the "comment" field.
 func (cu *CommentUpdate) SetComment(s string) *CommentUpdate {
 	cu.mutation.SetComment(s)
@@ -86,12 +93,6 @@ func (cu *CommentUpdate) SetNillableDeletedAt(t *time.Time) *CommentUpdate {
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (cu *CommentUpdate) ClearDeletedAt() *CommentUpdate {
 	cu.mutation.ClearDeletedAt()
-	return cu
-}
-
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (cu *CommentUpdate) SetRequestID(id int) *CommentUpdate {
-	cu.mutation.SetRequestID(id)
 	return cu
 }
 
@@ -238,7 +239,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if cu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   comment.RequestTable,
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,
@@ -254,7 +255,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := cu.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   comment.RequestTable,
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,
@@ -292,6 +293,13 @@ type CommentUpdateOne struct {
 // SetCreatedBy sets the "created_by" field.
 func (cuo *CommentUpdateOne) SetCreatedBy(s string) *CommentUpdateOne {
 	cuo.mutation.SetCreatedBy(s)
+	return cuo
+}
+
+// SetRequestID sets the "request_id" field.
+func (cuo *CommentUpdateOne) SetRequestID(i int) *CommentUpdateOne {
+	cuo.mutation.ResetRequestID()
+	cuo.mutation.SetRequestID(i)
 	return cuo
 }
 
@@ -346,12 +354,6 @@ func (cuo *CommentUpdateOne) SetNillableDeletedAt(t *time.Time) *CommentUpdateOn
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (cuo *CommentUpdateOne) ClearDeletedAt() *CommentUpdateOne {
 	cuo.mutation.ClearDeletedAt()
-	return cuo
-}
-
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (cuo *CommentUpdateOne) SetRequestID(id int) *CommentUpdateOne {
-	cuo.mutation.SetRequestID(id)
 	return cuo
 }
 
@@ -522,7 +524,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 	if cuo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   comment.RequestTable,
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,
@@ -538,7 +540,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 	if nodes := cuo.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   comment.RequestTable,
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,

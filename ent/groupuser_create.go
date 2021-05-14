@@ -27,6 +27,12 @@ func (guc *GroupUserCreate) SetUserID(s string) *GroupUserCreate {
 	return guc
 }
 
+// SetGroupID sets the "group_id" field.
+func (guc *GroupUserCreate) SetGroupID(i int) *GroupUserCreate {
+	guc.mutation.SetGroupID(i)
+	return guc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (guc *GroupUserCreate) SetCreatedAt(t time.Time) *GroupUserCreate {
 	guc.mutation.SetCreatedAt(t)
@@ -38,12 +44,6 @@ func (guc *GroupUserCreate) SetNillableCreatedAt(t *time.Time) *GroupUserCreate 
 	if t != nil {
 		guc.SetCreatedAt(*t)
 	}
-	return guc
-}
-
-// SetGroupID sets the "group" edge to the Group entity by ID.
-func (guc *GroupUserCreate) SetGroupID(id int) *GroupUserCreate {
-	guc.mutation.SetGroupID(id)
 	return guc
 }
 
@@ -115,6 +115,9 @@ func (guc *GroupUserCreate) check() error {
 	if _, ok := guc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New("ent: missing required field \"user_id\"")}
 	}
+	if _, ok := guc.mutation.GroupID(); !ok {
+		return &ValidationError{Name: "group_id", err: errors.New("ent: missing required field \"group_id\"")}
+	}
 	if _, ok := guc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
 	}
@@ -167,7 +170,7 @@ func (guc *GroupUserCreate) createSpec() (*GroupUser, *sqlgraph.CreateSpec) {
 	if nodes := guc.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   groupuser.GroupTable,
 			Columns: []string{groupuser.GroupColumn},
 			Bidi:    false,
@@ -181,7 +184,7 @@ func (guc *GroupUserCreate) createSpec() (*GroupUser, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.group_user = &nodes[0]
+		_node.GroupID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -17,6 +17,7 @@ type RequestStatus struct {
 func (RequestStatus) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("created_by"),
+		field.Int("request_id"),
 		field.Enum("status").
 			Values("submitted", "fix_required", "accepted", "completed", "rejected").
 			Default("submitted"),
@@ -29,8 +30,8 @@ func (RequestStatus) Fields() []ent.Field {
 // Edges of the RequestStatus.
 func (RequestStatus) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("request", Request.Type).
-			Ref("status").
+		edge.To("request", Request.Type).
+			Field("request_id").
 			Unique().
 			Required(),
 	}

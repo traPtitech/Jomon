@@ -16,6 +16,7 @@ type RequestFile struct {
 // Fields of the RequestFile.
 func (RequestFile) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("request_id"),
 		field.Time("created_at").
 			Default(time.Now),
 	}
@@ -24,11 +25,12 @@ func (RequestFile) Fields() []ent.Field {
 // Edges of the RequestFile.
 func (RequestFile) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("request", Request.Type).
-			Ref("file").
+		edge.To("request", Request.Type).
+			Field("request_id").
 			Unique().
 			Required(),
 		edge.To("file", File.Type).
-			Unique(),
+			Unique().
+			Required(),
 	}
 }

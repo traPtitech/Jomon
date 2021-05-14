@@ -76,34 +76,26 @@ func (tc *TagCreate) SetNillableDeletedAt(t *time.Time) *TagCreate {
 	return tc
 }
 
-// AddRequestTagIDs adds the "request_tag" edge to the RequestTag entity by IDs.
-func (tc *TagCreate) AddRequestTagIDs(ids ...int) *TagCreate {
-	tc.mutation.AddRequestTagIDs(ids...)
+// SetRequestTagID sets the "request_tag" edge to the RequestTag entity by ID.
+func (tc *TagCreate) SetRequestTagID(id int) *TagCreate {
+	tc.mutation.SetRequestTagID(id)
 	return tc
 }
 
-// AddRequestTag adds the "request_tag" edges to the RequestTag entity.
-func (tc *TagCreate) AddRequestTag(r ...*RequestTag) *TagCreate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
-	}
-	return tc.AddRequestTagIDs(ids...)
+// SetRequestTag sets the "request_tag" edge to the RequestTag entity.
+func (tc *TagCreate) SetRequestTag(r *RequestTag) *TagCreate {
+	return tc.SetRequestTagID(r.ID)
 }
 
-// AddTransactionTagIDs adds the "transaction_tag" edge to the TransactionTag entity by IDs.
-func (tc *TagCreate) AddTransactionTagIDs(ids ...int) *TagCreate {
-	tc.mutation.AddTransactionTagIDs(ids...)
+// SetTransactionTagID sets the "transaction_tag" edge to the TransactionTag entity by ID.
+func (tc *TagCreate) SetTransactionTagID(id int) *TagCreate {
+	tc.mutation.SetTransactionTagID(id)
 	return tc
 }
 
-// AddTransactionTag adds the "transaction_tag" edges to the TransactionTag entity.
-func (tc *TagCreate) AddTransactionTag(t ...*TransactionTag) *TagCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return tc.AddTransactionTagIDs(ids...)
+// SetTransactionTag sets the "transaction_tag" edge to the TransactionTag entity.
+func (tc *TagCreate) SetTransactionTag(t *TransactionTag) *TagCreate {
+	return tc.SetTransactionTagID(t.ID)
 }
 
 // Mutation returns the TagMutation object of the builder.
@@ -182,6 +174,12 @@ func (tc *TagCreate) check() error {
 	if _, ok := tc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
 	}
+	if _, ok := tc.mutation.RequestTagID(); !ok {
+		return &ValidationError{Name: "request_tag", err: errors.New("ent: missing required edge \"request_tag\"")}
+	}
+	if _, ok := tc.mutation.TransactionTagID(); !ok {
+		return &ValidationError{Name: "transaction_tag", err: errors.New("ent: missing required edge \"transaction_tag\"")}
+	}
 	return nil
 }
 
@@ -251,8 +249,8 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 	}
 	if nodes := tc.mutation.RequestTagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
 			Table:   tag.RequestTagTable,
 			Columns: []string{tag.RequestTagColumn},
 			Bidi:    false,
@@ -266,12 +264,13 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.request_tag_tag = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tc.mutation.TransactionTagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
 			Table:   tag.TransactionTagTable,
 			Columns: []string{tag.TransactionTagColumn},
 			Bidi:    false,
@@ -285,6 +284,7 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.transaction_tag_tag = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

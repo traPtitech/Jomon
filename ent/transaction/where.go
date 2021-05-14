@@ -182,7 +182,7 @@ func HasDetail() predicate.Transaction {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(DetailTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, DetailTable, DetailColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, DetailTable, DetailColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -194,7 +194,7 @@ func HasDetailWith(preds ...predicate.TransactionDetail) predicate.Transaction {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(DetailInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, DetailTable, DetailColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, DetailTable, DetailColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -210,7 +210,7 @@ func HasTag() predicate.Transaction {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TagTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TagTable, TagColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, TagTable, TagColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -222,7 +222,7 @@ func HasTagWith(preds ...predicate.TransactionTag) predicate.Transaction {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TagInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TagTable, TagColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, TagTable, TagColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

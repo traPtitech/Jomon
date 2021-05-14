@@ -27,6 +27,12 @@ func (rsc *RequestStatusCreate) SetCreatedBy(s string) *RequestStatusCreate {
 	return rsc
 }
 
+// SetRequestID sets the "request_id" field.
+func (rsc *RequestStatusCreate) SetRequestID(i int) *RequestStatusCreate {
+	rsc.mutation.SetRequestID(i)
+	return rsc
+}
+
 // SetStatus sets the "status" field.
 func (rsc *RequestStatusCreate) SetStatus(r requeststatus.Status) *RequestStatusCreate {
 	rsc.mutation.SetStatus(r)
@@ -58,12 +64,6 @@ func (rsc *RequestStatusCreate) SetNillableCreatedAt(t *time.Time) *RequestStatu
 	if t != nil {
 		rsc.SetCreatedAt(*t)
 	}
-	return rsc
-}
-
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (rsc *RequestStatusCreate) SetRequestID(id int) *RequestStatusCreate {
-	rsc.mutation.SetRequestID(id)
 	return rsc
 }
 
@@ -138,6 +138,9 @@ func (rsc *RequestStatusCreate) defaults() {
 func (rsc *RequestStatusCreate) check() error {
 	if _, ok := rsc.mutation.CreatedBy(); !ok {
 		return &ValidationError{Name: "created_by", err: errors.New("ent: missing required field \"created_by\"")}
+	}
+	if _, ok := rsc.mutation.RequestID(); !ok {
+		return &ValidationError{Name: "request_id", err: errors.New("ent: missing required field \"request_id\"")}
 	}
 	if _, ok := rsc.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New("ent: missing required field \"status\"")}
@@ -218,7 +221,7 @@ func (rsc *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSp
 	if nodes := rsc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requeststatus.RequestTable,
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
@@ -232,7 +235,7 @@ func (rsc *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSp
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_status = &nodes[0]
+		_node.RequestID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

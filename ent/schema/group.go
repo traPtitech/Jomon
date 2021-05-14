@@ -34,8 +34,11 @@ func (Group) Fields() []ent.Field {
 // Edges of the Group.
 func (Group) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("group_budget", GroupBudget.Type),
-		edge.To("user", GroupUser.Type),
-		edge.To("owner", GroupOwner.Type),
+		edge.From("group_budget", GroupBudget.Type).
+			Ref("group"),
+		edge.From("user", GroupUser.Type).
+			Ref("group"),
+		edge.From("owner", GroupOwner.Type).
+			Ref("group"),
 	}
 }

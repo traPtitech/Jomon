@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/traPtitech/Jomon/ent/tag"
@@ -14,14 +15,16 @@ import (
 
 // TransactionTag is the model entity for the TransactionTag schema.
 type TransactionTag struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// TransactionID holds the value of the "transaction_id" field.
+	TransactionID int `json:"transaction_id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TransactionTagQuery when eager-loading is set.
-	Edges               TransactionTagEdges `json:"edges"`
-	tag_transaction_tag *int
-	transaction_tag     *int
+	Edges TransactionTagEdges `json:"edges"`
 }
 
 // TransactionTagEdges holds the relations/edges for other nodes in the graph.
@@ -68,12 +71,10 @@ func (*TransactionTag) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transactiontag.FieldID:
+		case transactiontag.FieldID, transactiontag.FieldTransactionID:
 			values[i] = new(sql.NullInt64)
-		case transactiontag.ForeignKeys[0]: // tag_transaction_tag
-			values[i] = new(sql.NullInt64)
-		case transactiontag.ForeignKeys[1]: // transaction_tag
-			values[i] = new(sql.NullInt64)
+		case transactiontag.FieldCreatedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type TransactionTag", columns[i])
 		}
@@ -95,19 +96,17 @@ func (tt *TransactionTag) assignValues(columns []string, values []interface{}) e
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			tt.ID = int(value.Int64)
-		case transactiontag.ForeignKeys[0]:
+		case transactiontag.FieldTransactionID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field tag_transaction_tag", value)
+				return fmt.Errorf("unexpected type %T for field transaction_id", values[i])
 			} else if value.Valid {
-				tt.tag_transaction_tag = new(int)
-				*tt.tag_transaction_tag = int(value.Int64)
+				tt.TransactionID = int(value.Int64)
 			}
-		case transactiontag.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field transaction_tag", value)
+		case transactiontag.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				tt.transaction_tag = new(int)
-				*tt.transaction_tag = int(value.Int64)
+				tt.CreatedAt = value.Time
 			}
 		}
 	}
@@ -147,6 +146,10 @@ func (tt *TransactionTag) String() string {
 	var builder strings.Builder
 	builder.WriteString("TransactionTag(")
 	builder.WriteString(fmt.Sprintf("id=%v", tt.ID))
+	builder.WriteString(", transaction_id=")
+	builder.WriteString(fmt.Sprintf("%v", tt.TransactionID))
+	builder.WriteString(", created_at=")
+	builder.WriteString(tt.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

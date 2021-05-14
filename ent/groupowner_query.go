@@ -27,7 +27,6 @@ type GroupOwnerQuery struct {
 	predicates []predicate.GroupOwner
 	// eager-loading edges.
 	withGroup *GroupQuery
-	withFKs   bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -78,7 +77,7 @@ func (goq *GroupOwnerQuery) QueryGroup() *GroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groupowner.Table, groupowner.FieldID, selector),
 			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, groupowner.GroupTable, groupowner.GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, groupowner.GroupTable, groupowner.GroupColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(goq.driver.Dialect(), step)
 		return fromU, nil
@@ -349,18 +348,11 @@ func (goq *GroupOwnerQuery) prepareQuery(ctx context.Context) error {
 func (goq *GroupOwnerQuery) sqlAll(ctx context.Context) ([]*GroupOwner, error) {
 	var (
 		nodes       = []*GroupOwner{}
-		withFKs     = goq.withFKs
 		_spec       = goq.querySpec()
 		loadedTypes = [1]bool{
 			goq.withGroup != nil,
 		}
 	)
-	if goq.withGroup != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, groupowner.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &GroupOwner{config: goq.config}
 		nodes = append(nodes, node)
@@ -385,10 +377,7 @@ func (goq *GroupOwnerQuery) sqlAll(ctx context.Context) ([]*GroupOwner, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*GroupOwner)
 		for i := range nodes {
-			if nodes[i].group_owner == nil {
-				continue
-			}
-			fk := *nodes[i].group_owner
+			fk := nodes[i].GroupID
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -402,7 +391,7 @@ func (goq *GroupOwnerQuery) sqlAll(ctx context.Context) ([]*GroupOwner, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_owner" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "group_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Group = n

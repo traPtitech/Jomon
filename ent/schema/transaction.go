@@ -24,8 +24,10 @@ func (Transaction) Fields() []ent.Field {
 // Edges of the Transaction.
 func (Transaction) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("detail", TransactionDetail.Type).
+		edge.From("detail", TransactionDetail.Type).
+			Ref("transaction").
 			Unique(),
-		edge.To("tag", TransactionTag.Type),
+		edge.From("tag", TransactionTag.Type).
+			Ref("transaction"),
 	}
 }

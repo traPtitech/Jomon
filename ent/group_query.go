@@ -82,7 +82,7 @@ func (gq *GroupQuery) QueryGroupBudget() *GroupBudgetQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, selector),
 			sqlgraph.To(groupbudget.Table, groupbudget.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, group.GroupBudgetTable, group.GroupBudgetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, group.GroupBudgetTable, group.GroupBudgetColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -104,7 +104,7 @@ func (gq *GroupQuery) QueryUser() *GroupUserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, selector),
 			sqlgraph.To(groupuser.Table, groupuser.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, group.UserTable, group.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, group.UserTable, group.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -126,7 +126,7 @@ func (gq *GroupQuery) QueryOwner() *GroupOwnerQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, selector),
 			sqlgraph.To(groupowner.Table, groupowner.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, group.OwnerTable, group.OwnerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, group.OwnerTable, group.OwnerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -456,7 +456,6 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.GroupBudget = []*GroupBudget{}
 		}
-		query.withFKs = true
 		query.Where(predicate.GroupBudget(func(s *sql.Selector) {
 			s.Where(sql.InValues(group.GroupBudgetColumn, fks...))
 		}))
@@ -465,13 +464,10 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.group_group_budget
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "group_group_budget" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			fk := n.GroupID
+			node, ok := nodeids[fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_group_budget" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "group_id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.GroupBudget = append(node.Edges.GroupBudget, n)
 		}
@@ -485,7 +481,6 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.User = []*GroupUser{}
 		}
-		query.withFKs = true
 		query.Where(predicate.GroupUser(func(s *sql.Selector) {
 			s.Where(sql.InValues(group.UserColumn, fks...))
 		}))
@@ -494,13 +489,10 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.group_user
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "group_user" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			fk := n.GroupID
+			node, ok := nodeids[fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_user" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "group_id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.User = append(node.Edges.User, n)
 		}
@@ -514,7 +506,6 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.Owner = []*GroupOwner{}
 		}
-		query.withFKs = true
 		query.Where(predicate.GroupOwner(func(s *sql.Selector) {
 			s.Where(sql.InValues(group.OwnerColumn, fks...))
 		}))
@@ -523,13 +514,10 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.group_owner
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "group_owner" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			fk := n.GroupID
+			node, ok := nodeids[fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_owner" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "group_id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.Owner = append(node.Edges.Owner, n)
 		}

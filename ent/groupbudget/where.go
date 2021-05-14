@@ -100,6 +100,13 @@ func Amount(v int) predicate.GroupBudget {
 	})
 }
 
+// GroupID applies equality check predicate on the "group_id" field. It's identical to GroupIDEQ.
+func GroupID(v int) predicate.GroupBudget {
+	return predicate.GroupBudget(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldGroupID), v))
+	})
+}
+
 // Comment applies equality check predicate on the "comment" field. It's identical to CommentEQ.
 func Comment(v string) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
@@ -187,6 +194,54 @@ func AmountLT(v int) predicate.GroupBudget {
 func AmountLTE(v int) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldAmount), v))
+	})
+}
+
+// GroupIDEQ applies the EQ predicate on the "group_id" field.
+func GroupIDEQ(v int) predicate.GroupBudget {
+	return predicate.GroupBudget(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldGroupID), v))
+	})
+}
+
+// GroupIDNEQ applies the NEQ predicate on the "group_id" field.
+func GroupIDNEQ(v int) predicate.GroupBudget {
+	return predicate.GroupBudget(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldGroupID), v))
+	})
+}
+
+// GroupIDIn applies the In predicate on the "group_id" field.
+func GroupIDIn(vs ...int) predicate.GroupBudget {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.GroupBudget(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldGroupID), v...))
+	})
+}
+
+// GroupIDNotIn applies the NotIn predicate on the "group_id" field.
+func GroupIDNotIn(vs ...int) predicate.GroupBudget {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.GroupBudget(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldGroupID), v...))
 	})
 }
 
@@ -397,7 +452,7 @@ func HasGroup() predicate.GroupBudget {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GroupTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, GroupTable, GroupColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -409,7 +464,7 @@ func HasGroupWith(preds ...predicate.Group) predicate.GroupBudget {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GroupInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, GroupTable, GroupColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

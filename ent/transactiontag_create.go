@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -21,9 +22,23 @@ type TransactionTagCreate struct {
 	hooks    []Hook
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (ttc *TransactionTagCreate) SetTransactionID(id int) *TransactionTagCreate {
-	ttc.mutation.SetTransactionID(id)
+// SetTransactionID sets the "transaction_id" field.
+func (ttc *TransactionTagCreate) SetTransactionID(i int) *TransactionTagCreate {
+	ttc.mutation.SetTransactionID(i)
+	return ttc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (ttc *TransactionTagCreate) SetCreatedAt(t time.Time) *TransactionTagCreate {
+	ttc.mutation.SetCreatedAt(t)
+	return ttc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ttc *TransactionTagCreate) SetNillableCreatedAt(t *time.Time) *TransactionTagCreate {
+	if t != nil {
+		ttc.SetCreatedAt(*t)
+	}
 	return ttc
 }
 
@@ -35,6 +50,14 @@ func (ttc *TransactionTagCreate) SetTransaction(t *Transaction) *TransactionTagC
 // SetTagID sets the "tag" edge to the Tag entity by ID.
 func (ttc *TransactionTagCreate) SetTagID(id int) *TransactionTagCreate {
 	ttc.mutation.SetTagID(id)
+	return ttc
+}
+
+// SetNillableTagID sets the "tag" edge to the Tag entity by ID if the given value is not nil.
+func (ttc *TransactionTagCreate) SetNillableTagID(id *int) *TransactionTagCreate {
+	if id != nil {
+		ttc = ttc.SetTagID(*id)
+	}
 	return ttc
 }
 
@@ -54,6 +77,7 @@ func (ttc *TransactionTagCreate) Save(ctx context.Context) (*TransactionTag, err
 		err  error
 		node *TransactionTag
 	)
+	ttc.defaults()
 	if len(ttc.hooks) == 0 {
 		if err = ttc.check(); err != nil {
 			return nil, err
@@ -92,13 +116,24 @@ func (ttc *TransactionTagCreate) SaveX(ctx context.Context) *TransactionTag {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (ttc *TransactionTagCreate) defaults() {
+	if _, ok := ttc.mutation.CreatedAt(); !ok {
+		v := transactiontag.DefaultCreatedAt()
+		ttc.mutation.SetCreatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ttc *TransactionTagCreate) check() error {
 	if _, ok := ttc.mutation.TransactionID(); !ok {
-		return &ValidationError{Name: "transaction", err: errors.New("ent: missing required edge \"transaction\"")}
+		return &ValidationError{Name: "transaction_id", err: errors.New("ent: missing required field \"transaction_id\"")}
 	}
-	if _, ok := ttc.mutation.TagID(); !ok {
-		return &ValidationError{Name: "tag", err: errors.New("ent: missing required edge \"tag\"")}
+	if _, ok := ttc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+	}
+	if _, ok := ttc.mutation.TransactionID(); !ok {
+		return &ValidationError{Name: "transaction", err: errors.New("ent: missing required edge \"transaction\"")}
 	}
 	return nil
 }
@@ -127,10 +162,18 @@ func (ttc *TransactionTagCreate) createSpec() (*TransactionTag, *sqlgraph.Create
 			},
 		}
 	)
+	if value, ok := ttc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: transactiontag.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
+	}
 	if nodes := ttc.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   transactiontag.TransactionTable,
 			Columns: []string{transactiontag.TransactionColumn},
 			Bidi:    false,
@@ -144,13 +187,13 @@ func (ttc *TransactionTagCreate) createSpec() (*TransactionTag, *sqlgraph.Create
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.transaction_tag = &nodes[0]
+		_node.TransactionID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := ttc.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   transactiontag.TagTable,
 			Columns: []string{transactiontag.TagColumn},
 			Bidi:    false,
@@ -164,7 +207,6 @@ func (ttc *TransactionTagCreate) createSpec() (*TransactionTag, *sqlgraph.Create
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.tag_transaction_tag = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -184,6 +226,7 @@ func (ttcb *TransactionTagCreateBulk) Save(ctx context.Context) ([]*TransactionT
 	for i := range ttcb.builders {
 		func(i int, root context.Context) {
 			builder := ttcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TransactionTagMutation)
 				if !ok {

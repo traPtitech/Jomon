@@ -30,6 +30,13 @@ func (rfu *RequestFileUpdate) Where(ps ...predicate.RequestFile) *RequestFileUpd
 	return rfu
 }
 
+// SetRequestID sets the "request_id" field.
+func (rfu *RequestFileUpdate) SetRequestID(i int) *RequestFileUpdate {
+	rfu.mutation.ResetRequestID()
+	rfu.mutation.SetRequestID(i)
+	return rfu
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (rfu *RequestFileUpdate) SetCreatedAt(t time.Time) *RequestFileUpdate {
 	rfu.mutation.SetCreatedAt(t)
@@ -44,12 +51,6 @@ func (rfu *RequestFileUpdate) SetNillableCreatedAt(t *time.Time) *RequestFileUpd
 	return rfu
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (rfu *RequestFileUpdate) SetRequestID(id int) *RequestFileUpdate {
-	rfu.mutation.SetRequestID(id)
-	return rfu
-}
-
 // SetRequest sets the "request" edge to the Request entity.
 func (rfu *RequestFileUpdate) SetRequest(r *Request) *RequestFileUpdate {
 	return rfu.SetRequestID(r.ID)
@@ -58,14 +59,6 @@ func (rfu *RequestFileUpdate) SetRequest(r *Request) *RequestFileUpdate {
 // SetFileID sets the "file" edge to the File entity by ID.
 func (rfu *RequestFileUpdate) SetFileID(id int) *RequestFileUpdate {
 	rfu.mutation.SetFileID(id)
-	return rfu
-}
-
-// SetNillableFileID sets the "file" edge to the File entity by ID if the given value is not nil.
-func (rfu *RequestFileUpdate) SetNillableFileID(id *int) *RequestFileUpdate {
-	if id != nil {
-		rfu = rfu.SetFileID(*id)
-	}
 	return rfu
 }
 
@@ -153,6 +146,9 @@ func (rfu *RequestFileUpdate) check() error {
 	if _, ok := rfu.mutation.RequestID(); rfu.mutation.RequestCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"request\"")
 	}
+	if _, ok := rfu.mutation.FileID(); rfu.mutation.FileCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"file\"")
+	}
 	return nil
 }
 
@@ -184,7 +180,7 @@ func (rfu *RequestFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if rfu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requestfile.RequestTable,
 			Columns: []string{requestfile.RequestColumn},
 			Bidi:    false,
@@ -200,7 +196,7 @@ func (rfu *RequestFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := rfu.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requestfile.RequestTable,
 			Columns: []string{requestfile.RequestColumn},
 			Bidi:    false,
@@ -270,6 +266,13 @@ type RequestFileUpdateOne struct {
 	mutation *RequestFileMutation
 }
 
+// SetRequestID sets the "request_id" field.
+func (rfuo *RequestFileUpdateOne) SetRequestID(i int) *RequestFileUpdateOne {
+	rfuo.mutation.ResetRequestID()
+	rfuo.mutation.SetRequestID(i)
+	return rfuo
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (rfuo *RequestFileUpdateOne) SetCreatedAt(t time.Time) *RequestFileUpdateOne {
 	rfuo.mutation.SetCreatedAt(t)
@@ -284,12 +287,6 @@ func (rfuo *RequestFileUpdateOne) SetNillableCreatedAt(t *time.Time) *RequestFil
 	return rfuo
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (rfuo *RequestFileUpdateOne) SetRequestID(id int) *RequestFileUpdateOne {
-	rfuo.mutation.SetRequestID(id)
-	return rfuo
-}
-
 // SetRequest sets the "request" edge to the Request entity.
 func (rfuo *RequestFileUpdateOne) SetRequest(r *Request) *RequestFileUpdateOne {
 	return rfuo.SetRequestID(r.ID)
@@ -298,14 +295,6 @@ func (rfuo *RequestFileUpdateOne) SetRequest(r *Request) *RequestFileUpdateOne {
 // SetFileID sets the "file" edge to the File entity by ID.
 func (rfuo *RequestFileUpdateOne) SetFileID(id int) *RequestFileUpdateOne {
 	rfuo.mutation.SetFileID(id)
-	return rfuo
-}
-
-// SetNillableFileID sets the "file" edge to the File entity by ID if the given value is not nil.
-func (rfuo *RequestFileUpdateOne) SetNillableFileID(id *int) *RequestFileUpdateOne {
-	if id != nil {
-		rfuo = rfuo.SetFileID(*id)
-	}
 	return rfuo
 }
 
@@ -400,6 +389,9 @@ func (rfuo *RequestFileUpdateOne) check() error {
 	if _, ok := rfuo.mutation.RequestID(); rfuo.mutation.RequestCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"request\"")
 	}
+	if _, ok := rfuo.mutation.FileID(); rfuo.mutation.FileCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"file\"")
+	}
 	return nil
 }
 
@@ -448,7 +440,7 @@ func (rfuo *RequestFileUpdateOne) sqlSave(ctx context.Context) (_node *RequestFi
 	if rfuo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requestfile.RequestTable,
 			Columns: []string{requestfile.RequestColumn},
 			Bidi:    false,
@@ -464,7 +456,7 @@ func (rfuo *RequestFileUpdateOne) sqlSave(ctx context.Context) (_node *RequestFi
 	if nodes := rfuo.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requestfile.RequestTable,
 			Columns: []string{requestfile.RequestColumn},
 			Bidi:    false,

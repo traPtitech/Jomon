@@ -387,7 +387,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if ru.mutation.StatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.StatusTable,
 			Columns: []string{request.StatusColumn},
 			Bidi:    false,
@@ -403,7 +403,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ru.mutation.RemovedStatusIDs(); len(nodes) > 0 && !ru.mutation.StatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.StatusTable,
 			Columns: []string{request.StatusColumn},
 			Bidi:    false,
@@ -422,7 +422,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ru.mutation.StatusIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.StatusTable,
 			Columns: []string{request.StatusColumn},
 			Bidi:    false,
@@ -441,7 +441,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if ru.mutation.TargetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TargetTable,
 			Columns: []string{request.TargetColumn},
 			Bidi:    false,
@@ -457,7 +457,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ru.mutation.RemovedTargetIDs(); len(nodes) > 0 && !ru.mutation.TargetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TargetTable,
 			Columns: []string{request.TargetColumn},
 			Bidi:    false,
@@ -476,7 +476,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ru.mutation.TargetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TargetTable,
 			Columns: []string{request.TargetColumn},
 			Bidi:    false,
@@ -495,7 +495,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if ru.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.FileTable,
 			Columns: []string{request.FileColumn},
 			Bidi:    false,
@@ -511,7 +511,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ru.mutation.RemovedFileIDs(); len(nodes) > 0 && !ru.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.FileTable,
 			Columns: []string{request.FileColumn},
 			Bidi:    false,
@@ -530,7 +530,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ru.mutation.FileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.FileTable,
 			Columns: []string{request.FileColumn},
 			Bidi:    false,
@@ -549,7 +549,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if ru.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TagTable,
 			Columns: []string{request.TagColumn},
 			Bidi:    false,
@@ -565,7 +565,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ru.mutation.RemovedTagIDs(); len(nodes) > 0 && !ru.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TagTable,
 			Columns: []string{request.TagColumn},
 			Bidi:    false,
@@ -584,7 +584,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ru.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TagTable,
 			Columns: []string{request.TagColumn},
 			Bidi:    false,
@@ -603,7 +603,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if ru.mutation.TransactionDetailCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TransactionDetailTable,
 			Columns: []string{request.TransactionDetailColumn},
 			Bidi:    false,
@@ -619,7 +619,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ru.mutation.RemovedTransactionDetailIDs(); len(nodes) > 0 && !ru.mutation.TransactionDetailCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TransactionDetailTable,
 			Columns: []string{request.TransactionDetailColumn},
 			Bidi:    false,
@@ -638,7 +638,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ru.mutation.TransactionDetailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TransactionDetailTable,
 			Columns: []string{request.TransactionDetailColumn},
 			Bidi:    false,
@@ -657,7 +657,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if ru.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.CommentTable,
 			Columns: []string{request.CommentColumn},
 			Bidi:    false,
@@ -673,7 +673,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ru.mutation.RemovedCommentIDs(); len(nodes) > 0 && !ru.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.CommentTable,
 			Columns: []string{request.CommentColumn},
 			Bidi:    false,
@@ -692,7 +692,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := ru.mutation.CommentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.CommentTable,
 			Columns: []string{request.CommentColumn},
 			Bidi:    false,
@@ -1105,7 +1105,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if ruo.mutation.StatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.StatusTable,
 			Columns: []string{request.StatusColumn},
 			Bidi:    false,
@@ -1121,7 +1121,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if nodes := ruo.mutation.RemovedStatusIDs(); len(nodes) > 0 && !ruo.mutation.StatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.StatusTable,
 			Columns: []string{request.StatusColumn},
 			Bidi:    false,
@@ -1140,7 +1140,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if nodes := ruo.mutation.StatusIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.StatusTable,
 			Columns: []string{request.StatusColumn},
 			Bidi:    false,
@@ -1159,7 +1159,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if ruo.mutation.TargetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TargetTable,
 			Columns: []string{request.TargetColumn},
 			Bidi:    false,
@@ -1175,7 +1175,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if nodes := ruo.mutation.RemovedTargetIDs(); len(nodes) > 0 && !ruo.mutation.TargetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TargetTable,
 			Columns: []string{request.TargetColumn},
 			Bidi:    false,
@@ -1194,7 +1194,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if nodes := ruo.mutation.TargetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TargetTable,
 			Columns: []string{request.TargetColumn},
 			Bidi:    false,
@@ -1213,7 +1213,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if ruo.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.FileTable,
 			Columns: []string{request.FileColumn},
 			Bidi:    false,
@@ -1229,7 +1229,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if nodes := ruo.mutation.RemovedFileIDs(); len(nodes) > 0 && !ruo.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.FileTable,
 			Columns: []string{request.FileColumn},
 			Bidi:    false,
@@ -1248,7 +1248,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if nodes := ruo.mutation.FileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.FileTable,
 			Columns: []string{request.FileColumn},
 			Bidi:    false,
@@ -1267,7 +1267,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if ruo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TagTable,
 			Columns: []string{request.TagColumn},
 			Bidi:    false,
@@ -1283,7 +1283,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if nodes := ruo.mutation.RemovedTagIDs(); len(nodes) > 0 && !ruo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TagTable,
 			Columns: []string{request.TagColumn},
 			Bidi:    false,
@@ -1302,7 +1302,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if nodes := ruo.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TagTable,
 			Columns: []string{request.TagColumn},
 			Bidi:    false,
@@ -1321,7 +1321,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if ruo.mutation.TransactionDetailCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TransactionDetailTable,
 			Columns: []string{request.TransactionDetailColumn},
 			Bidi:    false,
@@ -1337,7 +1337,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if nodes := ruo.mutation.RemovedTransactionDetailIDs(); len(nodes) > 0 && !ruo.mutation.TransactionDetailCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TransactionDetailTable,
 			Columns: []string{request.TransactionDetailColumn},
 			Bidi:    false,
@@ -1356,7 +1356,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if nodes := ruo.mutation.TransactionDetailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.TransactionDetailTable,
 			Columns: []string{request.TransactionDetailColumn},
 			Bidi:    false,
@@ -1375,7 +1375,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if ruo.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.CommentTable,
 			Columns: []string{request.CommentColumn},
 			Bidi:    false,
@@ -1391,7 +1391,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if nodes := ruo.mutation.RemovedCommentIDs(); len(nodes) > 0 && !ruo.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.CommentTable,
 			Columns: []string{request.CommentColumn},
 			Bidi:    false,
@@ -1410,7 +1410,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if nodes := ruo.mutation.CommentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Inverse: true,
 			Table:   request.CommentTable,
 			Columns: []string{request.CommentColumn},
 			Bidi:    false,

@@ -19,14 +19,15 @@ type GroupBudget struct {
 	ID int `json:"id,omitempty"`
 	// Amount holds the value of the "amount" field.
 	Amount int `json:"amount,omitempty"`
+	// GroupID holds the value of the "group_id" field.
+	GroupID int `json:"group_id,omitempty"`
 	// Comment holds the value of the "comment" field.
 	Comment *string `json:"comment,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupBudgetQuery when eager-loading is set.
-	Edges              GroupBudgetEdges `json:"edges"`
-	group_group_budget *int
+	Edges GroupBudgetEdges `json:"edges"`
 }
 
 // GroupBudgetEdges holds the relations/edges for other nodes in the graph.
@@ -57,14 +58,12 @@ func (*GroupBudget) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case groupbudget.FieldID, groupbudget.FieldAmount:
+		case groupbudget.FieldID, groupbudget.FieldAmount, groupbudget.FieldGroupID:
 			values[i] = new(sql.NullInt64)
 		case groupbudget.FieldComment:
 			values[i] = new(sql.NullString)
 		case groupbudget.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case groupbudget.ForeignKeys[0]: // group_group_budget
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type GroupBudget", columns[i])
 		}
@@ -92,6 +91,12 @@ func (gb *GroupBudget) assignValues(columns []string, values []interface{}) erro
 			} else if value.Valid {
 				gb.Amount = int(value.Int64)
 			}
+		case groupbudget.FieldGroupID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field group_id", values[i])
+			} else if value.Valid {
+				gb.GroupID = int(value.Int64)
+			}
 		case groupbudget.FieldComment:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field comment", values[i])
@@ -104,13 +109,6 @@ func (gb *GroupBudget) assignValues(columns []string, values []interface{}) erro
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				gb.CreatedAt = value.Time
-			}
-		case groupbudget.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field group_group_budget", value)
-			} else if value.Valid {
-				gb.group_group_budget = new(int)
-				*gb.group_group_budget = int(value.Int64)
 			}
 		}
 	}
@@ -147,6 +145,8 @@ func (gb *GroupBudget) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", gb.ID))
 	builder.WriteString(", amount=")
 	builder.WriteString(fmt.Sprintf("%v", gb.Amount))
+	builder.WriteString(", group_id=")
+	builder.WriteString(fmt.Sprintf("%v", gb.GroupID))
 	if v := gb.Comment; v != nil {
 		builder.WriteString(", comment=")
 		builder.WriteString(*v)

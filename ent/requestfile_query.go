@@ -30,7 +30,6 @@ type RequestFileQuery struct {
 	// eager-loading edges.
 	withRequest *RequestQuery
 	withFile    *FileQuery
-	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -81,7 +80,7 @@ func (rfq *RequestFileQuery) QueryRequest() *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requestfile.Table, requestfile.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, requestfile.RequestTable, requestfile.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, requestfile.RequestTable, requestfile.RequestColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rfq.driver.Dialect(), step)
 		return fromU, nil
@@ -328,12 +327,12 @@ func (rfq *RequestFileQuery) WithFile(opts ...func(*FileQuery)) *RequestFileQuer
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		RequestID int `json:"request_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.RequestFile.Query().
-//		GroupBy(requestfile.FieldCreatedAt).
+//		GroupBy(requestfile.FieldRequestID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -355,11 +354,11 @@ func (rfq *RequestFileQuery) GroupBy(field string, fields ...string) *RequestFil
 // Example:
 //
 //	var v []struct {
-//		CreatedAt time.Time `json:"created_at,omitempty"`
+//		RequestID int `json:"request_id,omitempty"`
 //	}
 //
 //	client.RequestFile.Query().
-//		Select(requestfile.FieldCreatedAt).
+//		Select(requestfile.FieldRequestID).
 //		Scan(ctx, &v)
 //
 func (rfq *RequestFileQuery) Select(field string, fields ...string) *RequestFileSelect {
@@ -386,19 +385,12 @@ func (rfq *RequestFileQuery) prepareQuery(ctx context.Context) error {
 func (rfq *RequestFileQuery) sqlAll(ctx context.Context) ([]*RequestFile, error) {
 	var (
 		nodes       = []*RequestFile{}
-		withFKs     = rfq.withFKs
 		_spec       = rfq.querySpec()
 		loadedTypes = [2]bool{
 			rfq.withRequest != nil,
 			rfq.withFile != nil,
 		}
 	)
-	if rfq.withRequest != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, requestfile.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &RequestFile{config: rfq.config}
 		nodes = append(nodes, node)
@@ -423,10 +415,7 @@ func (rfq *RequestFileQuery) sqlAll(ctx context.Context) ([]*RequestFile, error)
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*RequestFile)
 		for i := range nodes {
-			if nodes[i].request_file == nil {
-				continue
-			}
-			fk := *nodes[i].request_file
+			fk := nodes[i].RequestID
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -440,7 +429,7 @@ func (rfq *RequestFileQuery) sqlAll(ctx context.Context) ([]*RequestFile, error)
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_file" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Request = n

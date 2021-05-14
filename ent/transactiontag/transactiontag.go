@@ -2,11 +2,19 @@
 
 package transactiontag
 
+import (
+	"time"
+)
+
 const (
 	// Label holds the string label denoting the transactiontag type in the database.
 	Label = "transaction_tag"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldTransactionID holds the string denoting the transaction_id field in the database.
+	FieldTransactionID = "transaction_id"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
 	// EdgeTransaction holds the string denoting the transaction edge name in mutations.
 	EdgeTransaction = "transaction"
 	// EdgeTag holds the string denoting the tag edge name in mutations.
@@ -19,26 +27,21 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "transaction" package.
 	TransactionInverseTable = "transactions"
 	// TransactionColumn is the table column denoting the transaction relation/edge.
-	TransactionColumn = "transaction_tag"
+	TransactionColumn = "transaction_id"
 	// TagTable is the table the holds the tag relation/edge.
-	TagTable = "transaction_tags"
+	TagTable = "tags"
 	// TagInverseTable is the table name for the Tag entity.
 	// It exists in this package in order to avoid circular dependency with the "tag" package.
 	TagInverseTable = "tags"
 	// TagColumn is the table column denoting the tag relation/edge.
-	TagColumn = "tag_transaction_tag"
+	TagColumn = "transaction_tag_tag"
 )
 
 // Columns holds all SQL columns for transactiontag fields.
 var Columns = []string{
 	FieldID,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "transaction_tags"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"tag_transaction_tag",
-	"transaction_tag",
+	FieldTransactionID,
+	FieldCreatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -48,10 +51,10 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
-			return true
-		}
-	}
 	return false
 }
+
+var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+)

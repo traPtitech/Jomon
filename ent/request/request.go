@@ -37,42 +37,42 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "requeststatus" package.
 	StatusInverseTable = "request_status"
 	// StatusColumn is the table column denoting the status relation/edge.
-	StatusColumn = "request_status"
+	StatusColumn = "request_id"
 	// TargetTable is the table the holds the target relation/edge.
 	TargetTable = "request_targets"
 	// TargetInverseTable is the table name for the RequestTarget entity.
 	// It exists in this package in order to avoid circular dependency with the "requesttarget" package.
 	TargetInverseTable = "request_targets"
 	// TargetColumn is the table column denoting the target relation/edge.
-	TargetColumn = "request_target"
+	TargetColumn = "request_id"
 	// FileTable is the table the holds the file relation/edge.
 	FileTable = "request_files"
 	// FileInverseTable is the table name for the RequestFile entity.
 	// It exists in this package in order to avoid circular dependency with the "requestfile" package.
 	FileInverseTable = "request_files"
 	// FileColumn is the table column denoting the file relation/edge.
-	FileColumn = "request_file"
+	FileColumn = "request_id"
 	// TagTable is the table the holds the tag relation/edge.
 	TagTable = "request_tags"
 	// TagInverseTable is the table name for the RequestTag entity.
 	// It exists in this package in order to avoid circular dependency with the "requesttag" package.
 	TagInverseTable = "request_tags"
 	// TagColumn is the table column denoting the tag relation/edge.
-	TagColumn = "request_tag"
+	TagColumn = "request_id"
 	// TransactionDetailTable is the table the holds the transaction_detail relation/edge.
 	TransactionDetailTable = "transaction_details"
 	// TransactionDetailInverseTable is the table name for the TransactionDetail entity.
 	// It exists in this package in order to avoid circular dependency with the "transactiondetail" package.
 	TransactionDetailInverseTable = "transaction_details"
 	// TransactionDetailColumn is the table column denoting the transaction_detail relation/edge.
-	TransactionDetailColumn = "request_transaction_detail"
+	TransactionDetailColumn = "request_id"
 	// CommentTable is the table the holds the comment relation/edge.
 	CommentTable = "comments"
 	// CommentInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
 	CommentInverseTable = "comments"
 	// CommentColumn is the table column denoting the comment relation/edge.
-	CommentColumn = "request_comment"
+	CommentColumn = "request_id"
 )
 
 // Columns holds all SQL columns for request fields.

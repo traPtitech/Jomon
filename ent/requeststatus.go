@@ -19,6 +19,8 @@ type RequestStatus struct {
 	ID int `json:"id,omitempty"`
 	// CreatedBy holds the value of the "created_by" field.
 	CreatedBy string `json:"created_by,omitempty"`
+	// RequestID holds the value of the "request_id" field.
+	RequestID int `json:"request_id,omitempty"`
 	// Status holds the value of the "status" field.
 	Status requeststatus.Status `json:"status,omitempty"`
 	// Reason holds the value of the "reason" field.
@@ -27,8 +29,7 @@ type RequestStatus struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RequestStatusQuery when eager-loading is set.
-	Edges          RequestStatusEdges `json:"edges"`
-	request_status *int
+	Edges RequestStatusEdges `json:"edges"`
 }
 
 // RequestStatusEdges holds the relations/edges for other nodes in the graph.
@@ -59,14 +60,12 @@ func (*RequestStatus) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case requeststatus.FieldID:
+		case requeststatus.FieldID, requeststatus.FieldRequestID:
 			values[i] = new(sql.NullInt64)
 		case requeststatus.FieldCreatedBy, requeststatus.FieldStatus, requeststatus.FieldReason:
 			values[i] = new(sql.NullString)
 		case requeststatus.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case requeststatus.ForeignKeys[0]: // request_status
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type RequestStatus", columns[i])
 		}
@@ -94,6 +93,12 @@ func (rs *RequestStatus) assignValues(columns []string, values []interface{}) er
 			} else if value.Valid {
 				rs.CreatedBy = value.String
 			}
+		case requeststatus.FieldRequestID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field request_id", values[i])
+			} else if value.Valid {
+				rs.RequestID = int(value.Int64)
+			}
 		case requeststatus.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
@@ -111,13 +116,6 @@ func (rs *RequestStatus) assignValues(columns []string, values []interface{}) er
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				rs.CreatedAt = value.Time
-			}
-		case requeststatus.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field request_status", value)
-			} else if value.Valid {
-				rs.request_status = new(int)
-				*rs.request_status = int(value.Int64)
 			}
 		}
 	}
@@ -154,6 +152,8 @@ func (rs *RequestStatus) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", rs.ID))
 	builder.WriteString(", created_by=")
 	builder.WriteString(rs.CreatedBy)
+	builder.WriteString(", request_id=")
+	builder.WriteString(fmt.Sprintf("%v", rs.RequestID))
 	builder.WriteString(", status=")
 	builder.WriteString(fmt.Sprintf("%v", rs.Status))
 	builder.WriteString(", reason=")

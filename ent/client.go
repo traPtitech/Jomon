@@ -410,7 +410,7 @@ func (c *CommentClient) QueryRequest(co *Comment) *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(comment.Table, comment.FieldID, id),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, comment.RequestTable, comment.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, comment.RequestTable, comment.RequestColumn),
 		)
 		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
 		return fromV, nil
@@ -622,7 +622,7 @@ func (c *GroupClient) QueryGroupBudget(gr *Group) *GroupBudgetQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
 			sqlgraph.To(groupbudget.Table, groupbudget.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, group.GroupBudgetTable, group.GroupBudgetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, group.GroupBudgetTable, group.GroupBudgetColumn),
 		)
 		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 		return fromV, nil
@@ -638,7 +638,7 @@ func (c *GroupClient) QueryUser(gr *Group) *GroupUserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
 			sqlgraph.To(groupuser.Table, groupuser.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, group.UserTable, group.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, group.UserTable, group.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 		return fromV, nil
@@ -654,7 +654,7 @@ func (c *GroupClient) QueryOwner(gr *Group) *GroupOwnerQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
 			sqlgraph.To(groupowner.Table, groupowner.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, group.OwnerTable, group.OwnerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, group.OwnerTable, group.OwnerColumn),
 		)
 		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 		return fromV, nil
@@ -760,7 +760,7 @@ func (c *GroupBudgetClient) QueryGroup(gb *GroupBudget) *GroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groupbudget.Table, groupbudget.FieldID, id),
 			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, groupbudget.GroupTable, groupbudget.GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, groupbudget.GroupTable, groupbudget.GroupColumn),
 		)
 		fromV = sqlgraph.Neighbors(gb.driver.Dialect(), step)
 		return fromV, nil
@@ -866,7 +866,7 @@ func (c *GroupOwnerClient) QueryGroup(_go *GroupOwner) *GroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groupowner.Table, groupowner.FieldID, id),
 			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, groupowner.GroupTable, groupowner.GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, groupowner.GroupTable, groupowner.GroupColumn),
 		)
 		fromV = sqlgraph.Neighbors(_go.driver.Dialect(), step)
 		return fromV, nil
@@ -972,7 +972,7 @@ func (c *GroupUserClient) QueryGroup(gu *GroupUser) *GroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groupuser.Table, groupuser.FieldID, id),
 			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, groupuser.GroupTable, groupuser.GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, groupuser.GroupTable, groupuser.GroupColumn),
 		)
 		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
 		return fromV, nil
@@ -1078,7 +1078,7 @@ func (c *RequestClient) QueryStatus(r *Request) *RequestStatusQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, id),
 			sqlgraph.To(requeststatus.Table, requeststatus.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.StatusTable, request.StatusColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, request.StatusTable, request.StatusColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1094,7 +1094,7 @@ func (c *RequestClient) QueryTarget(r *Request) *RequestTargetQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, id),
 			sqlgraph.To(requesttarget.Table, requesttarget.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.TargetTable, request.TargetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, request.TargetTable, request.TargetColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1110,7 +1110,7 @@ func (c *RequestClient) QueryFile(r *Request) *RequestFileQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, id),
 			sqlgraph.To(requestfile.Table, requestfile.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.FileTable, request.FileColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, request.FileTable, request.FileColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1126,7 +1126,7 @@ func (c *RequestClient) QueryTag(r *Request) *RequestTagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, id),
 			sqlgraph.To(requesttag.Table, requesttag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.TagTable, request.TagColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, request.TagTable, request.TagColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1142,7 +1142,7 @@ func (c *RequestClient) QueryTransactionDetail(r *Request) *TransactionDetailQue
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, id),
 			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.TransactionDetailTable, request.TransactionDetailColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, request.TransactionDetailTable, request.TransactionDetailColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1158,7 +1158,7 @@ func (c *RequestClient) QueryComment(r *Request) *CommentQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, id),
 			sqlgraph.To(comment.Table, comment.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.CommentTable, request.CommentColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, request.CommentTable, request.CommentColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1264,7 +1264,7 @@ func (c *RequestFileClient) QueryRequest(rf *RequestFile) *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requestfile.Table, requestfile.FieldID, id),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, requestfile.RequestTable, requestfile.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, requestfile.RequestTable, requestfile.RequestColumn),
 		)
 		fromV = sqlgraph.Neighbors(rf.driver.Dialect(), step)
 		return fromV, nil
@@ -1386,7 +1386,7 @@ func (c *RequestStatusClient) QueryRequest(rs *RequestStatus) *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requeststatus.Table, requeststatus.FieldID, id),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, requeststatus.RequestTable, requeststatus.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, requeststatus.RequestTable, requeststatus.RequestColumn),
 		)
 		fromV = sqlgraph.Neighbors(rs.driver.Dialect(), step)
 		return fromV, nil
@@ -1492,7 +1492,7 @@ func (c *RequestTagClient) QueryRequest(rt *RequestTag) *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requesttag.Table, requesttag.FieldID, id),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, requesttag.RequestTable, requesttag.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, requesttag.RequestTable, requesttag.RequestColumn),
 		)
 		fromV = sqlgraph.Neighbors(rt.driver.Dialect(), step)
 		return fromV, nil
@@ -1508,7 +1508,7 @@ func (c *RequestTagClient) QueryTag(rt *RequestTag) *TagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requesttag.Table, requesttag.FieldID, id),
 			sqlgraph.To(tag.Table, tag.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, requesttag.TagTable, requesttag.TagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, requesttag.TagTable, requesttag.TagColumn),
 		)
 		fromV = sqlgraph.Neighbors(rt.driver.Dialect(), step)
 		return fromV, nil
@@ -1614,7 +1614,7 @@ func (c *RequestTargetClient) QueryRequest(rt *RequestTarget) *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requesttarget.Table, requesttarget.FieldID, id),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, requesttarget.RequestTable, requesttarget.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, requesttarget.RequestTable, requesttarget.RequestColumn),
 		)
 		fromV = sqlgraph.Neighbors(rt.driver.Dialect(), step)
 		return fromV, nil
@@ -1720,7 +1720,7 @@ func (c *TagClient) QueryRequestTag(t *Tag) *RequestTagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, id),
 			sqlgraph.To(requesttag.Table, requesttag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, tag.RequestTagTable, tag.RequestTagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, tag.RequestTagTable, tag.RequestTagColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -1736,7 +1736,7 @@ func (c *TagClient) QueryTransactionTag(t *Tag) *TransactionTagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, id),
 			sqlgraph.To(transactiontag.Table, transactiontag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, tag.TransactionTagTable, tag.TransactionTagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, tag.TransactionTagTable, tag.TransactionTagColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -1842,7 +1842,7 @@ func (c *TransactionClient) QueryDetail(t *Transaction) *TransactionDetailQuery 
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, id),
 			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, transaction.DetailTable, transaction.DetailColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, transaction.DetailTable, transaction.DetailColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -1858,7 +1858,7 @@ func (c *TransactionClient) QueryTag(t *Transaction) *TransactionTagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, id),
 			sqlgraph.To(transactiontag.Table, transactiontag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, transaction.TagTable, transaction.TagColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, transaction.TagTable, transaction.TagColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -1964,7 +1964,7 @@ func (c *TransactionDetailClient) QueryTransaction(td *TransactionDetail) *Trans
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transactiondetail.Table, transactiondetail.FieldID, id),
 			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, transactiondetail.TransactionTable, transactiondetail.TransactionColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, transactiondetail.TransactionTable, transactiondetail.TransactionColumn),
 		)
 		fromV = sqlgraph.Neighbors(td.driver.Dialect(), step)
 		return fromV, nil
@@ -1980,7 +1980,23 @@ func (c *TransactionDetailClient) QueryRequest(td *TransactionDetail) *RequestQu
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transactiondetail.Table, transactiondetail.FieldID, id),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, transactiondetail.RequestTable, transactiondetail.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, transactiondetail.RequestTable, transactiondetail.RequestColumn),
+		)
+		fromV = sqlgraph.Neighbors(td.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroup queries the group edge of a TransactionDetail.
+func (c *TransactionDetailClient) QueryGroup(td *TransactionDetail) *GroupQuery {
+	query := &GroupQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := td.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transactiondetail.Table, transactiondetail.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, transactiondetail.GroupTable, transactiondetail.GroupColumn),
 		)
 		fromV = sqlgraph.Neighbors(td.driver.Dialect(), step)
 		return fromV, nil
@@ -2086,7 +2102,7 @@ func (c *TransactionTagClient) QueryTransaction(tt *TransactionTag) *Transaction
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transactiontag.Table, transactiontag.FieldID, id),
 			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, transactiontag.TransactionTable, transactiontag.TransactionColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, transactiontag.TransactionTable, transactiontag.TransactionColumn),
 		)
 		fromV = sqlgraph.Neighbors(tt.driver.Dialect(), step)
 		return fromV, nil
@@ -2102,7 +2118,7 @@ func (c *TransactionTagClient) QueryTag(tt *TransactionTag) *TagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transactiontag.Table, transactiontag.FieldID, id),
 			sqlgraph.To(tag.Table, tag.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, transactiontag.TagTable, transactiontag.TagColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, transactiontag.TagTable, transactiontag.TagColumn),
 		)
 		fromV = sqlgraph.Neighbors(tt.driver.Dialect(), step)
 		return fromV, nil

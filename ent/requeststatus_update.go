@@ -35,6 +35,13 @@ func (rsu *RequestStatusUpdate) SetCreatedBy(s string) *RequestStatusUpdate {
 	return rsu
 }
 
+// SetRequestID sets the "request_id" field.
+func (rsu *RequestStatusUpdate) SetRequestID(i int) *RequestStatusUpdate {
+	rsu.mutation.ResetRequestID()
+	rsu.mutation.SetRequestID(i)
+	return rsu
+}
+
 // SetStatus sets the "status" field.
 func (rsu *RequestStatusUpdate) SetStatus(r requeststatus.Status) *RequestStatusUpdate {
 	rsu.mutation.SetStatus(r)
@@ -66,12 +73,6 @@ func (rsu *RequestStatusUpdate) SetNillableCreatedAt(t *time.Time) *RequestStatu
 	if t != nil {
 		rsu.SetCreatedAt(*t)
 	}
-	return rsu
-}
-
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (rsu *RequestStatusUpdate) SetRequestID(id int) *RequestStatusUpdate {
-	rsu.mutation.SetRequestID(id)
 	return rsu
 }
 
@@ -210,7 +211,7 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	if rsu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requeststatus.RequestTable,
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
@@ -226,7 +227,7 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	if nodes := rsu.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requeststatus.RequestTable,
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
@@ -267,6 +268,13 @@ func (rsuo *RequestStatusUpdateOne) SetCreatedBy(s string) *RequestStatusUpdateO
 	return rsuo
 }
 
+// SetRequestID sets the "request_id" field.
+func (rsuo *RequestStatusUpdateOne) SetRequestID(i int) *RequestStatusUpdateOne {
+	rsuo.mutation.ResetRequestID()
+	rsuo.mutation.SetRequestID(i)
+	return rsuo
+}
+
 // SetStatus sets the "status" field.
 func (rsuo *RequestStatusUpdateOne) SetStatus(r requeststatus.Status) *RequestStatusUpdateOne {
 	rsuo.mutation.SetStatus(r)
@@ -298,12 +306,6 @@ func (rsuo *RequestStatusUpdateOne) SetNillableCreatedAt(t *time.Time) *RequestS
 	if t != nil {
 		rsuo.SetCreatedAt(*t)
 	}
-	return rsuo
-}
-
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (rsuo *RequestStatusUpdateOne) SetRequestID(id int) *RequestStatusUpdateOne {
-	rsuo.mutation.SetRequestID(id)
 	return rsuo
 }
 
@@ -466,7 +468,7 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 	if rsuo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requeststatus.RequestTable,
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
@@ -482,7 +484,7 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 	if nodes := rsuo.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requeststatus.RequestTable,
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,

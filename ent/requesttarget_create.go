@@ -27,6 +27,12 @@ func (rtc *RequestTargetCreate) SetTarget(s string) *RequestTargetCreate {
 	return rtc
 }
 
+// SetRequestID sets the "request_id" field.
+func (rtc *RequestTargetCreate) SetRequestID(i int) *RequestTargetCreate {
+	rtc.mutation.SetRequestID(i)
+	return rtc
+}
+
 // SetPaidAt sets the "paid_at" field.
 func (rtc *RequestTargetCreate) SetPaidAt(t time.Time) *RequestTargetCreate {
 	rtc.mutation.SetPaidAt(t)
@@ -52,12 +58,6 @@ func (rtc *RequestTargetCreate) SetNillableCreatedAt(t *time.Time) *RequestTarge
 	if t != nil {
 		rtc.SetCreatedAt(*t)
 	}
-	return rtc
-}
-
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (rtc *RequestTargetCreate) SetRequestID(id int) *RequestTargetCreate {
-	rtc.mutation.SetRequestID(id)
 	return rtc
 }
 
@@ -129,6 +129,9 @@ func (rtc *RequestTargetCreate) check() error {
 	if _, ok := rtc.mutation.Target(); !ok {
 		return &ValidationError{Name: "target", err: errors.New("ent: missing required field \"target\"")}
 	}
+	if _, ok := rtc.mutation.RequestID(); !ok {
+		return &ValidationError{Name: "request_id", err: errors.New("ent: missing required field \"request_id\"")}
+	}
 	if _, ok := rtc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
 	}
@@ -189,7 +192,7 @@ func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSp
 	if nodes := rtc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   requesttarget.RequestTable,
 			Columns: []string{requesttarget.RequestColumn},
 			Bidi:    false,
@@ -203,7 +206,7 @@ func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSp
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_target = &nodes[0]
+		_node.RequestID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

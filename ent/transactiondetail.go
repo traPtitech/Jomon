@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -20,15 +21,17 @@ type TransactionDetail struct {
 	ID int `json:"id,omitempty"`
 	// Amount holds the value of the "amount" field.
 	Amount int `json:"amount,omitempty"`
+	// RequestID holds the value of the "request_id" field.
+	RequestID *int `json:"request_id,omitempty"`
+	// GroupID holds the value of the "group_id" field.
+	GroupID *int `json:"group_id,omitempty"`
 	// Target holds the value of the "target" field.
 	Target string `json:"target,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TransactionDetailQuery when eager-loading is set.
-	Edges                      TransactionDetailEdges `json:"edges"`
-	request_transaction_detail *int
-	transaction_detail         *int
+	Edges TransactionDetailEdges `json:"edges"`
 }
 
 // TransactionDetailEdges holds the relations/edges for other nodes in the graph.
@@ -37,9 +40,11 @@ type TransactionDetailEdges struct {
 	Transaction *Transaction `json:"transaction,omitempty"`
 	// Request holds the value of the request edge.
 	Request *Request `json:"request,omitempty"`
+	// Group holds the value of the group edge.
+	Group *Group `json:"group,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // TransactionOrErr returns the Transaction value or an error if the edge
@@ -70,21 +75,31 @@ func (e TransactionDetailEdges) RequestOrErr() (*Request, error) {
 	return nil, &NotLoadedError{edge: "request"}
 }
 
+// GroupOrErr returns the Group value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TransactionDetailEdges) GroupOrErr() (*Group, error) {
+	if e.loadedTypes[2] {
+		if e.Group == nil {
+			// The edge group was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: group.Label}
+		}
+		return e.Group, nil
+	}
+	return nil, &NotLoadedError{edge: "group"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*TransactionDetail) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transactiondetail.FieldID, transactiondetail.FieldAmount:
+		case transactiondetail.FieldID, transactiondetail.FieldAmount, transactiondetail.FieldRequestID, transactiondetail.FieldGroupID:
 			values[i] = new(sql.NullInt64)
 		case transactiondetail.FieldTarget:
 			values[i] = new(sql.NullString)
 		case transactiondetail.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case transactiondetail.ForeignKeys[0]: // request_transaction_detail
-			values[i] = new(sql.NullInt64)
-		case transactiondetail.ForeignKeys[1]: // transaction_detail
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type TransactionDetail", columns[i])
 		}
@@ -112,6 +127,20 @@ func (td *TransactionDetail) assignValues(columns []string, values []interface{}
 			} else if value.Valid {
 				td.Amount = int(value.Int64)
 			}
+		case transactiondetail.FieldRequestID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field request_id", values[i])
+			} else if value.Valid {
+				td.RequestID = new(int)
+				*td.RequestID = int(value.Int64)
+			}
+		case transactiondetail.FieldGroupID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field group_id", values[i])
+			} else if value.Valid {
+				td.GroupID = new(int)
+				*td.GroupID = int(value.Int64)
+			}
 		case transactiondetail.FieldTarget:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field target", values[i])
@@ -123,20 +152,6 @@ func (td *TransactionDetail) assignValues(columns []string, values []interface{}
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				td.CreatedAt = value.Time
-			}
-		case transactiondetail.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field request_transaction_detail", value)
-			} else if value.Valid {
-				td.request_transaction_detail = new(int)
-				*td.request_transaction_detail = int(value.Int64)
-			}
-		case transactiondetail.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field transaction_detail", value)
-			} else if value.Valid {
-				td.transaction_detail = new(int)
-				*td.transaction_detail = int(value.Int64)
 			}
 		}
 	}
@@ -151,6 +166,11 @@ func (td *TransactionDetail) QueryTransaction() *TransactionQuery {
 // QueryRequest queries the "request" edge of the TransactionDetail entity.
 func (td *TransactionDetail) QueryRequest() *RequestQuery {
 	return (&TransactionDetailClient{config: td.config}).QueryRequest(td)
+}
+
+// QueryGroup queries the "group" edge of the TransactionDetail entity.
+func (td *TransactionDetail) QueryGroup() *GroupQuery {
+	return (&TransactionDetailClient{config: td.config}).QueryGroup(td)
 }
 
 // Update returns a builder for updating this TransactionDetail.
@@ -178,6 +198,14 @@ func (td *TransactionDetail) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", td.ID))
 	builder.WriteString(", amount=")
 	builder.WriteString(fmt.Sprintf("%v", td.Amount))
+	if v := td.RequestID; v != nil {
+		builder.WriteString(", request_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	if v := td.GroupID; v != nil {
+		builder.WriteString(", group_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", target=")
 	builder.WriteString(td.Target)
 	builder.WriteString(", created_at=")

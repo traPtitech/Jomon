@@ -14,6 +14,8 @@ const (
 	FieldID = "id"
 	// FieldCreatedBy holds the string denoting the created_by field in the database.
 	FieldCreatedBy = "created_by"
+	// FieldRequestID holds the string denoting the request_id field in the database.
+	FieldRequestID = "request_id"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldReason holds the string denoting the reason field in the database.
@@ -30,33 +32,23 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "request" package.
 	RequestInverseTable = "requests"
 	// RequestColumn is the table column denoting the request relation/edge.
-	RequestColumn = "request_status"
+	RequestColumn = "request_id"
 )
 
 // Columns holds all SQL columns for requeststatus fields.
 var Columns = []string{
 	FieldID,
 	FieldCreatedBy,
+	FieldRequestID,
 	FieldStatus,
 	FieldReason,
 	FieldCreatedAt,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "request_status"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"request_status",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
