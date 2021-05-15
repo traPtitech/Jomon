@@ -10,8 +10,10 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
+	"github.com/traPtitech/Jomon/ent/transaction"
 )
 
 // GroupBudgetCreate is the builder for creating a GroupBudget entity.
@@ -24,12 +26,6 @@ type GroupBudgetCreate struct {
 // SetAmount sets the "amount" field.
 func (gbc *GroupBudgetCreate) SetAmount(i int) *GroupBudgetCreate {
 	gbc.mutation.SetAmount(i)
-	return gbc
-}
-
-// SetGroupID sets the "group_id" field.
-func (gbc *GroupBudgetCreate) SetGroupID(i int) *GroupBudgetCreate {
-	gbc.mutation.SetGroupID(i)
 	return gbc
 }
 
@@ -61,9 +57,40 @@ func (gbc *GroupBudgetCreate) SetNillableCreatedAt(t *time.Time) *GroupBudgetCre
 	return gbc
 }
 
+// SetID sets the "id" field.
+func (gbc *GroupBudgetCreate) SetID(u uuid.UUID) *GroupBudgetCreate {
+	gbc.mutation.SetID(u)
+	return gbc
+}
+
+// SetGroupID sets the "group" edge to the Group entity by ID.
+func (gbc *GroupBudgetCreate) SetGroupID(id uuid.UUID) *GroupBudgetCreate {
+	gbc.mutation.SetGroupID(id)
+	return gbc
+}
+
 // SetGroup sets the "group" edge to the Group entity.
 func (gbc *GroupBudgetCreate) SetGroup(g *Group) *GroupBudgetCreate {
 	return gbc.SetGroupID(g.ID)
+}
+
+// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
+func (gbc *GroupBudgetCreate) SetTransactionID(id uuid.UUID) *GroupBudgetCreate {
+	gbc.mutation.SetTransactionID(id)
+	return gbc
+}
+
+// SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
+func (gbc *GroupBudgetCreate) SetNillableTransactionID(id *uuid.UUID) *GroupBudgetCreate {
+	if id != nil {
+		gbc = gbc.SetTransactionID(*id)
+	}
+	return gbc
+}
+
+// SetTransaction sets the "transaction" edge to the Transaction entity.
+func (gbc *GroupBudgetCreate) SetTransaction(t *Transaction) *GroupBudgetCreate {
+	return gbc.SetTransactionID(t.ID)
 }
 
 // Mutation returns the GroupBudgetMutation object of the builder.
@@ -122,15 +149,16 @@ func (gbc *GroupBudgetCreate) defaults() {
 		v := groupbudget.DefaultCreatedAt()
 		gbc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := gbc.mutation.ID(); !ok {
+		v := groupbudget.DefaultID()
+		gbc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (gbc *GroupBudgetCreate) check() error {
 	if _, ok := gbc.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New("ent: missing required field \"amount\"")}
-	}
-	if _, ok := gbc.mutation.GroupID(); !ok {
-		return &ValidationError{Name: "group_id", err: errors.New("ent: missing required field \"group_id\"")}
 	}
 	if _, ok := gbc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
@@ -149,8 +177,6 @@ func (gbc *GroupBudgetCreate) sqlSave(ctx context.Context) (*GroupBudget, error)
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -160,11 +186,15 @@ func (gbc *GroupBudgetCreate) createSpec() (*GroupBudget, *sqlgraph.CreateSpec) 
 		_spec = &sqlgraph.CreateSpec{
 			Table: groupbudget.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: groupbudget.FieldID,
 			},
 		}
 	)
+	if id, ok := gbc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := gbc.mutation.Amount(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
@@ -192,13 +222,13 @@ func (gbc *GroupBudgetCreate) createSpec() (*GroupBudget, *sqlgraph.CreateSpec) 
 	if nodes := gbc.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   groupbudget.GroupTable,
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: group.FieldID,
 				},
 			},
@@ -206,7 +236,26 @@ func (gbc *GroupBudgetCreate) createSpec() (*GroupBudget, *sqlgraph.CreateSpec) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.GroupID = nodes[0]
+		_node.group_group_budget = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := gbc.mutation.TransactionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   groupbudget.TransactionTable,
+			Columns: []string{groupbudget.TransactionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transaction.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -252,8 +301,6 @@ func (gbcb *GroupBudgetCreateBulk) Save(ctx context.Context) ([]*GroupBudget, er
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

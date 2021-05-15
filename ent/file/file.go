@@ -4,6 +4,8 @@ package file
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -17,17 +19,17 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// EdgeRequestFile holds the string denoting the request_file edge name in mutations.
-	EdgeRequestFile = "request_file"
+	// EdgeRequest holds the string denoting the request edge name in mutations.
+	EdgeRequest = "request"
 	// Table holds the table name of the file in the database.
 	Table = "files"
-	// RequestFileTable is the table the holds the request_file relation/edge.
-	RequestFileTable = "files"
-	// RequestFileInverseTable is the table name for the RequestFile entity.
-	// It exists in this package in order to avoid circular dependency with the "requestfile" package.
-	RequestFileInverseTable = "request_files"
-	// RequestFileColumn is the table column denoting the request_file relation/edge.
-	RequestFileColumn = "request_file_file"
+	// RequestTable is the table the holds the request relation/edge.
+	RequestTable = "files"
+	// RequestInverseTable is the table name for the Request entity.
+	// It exists in this package in order to avoid circular dependency with the "request" package.
+	RequestInverseTable = "requests"
+	// RequestColumn is the table column denoting the request relation/edge.
+	RequestColumn = "request_file"
 )
 
 // Columns holds all SQL columns for file fields.
@@ -41,7 +43,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "files"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"request_file_file",
+	"request_file",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -62,4 +64,6 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )

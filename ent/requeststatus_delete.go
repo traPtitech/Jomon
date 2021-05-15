@@ -69,7 +69,7 @@ func (rsd *RequestStatusDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: requeststatus.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: requeststatus.FieldID,
 			},
 		},

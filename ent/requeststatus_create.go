@@ -10,8 +10,10 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // RequestStatusCreate is the builder for creating a RequestStatus entity.
@@ -19,18 +21,6 @@ type RequestStatusCreate struct {
 	config
 	mutation *RequestStatusMutation
 	hooks    []Hook
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (rsc *RequestStatusCreate) SetCreatedBy(s string) *RequestStatusCreate {
-	rsc.mutation.SetCreatedBy(s)
-	return rsc
-}
-
-// SetRequestID sets the "request_id" field.
-func (rsc *RequestStatusCreate) SetRequestID(i int) *RequestStatusCreate {
-	rsc.mutation.SetRequestID(i)
-	return rsc
 }
 
 // SetStatus sets the "status" field.
@@ -67,9 +57,32 @@ func (rsc *RequestStatusCreate) SetNillableCreatedAt(t *time.Time) *RequestStatu
 	return rsc
 }
 
+// SetID sets the "id" field.
+func (rsc *RequestStatusCreate) SetID(u uuid.UUID) *RequestStatusCreate {
+	rsc.mutation.SetID(u)
+	return rsc
+}
+
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (rsc *RequestStatusCreate) SetRequestID(id uuid.UUID) *RequestStatusCreate {
+	rsc.mutation.SetRequestID(id)
+	return rsc
+}
+
 // SetRequest sets the "request" edge to the Request entity.
 func (rsc *RequestStatusCreate) SetRequest(r *Request) *RequestStatusCreate {
 	return rsc.SetRequestID(r.ID)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (rsc *RequestStatusCreate) SetUserID(id uuid.UUID) *RequestStatusCreate {
+	rsc.mutation.SetUserID(id)
+	return rsc
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (rsc *RequestStatusCreate) SetUser(u *User) *RequestStatusCreate {
+	return rsc.SetUserID(u.ID)
 }
 
 // Mutation returns the RequestStatusMutation object of the builder.
@@ -132,16 +145,14 @@ func (rsc *RequestStatusCreate) defaults() {
 		v := requeststatus.DefaultCreatedAt()
 		rsc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := rsc.mutation.ID(); !ok {
+		v := requeststatus.DefaultID()
+		rsc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (rsc *RequestStatusCreate) check() error {
-	if _, ok := rsc.mutation.CreatedBy(); !ok {
-		return &ValidationError{Name: "created_by", err: errors.New("ent: missing required field \"created_by\"")}
-	}
-	if _, ok := rsc.mutation.RequestID(); !ok {
-		return &ValidationError{Name: "request_id", err: errors.New("ent: missing required field \"request_id\"")}
-	}
 	if _, ok := rsc.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New("ent: missing required field \"status\"")}
 	}
@@ -159,6 +170,9 @@ func (rsc *RequestStatusCreate) check() error {
 	if _, ok := rsc.mutation.RequestID(); !ok {
 		return &ValidationError{Name: "request", err: errors.New("ent: missing required edge \"request\"")}
 	}
+	if _, ok := rsc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user", err: errors.New("ent: missing required edge \"user\"")}
+	}
 	return nil
 }
 
@@ -170,8 +184,6 @@ func (rsc *RequestStatusCreate) sqlSave(ctx context.Context) (*RequestStatus, er
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -181,18 +193,14 @@ func (rsc *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSp
 		_spec = &sqlgraph.CreateSpec{
 			Table: requeststatus.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: requeststatus.FieldID,
 			},
 		}
 	)
-	if value, ok := rsc.mutation.CreatedBy(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: requeststatus.FieldCreatedBy,
-		})
-		_node.CreatedBy = value
+	if id, ok := rsc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
 	}
 	if value, ok := rsc.mutation.Status(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -221,13 +229,13 @@ func (rsc *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSp
 	if nodes := rsc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   requeststatus.RequestTable,
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: request.FieldID,
 				},
 			},
@@ -235,7 +243,26 @@ func (rsc *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSp
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.RequestID = nodes[0]
+		_node.request_status = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := rsc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   requeststatus.UserTable,
+			Columns: []string{requeststatus.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -281,8 +308,6 @@ func (rscb *RequestStatusCreateBulk) Save(ctx context.Context) ([]*RequestStatus
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

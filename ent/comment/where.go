@@ -7,32 +7,33 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Comment {
+func ID(id uuid.UUID) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Comment {
+func IDEQ(id uuid.UUID) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Comment {
+func IDNEQ(id uuid.UUID) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Comment {
+func IDIn(ids ...uuid.UUID) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -49,7 +50,7 @@ func IDIn(ids ...int) predicate.Comment {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Comment {
+func IDNotIn(ids ...uuid.UUID) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -66,44 +67,30 @@ func IDNotIn(ids ...int) predicate.Comment {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Comment {
+func IDGT(id uuid.UUID) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Comment {
+func IDGTE(id uuid.UUID) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Comment {
+func IDLT(id uuid.UUID) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Comment {
+func IDLTE(id uuid.UUID) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
-	})
-}
-
-// CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
-func CreatedBy(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedBy), v))
-	})
-}
-
-// RequestID applies equality check predicate on the "request_id" field. It's identical to RequestIDEQ.
-func RequestID(v int) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRequestID), v))
 	})
 }
 
@@ -132,165 +119,6 @@ func UpdatedAt(v time.Time) predicate.Comment {
 func DeletedAt(v time.Time) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldDeletedAt), v))
-	})
-}
-
-// CreatedByEQ applies the EQ predicate on the "created_by" field.
-func CreatedByEQ(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByNEQ applies the NEQ predicate on the "created_by" field.
-func CreatedByNEQ(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByIn applies the In predicate on the "created_by" field.
-func CreatedByIn(vs ...string) predicate.Comment {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Comment(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldCreatedBy), v...))
-	})
-}
-
-// CreatedByNotIn applies the NotIn predicate on the "created_by" field.
-func CreatedByNotIn(vs ...string) predicate.Comment {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Comment(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldCreatedBy), v...))
-	})
-}
-
-// CreatedByGT applies the GT predicate on the "created_by" field.
-func CreatedByGT(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByGTE applies the GTE predicate on the "created_by" field.
-func CreatedByGTE(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByLT applies the LT predicate on the "created_by" field.
-func CreatedByLT(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByLTE applies the LTE predicate on the "created_by" field.
-func CreatedByLTE(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByContains applies the Contains predicate on the "created_by" field.
-func CreatedByContains(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByHasPrefix applies the HasPrefix predicate on the "created_by" field.
-func CreatedByHasPrefix(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByHasSuffix applies the HasSuffix predicate on the "created_by" field.
-func CreatedByHasSuffix(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByEqualFold applies the EqualFold predicate on the "created_by" field.
-func CreatedByEqualFold(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByContainsFold applies the ContainsFold predicate on the "created_by" field.
-func CreatedByContainsFold(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldCreatedBy), v))
-	})
-}
-
-// RequestIDEQ applies the EQ predicate on the "request_id" field.
-func RequestIDEQ(v int) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRequestID), v))
-	})
-}
-
-// RequestIDNEQ applies the NEQ predicate on the "request_id" field.
-func RequestIDNEQ(v int) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldRequestID), v))
-	})
-}
-
-// RequestIDIn applies the In predicate on the "request_id" field.
-func RequestIDIn(vs ...int) predicate.Comment {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Comment(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldRequestID), v...))
-	})
-}
-
-// RequestIDNotIn applies the NotIn predicate on the "request_id" field.
-func RequestIDNotIn(vs ...int) predicate.Comment {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Comment(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldRequestID), v...))
 	})
 }
 
@@ -653,7 +481,7 @@ func HasRequest() predicate.Comment {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RequestTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, RequestTable, RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -665,7 +493,35 @@ func HasRequestWith(preds ...predicate.Request) predicate.Comment {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RequestInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, RequestTable, RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasUser applies the HasEdge predicate on the "user" edge.
+func HasUser() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, UserTable, UserColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
+func HasUserWith(preds ...predicate.User) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

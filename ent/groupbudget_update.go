@@ -11,9 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/predicate"
+	"github.com/traPtitech/Jomon/ent/transaction"
 )
 
 // GroupBudgetUpdate is the builder for updating GroupBudget entities.
@@ -39,13 +41,6 @@ func (gbu *GroupBudgetUpdate) SetAmount(i int) *GroupBudgetUpdate {
 // AddAmount adds i to the "amount" field.
 func (gbu *GroupBudgetUpdate) AddAmount(i int) *GroupBudgetUpdate {
 	gbu.mutation.AddAmount(i)
-	return gbu
-}
-
-// SetGroupID sets the "group_id" field.
-func (gbu *GroupBudgetUpdate) SetGroupID(i int) *GroupBudgetUpdate {
-	gbu.mutation.ResetGroupID()
-	gbu.mutation.SetGroupID(i)
 	return gbu
 }
 
@@ -83,9 +78,34 @@ func (gbu *GroupBudgetUpdate) SetNillableCreatedAt(t *time.Time) *GroupBudgetUpd
 	return gbu
 }
 
+// SetGroupID sets the "group" edge to the Group entity by ID.
+func (gbu *GroupBudgetUpdate) SetGroupID(id uuid.UUID) *GroupBudgetUpdate {
+	gbu.mutation.SetGroupID(id)
+	return gbu
+}
+
 // SetGroup sets the "group" edge to the Group entity.
 func (gbu *GroupBudgetUpdate) SetGroup(g *Group) *GroupBudgetUpdate {
 	return gbu.SetGroupID(g.ID)
+}
+
+// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
+func (gbu *GroupBudgetUpdate) SetTransactionID(id uuid.UUID) *GroupBudgetUpdate {
+	gbu.mutation.SetTransactionID(id)
+	return gbu
+}
+
+// SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
+func (gbu *GroupBudgetUpdate) SetNillableTransactionID(id *uuid.UUID) *GroupBudgetUpdate {
+	if id != nil {
+		gbu = gbu.SetTransactionID(*id)
+	}
+	return gbu
+}
+
+// SetTransaction sets the "transaction" edge to the Transaction entity.
+func (gbu *GroupBudgetUpdate) SetTransaction(t *Transaction) *GroupBudgetUpdate {
+	return gbu.SetTransactionID(t.ID)
 }
 
 // Mutation returns the GroupBudgetMutation object of the builder.
@@ -96,6 +116,12 @@ func (gbu *GroupBudgetUpdate) Mutation() *GroupBudgetMutation {
 // ClearGroup clears the "group" edge to the Group entity.
 func (gbu *GroupBudgetUpdate) ClearGroup() *GroupBudgetUpdate {
 	gbu.mutation.ClearGroup()
+	return gbu
+}
+
+// ClearTransaction clears the "transaction" edge to the Transaction entity.
+func (gbu *GroupBudgetUpdate) ClearTransaction() *GroupBudgetUpdate {
+	gbu.mutation.ClearTransaction()
 	return gbu
 }
 
@@ -170,7 +196,7 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   groupbudget.Table,
 			Columns: groupbudget.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: groupbudget.FieldID,
 			},
 		},
@@ -219,13 +245,13 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if gbu.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   groupbudget.GroupTable,
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: group.FieldID,
 				},
 			},
@@ -235,14 +261,49 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := gbu.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   groupbudget.GroupTable,
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if gbu.mutation.TransactionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   groupbudget.TransactionTable,
+			Columns: []string{groupbudget.TransactionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transaction.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gbu.mutation.TransactionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   groupbudget.TransactionTable,
+			Columns: []string{groupbudget.TransactionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transaction.FieldID,
 				},
 			},
 		}
@@ -283,13 +344,6 @@ func (gbuo *GroupBudgetUpdateOne) AddAmount(i int) *GroupBudgetUpdateOne {
 	return gbuo
 }
 
-// SetGroupID sets the "group_id" field.
-func (gbuo *GroupBudgetUpdateOne) SetGroupID(i int) *GroupBudgetUpdateOne {
-	gbuo.mutation.ResetGroupID()
-	gbuo.mutation.SetGroupID(i)
-	return gbuo
-}
-
 // SetComment sets the "comment" field.
 func (gbuo *GroupBudgetUpdateOne) SetComment(s string) *GroupBudgetUpdateOne {
 	gbuo.mutation.SetComment(s)
@@ -324,9 +378,34 @@ func (gbuo *GroupBudgetUpdateOne) SetNillableCreatedAt(t *time.Time) *GroupBudge
 	return gbuo
 }
 
+// SetGroupID sets the "group" edge to the Group entity by ID.
+func (gbuo *GroupBudgetUpdateOne) SetGroupID(id uuid.UUID) *GroupBudgetUpdateOne {
+	gbuo.mutation.SetGroupID(id)
+	return gbuo
+}
+
 // SetGroup sets the "group" edge to the Group entity.
 func (gbuo *GroupBudgetUpdateOne) SetGroup(g *Group) *GroupBudgetUpdateOne {
 	return gbuo.SetGroupID(g.ID)
+}
+
+// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
+func (gbuo *GroupBudgetUpdateOne) SetTransactionID(id uuid.UUID) *GroupBudgetUpdateOne {
+	gbuo.mutation.SetTransactionID(id)
+	return gbuo
+}
+
+// SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
+func (gbuo *GroupBudgetUpdateOne) SetNillableTransactionID(id *uuid.UUID) *GroupBudgetUpdateOne {
+	if id != nil {
+		gbuo = gbuo.SetTransactionID(*id)
+	}
+	return gbuo
+}
+
+// SetTransaction sets the "transaction" edge to the Transaction entity.
+func (gbuo *GroupBudgetUpdateOne) SetTransaction(t *Transaction) *GroupBudgetUpdateOne {
+	return gbuo.SetTransactionID(t.ID)
 }
 
 // Mutation returns the GroupBudgetMutation object of the builder.
@@ -337,6 +416,12 @@ func (gbuo *GroupBudgetUpdateOne) Mutation() *GroupBudgetMutation {
 // ClearGroup clears the "group" edge to the Group entity.
 func (gbuo *GroupBudgetUpdateOne) ClearGroup() *GroupBudgetUpdateOne {
 	gbuo.mutation.ClearGroup()
+	return gbuo
+}
+
+// ClearTransaction clears the "transaction" edge to the Transaction entity.
+func (gbuo *GroupBudgetUpdateOne) ClearTransaction() *GroupBudgetUpdateOne {
+	gbuo.mutation.ClearTransaction()
 	return gbuo
 }
 
@@ -418,7 +503,7 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 			Table:   groupbudget.Table,
 			Columns: groupbudget.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: groupbudget.FieldID,
 			},
 		},
@@ -484,13 +569,13 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 	if gbuo.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   groupbudget.GroupTable,
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: group.FieldID,
 				},
 			},
@@ -500,14 +585,49 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 	if nodes := gbuo.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   groupbudget.GroupTable,
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if gbuo.mutation.TransactionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   groupbudget.TransactionTable,
+			Columns: []string{groupbudget.TransactionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transaction.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gbuo.mutation.TransactionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   groupbudget.TransactionTable,
+			Columns: []string{groupbudget.TransactionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transaction.FieldID,
 				},
 			},
 		}

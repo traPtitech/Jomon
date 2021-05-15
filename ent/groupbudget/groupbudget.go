@@ -4,6 +4,8 @@ package groupbudget
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -13,14 +15,14 @@ const (
 	FieldID = "id"
 	// FieldAmount holds the string denoting the amount field in the database.
 	FieldAmount = "amount"
-	// FieldGroupID holds the string denoting the group_id field in the database.
-	FieldGroupID = "group_id"
 	// FieldComment holds the string denoting the comment field in the database.
 	FieldComment = "comment"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// EdgeGroup holds the string denoting the group edge name in mutations.
 	EdgeGroup = "group"
+	// EdgeTransaction holds the string denoting the transaction edge name in mutations.
+	EdgeTransaction = "transaction"
 	// Table holds the table name of the groupbudget in the database.
 	Table = "group_budgets"
 	// GroupTable is the table the holds the group relation/edge.
@@ -29,16 +31,28 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	GroupInverseTable = "groups"
 	// GroupColumn is the table column denoting the group relation/edge.
-	GroupColumn = "group_id"
+	GroupColumn = "group_group_budget"
+	// TransactionTable is the table the holds the transaction relation/edge.
+	TransactionTable = "transactions"
+	// TransactionInverseTable is the table name for the Transaction entity.
+	// It exists in this package in order to avoid circular dependency with the "transaction" package.
+	TransactionInverseTable = "transactions"
+	// TransactionColumn is the table column denoting the transaction relation/edge.
+	TransactionColumn = "group_budget_transaction"
 )
 
 // Columns holds all SQL columns for groupbudget fields.
 var Columns = []string{
 	FieldID,
 	FieldAmount,
-	FieldGroupID,
 	FieldComment,
 	FieldCreatedAt,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "group_budgets"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"group_group_budget",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -48,10 +62,17 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
 
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )

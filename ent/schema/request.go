@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // Request holds the schema definition for the Request entity.
@@ -16,7 +17,8 @@ type Request struct {
 // Fields of the Request.
 func (Request) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("created_by"),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New),
 		field.Int("amount"),
 		field.Time("created_at").
 			Default(time.Now),
@@ -26,17 +28,13 @@ func (Request) Fields() []ent.Field {
 // Edges of the Request.
 func (Request) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("status", RequestStatus.Type).
-			Ref("request"),
-		edge.From("target", RequestTarget.Type).
-			Ref("request"),
-		edge.From("file", RequestFile.Type).
-			Ref("request"),
-		edge.From("tag", RequestTag.Type).
-			Ref("request"),
-		edge.From("transaction_detail", TransactionDetail.Type).
-			Ref("request"),
-		edge.From("comment", Comment.Type).
-			Ref("request"),
+		edge.To("status", RequestStatus.Type),
+		edge.To("target", RequestTarget.Type),
+		edge.To("file", File.Type),
+		edge.To("tag", Tag.Type),
+		edge.To("transaction_detail", TransactionDetail.Type),
+		edge.To("comment", Comment.Type),
+		edge.To("user", User.Type).
+			Unique(),
 	}
 }

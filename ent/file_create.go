@@ -10,8 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/requestfile"
+	"github.com/traPtitech/Jomon/ent/request"
 )
 
 // FileCreate is the builder for creating a File entity.
@@ -55,23 +56,29 @@ func (fc *FileCreate) SetNillableDeletedAt(t *time.Time) *FileCreate {
 	return fc
 }
 
-// SetRequestFileID sets the "request_file" edge to the RequestFile entity by ID.
-func (fc *FileCreate) SetRequestFileID(id int) *FileCreate {
-	fc.mutation.SetRequestFileID(id)
+// SetID sets the "id" field.
+func (fc *FileCreate) SetID(u uuid.UUID) *FileCreate {
+	fc.mutation.SetID(u)
 	return fc
 }
 
-// SetNillableRequestFileID sets the "request_file" edge to the RequestFile entity by ID if the given value is not nil.
-func (fc *FileCreate) SetNillableRequestFileID(id *int) *FileCreate {
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (fc *FileCreate) SetRequestID(id uuid.UUID) *FileCreate {
+	fc.mutation.SetRequestID(id)
+	return fc
+}
+
+// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
+func (fc *FileCreate) SetNillableRequestID(id *uuid.UUID) *FileCreate {
 	if id != nil {
-		fc = fc.SetRequestFileID(*id)
+		fc = fc.SetRequestID(*id)
 	}
 	return fc
 }
 
-// SetRequestFile sets the "request_file" edge to the RequestFile entity.
-func (fc *FileCreate) SetRequestFile(r *RequestFile) *FileCreate {
-	return fc.SetRequestFileID(r.ID)
+// SetRequest sets the "request" edge to the Request entity.
+func (fc *FileCreate) SetRequest(r *Request) *FileCreate {
+	return fc.SetRequestID(r.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
@@ -130,6 +137,10 @@ func (fc *FileCreate) defaults() {
 		v := file.DefaultCreatedAt()
 		fc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := fc.mutation.ID(); !ok {
+		v := file.DefaultID()
+		fc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -151,8 +162,6 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -162,11 +171,15 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: file.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: file.FieldID,
 			},
 		}
 	)
+	if id, ok := fc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := fc.mutation.MimeType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -191,24 +204,24 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		})
 		_node.DeletedAt = &value
 	}
-	if nodes := fc.mutation.RequestFileIDs(); len(nodes) > 0 {
+	if nodes := fc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.RequestFileTable,
-			Columns: []string{file.RequestFileColumn},
+			Table:   file.RequestTable,
+			Columns: []string{file.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: requestfile.FieldID,
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_file_file = &nodes[0]
+		_node.request_file = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -254,8 +267,6 @@ func (fcb *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

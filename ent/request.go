@@ -8,16 +8,16 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/request"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // Request is the model entity for the Request schema.
 type Request struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
-	// CreatedBy holds the value of the "created_by" field.
-	CreatedBy string `json:"created_by,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Amount holds the value of the "amount" field.
 	Amount int `json:"amount,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -34,16 +34,18 @@ type RequestEdges struct {
 	// Target holds the value of the target edge.
 	Target []*RequestTarget `json:"target,omitempty"`
 	// File holds the value of the file edge.
-	File []*RequestFile `json:"file,omitempty"`
+	File []*File `json:"file,omitempty"`
 	// Tag holds the value of the tag edge.
-	Tag []*RequestTag `json:"tag,omitempty"`
+	Tag []*Tag `json:"tag,omitempty"`
 	// TransactionDetail holds the value of the transaction_detail edge.
 	TransactionDetail []*TransactionDetail `json:"transaction_detail,omitempty"`
 	// Comment holds the value of the comment edge.
 	Comment []*Comment `json:"comment,omitempty"`
+	// User holds the value of the user edge.
+	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [7]bool
 }
 
 // StatusOrErr returns the Status value or an error if the edge
@@ -66,7 +68,7 @@ func (e RequestEdges) TargetOrErr() ([]*RequestTarget, error) {
 
 // FileOrErr returns the File value or an error if the edge
 // was not loaded in eager-loading.
-func (e RequestEdges) FileOrErr() ([]*RequestFile, error) {
+func (e RequestEdges) FileOrErr() ([]*File, error) {
 	if e.loadedTypes[2] {
 		return e.File, nil
 	}
@@ -75,7 +77,7 @@ func (e RequestEdges) FileOrErr() ([]*RequestFile, error) {
 
 // TagOrErr returns the Tag value or an error if the edge
 // was not loaded in eager-loading.
-func (e RequestEdges) TagOrErr() ([]*RequestTag, error) {
+func (e RequestEdges) TagOrErr() ([]*Tag, error) {
 	if e.loadedTypes[3] {
 		return e.Tag, nil
 	}
@@ -100,17 +102,31 @@ func (e RequestEdges) CommentOrErr() ([]*Comment, error) {
 	return nil, &NotLoadedError{edge: "comment"}
 }
 
+// UserOrErr returns the User value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RequestEdges) UserOrErr() (*User, error) {
+	if e.loadedTypes[6] {
+		if e.User == nil {
+			// The edge user was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.User, nil
+	}
+	return nil, &NotLoadedError{edge: "user"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Request) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case request.FieldID, request.FieldAmount:
+		case request.FieldAmount:
 			values[i] = new(sql.NullInt64)
-		case request.FieldCreatedBy:
-			values[i] = new(sql.NullString)
 		case request.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
+		case request.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Request", columns[i])
 		}
@@ -127,16 +143,10 @@ func (r *Request) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case request.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			r.ID = int(value.Int64)
-		case request.FieldCreatedBy:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field created_by", values[i])
-			} else if value.Valid {
-				r.CreatedBy = value.String
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				r.ID = *value
 			}
 		case request.FieldAmount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -166,12 +176,12 @@ func (r *Request) QueryTarget() *RequestTargetQuery {
 }
 
 // QueryFile queries the "file" edge of the Request entity.
-func (r *Request) QueryFile() *RequestFileQuery {
+func (r *Request) QueryFile() *FileQuery {
 	return (&RequestClient{config: r.config}).QueryFile(r)
 }
 
 // QueryTag queries the "tag" edge of the Request entity.
-func (r *Request) QueryTag() *RequestTagQuery {
+func (r *Request) QueryTag() *TagQuery {
 	return (&RequestClient{config: r.config}).QueryTag(r)
 }
 
@@ -183,6 +193,11 @@ func (r *Request) QueryTransactionDetail() *TransactionDetailQuery {
 // QueryComment queries the "comment" edge of the Request entity.
 func (r *Request) QueryComment() *CommentQuery {
 	return (&RequestClient{config: r.config}).QueryComment(r)
+}
+
+// QueryUser queries the "user" edge of the Request entity.
+func (r *Request) QueryUser() *UserQuery {
+	return (&RequestClient{config: r.config}).QueryUser(r)
 }
 
 // Update returns a builder for updating this Request.
@@ -208,8 +223,6 @@ func (r *Request) String() string {
 	var builder strings.Builder
 	builder.WriteString("Request(")
 	builder.WriteString(fmt.Sprintf("id=%v", r.ID))
-	builder.WriteString(", created_by=")
-	builder.WriteString(r.CreatedBy)
 	builder.WriteString(", amount=")
 	builder.WriteString(fmt.Sprintf("%v", r.Amount))
 	builder.WriteString(", created_at=")

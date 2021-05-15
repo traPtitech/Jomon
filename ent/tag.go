@@ -8,16 +8,17 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/traPtitech/Jomon/ent/requesttag"
+	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
-	"github.com/traPtitech/Jomon/ent/transactiontag"
+	"github.com/traPtitech/Jomon/ent/transaction"
 )
 
 // Tag is the model entity for the Tag schema.
 type Tag struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Description holds the value of the "description" field.
@@ -30,48 +31,48 @@ type Tag struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TagQuery when eager-loading is set.
-	Edges               TagEdges `json:"edges"`
-	request_tag_tag     *int
-	transaction_tag_tag *int
+	Edges           TagEdges `json:"edges"`
+	request_tag     *uuid.UUID
+	transaction_tag *uuid.UUID
 }
 
 // TagEdges holds the relations/edges for other nodes in the graph.
 type TagEdges struct {
-	// RequestTag holds the value of the request_tag edge.
-	RequestTag *RequestTag `json:"request_tag,omitempty"`
-	// TransactionTag holds the value of the transaction_tag edge.
-	TransactionTag *TransactionTag `json:"transaction_tag,omitempty"`
+	// Request holds the value of the request edge.
+	Request *Request `json:"request,omitempty"`
+	// Transaction holds the value of the transaction edge.
+	Transaction *Transaction `json:"transaction,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
 }
 
-// RequestTagOrErr returns the RequestTag value or an error if the edge
+// RequestOrErr returns the Request value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e TagEdges) RequestTagOrErr() (*RequestTag, error) {
+func (e TagEdges) RequestOrErr() (*Request, error) {
 	if e.loadedTypes[0] {
-		if e.RequestTag == nil {
-			// The edge request_tag was loaded in eager-loading,
+		if e.Request == nil {
+			// The edge request was loaded in eager-loading,
 			// but was not found.
-			return nil, &NotFoundError{label: requesttag.Label}
+			return nil, &NotFoundError{label: request.Label}
 		}
-		return e.RequestTag, nil
+		return e.Request, nil
 	}
-	return nil, &NotLoadedError{edge: "request_tag"}
+	return nil, &NotLoadedError{edge: "request"}
 }
 
-// TransactionTagOrErr returns the TransactionTag value or an error if the edge
+// TransactionOrErr returns the Transaction value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e TagEdges) TransactionTagOrErr() (*TransactionTag, error) {
+func (e TagEdges) TransactionOrErr() (*Transaction, error) {
 	if e.loadedTypes[1] {
-		if e.TransactionTag == nil {
-			// The edge transaction_tag was loaded in eager-loading,
+		if e.Transaction == nil {
+			// The edge transaction was loaded in eager-loading,
 			// but was not found.
-			return nil, &NotFoundError{label: transactiontag.Label}
+			return nil, &NotFoundError{label: transaction.Label}
 		}
-		return e.TransactionTag, nil
+		return e.Transaction, nil
 	}
-	return nil, &NotLoadedError{edge: "transaction_tag"}
+	return nil, &NotLoadedError{edge: "transaction"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -79,16 +80,16 @@ func (*Tag) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case tag.FieldID:
-			values[i] = new(sql.NullInt64)
 		case tag.FieldName, tag.FieldDescription:
 			values[i] = new(sql.NullString)
 		case tag.FieldCreatedAt, tag.FieldUpdatedAt, tag.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
-		case tag.ForeignKeys[0]: // request_tag_tag
-			values[i] = new(sql.NullInt64)
-		case tag.ForeignKeys[1]: // transaction_tag_tag
-			values[i] = new(sql.NullInt64)
+		case tag.FieldID:
+			values[i] = new(uuid.UUID)
+		case tag.ForeignKeys[0]: // request_tag
+			values[i] = new(uuid.UUID)
+		case tag.ForeignKeys[1]: // transaction_tag
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Tag", columns[i])
 		}
@@ -105,11 +106,11 @@ func (t *Tag) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case tag.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				t.ID = *value
 			}
-			t.ID = int(value.Int64)
 		case tag.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -142,32 +143,30 @@ func (t *Tag) assignValues(columns []string, values []interface{}) error {
 				*t.DeletedAt = value.Time
 			}
 		case tag.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field request_tag_tag", value)
-			} else if value.Valid {
-				t.request_tag_tag = new(int)
-				*t.request_tag_tag = int(value.Int64)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field request_tag", values[i])
+			} else if value != nil {
+				t.request_tag = value
 			}
 		case tag.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field transaction_tag_tag", value)
-			} else if value.Valid {
-				t.transaction_tag_tag = new(int)
-				*t.transaction_tag_tag = int(value.Int64)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field transaction_tag", values[i])
+			} else if value != nil {
+				t.transaction_tag = value
 			}
 		}
 	}
 	return nil
 }
 
-// QueryRequestTag queries the "request_tag" edge of the Tag entity.
-func (t *Tag) QueryRequestTag() *RequestTagQuery {
-	return (&TagClient{config: t.config}).QueryRequestTag(t)
+// QueryRequest queries the "request" edge of the Tag entity.
+func (t *Tag) QueryRequest() *RequestQuery {
+	return (&TagClient{config: t.config}).QueryRequest(t)
 }
 
-// QueryTransactionTag queries the "transaction_tag" edge of the Tag entity.
-func (t *Tag) QueryTransactionTag() *TransactionTagQuery {
-	return (&TagClient{config: t.config}).QueryTransactionTag(t)
+// QueryTransaction queries the "transaction" edge of the Tag entity.
+func (t *Tag) QueryTransaction() *TransactionQuery {
+	return (&TagClient{config: t.config}).QueryTransaction(t)
 }
 
 // Update returns a builder for updating this Tag.

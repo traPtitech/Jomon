@@ -8,15 +8,16 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/requestfile"
+	"github.com/traPtitech/Jomon/ent/request"
 )
 
 // File is the model entity for the File schema.
 type File struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// MimeType holds the value of the "mime_type" field.
 	MimeType string `json:"mime_type,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -25,31 +26,31 @@ type File struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
-	Edges             FileEdges `json:"edges"`
-	request_file_file *int
+	Edges        FileEdges `json:"edges"`
+	request_file *uuid.UUID
 }
 
 // FileEdges holds the relations/edges for other nodes in the graph.
 type FileEdges struct {
-	// RequestFile holds the value of the request_file edge.
-	RequestFile *RequestFile `json:"request_file,omitempty"`
+	// Request holds the value of the request edge.
+	Request *Request `json:"request,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// RequestFileOrErr returns the RequestFile value or an error if the edge
+// RequestOrErr returns the Request value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e FileEdges) RequestFileOrErr() (*RequestFile, error) {
+func (e FileEdges) RequestOrErr() (*Request, error) {
 	if e.loadedTypes[0] {
-		if e.RequestFile == nil {
-			// The edge request_file was loaded in eager-loading,
+		if e.Request == nil {
+			// The edge request was loaded in eager-loading,
 			// but was not found.
-			return nil, &NotFoundError{label: requestfile.Label}
+			return nil, &NotFoundError{label: request.Label}
 		}
-		return e.RequestFile, nil
+		return e.Request, nil
 	}
-	return nil, &NotLoadedError{edge: "request_file"}
+	return nil, &NotLoadedError{edge: "request"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -57,14 +58,14 @@ func (*File) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case file.FieldID:
-			values[i] = new(sql.NullInt64)
 		case file.FieldMimeType:
 			values[i] = new(sql.NullString)
 		case file.FieldCreatedAt, file.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
-		case file.ForeignKeys[0]: // request_file_file
-			values[i] = new(sql.NullInt64)
+		case file.FieldID:
+			values[i] = new(uuid.UUID)
+		case file.ForeignKeys[0]: // request_file
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type File", columns[i])
 		}
@@ -81,11 +82,11 @@ func (f *File) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case file.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				f.ID = *value
 			}
-			f.ID = int(value.Int64)
 		case file.FieldMimeType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field mime_type", values[i])
@@ -106,20 +107,19 @@ func (f *File) assignValues(columns []string, values []interface{}) error {
 				*f.DeletedAt = value.Time
 			}
 		case file.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field request_file_file", value)
-			} else if value.Valid {
-				f.request_file_file = new(int)
-				*f.request_file_file = int(value.Int64)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field request_file", values[i])
+			} else if value != nil {
+				f.request_file = value
 			}
 		}
 	}
 	return nil
 }
 
-// QueryRequestFile queries the "request_file" edge of the File entity.
-func (f *File) QueryRequestFile() *RequestFileQuery {
-	return (&FileClient{config: f.config}).QueryRequestFile(f)
+// QueryRequest queries the "request" edge of the File entity.
+func (f *File) QueryRequest() *RequestQuery {
+	return (&FileClient{config: f.config}).QueryRequest(f)
 }
 
 // Update returns a builder for updating this File.

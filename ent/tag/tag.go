@@ -4,6 +4,8 @@ package tag
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -21,26 +23,26 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// EdgeRequestTag holds the string denoting the request_tag edge name in mutations.
-	EdgeRequestTag = "request_tag"
-	// EdgeTransactionTag holds the string denoting the transaction_tag edge name in mutations.
-	EdgeTransactionTag = "transaction_tag"
+	// EdgeRequest holds the string denoting the request edge name in mutations.
+	EdgeRequest = "request"
+	// EdgeTransaction holds the string denoting the transaction edge name in mutations.
+	EdgeTransaction = "transaction"
 	// Table holds the table name of the tag in the database.
 	Table = "tags"
-	// RequestTagTable is the table the holds the request_tag relation/edge.
-	RequestTagTable = "tags"
-	// RequestTagInverseTable is the table name for the RequestTag entity.
-	// It exists in this package in order to avoid circular dependency with the "requesttag" package.
-	RequestTagInverseTable = "request_tags"
-	// RequestTagColumn is the table column denoting the request_tag relation/edge.
-	RequestTagColumn = "request_tag_tag"
-	// TransactionTagTable is the table the holds the transaction_tag relation/edge.
-	TransactionTagTable = "tags"
-	// TransactionTagInverseTable is the table name for the TransactionTag entity.
-	// It exists in this package in order to avoid circular dependency with the "transactiontag" package.
-	TransactionTagInverseTable = "transaction_tags"
-	// TransactionTagColumn is the table column denoting the transaction_tag relation/edge.
-	TransactionTagColumn = "transaction_tag_tag"
+	// RequestTable is the table the holds the request relation/edge.
+	RequestTable = "tags"
+	// RequestInverseTable is the table name for the Request entity.
+	// It exists in this package in order to avoid circular dependency with the "request" package.
+	RequestInverseTable = "requests"
+	// RequestColumn is the table column denoting the request relation/edge.
+	RequestColumn = "request_tag"
+	// TransactionTable is the table the holds the transaction relation/edge.
+	TransactionTable = "tags"
+	// TransactionInverseTable is the table name for the Transaction entity.
+	// It exists in this package in order to avoid circular dependency with the "transaction" package.
+	TransactionInverseTable = "transactions"
+	// TransactionColumn is the table column denoting the transaction relation/edge.
+	TransactionColumn = "transaction_tag"
 )
 
 // Columns holds all SQL columns for tag fields.
@@ -56,8 +58,8 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tags"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"request_tag_tag",
-	"transaction_tag_tag",
+	"request_tag",
+	"transaction_tag",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -80,4 +82,6 @@ var (
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )

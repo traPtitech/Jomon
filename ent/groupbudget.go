@@ -8,35 +8,38 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
+	"github.com/traPtitech/Jomon/ent/transaction"
 )
 
 // GroupBudget is the model entity for the GroupBudget schema.
 type GroupBudget struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Amount holds the value of the "amount" field.
 	Amount int `json:"amount,omitempty"`
-	// GroupID holds the value of the "group_id" field.
-	GroupID int `json:"group_id,omitempty"`
 	// Comment holds the value of the "comment" field.
 	Comment *string `json:"comment,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupBudgetQuery when eager-loading is set.
-	Edges GroupBudgetEdges `json:"edges"`
+	Edges              GroupBudgetEdges `json:"edges"`
+	group_group_budget *uuid.UUID
 }
 
 // GroupBudgetEdges holds the relations/edges for other nodes in the graph.
 type GroupBudgetEdges struct {
 	// Group holds the value of the group edge.
 	Group *Group `json:"group,omitempty"`
+	// Transaction holds the value of the transaction edge.
+	Transaction *Transaction `json:"transaction,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // GroupOrErr returns the Group value or an error if the edge
@@ -53,17 +56,35 @@ func (e GroupBudgetEdges) GroupOrErr() (*Group, error) {
 	return nil, &NotLoadedError{edge: "group"}
 }
 
+// TransactionOrErr returns the Transaction value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e GroupBudgetEdges) TransactionOrErr() (*Transaction, error) {
+	if e.loadedTypes[1] {
+		if e.Transaction == nil {
+			// The edge transaction was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: transaction.Label}
+		}
+		return e.Transaction, nil
+	}
+	return nil, &NotLoadedError{edge: "transaction"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*GroupBudget) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case groupbudget.FieldID, groupbudget.FieldAmount, groupbudget.FieldGroupID:
+		case groupbudget.FieldAmount:
 			values[i] = new(sql.NullInt64)
 		case groupbudget.FieldComment:
 			values[i] = new(sql.NullString)
 		case groupbudget.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
+		case groupbudget.FieldID:
+			values[i] = new(uuid.UUID)
+		case groupbudget.ForeignKeys[0]: // group_group_budget
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type GroupBudget", columns[i])
 		}
@@ -80,22 +101,16 @@ func (gb *GroupBudget) assignValues(columns []string, values []interface{}) erro
 	for i := range columns {
 		switch columns[i] {
 		case groupbudget.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				gb.ID = *value
 			}
-			gb.ID = int(value.Int64)
 		case groupbudget.FieldAmount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field amount", values[i])
 			} else if value.Valid {
 				gb.Amount = int(value.Int64)
-			}
-		case groupbudget.FieldGroupID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field group_id", values[i])
-			} else if value.Valid {
-				gb.GroupID = int(value.Int64)
 			}
 		case groupbudget.FieldComment:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -110,6 +125,12 @@ func (gb *GroupBudget) assignValues(columns []string, values []interface{}) erro
 			} else if value.Valid {
 				gb.CreatedAt = value.Time
 			}
+		case groupbudget.ForeignKeys[0]:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field group_group_budget", values[i])
+			} else if value != nil {
+				gb.group_group_budget = value
+			}
 		}
 	}
 	return nil
@@ -118,6 +139,11 @@ func (gb *GroupBudget) assignValues(columns []string, values []interface{}) erro
 // QueryGroup queries the "group" edge of the GroupBudget entity.
 func (gb *GroupBudget) QueryGroup() *GroupQuery {
 	return (&GroupBudgetClient{config: gb.config}).QueryGroup(gb)
+}
+
+// QueryTransaction queries the "transaction" edge of the GroupBudget entity.
+func (gb *GroupBudget) QueryTransaction() *TransactionQuery {
+	return (&GroupBudgetClient{config: gb.config}).QueryTransaction(gb)
 }
 
 // Update returns a builder for updating this GroupBudget.
@@ -145,8 +171,6 @@ func (gb *GroupBudget) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", gb.ID))
 	builder.WriteString(", amount=")
 	builder.WriteString(fmt.Sprintf("%v", gb.Amount))
-	builder.WriteString(", group_id=")
-	builder.WriteString(fmt.Sprintf("%v", gb.GroupID))
 	if v := gb.Comment; v != nil {
 		builder.WriteString(", comment=")
 		builder.WriteString(*v)

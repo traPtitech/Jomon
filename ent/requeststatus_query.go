@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -11,9 +12,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // RequestStatusQuery is the builder for querying RequestStatus entities.
@@ -27,6 +30,8 @@ type RequestStatusQuery struct {
 	predicates []predicate.RequestStatus
 	// eager-loading edges.
 	withRequest *RequestQuery
+	withUser    *UserQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -77,7 +82,29 @@ func (rsq *RequestStatusQuery) QueryRequest() *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requeststatus.Table, requeststatus.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, requeststatus.RequestTable, requeststatus.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, requeststatus.RequestTable, requeststatus.RequestColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rsq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUser chains the current query on the "user" edge.
+func (rsq *RequestStatusQuery) QueryUser() *UserQuery {
+	query := &UserQuery{config: rsq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rsq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rsq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(requeststatus.Table, requeststatus.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, requeststatus.UserTable, requeststatus.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rsq.driver.Dialect(), step)
 		return fromU, nil
@@ -109,8 +136,8 @@ func (rsq *RequestStatusQuery) FirstX(ctx context.Context) *RequestStatus {
 
 // FirstID returns the first RequestStatus ID from the query.
 // Returns a *NotFoundError when no RequestStatus ID was found.
-func (rsq *RequestStatusQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (rsq *RequestStatusQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = rsq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -122,7 +149,7 @@ func (rsq *RequestStatusQuery) FirstID(ctx context.Context) (id int, err error) 
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (rsq *RequestStatusQuery) FirstIDX(ctx context.Context) int {
+func (rsq *RequestStatusQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := rsq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -160,8 +187,8 @@ func (rsq *RequestStatusQuery) OnlyX(ctx context.Context) *RequestStatus {
 // OnlyID is like Only, but returns the only RequestStatus ID in the query.
 // Returns a *NotSingularError when exactly one RequestStatus ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (rsq *RequestStatusQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (rsq *RequestStatusQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = rsq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -177,7 +204,7 @@ func (rsq *RequestStatusQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (rsq *RequestStatusQuery) OnlyIDX(ctx context.Context) int {
+func (rsq *RequestStatusQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := rsq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -203,8 +230,8 @@ func (rsq *RequestStatusQuery) AllX(ctx context.Context) []*RequestStatus {
 }
 
 // IDs executes the query and returns a list of RequestStatus IDs.
-func (rsq *RequestStatusQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (rsq *RequestStatusQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := rsq.Select(requeststatus.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -212,7 +239,7 @@ func (rsq *RequestStatusQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (rsq *RequestStatusQuery) IDsX(ctx context.Context) []int {
+func (rsq *RequestStatusQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := rsq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -267,6 +294,7 @@ func (rsq *RequestStatusQuery) Clone() *RequestStatusQuery {
 		order:       append([]OrderFunc{}, rsq.order...),
 		predicates:  append([]predicate.RequestStatus{}, rsq.predicates...),
 		withRequest: rsq.withRequest.Clone(),
+		withUser:    rsq.withUser.Clone(),
 		// clone intermediate query.
 		sql:  rsq.sql.Clone(),
 		path: rsq.path,
@@ -284,18 +312,29 @@ func (rsq *RequestStatusQuery) WithRequest(opts ...func(*RequestQuery)) *Request
 	return rsq
 }
 
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (rsq *RequestStatusQuery) WithUser(opts ...func(*UserQuery)) *RequestStatusQuery {
+	query := &UserQuery{config: rsq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rsq.withUser = query
+	return rsq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		CreatedBy string `json:"created_by,omitempty"`
+//		Status requeststatus.Status `json:"status,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.RequestStatus.Query().
-//		GroupBy(requeststatus.FieldCreatedBy).
+//		GroupBy(requeststatus.FieldStatus).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -317,11 +356,11 @@ func (rsq *RequestStatusQuery) GroupBy(field string, fields ...string) *RequestS
 // Example:
 //
 //	var v []struct {
-//		CreatedBy string `json:"created_by,omitempty"`
+//		Status requeststatus.Status `json:"status,omitempty"`
 //	}
 //
 //	client.RequestStatus.Query().
-//		Select(requeststatus.FieldCreatedBy).
+//		Select(requeststatus.FieldStatus).
 //		Scan(ctx, &v)
 //
 func (rsq *RequestStatusQuery) Select(field string, fields ...string) *RequestStatusSelect {
@@ -348,11 +387,19 @@ func (rsq *RequestStatusQuery) prepareQuery(ctx context.Context) error {
 func (rsq *RequestStatusQuery) sqlAll(ctx context.Context) ([]*RequestStatus, error) {
 	var (
 		nodes       = []*RequestStatus{}
+		withFKs     = rsq.withFKs
 		_spec       = rsq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			rsq.withRequest != nil,
+			rsq.withUser != nil,
 		}
 	)
+	if rsq.withRequest != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, requeststatus.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &RequestStatus{config: rsq.config}
 		nodes = append(nodes, node)
@@ -374,10 +421,13 @@ func (rsq *RequestStatusQuery) sqlAll(ctx context.Context) ([]*RequestStatus, er
 	}
 
 	if query := rsq.withRequest; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*RequestStatus)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*RequestStatus)
 		for i := range nodes {
-			fk := nodes[i].RequestID
+			if nodes[i].request_status == nil {
+				continue
+			}
+			fk := *nodes[i].request_status
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -391,11 +441,39 @@ func (rsq *RequestStatusQuery) sqlAll(ctx context.Context) ([]*RequestStatus, er
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_status" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Request = n
 			}
+		}
+	}
+
+	if query := rsq.withUser; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*RequestStatus)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sql.InValues(requeststatus.UserColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.request_status_user
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "request_status_user" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "request_status_user" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.User = n
 		}
 	}
 
@@ -421,7 +499,7 @@ func (rsq *RequestStatusQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   requeststatus.Table,
 			Columns: requeststatus.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: requeststatus.FieldID,
 			},
 		},

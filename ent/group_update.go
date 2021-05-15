@@ -10,11 +10,13 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/groupowner"
-	"github.com/traPtitech/Jomon/ent/groupuser"
 	"github.com/traPtitech/Jomon/ent/predicate"
+	"github.com/traPtitech/Jomon/ent/transactiondetail"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // GroupUpdate is the builder for updating Group entities.
@@ -118,48 +120,63 @@ func (gu *GroupUpdate) ClearDeletedAt() *GroupUpdate {
 }
 
 // AddGroupBudgetIDs adds the "group_budget" edge to the GroupBudget entity by IDs.
-func (gu *GroupUpdate) AddGroupBudgetIDs(ids ...int) *GroupUpdate {
+func (gu *GroupUpdate) AddGroupBudgetIDs(ids ...uuid.UUID) *GroupUpdate {
 	gu.mutation.AddGroupBudgetIDs(ids...)
 	return gu
 }
 
 // AddGroupBudget adds the "group_budget" edges to the GroupBudget entity.
 func (gu *GroupUpdate) AddGroupBudget(g ...*GroupBudget) *GroupUpdate {
-	ids := make([]int, len(g))
+	ids := make([]uuid.UUID, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
 	return gu.AddGroupBudgetIDs(ids...)
 }
 
-// AddUserIDs adds the "user" edge to the GroupUser entity by IDs.
-func (gu *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
+// AddUserIDs adds the "user" edge to the User entity by IDs.
+func (gu *GroupUpdate) AddUserIDs(ids ...uuid.UUID) *GroupUpdate {
 	gu.mutation.AddUserIDs(ids...)
 	return gu
 }
 
-// AddUser adds the "user" edges to the GroupUser entity.
-func (gu *GroupUpdate) AddUser(g ...*GroupUser) *GroupUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// AddUser adds the "user" edges to the User entity.
+func (gu *GroupUpdate) AddUser(u ...*User) *GroupUpdate {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
 	return gu.AddUserIDs(ids...)
 }
 
 // AddOwnerIDs adds the "owner" edge to the GroupOwner entity by IDs.
-func (gu *GroupUpdate) AddOwnerIDs(ids ...int) *GroupUpdate {
+func (gu *GroupUpdate) AddOwnerIDs(ids ...uuid.UUID) *GroupUpdate {
 	gu.mutation.AddOwnerIDs(ids...)
 	return gu
 }
 
 // AddOwner adds the "owner" edges to the GroupOwner entity.
 func (gu *GroupUpdate) AddOwner(g ...*GroupOwner) *GroupUpdate {
-	ids := make([]int, len(g))
+	ids := make([]uuid.UUID, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
 	return gu.AddOwnerIDs(ids...)
+}
+
+// AddTransactionDetailIDs adds the "transaction_detail" edge to the TransactionDetail entity by IDs.
+func (gu *GroupUpdate) AddTransactionDetailIDs(ids ...uuid.UUID) *GroupUpdate {
+	gu.mutation.AddTransactionDetailIDs(ids...)
+	return gu
+}
+
+// AddTransactionDetail adds the "transaction_detail" edges to the TransactionDetail entity.
+func (gu *GroupUpdate) AddTransactionDetail(t ...*TransactionDetail) *GroupUpdate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return gu.AddTransactionDetailIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -174,37 +191,37 @@ func (gu *GroupUpdate) ClearGroupBudget() *GroupUpdate {
 }
 
 // RemoveGroupBudgetIDs removes the "group_budget" edge to GroupBudget entities by IDs.
-func (gu *GroupUpdate) RemoveGroupBudgetIDs(ids ...int) *GroupUpdate {
+func (gu *GroupUpdate) RemoveGroupBudgetIDs(ids ...uuid.UUID) *GroupUpdate {
 	gu.mutation.RemoveGroupBudgetIDs(ids...)
 	return gu
 }
 
 // RemoveGroupBudget removes "group_budget" edges to GroupBudget entities.
 func (gu *GroupUpdate) RemoveGroupBudget(g ...*GroupBudget) *GroupUpdate {
-	ids := make([]int, len(g))
+	ids := make([]uuid.UUID, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
 	return gu.RemoveGroupBudgetIDs(ids...)
 }
 
-// ClearUser clears all "user" edges to the GroupUser entity.
+// ClearUser clears all "user" edges to the User entity.
 func (gu *GroupUpdate) ClearUser() *GroupUpdate {
 	gu.mutation.ClearUser()
 	return gu
 }
 
-// RemoveUserIDs removes the "user" edge to GroupUser entities by IDs.
-func (gu *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
+// RemoveUserIDs removes the "user" edge to User entities by IDs.
+func (gu *GroupUpdate) RemoveUserIDs(ids ...uuid.UUID) *GroupUpdate {
 	gu.mutation.RemoveUserIDs(ids...)
 	return gu
 }
 
-// RemoveUser removes "user" edges to GroupUser entities.
-func (gu *GroupUpdate) RemoveUser(g ...*GroupUser) *GroupUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// RemoveUser removes "user" edges to User entities.
+func (gu *GroupUpdate) RemoveUser(u ...*User) *GroupUpdate {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
 	return gu.RemoveUserIDs(ids...)
 }
@@ -216,18 +233,39 @@ func (gu *GroupUpdate) ClearOwner() *GroupUpdate {
 }
 
 // RemoveOwnerIDs removes the "owner" edge to GroupOwner entities by IDs.
-func (gu *GroupUpdate) RemoveOwnerIDs(ids ...int) *GroupUpdate {
+func (gu *GroupUpdate) RemoveOwnerIDs(ids ...uuid.UUID) *GroupUpdate {
 	gu.mutation.RemoveOwnerIDs(ids...)
 	return gu
 }
 
 // RemoveOwner removes "owner" edges to GroupOwner entities.
 func (gu *GroupUpdate) RemoveOwner(g ...*GroupOwner) *GroupUpdate {
-	ids := make([]int, len(g))
+	ids := make([]uuid.UUID, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
 	return gu.RemoveOwnerIDs(ids...)
+}
+
+// ClearTransactionDetail clears all "transaction_detail" edges to the TransactionDetail entity.
+func (gu *GroupUpdate) ClearTransactionDetail() *GroupUpdate {
+	gu.mutation.ClearTransactionDetail()
+	return gu
+}
+
+// RemoveTransactionDetailIDs removes the "transaction_detail" edge to TransactionDetail entities by IDs.
+func (gu *GroupUpdate) RemoveTransactionDetailIDs(ids ...uuid.UUID) *GroupUpdate {
+	gu.mutation.RemoveTransactionDetailIDs(ids...)
+	return gu
+}
+
+// RemoveTransactionDetail removes "transaction_detail" edges to TransactionDetail entities.
+func (gu *GroupUpdate) RemoveTransactionDetail(t ...*TransactionDetail) *GroupUpdate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return gu.RemoveTransactionDetailIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -287,7 +325,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   group.Table,
 			Columns: group.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: group.FieldID,
 			},
 		},
@@ -363,13 +401,13 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if gu.mutation.GroupBudgetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.GroupBudgetTable,
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupbudget.FieldID,
 				},
 			},
@@ -379,13 +417,13 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := gu.mutation.RemovedGroupBudgetIDs(); len(nodes) > 0 && !gu.mutation.GroupBudgetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.GroupBudgetTable,
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupbudget.FieldID,
 				},
 			},
@@ -398,13 +436,13 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := gu.mutation.GroupBudgetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.GroupBudgetTable,
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupbudget.FieldID,
 				},
 			},
@@ -416,15 +454,15 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if gu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
 			Table:   group.UserTable,
-			Columns: []string{group.UserColumn},
+			Columns: group.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: groupuser.FieldID,
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -432,15 +470,15 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := gu.mutation.RemovedUserIDs(); len(nodes) > 0 && !gu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
 			Table:   group.UserTable,
-			Columns: []string{group.UserColumn},
+			Columns: group.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: groupuser.FieldID,
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -451,15 +489,15 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := gu.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
 			Table:   group.UserTable,
-			Columns: []string{group.UserColumn},
+			Columns: group.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: groupuser.FieldID,
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -471,13 +509,13 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if gu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.OwnerTable,
 			Columns: []string{group.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupowner.FieldID,
 				},
 			},
@@ -487,13 +525,13 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := gu.mutation.RemovedOwnerIDs(); len(nodes) > 0 && !gu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.OwnerTable,
 			Columns: []string{group.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupowner.FieldID,
 				},
 			},
@@ -506,14 +544,68 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := gu.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.OwnerTable,
 			Columns: []string{group.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupowner.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if gu.mutation.TransactionDetailCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.TransactionDetailTable,
+			Columns: []string{group.TransactionDetailColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transactiondetail.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.RemovedTransactionDetailIDs(); len(nodes) > 0 && !gu.mutation.TransactionDetailCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.TransactionDetailTable,
+			Columns: []string{group.TransactionDetailColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transactiondetail.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := gu.mutation.TransactionDetailIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.TransactionDetailTable,
+			Columns: []string{group.TransactionDetailColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transactiondetail.FieldID,
 				},
 			},
 		}
@@ -629,48 +721,63 @@ func (guo *GroupUpdateOne) ClearDeletedAt() *GroupUpdateOne {
 }
 
 // AddGroupBudgetIDs adds the "group_budget" edge to the GroupBudget entity by IDs.
-func (guo *GroupUpdateOne) AddGroupBudgetIDs(ids ...int) *GroupUpdateOne {
+func (guo *GroupUpdateOne) AddGroupBudgetIDs(ids ...uuid.UUID) *GroupUpdateOne {
 	guo.mutation.AddGroupBudgetIDs(ids...)
 	return guo
 }
 
 // AddGroupBudget adds the "group_budget" edges to the GroupBudget entity.
 func (guo *GroupUpdateOne) AddGroupBudget(g ...*GroupBudget) *GroupUpdateOne {
-	ids := make([]int, len(g))
+	ids := make([]uuid.UUID, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
 	return guo.AddGroupBudgetIDs(ids...)
 }
 
-// AddUserIDs adds the "user" edge to the GroupUser entity by IDs.
-func (guo *GroupUpdateOne) AddUserIDs(ids ...int) *GroupUpdateOne {
+// AddUserIDs adds the "user" edge to the User entity by IDs.
+func (guo *GroupUpdateOne) AddUserIDs(ids ...uuid.UUID) *GroupUpdateOne {
 	guo.mutation.AddUserIDs(ids...)
 	return guo
 }
 
-// AddUser adds the "user" edges to the GroupUser entity.
-func (guo *GroupUpdateOne) AddUser(g ...*GroupUser) *GroupUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// AddUser adds the "user" edges to the User entity.
+func (guo *GroupUpdateOne) AddUser(u ...*User) *GroupUpdateOne {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
 	return guo.AddUserIDs(ids...)
 }
 
 // AddOwnerIDs adds the "owner" edge to the GroupOwner entity by IDs.
-func (guo *GroupUpdateOne) AddOwnerIDs(ids ...int) *GroupUpdateOne {
+func (guo *GroupUpdateOne) AddOwnerIDs(ids ...uuid.UUID) *GroupUpdateOne {
 	guo.mutation.AddOwnerIDs(ids...)
 	return guo
 }
 
 // AddOwner adds the "owner" edges to the GroupOwner entity.
 func (guo *GroupUpdateOne) AddOwner(g ...*GroupOwner) *GroupUpdateOne {
-	ids := make([]int, len(g))
+	ids := make([]uuid.UUID, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
 	return guo.AddOwnerIDs(ids...)
+}
+
+// AddTransactionDetailIDs adds the "transaction_detail" edge to the TransactionDetail entity by IDs.
+func (guo *GroupUpdateOne) AddTransactionDetailIDs(ids ...uuid.UUID) *GroupUpdateOne {
+	guo.mutation.AddTransactionDetailIDs(ids...)
+	return guo
+}
+
+// AddTransactionDetail adds the "transaction_detail" edges to the TransactionDetail entity.
+func (guo *GroupUpdateOne) AddTransactionDetail(t ...*TransactionDetail) *GroupUpdateOne {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return guo.AddTransactionDetailIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -685,37 +792,37 @@ func (guo *GroupUpdateOne) ClearGroupBudget() *GroupUpdateOne {
 }
 
 // RemoveGroupBudgetIDs removes the "group_budget" edge to GroupBudget entities by IDs.
-func (guo *GroupUpdateOne) RemoveGroupBudgetIDs(ids ...int) *GroupUpdateOne {
+func (guo *GroupUpdateOne) RemoveGroupBudgetIDs(ids ...uuid.UUID) *GroupUpdateOne {
 	guo.mutation.RemoveGroupBudgetIDs(ids...)
 	return guo
 }
 
 // RemoveGroupBudget removes "group_budget" edges to GroupBudget entities.
 func (guo *GroupUpdateOne) RemoveGroupBudget(g ...*GroupBudget) *GroupUpdateOne {
-	ids := make([]int, len(g))
+	ids := make([]uuid.UUID, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
 	return guo.RemoveGroupBudgetIDs(ids...)
 }
 
-// ClearUser clears all "user" edges to the GroupUser entity.
+// ClearUser clears all "user" edges to the User entity.
 func (guo *GroupUpdateOne) ClearUser() *GroupUpdateOne {
 	guo.mutation.ClearUser()
 	return guo
 }
 
-// RemoveUserIDs removes the "user" edge to GroupUser entities by IDs.
-func (guo *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
+// RemoveUserIDs removes the "user" edge to User entities by IDs.
+func (guo *GroupUpdateOne) RemoveUserIDs(ids ...uuid.UUID) *GroupUpdateOne {
 	guo.mutation.RemoveUserIDs(ids...)
 	return guo
 }
 
-// RemoveUser removes "user" edges to GroupUser entities.
-func (guo *GroupUpdateOne) RemoveUser(g ...*GroupUser) *GroupUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// RemoveUser removes "user" edges to User entities.
+func (guo *GroupUpdateOne) RemoveUser(u ...*User) *GroupUpdateOne {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
 	return guo.RemoveUserIDs(ids...)
 }
@@ -727,18 +834,39 @@ func (guo *GroupUpdateOne) ClearOwner() *GroupUpdateOne {
 }
 
 // RemoveOwnerIDs removes the "owner" edge to GroupOwner entities by IDs.
-func (guo *GroupUpdateOne) RemoveOwnerIDs(ids ...int) *GroupUpdateOne {
+func (guo *GroupUpdateOne) RemoveOwnerIDs(ids ...uuid.UUID) *GroupUpdateOne {
 	guo.mutation.RemoveOwnerIDs(ids...)
 	return guo
 }
 
 // RemoveOwner removes "owner" edges to GroupOwner entities.
 func (guo *GroupUpdateOne) RemoveOwner(g ...*GroupOwner) *GroupUpdateOne {
-	ids := make([]int, len(g))
+	ids := make([]uuid.UUID, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
 	return guo.RemoveOwnerIDs(ids...)
+}
+
+// ClearTransactionDetail clears all "transaction_detail" edges to the TransactionDetail entity.
+func (guo *GroupUpdateOne) ClearTransactionDetail() *GroupUpdateOne {
+	guo.mutation.ClearTransactionDetail()
+	return guo
+}
+
+// RemoveTransactionDetailIDs removes the "transaction_detail" edge to TransactionDetail entities by IDs.
+func (guo *GroupUpdateOne) RemoveTransactionDetailIDs(ids ...uuid.UUID) *GroupUpdateOne {
+	guo.mutation.RemoveTransactionDetailIDs(ids...)
+	return guo
+}
+
+// RemoveTransactionDetail removes "transaction_detail" edges to TransactionDetail entities.
+func (guo *GroupUpdateOne) RemoveTransactionDetail(t ...*TransactionDetail) *GroupUpdateOne {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return guo.RemoveTransactionDetailIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -805,7 +933,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Table:   group.Table,
 			Columns: group.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: group.FieldID,
 			},
 		},
@@ -898,13 +1026,13 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if guo.mutation.GroupBudgetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.GroupBudgetTable,
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupbudget.FieldID,
 				},
 			},
@@ -914,13 +1042,13 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if nodes := guo.mutation.RemovedGroupBudgetIDs(); len(nodes) > 0 && !guo.mutation.GroupBudgetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.GroupBudgetTable,
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupbudget.FieldID,
 				},
 			},
@@ -933,13 +1061,13 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if nodes := guo.mutation.GroupBudgetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.GroupBudgetTable,
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupbudget.FieldID,
 				},
 			},
@@ -951,15 +1079,15 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	}
 	if guo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
 			Table:   group.UserTable,
-			Columns: []string{group.UserColumn},
+			Columns: group.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: groupuser.FieldID,
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -967,15 +1095,15 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	}
 	if nodes := guo.mutation.RemovedUserIDs(); len(nodes) > 0 && !guo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
 			Table:   group.UserTable,
-			Columns: []string{group.UserColumn},
+			Columns: group.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: groupuser.FieldID,
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -986,15 +1114,15 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	}
 	if nodes := guo.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
 			Table:   group.UserTable,
-			Columns: []string{group.UserColumn},
+			Columns: group.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: groupuser.FieldID,
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -1006,13 +1134,13 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if guo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.OwnerTable,
 			Columns: []string{group.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupowner.FieldID,
 				},
 			},
@@ -1022,13 +1150,13 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if nodes := guo.mutation.RemovedOwnerIDs(); len(nodes) > 0 && !guo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.OwnerTable,
 			Columns: []string{group.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupowner.FieldID,
 				},
 			},
@@ -1041,14 +1169,68 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if nodes := guo.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.OwnerTable,
 			Columns: []string{group.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupowner.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if guo.mutation.TransactionDetailCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.TransactionDetailTable,
+			Columns: []string{group.TransactionDetailColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transactiondetail.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.RemovedTransactionDetailIDs(); len(nodes) > 0 && !guo.mutation.TransactionDetailCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.TransactionDetailTable,
+			Columns: []string{group.TransactionDetailColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transactiondetail.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := guo.mutation.TransactionDetailIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.TransactionDetailTable,
+			Columns: []string{group.TransactionDetailColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transactiondetail.FieldID,
 				},
 			},
 		}

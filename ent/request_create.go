@@ -10,13 +10,15 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
+	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/request"
-	"github.com/traPtitech/Jomon/ent/requestfile"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
-	"github.com/traPtitech/Jomon/ent/requesttag"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
+	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // RequestCreate is the builder for creating a Request entity.
@@ -24,12 +26,6 @@ type RequestCreate struct {
 	config
 	mutation *RequestMutation
 	hooks    []Hook
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (rc *RequestCreate) SetCreatedBy(s string) *RequestCreate {
-	rc.mutation.SetCreatedBy(s)
-	return rc
 }
 
 // SetAmount sets the "amount" field.
@@ -52,15 +48,21 @@ func (rc *RequestCreate) SetNillableCreatedAt(t *time.Time) *RequestCreate {
 	return rc
 }
 
+// SetID sets the "id" field.
+func (rc *RequestCreate) SetID(u uuid.UUID) *RequestCreate {
+	rc.mutation.SetID(u)
+	return rc
+}
+
 // AddStatuIDs adds the "status" edge to the RequestStatus entity by IDs.
-func (rc *RequestCreate) AddStatuIDs(ids ...int) *RequestCreate {
+func (rc *RequestCreate) AddStatuIDs(ids ...uuid.UUID) *RequestCreate {
 	rc.mutation.AddStatuIDs(ids...)
 	return rc
 }
 
 // AddStatus adds the "status" edges to the RequestStatus entity.
 func (rc *RequestCreate) AddStatus(r ...*RequestStatus) *RequestCreate {
-	ids := make([]int, len(r))
+	ids := make([]uuid.UUID, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
@@ -68,59 +70,59 @@ func (rc *RequestCreate) AddStatus(r ...*RequestStatus) *RequestCreate {
 }
 
 // AddTargetIDs adds the "target" edge to the RequestTarget entity by IDs.
-func (rc *RequestCreate) AddTargetIDs(ids ...int) *RequestCreate {
+func (rc *RequestCreate) AddTargetIDs(ids ...uuid.UUID) *RequestCreate {
 	rc.mutation.AddTargetIDs(ids...)
 	return rc
 }
 
 // AddTarget adds the "target" edges to the RequestTarget entity.
 func (rc *RequestCreate) AddTarget(r ...*RequestTarget) *RequestCreate {
-	ids := make([]int, len(r))
+	ids := make([]uuid.UUID, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
 	return rc.AddTargetIDs(ids...)
 }
 
-// AddFileIDs adds the "file" edge to the RequestFile entity by IDs.
-func (rc *RequestCreate) AddFileIDs(ids ...int) *RequestCreate {
+// AddFileIDs adds the "file" edge to the File entity by IDs.
+func (rc *RequestCreate) AddFileIDs(ids ...uuid.UUID) *RequestCreate {
 	rc.mutation.AddFileIDs(ids...)
 	return rc
 }
 
-// AddFile adds the "file" edges to the RequestFile entity.
-func (rc *RequestCreate) AddFile(r ...*RequestFile) *RequestCreate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddFile adds the "file" edges to the File entity.
+func (rc *RequestCreate) AddFile(f ...*File) *RequestCreate {
+	ids := make([]uuid.UUID, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
 	}
 	return rc.AddFileIDs(ids...)
 }
 
-// AddTagIDs adds the "tag" edge to the RequestTag entity by IDs.
-func (rc *RequestCreate) AddTagIDs(ids ...int) *RequestCreate {
+// AddTagIDs adds the "tag" edge to the Tag entity by IDs.
+func (rc *RequestCreate) AddTagIDs(ids ...uuid.UUID) *RequestCreate {
 	rc.mutation.AddTagIDs(ids...)
 	return rc
 }
 
-// AddTag adds the "tag" edges to the RequestTag entity.
-func (rc *RequestCreate) AddTag(r ...*RequestTag) *RequestCreate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddTag adds the "tag" edges to the Tag entity.
+func (rc *RequestCreate) AddTag(t ...*Tag) *RequestCreate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
 	return rc.AddTagIDs(ids...)
 }
 
 // AddTransactionDetailIDs adds the "transaction_detail" edge to the TransactionDetail entity by IDs.
-func (rc *RequestCreate) AddTransactionDetailIDs(ids ...int) *RequestCreate {
+func (rc *RequestCreate) AddTransactionDetailIDs(ids ...uuid.UUID) *RequestCreate {
 	rc.mutation.AddTransactionDetailIDs(ids...)
 	return rc
 }
 
 // AddTransactionDetail adds the "transaction_detail" edges to the TransactionDetail entity.
 func (rc *RequestCreate) AddTransactionDetail(t ...*TransactionDetail) *RequestCreate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -128,18 +130,37 @@ func (rc *RequestCreate) AddTransactionDetail(t ...*TransactionDetail) *RequestC
 }
 
 // AddCommentIDs adds the "comment" edge to the Comment entity by IDs.
-func (rc *RequestCreate) AddCommentIDs(ids ...int) *RequestCreate {
+func (rc *RequestCreate) AddCommentIDs(ids ...uuid.UUID) *RequestCreate {
 	rc.mutation.AddCommentIDs(ids...)
 	return rc
 }
 
 // AddComment adds the "comment" edges to the Comment entity.
 func (rc *RequestCreate) AddComment(c ...*Comment) *RequestCreate {
-	ids := make([]int, len(c))
+	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
 	return rc.AddCommentIDs(ids...)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (rc *RequestCreate) SetUserID(id uuid.UUID) *RequestCreate {
+	rc.mutation.SetUserID(id)
+	return rc
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (rc *RequestCreate) SetNillableUserID(id *uuid.UUID) *RequestCreate {
+	if id != nil {
+		rc = rc.SetUserID(*id)
+	}
+	return rc
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (rc *RequestCreate) SetUser(u *User) *RequestCreate {
+	return rc.SetUserID(u.ID)
 }
 
 // Mutation returns the RequestMutation object of the builder.
@@ -198,13 +219,14 @@ func (rc *RequestCreate) defaults() {
 		v := request.DefaultCreatedAt()
 		rc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := rc.mutation.ID(); !ok {
+		v := request.DefaultID()
+		rc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (rc *RequestCreate) check() error {
-	if _, ok := rc.mutation.CreatedBy(); !ok {
-		return &ValidationError{Name: "created_by", err: errors.New("ent: missing required field \"created_by\"")}
-	}
 	if _, ok := rc.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New("ent: missing required field \"amount\"")}
 	}
@@ -222,8 +244,6 @@ func (rc *RequestCreate) sqlSave(ctx context.Context) (*Request, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -233,18 +253,14 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: request.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: request.FieldID,
 			},
 		}
 	)
-	if value, ok := rc.mutation.CreatedBy(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: request.FieldCreatedBy,
-		})
-		_node.CreatedBy = value
+	if id, ok := rc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
 	}
 	if value, ok := rc.mutation.Amount(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -265,13 +281,13 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 	if nodes := rc.mutation.StatusIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   request.StatusTable,
 			Columns: []string{request.StatusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: requeststatus.FieldID,
 				},
 			},
@@ -284,13 +300,13 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 	if nodes := rc.mutation.TargetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   request.TargetTable,
 			Columns: []string{request.TargetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: requesttarget.FieldID,
 				},
 			},
@@ -303,14 +319,14 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 	if nodes := rc.mutation.FileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   request.FileTable,
 			Columns: []string{request.FileColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: requestfile.FieldID,
+					Type:   field.TypeUUID,
+					Column: file.FieldID,
 				},
 			},
 		}
@@ -322,14 +338,14 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 	if nodes := rc.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   request.TagTable,
 			Columns: []string{request.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: requesttag.FieldID,
+					Type:   field.TypeUUID,
+					Column: tag.FieldID,
 				},
 			},
 		}
@@ -341,13 +357,13 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 	if nodes := rc.mutation.TransactionDetailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   request.TransactionDetailTable,
 			Columns: []string{request.TransactionDetailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: transactiondetail.FieldID,
 				},
 			},
@@ -360,14 +376,33 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 	if nodes := rc.mutation.CommentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   request.CommentTable,
 			Columns: []string{request.CommentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: comment.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := rc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   request.UserTable,
+			Columns: []string{request.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -419,8 +454,6 @@ func (rcb *RequestCreateBulk) Save(ctx context.Context) ([]*Request, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

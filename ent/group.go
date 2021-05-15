@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 )
 
@@ -15,7 +16,7 @@ import (
 type Group struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Description holds the value of the "description" field.
@@ -38,12 +39,14 @@ type GroupEdges struct {
 	// GroupBudget holds the value of the group_budget edge.
 	GroupBudget []*GroupBudget `json:"group_budget,omitempty"`
 	// User holds the value of the user edge.
-	User []*GroupUser `json:"user,omitempty"`
+	User []*User `json:"user,omitempty"`
 	// Owner holds the value of the owner edge.
 	Owner []*GroupOwner `json:"owner,omitempty"`
+	// TransactionDetail holds the value of the transaction_detail edge.
+	TransactionDetail []*TransactionDetail `json:"transaction_detail,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // GroupBudgetOrErr returns the GroupBudget value or an error if the edge
@@ -57,7 +60,7 @@ func (e GroupEdges) GroupBudgetOrErr() ([]*GroupBudget, error) {
 
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading.
-func (e GroupEdges) UserOrErr() ([]*GroupUser, error) {
+func (e GroupEdges) UserOrErr() ([]*User, error) {
 	if e.loadedTypes[1] {
 		return e.User, nil
 	}
@@ -73,17 +76,28 @@ func (e GroupEdges) OwnerOrErr() ([]*GroupOwner, error) {
 	return nil, &NotLoadedError{edge: "owner"}
 }
 
+// TransactionDetailOrErr returns the TransactionDetail value or an error if the edge
+// was not loaded in eager-loading.
+func (e GroupEdges) TransactionDetailOrErr() ([]*TransactionDetail, error) {
+	if e.loadedTypes[3] {
+		return e.TransactionDetail, nil
+	}
+	return nil, &NotLoadedError{edge: "transaction_detail"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Group) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case group.FieldID, group.FieldBudget:
+		case group.FieldBudget:
 			values[i] = new(sql.NullInt64)
 		case group.FieldName, group.FieldDescription:
 			values[i] = new(sql.NullString)
 		case group.FieldCreatedAt, group.FieldUpdatedAt, group.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
+		case group.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Group", columns[i])
 		}
@@ -100,11 +114,11 @@ func (gr *Group) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case group.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				gr.ID = *value
 			}
-			gr.ID = int(value.Int64)
 		case group.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -154,13 +168,18 @@ func (gr *Group) QueryGroupBudget() *GroupBudgetQuery {
 }
 
 // QueryUser queries the "user" edge of the Group entity.
-func (gr *Group) QueryUser() *GroupUserQuery {
+func (gr *Group) QueryUser() *UserQuery {
 	return (&GroupClient{config: gr.config}).QueryUser(gr)
 }
 
 // QueryOwner queries the "owner" edge of the Group entity.
 func (gr *Group) QueryOwner() *GroupOwnerQuery {
 	return (&GroupClient{config: gr.config}).QueryOwner(gr)
+}
+
+// QueryTransactionDetail queries the "transaction_detail" edge of the Group entity.
+func (gr *Group) QueryTransactionDetail() *TransactionDetailQuery {
+	return (&GroupClient{config: gr.config}).QueryTransactionDetail(gr)
 }
 
 // Update returns a builder for updating this Group.

@@ -7,32 +7,33 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.RequestTarget {
+func ID(id uuid.UUID) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.RequestTarget {
+func IDEQ(id uuid.UUID) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.RequestTarget {
+func IDNEQ(id uuid.UUID) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.RequestTarget {
+func IDIn(ids ...uuid.UUID) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -49,7 +50,7 @@ func IDIn(ids ...int) predicate.RequestTarget {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.RequestTarget {
+func IDNotIn(ids ...uuid.UUID) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -66,28 +67,28 @@ func IDNotIn(ids ...int) predicate.RequestTarget {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.RequestTarget {
+func IDGT(id uuid.UUID) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.RequestTarget {
+func IDGTE(id uuid.UUID) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.RequestTarget {
+func IDLT(id uuid.UUID) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.RequestTarget {
+func IDLTE(id uuid.UUID) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
 	})
@@ -97,13 +98,6 @@ func IDLTE(id int) predicate.RequestTarget {
 func Target(v string) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldTarget), v))
-	})
-}
-
-// RequestID applies equality check predicate on the "request_id" field. It's identical to RequestIDEQ.
-func RequestID(v int) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRequestID), v))
 	})
 }
 
@@ -229,54 +223,6 @@ func TargetEqualFold(v string) predicate.RequestTarget {
 func TargetContainsFold(v string) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldTarget), v))
-	})
-}
-
-// RequestIDEQ applies the EQ predicate on the "request_id" field.
-func RequestIDEQ(v int) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRequestID), v))
-	})
-}
-
-// RequestIDNEQ applies the NEQ predicate on the "request_id" field.
-func RequestIDNEQ(v int) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldRequestID), v))
-	})
-}
-
-// RequestIDIn applies the In predicate on the "request_id" field.
-func RequestIDIn(vs ...int) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldRequestID), v...))
-	})
-}
-
-// RequestIDNotIn applies the NotIn predicate on the "request_id" field.
-func RequestIDNotIn(vs ...int) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldRequestID), v...))
 	})
 }
 
@@ -452,7 +398,7 @@ func HasRequest() predicate.RequestTarget {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RequestTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, RequestTable, RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -464,7 +410,7 @@ func HasRequestWith(preds ...predicate.Request) predicate.RequestTarget {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RequestInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, RequestTable, RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

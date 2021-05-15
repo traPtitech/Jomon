@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -11,9 +12,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // CommentQuery is the builder for querying Comment entities.
@@ -27,6 +30,8 @@ type CommentQuery struct {
 	predicates []predicate.Comment
 	// eager-loading edges.
 	withRequest *RequestQuery
+	withUser    *UserQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -77,7 +82,29 @@ func (cq *CommentQuery) QueryRequest() *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(comment.Table, comment.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, comment.RequestTable, comment.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.RequestTable, comment.RequestColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUser chains the current query on the "user" edge.
+func (cq *CommentQuery) QueryUser() *UserQuery {
+	query := &UserQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, comment.UserTable, comment.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -109,8 +136,8 @@ func (cq *CommentQuery) FirstX(ctx context.Context) *Comment {
 
 // FirstID returns the first Comment ID from the query.
 // Returns a *NotFoundError when no Comment ID was found.
-func (cq *CommentQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (cq *CommentQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -122,7 +149,7 @@ func (cq *CommentQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (cq *CommentQuery) FirstIDX(ctx context.Context) int {
+func (cq *CommentQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := cq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -160,8 +187,8 @@ func (cq *CommentQuery) OnlyX(ctx context.Context) *Comment {
 // OnlyID is like Only, but returns the only Comment ID in the query.
 // Returns a *NotSingularError when exactly one Comment ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (cq *CommentQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (cq *CommentQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -177,7 +204,7 @@ func (cq *CommentQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (cq *CommentQuery) OnlyIDX(ctx context.Context) int {
+func (cq *CommentQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := cq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -203,8 +230,8 @@ func (cq *CommentQuery) AllX(ctx context.Context) []*Comment {
 }
 
 // IDs executes the query and returns a list of Comment IDs.
-func (cq *CommentQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (cq *CommentQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := cq.Select(comment.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -212,7 +239,7 @@ func (cq *CommentQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (cq *CommentQuery) IDsX(ctx context.Context) []int {
+func (cq *CommentQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := cq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -267,6 +294,7 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 		order:       append([]OrderFunc{}, cq.order...),
 		predicates:  append([]predicate.Comment{}, cq.predicates...),
 		withRequest: cq.withRequest.Clone(),
+		withUser:    cq.withUser.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -284,18 +312,29 @@ func (cq *CommentQuery) WithRequest(opts ...func(*RequestQuery)) *CommentQuery {
 	return cq
 }
 
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CommentQuery) WithUser(opts ...func(*UserQuery)) *CommentQuery {
+	query := &UserQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withUser = query
+	return cq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		CreatedBy string `json:"created_by,omitempty"`
+//		Comment string `json:"comment,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Comment.Query().
-//		GroupBy(comment.FieldCreatedBy).
+//		GroupBy(comment.FieldComment).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -317,11 +356,11 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 // Example:
 //
 //	var v []struct {
-//		CreatedBy string `json:"created_by,omitempty"`
+//		Comment string `json:"comment,omitempty"`
 //	}
 //
 //	client.Comment.Query().
-//		Select(comment.FieldCreatedBy).
+//		Select(comment.FieldComment).
 //		Scan(ctx, &v)
 //
 func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
@@ -348,11 +387,19 @@ func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
 func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 	var (
 		nodes       = []*Comment{}
+		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			cq.withRequest != nil,
+			cq.withUser != nil,
 		}
 	)
+	if cq.withRequest != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, comment.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Comment{config: cq.config}
 		nodes = append(nodes, node)
@@ -374,10 +421,13 @@ func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 	}
 
 	if query := cq.withRequest; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Comment)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Comment)
 		for i := range nodes {
-			fk := nodes[i].RequestID
+			if nodes[i].request_comment == nil {
+				continue
+			}
+			fk := *nodes[i].request_comment
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -391,11 +441,39 @@ func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_comment" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Request = n
 			}
+		}
+	}
+
+	if query := cq.withUser; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Comment)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sql.InValues(comment.UserColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.comment_user
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "comment_user" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "comment_user" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.User = n
 		}
 	}
 
@@ -421,7 +499,7 @@ func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   comment.Table,
 			Columns: comment.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: comment.FieldID,
 			},
 		},

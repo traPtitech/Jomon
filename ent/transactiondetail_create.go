@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/transaction"
@@ -33,34 +34,6 @@ func (tdc *TransactionDetailCreate) SetAmount(i int) *TransactionDetailCreate {
 func (tdc *TransactionDetailCreate) SetNillableAmount(i *int) *TransactionDetailCreate {
 	if i != nil {
 		tdc.SetAmount(*i)
-	}
-	return tdc
-}
-
-// SetRequestID sets the "request_id" field.
-func (tdc *TransactionDetailCreate) SetRequestID(i int) *TransactionDetailCreate {
-	tdc.mutation.SetRequestID(i)
-	return tdc
-}
-
-// SetNillableRequestID sets the "request_id" field if the given value is not nil.
-func (tdc *TransactionDetailCreate) SetNillableRequestID(i *int) *TransactionDetailCreate {
-	if i != nil {
-		tdc.SetRequestID(*i)
-	}
-	return tdc
-}
-
-// SetGroupID sets the "group_id" field.
-func (tdc *TransactionDetailCreate) SetGroupID(i int) *TransactionDetailCreate {
-	tdc.mutation.SetGroupID(i)
-	return tdc
-}
-
-// SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (tdc *TransactionDetailCreate) SetNillableGroupID(i *int) *TransactionDetailCreate {
-	if i != nil {
-		tdc.SetGroupID(*i)
 	}
 	return tdc
 }
@@ -93,8 +66,14 @@ func (tdc *TransactionDetailCreate) SetNillableCreatedAt(t *time.Time) *Transact
 	return tdc
 }
 
+// SetID sets the "id" field.
+func (tdc *TransactionDetailCreate) SetID(u uuid.UUID) *TransactionDetailCreate {
+	tdc.mutation.SetID(u)
+	return tdc
+}
+
 // SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (tdc *TransactionDetailCreate) SetTransactionID(id int) *TransactionDetailCreate {
+func (tdc *TransactionDetailCreate) SetTransactionID(id uuid.UUID) *TransactionDetailCreate {
 	tdc.mutation.SetTransactionID(id)
 	return tdc
 }
@@ -104,9 +83,37 @@ func (tdc *TransactionDetailCreate) SetTransaction(t *Transaction) *TransactionD
 	return tdc.SetTransactionID(t.ID)
 }
 
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (tdc *TransactionDetailCreate) SetRequestID(id uuid.UUID) *TransactionDetailCreate {
+	tdc.mutation.SetRequestID(id)
+	return tdc
+}
+
+// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
+func (tdc *TransactionDetailCreate) SetNillableRequestID(id *uuid.UUID) *TransactionDetailCreate {
+	if id != nil {
+		tdc = tdc.SetRequestID(*id)
+	}
+	return tdc
+}
+
 // SetRequest sets the "request" edge to the Request entity.
 func (tdc *TransactionDetailCreate) SetRequest(r *Request) *TransactionDetailCreate {
 	return tdc.SetRequestID(r.ID)
+}
+
+// SetGroupID sets the "group" edge to the Group entity by ID.
+func (tdc *TransactionDetailCreate) SetGroupID(id uuid.UUID) *TransactionDetailCreate {
+	tdc.mutation.SetGroupID(id)
+	return tdc
+}
+
+// SetNillableGroupID sets the "group" edge to the Group entity by ID if the given value is not nil.
+func (tdc *TransactionDetailCreate) SetNillableGroupID(id *uuid.UUID) *TransactionDetailCreate {
+	if id != nil {
+		tdc = tdc.SetGroupID(*id)
+	}
+	return tdc
 }
 
 // SetGroup sets the "group" edge to the Group entity.
@@ -178,6 +185,10 @@ func (tdc *TransactionDetailCreate) defaults() {
 		v := transactiondetail.DefaultCreatedAt()
 		tdc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := tdc.mutation.ID(); !ok {
+		v := transactiondetail.DefaultID()
+		tdc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -205,8 +216,6 @@ func (tdc *TransactionDetailCreate) sqlSave(ctx context.Context) (*TransactionDe
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -216,11 +225,15 @@ func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.
 		_spec = &sqlgraph.CreateSpec{
 			Table: transactiondetail.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: transactiondetail.FieldID,
 			},
 		}
 	)
+	if id, ok := tdc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := tdc.mutation.Amount(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
@@ -248,13 +261,13 @@ func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.
 	if nodes := tdc.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   transactiondetail.TransactionTable,
 			Columns: []string{transactiondetail.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: transaction.FieldID,
 				},
 			},
@@ -262,18 +275,19 @@ func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.transaction_detail = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tdc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   transactiondetail.RequestTable,
 			Columns: []string{transactiondetail.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: request.FieldID,
 				},
 			},
@@ -281,19 +295,19 @@ func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.RequestID = &nodes[0]
+		_node.request_transaction_detail = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tdc.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   transactiondetail.GroupTable,
 			Columns: []string{transactiondetail.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: group.FieldID,
 				},
 			},
@@ -301,7 +315,7 @@ func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.GroupID = &nodes[0]
+		_node.group_transaction_detail = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -347,8 +361,6 @@ func (tdcb *TransactionDetailCreateBulk) Save(ctx context.Context) ([]*Transacti
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

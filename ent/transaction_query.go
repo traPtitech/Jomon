@@ -12,10 +12,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/predicate"
+	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
-	"github.com/traPtitech/Jomon/ent/transactiontag"
 )
 
 // TransactionQuery is the builder for querying Transaction entities.
@@ -28,9 +30,10 @@ type TransactionQuery struct {
 	fields     []string
 	predicates []predicate.Transaction
 	// eager-loading edges.
-	withDetail *TransactionDetailQuery
-	withTag    *TransactionTagQuery
-	withFKs    bool
+	withDetail      *TransactionDetailQuery
+	withTag         *TagQuery
+	withGroupBudget *GroupBudgetQuery
+	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -81,7 +84,7 @@ func (tq *TransactionQuery) QueryDetail() *TransactionDetailQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
 			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, transaction.DetailTable, transaction.DetailColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, transaction.DetailTable, transaction.DetailColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -90,8 +93,8 @@ func (tq *TransactionQuery) QueryDetail() *TransactionDetailQuery {
 }
 
 // QueryTag chains the current query on the "tag" edge.
-func (tq *TransactionQuery) QueryTag() *TransactionTagQuery {
-	query := &TransactionTagQuery{config: tq.config}
+func (tq *TransactionQuery) QueryTag() *TagQuery {
+	query := &TagQuery{config: tq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -102,8 +105,30 @@ func (tq *TransactionQuery) QueryTag() *TransactionTagQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
-			sqlgraph.To(transactiontag.Table, transactiontag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, transaction.TagTable, transaction.TagColumn),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, transaction.TagTable, transaction.TagColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryGroupBudget chains the current query on the "group_budget" edge.
+func (tq *TransactionQuery) QueryGroupBudget() *GroupBudgetQuery {
+	query := &GroupBudgetQuery{config: tq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
+			sqlgraph.To(groupbudget.Table, groupbudget.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, transaction.GroupBudgetTable, transaction.GroupBudgetColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -135,8 +160,8 @@ func (tq *TransactionQuery) FirstX(ctx context.Context) *Transaction {
 
 // FirstID returns the first Transaction ID from the query.
 // Returns a *NotFoundError when no Transaction ID was found.
-func (tq *TransactionQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (tq *TransactionQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = tq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -148,7 +173,7 @@ func (tq *TransactionQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (tq *TransactionQuery) FirstIDX(ctx context.Context) int {
+func (tq *TransactionQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := tq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -186,8 +211,8 @@ func (tq *TransactionQuery) OnlyX(ctx context.Context) *Transaction {
 // OnlyID is like Only, but returns the only Transaction ID in the query.
 // Returns a *NotSingularError when exactly one Transaction ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (tq *TransactionQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (tq *TransactionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = tq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -203,7 +228,7 @@ func (tq *TransactionQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (tq *TransactionQuery) OnlyIDX(ctx context.Context) int {
+func (tq *TransactionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := tq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -229,8 +254,8 @@ func (tq *TransactionQuery) AllX(ctx context.Context) []*Transaction {
 }
 
 // IDs executes the query and returns a list of Transaction IDs.
-func (tq *TransactionQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (tq *TransactionQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := tq.Select(transaction.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -238,7 +263,7 @@ func (tq *TransactionQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (tq *TransactionQuery) IDsX(ctx context.Context) []int {
+func (tq *TransactionQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := tq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -287,13 +312,14 @@ func (tq *TransactionQuery) Clone() *TransactionQuery {
 		return nil
 	}
 	return &TransactionQuery{
-		config:     tq.config,
-		limit:      tq.limit,
-		offset:     tq.offset,
-		order:      append([]OrderFunc{}, tq.order...),
-		predicates: append([]predicate.Transaction{}, tq.predicates...),
-		withDetail: tq.withDetail.Clone(),
-		withTag:    tq.withTag.Clone(),
+		config:          tq.config,
+		limit:           tq.limit,
+		offset:          tq.offset,
+		order:           append([]OrderFunc{}, tq.order...),
+		predicates:      append([]predicate.Transaction{}, tq.predicates...),
+		withDetail:      tq.withDetail.Clone(),
+		withTag:         tq.withTag.Clone(),
+		withGroupBudget: tq.withGroupBudget.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
@@ -313,12 +339,23 @@ func (tq *TransactionQuery) WithDetail(opts ...func(*TransactionDetailQuery)) *T
 
 // WithTag tells the query-builder to eager-load the nodes that are connected to
 // the "tag" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TransactionQuery) WithTag(opts ...func(*TransactionTagQuery)) *TransactionQuery {
-	query := &TransactionTagQuery{config: tq.config}
+func (tq *TransactionQuery) WithTag(opts ...func(*TagQuery)) *TransactionQuery {
+	query := &TagQuery{config: tq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
 	tq.withTag = query
+	return tq
+}
+
+// WithGroupBudget tells the query-builder to eager-load the nodes that are connected to
+// the "group_budget" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TransactionQuery) WithGroupBudget(opts ...func(*GroupBudgetQuery)) *TransactionQuery {
+	query := &GroupBudgetQuery{config: tq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withGroupBudget = query
 	return tq
 }
 
@@ -388,12 +425,13 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context) ([]*Transaction, error) 
 		nodes       = []*Transaction{}
 		withFKs     = tq.withFKs
 		_spec       = tq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			tq.withDetail != nil,
 			tq.withTag != nil,
+			tq.withGroupBudget != nil,
 		}
 	)
-	if tq.withDetail != nil {
+	if tq.withGroupBudget != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -420,43 +458,43 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context) ([]*Transaction, error) 
 	}
 
 	if query := tq.withDetail; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Transaction)
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Transaction)
 		for i := range nodes {
-			if nodes[i].transaction_detail_transaction == nil {
-				continue
-			}
-			fk := *nodes[i].transaction_detail_transaction
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
 		}
-		query.Where(transactiondetail.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.TransactionDetail(func(s *sql.Selector) {
+			s.Where(sql.InValues(transaction.DetailColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.transaction_detail
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "transaction_detail" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "transaction_detail_transaction" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "transaction_detail" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Detail = n
-			}
+			node.Edges.Detail = n
 		}
 	}
 
 	if query := tq.withTag; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Transaction)
+		nodeids := make(map[uuid.UUID]*Transaction)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Tag = []*TransactionTag{}
+			nodes[i].Edges.Tag = []*Tag{}
 		}
-		query.Where(predicate.TransactionTag(func(s *sql.Selector) {
+		query.withFKs = true
+		query.Where(predicate.Tag(func(s *sql.Selector) {
 			s.Where(sql.InValues(transaction.TagColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
@@ -464,12 +502,44 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context) ([]*Transaction, error) 
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.TransactionID
-			node, ok := nodeids[fk]
+			fk := n.transaction_tag
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "transaction_tag" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "transaction_id" returned %v for node %v`, fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "transaction_tag" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Tag = append(node.Edges.Tag, n)
+		}
+	}
+
+	if query := tq.withGroupBudget; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Transaction)
+		for i := range nodes {
+			if nodes[i].group_budget_transaction == nil {
+				continue
+			}
+			fk := *nodes[i].group_budget_transaction
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(groupbudget.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "group_budget_transaction" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.GroupBudget = n
+			}
 		}
 	}
 
@@ -495,7 +565,7 @@ func (tq *TransactionQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   transaction.Table,
 			Columns: transaction.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: transaction.FieldID,
 			},
 		},

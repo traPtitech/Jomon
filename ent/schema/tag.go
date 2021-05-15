@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // Tag holds the schema definition for the Tag entity.
@@ -16,6 +17,8 @@ type Tag struct {
 // Fields of the Tag.
 func (Tag) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New),
 		field.String("name"),
 		field.String("description"),
 		field.Time("created_at").
@@ -23,19 +26,19 @@ func (Tag) Fields() []ent.Field {
 		field.Time("updated_at").
 			Default(time.Now),
 		field.Time("deleted_at").
-			Nillable().
-			Optional(),
+			Optional().
+			Nillable(),
 	}
 }
 
 // Edges of the Tag.
 func (Tag) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("request_tag", RequestTag.Type).
+		edge.From("request", Request.Type).
 			Ref("tag").
 			Unique().
 			Required(),
-		edge.From("transaction_tag", TransactionTag.Type).
+		edge.From("transaction", Transaction.Type).
 			Ref("tag").
 			Unique().
 			Required(),

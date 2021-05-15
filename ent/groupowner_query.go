@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupowner"
 	"github.com/traPtitech/Jomon/ent/predicate"
@@ -27,6 +28,7 @@ type GroupOwnerQuery struct {
 	predicates []predicate.GroupOwner
 	// eager-loading edges.
 	withGroup *GroupQuery
+	withFKs   bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -77,7 +79,7 @@ func (goq *GroupOwnerQuery) QueryGroup() *GroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groupowner.Table, groupowner.FieldID, selector),
 			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, groupowner.GroupTable, groupowner.GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, groupowner.GroupTable, groupowner.GroupColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(goq.driver.Dialect(), step)
 		return fromU, nil
@@ -109,8 +111,8 @@ func (goq *GroupOwnerQuery) FirstX(ctx context.Context) *GroupOwner {
 
 // FirstID returns the first GroupOwner ID from the query.
 // Returns a *NotFoundError when no GroupOwner ID was found.
-func (goq *GroupOwnerQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (goq *GroupOwnerQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = goq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -122,7 +124,7 @@ func (goq *GroupOwnerQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (goq *GroupOwnerQuery) FirstIDX(ctx context.Context) int {
+func (goq *GroupOwnerQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := goq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -160,8 +162,8 @@ func (goq *GroupOwnerQuery) OnlyX(ctx context.Context) *GroupOwner {
 // OnlyID is like Only, but returns the only GroupOwner ID in the query.
 // Returns a *NotSingularError when exactly one GroupOwner ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (goq *GroupOwnerQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (goq *GroupOwnerQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = goq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -177,7 +179,7 @@ func (goq *GroupOwnerQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (goq *GroupOwnerQuery) OnlyIDX(ctx context.Context) int {
+func (goq *GroupOwnerQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := goq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -203,8 +205,8 @@ func (goq *GroupOwnerQuery) AllX(ctx context.Context) []*GroupOwner {
 }
 
 // IDs executes the query and returns a list of GroupOwner IDs.
-func (goq *GroupOwnerQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (goq *GroupOwnerQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := goq.Select(groupowner.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -212,7 +214,7 @@ func (goq *GroupOwnerQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (goq *GroupOwnerQuery) IDsX(ctx context.Context) []int {
+func (goq *GroupOwnerQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := goq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -348,11 +350,18 @@ func (goq *GroupOwnerQuery) prepareQuery(ctx context.Context) error {
 func (goq *GroupOwnerQuery) sqlAll(ctx context.Context) ([]*GroupOwner, error) {
 	var (
 		nodes       = []*GroupOwner{}
+		withFKs     = goq.withFKs
 		_spec       = goq.querySpec()
 		loadedTypes = [1]bool{
 			goq.withGroup != nil,
 		}
 	)
+	if goq.withGroup != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, groupowner.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &GroupOwner{config: goq.config}
 		nodes = append(nodes, node)
@@ -374,10 +383,13 @@ func (goq *GroupOwnerQuery) sqlAll(ctx context.Context) ([]*GroupOwner, error) {
 	}
 
 	if query := goq.withGroup; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*GroupOwner)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*GroupOwner)
 		for i := range nodes {
-			fk := nodes[i].GroupID
+			if nodes[i].group_owner == nil {
+				continue
+			}
+			fk := *nodes[i].group_owner
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -391,7 +403,7 @@ func (goq *GroupOwnerQuery) sqlAll(ctx context.Context) ([]*GroupOwner, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_id" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "group_owner" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Group = n
@@ -421,7 +433,7 @@ func (goq *GroupOwnerQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   groupowner.Table,
 			Columns: groupowner.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: groupowner.FieldID,
 			},
 		},

@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // GroupBudget holds the schema definition for the GroupBudget entity.
@@ -16,11 +17,12 @@ type GroupBudget struct {
 // Fields of the GroupBudget.
 func (GroupBudget) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New),
 		field.Int("amount"),
-		field.Int("group_id"),
 		field.Text("comment").
-			Nillable().
-			Optional(),
+			Optional().
+			Nillable(),
 		field.Time("created_at").
 			Default(time.Now),
 	}
@@ -29,9 +31,11 @@ func (GroupBudget) Fields() []ent.Field {
 // Edges of the GroupBudget.
 func (GroupBudget) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("group", Group.Type).
-			Field("group_id").
+		edge.From("group", Group.Type).
+			Ref("group_budget").
 			Unique().
 			Required(),
+		edge.To("transaction", Transaction.Type).
+			Unique(),
 	}
 }

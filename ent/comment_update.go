@@ -11,9 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // CommentUpdate is the builder for updating Comment entities.
@@ -26,19 +28,6 @@ type CommentUpdate struct {
 // Where adds a new predicate for the CommentUpdate builder.
 func (cu *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
-	return cu
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (cu *CommentUpdate) SetCreatedBy(s string) *CommentUpdate {
-	cu.mutation.SetCreatedBy(s)
-	return cu
-}
-
-// SetRequestID sets the "request_id" field.
-func (cu *CommentUpdate) SetRequestID(i int) *CommentUpdate {
-	cu.mutation.ResetRequestID()
-	cu.mutation.SetRequestID(i)
 	return cu
 }
 
@@ -96,9 +85,26 @@ func (cu *CommentUpdate) ClearDeletedAt() *CommentUpdate {
 	return cu
 }
 
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (cu *CommentUpdate) SetRequestID(id uuid.UUID) *CommentUpdate {
+	cu.mutation.SetRequestID(id)
+	return cu
+}
+
 // SetRequest sets the "request" edge to the Request entity.
 func (cu *CommentUpdate) SetRequest(r *Request) *CommentUpdate {
 	return cu.SetRequestID(r.ID)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (cu *CommentUpdate) SetUserID(id uuid.UUID) *CommentUpdate {
+	cu.mutation.SetUserID(id)
+	return cu
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (cu *CommentUpdate) SetUser(u *User) *CommentUpdate {
+	return cu.SetUserID(u.ID)
 }
 
 // Mutation returns the CommentMutation object of the builder.
@@ -109,6 +115,12 @@ func (cu *CommentUpdate) Mutation() *CommentMutation {
 // ClearRequest clears the "request" edge to the Request entity.
 func (cu *CommentUpdate) ClearRequest() *CommentUpdate {
 	cu.mutation.ClearRequest()
+	return cu
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (cu *CommentUpdate) ClearUser() *CommentUpdate {
+	cu.mutation.ClearUser()
 	return cu
 }
 
@@ -174,6 +186,9 @@ func (cu *CommentUpdate) check() error {
 	if _, ok := cu.mutation.RequestID(); cu.mutation.RequestCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"request\"")
 	}
+	if _, ok := cu.mutation.UserID(); cu.mutation.UserCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"user\"")
+	}
 	return nil
 }
 
@@ -183,7 +198,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   comment.Table,
 			Columns: comment.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: comment.FieldID,
 			},
 		},
@@ -194,13 +209,6 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := cu.mutation.CreatedBy(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: comment.FieldCreatedBy,
-		})
 	}
 	if value, ok := cu.mutation.Comment(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -239,13 +247,13 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if cu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   comment.RequestTable,
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: request.FieldID,
 				},
 			},
@@ -255,14 +263,49 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := cu.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   comment.RequestTable,
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cu.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   comment.UserTable,
+			Columns: []string{comment.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   comment.UserTable,
+			Columns: []string{comment.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -288,19 +331,6 @@ type CommentUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *CommentMutation
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (cuo *CommentUpdateOne) SetCreatedBy(s string) *CommentUpdateOne {
-	cuo.mutation.SetCreatedBy(s)
-	return cuo
-}
-
-// SetRequestID sets the "request_id" field.
-func (cuo *CommentUpdateOne) SetRequestID(i int) *CommentUpdateOne {
-	cuo.mutation.ResetRequestID()
-	cuo.mutation.SetRequestID(i)
-	return cuo
 }
 
 // SetComment sets the "comment" field.
@@ -357,9 +387,26 @@ func (cuo *CommentUpdateOne) ClearDeletedAt() *CommentUpdateOne {
 	return cuo
 }
 
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (cuo *CommentUpdateOne) SetRequestID(id uuid.UUID) *CommentUpdateOne {
+	cuo.mutation.SetRequestID(id)
+	return cuo
+}
+
 // SetRequest sets the "request" edge to the Request entity.
 func (cuo *CommentUpdateOne) SetRequest(r *Request) *CommentUpdateOne {
 	return cuo.SetRequestID(r.ID)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (cuo *CommentUpdateOne) SetUserID(id uuid.UUID) *CommentUpdateOne {
+	cuo.mutation.SetUserID(id)
+	return cuo
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (cuo *CommentUpdateOne) SetUser(u *User) *CommentUpdateOne {
+	return cuo.SetUserID(u.ID)
 }
 
 // Mutation returns the CommentMutation object of the builder.
@@ -370,6 +417,12 @@ func (cuo *CommentUpdateOne) Mutation() *CommentMutation {
 // ClearRequest clears the "request" edge to the Request entity.
 func (cuo *CommentUpdateOne) ClearRequest() *CommentUpdateOne {
 	cuo.mutation.ClearRequest()
+	return cuo
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (cuo *CommentUpdateOne) ClearUser() *CommentUpdateOne {
+	cuo.mutation.ClearUser()
 	return cuo
 }
 
@@ -442,6 +495,9 @@ func (cuo *CommentUpdateOne) check() error {
 	if _, ok := cuo.mutation.RequestID(); cuo.mutation.RequestCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"request\"")
 	}
+	if _, ok := cuo.mutation.UserID(); cuo.mutation.UserCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"user\"")
+	}
 	return nil
 }
 
@@ -451,7 +507,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 			Table:   comment.Table,
 			Columns: comment.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: comment.FieldID,
 			},
 		},
@@ -479,13 +535,6 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := cuo.mutation.CreatedBy(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: comment.FieldCreatedBy,
-		})
 	}
 	if value, ok := cuo.mutation.Comment(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -524,13 +573,13 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 	if cuo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   comment.RequestTable,
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: request.FieldID,
 				},
 			},
@@ -540,14 +589,49 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 	if nodes := cuo.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   comment.RequestTable,
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   comment.UserTable,
+			Columns: []string{comment.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   comment.UserTable,
+			Columns: []string{comment.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}

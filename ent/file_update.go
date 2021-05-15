@@ -10,9 +10,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/requestfile"
+	"github.com/traPtitech/Jomon/ent/request"
 )
 
 // FileUpdate is the builder for updating File entities.
@@ -68,23 +69,23 @@ func (fu *FileUpdate) ClearDeletedAt() *FileUpdate {
 	return fu
 }
 
-// SetRequestFileID sets the "request_file" edge to the RequestFile entity by ID.
-func (fu *FileUpdate) SetRequestFileID(id int) *FileUpdate {
-	fu.mutation.SetRequestFileID(id)
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (fu *FileUpdate) SetRequestID(id uuid.UUID) *FileUpdate {
+	fu.mutation.SetRequestID(id)
 	return fu
 }
 
-// SetNillableRequestFileID sets the "request_file" edge to the RequestFile entity by ID if the given value is not nil.
-func (fu *FileUpdate) SetNillableRequestFileID(id *int) *FileUpdate {
+// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
+func (fu *FileUpdate) SetNillableRequestID(id *uuid.UUID) *FileUpdate {
 	if id != nil {
-		fu = fu.SetRequestFileID(*id)
+		fu = fu.SetRequestID(*id)
 	}
 	return fu
 }
 
-// SetRequestFile sets the "request_file" edge to the RequestFile entity.
-func (fu *FileUpdate) SetRequestFile(r *RequestFile) *FileUpdate {
-	return fu.SetRequestFileID(r.ID)
+// SetRequest sets the "request" edge to the Request entity.
+func (fu *FileUpdate) SetRequest(r *Request) *FileUpdate {
+	return fu.SetRequestID(r.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
@@ -92,9 +93,9 @@ func (fu *FileUpdate) Mutation() *FileMutation {
 	return fu.mutation
 }
 
-// ClearRequestFile clears the "request_file" edge to the RequestFile entity.
-func (fu *FileUpdate) ClearRequestFile() *FileUpdate {
-	fu.mutation.ClearRequestFile()
+// ClearRequest clears the "request" edge to the Request entity.
+func (fu *FileUpdate) ClearRequest() *FileUpdate {
+	fu.mutation.ClearRequest()
 	return fu
 }
 
@@ -155,7 +156,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   file.Table,
 			Columns: file.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: file.FieldID,
 			},
 		},
@@ -194,33 +195,33 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: file.FieldDeletedAt,
 		})
 	}
-	if fu.mutation.RequestFileCleared() {
+	if fu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.RequestFileTable,
-			Columns: []string{file.RequestFileColumn},
+			Table:   file.RequestTable,
+			Columns: []string{file.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: requestfile.FieldID,
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fu.mutation.RequestFileIDs(); len(nodes) > 0 {
+	if nodes := fu.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.RequestFileTable,
-			Columns: []string{file.RequestFileColumn},
+			Table:   file.RequestTable,
+			Columns: []string{file.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: requestfile.FieldID,
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
 				},
 			},
 		}
@@ -288,23 +289,23 @@ func (fuo *FileUpdateOne) ClearDeletedAt() *FileUpdateOne {
 	return fuo
 }
 
-// SetRequestFileID sets the "request_file" edge to the RequestFile entity by ID.
-func (fuo *FileUpdateOne) SetRequestFileID(id int) *FileUpdateOne {
-	fuo.mutation.SetRequestFileID(id)
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (fuo *FileUpdateOne) SetRequestID(id uuid.UUID) *FileUpdateOne {
+	fuo.mutation.SetRequestID(id)
 	return fuo
 }
 
-// SetNillableRequestFileID sets the "request_file" edge to the RequestFile entity by ID if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableRequestFileID(id *int) *FileUpdateOne {
+// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableRequestID(id *uuid.UUID) *FileUpdateOne {
 	if id != nil {
-		fuo = fuo.SetRequestFileID(*id)
+		fuo = fuo.SetRequestID(*id)
 	}
 	return fuo
 }
 
-// SetRequestFile sets the "request_file" edge to the RequestFile entity.
-func (fuo *FileUpdateOne) SetRequestFile(r *RequestFile) *FileUpdateOne {
-	return fuo.SetRequestFileID(r.ID)
+// SetRequest sets the "request" edge to the Request entity.
+func (fuo *FileUpdateOne) SetRequest(r *Request) *FileUpdateOne {
+	return fuo.SetRequestID(r.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
@@ -312,9 +313,9 @@ func (fuo *FileUpdateOne) Mutation() *FileMutation {
 	return fuo.mutation
 }
 
-// ClearRequestFile clears the "request_file" edge to the RequestFile entity.
-func (fuo *FileUpdateOne) ClearRequestFile() *FileUpdateOne {
-	fuo.mutation.ClearRequestFile()
+// ClearRequest clears the "request" edge to the Request entity.
+func (fuo *FileUpdateOne) ClearRequest() *FileUpdateOne {
+	fuo.mutation.ClearRequest()
 	return fuo
 }
 
@@ -382,7 +383,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 			Table:   file.Table,
 			Columns: file.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: file.FieldID,
 			},
 		},
@@ -438,33 +439,33 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 			Column: file.FieldDeletedAt,
 		})
 	}
-	if fuo.mutation.RequestFileCleared() {
+	if fuo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.RequestFileTable,
-			Columns: []string{file.RequestFileColumn},
+			Table:   file.RequestTable,
+			Columns: []string{file.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: requestfile.FieldID,
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fuo.mutation.RequestFileIDs(); len(nodes) > 0 {
+	if nodes := fuo.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.RequestFileTable,
-			Columns: []string{file.RequestFileColumn},
+			Table:   file.RequestTable,
+			Columns: []string{file.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: requestfile.FieldID,
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
 				},
 			},
 		}

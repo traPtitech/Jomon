@@ -7,32 +7,33 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.GroupBudget {
+func ID(id uuid.UUID) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.GroupBudget {
+func IDEQ(id uuid.UUID) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.GroupBudget {
+func IDNEQ(id uuid.UUID) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.GroupBudget {
+func IDIn(ids ...uuid.UUID) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -49,7 +50,7 @@ func IDIn(ids ...int) predicate.GroupBudget {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.GroupBudget {
+func IDNotIn(ids ...uuid.UUID) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -66,28 +67,28 @@ func IDNotIn(ids ...int) predicate.GroupBudget {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.GroupBudget {
+func IDGT(id uuid.UUID) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.GroupBudget {
+func IDGTE(id uuid.UUID) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.GroupBudget {
+func IDLT(id uuid.UUID) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.GroupBudget {
+func IDLTE(id uuid.UUID) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
 	})
@@ -97,13 +98,6 @@ func IDLTE(id int) predicate.GroupBudget {
 func Amount(v int) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldAmount), v))
-	})
-}
-
-// GroupID applies equality check predicate on the "group_id" field. It's identical to GroupIDEQ.
-func GroupID(v int) predicate.GroupBudget {
-	return predicate.GroupBudget(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGroupID), v))
 	})
 }
 
@@ -194,54 +188,6 @@ func AmountLT(v int) predicate.GroupBudget {
 func AmountLTE(v int) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldAmount), v))
-	})
-}
-
-// GroupIDEQ applies the EQ predicate on the "group_id" field.
-func GroupIDEQ(v int) predicate.GroupBudget {
-	return predicate.GroupBudget(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGroupID), v))
-	})
-}
-
-// GroupIDNEQ applies the NEQ predicate on the "group_id" field.
-func GroupIDNEQ(v int) predicate.GroupBudget {
-	return predicate.GroupBudget(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldGroupID), v))
-	})
-}
-
-// GroupIDIn applies the In predicate on the "group_id" field.
-func GroupIDIn(vs ...int) predicate.GroupBudget {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GroupBudget(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldGroupID), v...))
-	})
-}
-
-// GroupIDNotIn applies the NotIn predicate on the "group_id" field.
-func GroupIDNotIn(vs ...int) predicate.GroupBudget {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.GroupBudget(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldGroupID), v...))
 	})
 }
 
@@ -452,7 +398,7 @@ func HasGroup() predicate.GroupBudget {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GroupTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, GroupTable, GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -464,7 +410,35 @@ func HasGroupWith(preds ...predicate.Group) predicate.GroupBudget {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GroupInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, GroupTable, GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasTransaction applies the HasEdge predicate on the "transaction" edge.
+func HasTransaction() predicate.GroupBudget {
+	return predicate.GroupBudget(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TransactionTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, TransactionTable, TransactionColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTransactionWith applies the HasEdge predicate on the "transaction" edge with a given conditions (other predicates).
+func HasTransactionWith(preds ...predicate.Transaction) predicate.GroupBudget {
+	return predicate.GroupBudget(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TransactionInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, TransactionTable, TransactionColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

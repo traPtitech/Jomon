@@ -8,19 +8,17 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/request"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // Comment is the model entity for the Comment schema.
 type Comment struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
-	// CreatedBy holds the value of the "created_by" field.
-	CreatedBy string `json:"created_by,omitempty"`
-	// RequestID holds the value of the "request_id" field.
-	RequestID int `json:"request_id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Comment holds the value of the "comment" field.
 	Comment string `json:"comment,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -31,16 +29,19 @@ type Comment struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CommentQuery when eager-loading is set.
-	Edges CommentEdges `json:"edges"`
+	Edges           CommentEdges `json:"edges"`
+	request_comment *uuid.UUID
 }
 
 // CommentEdges holds the relations/edges for other nodes in the graph.
 type CommentEdges struct {
 	// Request holds the value of the request edge.
 	Request *Request `json:"request,omitempty"`
+	// User holds the value of the user edge.
+	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // RequestOrErr returns the Request value or an error if the edge
@@ -57,17 +58,33 @@ func (e CommentEdges) RequestOrErr() (*Request, error) {
 	return nil, &NotLoadedError{edge: "request"}
 }
 
+// UserOrErr returns the User value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e CommentEdges) UserOrErr() (*User, error) {
+	if e.loadedTypes[1] {
+		if e.User == nil {
+			// The edge user was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.User, nil
+	}
+	return nil, &NotLoadedError{edge: "user"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Comment) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case comment.FieldID, comment.FieldRequestID:
-			values[i] = new(sql.NullInt64)
-		case comment.FieldCreatedBy, comment.FieldComment:
+		case comment.FieldComment:
 			values[i] = new(sql.NullString)
 		case comment.FieldCreatedAt, comment.FieldUpdatedAt, comment.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
+		case comment.FieldID:
+			values[i] = new(uuid.UUID)
+		case comment.ForeignKeys[0]: // request_comment
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Comment", columns[i])
 		}
@@ -84,22 +101,10 @@ func (c *Comment) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case comment.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			c.ID = int(value.Int64)
-		case comment.FieldCreatedBy:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field created_by", values[i])
-			} else if value.Valid {
-				c.CreatedBy = value.String
-			}
-		case comment.FieldRequestID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field request_id", values[i])
-			} else if value.Valid {
-				c.RequestID = int(value.Int64)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				c.ID = *value
 			}
 		case comment.FieldComment:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -126,6 +131,12 @@ func (c *Comment) assignValues(columns []string, values []interface{}) error {
 				c.DeletedAt = new(time.Time)
 				*c.DeletedAt = value.Time
 			}
+		case comment.ForeignKeys[0]:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field request_comment", values[i])
+			} else if value != nil {
+				c.request_comment = value
+			}
 		}
 	}
 	return nil
@@ -134,6 +145,11 @@ func (c *Comment) assignValues(columns []string, values []interface{}) error {
 // QueryRequest queries the "request" edge of the Comment entity.
 func (c *Comment) QueryRequest() *RequestQuery {
 	return (&CommentClient{config: c.config}).QueryRequest(c)
+}
+
+// QueryUser queries the "user" edge of the Comment entity.
+func (c *Comment) QueryUser() *UserQuery {
+	return (&CommentClient{config: c.config}).QueryUser(c)
 }
 
 // Update returns a builder for updating this Comment.
@@ -159,10 +175,6 @@ func (c *Comment) String() string {
 	var builder strings.Builder
 	builder.WriteString("Comment(")
 	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
-	builder.WriteString(", created_by=")
-	builder.WriteString(c.CreatedBy)
-	builder.WriteString(", request_id=")
-	builder.WriteString(fmt.Sprintf("%v", c.RequestID))
 	builder.WriteString(", comment=")
 	builder.WriteString(c.Comment)
 	builder.WriteString(", created_at=")

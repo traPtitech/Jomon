@@ -10,9 +10,10 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/traPtitech/Jomon/ent/requesttag"
+	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
-	"github.com/traPtitech/Jomon/ent/transactiontag"
+	"github.com/traPtitech/Jomon/ent/transaction"
 )
 
 // TagCreate is the builder for creating a Tag entity.
@@ -76,26 +77,32 @@ func (tc *TagCreate) SetNillableDeletedAt(t *time.Time) *TagCreate {
 	return tc
 }
 
-// SetRequestTagID sets the "request_tag" edge to the RequestTag entity by ID.
-func (tc *TagCreate) SetRequestTagID(id int) *TagCreate {
-	tc.mutation.SetRequestTagID(id)
+// SetID sets the "id" field.
+func (tc *TagCreate) SetID(u uuid.UUID) *TagCreate {
+	tc.mutation.SetID(u)
 	return tc
 }
 
-// SetRequestTag sets the "request_tag" edge to the RequestTag entity.
-func (tc *TagCreate) SetRequestTag(r *RequestTag) *TagCreate {
-	return tc.SetRequestTagID(r.ID)
-}
-
-// SetTransactionTagID sets the "transaction_tag" edge to the TransactionTag entity by ID.
-func (tc *TagCreate) SetTransactionTagID(id int) *TagCreate {
-	tc.mutation.SetTransactionTagID(id)
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (tc *TagCreate) SetRequestID(id uuid.UUID) *TagCreate {
+	tc.mutation.SetRequestID(id)
 	return tc
 }
 
-// SetTransactionTag sets the "transaction_tag" edge to the TransactionTag entity.
-func (tc *TagCreate) SetTransactionTag(t *TransactionTag) *TagCreate {
-	return tc.SetTransactionTagID(t.ID)
+// SetRequest sets the "request" edge to the Request entity.
+func (tc *TagCreate) SetRequest(r *Request) *TagCreate {
+	return tc.SetRequestID(r.ID)
+}
+
+// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
+func (tc *TagCreate) SetTransactionID(id uuid.UUID) *TagCreate {
+	tc.mutation.SetTransactionID(id)
+	return tc
+}
+
+// SetTransaction sets the "transaction" edge to the Transaction entity.
+func (tc *TagCreate) SetTransaction(t *Transaction) *TagCreate {
+	return tc.SetTransactionID(t.ID)
 }
 
 // Mutation returns the TagMutation object of the builder.
@@ -158,6 +165,10 @@ func (tc *TagCreate) defaults() {
 		v := tag.DefaultUpdatedAt()
 		tc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := tc.mutation.ID(); !ok {
+		v := tag.DefaultID()
+		tc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -174,11 +185,11 @@ func (tc *TagCreate) check() error {
 	if _, ok := tc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
 	}
-	if _, ok := tc.mutation.RequestTagID(); !ok {
-		return &ValidationError{Name: "request_tag", err: errors.New("ent: missing required edge \"request_tag\"")}
+	if _, ok := tc.mutation.RequestID(); !ok {
+		return &ValidationError{Name: "request", err: errors.New("ent: missing required edge \"request\"")}
 	}
-	if _, ok := tc.mutation.TransactionTagID(); !ok {
-		return &ValidationError{Name: "transaction_tag", err: errors.New("ent: missing required edge \"transaction_tag\"")}
+	if _, ok := tc.mutation.TransactionID(); !ok {
+		return &ValidationError{Name: "transaction", err: errors.New("ent: missing required edge \"transaction\"")}
 	}
 	return nil
 }
@@ -191,8 +202,6 @@ func (tc *TagCreate) sqlSave(ctx context.Context) (*Tag, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -202,11 +211,15 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: tag.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: tag.FieldID,
 			},
 		}
 	)
+	if id, ok := tc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := tc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -247,44 +260,44 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		})
 		_node.DeletedAt = &value
 	}
-	if nodes := tc.mutation.RequestTagIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   tag.RequestTagTable,
-			Columns: []string{tag.RequestTagColumn},
+			Table:   tag.RequestTable,
+			Columns: []string{tag.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: requesttag.FieldID,
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_tag_tag = &nodes[0]
+		_node.request_tag = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := tc.mutation.TransactionTagIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   tag.TransactionTagTable,
-			Columns: []string{tag.TransactionTagColumn},
+			Table:   tag.TransactionTable,
+			Columns: []string{tag.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: transactiontag.FieldID,
+					Type:   field.TypeUUID,
+					Column: transaction.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.transaction_tag_tag = &nodes[0]
+		_node.transaction_tag = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -330,8 +343,6 @@ func (tcb *TagCreateBulk) Save(ctx context.Context) ([]*Tag, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

@@ -4,6 +4,8 @@ package groupowner
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -13,8 +15,6 @@ const (
 	FieldID = "id"
 	// FieldOwner holds the string denoting the owner field in the database.
 	FieldOwner = "owner"
-	// FieldGroupID holds the string denoting the group_id field in the database.
-	FieldGroupID = "group_id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// EdgeGroup holds the string denoting the group edge name in mutations.
@@ -27,15 +27,20 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	GroupInverseTable = "groups"
 	// GroupColumn is the table column denoting the group relation/edge.
-	GroupColumn = "group_id"
+	GroupColumn = "group_owner"
 )
 
 // Columns holds all SQL columns for groupowner fields.
 var Columns = []string{
 	FieldID,
 	FieldOwner,
-	FieldGroupID,
 	FieldCreatedAt,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "group_owners"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"group_owner",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -45,10 +50,17 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
 
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )

@@ -7,32 +7,33 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.TransactionDetail {
+func ID(id uuid.UUID) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.TransactionDetail {
+func IDEQ(id uuid.UUID) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.TransactionDetail {
+func IDNEQ(id uuid.UUID) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.TransactionDetail {
+func IDIn(ids ...uuid.UUID) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -49,7 +50,7 @@ func IDIn(ids ...int) predicate.TransactionDetail {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.TransactionDetail {
+func IDNotIn(ids ...uuid.UUID) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -66,28 +67,28 @@ func IDNotIn(ids ...int) predicate.TransactionDetail {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.TransactionDetail {
+func IDGT(id uuid.UUID) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.TransactionDetail {
+func IDGTE(id uuid.UUID) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.TransactionDetail {
+func IDLT(id uuid.UUID) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.TransactionDetail {
+func IDLTE(id uuid.UUID) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
 	})
@@ -97,20 +98,6 @@ func IDLTE(id int) predicate.TransactionDetail {
 func Amount(v int) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldAmount), v))
-	})
-}
-
-// RequestID applies equality check predicate on the "request_id" field. It's identical to RequestIDEQ.
-func RequestID(v int) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRequestID), v))
-	})
-}
-
-// GroupID applies equality check predicate on the "group_id" field. It's identical to GroupIDEQ.
-func GroupID(v int) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGroupID), v))
 	})
 }
 
@@ -201,130 +188,6 @@ func AmountLT(v int) predicate.TransactionDetail {
 func AmountLTE(v int) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldAmount), v))
-	})
-}
-
-// RequestIDEQ applies the EQ predicate on the "request_id" field.
-func RequestIDEQ(v int) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRequestID), v))
-	})
-}
-
-// RequestIDNEQ applies the NEQ predicate on the "request_id" field.
-func RequestIDNEQ(v int) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldRequestID), v))
-	})
-}
-
-// RequestIDIn applies the In predicate on the "request_id" field.
-func RequestIDIn(vs ...int) predicate.TransactionDetail {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldRequestID), v...))
-	})
-}
-
-// RequestIDNotIn applies the NotIn predicate on the "request_id" field.
-func RequestIDNotIn(vs ...int) predicate.TransactionDetail {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldRequestID), v...))
-	})
-}
-
-// RequestIDIsNil applies the IsNil predicate on the "request_id" field.
-func RequestIDIsNil() predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldRequestID)))
-	})
-}
-
-// RequestIDNotNil applies the NotNil predicate on the "request_id" field.
-func RequestIDNotNil() predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldRequestID)))
-	})
-}
-
-// GroupIDEQ applies the EQ predicate on the "group_id" field.
-func GroupIDEQ(v int) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGroupID), v))
-	})
-}
-
-// GroupIDNEQ applies the NEQ predicate on the "group_id" field.
-func GroupIDNEQ(v int) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldGroupID), v))
-	})
-}
-
-// GroupIDIn applies the In predicate on the "group_id" field.
-func GroupIDIn(vs ...int) predicate.TransactionDetail {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldGroupID), v...))
-	})
-}
-
-// GroupIDNotIn applies the NotIn predicate on the "group_id" field.
-func GroupIDNotIn(vs ...int) predicate.TransactionDetail {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldGroupID), v...))
-	})
-}
-
-// GroupIDIsNil applies the IsNil predicate on the "group_id" field.
-func GroupIDIsNil() predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldGroupID)))
-	})
-}
-
-// GroupIDNotNil applies the NotNil predicate on the "group_id" field.
-func GroupIDNotNil() predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldGroupID)))
 	})
 }
 
@@ -521,7 +384,7 @@ func HasTransaction() predicate.TransactionDetail {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TransactionTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, TransactionTable, TransactionColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, TransactionTable, TransactionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -533,7 +396,7 @@ func HasTransactionWith(preds ...predicate.Transaction) predicate.TransactionDet
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TransactionInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, TransactionTable, TransactionColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, TransactionTable, TransactionColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -549,7 +412,7 @@ func HasRequest() predicate.TransactionDetail {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RequestTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, RequestTable, RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -561,7 +424,7 @@ func HasRequestWith(preds ...predicate.Request) predicate.TransactionDetail {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RequestInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, RequestTable, RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -577,7 +440,7 @@ func HasGroup() predicate.TransactionDetail {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GroupTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, GroupTable, GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -589,7 +452,7 @@ func HasGroupWith(preds ...predicate.Group) predicate.TransactionDetail {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GroupInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, GroupTable, GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

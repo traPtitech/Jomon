@@ -9,19 +9,6 @@ import (
 	"github.com/traPtitech/Jomon/ent"
 )
 
-// The AdministratorFunc type is an adapter to allow the use of ordinary
-// function as Administrator mutator.
-type AdministratorFunc func(context.Context, *ent.AdministratorMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f AdministratorFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.AdministratorMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdministratorMutation", m)
-	}
-	return f(ctx, mv)
-}
-
 // The CommentFunc type is an adapter to allow the use of ordinary
 // function as Comment mutator.
 type CommentFunc func(context.Context, *ent.CommentMutation) (ent.Value, error)
@@ -87,19 +74,6 @@ func (f GroupOwnerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return f(ctx, mv)
 }
 
-// The GroupUserFunc type is an adapter to allow the use of ordinary
-// function as GroupUser mutator.
-type GroupUserFunc func(context.Context, *ent.GroupUserMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f GroupUserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.GroupUserMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GroupUserMutation", m)
-	}
-	return f(ctx, mv)
-}
-
 // The RequestFunc type is an adapter to allow the use of ordinary
 // function as Request mutator.
 type RequestFunc func(context.Context, *ent.RequestMutation) (ent.Value, error)
@@ -113,19 +87,6 @@ func (f RequestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return f(ctx, mv)
 }
 
-// The RequestFileFunc type is an adapter to allow the use of ordinary
-// function as RequestFile mutator.
-type RequestFileFunc func(context.Context, *ent.RequestFileMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f RequestFileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.RequestFileMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RequestFileMutation", m)
-	}
-	return f(ctx, mv)
-}
-
 // The RequestStatusFunc type is an adapter to allow the use of ordinary
 // function as RequestStatus mutator.
 type RequestStatusFunc func(context.Context, *ent.RequestStatusMutation) (ent.Value, error)
@@ -135,19 +96,6 @@ func (f RequestStatusFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	mv, ok := m.(*ent.RequestStatusMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RequestStatusMutation", m)
-	}
-	return f(ctx, mv)
-}
-
-// The RequestTagFunc type is an adapter to allow the use of ordinary
-// function as RequestTag mutator.
-type RequestTagFunc func(context.Context, *ent.RequestTagMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f RequestTagFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.RequestTagMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RequestTagMutation", m)
 	}
 	return f(ctx, mv)
 }
@@ -204,15 +152,15 @@ func (f TransactionDetailFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.
 	return f(ctx, mv)
 }
 
-// The TransactionTagFunc type is an adapter to allow the use of ordinary
-// function as TransactionTag mutator.
-type TransactionTagFunc func(context.Context, *ent.TransactionTagMutation) (ent.Value, error)
+// The UserFunc type is an adapter to allow the use of ordinary
+// function as User mutator.
+type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f TransactionTagFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.TransactionTagMutation)
+func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.UserMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TransactionTagMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
 	}
 	return f(ctx, mv)
 }

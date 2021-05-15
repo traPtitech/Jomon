@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -11,9 +12,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/predicate"
+	"github.com/traPtitech/Jomon/ent/transaction"
 )
 
 // GroupBudgetQuery is the builder for querying GroupBudget entities.
@@ -26,7 +29,9 @@ type GroupBudgetQuery struct {
 	fields     []string
 	predicates []predicate.GroupBudget
 	// eager-loading edges.
-	withGroup *GroupQuery
+	withGroup       *GroupQuery
+	withTransaction *TransactionQuery
+	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -77,7 +82,29 @@ func (gbq *GroupBudgetQuery) QueryGroup() *GroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groupbudget.Table, groupbudget.FieldID, selector),
 			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, groupbudget.GroupTable, groupbudget.GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, groupbudget.GroupTable, groupbudget.GroupColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(gbq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTransaction chains the current query on the "transaction" edge.
+func (gbq *GroupBudgetQuery) QueryTransaction() *TransactionQuery {
+	query := &TransactionQuery{config: gbq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := gbq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := gbq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(groupbudget.Table, groupbudget.FieldID, selector),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, groupbudget.TransactionTable, groupbudget.TransactionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gbq.driver.Dialect(), step)
 		return fromU, nil
@@ -109,8 +136,8 @@ func (gbq *GroupBudgetQuery) FirstX(ctx context.Context) *GroupBudget {
 
 // FirstID returns the first GroupBudget ID from the query.
 // Returns a *NotFoundError when no GroupBudget ID was found.
-func (gbq *GroupBudgetQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (gbq *GroupBudgetQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = gbq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -122,7 +149,7 @@ func (gbq *GroupBudgetQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (gbq *GroupBudgetQuery) FirstIDX(ctx context.Context) int {
+func (gbq *GroupBudgetQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := gbq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -160,8 +187,8 @@ func (gbq *GroupBudgetQuery) OnlyX(ctx context.Context) *GroupBudget {
 // OnlyID is like Only, but returns the only GroupBudget ID in the query.
 // Returns a *NotSingularError when exactly one GroupBudget ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (gbq *GroupBudgetQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (gbq *GroupBudgetQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = gbq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -177,7 +204,7 @@ func (gbq *GroupBudgetQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (gbq *GroupBudgetQuery) OnlyIDX(ctx context.Context) int {
+func (gbq *GroupBudgetQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := gbq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -203,8 +230,8 @@ func (gbq *GroupBudgetQuery) AllX(ctx context.Context) []*GroupBudget {
 }
 
 // IDs executes the query and returns a list of GroupBudget IDs.
-func (gbq *GroupBudgetQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (gbq *GroupBudgetQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := gbq.Select(groupbudget.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -212,7 +239,7 @@ func (gbq *GroupBudgetQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (gbq *GroupBudgetQuery) IDsX(ctx context.Context) []int {
+func (gbq *GroupBudgetQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := gbq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -261,12 +288,13 @@ func (gbq *GroupBudgetQuery) Clone() *GroupBudgetQuery {
 		return nil
 	}
 	return &GroupBudgetQuery{
-		config:     gbq.config,
-		limit:      gbq.limit,
-		offset:     gbq.offset,
-		order:      append([]OrderFunc{}, gbq.order...),
-		predicates: append([]predicate.GroupBudget{}, gbq.predicates...),
-		withGroup:  gbq.withGroup.Clone(),
+		config:          gbq.config,
+		limit:           gbq.limit,
+		offset:          gbq.offset,
+		order:           append([]OrderFunc{}, gbq.order...),
+		predicates:      append([]predicate.GroupBudget{}, gbq.predicates...),
+		withGroup:       gbq.withGroup.Clone(),
+		withTransaction: gbq.withTransaction.Clone(),
 		// clone intermediate query.
 		sql:  gbq.sql.Clone(),
 		path: gbq.path,
@@ -281,6 +309,17 @@ func (gbq *GroupBudgetQuery) WithGroup(opts ...func(*GroupQuery)) *GroupBudgetQu
 		opt(query)
 	}
 	gbq.withGroup = query
+	return gbq
+}
+
+// WithTransaction tells the query-builder to eager-load the nodes that are connected to
+// the "transaction" edge. The optional arguments are used to configure the query builder of the edge.
+func (gbq *GroupBudgetQuery) WithTransaction(opts ...func(*TransactionQuery)) *GroupBudgetQuery {
+	query := &TransactionQuery{config: gbq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	gbq.withTransaction = query
 	return gbq
 }
 
@@ -348,11 +387,19 @@ func (gbq *GroupBudgetQuery) prepareQuery(ctx context.Context) error {
 func (gbq *GroupBudgetQuery) sqlAll(ctx context.Context) ([]*GroupBudget, error) {
 	var (
 		nodes       = []*GroupBudget{}
+		withFKs     = gbq.withFKs
 		_spec       = gbq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			gbq.withGroup != nil,
+			gbq.withTransaction != nil,
 		}
 	)
+	if gbq.withGroup != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, groupbudget.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &GroupBudget{config: gbq.config}
 		nodes = append(nodes, node)
@@ -374,10 +421,13 @@ func (gbq *GroupBudgetQuery) sqlAll(ctx context.Context) ([]*GroupBudget, error)
 	}
 
 	if query := gbq.withGroup; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*GroupBudget)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*GroupBudget)
 		for i := range nodes {
-			fk := nodes[i].GroupID
+			if nodes[i].group_group_budget == nil {
+				continue
+			}
+			fk := *nodes[i].group_group_budget
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -391,11 +441,39 @@ func (gbq *GroupBudgetQuery) sqlAll(ctx context.Context) ([]*GroupBudget, error)
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_id" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "group_group_budget" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Group = n
 			}
+		}
+	}
+
+	if query := gbq.withTransaction; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*GroupBudget)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Transaction(func(s *sql.Selector) {
+			s.Where(sql.InValues(groupbudget.TransactionColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.group_budget_transaction
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "group_budget_transaction" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "group_budget_transaction" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Transaction = n
 		}
 	}
 
@@ -421,7 +499,7 @@ func (gbq *GroupBudgetQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   groupbudget.Table,
 			Columns: groupbudget.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: groupbudget.FieldID,
 			},
 		},

@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
 )
@@ -16,13 +18,13 @@ import (
 type Transaction struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TransactionQuery when eager-loading is set.
-	Edges                          TransactionEdges `json:"edges"`
-	transaction_detail_transaction *int
+	Edges                    TransactionEdges `json:"edges"`
+	group_budget_transaction *uuid.UUID
 }
 
 // TransactionEdges holds the relations/edges for other nodes in the graph.
@@ -30,10 +32,12 @@ type TransactionEdges struct {
 	// Detail holds the value of the detail edge.
 	Detail *TransactionDetail `json:"detail,omitempty"`
 	// Tag holds the value of the tag edge.
-	Tag []*TransactionTag `json:"tag,omitempty"`
+	Tag []*Tag `json:"tag,omitempty"`
+	// GroupBudget holds the value of the group_budget edge.
+	GroupBudget *GroupBudget `json:"group_budget,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // DetailOrErr returns the Detail value or an error if the edge
@@ -52,11 +56,25 @@ func (e TransactionEdges) DetailOrErr() (*TransactionDetail, error) {
 
 // TagOrErr returns the Tag value or an error if the edge
 // was not loaded in eager-loading.
-func (e TransactionEdges) TagOrErr() ([]*TransactionTag, error) {
+func (e TransactionEdges) TagOrErr() ([]*Tag, error) {
 	if e.loadedTypes[1] {
 		return e.Tag, nil
 	}
 	return nil, &NotLoadedError{edge: "tag"}
+}
+
+// GroupBudgetOrErr returns the GroupBudget value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TransactionEdges) GroupBudgetOrErr() (*GroupBudget, error) {
+	if e.loadedTypes[2] {
+		if e.GroupBudget == nil {
+			// The edge group_budget was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: groupbudget.Label}
+		}
+		return e.GroupBudget, nil
+	}
+	return nil, &NotLoadedError{edge: "group_budget"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -64,12 +82,12 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transaction.FieldID:
-			values[i] = new(sql.NullInt64)
 		case transaction.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case transaction.ForeignKeys[0]: // transaction_detail_transaction
-			values[i] = new(sql.NullInt64)
+		case transaction.FieldID:
+			values[i] = new(uuid.UUID)
+		case transaction.ForeignKeys[0]: // group_budget_transaction
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Transaction", columns[i])
 		}
@@ -86,11 +104,11 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 	for i := range columns {
 		switch columns[i] {
 		case transaction.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				t.ID = *value
 			}
-			t.ID = int(value.Int64)
 		case transaction.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -98,11 +116,10 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 				t.CreatedAt = value.Time
 			}
 		case transaction.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field transaction_detail_transaction", value)
-			} else if value.Valid {
-				t.transaction_detail_transaction = new(int)
-				*t.transaction_detail_transaction = int(value.Int64)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field group_budget_transaction", values[i])
+			} else if value != nil {
+				t.group_budget_transaction = value
 			}
 		}
 	}
@@ -115,8 +132,13 @@ func (t *Transaction) QueryDetail() *TransactionDetailQuery {
 }
 
 // QueryTag queries the "tag" edge of the Transaction entity.
-func (t *Transaction) QueryTag() *TransactionTagQuery {
+func (t *Transaction) QueryTag() *TagQuery {
 	return (&TransactionClient{config: t.config}).QueryTag(t)
+}
+
+// QueryGroupBudget queries the "group_budget" edge of the Transaction entity.
+func (t *Transaction) QueryGroupBudget() *GroupBudgetQuery {
+	return (&TransactionClient{config: t.config}).QueryGroupBudget(t)
 }
 
 // Update returns a builder for updating this Transaction.

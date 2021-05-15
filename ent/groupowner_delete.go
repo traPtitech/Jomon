@@ -69,7 +69,7 @@ func (god *GroupOwnerDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: groupowner.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: groupowner.FieldID,
 			},
 		},

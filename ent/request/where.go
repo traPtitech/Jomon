@@ -7,32 +7,33 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Request {
+func ID(id uuid.UUID) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Request {
+func IDEQ(id uuid.UUID) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Request {
+func IDNEQ(id uuid.UUID) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Request {
+func IDIn(ids ...uuid.UUID) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -49,7 +50,7 @@ func IDIn(ids ...int) predicate.Request {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Request {
+func IDNotIn(ids ...uuid.UUID) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -66,37 +67,30 @@ func IDNotIn(ids ...int) predicate.Request {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Request {
+func IDGT(id uuid.UUID) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Request {
+func IDGTE(id uuid.UUID) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Request {
+func IDLT(id uuid.UUID) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Request {
+func IDLTE(id uuid.UUID) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
-	})
-}
-
-// CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
-func CreatedBy(v string) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedBy), v))
 	})
 }
 
@@ -111,117 +105,6 @@ func Amount(v int) predicate.Request {
 func CreatedAt(v time.Time) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
-	})
-}
-
-// CreatedByEQ applies the EQ predicate on the "created_by" field.
-func CreatedByEQ(v string) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByNEQ applies the NEQ predicate on the "created_by" field.
-func CreatedByNEQ(v string) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByIn applies the In predicate on the "created_by" field.
-func CreatedByIn(vs ...string) predicate.Request {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Request(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldCreatedBy), v...))
-	})
-}
-
-// CreatedByNotIn applies the NotIn predicate on the "created_by" field.
-func CreatedByNotIn(vs ...string) predicate.Request {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Request(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldCreatedBy), v...))
-	})
-}
-
-// CreatedByGT applies the GT predicate on the "created_by" field.
-func CreatedByGT(v string) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByGTE applies the GTE predicate on the "created_by" field.
-func CreatedByGTE(v string) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByLT applies the LT predicate on the "created_by" field.
-func CreatedByLT(v string) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByLTE applies the LTE predicate on the "created_by" field.
-func CreatedByLTE(v string) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByContains applies the Contains predicate on the "created_by" field.
-func CreatedByContains(v string) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByHasPrefix applies the HasPrefix predicate on the "created_by" field.
-func CreatedByHasPrefix(v string) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByHasSuffix applies the HasSuffix predicate on the "created_by" field.
-func CreatedByHasSuffix(v string) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByEqualFold applies the EqualFold predicate on the "created_by" field.
-func CreatedByEqualFold(v string) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldCreatedBy), v))
-	})
-}
-
-// CreatedByContainsFold applies the ContainsFold predicate on the "created_by" field.
-func CreatedByContainsFold(v string) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldCreatedBy), v))
 	})
 }
 
@@ -383,7 +266,7 @@ func HasStatus() predicate.Request {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(StatusTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, StatusTable, StatusColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, StatusTable, StatusColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -395,7 +278,7 @@ func HasStatusWith(preds ...predicate.RequestStatus) predicate.Request {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(StatusInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, StatusTable, StatusColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, StatusTable, StatusColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -411,7 +294,7 @@ func HasTarget() predicate.Request {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TargetTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TargetTable, TargetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, TargetTable, TargetColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -423,7 +306,7 @@ func HasTargetWith(preds ...predicate.RequestTarget) predicate.Request {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TargetInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TargetTable, TargetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, TargetTable, TargetColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -439,19 +322,19 @@ func HasFile() predicate.Request {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(FileTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, FileTable, FileColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, FileTable, FileColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
 // HasFileWith applies the HasEdge predicate on the "file" edge with a given conditions (other predicates).
-func HasFileWith(preds ...predicate.RequestFile) predicate.Request {
+func HasFileWith(preds ...predicate.File) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(FileInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, FileTable, FileColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, FileTable, FileColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -467,19 +350,19 @@ func HasTag() predicate.Request {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TagTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TagTable, TagColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, TagTable, TagColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
 // HasTagWith applies the HasEdge predicate on the "tag" edge with a given conditions (other predicates).
-func HasTagWith(preds ...predicate.RequestTag) predicate.Request {
+func HasTagWith(preds ...predicate.Tag) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TagInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TagTable, TagColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, TagTable, TagColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -495,7 +378,7 @@ func HasTransactionDetail() predicate.Request {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TransactionDetailTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TransactionDetailTable, TransactionDetailColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, TransactionDetailTable, TransactionDetailColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -507,7 +390,7 @@ func HasTransactionDetailWith(preds ...predicate.TransactionDetail) predicate.Re
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TransactionDetailInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TransactionDetailTable, TransactionDetailColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, TransactionDetailTable, TransactionDetailColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -523,7 +406,7 @@ func HasComment() predicate.Request {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(CommentTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, CommentTable, CommentColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, CommentTable, CommentColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -535,7 +418,35 @@ func HasCommentWith(preds ...predicate.Comment) predicate.Request {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(CommentInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, CommentTable, CommentColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, CommentTable, CommentColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasUser applies the HasEdge predicate on the "user" edge.
+func HasUser() predicate.Request {
+	return predicate.Request(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, UserTable, UserColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
+func HasUserWith(preds ...predicate.User) predicate.Request {
+	return predicate.Request(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

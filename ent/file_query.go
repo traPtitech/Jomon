@@ -11,9 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/requestfile"
+	"github.com/traPtitech/Jomon/ent/request"
 )
 
 // FileQuery is the builder for querying File entities.
@@ -26,8 +27,8 @@ type FileQuery struct {
 	fields     []string
 	predicates []predicate.File
 	// eager-loading edges.
-	withRequestFile *RequestFileQuery
-	withFKs         bool
+	withRequest *RequestQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,9 +65,9 @@ func (fq *FileQuery) Order(o ...OrderFunc) *FileQuery {
 	return fq
 }
 
-// QueryRequestFile chains the current query on the "request_file" edge.
-func (fq *FileQuery) QueryRequestFile() *RequestFileQuery {
-	query := &RequestFileQuery{config: fq.config}
+// QueryRequest chains the current query on the "request" edge.
+func (fq *FileQuery) QueryRequest() *RequestQuery {
+	query := &RequestQuery{config: fq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -77,8 +78,8 @@ func (fq *FileQuery) QueryRequestFile() *RequestFileQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, selector),
-			sqlgraph.To(requestfile.Table, requestfile.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, file.RequestFileTable, file.RequestFileColumn),
+			sqlgraph.To(request.Table, request.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.RequestTable, file.RequestColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
 		return fromU, nil
@@ -110,8 +111,8 @@ func (fq *FileQuery) FirstX(ctx context.Context) *File {
 
 // FirstID returns the first File ID from the query.
 // Returns a *NotFoundError when no File ID was found.
-func (fq *FileQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (fq *FileQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = fq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -123,7 +124,7 @@ func (fq *FileQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (fq *FileQuery) FirstIDX(ctx context.Context) int {
+func (fq *FileQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := fq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -161,8 +162,8 @@ func (fq *FileQuery) OnlyX(ctx context.Context) *File {
 // OnlyID is like Only, but returns the only File ID in the query.
 // Returns a *NotSingularError when exactly one File ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (fq *FileQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (fq *FileQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = fq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -178,7 +179,7 @@ func (fq *FileQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (fq *FileQuery) OnlyIDX(ctx context.Context) int {
+func (fq *FileQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := fq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -204,8 +205,8 @@ func (fq *FileQuery) AllX(ctx context.Context) []*File {
 }
 
 // IDs executes the query and returns a list of File IDs.
-func (fq *FileQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (fq *FileQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := fq.Select(file.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -213,7 +214,7 @@ func (fq *FileQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (fq *FileQuery) IDsX(ctx context.Context) []int {
+func (fq *FileQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := fq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -262,26 +263,26 @@ func (fq *FileQuery) Clone() *FileQuery {
 		return nil
 	}
 	return &FileQuery{
-		config:          fq.config,
-		limit:           fq.limit,
-		offset:          fq.offset,
-		order:           append([]OrderFunc{}, fq.order...),
-		predicates:      append([]predicate.File{}, fq.predicates...),
-		withRequestFile: fq.withRequestFile.Clone(),
+		config:      fq.config,
+		limit:       fq.limit,
+		offset:      fq.offset,
+		order:       append([]OrderFunc{}, fq.order...),
+		predicates:  append([]predicate.File{}, fq.predicates...),
+		withRequest: fq.withRequest.Clone(),
 		// clone intermediate query.
 		sql:  fq.sql.Clone(),
 		path: fq.path,
 	}
 }
 
-// WithRequestFile tells the query-builder to eager-load the nodes that are connected to
-// the "request_file" edge. The optional arguments are used to configure the query builder of the edge.
-func (fq *FileQuery) WithRequestFile(opts ...func(*RequestFileQuery)) *FileQuery {
-	query := &RequestFileQuery{config: fq.config}
+// WithRequest tells the query-builder to eager-load the nodes that are connected to
+// the "request" edge. The optional arguments are used to configure the query builder of the edge.
+func (fq *FileQuery) WithRequest(opts ...func(*RequestQuery)) *FileQuery {
+	query := &RequestQuery{config: fq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	fq.withRequestFile = query
+	fq.withRequest = query
 	return fq
 }
 
@@ -352,10 +353,10 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		withFKs     = fq.withFKs
 		_spec       = fq.querySpec()
 		loadedTypes = [1]bool{
-			fq.withRequestFile != nil,
+			fq.withRequest != nil,
 		}
 	)
-	if fq.withRequestFile != nil {
+	if fq.withRequest != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -381,20 +382,20 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		return nodes, nil
 	}
 
-	if query := fq.withRequestFile; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*File)
+	if query := fq.withRequest; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*File)
 		for i := range nodes {
-			if nodes[i].request_file_file == nil {
+			if nodes[i].request_file == nil {
 				continue
 			}
-			fk := *nodes[i].request_file_file
+			fk := *nodes[i].request_file
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
 			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.Where(requestfile.IDIn(ids...))
+		query.Where(request.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
@@ -402,10 +403,10 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_file_file" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_file" returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.RequestFile = n
+				nodes[i].Edges.Request = n
 			}
 		}
 	}
@@ -432,7 +433,7 @@ func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   file.Table,
 			Columns: file.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: file.FieldID,
 			},
 		},

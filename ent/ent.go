@@ -10,22 +10,18 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/traPtitech/Jomon/ent/administrator"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/groupowner"
-	"github.com/traPtitech/Jomon/ent/groupuser"
 	"github.com/traPtitech/Jomon/ent/request"
-	"github.com/traPtitech/Jomon/ent/requestfile"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
-	"github.com/traPtitech/Jomon/ent/requesttag"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
-	"github.com/traPtitech/Jomon/ent/transactiontag"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -46,22 +42,18 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		administrator.Table:     administrator.ValidColumn,
 		comment.Table:           comment.ValidColumn,
 		file.Table:              file.ValidColumn,
 		group.Table:             group.ValidColumn,
 		groupbudget.Table:       groupbudget.ValidColumn,
 		groupowner.Table:        groupowner.ValidColumn,
-		groupuser.Table:         groupuser.ValidColumn,
 		request.Table:           request.ValidColumn,
-		requestfile.Table:       requestfile.ValidColumn,
 		requeststatus.Table:     requeststatus.ValidColumn,
-		requesttag.Table:        requesttag.ValidColumn,
 		requesttarget.Table:     requesttarget.ValidColumn,
 		tag.Table:               tag.ValidColumn,
 		transaction.Table:       transaction.ValidColumn,
 		transactiondetail.Table: transactiondetail.ValidColumn,
-		transactiontag.Table:    transactiontag.ValidColumn,
+		user.Table:              user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

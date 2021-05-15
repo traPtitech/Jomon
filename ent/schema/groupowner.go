@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // GroupOwner holds the schema definition for the GroupOwner entity.
@@ -16,8 +17,9 @@ type GroupOwner struct {
 // Fields of the GroupOwner.
 func (GroupOwner) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New),
 		field.String("owner"),
-		field.Int("group_id"),
 		field.Time("created_at").
 			Default(time.Now),
 	}
@@ -26,8 +28,8 @@ func (GroupOwner) Fields() []ent.Field {
 // Edges of the GroupOwner.
 func (GroupOwner) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("group", Group.Type).
-			Field("group_id").
+		edge.From("group", Group.Type).
+			Ref("owner").
 			Unique().
 			Required(),
 	}

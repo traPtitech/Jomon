@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // RequestTarget holds the schema definition for the RequestTarget entity.
@@ -16,11 +17,12 @@ type RequestTarget struct {
 // Fields of the RequestTarget.
 func (RequestTarget) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New),
 		field.String("target"),
-		field.Int("request_id"),
 		field.Time("paid_at").
-			Nillable().
-			Optional(),
+			Optional().
+			Nillable(),
 		field.Time("created_at").
 			Default(time.Now),
 	}
@@ -29,8 +31,8 @@ func (RequestTarget) Fields() []ent.Field {
 // Edges of the RequestTarget.
 func (RequestTarget) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("request", Request.Type).
-			Field("request_id").
+		edge.From("request", Request.Type).
+			Ref("target").
 			Unique().
 			Required(),
 	}

@@ -4,6 +4,8 @@ package request
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -11,8 +13,6 @@ const (
 	Label = "request"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldCreatedBy holds the string denoting the created_by field in the database.
-	FieldCreatedBy = "created_by"
 	// FieldAmount holds the string denoting the amount field in the database.
 	FieldAmount = "amount"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -29,6 +29,8 @@ const (
 	EdgeTransactionDetail = "transaction_detail"
 	// EdgeComment holds the string denoting the comment edge name in mutations.
 	EdgeComment = "comment"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 	// Table holds the table name of the request in the database.
 	Table = "requests"
 	// StatusTable is the table the holds the status relation/edge.
@@ -37,48 +39,54 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "requeststatus" package.
 	StatusInverseTable = "request_status"
 	// StatusColumn is the table column denoting the status relation/edge.
-	StatusColumn = "request_id"
+	StatusColumn = "request_status"
 	// TargetTable is the table the holds the target relation/edge.
 	TargetTable = "request_targets"
 	// TargetInverseTable is the table name for the RequestTarget entity.
 	// It exists in this package in order to avoid circular dependency with the "requesttarget" package.
 	TargetInverseTable = "request_targets"
 	// TargetColumn is the table column denoting the target relation/edge.
-	TargetColumn = "request_id"
+	TargetColumn = "request_target"
 	// FileTable is the table the holds the file relation/edge.
-	FileTable = "request_files"
-	// FileInverseTable is the table name for the RequestFile entity.
-	// It exists in this package in order to avoid circular dependency with the "requestfile" package.
-	FileInverseTable = "request_files"
+	FileTable = "files"
+	// FileInverseTable is the table name for the File entity.
+	// It exists in this package in order to avoid circular dependency with the "file" package.
+	FileInverseTable = "files"
 	// FileColumn is the table column denoting the file relation/edge.
-	FileColumn = "request_id"
+	FileColumn = "request_file"
 	// TagTable is the table the holds the tag relation/edge.
-	TagTable = "request_tags"
-	// TagInverseTable is the table name for the RequestTag entity.
-	// It exists in this package in order to avoid circular dependency with the "requesttag" package.
-	TagInverseTable = "request_tags"
+	TagTable = "tags"
+	// TagInverseTable is the table name for the Tag entity.
+	// It exists in this package in order to avoid circular dependency with the "tag" package.
+	TagInverseTable = "tags"
 	// TagColumn is the table column denoting the tag relation/edge.
-	TagColumn = "request_id"
+	TagColumn = "request_tag"
 	// TransactionDetailTable is the table the holds the transaction_detail relation/edge.
 	TransactionDetailTable = "transaction_details"
 	// TransactionDetailInverseTable is the table name for the TransactionDetail entity.
 	// It exists in this package in order to avoid circular dependency with the "transactiondetail" package.
 	TransactionDetailInverseTable = "transaction_details"
 	// TransactionDetailColumn is the table column denoting the transaction_detail relation/edge.
-	TransactionDetailColumn = "request_id"
+	TransactionDetailColumn = "request_transaction_detail"
 	// CommentTable is the table the holds the comment relation/edge.
 	CommentTable = "comments"
 	// CommentInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
 	CommentInverseTable = "comments"
 	// CommentColumn is the table column denoting the comment relation/edge.
-	CommentColumn = "request_id"
+	CommentColumn = "request_comment"
+	// UserTable is the table the holds the user relation/edge.
+	UserTable = "users"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "request_user"
 )
 
 // Columns holds all SQL columns for request fields.
 var Columns = []string{
 	FieldID,
-	FieldCreatedBy,
 	FieldAmount,
 	FieldCreatedAt,
 }
@@ -96,4 +104,6 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )

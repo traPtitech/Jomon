@@ -6,9 +6,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Administrator is the predicate function for administrator builders.
-type Administrator func(*sql.Selector)
-
 // Comment is the predicate function for comment builders.
 type Comment func(*sql.Selector)
 
@@ -24,20 +21,11 @@ type GroupBudget func(*sql.Selector)
 // GroupOwner is the predicate function for groupowner builders.
 type GroupOwner func(*sql.Selector)
 
-// GroupUser is the predicate function for groupuser builders.
-type GroupUser func(*sql.Selector)
-
 // Request is the predicate function for request builders.
 type Request func(*sql.Selector)
 
-// RequestFile is the predicate function for requestfile builders.
-type RequestFile func(*sql.Selector)
-
 // RequestStatus is the predicate function for requeststatus builders.
 type RequestStatus func(*sql.Selector)
-
-// RequestTag is the predicate function for requesttag builders.
-type RequestTag func(*sql.Selector)
 
 // RequestTarget is the predicate function for requesttarget builders.
 type RequestTarget func(*sql.Selector)
@@ -51,5 +39,5 @@ type Transaction func(*sql.Selector)
 // TransactionDetail is the predicate function for transactiondetail builders.
 type TransactionDetail func(*sql.Selector)
 
-// TransactionTag is the predicate function for transactiontag builders.
-type TransactionTag func(*sql.Selector)
+// User is the predicate function for user builders.
+type User func(*sql.Selector)

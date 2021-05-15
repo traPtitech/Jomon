@@ -12,8 +12,6 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Administrator is the client for interacting with the Administrator builders.
-	Administrator *AdministratorClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
 	// File is the client for interacting with the File builders.
@@ -24,16 +22,10 @@ type Tx struct {
 	GroupBudget *GroupBudgetClient
 	// GroupOwner is the client for interacting with the GroupOwner builders.
 	GroupOwner *GroupOwnerClient
-	// GroupUser is the client for interacting with the GroupUser builders.
-	GroupUser *GroupUserClient
 	// Request is the client for interacting with the Request builders.
 	Request *RequestClient
-	// RequestFile is the client for interacting with the RequestFile builders.
-	RequestFile *RequestFileClient
 	// RequestStatus is the client for interacting with the RequestStatus builders.
 	RequestStatus *RequestStatusClient
-	// RequestTag is the client for interacting with the RequestTag builders.
-	RequestTag *RequestTagClient
 	// RequestTarget is the client for interacting with the RequestTarget builders.
 	RequestTarget *RequestTargetClient
 	// Tag is the client for interacting with the Tag builders.
@@ -42,8 +34,8 @@ type Tx struct {
 	Transaction *TransactionClient
 	// TransactionDetail is the client for interacting with the TransactionDetail builders.
 	TransactionDetail *TransactionDetailClient
-	// TransactionTag is the client for interacting with the TransactionTag builders.
-	TransactionTag *TransactionTagClient
+	// User is the client for interacting with the User builders.
+	User *UserClient
 
 	// lazily loaded.
 	client     *Client
@@ -179,22 +171,18 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.Administrator = NewAdministratorClient(tx.config)
 	tx.Comment = NewCommentClient(tx.config)
 	tx.File = NewFileClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
 	tx.GroupBudget = NewGroupBudgetClient(tx.config)
 	tx.GroupOwner = NewGroupOwnerClient(tx.config)
-	tx.GroupUser = NewGroupUserClient(tx.config)
 	tx.Request = NewRequestClient(tx.config)
-	tx.RequestFile = NewRequestFileClient(tx.config)
 	tx.RequestStatus = NewRequestStatusClient(tx.config)
-	tx.RequestTag = NewRequestTagClient(tx.config)
 	tx.RequestTarget = NewRequestTargetClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
 	tx.Transaction = NewTransactionClient(tx.config)
 	tx.TransactionDetail = NewTransactionDetailClient(tx.config)
-	tx.TransactionTag = NewTransactionTagClient(tx.config)
+	tx.User = NewUserClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -204,7 +192,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Administrator.QueryXXX(), the query will be executed
+// applies a query, for example: Comment.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

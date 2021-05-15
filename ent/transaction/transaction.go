@@ -4,6 +4,8 @@ package transaction
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -17,22 +19,31 @@ const (
 	EdgeDetail = "detail"
 	// EdgeTag holds the string denoting the tag edge name in mutations.
 	EdgeTag = "tag"
+	// EdgeGroupBudget holds the string denoting the group_budget edge name in mutations.
+	EdgeGroupBudget = "group_budget"
 	// Table holds the table name of the transaction in the database.
 	Table = "transactions"
 	// DetailTable is the table the holds the detail relation/edge.
-	DetailTable = "transactions"
+	DetailTable = "transaction_details"
 	// DetailInverseTable is the table name for the TransactionDetail entity.
 	// It exists in this package in order to avoid circular dependency with the "transactiondetail" package.
 	DetailInverseTable = "transaction_details"
 	// DetailColumn is the table column denoting the detail relation/edge.
-	DetailColumn = "transaction_detail_transaction"
+	DetailColumn = "transaction_detail"
 	// TagTable is the table the holds the tag relation/edge.
-	TagTable = "transaction_tags"
-	// TagInverseTable is the table name for the TransactionTag entity.
-	// It exists in this package in order to avoid circular dependency with the "transactiontag" package.
-	TagInverseTable = "transaction_tags"
+	TagTable = "tags"
+	// TagInverseTable is the table name for the Tag entity.
+	// It exists in this package in order to avoid circular dependency with the "tag" package.
+	TagInverseTable = "tags"
 	// TagColumn is the table column denoting the tag relation/edge.
-	TagColumn = "transaction_id"
+	TagColumn = "transaction_tag"
+	// GroupBudgetTable is the table the holds the group_budget relation/edge.
+	GroupBudgetTable = "transactions"
+	// GroupBudgetInverseTable is the table name for the GroupBudget entity.
+	// It exists in this package in order to avoid circular dependency with the "groupbudget" package.
+	GroupBudgetInverseTable = "group_budgets"
+	// GroupBudgetColumn is the table column denoting the group_budget relation/edge.
+	GroupBudgetColumn = "group_budget_transaction"
 )
 
 // Columns holds all SQL columns for transaction fields.
@@ -44,7 +55,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "transactions"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"transaction_detail_transaction",
+	"group_budget_transaction",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -65,4 +76,6 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )

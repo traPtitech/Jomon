@@ -12,14 +12,16 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
+	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
-	"github.com/traPtitech/Jomon/ent/requestfile"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
-	"github.com/traPtitech/Jomon/ent/requesttag"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
+	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // RequestQuery is the builder for querying Request entities.
@@ -34,10 +36,11 @@ type RequestQuery struct {
 	// eager-loading edges.
 	withStatus            *RequestStatusQuery
 	withTarget            *RequestTargetQuery
-	withFile              *RequestFileQuery
-	withTag               *RequestTagQuery
+	withFile              *FileQuery
+	withTag               *TagQuery
 	withTransactionDetail *TransactionDetailQuery
 	withComment           *CommentQuery
+	withUser              *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -88,7 +91,7 @@ func (rq *RequestQuery) QueryStatus() *RequestStatusQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(requeststatus.Table, requeststatus.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, request.StatusTable, request.StatusColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.StatusTable, request.StatusColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -110,7 +113,7 @@ func (rq *RequestQuery) QueryTarget() *RequestTargetQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(requesttarget.Table, requesttarget.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, request.TargetTable, request.TargetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.TargetTable, request.TargetColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -119,8 +122,8 @@ func (rq *RequestQuery) QueryTarget() *RequestTargetQuery {
 }
 
 // QueryFile chains the current query on the "file" edge.
-func (rq *RequestQuery) QueryFile() *RequestFileQuery {
-	query := &RequestFileQuery{config: rq.config}
+func (rq *RequestQuery) QueryFile() *FileQuery {
+	query := &FileQuery{config: rq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := rq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -131,8 +134,8 @@ func (rq *RequestQuery) QueryFile() *RequestFileQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
-			sqlgraph.To(requestfile.Table, requestfile.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, request.FileTable, request.FileColumn),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.FileTable, request.FileColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -141,8 +144,8 @@ func (rq *RequestQuery) QueryFile() *RequestFileQuery {
 }
 
 // QueryTag chains the current query on the "tag" edge.
-func (rq *RequestQuery) QueryTag() *RequestTagQuery {
-	query := &RequestTagQuery{config: rq.config}
+func (rq *RequestQuery) QueryTag() *TagQuery {
+	query := &TagQuery{config: rq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := rq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -153,8 +156,8 @@ func (rq *RequestQuery) QueryTag() *RequestTagQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
-			sqlgraph.To(requesttag.Table, requesttag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, request.TagTable, request.TagColumn),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.TagTable, request.TagColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -176,7 +179,7 @@ func (rq *RequestQuery) QueryTransactionDetail() *TransactionDetailQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, request.TransactionDetailTable, request.TransactionDetailColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.TransactionDetailTable, request.TransactionDetailColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -198,7 +201,29 @@ func (rq *RequestQuery) QueryComment() *CommentQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(comment.Table, comment.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, request.CommentTable, request.CommentColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.CommentTable, request.CommentColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUser chains the current query on the "user" edge.
+func (rq *RequestQuery) QueryUser() *UserQuery {
+	query := &UserQuery{config: rq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(request.Table, request.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, request.UserTable, request.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -230,8 +255,8 @@ func (rq *RequestQuery) FirstX(ctx context.Context) *Request {
 
 // FirstID returns the first Request ID from the query.
 // Returns a *NotFoundError when no Request ID was found.
-func (rq *RequestQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (rq *RequestQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = rq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -243,7 +268,7 @@ func (rq *RequestQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (rq *RequestQuery) FirstIDX(ctx context.Context) int {
+func (rq *RequestQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := rq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -281,8 +306,8 @@ func (rq *RequestQuery) OnlyX(ctx context.Context) *Request {
 // OnlyID is like Only, but returns the only Request ID in the query.
 // Returns a *NotSingularError when exactly one Request ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (rq *RequestQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (rq *RequestQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = rq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -298,7 +323,7 @@ func (rq *RequestQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (rq *RequestQuery) OnlyIDX(ctx context.Context) int {
+func (rq *RequestQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := rq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -324,8 +349,8 @@ func (rq *RequestQuery) AllX(ctx context.Context) []*Request {
 }
 
 // IDs executes the query and returns a list of Request IDs.
-func (rq *RequestQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (rq *RequestQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := rq.Select(request.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -333,7 +358,7 @@ func (rq *RequestQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (rq *RequestQuery) IDsX(ctx context.Context) []int {
+func (rq *RequestQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := rq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -393,6 +418,7 @@ func (rq *RequestQuery) Clone() *RequestQuery {
 		withTag:               rq.withTag.Clone(),
 		withTransactionDetail: rq.withTransactionDetail.Clone(),
 		withComment:           rq.withComment.Clone(),
+		withUser:              rq.withUser.Clone(),
 		// clone intermediate query.
 		sql:  rq.sql.Clone(),
 		path: rq.path,
@@ -423,8 +449,8 @@ func (rq *RequestQuery) WithTarget(opts ...func(*RequestTargetQuery)) *RequestQu
 
 // WithFile tells the query-builder to eager-load the nodes that are connected to
 // the "file" edge. The optional arguments are used to configure the query builder of the edge.
-func (rq *RequestQuery) WithFile(opts ...func(*RequestFileQuery)) *RequestQuery {
-	query := &RequestFileQuery{config: rq.config}
+func (rq *RequestQuery) WithFile(opts ...func(*FileQuery)) *RequestQuery {
+	query := &FileQuery{config: rq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -434,8 +460,8 @@ func (rq *RequestQuery) WithFile(opts ...func(*RequestFileQuery)) *RequestQuery 
 
 // WithTag tells the query-builder to eager-load the nodes that are connected to
 // the "tag" edge. The optional arguments are used to configure the query builder of the edge.
-func (rq *RequestQuery) WithTag(opts ...func(*RequestTagQuery)) *RequestQuery {
-	query := &RequestTagQuery{config: rq.config}
+func (rq *RequestQuery) WithTag(opts ...func(*TagQuery)) *RequestQuery {
+	query := &TagQuery{config: rq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -465,18 +491,29 @@ func (rq *RequestQuery) WithComment(opts ...func(*CommentQuery)) *RequestQuery {
 	return rq
 }
 
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RequestQuery) WithUser(opts ...func(*UserQuery)) *RequestQuery {
+	query := &UserQuery{config: rq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withUser = query
+	return rq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		CreatedBy string `json:"created_by,omitempty"`
+//		Amount int `json:"amount,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Request.Query().
-//		GroupBy(request.FieldCreatedBy).
+//		GroupBy(request.FieldAmount).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -498,11 +535,11 @@ func (rq *RequestQuery) GroupBy(field string, fields ...string) *RequestGroupBy 
 // Example:
 //
 //	var v []struct {
-//		CreatedBy string `json:"created_by,omitempty"`
+//		Amount int `json:"amount,omitempty"`
 //	}
 //
 //	client.Request.Query().
-//		Select(request.FieldCreatedBy).
+//		Select(request.FieldAmount).
 //		Scan(ctx, &v)
 //
 func (rq *RequestQuery) Select(field string, fields ...string) *RequestSelect {
@@ -530,13 +567,14 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 	var (
 		nodes       = []*Request{}
 		_spec       = rq.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [7]bool{
 			rq.withStatus != nil,
 			rq.withTarget != nil,
 			rq.withFile != nil,
 			rq.withTag != nil,
 			rq.withTransactionDetail != nil,
 			rq.withComment != nil,
+			rq.withUser != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -561,12 +599,13 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 
 	if query := rq.withStatus; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Request)
+		nodeids := make(map[uuid.UUID]*Request)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.Status = []*RequestStatus{}
 		}
+		query.withFKs = true
 		query.Where(predicate.RequestStatus(func(s *sql.Selector) {
 			s.Where(sql.InValues(request.StatusColumn, fks...))
 		}))
@@ -575,10 +614,13 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.RequestID
-			node, ok := nodeids[fk]
+			fk := n.request_status
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "request_status" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v for node %v`, fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_status" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Status = append(node.Edges.Status, n)
 		}
@@ -586,12 +628,13 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 
 	if query := rq.withTarget; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Request)
+		nodeids := make(map[uuid.UUID]*Request)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.Target = []*RequestTarget{}
 		}
+		query.withFKs = true
 		query.Where(predicate.RequestTarget(func(s *sql.Selector) {
 			s.Where(sql.InValues(request.TargetColumn, fks...))
 		}))
@@ -600,10 +643,13 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.RequestID
-			node, ok := nodeids[fk]
+			fk := n.request_target
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "request_target" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v for node %v`, fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_target" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Target = append(node.Edges.Target, n)
 		}
@@ -611,13 +657,14 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 
 	if query := rq.withFile; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Request)
+		nodeids := make(map[uuid.UUID]*Request)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.File = []*RequestFile{}
+			nodes[i].Edges.File = []*File{}
 		}
-		query.Where(predicate.RequestFile(func(s *sql.Selector) {
+		query.withFKs = true
+		query.Where(predicate.File(func(s *sql.Selector) {
 			s.Where(sql.InValues(request.FileColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
@@ -625,10 +672,13 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.RequestID
-			node, ok := nodeids[fk]
+			fk := n.request_file
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "request_file" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v for node %v`, fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_file" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.File = append(node.Edges.File, n)
 		}
@@ -636,13 +686,14 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 
 	if query := rq.withTag; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Request)
+		nodeids := make(map[uuid.UUID]*Request)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Tag = []*RequestTag{}
+			nodes[i].Edges.Tag = []*Tag{}
 		}
-		query.Where(predicate.RequestTag(func(s *sql.Selector) {
+		query.withFKs = true
+		query.Where(predicate.Tag(func(s *sql.Selector) {
 			s.Where(sql.InValues(request.TagColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
@@ -650,10 +701,13 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.RequestID
-			node, ok := nodeids[fk]
+			fk := n.request_tag
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "request_tag" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v for node %v`, fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_tag" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Tag = append(node.Edges.Tag, n)
 		}
@@ -661,12 +715,13 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 
 	if query := rq.withTransactionDetail; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Request)
+		nodeids := make(map[uuid.UUID]*Request)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.TransactionDetail = []*TransactionDetail{}
 		}
+		query.withFKs = true
 		query.Where(predicate.TransactionDetail(func(s *sql.Selector) {
 			s.Where(sql.InValues(request.TransactionDetailColumn, fks...))
 		}))
@@ -675,13 +730,13 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.RequestID
+			fk := n.request_transaction_detail
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_id" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "request_transaction_detail" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_transaction_detail" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.TransactionDetail = append(node.Edges.TransactionDetail, n)
 		}
@@ -689,12 +744,13 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 
 	if query := rq.withComment; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Request)
+		nodeids := make(map[uuid.UUID]*Request)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
 			nodes[i].Edges.Comment = []*Comment{}
 		}
+		query.withFKs = true
 		query.Where(predicate.Comment(func(s *sql.Selector) {
 			s.Where(sql.InValues(request.CommentColumn, fks...))
 		}))
@@ -703,12 +759,43 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.RequestID
-			node, ok := nodeids[fk]
+			fk := n.request_comment
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "request_comment" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_id" returned %v for node %v`, fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_comment" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Comment = append(node.Edges.Comment, n)
+		}
+	}
+
+	if query := rq.withUser; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Request)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sql.InValues(request.UserColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.request_user
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "request_user" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "request_user" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.User = n
 		}
 	}
 
@@ -734,7 +821,7 @@ func (rq *RequestQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   request.Table,
 			Columns: request.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: request.FieldID,
 			},
 		},

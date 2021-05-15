@@ -4,6 +4,8 @@ package requesttarget
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -13,8 +15,6 @@ const (
 	FieldID = "id"
 	// FieldTarget holds the string denoting the target field in the database.
 	FieldTarget = "target"
-	// FieldRequestID holds the string denoting the request_id field in the database.
-	FieldRequestID = "request_id"
 	// FieldPaidAt holds the string denoting the paid_at field in the database.
 	FieldPaidAt = "paid_at"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -29,16 +29,21 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "request" package.
 	RequestInverseTable = "requests"
 	// RequestColumn is the table column denoting the request relation/edge.
-	RequestColumn = "request_id"
+	RequestColumn = "request_target"
 )
 
 // Columns holds all SQL columns for requesttarget fields.
 var Columns = []string{
 	FieldID,
 	FieldTarget,
-	FieldRequestID,
 	FieldPaidAt,
 	FieldCreatedAt,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "request_targets"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"request_target",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -48,10 +53,17 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
 
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )

@@ -11,9 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // RequestStatusUpdate is the builder for updating RequestStatus entities.
@@ -26,19 +28,6 @@ type RequestStatusUpdate struct {
 // Where adds a new predicate for the RequestStatusUpdate builder.
 func (rsu *RequestStatusUpdate) Where(ps ...predicate.RequestStatus) *RequestStatusUpdate {
 	rsu.mutation.predicates = append(rsu.mutation.predicates, ps...)
-	return rsu
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (rsu *RequestStatusUpdate) SetCreatedBy(s string) *RequestStatusUpdate {
-	rsu.mutation.SetCreatedBy(s)
-	return rsu
-}
-
-// SetRequestID sets the "request_id" field.
-func (rsu *RequestStatusUpdate) SetRequestID(i int) *RequestStatusUpdate {
-	rsu.mutation.ResetRequestID()
-	rsu.mutation.SetRequestID(i)
 	return rsu
 }
 
@@ -76,9 +65,26 @@ func (rsu *RequestStatusUpdate) SetNillableCreatedAt(t *time.Time) *RequestStatu
 	return rsu
 }
 
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (rsu *RequestStatusUpdate) SetRequestID(id uuid.UUID) *RequestStatusUpdate {
+	rsu.mutation.SetRequestID(id)
+	return rsu
+}
+
 // SetRequest sets the "request" edge to the Request entity.
 func (rsu *RequestStatusUpdate) SetRequest(r *Request) *RequestStatusUpdate {
 	return rsu.SetRequestID(r.ID)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (rsu *RequestStatusUpdate) SetUserID(id uuid.UUID) *RequestStatusUpdate {
+	rsu.mutation.SetUserID(id)
+	return rsu
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (rsu *RequestStatusUpdate) SetUser(u *User) *RequestStatusUpdate {
+	return rsu.SetUserID(u.ID)
 }
 
 // Mutation returns the RequestStatusMutation object of the builder.
@@ -89,6 +95,12 @@ func (rsu *RequestStatusUpdate) Mutation() *RequestStatusMutation {
 // ClearRequest clears the "request" edge to the Request entity.
 func (rsu *RequestStatusUpdate) ClearRequest() *RequestStatusUpdate {
 	rsu.mutation.ClearRequest()
+	return rsu
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (rsu *RequestStatusUpdate) ClearUser() *RequestStatusUpdate {
+	rsu.mutation.ClearUser()
 	return rsu
 }
 
@@ -159,6 +171,9 @@ func (rsu *RequestStatusUpdate) check() error {
 	if _, ok := rsu.mutation.RequestID(); rsu.mutation.RequestCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"request\"")
 	}
+	if _, ok := rsu.mutation.UserID(); rsu.mutation.UserCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"user\"")
+	}
 	return nil
 }
 
@@ -168,7 +183,7 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Table:   requeststatus.Table,
 			Columns: requeststatus.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: requeststatus.FieldID,
 			},
 		},
@@ -179,13 +194,6 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := rsu.mutation.CreatedBy(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: requeststatus.FieldCreatedBy,
-		})
 	}
 	if value, ok := rsu.mutation.Status(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -211,13 +219,13 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	if rsu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   requeststatus.RequestTable,
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: request.FieldID,
 				},
 			},
@@ -227,14 +235,49 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	if nodes := rsu.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   requeststatus.RequestTable,
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if rsu.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   requeststatus.UserTable,
+			Columns: []string{requeststatus.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := rsu.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   requeststatus.UserTable,
+			Columns: []string{requeststatus.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -260,19 +303,6 @@ type RequestStatusUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *RequestStatusMutation
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (rsuo *RequestStatusUpdateOne) SetCreatedBy(s string) *RequestStatusUpdateOne {
-	rsuo.mutation.SetCreatedBy(s)
-	return rsuo
-}
-
-// SetRequestID sets the "request_id" field.
-func (rsuo *RequestStatusUpdateOne) SetRequestID(i int) *RequestStatusUpdateOne {
-	rsuo.mutation.ResetRequestID()
-	rsuo.mutation.SetRequestID(i)
-	return rsuo
 }
 
 // SetStatus sets the "status" field.
@@ -309,9 +339,26 @@ func (rsuo *RequestStatusUpdateOne) SetNillableCreatedAt(t *time.Time) *RequestS
 	return rsuo
 }
 
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (rsuo *RequestStatusUpdateOne) SetRequestID(id uuid.UUID) *RequestStatusUpdateOne {
+	rsuo.mutation.SetRequestID(id)
+	return rsuo
+}
+
 // SetRequest sets the "request" edge to the Request entity.
 func (rsuo *RequestStatusUpdateOne) SetRequest(r *Request) *RequestStatusUpdateOne {
 	return rsuo.SetRequestID(r.ID)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (rsuo *RequestStatusUpdateOne) SetUserID(id uuid.UUID) *RequestStatusUpdateOne {
+	rsuo.mutation.SetUserID(id)
+	return rsuo
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (rsuo *RequestStatusUpdateOne) SetUser(u *User) *RequestStatusUpdateOne {
+	return rsuo.SetUserID(u.ID)
 }
 
 // Mutation returns the RequestStatusMutation object of the builder.
@@ -322,6 +369,12 @@ func (rsuo *RequestStatusUpdateOne) Mutation() *RequestStatusMutation {
 // ClearRequest clears the "request" edge to the Request entity.
 func (rsuo *RequestStatusUpdateOne) ClearRequest() *RequestStatusUpdateOne {
 	rsuo.mutation.ClearRequest()
+	return rsuo
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (rsuo *RequestStatusUpdateOne) ClearUser() *RequestStatusUpdateOne {
+	rsuo.mutation.ClearUser()
 	return rsuo
 }
 
@@ -399,6 +452,9 @@ func (rsuo *RequestStatusUpdateOne) check() error {
 	if _, ok := rsuo.mutation.RequestID(); rsuo.mutation.RequestCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"request\"")
 	}
+	if _, ok := rsuo.mutation.UserID(); rsuo.mutation.UserCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"user\"")
+	}
 	return nil
 }
 
@@ -408,7 +464,7 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			Table:   requeststatus.Table,
 			Columns: requeststatus.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: requeststatus.FieldID,
 			},
 		},
@@ -437,13 +493,6 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			}
 		}
 	}
-	if value, ok := rsuo.mutation.CreatedBy(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: requeststatus.FieldCreatedBy,
-		})
-	}
 	if value, ok := rsuo.mutation.Status(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
@@ -468,13 +517,13 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 	if rsuo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   requeststatus.RequestTable,
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: request.FieldID,
 				},
 			},
@@ -484,14 +533,49 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 	if nodes := rsuo.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   requeststatus.RequestTable,
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if rsuo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   requeststatus.UserTable,
+			Columns: []string{requeststatus.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := rsuo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   requeststatus.UserTable,
+			Columns: []string{requeststatus.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}

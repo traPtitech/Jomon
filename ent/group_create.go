@@ -10,10 +10,12 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/groupowner"
-	"github.com/traPtitech/Jomon/ent/groupuser"
+	"github.com/traPtitech/Jomon/ent/transactiondetail"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // GroupCreate is the builder for creating a Group entity.
@@ -91,49 +93,70 @@ func (gc *GroupCreate) SetNillableDeletedAt(t *time.Time) *GroupCreate {
 	return gc
 }
 
+// SetID sets the "id" field.
+func (gc *GroupCreate) SetID(u uuid.UUID) *GroupCreate {
+	gc.mutation.SetID(u)
+	return gc
+}
+
 // AddGroupBudgetIDs adds the "group_budget" edge to the GroupBudget entity by IDs.
-func (gc *GroupCreate) AddGroupBudgetIDs(ids ...int) *GroupCreate {
+func (gc *GroupCreate) AddGroupBudgetIDs(ids ...uuid.UUID) *GroupCreate {
 	gc.mutation.AddGroupBudgetIDs(ids...)
 	return gc
 }
 
 // AddGroupBudget adds the "group_budget" edges to the GroupBudget entity.
 func (gc *GroupCreate) AddGroupBudget(g ...*GroupBudget) *GroupCreate {
-	ids := make([]int, len(g))
+	ids := make([]uuid.UUID, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
 	return gc.AddGroupBudgetIDs(ids...)
 }
 
-// AddUserIDs adds the "user" edge to the GroupUser entity by IDs.
-func (gc *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
+// AddUserIDs adds the "user" edge to the User entity by IDs.
+func (gc *GroupCreate) AddUserIDs(ids ...uuid.UUID) *GroupCreate {
 	gc.mutation.AddUserIDs(ids...)
 	return gc
 }
 
-// AddUser adds the "user" edges to the GroupUser entity.
-func (gc *GroupCreate) AddUser(g ...*GroupUser) *GroupCreate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// AddUser adds the "user" edges to the User entity.
+func (gc *GroupCreate) AddUser(u ...*User) *GroupCreate {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
 	return gc.AddUserIDs(ids...)
 }
 
 // AddOwnerIDs adds the "owner" edge to the GroupOwner entity by IDs.
-func (gc *GroupCreate) AddOwnerIDs(ids ...int) *GroupCreate {
+func (gc *GroupCreate) AddOwnerIDs(ids ...uuid.UUID) *GroupCreate {
 	gc.mutation.AddOwnerIDs(ids...)
 	return gc
 }
 
 // AddOwner adds the "owner" edges to the GroupOwner entity.
 func (gc *GroupCreate) AddOwner(g ...*GroupOwner) *GroupCreate {
-	ids := make([]int, len(g))
+	ids := make([]uuid.UUID, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
 	return gc.AddOwnerIDs(ids...)
+}
+
+// AddTransactionDetailIDs adds the "transaction_detail" edge to the TransactionDetail entity by IDs.
+func (gc *GroupCreate) AddTransactionDetailIDs(ids ...uuid.UUID) *GroupCreate {
+	gc.mutation.AddTransactionDetailIDs(ids...)
+	return gc
+}
+
+// AddTransactionDetail adds the "transaction_detail" edges to the TransactionDetail entity.
+func (gc *GroupCreate) AddTransactionDetail(t ...*TransactionDetail) *GroupCreate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return gc.AddTransactionDetailIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -196,6 +219,10 @@ func (gc *GroupCreate) defaults() {
 		v := group.DefaultUpdatedAt()
 		gc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := gc.mutation.ID(); !ok {
+		v := group.DefaultID()
+		gc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -223,8 +250,6 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -234,11 +259,15 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: group.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: group.FieldID,
 			},
 		}
 	)
+	if id, ok := gc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := gc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -290,13 +319,13 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	if nodes := gc.mutation.GroupBudgetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.GroupBudgetTable,
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupbudget.FieldID,
 				},
 			},
@@ -308,15 +337,15 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	}
 	if nodes := gc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
 			Table:   group.UserTable,
-			Columns: []string{group.UserColumn},
+			Columns: group.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: groupuser.FieldID,
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -328,14 +357,33 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	if nodes := gc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   group.OwnerTable,
 			Columns: []string{group.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: groupowner.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := gc.mutation.TransactionDetailIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   group.TransactionDetailTable,
+			Columns: []string{group.TransactionDetailColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transactiondetail.FieldID,
 				},
 			},
 		}
@@ -387,8 +435,6 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

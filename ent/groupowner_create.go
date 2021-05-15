@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupowner"
 )
@@ -27,12 +28,6 @@ func (goc *GroupOwnerCreate) SetOwner(s string) *GroupOwnerCreate {
 	return goc
 }
 
-// SetGroupID sets the "group_id" field.
-func (goc *GroupOwnerCreate) SetGroupID(i int) *GroupOwnerCreate {
-	goc.mutation.SetGroupID(i)
-	return goc
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (goc *GroupOwnerCreate) SetCreatedAt(t time.Time) *GroupOwnerCreate {
 	goc.mutation.SetCreatedAt(t)
@@ -44,6 +39,18 @@ func (goc *GroupOwnerCreate) SetNillableCreatedAt(t *time.Time) *GroupOwnerCreat
 	if t != nil {
 		goc.SetCreatedAt(*t)
 	}
+	return goc
+}
+
+// SetID sets the "id" field.
+func (goc *GroupOwnerCreate) SetID(u uuid.UUID) *GroupOwnerCreate {
+	goc.mutation.SetID(u)
+	return goc
+}
+
+// SetGroupID sets the "group" edge to the Group entity by ID.
+func (goc *GroupOwnerCreate) SetGroupID(id uuid.UUID) *GroupOwnerCreate {
+	goc.mutation.SetGroupID(id)
 	return goc
 }
 
@@ -108,15 +115,16 @@ func (goc *GroupOwnerCreate) defaults() {
 		v := groupowner.DefaultCreatedAt()
 		goc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := goc.mutation.ID(); !ok {
+		v := groupowner.DefaultID()
+		goc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (goc *GroupOwnerCreate) check() error {
 	if _, ok := goc.mutation.Owner(); !ok {
 		return &ValidationError{Name: "owner", err: errors.New("ent: missing required field \"owner\"")}
-	}
-	if _, ok := goc.mutation.GroupID(); !ok {
-		return &ValidationError{Name: "group_id", err: errors.New("ent: missing required field \"group_id\"")}
 	}
 	if _, ok := goc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
@@ -135,8 +143,6 @@ func (goc *GroupOwnerCreate) sqlSave(ctx context.Context) (*GroupOwner, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -146,11 +152,15 @@ func (goc *GroupOwnerCreate) createSpec() (*GroupOwner, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: groupowner.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: groupowner.FieldID,
 			},
 		}
 	)
+	if id, ok := goc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := goc.mutation.Owner(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -170,13 +180,13 @@ func (goc *GroupOwnerCreate) createSpec() (*GroupOwner, *sqlgraph.CreateSpec) {
 	if nodes := goc.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   groupowner.GroupTable,
 			Columns: []string{groupowner.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: group.FieldID,
 				},
 			},
@@ -184,7 +194,7 @@ func (goc *GroupOwnerCreate) createSpec() (*GroupOwner, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.GroupID = nodes[0]
+		_node.group_owner = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -230,8 +240,6 @@ func (gocb *GroupOwnerCreateBulk) Save(ctx context.Context) ([]*GroupOwner, erro
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

@@ -7,24 +7,21 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/migrate"
 
-	"github.com/traPtitech/Jomon/ent/administrator"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/groupowner"
-	"github.com/traPtitech/Jomon/ent/groupuser"
 	"github.com/traPtitech/Jomon/ent/request"
-	"github.com/traPtitech/Jomon/ent/requestfile"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
-	"github.com/traPtitech/Jomon/ent/requesttag"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
-	"github.com/traPtitech/Jomon/ent/transactiontag"
+	"github.com/traPtitech/Jomon/ent/user"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -36,8 +33,6 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// Administrator is the client for interacting with the Administrator builders.
-	Administrator *AdministratorClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
 	// File is the client for interacting with the File builders.
@@ -48,16 +43,10 @@ type Client struct {
 	GroupBudget *GroupBudgetClient
 	// GroupOwner is the client for interacting with the GroupOwner builders.
 	GroupOwner *GroupOwnerClient
-	// GroupUser is the client for interacting with the GroupUser builders.
-	GroupUser *GroupUserClient
 	// Request is the client for interacting with the Request builders.
 	Request *RequestClient
-	// RequestFile is the client for interacting with the RequestFile builders.
-	RequestFile *RequestFileClient
 	// RequestStatus is the client for interacting with the RequestStatus builders.
 	RequestStatus *RequestStatusClient
-	// RequestTag is the client for interacting with the RequestTag builders.
-	RequestTag *RequestTagClient
 	// RequestTarget is the client for interacting with the RequestTarget builders.
 	RequestTarget *RequestTargetClient
 	// Tag is the client for interacting with the Tag builders.
@@ -66,8 +55,8 @@ type Client struct {
 	Transaction *TransactionClient
 	// TransactionDetail is the client for interacting with the TransactionDetail builders.
 	TransactionDetail *TransactionDetailClient
-	// TransactionTag is the client for interacting with the TransactionTag builders.
-	TransactionTag *TransactionTagClient
+	// User is the client for interacting with the User builders.
+	User *UserClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -81,22 +70,18 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.Administrator = NewAdministratorClient(c.config)
 	c.Comment = NewCommentClient(c.config)
 	c.File = NewFileClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.GroupBudget = NewGroupBudgetClient(c.config)
 	c.GroupOwner = NewGroupOwnerClient(c.config)
-	c.GroupUser = NewGroupUserClient(c.config)
 	c.Request = NewRequestClient(c.config)
-	c.RequestFile = NewRequestFileClient(c.config)
 	c.RequestStatus = NewRequestStatusClient(c.config)
-	c.RequestTag = NewRequestTagClient(c.config)
 	c.RequestTarget = NewRequestTargetClient(c.config)
 	c.Tag = NewTagClient(c.config)
 	c.Transaction = NewTransactionClient(c.config)
 	c.TransactionDetail = NewTransactionDetailClient(c.config)
-	c.TransactionTag = NewTransactionTagClient(c.config)
+	c.User = NewUserClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -130,22 +115,18 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:               ctx,
 		config:            cfg,
-		Administrator:     NewAdministratorClient(cfg),
 		Comment:           NewCommentClient(cfg),
 		File:              NewFileClient(cfg),
 		Group:             NewGroupClient(cfg),
 		GroupBudget:       NewGroupBudgetClient(cfg),
 		GroupOwner:        NewGroupOwnerClient(cfg),
-		GroupUser:         NewGroupUserClient(cfg),
 		Request:           NewRequestClient(cfg),
-		RequestFile:       NewRequestFileClient(cfg),
 		RequestStatus:     NewRequestStatusClient(cfg),
-		RequestTag:        NewRequestTagClient(cfg),
 		RequestTarget:     NewRequestTargetClient(cfg),
 		Tag:               NewTagClient(cfg),
 		Transaction:       NewTransactionClient(cfg),
 		TransactionDetail: NewTransactionDetailClient(cfg),
-		TransactionTag:    NewTransactionTagClient(cfg),
+		User:              NewUserClient(cfg),
 	}, nil
 }
 
@@ -164,29 +145,25 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
 		config:            cfg,
-		Administrator:     NewAdministratorClient(cfg),
 		Comment:           NewCommentClient(cfg),
 		File:              NewFileClient(cfg),
 		Group:             NewGroupClient(cfg),
 		GroupBudget:       NewGroupBudgetClient(cfg),
 		GroupOwner:        NewGroupOwnerClient(cfg),
-		GroupUser:         NewGroupUserClient(cfg),
 		Request:           NewRequestClient(cfg),
-		RequestFile:       NewRequestFileClient(cfg),
 		RequestStatus:     NewRequestStatusClient(cfg),
-		RequestTag:        NewRequestTagClient(cfg),
 		RequestTarget:     NewRequestTargetClient(cfg),
 		Tag:               NewTagClient(cfg),
 		Transaction:       NewTransactionClient(cfg),
 		TransactionDetail: NewTransactionDetailClient(cfg),
-		TransactionTag:    NewTransactionTagClient(cfg),
+		User:              NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Administrator.
+//		Comment.
 //		Query().
 //		Count(ctx)
 //
@@ -209,112 +186,18 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Administrator.Use(hooks...)
 	c.Comment.Use(hooks...)
 	c.File.Use(hooks...)
 	c.Group.Use(hooks...)
 	c.GroupBudget.Use(hooks...)
 	c.GroupOwner.Use(hooks...)
-	c.GroupUser.Use(hooks...)
 	c.Request.Use(hooks...)
-	c.RequestFile.Use(hooks...)
 	c.RequestStatus.Use(hooks...)
-	c.RequestTag.Use(hooks...)
 	c.RequestTarget.Use(hooks...)
 	c.Tag.Use(hooks...)
 	c.Transaction.Use(hooks...)
 	c.TransactionDetail.Use(hooks...)
-	c.TransactionTag.Use(hooks...)
-}
-
-// AdministratorClient is a client for the Administrator schema.
-type AdministratorClient struct {
-	config
-}
-
-// NewAdministratorClient returns a client for the Administrator from the given config.
-func NewAdministratorClient(c config) *AdministratorClient {
-	return &AdministratorClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `administrator.Hooks(f(g(h())))`.
-func (c *AdministratorClient) Use(hooks ...Hook) {
-	c.hooks.Administrator = append(c.hooks.Administrator, hooks...)
-}
-
-// Create returns a create builder for Administrator.
-func (c *AdministratorClient) Create() *AdministratorCreate {
-	mutation := newAdministratorMutation(c.config, OpCreate)
-	return &AdministratorCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Administrator entities.
-func (c *AdministratorClient) CreateBulk(builders ...*AdministratorCreate) *AdministratorCreateBulk {
-	return &AdministratorCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Administrator.
-func (c *AdministratorClient) Update() *AdministratorUpdate {
-	mutation := newAdministratorMutation(c.config, OpUpdate)
-	return &AdministratorUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *AdministratorClient) UpdateOne(a *Administrator) *AdministratorUpdateOne {
-	mutation := newAdministratorMutation(c.config, OpUpdateOne, withAdministrator(a))
-	return &AdministratorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *AdministratorClient) UpdateOneID(id int) *AdministratorUpdateOne {
-	mutation := newAdministratorMutation(c.config, OpUpdateOne, withAdministratorID(id))
-	return &AdministratorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Administrator.
-func (c *AdministratorClient) Delete() *AdministratorDelete {
-	mutation := newAdministratorMutation(c.config, OpDelete)
-	return &AdministratorDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *AdministratorClient) DeleteOne(a *Administrator) *AdministratorDeleteOne {
-	return c.DeleteOneID(a.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *AdministratorClient) DeleteOneID(id int) *AdministratorDeleteOne {
-	builder := c.Delete().Where(administrator.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &AdministratorDeleteOne{builder}
-}
-
-// Query returns a query builder for Administrator.
-func (c *AdministratorClient) Query() *AdministratorQuery {
-	return &AdministratorQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a Administrator entity by its id.
-func (c *AdministratorClient) Get(ctx context.Context, id int) (*Administrator, error) {
-	return c.Query().Where(administrator.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *AdministratorClient) GetX(ctx context.Context, id int) *Administrator {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *AdministratorClient) Hooks() []Hook {
-	return c.hooks.Administrator
+	c.User.Use(hooks...)
 }
 
 // CommentClient is a client for the Comment schema.
@@ -357,7 +240,7 @@ func (c *CommentClient) UpdateOne(co *Comment) *CommentUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CommentClient) UpdateOneID(id int) *CommentUpdateOne {
+func (c *CommentClient) UpdateOneID(id uuid.UUID) *CommentUpdateOne {
 	mutation := newCommentMutation(c.config, OpUpdateOne, withCommentID(id))
 	return &CommentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -374,7 +257,7 @@ func (c *CommentClient) DeleteOne(co *Comment) *CommentDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *CommentClient) DeleteOneID(id int) *CommentDeleteOne {
+func (c *CommentClient) DeleteOneID(id uuid.UUID) *CommentDeleteOne {
 	builder := c.Delete().Where(comment.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -389,12 +272,12 @@ func (c *CommentClient) Query() *CommentQuery {
 }
 
 // Get returns a Comment entity by its id.
-func (c *CommentClient) Get(ctx context.Context, id int) (*Comment, error) {
+func (c *CommentClient) Get(ctx context.Context, id uuid.UUID) (*Comment, error) {
 	return c.Query().Where(comment.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CommentClient) GetX(ctx context.Context, id int) *Comment {
+func (c *CommentClient) GetX(ctx context.Context, id uuid.UUID) *Comment {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -410,7 +293,23 @@ func (c *CommentClient) QueryRequest(co *Comment) *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(comment.Table, comment.FieldID, id),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, comment.RequestTable, comment.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.RequestTable, comment.RequestColumn),
+		)
+		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a Comment.
+func (c *CommentClient) QueryUser(co *Comment) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := co.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, comment.UserTable, comment.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
 		return fromV, nil
@@ -463,7 +362,7 @@ func (c *FileClient) UpdateOne(f *File) *FileUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *FileClient) UpdateOneID(id int) *FileUpdateOne {
+func (c *FileClient) UpdateOneID(id uuid.UUID) *FileUpdateOne {
 	mutation := newFileMutation(c.config, OpUpdateOne, withFileID(id))
 	return &FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -480,7 +379,7 @@ func (c *FileClient) DeleteOne(f *File) *FileDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
+func (c *FileClient) DeleteOneID(id uuid.UUID) *FileDeleteOne {
 	builder := c.Delete().Where(file.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -495,12 +394,12 @@ func (c *FileClient) Query() *FileQuery {
 }
 
 // Get returns a File entity by its id.
-func (c *FileClient) Get(ctx context.Context, id int) (*File, error) {
+func (c *FileClient) Get(ctx context.Context, id uuid.UUID) (*File, error) {
 	return c.Query().Where(file.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *FileClient) GetX(ctx context.Context, id int) *File {
+func (c *FileClient) GetX(ctx context.Context, id uuid.UUID) *File {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -508,15 +407,15 @@ func (c *FileClient) GetX(ctx context.Context, id int) *File {
 	return obj
 }
 
-// QueryRequestFile queries the request_file edge of a File.
-func (c *FileClient) QueryRequestFile(f *File) *RequestFileQuery {
-	query := &RequestFileQuery{config: c.config}
+// QueryRequest queries the request edge of a File.
+func (c *FileClient) QueryRequest(f *File) *RequestQuery {
+	query := &RequestQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, id),
-			sqlgraph.To(requestfile.Table, requestfile.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, file.RequestFileTable, file.RequestFileColumn),
+			sqlgraph.To(request.Table, request.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.RequestTable, file.RequestColumn),
 		)
 		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
 		return fromV, nil
@@ -569,7 +468,7 @@ func (c *GroupClient) UpdateOne(gr *Group) *GroupUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *GroupClient) UpdateOneID(id int) *GroupUpdateOne {
+func (c *GroupClient) UpdateOneID(id uuid.UUID) *GroupUpdateOne {
 	mutation := newGroupMutation(c.config, OpUpdateOne, withGroupID(id))
 	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -586,7 +485,7 @@ func (c *GroupClient) DeleteOne(gr *Group) *GroupDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
+func (c *GroupClient) DeleteOneID(id uuid.UUID) *GroupDeleteOne {
 	builder := c.Delete().Where(group.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -601,12 +500,12 @@ func (c *GroupClient) Query() *GroupQuery {
 }
 
 // Get returns a Group entity by its id.
-func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
+func (c *GroupClient) Get(ctx context.Context, id uuid.UUID) (*Group, error) {
 	return c.Query().Where(group.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
+func (c *GroupClient) GetX(ctx context.Context, id uuid.UUID) *Group {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -622,7 +521,7 @@ func (c *GroupClient) QueryGroupBudget(gr *Group) *GroupBudgetQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
 			sqlgraph.To(groupbudget.Table, groupbudget.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, group.GroupBudgetTable, group.GroupBudgetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.GroupBudgetTable, group.GroupBudgetColumn),
 		)
 		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 		return fromV, nil
@@ -631,14 +530,14 @@ func (c *GroupClient) QueryGroupBudget(gr *Group) *GroupBudgetQuery {
 }
 
 // QueryUser queries the user edge of a Group.
-func (c *GroupClient) QueryUser(gr *Group) *GroupUserQuery {
-	query := &GroupUserQuery{config: c.config}
+func (c *GroupClient) QueryUser(gr *Group) *UserQuery {
+	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := gr.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
-			sqlgraph.To(groupuser.Table, groupuser.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, group.UserTable, group.UserColumn),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, group.UserTable, group.UserPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 		return fromV, nil
@@ -654,7 +553,23 @@ func (c *GroupClient) QueryOwner(gr *Group) *GroupOwnerQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
 			sqlgraph.To(groupowner.Table, groupowner.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, group.OwnerTable, group.OwnerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.OwnerTable, group.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTransactionDetail queries the transaction_detail edge of a Group.
+func (c *GroupClient) QueryTransactionDetail(gr *Group) *TransactionDetailQuery {
+	query := &TransactionDetailQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, id),
+			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.TransactionDetailTable, group.TransactionDetailColumn),
 		)
 		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 		return fromV, nil
@@ -707,7 +622,7 @@ func (c *GroupBudgetClient) UpdateOne(gb *GroupBudget) *GroupBudgetUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *GroupBudgetClient) UpdateOneID(id int) *GroupBudgetUpdateOne {
+func (c *GroupBudgetClient) UpdateOneID(id uuid.UUID) *GroupBudgetUpdateOne {
 	mutation := newGroupBudgetMutation(c.config, OpUpdateOne, withGroupBudgetID(id))
 	return &GroupBudgetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -724,7 +639,7 @@ func (c *GroupBudgetClient) DeleteOne(gb *GroupBudget) *GroupBudgetDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *GroupBudgetClient) DeleteOneID(id int) *GroupBudgetDeleteOne {
+func (c *GroupBudgetClient) DeleteOneID(id uuid.UUID) *GroupBudgetDeleteOne {
 	builder := c.Delete().Where(groupbudget.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -739,12 +654,12 @@ func (c *GroupBudgetClient) Query() *GroupBudgetQuery {
 }
 
 // Get returns a GroupBudget entity by its id.
-func (c *GroupBudgetClient) Get(ctx context.Context, id int) (*GroupBudget, error) {
+func (c *GroupBudgetClient) Get(ctx context.Context, id uuid.UUID) (*GroupBudget, error) {
 	return c.Query().Where(groupbudget.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *GroupBudgetClient) GetX(ctx context.Context, id int) *GroupBudget {
+func (c *GroupBudgetClient) GetX(ctx context.Context, id uuid.UUID) *GroupBudget {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -760,7 +675,23 @@ func (c *GroupBudgetClient) QueryGroup(gb *GroupBudget) *GroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groupbudget.Table, groupbudget.FieldID, id),
 			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, groupbudget.GroupTable, groupbudget.GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, groupbudget.GroupTable, groupbudget.GroupColumn),
+		)
+		fromV = sqlgraph.Neighbors(gb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTransaction queries the transaction edge of a GroupBudget.
+func (c *GroupBudgetClient) QueryTransaction(gb *GroupBudget) *TransactionQuery {
+	query := &TransactionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := gb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(groupbudget.Table, groupbudget.FieldID, id),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, groupbudget.TransactionTable, groupbudget.TransactionColumn),
 		)
 		fromV = sqlgraph.Neighbors(gb.driver.Dialect(), step)
 		return fromV, nil
@@ -813,7 +744,7 @@ func (c *GroupOwnerClient) UpdateOne(_go *GroupOwner) *GroupOwnerUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *GroupOwnerClient) UpdateOneID(id int) *GroupOwnerUpdateOne {
+func (c *GroupOwnerClient) UpdateOneID(id uuid.UUID) *GroupOwnerUpdateOne {
 	mutation := newGroupOwnerMutation(c.config, OpUpdateOne, withGroupOwnerID(id))
 	return &GroupOwnerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -830,7 +761,7 @@ func (c *GroupOwnerClient) DeleteOne(_go *GroupOwner) *GroupOwnerDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *GroupOwnerClient) DeleteOneID(id int) *GroupOwnerDeleteOne {
+func (c *GroupOwnerClient) DeleteOneID(id uuid.UUID) *GroupOwnerDeleteOne {
 	builder := c.Delete().Where(groupowner.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -845,12 +776,12 @@ func (c *GroupOwnerClient) Query() *GroupOwnerQuery {
 }
 
 // Get returns a GroupOwner entity by its id.
-func (c *GroupOwnerClient) Get(ctx context.Context, id int) (*GroupOwner, error) {
+func (c *GroupOwnerClient) Get(ctx context.Context, id uuid.UUID) (*GroupOwner, error) {
 	return c.Query().Where(groupowner.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *GroupOwnerClient) GetX(ctx context.Context, id int) *GroupOwner {
+func (c *GroupOwnerClient) GetX(ctx context.Context, id uuid.UUID) *GroupOwner {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -866,7 +797,7 @@ func (c *GroupOwnerClient) QueryGroup(_go *GroupOwner) *GroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groupowner.Table, groupowner.FieldID, id),
 			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, groupowner.GroupTable, groupowner.GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, groupowner.GroupTable, groupowner.GroupColumn),
 		)
 		fromV = sqlgraph.Neighbors(_go.driver.Dialect(), step)
 		return fromV, nil
@@ -877,112 +808,6 @@ func (c *GroupOwnerClient) QueryGroup(_go *GroupOwner) *GroupQuery {
 // Hooks returns the client hooks.
 func (c *GroupOwnerClient) Hooks() []Hook {
 	return c.hooks.GroupOwner
-}
-
-// GroupUserClient is a client for the GroupUser schema.
-type GroupUserClient struct {
-	config
-}
-
-// NewGroupUserClient returns a client for the GroupUser from the given config.
-func NewGroupUserClient(c config) *GroupUserClient {
-	return &GroupUserClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `groupuser.Hooks(f(g(h())))`.
-func (c *GroupUserClient) Use(hooks ...Hook) {
-	c.hooks.GroupUser = append(c.hooks.GroupUser, hooks...)
-}
-
-// Create returns a create builder for GroupUser.
-func (c *GroupUserClient) Create() *GroupUserCreate {
-	mutation := newGroupUserMutation(c.config, OpCreate)
-	return &GroupUserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of GroupUser entities.
-func (c *GroupUserClient) CreateBulk(builders ...*GroupUserCreate) *GroupUserCreateBulk {
-	return &GroupUserCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for GroupUser.
-func (c *GroupUserClient) Update() *GroupUserUpdate {
-	mutation := newGroupUserMutation(c.config, OpUpdate)
-	return &GroupUserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *GroupUserClient) UpdateOne(gu *GroupUser) *GroupUserUpdateOne {
-	mutation := newGroupUserMutation(c.config, OpUpdateOne, withGroupUser(gu))
-	return &GroupUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *GroupUserClient) UpdateOneID(id int) *GroupUserUpdateOne {
-	mutation := newGroupUserMutation(c.config, OpUpdateOne, withGroupUserID(id))
-	return &GroupUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for GroupUser.
-func (c *GroupUserClient) Delete() *GroupUserDelete {
-	mutation := newGroupUserMutation(c.config, OpDelete)
-	return &GroupUserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *GroupUserClient) DeleteOne(gu *GroupUser) *GroupUserDeleteOne {
-	return c.DeleteOneID(gu.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *GroupUserClient) DeleteOneID(id int) *GroupUserDeleteOne {
-	builder := c.Delete().Where(groupuser.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &GroupUserDeleteOne{builder}
-}
-
-// Query returns a query builder for GroupUser.
-func (c *GroupUserClient) Query() *GroupUserQuery {
-	return &GroupUserQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a GroupUser entity by its id.
-func (c *GroupUserClient) Get(ctx context.Context, id int) (*GroupUser, error) {
-	return c.Query().Where(groupuser.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *GroupUserClient) GetX(ctx context.Context, id int) *GroupUser {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryGroup queries the group edge of a GroupUser.
-func (c *GroupUserClient) QueryGroup(gu *GroupUser) *GroupQuery {
-	query := &GroupQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := gu.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(groupuser.Table, groupuser.FieldID, id),
-			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, groupuser.GroupTable, groupuser.GroupColumn),
-		)
-		fromV = sqlgraph.Neighbors(gu.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *GroupUserClient) Hooks() []Hook {
-	return c.hooks.GroupUser
 }
 
 // RequestClient is a client for the Request schema.
@@ -1025,7 +850,7 @@ func (c *RequestClient) UpdateOne(r *Request) *RequestUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *RequestClient) UpdateOneID(id int) *RequestUpdateOne {
+func (c *RequestClient) UpdateOneID(id uuid.UUID) *RequestUpdateOne {
 	mutation := newRequestMutation(c.config, OpUpdateOne, withRequestID(id))
 	return &RequestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1042,7 +867,7 @@ func (c *RequestClient) DeleteOne(r *Request) *RequestDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *RequestClient) DeleteOneID(id int) *RequestDeleteOne {
+func (c *RequestClient) DeleteOneID(id uuid.UUID) *RequestDeleteOne {
 	builder := c.Delete().Where(request.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1057,12 +882,12 @@ func (c *RequestClient) Query() *RequestQuery {
 }
 
 // Get returns a Request entity by its id.
-func (c *RequestClient) Get(ctx context.Context, id int) (*Request, error) {
+func (c *RequestClient) Get(ctx context.Context, id uuid.UUID) (*Request, error) {
 	return c.Query().Where(request.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *RequestClient) GetX(ctx context.Context, id int) *Request {
+func (c *RequestClient) GetX(ctx context.Context, id uuid.UUID) *Request {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1078,7 +903,7 @@ func (c *RequestClient) QueryStatus(r *Request) *RequestStatusQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, id),
 			sqlgraph.To(requeststatus.Table, requeststatus.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, request.StatusTable, request.StatusColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.StatusTable, request.StatusColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1094,7 +919,7 @@ func (c *RequestClient) QueryTarget(r *Request) *RequestTargetQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, id),
 			sqlgraph.To(requesttarget.Table, requesttarget.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, request.TargetTable, request.TargetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.TargetTable, request.TargetColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1103,14 +928,14 @@ func (c *RequestClient) QueryTarget(r *Request) *RequestTargetQuery {
 }
 
 // QueryFile queries the file edge of a Request.
-func (c *RequestClient) QueryFile(r *Request) *RequestFileQuery {
-	query := &RequestFileQuery{config: c.config}
+func (c *RequestClient) QueryFile(r *Request) *FileQuery {
+	query := &FileQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, id),
-			sqlgraph.To(requestfile.Table, requestfile.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, request.FileTable, request.FileColumn),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.FileTable, request.FileColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1119,14 +944,14 @@ func (c *RequestClient) QueryFile(r *Request) *RequestFileQuery {
 }
 
 // QueryTag queries the tag edge of a Request.
-func (c *RequestClient) QueryTag(r *Request) *RequestTagQuery {
-	query := &RequestTagQuery{config: c.config}
+func (c *RequestClient) QueryTag(r *Request) *TagQuery {
+	query := &TagQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, id),
-			sqlgraph.To(requesttag.Table, requesttag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, request.TagTable, request.TagColumn),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.TagTable, request.TagColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1142,7 +967,7 @@ func (c *RequestClient) QueryTransactionDetail(r *Request) *TransactionDetailQue
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, id),
 			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, request.TransactionDetailTable, request.TransactionDetailColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.TransactionDetailTable, request.TransactionDetailColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1158,7 +983,23 @@ func (c *RequestClient) QueryComment(r *Request) *CommentQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, id),
 			sqlgraph.To(comment.Table, comment.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, request.CommentTable, request.CommentColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.CommentTable, request.CommentColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a Request.
+func (c *RequestClient) QueryUser(r *Request) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(request.Table, request.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, request.UserTable, request.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1169,128 +1010,6 @@ func (c *RequestClient) QueryComment(r *Request) *CommentQuery {
 // Hooks returns the client hooks.
 func (c *RequestClient) Hooks() []Hook {
 	return c.hooks.Request
-}
-
-// RequestFileClient is a client for the RequestFile schema.
-type RequestFileClient struct {
-	config
-}
-
-// NewRequestFileClient returns a client for the RequestFile from the given config.
-func NewRequestFileClient(c config) *RequestFileClient {
-	return &RequestFileClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `requestfile.Hooks(f(g(h())))`.
-func (c *RequestFileClient) Use(hooks ...Hook) {
-	c.hooks.RequestFile = append(c.hooks.RequestFile, hooks...)
-}
-
-// Create returns a create builder for RequestFile.
-func (c *RequestFileClient) Create() *RequestFileCreate {
-	mutation := newRequestFileMutation(c.config, OpCreate)
-	return &RequestFileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of RequestFile entities.
-func (c *RequestFileClient) CreateBulk(builders ...*RequestFileCreate) *RequestFileCreateBulk {
-	return &RequestFileCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for RequestFile.
-func (c *RequestFileClient) Update() *RequestFileUpdate {
-	mutation := newRequestFileMutation(c.config, OpUpdate)
-	return &RequestFileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *RequestFileClient) UpdateOne(rf *RequestFile) *RequestFileUpdateOne {
-	mutation := newRequestFileMutation(c.config, OpUpdateOne, withRequestFile(rf))
-	return &RequestFileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *RequestFileClient) UpdateOneID(id int) *RequestFileUpdateOne {
-	mutation := newRequestFileMutation(c.config, OpUpdateOne, withRequestFileID(id))
-	return &RequestFileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for RequestFile.
-func (c *RequestFileClient) Delete() *RequestFileDelete {
-	mutation := newRequestFileMutation(c.config, OpDelete)
-	return &RequestFileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *RequestFileClient) DeleteOne(rf *RequestFile) *RequestFileDeleteOne {
-	return c.DeleteOneID(rf.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *RequestFileClient) DeleteOneID(id int) *RequestFileDeleteOne {
-	builder := c.Delete().Where(requestfile.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &RequestFileDeleteOne{builder}
-}
-
-// Query returns a query builder for RequestFile.
-func (c *RequestFileClient) Query() *RequestFileQuery {
-	return &RequestFileQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a RequestFile entity by its id.
-func (c *RequestFileClient) Get(ctx context.Context, id int) (*RequestFile, error) {
-	return c.Query().Where(requestfile.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *RequestFileClient) GetX(ctx context.Context, id int) *RequestFile {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryRequest queries the request edge of a RequestFile.
-func (c *RequestFileClient) QueryRequest(rf *RequestFile) *RequestQuery {
-	query := &RequestQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := rf.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(requestfile.Table, requestfile.FieldID, id),
-			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, requestfile.RequestTable, requestfile.RequestColumn),
-		)
-		fromV = sqlgraph.Neighbors(rf.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryFile queries the file edge of a RequestFile.
-func (c *RequestFileClient) QueryFile(rf *RequestFile) *FileQuery {
-	query := &FileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := rf.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(requestfile.Table, requestfile.FieldID, id),
-			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, requestfile.FileTable, requestfile.FileColumn),
-		)
-		fromV = sqlgraph.Neighbors(rf.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *RequestFileClient) Hooks() []Hook {
-	return c.hooks.RequestFile
 }
 
 // RequestStatusClient is a client for the RequestStatus schema.
@@ -1333,7 +1052,7 @@ func (c *RequestStatusClient) UpdateOne(rs *RequestStatus) *RequestStatusUpdateO
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *RequestStatusClient) UpdateOneID(id int) *RequestStatusUpdateOne {
+func (c *RequestStatusClient) UpdateOneID(id uuid.UUID) *RequestStatusUpdateOne {
 	mutation := newRequestStatusMutation(c.config, OpUpdateOne, withRequestStatusID(id))
 	return &RequestStatusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1350,7 +1069,7 @@ func (c *RequestStatusClient) DeleteOne(rs *RequestStatus) *RequestStatusDeleteO
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *RequestStatusClient) DeleteOneID(id int) *RequestStatusDeleteOne {
+func (c *RequestStatusClient) DeleteOneID(id uuid.UUID) *RequestStatusDeleteOne {
 	builder := c.Delete().Where(requeststatus.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1365,12 +1084,12 @@ func (c *RequestStatusClient) Query() *RequestStatusQuery {
 }
 
 // Get returns a RequestStatus entity by its id.
-func (c *RequestStatusClient) Get(ctx context.Context, id int) (*RequestStatus, error) {
+func (c *RequestStatusClient) Get(ctx context.Context, id uuid.UUID) (*RequestStatus, error) {
 	return c.Query().Where(requeststatus.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *RequestStatusClient) GetX(ctx context.Context, id int) *RequestStatus {
+func (c *RequestStatusClient) GetX(ctx context.Context, id uuid.UUID) *RequestStatus {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1386,7 +1105,23 @@ func (c *RequestStatusClient) QueryRequest(rs *RequestStatus) *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requeststatus.Table, requeststatus.FieldID, id),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, requeststatus.RequestTable, requeststatus.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, requeststatus.RequestTable, requeststatus.RequestColumn),
+		)
+		fromV = sqlgraph.Neighbors(rs.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a RequestStatus.
+func (c *RequestStatusClient) QueryUser(rs *RequestStatus) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := rs.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(requeststatus.Table, requeststatus.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, requeststatus.UserTable, requeststatus.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(rs.driver.Dialect(), step)
 		return fromV, nil
@@ -1397,128 +1132,6 @@ func (c *RequestStatusClient) QueryRequest(rs *RequestStatus) *RequestQuery {
 // Hooks returns the client hooks.
 func (c *RequestStatusClient) Hooks() []Hook {
 	return c.hooks.RequestStatus
-}
-
-// RequestTagClient is a client for the RequestTag schema.
-type RequestTagClient struct {
-	config
-}
-
-// NewRequestTagClient returns a client for the RequestTag from the given config.
-func NewRequestTagClient(c config) *RequestTagClient {
-	return &RequestTagClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `requesttag.Hooks(f(g(h())))`.
-func (c *RequestTagClient) Use(hooks ...Hook) {
-	c.hooks.RequestTag = append(c.hooks.RequestTag, hooks...)
-}
-
-// Create returns a create builder for RequestTag.
-func (c *RequestTagClient) Create() *RequestTagCreate {
-	mutation := newRequestTagMutation(c.config, OpCreate)
-	return &RequestTagCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of RequestTag entities.
-func (c *RequestTagClient) CreateBulk(builders ...*RequestTagCreate) *RequestTagCreateBulk {
-	return &RequestTagCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for RequestTag.
-func (c *RequestTagClient) Update() *RequestTagUpdate {
-	mutation := newRequestTagMutation(c.config, OpUpdate)
-	return &RequestTagUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *RequestTagClient) UpdateOne(rt *RequestTag) *RequestTagUpdateOne {
-	mutation := newRequestTagMutation(c.config, OpUpdateOne, withRequestTag(rt))
-	return &RequestTagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *RequestTagClient) UpdateOneID(id int) *RequestTagUpdateOne {
-	mutation := newRequestTagMutation(c.config, OpUpdateOne, withRequestTagID(id))
-	return &RequestTagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for RequestTag.
-func (c *RequestTagClient) Delete() *RequestTagDelete {
-	mutation := newRequestTagMutation(c.config, OpDelete)
-	return &RequestTagDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *RequestTagClient) DeleteOne(rt *RequestTag) *RequestTagDeleteOne {
-	return c.DeleteOneID(rt.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *RequestTagClient) DeleteOneID(id int) *RequestTagDeleteOne {
-	builder := c.Delete().Where(requesttag.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &RequestTagDeleteOne{builder}
-}
-
-// Query returns a query builder for RequestTag.
-func (c *RequestTagClient) Query() *RequestTagQuery {
-	return &RequestTagQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a RequestTag entity by its id.
-func (c *RequestTagClient) Get(ctx context.Context, id int) (*RequestTag, error) {
-	return c.Query().Where(requesttag.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *RequestTagClient) GetX(ctx context.Context, id int) *RequestTag {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryRequest queries the request edge of a RequestTag.
-func (c *RequestTagClient) QueryRequest(rt *RequestTag) *RequestQuery {
-	query := &RequestQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := rt.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(requesttag.Table, requesttag.FieldID, id),
-			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, requesttag.RequestTable, requesttag.RequestColumn),
-		)
-		fromV = sqlgraph.Neighbors(rt.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryTag queries the tag edge of a RequestTag.
-func (c *RequestTagClient) QueryTag(rt *RequestTag) *TagQuery {
-	query := &TagQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := rt.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(requesttag.Table, requesttag.FieldID, id),
-			sqlgraph.To(tag.Table, tag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, requesttag.TagTable, requesttag.TagColumn),
-		)
-		fromV = sqlgraph.Neighbors(rt.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *RequestTagClient) Hooks() []Hook {
-	return c.hooks.RequestTag
 }
 
 // RequestTargetClient is a client for the RequestTarget schema.
@@ -1561,7 +1174,7 @@ func (c *RequestTargetClient) UpdateOne(rt *RequestTarget) *RequestTargetUpdateO
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *RequestTargetClient) UpdateOneID(id int) *RequestTargetUpdateOne {
+func (c *RequestTargetClient) UpdateOneID(id uuid.UUID) *RequestTargetUpdateOne {
 	mutation := newRequestTargetMutation(c.config, OpUpdateOne, withRequestTargetID(id))
 	return &RequestTargetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1578,7 +1191,7 @@ func (c *RequestTargetClient) DeleteOne(rt *RequestTarget) *RequestTargetDeleteO
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *RequestTargetClient) DeleteOneID(id int) *RequestTargetDeleteOne {
+func (c *RequestTargetClient) DeleteOneID(id uuid.UUID) *RequestTargetDeleteOne {
 	builder := c.Delete().Where(requesttarget.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1593,12 +1206,12 @@ func (c *RequestTargetClient) Query() *RequestTargetQuery {
 }
 
 // Get returns a RequestTarget entity by its id.
-func (c *RequestTargetClient) Get(ctx context.Context, id int) (*RequestTarget, error) {
+func (c *RequestTargetClient) Get(ctx context.Context, id uuid.UUID) (*RequestTarget, error) {
 	return c.Query().Where(requesttarget.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *RequestTargetClient) GetX(ctx context.Context, id int) *RequestTarget {
+func (c *RequestTargetClient) GetX(ctx context.Context, id uuid.UUID) *RequestTarget {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1614,7 +1227,7 @@ func (c *RequestTargetClient) QueryRequest(rt *RequestTarget) *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requesttarget.Table, requesttarget.FieldID, id),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, requesttarget.RequestTable, requesttarget.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, requesttarget.RequestTable, requesttarget.RequestColumn),
 		)
 		fromV = sqlgraph.Neighbors(rt.driver.Dialect(), step)
 		return fromV, nil
@@ -1667,7 +1280,7 @@ func (c *TagClient) UpdateOne(t *Tag) *TagUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TagClient) UpdateOneID(id int) *TagUpdateOne {
+func (c *TagClient) UpdateOneID(id uuid.UUID) *TagUpdateOne {
 	mutation := newTagMutation(c.config, OpUpdateOne, withTagID(id))
 	return &TagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1684,7 +1297,7 @@ func (c *TagClient) DeleteOne(t *Tag) *TagDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *TagClient) DeleteOneID(id int) *TagDeleteOne {
+func (c *TagClient) DeleteOneID(id uuid.UUID) *TagDeleteOne {
 	builder := c.Delete().Where(tag.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1699,12 +1312,12 @@ func (c *TagClient) Query() *TagQuery {
 }
 
 // Get returns a Tag entity by its id.
-func (c *TagClient) Get(ctx context.Context, id int) (*Tag, error) {
+func (c *TagClient) Get(ctx context.Context, id uuid.UUID) (*Tag, error) {
 	return c.Query().Where(tag.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TagClient) GetX(ctx context.Context, id int) *Tag {
+func (c *TagClient) GetX(ctx context.Context, id uuid.UUID) *Tag {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1712,15 +1325,15 @@ func (c *TagClient) GetX(ctx context.Context, id int) *Tag {
 	return obj
 }
 
-// QueryRequestTag queries the request_tag edge of a Tag.
-func (c *TagClient) QueryRequestTag(t *Tag) *RequestTagQuery {
-	query := &RequestTagQuery{config: c.config}
+// QueryRequest queries the request edge of a Tag.
+func (c *TagClient) QueryRequest(t *Tag) *RequestQuery {
+	query := &RequestQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, id),
-			sqlgraph.To(requesttag.Table, requesttag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, tag.RequestTagTable, tag.RequestTagColumn),
+			sqlgraph.To(request.Table, request.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, tag.RequestTable, tag.RequestColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -1728,15 +1341,15 @@ func (c *TagClient) QueryRequestTag(t *Tag) *RequestTagQuery {
 	return query
 }
 
-// QueryTransactionTag queries the transaction_tag edge of a Tag.
-func (c *TagClient) QueryTransactionTag(t *Tag) *TransactionTagQuery {
-	query := &TransactionTagQuery{config: c.config}
+// QueryTransaction queries the transaction edge of a Tag.
+func (c *TagClient) QueryTransaction(t *Tag) *TransactionQuery {
+	query := &TransactionQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, id),
-			sqlgraph.To(transactiontag.Table, transactiontag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, tag.TransactionTagTable, tag.TransactionTagColumn),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, tag.TransactionTable, tag.TransactionColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -1789,7 +1402,7 @@ func (c *TransactionClient) UpdateOne(t *Transaction) *TransactionUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TransactionClient) UpdateOneID(id int) *TransactionUpdateOne {
+func (c *TransactionClient) UpdateOneID(id uuid.UUID) *TransactionUpdateOne {
 	mutation := newTransactionMutation(c.config, OpUpdateOne, withTransactionID(id))
 	return &TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1806,7 +1419,7 @@ func (c *TransactionClient) DeleteOne(t *Transaction) *TransactionDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *TransactionClient) DeleteOneID(id int) *TransactionDeleteOne {
+func (c *TransactionClient) DeleteOneID(id uuid.UUID) *TransactionDeleteOne {
 	builder := c.Delete().Where(transaction.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1821,12 +1434,12 @@ func (c *TransactionClient) Query() *TransactionQuery {
 }
 
 // Get returns a Transaction entity by its id.
-func (c *TransactionClient) Get(ctx context.Context, id int) (*Transaction, error) {
+func (c *TransactionClient) Get(ctx context.Context, id uuid.UUID) (*Transaction, error) {
 	return c.Query().Where(transaction.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TransactionClient) GetX(ctx context.Context, id int) *Transaction {
+func (c *TransactionClient) GetX(ctx context.Context, id uuid.UUID) *Transaction {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1842,7 +1455,7 @@ func (c *TransactionClient) QueryDetail(t *Transaction) *TransactionDetailQuery 
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, id),
 			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, transaction.DetailTable, transaction.DetailColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, transaction.DetailTable, transaction.DetailColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -1851,14 +1464,30 @@ func (c *TransactionClient) QueryDetail(t *Transaction) *TransactionDetailQuery 
 }
 
 // QueryTag queries the tag edge of a Transaction.
-func (c *TransactionClient) QueryTag(t *Transaction) *TransactionTagQuery {
-	query := &TransactionTagQuery{config: c.config}
+func (c *TransactionClient) QueryTag(t *Transaction) *TagQuery {
+	query := &TagQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, id),
-			sqlgraph.To(transactiontag.Table, transactiontag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, transaction.TagTable, transaction.TagColumn),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, transaction.TagTable, transaction.TagColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroupBudget queries the group_budget edge of a Transaction.
+func (c *TransactionClient) QueryGroupBudget(t *Transaction) *GroupBudgetQuery {
+	query := &GroupBudgetQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(groupbudget.Table, groupbudget.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, transaction.GroupBudgetTable, transaction.GroupBudgetColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -1911,7 +1540,7 @@ func (c *TransactionDetailClient) UpdateOne(td *TransactionDetail) *TransactionD
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TransactionDetailClient) UpdateOneID(id int) *TransactionDetailUpdateOne {
+func (c *TransactionDetailClient) UpdateOneID(id uuid.UUID) *TransactionDetailUpdateOne {
 	mutation := newTransactionDetailMutation(c.config, OpUpdateOne, withTransactionDetailID(id))
 	return &TransactionDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1928,7 +1557,7 @@ func (c *TransactionDetailClient) DeleteOne(td *TransactionDetail) *TransactionD
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *TransactionDetailClient) DeleteOneID(id int) *TransactionDetailDeleteOne {
+func (c *TransactionDetailClient) DeleteOneID(id uuid.UUID) *TransactionDetailDeleteOne {
 	builder := c.Delete().Where(transactiondetail.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1943,12 +1572,12 @@ func (c *TransactionDetailClient) Query() *TransactionDetailQuery {
 }
 
 // Get returns a TransactionDetail entity by its id.
-func (c *TransactionDetailClient) Get(ctx context.Context, id int) (*TransactionDetail, error) {
+func (c *TransactionDetailClient) Get(ctx context.Context, id uuid.UUID) (*TransactionDetail, error) {
 	return c.Query().Where(transactiondetail.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TransactionDetailClient) GetX(ctx context.Context, id int) *TransactionDetail {
+func (c *TransactionDetailClient) GetX(ctx context.Context, id uuid.UUID) *TransactionDetail {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1964,7 +1593,7 @@ func (c *TransactionDetailClient) QueryTransaction(td *TransactionDetail) *Trans
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transactiondetail.Table, transactiondetail.FieldID, id),
 			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, transactiondetail.TransactionTable, transactiondetail.TransactionColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, transactiondetail.TransactionTable, transactiondetail.TransactionColumn),
 		)
 		fromV = sqlgraph.Neighbors(td.driver.Dialect(), step)
 		return fromV, nil
@@ -1980,7 +1609,7 @@ func (c *TransactionDetailClient) QueryRequest(td *TransactionDetail) *RequestQu
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transactiondetail.Table, transactiondetail.FieldID, id),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, transactiondetail.RequestTable, transactiondetail.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, transactiondetail.RequestTable, transactiondetail.RequestColumn),
 		)
 		fromV = sqlgraph.Neighbors(td.driver.Dialect(), step)
 		return fromV, nil
@@ -1996,7 +1625,7 @@ func (c *TransactionDetailClient) QueryGroup(td *TransactionDetail) *GroupQuery 
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transactiondetail.Table, transactiondetail.FieldID, id),
 			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, transactiondetail.GroupTable, transactiondetail.GroupColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, transactiondetail.GroupTable, transactiondetail.GroupColumn),
 		)
 		fromV = sqlgraph.Neighbors(td.driver.Dialect(), step)
 		return fromV, nil
@@ -2009,84 +1638,84 @@ func (c *TransactionDetailClient) Hooks() []Hook {
 	return c.hooks.TransactionDetail
 }
 
-// TransactionTagClient is a client for the TransactionTag schema.
-type TransactionTagClient struct {
+// UserClient is a client for the User schema.
+type UserClient struct {
 	config
 }
 
-// NewTransactionTagClient returns a client for the TransactionTag from the given config.
-func NewTransactionTagClient(c config) *TransactionTagClient {
-	return &TransactionTagClient{config: c}
+// NewUserClient returns a client for the User from the given config.
+func NewUserClient(c config) *UserClient {
+	return &UserClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `transactiontag.Hooks(f(g(h())))`.
-func (c *TransactionTagClient) Use(hooks ...Hook) {
-	c.hooks.TransactionTag = append(c.hooks.TransactionTag, hooks...)
+// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
+func (c *UserClient) Use(hooks ...Hook) {
+	c.hooks.User = append(c.hooks.User, hooks...)
 }
 
-// Create returns a create builder for TransactionTag.
-func (c *TransactionTagClient) Create() *TransactionTagCreate {
-	mutation := newTransactionTagMutation(c.config, OpCreate)
-	return &TransactionTagCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for User.
+func (c *UserClient) Create() *UserCreate {
+	mutation := newUserMutation(c.config, OpCreate)
+	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of TransactionTag entities.
-func (c *TransactionTagClient) CreateBulk(builders ...*TransactionTagCreate) *TransactionTagCreateBulk {
-	return &TransactionTagCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of User entities.
+func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
+	return &UserCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for TransactionTag.
-func (c *TransactionTagClient) Update() *TransactionTagUpdate {
-	mutation := newTransactionTagMutation(c.config, OpUpdate)
-	return &TransactionTagUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for User.
+func (c *UserClient) Update() *UserUpdate {
+	mutation := newUserMutation(c.config, OpUpdate)
+	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *TransactionTagClient) UpdateOne(tt *TransactionTag) *TransactionTagUpdateOne {
-	mutation := newTransactionTagMutation(c.config, OpUpdateOne, withTransactionTag(tt))
-	return &TransactionTagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
+	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TransactionTagClient) UpdateOneID(id int) *TransactionTagUpdateOne {
-	mutation := newTransactionTagMutation(c.config, OpUpdateOne, withTransactionTagID(id))
-	return &TransactionTagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *UserClient) UpdateOneID(id uuid.UUID) *UserUpdateOne {
+	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for TransactionTag.
-func (c *TransactionTagClient) Delete() *TransactionTagDelete {
-	mutation := newTransactionTagMutation(c.config, OpDelete)
-	return &TransactionTagDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for User.
+func (c *UserClient) Delete() *UserDelete {
+	mutation := newUserMutation(c.config, OpDelete)
+	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *TransactionTagClient) DeleteOne(tt *TransactionTag) *TransactionTagDeleteOne {
-	return c.DeleteOneID(tt.ID)
+func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
+	return c.DeleteOneID(u.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *TransactionTagClient) DeleteOneID(id int) *TransactionTagDeleteOne {
-	builder := c.Delete().Where(transactiontag.ID(id))
+func (c *UserClient) DeleteOneID(id uuid.UUID) *UserDeleteOne {
+	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &TransactionTagDeleteOne{builder}
+	return &UserDeleteOne{builder}
 }
 
-// Query returns a query builder for TransactionTag.
-func (c *TransactionTagClient) Query() *TransactionTagQuery {
-	return &TransactionTagQuery{
+// Query returns a query builder for User.
+func (c *UserClient) Query() *UserQuery {
+	return &UserQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a TransactionTag entity by its id.
-func (c *TransactionTagClient) Get(ctx context.Context, id int) (*TransactionTag, error) {
-	return c.Query().Where(transactiontag.ID(id)).Only(ctx)
+// Get returns a User entity by its id.
+func (c *UserClient) Get(ctx context.Context, id uuid.UUID) (*User, error) {
+	return c.Query().Where(user.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TransactionTagClient) GetX(ctx context.Context, id int) *TransactionTag {
+func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2094,39 +1723,71 @@ func (c *TransactionTagClient) GetX(ctx context.Context, id int) *TransactionTag
 	return obj
 }
 
-// QueryTransaction queries the transaction edge of a TransactionTag.
-func (c *TransactionTagClient) QueryTransaction(tt *TransactionTag) *TransactionQuery {
-	query := &TransactionQuery{config: c.config}
+// QueryGroup queries the group edge of a User.
+func (c *UserClient) QueryGroup(u *User) *GroupQuery {
+	query := &GroupQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := tt.ID
+		id := u.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(transactiontag.Table, transactiontag.FieldID, id),
-			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, transactiontag.TransactionTable, transactiontag.TransactionColumn),
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.GroupTable, user.GroupPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(tt.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
-// QueryTag queries the tag edge of a TransactionTag.
-func (c *TransactionTagClient) QueryTag(tt *TransactionTag) *TagQuery {
-	query := &TagQuery{config: c.config}
+// QueryComment queries the comment edge of a User.
+func (c *UserClient) QueryComment(u *User) *CommentQuery {
+	query := &CommentQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := tt.ID
+		id := u.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(transactiontag.Table, transactiontag.FieldID, id),
-			sqlgraph.To(tag.Table, tag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, transactiontag.TagTable, transactiontag.TagColumn),
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, user.CommentTable, user.CommentColumn),
 		)
-		fromV = sqlgraph.Neighbors(tt.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequestStatus queries the request_status edge of a User.
+func (c *UserClient) QueryRequestStatus(u *User) *RequestStatusQuery {
+	query := &RequestStatusQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(requeststatus.Table, requeststatus.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, user.RequestStatusTable, user.RequestStatusColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequest queries the request edge of a User.
+func (c *UserClient) QueryRequest(u *User) *RequestQuery {
+	query := &RequestQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(request.Table, request.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, user.RequestTable, user.RequestColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *TransactionTagClient) Hooks() []Hook {
-	return c.hooks.TransactionTag
+func (c *UserClient) Hooks() []Hook {
+	return c.hooks.User
 }

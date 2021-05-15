@@ -10,9 +10,11 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/groupbudget"
+	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
-	"github.com/traPtitech/Jomon/ent/transactiontag"
 )
 
 // TransactionCreate is the builder for creating a Transaction entity.
@@ -36,14 +38,20 @@ func (tc *TransactionCreate) SetNillableCreatedAt(t *time.Time) *TransactionCrea
 	return tc
 }
 
+// SetID sets the "id" field.
+func (tc *TransactionCreate) SetID(u uuid.UUID) *TransactionCreate {
+	tc.mutation.SetID(u)
+	return tc
+}
+
 // SetDetailID sets the "detail" edge to the TransactionDetail entity by ID.
-func (tc *TransactionCreate) SetDetailID(id int) *TransactionCreate {
+func (tc *TransactionCreate) SetDetailID(id uuid.UUID) *TransactionCreate {
 	tc.mutation.SetDetailID(id)
 	return tc
 }
 
 // SetNillableDetailID sets the "detail" edge to the TransactionDetail entity by ID if the given value is not nil.
-func (tc *TransactionCreate) SetNillableDetailID(id *int) *TransactionCreate {
+func (tc *TransactionCreate) SetNillableDetailID(id *uuid.UUID) *TransactionCreate {
 	if id != nil {
 		tc = tc.SetDetailID(*id)
 	}
@@ -55,19 +63,38 @@ func (tc *TransactionCreate) SetDetail(t *TransactionDetail) *TransactionCreate 
 	return tc.SetDetailID(t.ID)
 }
 
-// AddTagIDs adds the "tag" edge to the TransactionTag entity by IDs.
-func (tc *TransactionCreate) AddTagIDs(ids ...int) *TransactionCreate {
+// AddTagIDs adds the "tag" edge to the Tag entity by IDs.
+func (tc *TransactionCreate) AddTagIDs(ids ...uuid.UUID) *TransactionCreate {
 	tc.mutation.AddTagIDs(ids...)
 	return tc
 }
 
-// AddTag adds the "tag" edges to the TransactionTag entity.
-func (tc *TransactionCreate) AddTag(t ...*TransactionTag) *TransactionCreate {
-	ids := make([]int, len(t))
+// AddTag adds the "tag" edges to the Tag entity.
+func (tc *TransactionCreate) AddTag(t ...*Tag) *TransactionCreate {
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
 	return tc.AddTagIDs(ids...)
+}
+
+// SetGroupBudgetID sets the "group_budget" edge to the GroupBudget entity by ID.
+func (tc *TransactionCreate) SetGroupBudgetID(id uuid.UUID) *TransactionCreate {
+	tc.mutation.SetGroupBudgetID(id)
+	return tc
+}
+
+// SetNillableGroupBudgetID sets the "group_budget" edge to the GroupBudget entity by ID if the given value is not nil.
+func (tc *TransactionCreate) SetNillableGroupBudgetID(id *uuid.UUID) *TransactionCreate {
+	if id != nil {
+		tc = tc.SetGroupBudgetID(*id)
+	}
+	return tc
+}
+
+// SetGroupBudget sets the "group_budget" edge to the GroupBudget entity.
+func (tc *TransactionCreate) SetGroupBudget(g *GroupBudget) *TransactionCreate {
+	return tc.SetGroupBudgetID(g.ID)
 }
 
 // Mutation returns the TransactionMutation object of the builder.
@@ -126,6 +153,10 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultCreatedAt()
 		tc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := tc.mutation.ID(); !ok {
+		v := transaction.DefaultID()
+		tc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -144,8 +175,6 @@ func (tc *TransactionCreate) sqlSave(ctx context.Context) (*Transaction, error) 
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -155,11 +184,15 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: transaction.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: transaction.FieldID,
 			},
 		}
 	)
+	if id, ok := tc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := tc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -171,13 +204,13 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 	if nodes := tc.mutation.DetailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   transaction.DetailTable,
 			Columns: []string{transaction.DetailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: transactiondetail.FieldID,
 				},
 			},
@@ -185,26 +218,45 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.transaction_detail_transaction = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tc.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   transaction.TagTable,
 			Columns: []string{transaction.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: transactiontag.FieldID,
+					Type:   field.TypeUUID,
+					Column: tag.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.GroupBudgetIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   transaction.GroupBudgetTable,
+			Columns: []string{transaction.GroupBudgetColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: groupbudget.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.group_budget_transaction = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -250,8 +302,6 @@ func (tcb *TransactionCreateBulk) Save(ctx context.Context) ([]*Transaction, err
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

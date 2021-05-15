@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+</head>
+<body>
+		<div class="mermaid" id="er-diagram">
+erDiagram
+    Comment {
+        uuidDOTUUID id
+        string comment
+        timeDOTTime created_at
+        timeDOTTime updated_at
+        timeDOTTime deleted_at
+    }
+    File {
+        uuidDOTUUID id
+        string mime_type
+        timeDOTTime created_at
+        timeDOTTime deleted_at
+    }
+    Group {
+        uuidDOTUUID id
+        string name
+        string description
+        int budget
+        timeDOTTime created_at
+        timeDOTTime updated_at
+        timeDOTTime deleted_at
+    }
+    GroupBudget {
+        uuidDOTUUID id
+        int amount
+        string comment
+        timeDOTTime created_at
+    }
+    GroupOwner {
+        uuidDOTUUID id
+        string owner
+        timeDOTTime created_at
+    }
+    Request {
+        uuidDOTUUID id
+        int amount
+        timeDOTTime created_at
+    }
+    RequestStatus {
+        uuidDOTUUID id
+        requeststatusDOTStatus status
+        string reason
+        timeDOTTime created_at
+    }
+    RequestTarget {
+        uuidDOTUUID id
+        string target
+        timeDOTTime paid_at
+        timeDOTTime created_at
+    }
+    Tag {
+        uuidDOTUUID id
+        string name
+        string description
+        timeDOTTime created_at
+        timeDOTTime updated_at
+        timeDOTTime deleted_at
+    }
+    Transaction {
+        uuidDOTUUID id
+        timeDOTTime created_at
+    }
+    TransactionDetail {
+        uuidDOTUUID id
+        int amount
+        string target
+        timeDOTTime created_at
+    }
+    User {
+        uuidDOTUUID id
+        string trap_id
+        string name
+        bool admin
+        timeDOTTime created_at
+        timeDOTTime updated_at
+        timeDOTTime deleted_at
+    }
+    	Comment |o--o| User : "user/comment"
+    	Group |o--o{ GroupBudget : "group_budget/group"
+    	Group }o--o{ User : "user/group"
+    	Group |o--o{ GroupOwner : "owner/group"
+    	Group |o--o{ TransactionDetail : "transaction_detail/group"
+    	GroupBudget |o--o| Transaction : "transaction/group_budget"
+    	Request |o--o{ RequestStatus : "status/request"
+    	Request |o--o{ RequestTarget : "target/request"
+    	Request |o--o{ File : "file/request"
+    	Request |o--o{ Tag : "tag/request"
+    	Request |o--o{ TransactionDetail : "transaction_detail/request"
+    	Request |o--o{ Comment : "comment/request"
+    	Request |o--o| User : "user/request"
+    	RequestStatus |o--o| User : "user/request_status"
+    	Transaction |o--o| TransactionDetail : "detail/transaction"
+    	Transaction |o--o{ Tag : "tag/transaction"
+		</div>
+	<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+	<script>
+		mermaid.mermaidAPI.initialize({
+			startOnLoad: true,
+		});
+		var observer = new MutationObserver((event) => {
+			document.querySelectorAll('text[id^=entity]').forEach(text => {
+				text.textContent = text.textContent.replace('DOT', '.');
+				text.textContent = text.textContent.replace('STAR', '*');
+				text.textContent = text.textContent.replace('LBRACK', '[');
+				text.textContent = text.textContent.replace('RBRACK', ']');
+			});
+			observer.disconnect();
+		});
+		observer.observe(document.getElementById('er-diagram'), { attributes: true, childList: true });
+	</script>
+</body>
+</html>

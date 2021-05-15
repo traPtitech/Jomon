@@ -4,6 +4,8 @@ package group
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -29,6 +31,8 @@ const (
 	EdgeUser = "user"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
+	// EdgeTransactionDetail holds the string denoting the transaction_detail edge name in mutations.
+	EdgeTransactionDetail = "transaction_detail"
 	// Table holds the table name of the group in the database.
 	Table = "groups"
 	// GroupBudgetTable is the table the holds the group_budget relation/edge.
@@ -37,21 +41,26 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "groupbudget" package.
 	GroupBudgetInverseTable = "group_budgets"
 	// GroupBudgetColumn is the table column denoting the group_budget relation/edge.
-	GroupBudgetColumn = "group_id"
-	// UserTable is the table the holds the user relation/edge.
-	UserTable = "group_users"
-	// UserInverseTable is the table name for the GroupUser entity.
-	// It exists in this package in order to avoid circular dependency with the "groupuser" package.
-	UserInverseTable = "group_users"
-	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "group_id"
+	GroupBudgetColumn = "group_group_budget"
+	// UserTable is the table the holds the user relation/edge. The primary key declared below.
+	UserTable = "group_user"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
 	// OwnerTable is the table the holds the owner relation/edge.
 	OwnerTable = "group_owners"
 	// OwnerInverseTable is the table name for the GroupOwner entity.
 	// It exists in this package in order to avoid circular dependency with the "groupowner" package.
 	OwnerInverseTable = "group_owners"
 	// OwnerColumn is the table column denoting the owner relation/edge.
-	OwnerColumn = "group_id"
+	OwnerColumn = "group_owner"
+	// TransactionDetailTable is the table the holds the transaction_detail relation/edge.
+	TransactionDetailTable = "transaction_details"
+	// TransactionDetailInverseTable is the table name for the TransactionDetail entity.
+	// It exists in this package in order to avoid circular dependency with the "transactiondetail" package.
+	TransactionDetailInverseTable = "transaction_details"
+	// TransactionDetailColumn is the table column denoting the transaction_detail relation/edge.
+	TransactionDetailColumn = "group_transaction_detail"
 )
 
 // Columns holds all SQL columns for group fields.
@@ -64,6 +73,12 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldDeletedAt,
 }
+
+var (
+	// UserPrimaryKey and UserColumn2 are the table columns denoting the
+	// primary key for the user relation (M2M).
+	UserPrimaryKey = []string{"group_id", "user_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -80,4 +95,6 @@ var (
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )

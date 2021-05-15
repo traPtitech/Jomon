@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
 )
@@ -24,12 +25,6 @@ type RequestTargetCreate struct {
 // SetTarget sets the "target" field.
 func (rtc *RequestTargetCreate) SetTarget(s string) *RequestTargetCreate {
 	rtc.mutation.SetTarget(s)
-	return rtc
-}
-
-// SetRequestID sets the "request_id" field.
-func (rtc *RequestTargetCreate) SetRequestID(i int) *RequestTargetCreate {
-	rtc.mutation.SetRequestID(i)
 	return rtc
 }
 
@@ -58,6 +53,18 @@ func (rtc *RequestTargetCreate) SetNillableCreatedAt(t *time.Time) *RequestTarge
 	if t != nil {
 		rtc.SetCreatedAt(*t)
 	}
+	return rtc
+}
+
+// SetID sets the "id" field.
+func (rtc *RequestTargetCreate) SetID(u uuid.UUID) *RequestTargetCreate {
+	rtc.mutation.SetID(u)
+	return rtc
+}
+
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (rtc *RequestTargetCreate) SetRequestID(id uuid.UUID) *RequestTargetCreate {
+	rtc.mutation.SetRequestID(id)
 	return rtc
 }
 
@@ -122,15 +129,16 @@ func (rtc *RequestTargetCreate) defaults() {
 		v := requesttarget.DefaultCreatedAt()
 		rtc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := rtc.mutation.ID(); !ok {
+		v := requesttarget.DefaultID()
+		rtc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (rtc *RequestTargetCreate) check() error {
 	if _, ok := rtc.mutation.Target(); !ok {
 		return &ValidationError{Name: "target", err: errors.New("ent: missing required field \"target\"")}
-	}
-	if _, ok := rtc.mutation.RequestID(); !ok {
-		return &ValidationError{Name: "request_id", err: errors.New("ent: missing required field \"request_id\"")}
 	}
 	if _, ok := rtc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
@@ -149,8 +157,6 @@ func (rtc *RequestTargetCreate) sqlSave(ctx context.Context) (*RequestTarget, er
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -160,11 +166,15 @@ func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSp
 		_spec = &sqlgraph.CreateSpec{
 			Table: requesttarget.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: requesttarget.FieldID,
 			},
 		}
 	)
+	if id, ok := rtc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := rtc.mutation.Target(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -192,13 +202,13 @@ func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSp
 	if nodes := rtc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   requesttarget.RequestTable,
 			Columns: []string{requesttarget.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: request.FieldID,
 				},
 			},
@@ -206,7 +216,7 @@ func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSp
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.RequestID = nodes[0]
+		_node.request_target = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -252,8 +262,6 @@ func (rtcb *RequestTargetCreateBulk) Save(ctx context.Context) ([]*RequestTarget
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

@@ -10,8 +10,10 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/request"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // CommentCreate is the builder for creating a Comment entity.
@@ -19,18 +21,6 @@ type CommentCreate struct {
 	config
 	mutation *CommentMutation
 	hooks    []Hook
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (cc *CommentCreate) SetCreatedBy(s string) *CommentCreate {
-	cc.mutation.SetCreatedBy(s)
-	return cc
-}
-
-// SetRequestID sets the "request_id" field.
-func (cc *CommentCreate) SetRequestID(i int) *CommentCreate {
-	cc.mutation.SetRequestID(i)
-	return cc
 }
 
 // SetComment sets the "comment" field.
@@ -81,9 +71,32 @@ func (cc *CommentCreate) SetNillableDeletedAt(t *time.Time) *CommentCreate {
 	return cc
 }
 
+// SetID sets the "id" field.
+func (cc *CommentCreate) SetID(u uuid.UUID) *CommentCreate {
+	cc.mutation.SetID(u)
+	return cc
+}
+
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (cc *CommentCreate) SetRequestID(id uuid.UUID) *CommentCreate {
+	cc.mutation.SetRequestID(id)
+	return cc
+}
+
 // SetRequest sets the "request" edge to the Request entity.
 func (cc *CommentCreate) SetRequest(r *Request) *CommentCreate {
 	return cc.SetRequestID(r.ID)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (cc *CommentCreate) SetUserID(id uuid.UUID) *CommentCreate {
+	cc.mutation.SetUserID(id)
+	return cc
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (cc *CommentCreate) SetUser(u *User) *CommentCreate {
+	return cc.SetUserID(u.ID)
 }
 
 // Mutation returns the CommentMutation object of the builder.
@@ -146,16 +159,14 @@ func (cc *CommentCreate) defaults() {
 		v := comment.DefaultUpdatedAt()
 		cc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := cc.mutation.ID(); !ok {
+		v := comment.DefaultID()
+		cc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CommentCreate) check() error {
-	if _, ok := cc.mutation.CreatedBy(); !ok {
-		return &ValidationError{Name: "created_by", err: errors.New("ent: missing required field \"created_by\"")}
-	}
-	if _, ok := cc.mutation.RequestID(); !ok {
-		return &ValidationError{Name: "request_id", err: errors.New("ent: missing required field \"request_id\"")}
-	}
 	if _, ok := cc.mutation.Comment(); !ok {
 		return &ValidationError{Name: "comment", err: errors.New("ent: missing required field \"comment\"")}
 	}
@@ -168,6 +179,9 @@ func (cc *CommentCreate) check() error {
 	if _, ok := cc.mutation.RequestID(); !ok {
 		return &ValidationError{Name: "request", err: errors.New("ent: missing required edge \"request\"")}
 	}
+	if _, ok := cc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user", err: errors.New("ent: missing required edge \"user\"")}
+	}
 	return nil
 }
 
@@ -179,8 +193,6 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -190,18 +202,14 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: comment.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: comment.FieldID,
 			},
 		}
 	)
-	if value, ok := cc.mutation.CreatedBy(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: comment.FieldCreatedBy,
-		})
-		_node.CreatedBy = value
+	if id, ok := cc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
 	}
 	if value, ok := cc.mutation.Comment(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -238,13 +246,13 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 	if nodes := cc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
-			Inverse: false,
+			Inverse: true,
 			Table:   comment.RequestTable,
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: request.FieldID,
 				},
 			},
@@ -252,7 +260,26 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.RequestID = nodes[0]
+		_node.request_comment = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   comment.UserTable,
+			Columns: []string{comment.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -298,8 +325,6 @@ func (ccb *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
 )
@@ -16,18 +17,17 @@ import (
 type RequestTarget struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Target holds the value of the "target" field.
 	Target string `json:"target,omitempty"`
-	// RequestID holds the value of the "request_id" field.
-	RequestID int `json:"request_id,omitempty"`
 	// PaidAt holds the value of the "paid_at" field.
 	PaidAt *time.Time `json:"paid_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RequestTargetQuery when eager-loading is set.
-	Edges RequestTargetEdges `json:"edges"`
+	Edges          RequestTargetEdges `json:"edges"`
+	request_target *uuid.UUID
 }
 
 // RequestTargetEdges holds the relations/edges for other nodes in the graph.
@@ -58,12 +58,14 @@ func (*RequestTarget) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case requesttarget.FieldID, requesttarget.FieldRequestID:
-			values[i] = new(sql.NullInt64)
 		case requesttarget.FieldTarget:
 			values[i] = new(sql.NullString)
 		case requesttarget.FieldPaidAt, requesttarget.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
+		case requesttarget.FieldID:
+			values[i] = new(uuid.UUID)
+		case requesttarget.ForeignKeys[0]: // request_target
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type RequestTarget", columns[i])
 		}
@@ -80,22 +82,16 @@ func (rt *RequestTarget) assignValues(columns []string, values []interface{}) er
 	for i := range columns {
 		switch columns[i] {
 		case requesttarget.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				rt.ID = *value
 			}
-			rt.ID = int(value.Int64)
 		case requesttarget.FieldTarget:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field target", values[i])
 			} else if value.Valid {
 				rt.Target = value.String
-			}
-		case requesttarget.FieldRequestID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field request_id", values[i])
-			} else if value.Valid {
-				rt.RequestID = int(value.Int64)
 			}
 		case requesttarget.FieldPaidAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -109,6 +105,12 @@ func (rt *RequestTarget) assignValues(columns []string, values []interface{}) er
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				rt.CreatedAt = value.Time
+			}
+		case requesttarget.ForeignKeys[0]:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field request_target", values[i])
+			} else if value != nil {
+				rt.request_target = value
 			}
 		}
 	}
@@ -145,8 +147,6 @@ func (rt *RequestTarget) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", rt.ID))
 	builder.WriteString(", target=")
 	builder.WriteString(rt.Target)
-	builder.WriteString(", request_id=")
-	builder.WriteString(fmt.Sprintf("%v", rt.RequestID))
 	if v := rt.PaidAt; v != nil {
 		builder.WriteString(", paid_at=")
 		builder.WriteString(v.Format(time.ANSIC))

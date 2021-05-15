@@ -7,32 +7,33 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Transaction {
+func ID(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Transaction {
+func IDEQ(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Transaction {
+func IDNEQ(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Transaction {
+func IDIn(ids ...uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -49,7 +50,7 @@ func IDIn(ids ...int) predicate.Transaction {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Transaction {
+func IDNotIn(ids ...uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -66,28 +67,28 @@ func IDNotIn(ids ...int) predicate.Transaction {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Transaction {
+func IDGT(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Transaction {
+func IDGTE(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Transaction {
+func IDLT(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Transaction {
+func IDLTE(id uuid.UUID) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
 	})
@@ -182,7 +183,7 @@ func HasDetail() predicate.Transaction {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(DetailTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, DetailTable, DetailColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, DetailTable, DetailColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -194,7 +195,7 @@ func HasDetailWith(preds ...predicate.TransactionDetail) predicate.Transaction {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(DetailInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, DetailTable, DetailColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, DetailTable, DetailColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -210,19 +211,47 @@ func HasTag() predicate.Transaction {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TagTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TagTable, TagColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, TagTable, TagColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
 // HasTagWith applies the HasEdge predicate on the "tag" edge with a given conditions (other predicates).
-func HasTagWith(preds ...predicate.TransactionTag) predicate.Transaction {
+func HasTagWith(preds ...predicate.Tag) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TagInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TagTable, TagColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, TagTable, TagColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasGroupBudget applies the HasEdge predicate on the "group_budget" edge.
+func HasGroupBudget() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GroupBudgetTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, GroupBudgetTable, GroupBudgetColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasGroupBudgetWith applies the HasEdge predicate on the "group_budget" edge with a given conditions (other predicates).
+func HasGroupBudgetWith(preds ...predicate.GroupBudget) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GroupBudgetInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, GroupBudgetTable, GroupBudgetColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

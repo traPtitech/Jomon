@@ -10,10 +10,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/predicate"
+	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
-	"github.com/traPtitech/Jomon/ent/transactiontag"
 )
 
 // TransactionUpdate is the builder for updating Transaction entities.
@@ -44,13 +46,13 @@ func (tu *TransactionUpdate) SetNillableCreatedAt(t *time.Time) *TransactionUpda
 }
 
 // SetDetailID sets the "detail" edge to the TransactionDetail entity by ID.
-func (tu *TransactionUpdate) SetDetailID(id int) *TransactionUpdate {
+func (tu *TransactionUpdate) SetDetailID(id uuid.UUID) *TransactionUpdate {
 	tu.mutation.SetDetailID(id)
 	return tu
 }
 
 // SetNillableDetailID sets the "detail" edge to the TransactionDetail entity by ID if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableDetailID(id *int) *TransactionUpdate {
+func (tu *TransactionUpdate) SetNillableDetailID(id *uuid.UUID) *TransactionUpdate {
 	if id != nil {
 		tu = tu.SetDetailID(*id)
 	}
@@ -62,19 +64,38 @@ func (tu *TransactionUpdate) SetDetail(t *TransactionDetail) *TransactionUpdate 
 	return tu.SetDetailID(t.ID)
 }
 
-// AddTagIDs adds the "tag" edge to the TransactionTag entity by IDs.
-func (tu *TransactionUpdate) AddTagIDs(ids ...int) *TransactionUpdate {
+// AddTagIDs adds the "tag" edge to the Tag entity by IDs.
+func (tu *TransactionUpdate) AddTagIDs(ids ...uuid.UUID) *TransactionUpdate {
 	tu.mutation.AddTagIDs(ids...)
 	return tu
 }
 
-// AddTag adds the "tag" edges to the TransactionTag entity.
-func (tu *TransactionUpdate) AddTag(t ...*TransactionTag) *TransactionUpdate {
-	ids := make([]int, len(t))
+// AddTag adds the "tag" edges to the Tag entity.
+func (tu *TransactionUpdate) AddTag(t ...*Tag) *TransactionUpdate {
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
 	return tu.AddTagIDs(ids...)
+}
+
+// SetGroupBudgetID sets the "group_budget" edge to the GroupBudget entity by ID.
+func (tu *TransactionUpdate) SetGroupBudgetID(id uuid.UUID) *TransactionUpdate {
+	tu.mutation.SetGroupBudgetID(id)
+	return tu
+}
+
+// SetNillableGroupBudgetID sets the "group_budget" edge to the GroupBudget entity by ID if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableGroupBudgetID(id *uuid.UUID) *TransactionUpdate {
+	if id != nil {
+		tu = tu.SetGroupBudgetID(*id)
+	}
+	return tu
+}
+
+// SetGroupBudget sets the "group_budget" edge to the GroupBudget entity.
+func (tu *TransactionUpdate) SetGroupBudget(g *GroupBudget) *TransactionUpdate {
+	return tu.SetGroupBudgetID(g.ID)
 }
 
 // Mutation returns the TransactionMutation object of the builder.
@@ -88,25 +109,31 @@ func (tu *TransactionUpdate) ClearDetail() *TransactionUpdate {
 	return tu
 }
 
-// ClearTag clears all "tag" edges to the TransactionTag entity.
+// ClearTag clears all "tag" edges to the Tag entity.
 func (tu *TransactionUpdate) ClearTag() *TransactionUpdate {
 	tu.mutation.ClearTag()
 	return tu
 }
 
-// RemoveTagIDs removes the "tag" edge to TransactionTag entities by IDs.
-func (tu *TransactionUpdate) RemoveTagIDs(ids ...int) *TransactionUpdate {
+// RemoveTagIDs removes the "tag" edge to Tag entities by IDs.
+func (tu *TransactionUpdate) RemoveTagIDs(ids ...uuid.UUID) *TransactionUpdate {
 	tu.mutation.RemoveTagIDs(ids...)
 	return tu
 }
 
-// RemoveTag removes "tag" edges to TransactionTag entities.
-func (tu *TransactionUpdate) RemoveTag(t ...*TransactionTag) *TransactionUpdate {
-	ids := make([]int, len(t))
+// RemoveTag removes "tag" edges to Tag entities.
+func (tu *TransactionUpdate) RemoveTag(t ...*Tag) *TransactionUpdate {
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
 	return tu.RemoveTagIDs(ids...)
+}
+
+// ClearGroupBudget clears the "group_budget" edge to the GroupBudget entity.
+func (tu *TransactionUpdate) ClearGroupBudget() *TransactionUpdate {
+	tu.mutation.ClearGroupBudget()
+	return tu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -166,7 +193,7 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   transaction.Table,
 			Columns: transaction.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: transaction.FieldID,
 			},
 		},
@@ -188,13 +215,13 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if tu.mutation.DetailCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   transaction.DetailTable,
 			Columns: []string{transaction.DetailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: transactiondetail.FieldID,
 				},
 			},
@@ -204,13 +231,13 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := tu.mutation.DetailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   transaction.DetailTable,
 			Columns: []string{transaction.DetailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: transactiondetail.FieldID,
 				},
 			},
@@ -223,14 +250,14 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if tu.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   transaction.TagTable,
 			Columns: []string{transaction.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: transactiontag.FieldID,
+					Type:   field.TypeUUID,
+					Column: tag.FieldID,
 				},
 			},
 		}
@@ -239,14 +266,14 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := tu.mutation.RemovedTagIDs(); len(nodes) > 0 && !tu.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   transaction.TagTable,
 			Columns: []string{transaction.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: transactiontag.FieldID,
+					Type:   field.TypeUUID,
+					Column: tag.FieldID,
 				},
 			},
 		}
@@ -258,14 +285,49 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if nodes := tu.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   transaction.TagTable,
 			Columns: []string{transaction.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: transactiontag.FieldID,
+					Type:   field.TypeUUID,
+					Column: tag.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tu.mutation.GroupBudgetCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   transaction.GroupBudgetTable,
+			Columns: []string{transaction.GroupBudgetColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: groupbudget.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.GroupBudgetIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   transaction.GroupBudgetTable,
+			Columns: []string{transaction.GroupBudgetColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: groupbudget.FieldID,
 				},
 			},
 		}
@@ -308,13 +370,13 @@ func (tuo *TransactionUpdateOne) SetNillableCreatedAt(t *time.Time) *Transaction
 }
 
 // SetDetailID sets the "detail" edge to the TransactionDetail entity by ID.
-func (tuo *TransactionUpdateOne) SetDetailID(id int) *TransactionUpdateOne {
+func (tuo *TransactionUpdateOne) SetDetailID(id uuid.UUID) *TransactionUpdateOne {
 	tuo.mutation.SetDetailID(id)
 	return tuo
 }
 
 // SetNillableDetailID sets the "detail" edge to the TransactionDetail entity by ID if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableDetailID(id *int) *TransactionUpdateOne {
+func (tuo *TransactionUpdateOne) SetNillableDetailID(id *uuid.UUID) *TransactionUpdateOne {
 	if id != nil {
 		tuo = tuo.SetDetailID(*id)
 	}
@@ -326,19 +388,38 @@ func (tuo *TransactionUpdateOne) SetDetail(t *TransactionDetail) *TransactionUpd
 	return tuo.SetDetailID(t.ID)
 }
 
-// AddTagIDs adds the "tag" edge to the TransactionTag entity by IDs.
-func (tuo *TransactionUpdateOne) AddTagIDs(ids ...int) *TransactionUpdateOne {
+// AddTagIDs adds the "tag" edge to the Tag entity by IDs.
+func (tuo *TransactionUpdateOne) AddTagIDs(ids ...uuid.UUID) *TransactionUpdateOne {
 	tuo.mutation.AddTagIDs(ids...)
 	return tuo
 }
 
-// AddTag adds the "tag" edges to the TransactionTag entity.
-func (tuo *TransactionUpdateOne) AddTag(t ...*TransactionTag) *TransactionUpdateOne {
-	ids := make([]int, len(t))
+// AddTag adds the "tag" edges to the Tag entity.
+func (tuo *TransactionUpdateOne) AddTag(t ...*Tag) *TransactionUpdateOne {
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
 	return tuo.AddTagIDs(ids...)
+}
+
+// SetGroupBudgetID sets the "group_budget" edge to the GroupBudget entity by ID.
+func (tuo *TransactionUpdateOne) SetGroupBudgetID(id uuid.UUID) *TransactionUpdateOne {
+	tuo.mutation.SetGroupBudgetID(id)
+	return tuo
+}
+
+// SetNillableGroupBudgetID sets the "group_budget" edge to the GroupBudget entity by ID if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableGroupBudgetID(id *uuid.UUID) *TransactionUpdateOne {
+	if id != nil {
+		tuo = tuo.SetGroupBudgetID(*id)
+	}
+	return tuo
+}
+
+// SetGroupBudget sets the "group_budget" edge to the GroupBudget entity.
+func (tuo *TransactionUpdateOne) SetGroupBudget(g *GroupBudget) *TransactionUpdateOne {
+	return tuo.SetGroupBudgetID(g.ID)
 }
 
 // Mutation returns the TransactionMutation object of the builder.
@@ -352,25 +433,31 @@ func (tuo *TransactionUpdateOne) ClearDetail() *TransactionUpdateOne {
 	return tuo
 }
 
-// ClearTag clears all "tag" edges to the TransactionTag entity.
+// ClearTag clears all "tag" edges to the Tag entity.
 func (tuo *TransactionUpdateOne) ClearTag() *TransactionUpdateOne {
 	tuo.mutation.ClearTag()
 	return tuo
 }
 
-// RemoveTagIDs removes the "tag" edge to TransactionTag entities by IDs.
-func (tuo *TransactionUpdateOne) RemoveTagIDs(ids ...int) *TransactionUpdateOne {
+// RemoveTagIDs removes the "tag" edge to Tag entities by IDs.
+func (tuo *TransactionUpdateOne) RemoveTagIDs(ids ...uuid.UUID) *TransactionUpdateOne {
 	tuo.mutation.RemoveTagIDs(ids...)
 	return tuo
 }
 
-// RemoveTag removes "tag" edges to TransactionTag entities.
-func (tuo *TransactionUpdateOne) RemoveTag(t ...*TransactionTag) *TransactionUpdateOne {
-	ids := make([]int, len(t))
+// RemoveTag removes "tag" edges to Tag entities.
+func (tuo *TransactionUpdateOne) RemoveTag(t ...*Tag) *TransactionUpdateOne {
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
 	return tuo.RemoveTagIDs(ids...)
+}
+
+// ClearGroupBudget clears the "group_budget" edge to the GroupBudget entity.
+func (tuo *TransactionUpdateOne) ClearGroupBudget() *TransactionUpdateOne {
+	tuo.mutation.ClearGroupBudget()
+	return tuo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -437,7 +524,7 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Table:   transaction.Table,
 			Columns: transaction.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: transaction.FieldID,
 			},
 		},
@@ -476,13 +563,13 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	if tuo.mutation.DetailCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   transaction.DetailTable,
 			Columns: []string{transaction.DetailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: transactiondetail.FieldID,
 				},
 			},
@@ -492,13 +579,13 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	if nodes := tuo.mutation.DetailIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Inverse: false,
 			Table:   transaction.DetailTable,
 			Columns: []string{transaction.DetailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: transactiondetail.FieldID,
 				},
 			},
@@ -511,14 +598,14 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	if tuo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   transaction.TagTable,
 			Columns: []string{transaction.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: transactiontag.FieldID,
+					Type:   field.TypeUUID,
+					Column: tag.FieldID,
 				},
 			},
 		}
@@ -527,14 +614,14 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	if nodes := tuo.mutation.RemovedTagIDs(); len(nodes) > 0 && !tuo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   transaction.TagTable,
 			Columns: []string{transaction.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: transactiontag.FieldID,
+					Type:   field.TypeUUID,
+					Column: tag.FieldID,
 				},
 			},
 		}
@@ -546,14 +633,49 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	if nodes := tuo.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
-			Inverse: true,
+			Inverse: false,
 			Table:   transaction.TagTable,
 			Columns: []string{transaction.TagColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: transactiontag.FieldID,
+					Type:   field.TypeUUID,
+					Column: tag.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.GroupBudgetCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   transaction.GroupBudgetTable,
+			Columns: []string{transaction.GroupBudgetColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: groupbudget.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.GroupBudgetIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   transaction.GroupBudgetTable,
+			Columns: []string{transaction.GroupBudgetColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: groupbudget.FieldID,
 				},
 			},
 		}

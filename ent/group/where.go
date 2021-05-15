@@ -7,32 +7,33 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Group {
+func ID(id uuid.UUID) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Group {
+func IDEQ(id uuid.UUID) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Group {
+func IDNEQ(id uuid.UUID) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Group {
+func IDIn(ids ...uuid.UUID) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -49,7 +50,7 @@ func IDIn(ids ...int) predicate.Group {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Group {
+func IDNotIn(ids ...uuid.UUID) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
@@ -66,28 +67,28 @@ func IDNotIn(ids ...int) predicate.Group {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Group {
+func IDGT(id uuid.UUID) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Group {
+func IDGTE(id uuid.UUID) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Group {
+func IDLT(id uuid.UUID) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Group {
+func IDLTE(id uuid.UUID) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
 	})
@@ -695,7 +696,7 @@ func HasGroupBudget() predicate.Group {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GroupBudgetTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, GroupBudgetTable, GroupBudgetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, GroupBudgetTable, GroupBudgetColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -707,7 +708,7 @@ func HasGroupBudgetWith(preds ...predicate.GroupBudget) predicate.Group {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(GroupBudgetInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, GroupBudgetTable, GroupBudgetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, GroupBudgetTable, GroupBudgetColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -723,19 +724,19 @@ func HasUser() predicate.Group {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(UserTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, UserTable, UserColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, UserTable, UserPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
-func HasUserWith(preds ...predicate.GroupUser) predicate.Group {
+func HasUserWith(preds ...predicate.User) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(UserInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, UserTable, UserColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, UserTable, UserPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -751,7 +752,7 @@ func HasOwner() predicate.Group {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(OwnerTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, OwnerTable, OwnerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, OwnerTable, OwnerColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -763,7 +764,35 @@ func HasOwnerWith(preds ...predicate.GroupOwner) predicate.Group {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(OwnerInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, OwnerTable, OwnerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, OwnerTable, OwnerColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasTransactionDetail applies the HasEdge predicate on the "transaction_detail" edge.
+func HasTransactionDetail() predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TransactionDetailTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TransactionDetailTable, TransactionDetailColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTransactionDetailWith applies the HasEdge predicate on the "transaction_detail" edge with a given conditions (other predicates).
+func HasTransactionDetailWith(preds ...predicate.TransactionDetail) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TransactionDetailInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TransactionDetailTable, TransactionDetailColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
