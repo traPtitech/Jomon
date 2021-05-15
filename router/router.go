@@ -3,12 +3,12 @@ package router
 import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
-	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/service"
 )
 
 type Handlers struct {
-	Repo         model.Repository
+	EntCli       *ent.Client
 	Service      service.Service
 	SessionName  string
 	SessionStore sessions.Store

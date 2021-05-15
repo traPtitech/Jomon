@@ -4,12 +4,16 @@ import (
 	"fmt"
 	"os"
 
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"github.com/traPtitech/Jomon/ent"
+
+	"github.com/go-sql-driver/mysql"
 )
 
-func EstablishConnection() (*gorm.DB, error) {
+func SetupEntClient() (*ent.Client, error) {
+	entOptions := []ent.Option{}
+
+	// 発行されるSQLをロギングするなら
+	entOptions = append(entOptions, ent.Debug())
 	dbUser := os.Getenv("MYSQL_USERNAME")
 	if dbUser == "" {
 		dbUser = "root"
@@ -17,7 +21,7 @@ func EstablishConnection() (*gorm.DB, error) {
 
 	dbPass := os.Getenv("MYSQL_PASSWORD")
 	if dbPass == "" {
-		dbPass = "password"
+		dbPass = "root"
 	}
 
 	dbHost := os.Getenv("MYSQL_HOSTNAME")
@@ -32,49 +36,22 @@ func EstablishConnection() (*gorm.DB, error) {
 
 	dbName := os.Getenv("MYSQL_DATABASE")
 	if dbName == "" {
-		dbName = "jomon"
+		dbName = "test_database"
+	}
+	mc := mysql.Config{
+		User:                 dbUser,
+		Passwd:               dbPass,
+		Net:                  "tcp",
+		Addr:                 "localhost" + ":" + dbPort,
+		DBName:               dbName,
+		AllowNativePasswords: true,
+		ParseTime:            true,
 	}
 
-	config := &gorm.Config{}
-	if os.Getenv("GORM_DEBUG") != "" {
-		config = &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info),
-		}
-	}
-
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
-	db, err := gorm.Open(mysql.Open(dsn), config)
+	client, err := ent.Open("mysql", mc.FormatDSN(), entOptions...)
 	if err != nil {
 		return nil, fmt.Errorf("can't connect to DATABASE: %w", err)
 	}
 
-	return db, nil
-}
-
-var AllTables = []interface{}{
-	&Administrator{},
-	&Transaction{},
-	&TransactionDetail{},
-	&TransactionTag{},
-	&Request{},
-	&RequestStatus{},
-	&RequestTarget{},
-	&RequestTag{},
-	&RequestFile{},
-	&File{},
-	&Comment{},
-	&Group{},
-	&GroupBudget{},
-	&GroupUser{},
-	&GroupOwner{},
-	&Tag{},
-}
-
-func Migrate(db *gorm.DB) error {
-	err := db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4").AutoMigrate(AllTables...)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return client, nil
 }

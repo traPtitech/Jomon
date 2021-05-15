@@ -8,8 +8,14 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/ent"
 	log "github.com/traPtitech/Jomon/logging"
 	"go.uber.org/zap"
+)
+
+const (
+	contextUserKey        = "user"
+	contextAccessTokenKey = "access_token"
 )
 
 func (h Handlers) AccessLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
@@ -81,9 +87,9 @@ func (h Handlers) AuthUser(c echo.Context) (echo.Context, error) {
 	}
 	c.Set(contextAccessTokenKey, accTok)
 
-	user, ok := sess.Values[sessionUserKey].(h.Repo.User)
+	user, ok := sess.Values[sessionUserKey].(ent.User)
 	if !ok {
-		user, err = s.Users.GetMyUser(accTok)
+		user, err = h.Service.Users.GetMyUser(accTok)
 		sess.Values[sessionUserKey] = user
 		if err := sess.Save(c.Request(), c.Response()); err != nil {
 			return nil, c.NoContent(http.StatusInternalServerError)
@@ -94,7 +100,7 @@ func (h Handlers) AuthUser(c echo.Context) (echo.Context, error) {
 		}
 	}
 
-	admins, err := s.Administrators.GetAdministratorList()
+	admins, err := h.Service.Administrators.GetAdministratorList()
 	if err != nil {
 		return nil, c.NoContent(http.StatusInternalServerError)
 	}

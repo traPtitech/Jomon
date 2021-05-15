@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	"github.com/gorilla/sessions"
@@ -14,28 +15,33 @@ import (
 )
 
 func main() {
-	// setup database
-	db, err := model.EstablishConnection()
+	// Setup ent client
+	client, err := model.SetupEntClient()
 	if err != nil {
 		panic(err)
 	}
+	defer client.Close()
 
-	err = model.Migrate(db)
-	if err != nil {
+	// Run the auto migration tool.
+	if err := client.Schema.Create(context.Background()); err != nil {
 		panic(err)
 	}
-	repo := model.NewGormRepository(db)
 
 	// setup service
-	services, err := service.NewServices(repo)
+	services, err := service.NewServices(client)
 	if err != nil {
 		panic(err)
 	}
 
 	// setup server
-	logger, _ := zap.NewDevelopment()
+	var logger *zap.Logger
+	if os.Getenv("IS_DEBUG_MODE") != "" {
+		logger, _ = zap.NewProduction()
+	} else {
+		logger, _ = zap.NewDevelopment()
+	}
 	handlers := router.Handlers{
-		Repo:         repo,
+		EntCli:       client,
 		Service:      services,
 		SessionName:  "session",
 		SessionStore: sessions.NewCookieStore([]byte("session")),
@@ -56,4 +62,5 @@ func main() {
 	}
 
 	e.Start(":" + port)
+
 }

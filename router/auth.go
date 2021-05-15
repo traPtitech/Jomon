@@ -10,6 +10,7 @@ import (
 
 	"github.com/dvsekhvalnov/jose2go/base64url"
 	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -57,7 +58,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	res, err := s.TraQAuth.GetAccessToken(code, codeVerifier)
+	res, err := h.Service.TraQAuth.GetAccessToken(code, codeVerifier)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -65,7 +66,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	sess.Values[sessionAccessTokenKey] = res.AccessToken
 	sess.Values[sessionRefreshTokenKey] = res.RefreshToken
 
-	user, err := s.Users.GetMyUser(res.AccessToken)
+	user, err := h.Service.Users.GetMyUser(res.AccessToken)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
