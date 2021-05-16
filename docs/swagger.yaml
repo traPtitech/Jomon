@@ -348,14 +348,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TrapID"
+              type: object
+              properties:
+                id:
+                  $ref: "#/components/schemas/TrapID"
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TrapID"
+                type: object
+                properties:
+                  id:
+                    $ref: "#/components/schemas/TrapID"
         "400":
           $ref: "#/components/responses/400"
         "403":

@@ -144,7 +144,7 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 	params := PKCEParams{
 		CodeChallenge:       getCodeChallenge(bytesCodeVerifier),
 		CodeChallengeMethod: "S256",
-		ClientID:            h.Repo.GetClientId(),
+		ClientID:            h.Service.GetClientId(),
 		ResponseType:        "code",
 	}
 
