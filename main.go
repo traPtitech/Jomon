@@ -53,7 +53,7 @@ func main() {
 	e.Use(middleware.Secure())
 	e.Use(session.Middleware(handlers.SessionStore))
 
-	handlers.Setup(e)
+	router.SetRouting(e, handlers)
 
 	// start server
 	port := os.Getenv("PORT")

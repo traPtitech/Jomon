@@ -14,7 +14,7 @@ type Handlers struct {
 	SessionStore sessions.Store
 }
 
-func (h Handlers) Setup(e *echo.Echo) {
+func SetRouting(e *echo.Echo, h Handlers) {
 	api := e.Group("/api")
 	{
 		apiAuth := api.Group("/auth")
@@ -53,7 +53,7 @@ func (h Handlers) Setup(e *echo.Echo) {
 		apiTags := api.Group("/tags", h.AuthUserMiddleware)
 		{
 			apiTags.GET("", h.GetTags)
-			apiTags.POST("", h.PostTags)
+			apiTags.POST("", h.PostTag)
 			apiTags.GET("/:tagID", h.GetTag)
 			apiTags.PUT("/:tagID", h.PutTag)
 			apiTags.DELETE("/:tagID", h.DeleteTag)
