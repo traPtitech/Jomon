@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/ent"
 )
 
 const (
@@ -34,6 +35,48 @@ type PKCEParams struct {
 	CodeChallengeMethod string `json:"code_challenge_method"`
 	ClientID            string `json:"client_id"`
 	ResponseType        string `json:"response_type"`
+}
+
+func (h Handlers) AuthUser(c echo.Context) (echo.Context, error) {
+	sess, err := session.Get(sessionKey, c)
+	if err != nil {
+		return nil, c.NoContent(http.StatusInternalServerError)
+	}
+
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   sessionDuration,
+		HttpOnly: true,
+	}
+
+	accTok, ok := sess.Values[sessionAccessTokenKey].(string)
+	if !ok || accTok == "" {
+		return nil, c.NoContent(http.StatusUnauthorized)
+	}
+	c.Set(contextAccessTokenKey, accTok)
+
+	user, ok := sess.Values[sessionUserKey].(ent.User)
+	if !ok {
+		user, err = h.Service.Users.GetMyUser(accTok)
+		sess.Values[sessionUserKey] = user
+		if err := sess.Save(c.Request(), c.Response()); err != nil {
+			return nil, c.NoContent(http.StatusInternalServerError)
+		}
+
+		if err != nil {
+			return nil, c.NoContent(http.StatusInternalServerError)
+		}
+	}
+
+	admins, err := h.Service.Administrators.GetAdministratorList()
+	if err != nil {
+		return nil, c.NoContent(http.StatusInternalServerError)
+	}
+	user.GiveIsUserAdmin(admins)
+
+	c.Set(contextUserKey, user)
+
+	return c, nil
 }
 
 func (h Handlers) AuthCallback(c echo.Context) error {

@@ -17,46 +17,63 @@ type Handlers struct {
 func (h Handlers) Setup(e *echo.Echo) {
 	api := e.Group("/api")
 	{
-		apiApplications := api.Group("/applications", AuthUserMiddleware)
-		{
-			apiApplications.GET("", GetApplicationList)
-			apiApplications.POST("", PostApplication)
-			apiApplications.GET("/:applicationId", GetApplication)
-			apiApplications.PATCH("/:applicationId", PatchApplication)
-		}
-
-		apiImages := api.Group("/images", AuthUserMiddleware)
-		{
-			apiImages.GET("/:imageId", GetImages)
-			apiImages.DELETE("/:imageId", DeleteImages)
-		}
-
-		apiComments := api.Group("/applications/:applicationId/comments", AuthUserMiddleware)
-		{
-			apiComments.POST("", PostComments)
-			apiComments.PUT("/:commentId", PutComments)
-			apiComments.DELETE("/:commentId", DeleteComments)
-		}
-
-		apiStatus := api.Group("/applications/:applicationId/states", AuthUserMiddleware)
-		{
-			apiStatus.PUT("", PutStates)
-			apiStatus.PUT("/repaid/:repaidToId", PutRepaidStates)
-		}
-
-		apiUsers := api.Group("/users", AuthUserMiddleware)
-		{
-			apiUsers.GET("", GetUsers)
-			apiUsers.GET("/me", GetMyUser)
-			apiUsers.GET("/admins", GetAdminUsers)
-			apiUsers.PUT("/admins", PutAdminUsers)
-		}
-
 		apiAuth := api.Group("/auth")
 		{
-			apiAuth.GET("/callback", AuthCallback)
-			apiAuth.GET("/genpkce", GeneratePKCE)
+			apiAuth.GET("/callback", h.AuthCallback)
+			apiAuth.GET("/genpkce", h.GeneratePKCE)
+		}
+
+		apiRequests := api.Group("/requests", h.AuthUserMiddleware)
+		{
+			apiRequests.GET("", h.GetRequests)
+			apiRequests.POST("", h.PostRequest)
+			apiRequests.GET("/:requestID", h.GetRequest)
+			apiRequests.PUT("/:requestID", h.PutRequest)
+			apiRequests.POST("/:requestID/comments", h.PostComment)
+			apiRequests.PUT("/:requestID/comments/:commentID", h.PutComment)
+			apiRequests.DELETE("/:requestID/comments/:commentID", h.DeleteComment)
+			apiRequests.PUT("/:requestID/status", h.PutStatus)
+		}
+
+		apiComments := api.Group("/transactions", h.AuthUserMiddleware)
+		{
+			apiComments.GET("", h.GetTransactions)
+			apiComments.POST("", h.PostTransaction)
+			apiComments.GET("/:transactionID", GetTransaction)
+			apiComments.PUT("/:transactionID", PutTransaction)
+		}
+
+		apiFiles := api.Group("/files", h.AuthUserMiddleware)
+		{
+			apiFiles.POST("", h.PostFile)
+			apiFiles.GET("/:fileID", h.GetFile)
+			apiFiles.DELETE("/:fileID", h.DeleteFile)
+		}
+
+		apiTags := api.Group("/tags", h.AuthUserMiddleware)
+		{
+			apiTags.GET("", h.GetTags)
+			apiTags.POST("", h.PostTags)
+			apiTags.GET("/:tagID", h.GetTag)
+			apiTags.PUT("/:tagID", h.PutTag)
+			apiTags.DELETE("/:tagID", h.DeleteTag)
+		}
+
+		apiGroups := api.Group("/groups", h.AuthUserMiddleware)
+		{
+			apiGroups.GET("", h.GetGroups)
+			apiGroups.POST("", h.PostGroup)
+			apiGroups.GET("/:groupID", h.GetGroup)
+			apiGroups.POST("/:groupID", h.PutGroup)
+			apiGroups.PUT("/:groupID", h.PostGroupUser)
+			apiGroups.DELETE("/:groupID", h.DeleteGroup)
+		}
+
+		apiAdmins := api.Group("/admins", h.AuthUserMiddleware)
+		{
+			apiAdmins.GET("", h.GetAdmins)
+			apiAdmins.POST("", h.PostAdmin)
+			apiAdmins.DELETE("/:userID", h.DeleteAdmin)
 		}
 	}
-
 }
