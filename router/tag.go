@@ -196,5 +196,4 @@ func (h *Handlers) DeleteTag(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
-	// TODO: Implement
 }
