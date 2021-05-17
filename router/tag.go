@@ -21,7 +21,13 @@ type TagOverview struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+func (h *Handlers) GetTags(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
+	// TODO: Implement
+}
+
 func (h *Handlers) PostTag(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
 	// TODO: Implement
 	/***** TEMPORARY IMPLEMENTED! *****/
 	var tag Tag
@@ -36,4 +42,19 @@ func (h *Handlers) PostTag(c echo.Context) error {
 		UpdatedAt:   time.Now(),
 	}
 	return c.JSON(http.StatusOK, res)
+}
+
+func (h *Handlers) GetTag(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
+	// TODO: Implement
+}
+
+func (h *Handlers) PutTag(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
+	// TODO: Implement
+}
+
+func (h *Handlers) DeleteTag(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
+	// TODO: Implement
 }

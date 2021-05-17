@@ -11,7 +11,7 @@ RUN go build -o /Jomon -ldflags "-s -w"
 
 ## run
 
-FROM alpine:3.13.2
+FROM alpine:3.13.5
 ENV TZ Asia/Tokyo
 
 RUN apk --update --no-cache add tzdata \

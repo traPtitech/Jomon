@@ -21,7 +21,7 @@ func SetupEntClient() (*ent.Client, error) {
 
 	dbPass := os.Getenv("MYSQL_PASSWORD")
 	if dbPass == "" {
-		dbPass = "root"
+		dbPass = "password"
 	}
 
 	dbHost := os.Getenv("MYSQL_HOSTNAME")
@@ -36,13 +36,13 @@ func SetupEntClient() (*ent.Client, error) {
 
 	dbName := os.Getenv("MYSQL_DATABASE")
 	if dbName == "" {
-		dbName = "test_database"
+		dbName = "jomon"
 	}
 	mc := mysql.Config{
 		User:                 dbUser,
 		Passwd:               dbPass,
 		Net:                  "tcp",
-		Addr:                 "localhost" + ":" + dbPort,
+		Addr:                 dbHost + ":" + dbPort,
 		DBName:               dbName,
 		AllowNativePasswords: true,
 		ParseTime:            true,

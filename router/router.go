@@ -39,8 +39,8 @@ func SetRouting(e *echo.Echo, h Handlers) {
 		{
 			apiComments.GET("", h.GetTransactions)
 			apiComments.POST("", h.PostTransaction)
-			apiComments.GET("/:transactionID", GetTransaction)
-			apiComments.PUT("/:transactionID", PutTransaction)
+			apiComments.GET("/:transactionID", h.GetTransaction)
+			apiComments.PUT("/:transactionID", h.PutTransaction)
 		}
 
 		apiFiles := api.Group("/files", h.AuthUserMiddleware)

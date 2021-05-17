@@ -9,10 +9,7 @@ import (
 	"net/http"
 
 	"github.com/dvsekhvalnov/jose2go/base64url"
-	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
-	"github.com/traPtitech/Jomon/ent"
 )
 
 const (
@@ -38,117 +35,158 @@ type PKCEParams struct {
 }
 
 func (h Handlers) AuthUser(c echo.Context) (echo.Context, error) {
-	sess, err := session.Get(sessionKey, c)
-	if err != nil {
-		return nil, c.NoContent(http.StatusInternalServerError)
-	}
-
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   sessionDuration,
-		HttpOnly: true,
-	}
-
-	accTok, ok := sess.Values[sessionAccessTokenKey].(string)
-	if !ok || accTok == "" {
-		return nil, c.NoContent(http.StatusUnauthorized)
-	}
-	c.Set(contextAccessTokenKey, accTok)
-
-	user, ok := sess.Values[sessionUserKey].(ent.User)
-	if !ok {
-		user, err = h.Service.Users.GetMyUser(accTok)
-		sess.Values[sessionUserKey] = user
-		if err := sess.Save(c.Request(), c.Response()); err != nil {
-			return nil, c.NoContent(http.StatusInternalServerError)
-		}
-
+	return c, nil
+	// TODO: Implement
+	/*
+		sess, err := session.Get(sessionKey, c)
 		if err != nil {
 			return nil, c.NoContent(http.StatusInternalServerError)
 		}
-	}
 
-	admins, err := h.Service.Administrators.GetAdministratorList()
-	if err != nil {
-		return nil, c.NoContent(http.StatusInternalServerError)
-	}
-	user.GiveIsUserAdmin(admins)
+		sess.Options = &sessions.Options{
+			Path:     "/",
+			MaxAge:   sessionDuration,
+			HttpOnly: true,
+		}
 
-	c.Set(contextUserKey, user)
+		accTok, ok := sess.Values[sessionAccessTokenKey].(string)
+		if !ok || accTok == "" {
+			return nil, c.NoContent(http.StatusUnauthorized)
+		}
+		c.Set(contextAccessTokenKey, accTok)
 
-	return c, nil
+		user, ok := sess.Values[sessionUserKey].(ent.User)
+		if !ok {
+			user, err = h.Service.Users.GetMyUser(accTok)
+			sess.Values[sessionUserKey] = user
+			if err := sess.Save(c.Request(), c.Response()); err != nil {
+				return nil, c.NoContent(http.StatusInternalServerError)
+			}
+
+			if err != nil {
+				return nil, c.NoContent(http.StatusInternalServerError)
+			}
+		}
+
+		admins, err := h.Service.Administrators.GetAdministratorList()
+		if err != nil {
+			return nil, c.NoContent(http.StatusInternalServerError)
+		}
+		user.GiveIsUserAdmin(admins)
+
+		c.Set(contextUserKey, user)
+
+		return c, nil
+	*/
 }
 
 func (h Handlers) AuthCallback(c echo.Context) error {
-	code := c.QueryParam("code")
-	if len(code) == 0 {
-		return c.NoContent(http.StatusBadRequest)
-	}
+	return c.NoContent(http.StatusOK)
+	// TODO: Implement
+	/*
+			code := c.QueryParam("code")
+			if len(code) == 0 {
+				return c.NoContent(http.StatusBadRequest)
+			}
 
-	sess, err := session.Get(sessionKey, c)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
+			sess, err := session.Get(sessionKey, c)
+			if err != nil {
+				return c.NoContent(http.StatusInternalServerError)
+			}
 
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   sessionDuration,
-		HttpOnly: true,
-	}
+			sess.Options = &sessions.Options{
+				Path:     "/",
+				MaxAge:   sessionDuration,
+				HttpOnly: true,
+			}
 
-	codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
-	if !ok {
-		return c.NoContent(http.StatusInternalServerError)
-	}
+			codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
+			if !ok {
+				return c.NoContent(http.StatusInternalServerError)
+			}
 
-	res, err := h.Service.TraQAuth.GetAccessToken(code, codeVerifier)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
+			res, err := h.Service.TraQAuth.GetAccessToken(code, codeVerifier)
+			if err != nil {
+				return c.NoContent(http.StatusInternalServerError)
+			}
 
-	sess.Values[sessionAccessTokenKey] = res.AccessToken
-	sess.Values[sessionRefreshTokenKey] = res.RefreshToken
+			sess.Values[sessionAccessTokenKey] = res.AccessToken
+			sess.Values[sessionRefreshTokenKey] = res.RefreshToken
 
-	user, err := h.Service.Users.GetMyUser(res.AccessToken)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	sess.Values[sessionUserKey] = user
+			user, err := h.Service.Users.GetMyUser(res.AccessToken)
+			if err != nil {
+				return c.NoContent(http.StatusInternalServerError)
+			}
+			sess.Values[sessionUserKey] = user
 
-	if err = sess.Save(c.Request(), c.Response()); err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
+			if err = sess.Save(c.Request(), c.Response()); err != nil {
+				return c.NoContent(http.StatusInternalServerError)
+			}
 
-	return c.Redirect(http.StatusSeeOther, "/")
+			return c.Redirect(http.StatusSeeOther, "/")
+		}
+
+		func (h Handlers) GeneratePKCE(c echo.Context) error {
+			sess, err := session.Get(sessionKey, c)
+			if err != nil {
+				return c.NoContent(http.StatusInternalServerError)
+			}
+
+			sess.Options = &sessions.Options{
+				Path:     "/",
+				MaxAge:   sessionDuration,
+				HttpOnly: true,
+			}
+
+			bytesCodeVerifier := generateCodeVerifier()
+			codeVerifier := string(bytesCodeVerifier)
+			sess.Values[sessionCodeVerifierKey] = codeVerifier
+			if err := sess.Save(c.Request(), c.Response()); err != nil {
+				return c.NoContent(http.StatusInternalServerError)
+			}
+
+			params := PKCEParams{
+				CodeChallenge:       getCodeChallenge(bytesCodeVerifier),
+				CodeChallengeMethod: "S256",
+				ClientID:            h.Service.GetClientId(),
+				ResponseType:        "code",
+			}
+
+			return c.JSON(http.StatusOK, params)
+	*/
 }
 
 func (h Handlers) GeneratePKCE(c echo.Context) error {
-	sess, err := session.Get(sessionKey, c)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
+	return c.NoContent(http.StatusOK)
+	// TODO: Implement
+	/*
+		sess, err := session.Get(sessionKey, c)
+		if err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
 
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   sessionDuration,
-		HttpOnly: true,
-	}
+		sess.Options = &sessions.Options{
+			Path:     "/",
+			MaxAge:   sessionDuration,
+			HttpOnly: true,
+		}
 
-	bytesCodeVerifier := generateCodeVerifier()
-	codeVerifier := string(bytesCodeVerifier)
-	sess.Values[sessionCodeVerifierKey] = codeVerifier
-	if err := sess.Save(c.Request(), c.Response()); err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
+		bytesCodeVerifier := generateCodeVerifier()
+		codeVerifier := string(bytesCodeVerifier)
+		sess.Values[sessionCodeVerifierKey] = codeVerifier
+		if err := sess.Save(c.Request(), c.Response()); err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
 
-	params := PKCEParams{
-		CodeChallenge:       getCodeChallenge(bytesCodeVerifier),
-		CodeChallengeMethod: "S256",
-		ClientID:            h.Service.GetClientId(),
-		ResponseType:        "code",
-	}
+		params := PKCEParams{
+			CodeChallenge:       getCodeChallenge(bytesCodeVerifier),
+			CodeChallengeMethod: "S256",
+			ClientID:            s.TraQAuth.GetClientId(),
+			ResponseType:        "code",
+		}
 
-	return c.JSON(http.StatusOK, params)
+		return c.JSON(http.StatusOK, params)
+	*/
 }
 
 var src cryptoSource
