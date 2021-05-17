@@ -89,6 +89,14 @@ func (tc *TagCreate) SetRequestID(id uuid.UUID) *TagCreate {
 	return tc
 }
 
+// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
+func (tc *TagCreate) SetNillableRequestID(id *uuid.UUID) *TagCreate {
+	if id != nil {
+		tc = tc.SetRequestID(*id)
+	}
+	return tc
+}
+
 // SetRequest sets the "request" edge to the Request entity.
 func (tc *TagCreate) SetRequest(r *Request) *TagCreate {
 	return tc.SetRequestID(r.ID)
@@ -97,6 +105,14 @@ func (tc *TagCreate) SetRequest(r *Request) *TagCreate {
 // SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
 func (tc *TagCreate) SetTransactionID(id uuid.UUID) *TagCreate {
 	tc.mutation.SetTransactionID(id)
+	return tc
+}
+
+// SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
+func (tc *TagCreate) SetNillableTransactionID(id *uuid.UUID) *TagCreate {
+	if id != nil {
+		tc = tc.SetTransactionID(*id)
+	}
 	return tc
 }
 
@@ -184,12 +200,6 @@ func (tc *TagCreate) check() error {
 	}
 	if _, ok := tc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
-	}
-	if _, ok := tc.mutation.RequestID(); !ok {
-		return &ValidationError{Name: "request", err: errors.New("ent: missing required edge \"request\"")}
-	}
-	if _, ok := tc.mutation.TransactionID(); !ok {
-		return &ValidationError{Name: "transaction", err: errors.New("ent: missing required edge \"transaction\"")}
 	}
 	return nil
 }

@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -97,6 +96,14 @@ func (tu *TagUpdate) SetRequestID(id uuid.UUID) *TagUpdate {
 	return tu
 }
 
+// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
+func (tu *TagUpdate) SetNillableRequestID(id *uuid.UUID) *TagUpdate {
+	if id != nil {
+		tu = tu.SetRequestID(*id)
+	}
+	return tu
+}
+
 // SetRequest sets the "request" edge to the Request entity.
 func (tu *TagUpdate) SetRequest(r *Request) *TagUpdate {
 	return tu.SetRequestID(r.ID)
@@ -105,6 +112,14 @@ func (tu *TagUpdate) SetRequest(r *Request) *TagUpdate {
 // SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
 func (tu *TagUpdate) SetTransactionID(id uuid.UUID) *TagUpdate {
 	tu.mutation.SetTransactionID(id)
+	return tu
+}
+
+// SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
+func (tu *TagUpdate) SetNillableTransactionID(id *uuid.UUID) *TagUpdate {
+	if id != nil {
+		tu = tu.SetTransactionID(*id)
+	}
 	return tu
 }
 
@@ -137,18 +152,12 @@ func (tu *TagUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(tu.hooks) == 0 {
-		if err = tu.check(); err != nil {
-			return 0, err
-		}
 		affected, err = tu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*TagMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = tu.check(); err != nil {
-				return 0, err
 			}
 			tu.mutation = mutation
 			affected, err = tu.sqlSave(ctx)
@@ -185,17 +194,6 @@ func (tu *TagUpdate) ExecX(ctx context.Context) {
 	if err := tu.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (tu *TagUpdate) check() error {
-	if _, ok := tu.mutation.RequestID(); tu.mutation.RequestCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"request\"")
-	}
-	if _, ok := tu.mutation.TransactionID(); tu.mutation.TransactionCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"transaction\"")
-	}
-	return nil
 }
 
 func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -412,6 +410,14 @@ func (tuo *TagUpdateOne) SetRequestID(id uuid.UUID) *TagUpdateOne {
 	return tuo
 }
 
+// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
+func (tuo *TagUpdateOne) SetNillableRequestID(id *uuid.UUID) *TagUpdateOne {
+	if id != nil {
+		tuo = tuo.SetRequestID(*id)
+	}
+	return tuo
+}
+
 // SetRequest sets the "request" edge to the Request entity.
 func (tuo *TagUpdateOne) SetRequest(r *Request) *TagUpdateOne {
 	return tuo.SetRequestID(r.ID)
@@ -420,6 +426,14 @@ func (tuo *TagUpdateOne) SetRequest(r *Request) *TagUpdateOne {
 // SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
 func (tuo *TagUpdateOne) SetTransactionID(id uuid.UUID) *TagUpdateOne {
 	tuo.mutation.SetTransactionID(id)
+	return tuo
+}
+
+// SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
+func (tuo *TagUpdateOne) SetNillableTransactionID(id *uuid.UUID) *TagUpdateOne {
+	if id != nil {
+		tuo = tuo.SetTransactionID(*id)
+	}
 	return tuo
 }
 
@@ -459,18 +473,12 @@ func (tuo *TagUpdateOne) Save(ctx context.Context) (*Tag, error) {
 		node *Tag
 	)
 	if len(tuo.hooks) == 0 {
-		if err = tuo.check(); err != nil {
-			return nil, err
-		}
 		node, err = tuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*TagMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = tuo.check(); err != nil {
-				return nil, err
 			}
 			tuo.mutation = mutation
 			node, err = tuo.sqlSave(ctx)
@@ -507,17 +515,6 @@ func (tuo *TagUpdateOne) ExecX(ctx context.Context) {
 	if err := tuo.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (tuo *TagUpdateOne) check() error {
-	if _, ok := tuo.mutation.RequestID(); tuo.mutation.RequestCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"request\"")
-	}
-	if _, ok := tuo.mutation.TransactionID(); tuo.mutation.TransactionCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"transaction\"")
-	}
-	return nil
 }
 
 func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {

@@ -36,11 +36,9 @@ func (Tag) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("request", Request.Type).
 			Ref("tag").
-			Unique().
-			Required(),
+			Unique(),
 		edge.From("transaction", Transaction.Type).
 			Ref("tag").
-			Unique().
-			Required(),
+			Unique(),
 	}
 }

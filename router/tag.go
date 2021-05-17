@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -27,19 +28,27 @@ func (h *Handlers) GetTags(c echo.Context) error {
 }
 
 func (h *Handlers) PostTag(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
-	/***** TEMPORARY IMPLEMENTED! *****/
 	var tag Tag
 	if err := c.Bind(&tag); err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
+	ctx := context.Background()
+	created, err := h.EntCli.Tag.
+		Create().
+		SetName(tag.Name).
+		SetDescription(tag.Description).
+		Save(ctx)
+
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
 	res := TagOverview{
-		ID:          uuid.New(),
-		Name:        tag.Name,
-		Description: tag.Description,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
+		ID:          created.ID,
+		Name:        created.Name,
+		Description: created.Description,
+		CreatedAt:   created.CreatedAt,
+		UpdatedAt:   created.UpdatedAt,
 	}
 	return c.JSON(http.StatusOK, res)
 }
