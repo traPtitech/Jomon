@@ -3,9 +3,6 @@ package model
 import (
 	"encoding/json"
 	"fmt"
-	"time"
-
-	"github.com/google/uuid"
 )
 
 type Status int
@@ -66,14 +63,4 @@ func (s *Status) UnmarshalJSON(data []byte) error {
 }
 
 type RequestStatusRepository interface {
-}
-
-type RequestStatus struct {
-	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
-	RequestID uuid.UUID `gorm:"type:char(36);not null;index"`
-	Request   *Request  `gorm:"foeignKey:RequestID"`
-	CreatedBy string    `gorm:"type:varchar(32);not null"`
-	Status    Status    `gorm:"type:enum('submitted','fix_required','accepted','completed','rejected');not null"`
-	Reason    string    `gorm:"type:text;not null"`
-	CreatedAt time.Time
 }

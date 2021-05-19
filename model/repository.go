@@ -1,7 +1,7 @@
 package model
 
 import (
-	"gorm.io/gorm"
+	"github.com/traPtitech/Jomon/ent"
 )
 
 type Repository interface {
@@ -23,6 +23,13 @@ type Repository interface {
 	TransactionRepository
 }
 
-type GormRepository struct {
-	db *gorm.DB
+type EntRepository struct {
+	client *ent.Client
+}
+
+func NewEntRepository(client *ent.Client) Repository {
+	repo := &EntRepository{
+		client: client,
+	}
+	return repo
 }

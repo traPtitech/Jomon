@@ -1,13 +1,15 @@
 package service
 
-import "github.com/traPtitech/Jomon/ent"
+import (
+	"github.com/traPtitech/Jomon/model"
+)
 
 type Service interface {
 }
 type Services struct {
-	EntCli *ent.Client
+	Repository model.Repository
 }
 
-func NewServices(client *ent.Client) (Services, error) {
-	return Services{client}, nil
+func NewServices(repo model.Repository) (Services, error) {
+	return Services{repo}, nil
 }

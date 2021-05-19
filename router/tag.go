@@ -93,13 +93,7 @@ func (h *Handlers) GetTag(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	tag, err := h.EntCli.Tag.
-		Query().
-		Where(tag.IDEQ(tagID)).
-		Only(ctx)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
+	tag, err := h.Repository.GetTags(ctx, tagID)
 
 	res := &TagOverview{
 		ID:          tag.ID,
@@ -126,18 +120,12 @@ func (h *Handlers) PutTag(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	tag, err := h.EntCli.Tag.
-		UpdateOneID(tagID).
-		SetName(req.Name).
-		SetDescription(req.Description).
-		Save(ctx)
+	tag, err := h.Repository.UpdateTag(ctx, tagID, req.Name, req.Description)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	transactions, err := tag.
-		QueryTransaction().
-		All(ctx)
+	transactions, err := h.Repository.GetTagTransactions(ctx, tag)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -146,9 +134,7 @@ func (h *Handlers) PutTag(c echo.Context) error {
 		transactionIDs = append(transactionIDs, transaction.ID)
 	}
 
-	requests, err := tag.
-		QueryRequest().
-		All(ctx)
+	requests, err := h.Repository.GetTagRequests(ctx, tag)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}

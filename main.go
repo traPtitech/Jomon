@@ -27,8 +27,10 @@ func main() {
 		panic(err)
 	}
 
+	// setup model repository
+	repo := model.NewEntRepository(client)
 	// setup service
-	services, err := service.NewServices(client)
+	services, err := service.NewServices(repo)
 	if err != nil {
 		panic(err)
 	}
@@ -36,12 +38,15 @@ func main() {
 	// setup server
 	var logger *zap.Logger
 	if os.Getenv("IS_DEBUG_MODE") != "" {
-		logger, _ = zap.NewProduction()
+		logger, err = zap.NewProduction()
 	} else {
-		logger, _ = zap.NewDevelopment()
+		logger, err = zap.NewDevelopment()
+	}
+	if err != nil {
+		panic(err)
 	}
 	handlers := router.Handlers{
-		EntCli:       client,
+		Repository:   repo,
 		Service:      services,
 		SessionName:  "session",
 		SessionStore: sessions.NewCookieStore([]byte("session")),

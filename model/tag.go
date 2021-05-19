@@ -1,20 +1,59 @@
 package model
 
 import (
-	"time"
+	"context"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
+	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/tag"
 )
 
 type TagRepository interface {
+	GetTags(ctx context.Context, tagID uuid.UUID) (*ent.Tag, error)
+	UpdateTag(ctx context.Context, tagID uuid.UUID, name string, description string) (*ent.Tag, error)
+	GetTagTransactions(ctx context.Context, tag *ent.Tag) ([]*ent.Transaction, error)
+	GetTagRequests(ctx context.Context, tag *ent.Tag) ([]*ent.Request, error)
 }
 
-type Tag struct {
-	ID          uuid.UUID `gorm:"type:char(36);primaryKey"`
-	Name        string    `gorm:"type:varchar(64);not null"`
-	Description string    `gorm:"type:text;not null"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt
+func (repo *EntRepository) GetTags(ctx context.Context, tagID uuid.UUID) (*ent.Tag, error) {
+	tag, err := repo.client.Tag.
+		Query().
+		Where(tag.IDEQ(tagID)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return tag, nil
+}
+
+func (repo *EntRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name string, description string) (*ent.Tag, error) {
+	tag, err := repo.client.Tag.
+		UpdateOneID(tagID).
+		SetName(name).
+		SetDescription(description).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return tag, nil
+}
+
+func (repo *EntRepository) GetTagTransactions(ctx context.Context, tag *ent.Tag) ([]*ent.Transaction, error) {
+	transactions, err := tag.
+		QueryTransaction().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return transactions, nil
+}
+
+func (repo *EntRepository) GetTagRequests(ctx context.Context, tag *ent.Tag) ([]*ent.Request, error) {
+	requests, err := tag.
+		QueryRequest().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return requests, nil
 }
