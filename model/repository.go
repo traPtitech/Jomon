@@ -21,6 +21,7 @@ type Repository interface {
 	TransactionDetailRepository
 	TransactionTagRepository
 	TransactionRepository
+	UserRepository
 }
 
 type EntRepository struct {

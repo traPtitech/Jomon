@@ -9,6 +9,8 @@ import (
 	"net/http"
 
 	"github.com/dvsekhvalnov/jose2go/base64url"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -83,77 +85,77 @@ func (h Handlers) AuthUser(c echo.Context) (echo.Context, error) {
 func (h Handlers) AuthCallback(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 	// TODO: Implement
-	/*
-			code := c.QueryParam("code")
-			if len(code) == 0 {
-				return c.NoContent(http.StatusBadRequest)
-			}
 
-			sess, err := session.Get(sessionKey, c)
-			if err != nil {
-				return c.NoContent(http.StatusInternalServerError)
-			}
+	code := c.QueryParam("code")
+	if len(code) == 0 {
+		return c.NoContent(http.StatusBadRequest)
+	}
 
-			sess.Options = &sessions.Options{
-				Path:     "/",
-				MaxAge:   sessionDuration,
-				HttpOnly: true,
-			}
+	sess, err := session.Get(sessionKey, c)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
 
-			codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
-			if !ok {
-				return c.NoContent(http.StatusInternalServerError)
-			}
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   sessionDuration,
+		HttpOnly: true,
+	}
 
-			res, err := h.Service.TraQAuth.GetAccessToken(code, codeVerifier)
-			if err != nil {
-				return c.NoContent(http.StatusInternalServerError)
-			}
+	codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
+	if !ok {
+		return c.NoContent(http.StatusInternalServerError)
+	}
 
-			sess.Values[sessionAccessTokenKey] = res.AccessToken
-			sess.Values[sessionRefreshTokenKey] = res.RefreshToken
+	res, err := h.Service.GetAccessToken(code, codeVerifier)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
 
-			user, err := h.Service.Users.GetMyUser(res.AccessToken)
-			if err != nil {
-				return c.NoContent(http.StatusInternalServerError)
-			}
-			sess.Values[sessionUserKey] = user
+	sess.Values[sessionAccessTokenKey] = res.AccessToken
+	sess.Values[sessionRefreshTokenKey] = res.RefreshToken
 
-			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				return c.NoContent(http.StatusInternalServerError)
-			}
+	user, err := h.Service.GetMyUser(res.AccessToken)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	sess.Values[sessionUserKey] = user
 
-			return c.Redirect(http.StatusSeeOther, "/")
-		}
+	if err = sess.Save(c.Request(), c.Response()); err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
 
-		func (h Handlers) GeneratePKCE(c echo.Context) error {
-			sess, err := session.Get(sessionKey, c)
-			if err != nil {
-				return c.NoContent(http.StatusInternalServerError)
-			}
+	return c.Redirect(http.StatusSeeOther, "/")
+}
 
-			sess.Options = &sessions.Options{
-				Path:     "/",
-				MaxAge:   sessionDuration,
-				HttpOnly: true,
-			}
+func (h Handlers) GeneratePKCE(c echo.Context) error {
+	sess, err := session.Get(sessionKey, c)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
 
-			bytesCodeVerifier := generateCodeVerifier()
-			codeVerifier := string(bytesCodeVerifier)
-			sess.Values[sessionCodeVerifierKey] = codeVerifier
-			if err := sess.Save(c.Request(), c.Response()); err != nil {
-				return c.NoContent(http.StatusInternalServerError)
-			}
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   sessionDuration,
+		HttpOnly: true,
+	}
 
-			params := PKCEParams{
-				CodeChallenge:       getCodeChallenge(bytesCodeVerifier),
-				CodeChallengeMethod: "S256",
-				ClientID:            h.Service.GetClientId(),
-				ResponseType:        "code",
-			}
+	bytesCodeVerifier := generateCodeVerifier()
+	codeVerifier := string(bytesCodeVerifier)
+	sess.Values[sessionCodeVerifierKey] = codeVerifier
+	if err := sess.Save(c.Request(), c.Response()); err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
 
-			return c.JSON(http.StatusOK, params)
-	*/
+	params := PKCEParams{
+		CodeChallenge:       getCodeChallenge(bytesCodeVerifier),
+		CodeChallengeMethod: "S256",
+		ClientID:            h.Service.GetClientId(),
+		ResponseType:        "code",
+	}
+
+	return c.JSON(http.StatusOK, params)
+
 }
 
 func (h Handlers) GeneratePKCE(c echo.Context) error {

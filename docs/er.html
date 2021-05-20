@@ -7,81 +7,81 @@
 		<div class="mermaid" id="er-diagram">
 erDiagram
     Comment {
-        uuidDOTUUID id
-        string comment
-        timeDOTTime created_at
-        timeDOTTime updated_at
-        timeDOTTime deleted_at
+        id uuidDOTUUID
+        comment string
+        created_at timeDOTTime
+        updated_at timeDOTTime
+        deleted_at timeDOTTime
     }
     File {
-        uuidDOTUUID id
-        string mime_type
-        timeDOTTime created_at
-        timeDOTTime deleted_at
+        id uuidDOTUUID
+        mime_type string
+        created_at timeDOTTime
+        deleted_at timeDOTTime
     }
     Group {
-        uuidDOTUUID id
-        string name
-        string description
-        int budget
-        timeDOTTime created_at
-        timeDOTTime updated_at
-        timeDOTTime deleted_at
+        id uuidDOTUUID
+        name string
+        description string
+        budget int
+        created_at timeDOTTime
+        updated_at timeDOTTime
+        deleted_at timeDOTTime
     }
     GroupBudget {
-        uuidDOTUUID id
-        int amount
-        string comment
-        timeDOTTime created_at
+        id uuidDOTUUID
+        amount int
+        comment string
+        created_at timeDOTTime
     }
     GroupOwner {
-        uuidDOTUUID id
-        string owner
-        timeDOTTime created_at
+        id uuidDOTUUID
+        owner string
+        created_at timeDOTTime
     }
     Request {
-        uuidDOTUUID id
-        int amount
-        timeDOTTime created_at
+        id uuidDOTUUID
+        amount int
+        created_at timeDOTTime
     }
     RequestStatus {
-        uuidDOTUUID id
-        requeststatusDOTStatus status
-        string reason
-        timeDOTTime created_at
+        id uuidDOTUUID
+        status requeststatusDOTStatus
+        reason string
+        created_at timeDOTTime
     }
     RequestTarget {
-        uuidDOTUUID id
-        string target
-        timeDOTTime paid_at
-        timeDOTTime created_at
+        id uuidDOTUUID
+        target string
+        paid_at timeDOTTime
+        created_at timeDOTTime
     }
     Tag {
-        uuidDOTUUID id
-        string name
-        string description
-        timeDOTTime created_at
-        timeDOTTime updated_at
-        timeDOTTime deleted_at
+        id uuidDOTUUID
+        name string
+        description string
+        created_at timeDOTTime
+        updated_at timeDOTTime
+        deleted_at timeDOTTime
     }
     Transaction {
-        uuidDOTUUID id
-        timeDOTTime created_at
+        id uuidDOTUUID
+        created_at timeDOTTime
     }
     TransactionDetail {
-        uuidDOTUUID id
-        int amount
-        string target
-        timeDOTTime created_at
+        id uuidDOTUUID
+        amount int
+        target string
+        created_at timeDOTTime
     }
     User {
-        uuidDOTUUID id
-        string trap_id
-        string name
-        bool admin
-        timeDOTTime created_at
-        timeDOTTime updated_at
-        timeDOTTime deleted_at
+        id uuidDOTUUID
+        trap_id string
+        name string
+        admin bool
+        created_at timeDOTTime
+        updated_at timeDOTTime
+        deleted_at timeDOTTime
     }
     	Comment |o--o| User : "user/comment"
     	Group |o--o{ GroupBudget : "group_budget/group"
