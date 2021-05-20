@@ -2,17 +2,18 @@ package model
 
 import (
 	"fmt"
+	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/enttest"
 	"github.com/traPtitech/Jomon/testutil"
 )
 
-func SetupEntClient() (*ent.Client, error) {
-	entOptions := []ent.Option{}
-
-	// 発行されるSQLをロギングするなら
-	entOptions = append(entOptions, ent.Debug())
+func SetupTestEntClient(t *testing.T) (*ent.Client, error) {
+	entOptions := []enttest.Option{
+		enttest.WithOptions(ent.Log(t.Log)),
+	}
 	dbUser := testutil.GetEnvOrDefault("MYSQL_USERNAME", "root")
 	dbPass := testutil.GetEnvOrDefault("MYSQL_PASSWORD", "password")
 	dbHost := testutil.GetEnvOrDefault("MYSQL_HOSTNAME", "db")
@@ -21,10 +22,6 @@ func SetupEntClient() (*ent.Client, error) {
 
 	dbDsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
 
-	client, err := ent.Open("mysql", dbDsn, entOptions...)
-	if err != nil {
-		return nil, fmt.Errorf("can't connect to DATABASE: %w", err)
-	}
-
+	client := enttest.Open(t, "mysql", dbDsn, entOptions...)
 	return client, nil
 }

@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/traPtitech/Jomon/ent/tag"
 )
 
 type Tag struct {
@@ -35,9 +34,7 @@ type TagDetail struct {
 
 func (h *Handlers) GetTags(c echo.Context) error {
 	ctx := context.Background()
-	tags, err := h.EntCli.Tag.
-		Query().
-		All(ctx)
+	tags, err := h.Repository.GetTags(ctx)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -63,11 +60,7 @@ func (h *Handlers) PostTag(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	created, err := h.EntCli.Tag.
-		Create().
-		SetName(tag.Name).
-		SetDescription(tag.Description).
-		Save(ctx)
+	created, err := h.Repository.CreateTag(ctx, tag.Name, tag.Description)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -93,7 +86,10 @@ func (h *Handlers) GetTag(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	tag, err := h.Repository.GetTags(ctx, tagID)
+	tag, err := h.Repository.GetTag(ctx, tagID)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
 
 	res := &TagOverview{
 		ID:          tag.ID,
@@ -125,7 +121,7 @@ func (h *Handlers) PutTag(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	transactions, err := h.Repository.GetTagTransactions(ctx, tag)
+	transactions, err := h.Repository.GetTagTransactions(ctx, tag.ID)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -134,7 +130,7 @@ func (h *Handlers) PutTag(c echo.Context) error {
 		transactionIDs = append(transactionIDs, transaction.ID)
 	}
 
-	requests, err := h.Repository.GetTagRequests(ctx, tag)
+	requests, err := h.Repository.GetTagRequests(ctx, tag.ID)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -166,17 +162,12 @@ func (h *Handlers) DeleteTag(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	tag, err := h.EntCli.Tag.
-		Query().
-		Where(tag.IDEQ(tagID)).
-		Only(ctx)
+	tag, err := h.Repository.GetTag(ctx, tagID)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	err = h.EntCli.Tag.
-		DeleteOne(tag).
-		Exec(ctx)
+	err = h.Repository.DeleteTag(ctx, tag.ID)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
