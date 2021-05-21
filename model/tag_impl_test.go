@@ -27,7 +27,7 @@ func TestEntRepository_GetTags(t *testing.T) {
 			assert.Equal(t, got[1].ID, tag2.ID)
 			assert.Equal(t, got[1].Name, tag2.Name)
 			assert.Equal(t, got[1].Description, tag2.Description)
-		} else {
+		} else if assert.Len(t, got, 2) {
 			assert.Equal(t, got[0].ID, tag2.ID)
 			assert.Equal(t, got[0].Name, tag2.Name)
 			assert.Equal(t, got[0].Description, tag2.Description)
