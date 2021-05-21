@@ -13,10 +13,10 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldTrapID holds the string denoting the trap_id field in the database.
-	FieldTrapID = "trap_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldDisplayName holds the string denoting the display_name field in the database.
+	FieldDisplayName = "display_name"
 	// FieldAdmin holds the string denoting the admin field in the database.
 	FieldAdmin = "admin"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -66,8 +66,8 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
-	FieldTrapID,
 	FieldName,
+	FieldDisplayName,
 	FieldAdmin,
 	FieldCreatedAt,
 	FieldUpdatedAt,

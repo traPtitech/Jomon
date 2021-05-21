@@ -25,15 +25,15 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetTrapID sets the "trap_id" field.
-func (uc *UserCreate) SetTrapID(s string) *UserCreate {
-	uc.mutation.SetTrapID(s)
-	return uc
-}
-
 // SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
+	return uc
+}
+
+// SetDisplayName sets the "display_name" field.
+func (uc *UserCreate) SetDisplayName(s string) *UserCreate {
+	uc.mutation.SetDisplayName(s)
 	return uc
 }
 
@@ -243,11 +243,11 @@ func (uc *UserCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
-	if _, ok := uc.mutation.TrapID(); !ok {
-		return &ValidationError{Name: "trap_id", err: errors.New("ent: missing required field \"trap_id\"")}
-	}
 	if _, ok := uc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	if _, ok := uc.mutation.DisplayName(); !ok {
+		return &ValidationError{Name: "display_name", err: errors.New("ent: missing required field \"display_name\"")}
 	}
 	if _, ok := uc.mutation.Admin(); !ok {
 		return &ValidationError{Name: "admin", err: errors.New("ent: missing required field \"admin\"")}
@@ -287,14 +287,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := uc.mutation.TrapID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldTrapID,
-		})
-		_node.TrapID = value
-	}
 	if value, ok := uc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -302,6 +294,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldName,
 		})
 		_node.Name = value
+	}
+	if value, ok := uc.mutation.DisplayName(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldDisplayName,
+		})
+		_node.DisplayName = value
 	}
 	if value, ok := uc.mutation.Admin(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

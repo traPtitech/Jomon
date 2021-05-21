@@ -9,7 +9,7 @@ import (
 
 type Handlers struct {
 	Repository   model.Repository
-	Service      service.Service
+	Service      service.Services
 	SessionName  string
 	SessionStore sessions.Store
 }

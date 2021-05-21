@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
@@ -50,6 +51,7 @@ func (repo *EntRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name 
 		UpdateOneID(tagID).
 		SetName(name).
 		SetDescription(description).
+		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
 		return nil, err

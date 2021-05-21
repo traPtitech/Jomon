@@ -6885,8 +6885,8 @@ type UserMutation struct {
 	op                    Op
 	typ                   string
 	id                    *uuid.UUID
-	trap_id               *string
 	name                  *string
+	display_name          *string
 	admin                 *bool
 	created_at            *time.Time
 	updated_at            *time.Time
@@ -6991,42 +6991,6 @@ func (m *UserMutation) ID() (id uuid.UUID, exists bool) {
 	return *m.id, true
 }
 
-// SetTrapID sets the "trap_id" field.
-func (m *UserMutation) SetTrapID(s string) {
-	m.trap_id = &s
-}
-
-// TrapID returns the value of the "trap_id" field in the mutation.
-func (m *UserMutation) TrapID() (r string, exists bool) {
-	v := m.trap_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTrapID returns the old "trap_id" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldTrapID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldTrapID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldTrapID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTrapID: %w", err)
-	}
-	return oldValue.TrapID, nil
-}
-
-// ResetTrapID resets all changes to the "trap_id" field.
-func (m *UserMutation) ResetTrapID() {
-	m.trap_id = nil
-}
-
 // SetName sets the "name" field.
 func (m *UserMutation) SetName(s string) {
 	m.name = &s
@@ -7061,6 +7025,42 @@ func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
+}
+
+// SetDisplayName sets the "display_name" field.
+func (m *UserMutation) SetDisplayName(s string) {
+	m.display_name = &s
+}
+
+// DisplayName returns the value of the "display_name" field in the mutation.
+func (m *UserMutation) DisplayName() (r string, exists bool) {
+	v := m.display_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisplayName returns the old "display_name" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldDisplayName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDisplayName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDisplayName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisplayName: %w", err)
+	}
+	return oldValue.DisplayName, nil
+}
+
+// ResetDisplayName resets all changes to the "display_name" field.
+func (m *UserMutation) ResetDisplayName() {
+	m.display_name = nil
 }
 
 // SetAdmin sets the "admin" field.
@@ -7405,11 +7405,11 @@ func (m *UserMutation) Type() string {
 // AddedFields().
 func (m *UserMutation) Fields() []string {
 	fields := make([]string, 0, 6)
-	if m.trap_id != nil {
-		fields = append(fields, user.FieldTrapID)
-	}
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
+	}
+	if m.display_name != nil {
+		fields = append(fields, user.FieldDisplayName)
 	}
 	if m.admin != nil {
 		fields = append(fields, user.FieldAdmin)
@@ -7431,10 +7431,10 @@ func (m *UserMutation) Fields() []string {
 // schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case user.FieldTrapID:
-		return m.TrapID()
 	case user.FieldName:
 		return m.Name()
+	case user.FieldDisplayName:
+		return m.DisplayName()
 	case user.FieldAdmin:
 		return m.Admin()
 	case user.FieldCreatedAt:
@@ -7452,10 +7452,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case user.FieldTrapID:
-		return m.OldTrapID(ctx)
 	case user.FieldName:
 		return m.OldName(ctx)
+	case user.FieldDisplayName:
+		return m.OldDisplayName(ctx)
 	case user.FieldAdmin:
 		return m.OldAdmin(ctx)
 	case user.FieldCreatedAt:
@@ -7473,19 +7473,19 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case user.FieldTrapID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTrapID(v)
-		return nil
 	case user.FieldName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case user.FieldDisplayName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisplayName(v)
 		return nil
 	case user.FieldAdmin:
 		v, ok := value.(bool)
@@ -7573,11 +7573,11 @@ func (m *UserMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
-	case user.FieldTrapID:
-		m.ResetTrapID()
-		return nil
 	case user.FieldName:
 		m.ResetName()
+		return nil
+	case user.FieldDisplayName:
+		m.ResetDisplayName()
 		return nil
 	case user.FieldAdmin:
 		m.ResetAdmin()

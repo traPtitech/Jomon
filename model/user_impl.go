@@ -1,28 +1,31 @@
 package model
 
 import (
-	"encoding/json"
-	"net/http"
+	"context"
+
+	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
-func (repo *EntRepository) GetMyUser(token string) (User, error) {
-	req, err := http.NewRequest("GET", TraQBaseURL+"/users/me", nil)
+func (repo *EntRepository) GetMe(ctx context.Context, name string) (*User, error) {
+	user, err := repo.client.User.
+		Query().
+		Where(user.NameEQ(name)).
+		Only(ctx)
 	if err != nil {
-		return User{}, err
+		return nil, err
 	}
-	req.Header.Set("Authorization", "Bearer "+token)
+	return ConvertEntUserToModelUser(user), nil
+}
 
-	body, err := repo.traqRepository.sendReq(req)
-	if err != nil {
-		return User{}, err
+func ConvertEntUserToModelUser(user *ent.User) *User {
+	return &User{
+		ID:          user.ID,
+		Name:        user.Name,
+		DisplayName: user.DisplayName,
+		Admin:       user.Admin,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
+		DeletedAt:   user.DeletedAt,
 	}
-
-	traqUser := traqUser{}
-	if err = json.Unmarshal(body, &traqUser); err != nil {
-		return User{}, err
-	}
-
-	return User{
-		TrapId: traqUser.Name,
-	}, nil
 }

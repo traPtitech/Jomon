@@ -19,9 +19,9 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
-		field.String("trap_id").
+		field.String("name").
 			Unique(),
-		field.String("name"),
+		field.String("display_name"),
 		field.Bool("admin").
 			Default(false),
 		field.Time("created_at").

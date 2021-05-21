@@ -84,8 +84,39 @@ func (h *Handlers) PostComment(c echo.Context) error {
 }
 
 func (h *Handlers) PutComment(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	requestID, err := uuid.Parse(c.Param("requestID"))
+	if err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+	if requestID == uuid.Nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+	commentID, err := uuid.Parse(c.Param("commentID"))
+	if err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+	if commentID == uuid.Nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	var req Comment
+	if err := c.Bind(&req); err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	ctx := context.Background()
+	comment, err := h.Repository.UpdateComment(ctx, req.Comment, requestID, commentID)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	res := &CommentDetail{
+		ID:        comment.ID,
+		User:      comment.User,
+		Comment:   comment.Comment,
+		CreatedAt: comment.CreatedAt,
+		UpdatedAt: comment.UpdatedAt,
+	}
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handlers) DeleteComment(c echo.Context) error {

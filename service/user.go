@@ -9,15 +9,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/model"
 )
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	TrapID    string    `json:"trap_id"`
-	Name      string    `json:"string"`
-	Admin     bool      `json:"admin"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID          uuid.UUID `json:"id"`
+	DisplayName string    `json:"display_name"`
+	Name        string    `json:"name"`
+	Admin       bool      `json:"admin"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type TraQUser struct {
@@ -44,11 +45,14 @@ func (s *Services) GetMe(token string) (*User, error) {
 
 	ctx := context.Background()
 	user, err := s.Repository.GetMe(ctx, traqUser.Name)
+	if err != nil {
+		return nil, err
+	}
 
-	return ConvertModelUserToServiceUser(user), nil
+	return ConvertModelUserToServiceUser(*user), nil
 }
 
-func (_ *Services) sendReq(req *http.Request) ([]byte, error) {
+func (*Services) sendReq(req *http.Request) ([]byte, error) {
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -59,4 +63,15 @@ func (_ *Services) sendReq(req *http.Request) ([]byte, error) {
 
 	defer res.Body.Close()
 	return ioutil.ReadAll(res.Body)
+}
+
+func ConvertModelUserToServiceUser(user model.User) *User {
+	return &User{
+		ID:          user.ID,
+		Name:        user.Name,
+		DisplayName: user.DisplayName,
+		Admin:       user.Admin,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
+	}
 }

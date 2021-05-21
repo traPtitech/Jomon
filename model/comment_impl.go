@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
@@ -18,6 +19,18 @@ func (repo *EntRepository) CreateComment(ctx context.Context, comment string, re
 		return nil, err
 	}
 	return ConvertEntCommentToModelComment(created), nil
+}
+
+func (repo *EntRepository) UpdateComment(ctx context.Context, comment string, requestID uuid.UUID, commentID uuid.UUID) (*Comment, error) {
+	updated, err := repo.client.Comment.
+		UpdateOneID(commentID).
+		SetComment(comment).
+		SetUpdatedAt(time.Now()).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ConvertEntCommentToModelComment(updated), nil
 }
 
 func ConvertEntCommentToModelComment(entcomment *ent.Comment) *Comment {

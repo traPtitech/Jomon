@@ -20,10 +20,10 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// TrapID holds the value of the "trap_id" field.
-	TrapID string `json:"trap_id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// DisplayName holds the value of the "display_name" field.
+	DisplayName string `json:"display_name,omitempty"`
 	// Admin holds the value of the "admin" field.
 	Admin bool `json:"admin,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -113,7 +113,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case user.FieldAdmin:
 			values[i] = new(sql.NullBool)
-		case user.FieldTrapID, user.FieldName:
+		case user.FieldName, user.FieldDisplayName:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -146,17 +146,17 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value != nil {
 				u.ID = *value
 			}
-		case user.FieldTrapID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field trap_id", values[i])
-			} else if value.Valid {
-				u.TrapID = value.String
-			}
 		case user.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				u.Name = value.String
+			}
+		case user.FieldDisplayName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field display_name", values[i])
+			} else if value.Valid {
+				u.DisplayName = value.String
 			}
 		case user.FieldAdmin:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -249,10 +249,10 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
-	builder.WriteString(", trap_id=")
-	builder.WriteString(u.TrapID)
 	builder.WriteString(", name=")
 	builder.WriteString(u.Name)
+	builder.WriteString(", display_name=")
+	builder.WriteString(u.DisplayName)
 	builder.WriteString(", admin=")
 	builder.WriteString(fmt.Sprintf("%v", u.Admin))
 	builder.WriteString(", created_at=")

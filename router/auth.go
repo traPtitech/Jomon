@@ -38,7 +38,6 @@ type PKCEParams struct {
 
 func (h Handlers) AuthUser(c echo.Context) (echo.Context, error) {
 	return c, nil
-	// TODO: Implement
 	/*
 		sess, err := session.Get(sessionKey, c)
 		if err != nil {
@@ -57,9 +56,9 @@ func (h Handlers) AuthUser(c echo.Context) (echo.Context, error) {
 		}
 		c.Set(contextAccessTokenKey, accTok)
 
-		user, ok := sess.Values[sessionUserKey].(ent.User)
+		user, ok := sess.Values[sessionUserKey].(*service.User)
 		if !ok {
-			user, err = h.Service.Users.GetMyUser(accTok)
+			user, err = h.Service.GetMe(accTok)
 			sess.Values[sessionUserKey] = user
 			if err := sess.Save(c.Request(), c.Response()); err != nil {
 				return nil, c.NoContent(http.StatusInternalServerError)
@@ -83,9 +82,6 @@ func (h Handlers) AuthUser(c echo.Context) (echo.Context, error) {
 }
 
 func (h Handlers) AuthCallback(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
-
 	code := c.QueryParam("code")
 	if len(code) == 0 {
 		return c.NoContent(http.StatusBadRequest)
@@ -115,7 +111,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	sess.Values[sessionAccessTokenKey] = res.AccessToken
 	sess.Values[sessionRefreshTokenKey] = res.RefreshToken
 
-	user, err := h.Service.GetMyUser(res.AccessToken)
+	user, err := h.Service.GetMe(res.AccessToken)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -156,39 +152,6 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, params)
 
-}
-
-func (h Handlers) GeneratePKCE(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
-	/*
-		sess, err := session.Get(sessionKey, c)
-		if err != nil {
-			return c.NoContent(http.StatusInternalServerError)
-		}
-
-		sess.Options = &sessions.Options{
-			Path:     "/",
-			MaxAge:   sessionDuration,
-			HttpOnly: true,
-		}
-
-		bytesCodeVerifier := generateCodeVerifier()
-		codeVerifier := string(bytesCodeVerifier)
-		sess.Values[sessionCodeVerifierKey] = codeVerifier
-		if err := sess.Save(c.Request(), c.Response()); err != nil {
-			return c.NoContent(http.StatusInternalServerError)
-		}
-
-		params := PKCEParams{
-			CodeChallenge:       getCodeChallenge(bytesCodeVerifier),
-			CodeChallengeMethod: "S256",
-			ClientID:            s.TraQAuth.GetClientId(),
-			ResponseType:        "code",
-		}
-
-		return c.JSON(http.StatusOK, params)
-	*/
 }
 
 var src cryptoSource
