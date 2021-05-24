@@ -9,10 +9,9 @@ import (
 )
 
 func SetupEntClient() (*ent.Client, error) {
-	entOptions := []ent.Option{}
+	// Logging
+	entOptions := []ent.Option{ent.Debug()}
 
-	// 発行されるSQLをロギングするなら
-	entOptions = append(entOptions, ent.Debug())
 	dbUser := testutil.GetEnvOrDefault("MYSQL_USERNAME", "root")
 	dbPass := testutil.GetEnvOrDefault("MYSQL_PASSWORD", "password")
 	dbHost := testutil.GetEnvOrDefault("MYSQL_HOSTNAME", "db")

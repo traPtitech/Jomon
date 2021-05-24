@@ -1,20 +1,32 @@
 package router
 
 import (
+	"os"
+
 	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
+	"go.uber.org/zap"
 )
 
 type Handlers struct {
 	Repository   model.Repository
+	Logger       *zap.Logger
 	Service      service.Services
 	SessionName  string
 	SessionStore sessions.Store
 }
 
 func SetRouting(e *echo.Echo, h Handlers) {
+	e.Debug = (os.Getenv("IS_DEBUG_MODE") != "")
+	e.Use(h.AccessLoggingMiddleware(h.Logger))
+	e.Use(middleware.Recover())
+	e.Use(middleware.Secure())
+	e.Use(session.Middleware(h.SessionStore))
+
 	api := e.Group("/api")
 	{
 		apiAuth := api.Group("/auth")
