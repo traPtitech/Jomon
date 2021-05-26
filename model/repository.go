@@ -5,12 +5,10 @@ import (
 )
 
 type Repository interface {
-	AdministratorRepository
 	CommentRepository
 	FileRepository
 	GroupBudgetRepository
 	GroupOwnerRepository
-	GroupUserRepository
 	GroupRepository
 	RequestFileRepository
 	RequestStatusRepository

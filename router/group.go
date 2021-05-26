@@ -26,16 +26,14 @@ type GroupOverview struct {
 }
 
 type GroupDetail struct {
-	ID           uuid.UUID    `json:"id"`
-	Name         string       `json:"name"`
-	Description  string       `json:"description"`
-	Budget       *int         `json:"budget"`
-	Owners       []*uuid.UUID `json:"owners"`
-	Transactions []*uuid.UUID `json:"transactions"`
-	Requests     []*uuid.UUID `json:"requests"`
-	Users        []*uuid.UUID `json:"users"`
-	CreatedAt    time.Time    `json:"created_at"`
-	UpdatedAt    time.Time    `json:"updated_at"`
+	ID          uuid.UUID    `json:"id"`
+	Name        string       `json:"name"`
+	Description string       `json:"description"`
+	Budget      *int         `json:"budget"`
+	Owners      []*uuid.UUID `json:"owners"`
+	Users       []*uuid.UUID `json:"users"`
+	CreatedAt   time.Time    `json:"created_at"`
+	UpdatedAt   time.Time    `json:"updated_at"`
 }
 
 func (h *Handlers) GetGroups(c echo.Context) error {
@@ -80,8 +78,6 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 			Description:  created.Description,
 			Budget:       created.Budget,
 			Owners:       created.Owners,
-			Transactions: created.Transactions,
-			Requests:     created.Requests,
 			Users:        created.Users,
 			CreatedAt:    created.CreatedAt,
 			UpdatedAt:    created.UpdatedAt,
@@ -89,11 +85,6 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 
 		return c.JSON(http.StatusOK, res)
 	*/
-}
-
-func (h *Handlers) GetGroup(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
 }
 
 func (h *Handlers) PostGroupUser(c echo.Context) error {

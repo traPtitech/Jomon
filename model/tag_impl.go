@@ -35,17 +35,6 @@ func (repo *EntRepository) CreateTag(ctx context.Context, name string, descripti
 	return ConvertEntTagToModelTag(created), nil
 }
 
-func (repo *EntRepository) GetTag(ctx context.Context, tagID uuid.UUID) (*Tag, error) {
-	tag, err := repo.client.Tag.
-		Query().
-		Where(tag.IDEQ(tagID)).
-		Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return ConvertEntTagToModelTag(tag), nil
-}
-
 func (repo *EntRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name string, description string) (*Tag, error) {
 	tag, err := repo.client.Tag.
 		UpdateOneID(tagID).
@@ -71,48 +60,6 @@ func (repo *EntRepository) DeleteTag(ctx context.Context, tagID uuid.UUID) error
 		DeleteOne(tag).
 		Exec(ctx)
 	return err
-}
-
-func (repo *EntRepository) GetTagTransactions(ctx context.Context, tagID uuid.UUID) ([]*Transaction, error) {
-	tag, err := repo.client.Tag.
-		Query().
-		Where(tag.IDEQ(tagID)).
-		Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-	transactions, err := tag.
-		QueryTransaction().
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-	modeltransactions := []*Transaction{}
-	for _, transaction := range transactions {
-		modeltransactions = append(modeltransactions, ConvertEntTransactionToModelTransaction(transaction))
-	}
-	return modeltransactions, nil
-}
-
-func (repo *EntRepository) GetTagRequests(ctx context.Context, tagID uuid.UUID) ([]*Request, error) {
-	tag, err := repo.client.Tag.
-		Query().
-		Where(tag.IDEQ(tagID)).
-		Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-	requests, err := tag.
-		QueryRequest().
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-	modelrequests := []*Request{}
-	for _, request := range requests {
-		modelrequests = append(modelrequests, ConvertEntRequestToModelRequest(request))
-	}
-	return modelrequests, nil
 }
 
 func ConvertEntTagToModelTag(enttag *ent.Tag) *Tag {

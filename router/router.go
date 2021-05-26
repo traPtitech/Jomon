@@ -66,7 +66,6 @@ func SetRouting(e *echo.Echo, h Handlers) {
 		{
 			apiTags.GET("", h.GetTags)
 			apiTags.POST("", h.PostTag)
-			apiTags.GET("/:tagID", h.GetTag)
 			apiTags.PUT("/:tagID", h.PutTag)
 			apiTags.DELETE("/:tagID", h.DeleteTag)
 		}
@@ -75,17 +74,9 @@ func SetRouting(e *echo.Echo, h Handlers) {
 		{
 			apiGroups.GET("", h.GetGroups)
 			apiGroups.POST("", h.PostGroup)
-			apiGroups.GET("/:groupID", h.GetGroup)
 			apiGroups.POST("/:groupID", h.PutGroup)
 			apiGroups.PUT("/:groupID", h.PostGroupUser)
 			apiGroups.DELETE("/:groupID", h.DeleteGroup)
-		}
-
-		apiAdmins := api.Group("/admins", h.AuthUserMiddleware)
-		{
-			apiAdmins.GET("", h.GetAdmins)
-			apiAdmins.POST("", h.PostAdmin)
-			apiAdmins.DELETE("/:userID", h.DeleteAdmin)
 		}
 	}
 }

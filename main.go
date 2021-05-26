@@ -61,5 +61,5 @@ func main() {
 	}
 
 	// Start server
-	e.Start(":" + port)
+	e.Logger.Fatal("failed to start server", e.Start(":"+port))
 }
