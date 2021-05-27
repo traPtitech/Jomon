@@ -8,7 +8,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/client"
     schedule:
-      interval: "daily"
+      interval: weekly
     open-pull-requests-limit: 10
     reviewers:
       - FujishigeTemma
@@ -20,7 +20,7 @@ updates:
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
-      interval: daily
+      interval: weekly
     open-pull-requests-limit: 10
     reviewers:
       - FujishigeTemma
