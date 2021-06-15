@@ -20,8 +20,6 @@ type Tx struct {
 	Group *GroupClient
 	// GroupBudget is the client for interacting with the GroupBudget builders.
 	GroupBudget *GroupBudgetClient
-	// GroupOwner is the client for interacting with the GroupOwner builders.
-	GroupOwner *GroupOwnerClient
 	// Request is the client for interacting with the Request builders.
 	Request *RequestClient
 	// RequestStatus is the client for interacting with the RequestStatus builders.
@@ -175,7 +173,6 @@ func (tx *Tx) init() {
 	tx.File = NewFileClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
 	tx.GroupBudget = NewGroupBudgetClient(tx.config)
-	tx.GroupOwner = NewGroupOwnerClient(tx.config)
 	tx.Request = NewRequestClient(tx.config)
 	tx.RequestStatus = NewRequestStatusClient(tx.config)
 	tx.RequestTarget = NewRequestTargetClient(tx.config)

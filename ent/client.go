@@ -14,7 +14,6 @@ import (
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
-	"github.com/traPtitech/Jomon/ent/groupowner"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
@@ -41,8 +40,6 @@ type Client struct {
 	Group *GroupClient
 	// GroupBudget is the client for interacting with the GroupBudget builders.
 	GroupBudget *GroupBudgetClient
-	// GroupOwner is the client for interacting with the GroupOwner builders.
-	GroupOwner *GroupOwnerClient
 	// Request is the client for interacting with the Request builders.
 	Request *RequestClient
 	// RequestStatus is the client for interacting with the RequestStatus builders.
@@ -74,7 +71,6 @@ func (c *Client) init() {
 	c.File = NewFileClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.GroupBudget = NewGroupBudgetClient(c.config)
-	c.GroupOwner = NewGroupOwnerClient(c.config)
 	c.Request = NewRequestClient(c.config)
 	c.RequestStatus = NewRequestStatusClient(c.config)
 	c.RequestTarget = NewRequestTargetClient(c.config)
@@ -119,7 +115,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		File:              NewFileClient(cfg),
 		Group:             NewGroupClient(cfg),
 		GroupBudget:       NewGroupBudgetClient(cfg),
-		GroupOwner:        NewGroupOwnerClient(cfg),
 		Request:           NewRequestClient(cfg),
 		RequestStatus:     NewRequestStatusClient(cfg),
 		RequestTarget:     NewRequestTargetClient(cfg),
@@ -149,7 +144,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		File:              NewFileClient(cfg),
 		Group:             NewGroupClient(cfg),
 		GroupBudget:       NewGroupBudgetClient(cfg),
-		GroupOwner:        NewGroupOwnerClient(cfg),
 		Request:           NewRequestClient(cfg),
 		RequestStatus:     NewRequestStatusClient(cfg),
 		RequestTarget:     NewRequestTargetClient(cfg),
@@ -190,7 +184,6 @@ func (c *Client) Use(hooks ...Hook) {
 	c.File.Use(hooks...)
 	c.Group.Use(hooks...)
 	c.GroupBudget.Use(hooks...)
-	c.GroupOwner.Use(hooks...)
 	c.Request.Use(hooks...)
 	c.RequestStatus.Use(hooks...)
 	c.RequestTarget.Use(hooks...)
@@ -546,14 +539,14 @@ func (c *GroupClient) QueryUser(gr *Group) *UserQuery {
 }
 
 // QueryOwner queries the owner edge of a Group.
-func (c *GroupClient) QueryOwner(gr *Group) *GroupOwnerQuery {
-	query := &GroupOwnerQuery{config: c.config}
+func (c *GroupClient) QueryOwner(gr *Group) *UserQuery {
+	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := gr.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
-			sqlgraph.To(groupowner.Table, groupowner.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, group.OwnerTable, group.OwnerColumn),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, group.OwnerTable, group.OwnerPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 		return fromV, nil
@@ -702,112 +695,6 @@ func (c *GroupBudgetClient) QueryTransaction(gb *GroupBudget) *TransactionQuery 
 // Hooks returns the client hooks.
 func (c *GroupBudgetClient) Hooks() []Hook {
 	return c.hooks.GroupBudget
-}
-
-// GroupOwnerClient is a client for the GroupOwner schema.
-type GroupOwnerClient struct {
-	config
-}
-
-// NewGroupOwnerClient returns a client for the GroupOwner from the given config.
-func NewGroupOwnerClient(c config) *GroupOwnerClient {
-	return &GroupOwnerClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `groupowner.Hooks(f(g(h())))`.
-func (c *GroupOwnerClient) Use(hooks ...Hook) {
-	c.hooks.GroupOwner = append(c.hooks.GroupOwner, hooks...)
-}
-
-// Create returns a create builder for GroupOwner.
-func (c *GroupOwnerClient) Create() *GroupOwnerCreate {
-	mutation := newGroupOwnerMutation(c.config, OpCreate)
-	return &GroupOwnerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of GroupOwner entities.
-func (c *GroupOwnerClient) CreateBulk(builders ...*GroupOwnerCreate) *GroupOwnerCreateBulk {
-	return &GroupOwnerCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for GroupOwner.
-func (c *GroupOwnerClient) Update() *GroupOwnerUpdate {
-	mutation := newGroupOwnerMutation(c.config, OpUpdate)
-	return &GroupOwnerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *GroupOwnerClient) UpdateOne(_go *GroupOwner) *GroupOwnerUpdateOne {
-	mutation := newGroupOwnerMutation(c.config, OpUpdateOne, withGroupOwner(_go))
-	return &GroupOwnerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *GroupOwnerClient) UpdateOneID(id uuid.UUID) *GroupOwnerUpdateOne {
-	mutation := newGroupOwnerMutation(c.config, OpUpdateOne, withGroupOwnerID(id))
-	return &GroupOwnerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for GroupOwner.
-func (c *GroupOwnerClient) Delete() *GroupOwnerDelete {
-	mutation := newGroupOwnerMutation(c.config, OpDelete)
-	return &GroupOwnerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *GroupOwnerClient) DeleteOne(_go *GroupOwner) *GroupOwnerDeleteOne {
-	return c.DeleteOneID(_go.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *GroupOwnerClient) DeleteOneID(id uuid.UUID) *GroupOwnerDeleteOne {
-	builder := c.Delete().Where(groupowner.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &GroupOwnerDeleteOne{builder}
-}
-
-// Query returns a query builder for GroupOwner.
-func (c *GroupOwnerClient) Query() *GroupOwnerQuery {
-	return &GroupOwnerQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a GroupOwner entity by its id.
-func (c *GroupOwnerClient) Get(ctx context.Context, id uuid.UUID) (*GroupOwner, error) {
-	return c.Query().Where(groupowner.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *GroupOwnerClient) GetX(ctx context.Context, id uuid.UUID) *GroupOwner {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryGroup queries the group edge of a GroupOwner.
-func (c *GroupOwnerClient) QueryGroup(_go *GroupOwner) *GroupQuery {
-	query := &GroupQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := _go.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(groupowner.Table, groupowner.FieldID, id),
-			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, groupowner.GroupTable, groupowner.GroupColumn),
-		)
-		fromV = sqlgraph.Neighbors(_go.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *GroupOwnerClient) Hooks() []Hook {
-	return c.hooks.GroupOwner
 }
 
 // RequestClient is a client for the Request schema.
@@ -1723,15 +1610,31 @@ func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
 	return obj
 }
 
-// QueryGroup queries the group edge of a User.
-func (c *UserClient) QueryGroup(u *User) *GroupQuery {
+// QueryGroupUser queries the group_user edge of a User.
+func (c *UserClient) QueryGroupUser(u *User) *GroupQuery {
 	query := &GroupQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, user.GroupTable, user.GroupPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.GroupUserTable, user.GroupUserPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroupOwner queries the group_owner edge of a User.
+func (c *UserClient) QueryGroupOwner(u *User) *GroupQuery {
+	query := &GroupQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.GroupOwnerTable, user.GroupOwnerPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

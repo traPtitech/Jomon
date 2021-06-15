@@ -614,25 +614,53 @@ func DeletedAtNotNil() predicate.User {
 	})
 }
 
-// HasGroup applies the HasEdge predicate on the "group" edge.
-func HasGroup() predicate.User {
+// HasGroupUser applies the HasEdge predicate on the "group_user" edge.
+func HasGroupUser() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GroupTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, GroupTable, GroupPrimaryKey...),
+			sqlgraph.To(GroupUserTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, GroupUserTable, GroupUserPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasGroupWith applies the HasEdge predicate on the "group" edge with a given conditions (other predicates).
-func HasGroupWith(preds ...predicate.Group) predicate.User {
+// HasGroupUserWith applies the HasEdge predicate on the "group_user" edge with a given conditions (other predicates).
+func HasGroupUserWith(preds ...predicate.Group) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GroupInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, GroupTable, GroupPrimaryKey...),
+			sqlgraph.To(GroupUserInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, GroupUserTable, GroupUserPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasGroupOwner applies the HasEdge predicate on the "group_owner" edge.
+func HasGroupOwner() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GroupOwnerTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, GroupOwnerTable, GroupOwnerPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasGroupOwnerWith applies the HasEdge predicate on the "group_owner" edge with a given conditions (other predicates).
+func HasGroupOwnerWith(preds ...predicate.Group) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(GroupOwnerInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, GroupOwnerTable, GroupOwnerPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

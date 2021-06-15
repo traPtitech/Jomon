@@ -14,7 +14,6 @@ import (
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
-	"github.com/traPtitech/Jomon/ent/groupowner"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
@@ -46,7 +45,6 @@ func columnChecker(table string) func(string) error {
 		file.Table:              file.ValidColumn,
 		group.Table:             group.ValidColumn,
 		groupbudget.Table:       groupbudget.ValidColumn,
-		groupowner.Table:        groupowner.ValidColumn,
 		request.Table:           request.ValidColumn,
 		requeststatus.Table:     requeststatus.ValidColumn,
 		requesttarget.Table:     requesttarget.ValidColumn,

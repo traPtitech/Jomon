@@ -20,6 +20,19 @@ func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
 	return modelgroups, nil
 }
 
+func (repo *EntRepository) CreateGroup(ctx context.Context, name string, description string, budget *int, owners *[]User) (*Group, error) {
+	created, err := repo.client.Group.
+		Create().
+		SetName(name).
+		SetDescription(description).
+		SetBudget(*budget).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ConvertEntGroupToModelGroup(created), nil
+}
+
 func ConvertEntGroupToModelGroup(entgroup *ent.Group) *Group {
 	return &Group{
 		ID:          entgroup.ID,

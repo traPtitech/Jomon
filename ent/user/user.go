@@ -25,8 +25,10 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// EdgeGroup holds the string denoting the group edge name in mutations.
-	EdgeGroup = "group"
+	// EdgeGroupUser holds the string denoting the group_user edge name in mutations.
+	EdgeGroupUser = "group_user"
+	// EdgeGroupOwner holds the string denoting the group_owner edge name in mutations.
+	EdgeGroupOwner = "group_owner"
 	// EdgeComment holds the string denoting the comment edge name in mutations.
 	EdgeComment = "comment"
 	// EdgeRequestStatus holds the string denoting the request_status edge name in mutations.
@@ -35,11 +37,16 @@ const (
 	EdgeRequest = "request"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// GroupTable is the table the holds the group relation/edge. The primary key declared below.
-	GroupTable = "group_user"
-	// GroupInverseTable is the table name for the Group entity.
+	// GroupUserTable is the table the holds the group_user relation/edge. The primary key declared below.
+	GroupUserTable = "group_user"
+	// GroupUserInverseTable is the table name for the Group entity.
 	// It exists in this package in order to avoid circular dependency with the "group" package.
-	GroupInverseTable = "groups"
+	GroupUserInverseTable = "groups"
+	// GroupOwnerTable is the table the holds the group_owner relation/edge. The primary key declared below.
+	GroupOwnerTable = "group_owner"
+	// GroupOwnerInverseTable is the table name for the Group entity.
+	// It exists in this package in order to avoid circular dependency with the "group" package.
+	GroupOwnerInverseTable = "groups"
 	// CommentTable is the table the holds the comment relation/edge.
 	CommentTable = "users"
 	// CommentInverseTable is the table name for the Comment entity.
@@ -83,9 +90,12 @@ var ForeignKeys = []string{
 }
 
 var (
-	// GroupPrimaryKey and GroupColumn2 are the table columns denoting the
-	// primary key for the group relation (M2M).
-	GroupPrimaryKey = []string{"group_id", "user_id"}
+	// GroupUserPrimaryKey and GroupUserColumn2 are the table columns denoting the
+	// primary key for the group_user relation (M2M).
+	GroupUserPrimaryKey = []string{"group_id", "user_id"}
+	// GroupOwnerPrimaryKey and GroupOwnerColumn2 are the table columns denoting the
+	// primary key for the group_owner relation (M2M).
+	GroupOwnerPrimaryKey = []string{"group_id", "user_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

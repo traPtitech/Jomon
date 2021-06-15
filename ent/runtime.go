@@ -10,7 +10,6 @@ import (
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
-	"github.com/traPtitech/Jomon/ent/groupowner"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
@@ -73,16 +72,6 @@ func init() {
 	groupbudgetDescID := groupbudgetFields[0].Descriptor()
 	// groupbudget.DefaultID holds the default value on creation for the id field.
 	groupbudget.DefaultID = groupbudgetDescID.Default.(func() uuid.UUID)
-	groupownerFields := schema.GroupOwner{}.Fields()
-	_ = groupownerFields
-	// groupownerDescCreatedAt is the schema descriptor for created_at field.
-	groupownerDescCreatedAt := groupownerFields[2].Descriptor()
-	// groupowner.DefaultCreatedAt holds the default value on creation for the created_at field.
-	groupowner.DefaultCreatedAt = groupownerDescCreatedAt.Default.(func() time.Time)
-	// groupownerDescID is the schema descriptor for id field.
-	groupownerDescID := groupownerFields[0].Descriptor()
-	// groupowner.DefaultID holds the default value on creation for the id field.
-	groupowner.DefaultID = groupownerDescID.Default.(func() uuid.UUID)
 	requestFields := schema.Request{}.Fields()
 	_ = requestFields
 	// requestDescCreatedAt is the schema descriptor for created_at field.

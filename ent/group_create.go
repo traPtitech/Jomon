@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
-	"github.com/traPtitech/Jomon/ent/groupowner"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
 	"github.com/traPtitech/Jomon/ent/user"
 )
@@ -129,17 +128,17 @@ func (gc *GroupCreate) AddUser(u ...*User) *GroupCreate {
 	return gc.AddUserIDs(ids...)
 }
 
-// AddOwnerIDs adds the "owner" edge to the GroupOwner entity by IDs.
+// AddOwnerIDs adds the "owner" edge to the User entity by IDs.
 func (gc *GroupCreate) AddOwnerIDs(ids ...uuid.UUID) *GroupCreate {
 	gc.mutation.AddOwnerIDs(ids...)
 	return gc
 }
 
-// AddOwner adds the "owner" edges to the GroupOwner entity.
-func (gc *GroupCreate) AddOwner(g ...*GroupOwner) *GroupCreate {
-	ids := make([]uuid.UUID, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// AddOwner adds the "owner" edges to the User entity.
+func (gc *GroupCreate) AddOwner(u ...*User) *GroupCreate {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
 	return gc.AddOwnerIDs(ids...)
 }
@@ -356,15 +355,15 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	}
 	if nodes := gc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   group.OwnerTable,
-			Columns: []string{group.OwnerColumn},
+			Columns: group.OwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: groupowner.FieldID,
+					Column: user.FieldID,
 				},
 			},
 		}

@@ -18,9 +18,6 @@ type Group func(*sql.Selector)
 // GroupBudget is the predicate function for groupbudget builders.
 type GroupBudget func(*sql.Selector)
 
-// GroupOwner is the predicate function for groupowner builders.
-type GroupOwner func(*sql.Selector)
-
 // Request is the predicate function for request builders.
 type Request func(*sql.Selector)
 

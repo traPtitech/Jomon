@@ -8,7 +8,6 @@ type Repository interface {
 	CommentRepository
 	FileRepository
 	GroupBudgetRepository
-	GroupOwnerRepository
 	GroupRepository
 	RequestFileRepository
 	RequestStatusRepository

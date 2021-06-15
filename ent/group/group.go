@@ -47,13 +47,11 @@ const (
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
-	// OwnerTable is the table the holds the owner relation/edge.
-	OwnerTable = "group_owners"
-	// OwnerInverseTable is the table name for the GroupOwner entity.
-	// It exists in this package in order to avoid circular dependency with the "groupowner" package.
-	OwnerInverseTable = "group_owners"
-	// OwnerColumn is the table column denoting the owner relation/edge.
-	OwnerColumn = "group_owner"
+	// OwnerTable is the table the holds the owner relation/edge. The primary key declared below.
+	OwnerTable = "group_owner"
+	// OwnerInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	OwnerInverseTable = "users"
 	// TransactionDetailTable is the table the holds the transaction_detail relation/edge.
 	TransactionDetailTable = "transaction_details"
 	// TransactionDetailInverseTable is the table name for the TransactionDetail entity.
@@ -78,6 +76,9 @@ var (
 	// UserPrimaryKey and UserColumn2 are the table columns denoting the
 	// primary key for the user relation (M2M).
 	UserPrimaryKey = []string{"group_id", "user_id"}
+	// OwnerPrimaryKey and OwnerColumn2 are the table columns denoting the
+	// primary key for the owner relation (M2M).
+	OwnerPrimaryKey = []string{"group_id", "user_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

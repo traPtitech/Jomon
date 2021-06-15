@@ -42,8 +42,10 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Group holds the value of the group edge.
-	Group []*Group `json:"group,omitempty"`
+	// GroupUser holds the value of the group_user edge.
+	GroupUser []*Group `json:"group_user,omitempty"`
+	// GroupOwner holds the value of the group_owner edge.
+	GroupOwner []*Group `json:"group_owner,omitempty"`
 	// Comment holds the value of the comment edge.
 	Comment *Comment `json:"comment,omitempty"`
 	// RequestStatus holds the value of the request_status edge.
@@ -52,22 +54,31 @@ type UserEdges struct {
 	Request *Request `json:"request,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
-// GroupOrErr returns the Group value or an error if the edge
+// GroupUserOrErr returns the GroupUser value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) GroupOrErr() ([]*Group, error) {
+func (e UserEdges) GroupUserOrErr() ([]*Group, error) {
 	if e.loadedTypes[0] {
-		return e.Group, nil
+		return e.GroupUser, nil
 	}
-	return nil, &NotLoadedError{edge: "group"}
+	return nil, &NotLoadedError{edge: "group_user"}
+}
+
+// GroupOwnerOrErr returns the GroupOwner value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) GroupOwnerOrErr() ([]*Group, error) {
+	if e.loadedTypes[1] {
+		return e.GroupOwner, nil
+	}
+	return nil, &NotLoadedError{edge: "group_owner"}
 }
 
 // CommentOrErr returns the Comment value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) CommentOrErr() (*Comment, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		if e.Comment == nil {
 			// The edge comment was loaded in eager-loading,
 			// but was not found.
@@ -81,7 +92,7 @@ func (e UserEdges) CommentOrErr() (*Comment, error) {
 // RequestStatusOrErr returns the RequestStatus value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) RequestStatusOrErr() (*RequestStatus, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		if e.RequestStatus == nil {
 			// The edge request_status was loaded in eager-loading,
 			// but was not found.
@@ -95,7 +106,7 @@ func (e UserEdges) RequestStatusOrErr() (*RequestStatus, error) {
 // RequestOrErr returns the Request value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) RequestOrErr() (*Request, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		if e.Request == nil {
 			// The edge request was loaded in eager-loading,
 			// but was not found.
@@ -206,9 +217,14 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryGroup queries the "group" edge of the User entity.
-func (u *User) QueryGroup() *GroupQuery {
-	return (&UserClient{config: u.config}).QueryGroup(u)
+// QueryGroupUser queries the "group_user" edge of the User entity.
+func (u *User) QueryGroupUser() *GroupQuery {
+	return (&UserClient{config: u.config}).QueryGroupUser(u)
+}
+
+// QueryGroupOwner queries the "group_owner" edge of the User entity.
+func (u *User) QueryGroupOwner() *GroupQuery {
+	return (&UserClient{config: u.config}).QueryGroupOwner(u)
 }
 
 // QueryComment queries the "comment" edge of the User entity.

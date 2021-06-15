@@ -31,7 +31,8 @@ type UserQuery struct {
 	fields     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withGroup         *GroupQuery
+	withGroupUser     *GroupQuery
+	withGroupOwner    *GroupQuery
 	withComment       *CommentQuery
 	withRequestStatus *RequestStatusQuery
 	withRequest       *RequestQuery
@@ -72,8 +73,8 @@ func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	return uq
 }
 
-// QueryGroup chains the current query on the "group" edge.
-func (uq *UserQuery) QueryGroup() *GroupQuery {
+// QueryGroupUser chains the current query on the "group_user" edge.
+func (uq *UserQuery) QueryGroupUser() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
@@ -86,7 +87,29 @@ func (uq *UserQuery) QueryGroup() *GroupQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, user.GroupTable, user.GroupPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.GroupUserTable, user.GroupUserPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryGroupOwner chains the current query on the "group_owner" edge.
+func (uq *UserQuery) QueryGroupOwner() *GroupQuery {
+	query := &GroupQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.GroupOwnerTable, user.GroupOwnerPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -341,7 +364,8 @@ func (uq *UserQuery) Clone() *UserQuery {
 		offset:            uq.offset,
 		order:             append([]OrderFunc{}, uq.order...),
 		predicates:        append([]predicate.User{}, uq.predicates...),
-		withGroup:         uq.withGroup.Clone(),
+		withGroupUser:     uq.withGroupUser.Clone(),
+		withGroupOwner:    uq.withGroupOwner.Clone(),
 		withComment:       uq.withComment.Clone(),
 		withRequestStatus: uq.withRequestStatus.Clone(),
 		withRequest:       uq.withRequest.Clone(),
@@ -351,14 +375,25 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 }
 
-// WithGroup tells the query-builder to eager-load the nodes that are connected to
-// the "group" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithGroup(opts ...func(*GroupQuery)) *UserQuery {
+// WithGroupUser tells the query-builder to eager-load the nodes that are connected to
+// the "group_user" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithGroupUser(opts ...func(*GroupQuery)) *UserQuery {
 	query := &GroupQuery{config: uq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withGroup = query
+	uq.withGroupUser = query
+	return uq
+}
+
+// WithGroupOwner tells the query-builder to eager-load the nodes that are connected to
+// the "group_owner" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithGroupOwner(opts ...func(*GroupQuery)) *UserQuery {
+	query := &GroupQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withGroupOwner = query
 	return uq
 }
 
@@ -461,8 +496,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		nodes       = []*User{}
 		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
-		loadedTypes = [4]bool{
-			uq.withGroup != nil,
+		loadedTypes = [5]bool{
+			uq.withGroupUser != nil,
+			uq.withGroupOwner != nil,
 			uq.withComment != nil,
 			uq.withRequestStatus != nil,
 			uq.withRequest != nil,
@@ -494,13 +530,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		return nodes, nil
 	}
 
-	if query := uq.withGroup; query != nil {
+	if query := uq.withGroupUser; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		ids := make(map[uuid.UUID]*User, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
-			node.Edges.Group = []*Group{}
+			node.Edges.GroupUser = []*Group{}
 		}
 		var (
 			edgeids []uuid.UUID
@@ -509,11 +545,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
 				Inverse: true,
-				Table:   user.GroupTable,
-				Columns: user.GroupPrimaryKey,
+				Table:   user.GroupUserTable,
+				Columns: user.GroupUserPrimaryKey,
 			},
 			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(user.GroupPrimaryKey[1], fks...))
+				s.Where(sql.InValues(user.GroupUserPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
 				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
@@ -541,7 +577,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			},
 		}
 		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "group": %w`, err)
+			return nil, fmt.Errorf(`query edges "group_user": %w`, err)
 		}
 		query.Where(group.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
@@ -551,10 +587,75 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		for _, n := range neighbors {
 			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected "group" node returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected "group_user" node returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Group = append(nodes[i].Edges.Group, n)
+				nodes[i].Edges.GroupUser = append(nodes[i].Edges.GroupUser, n)
+			}
+		}
+	}
+
+	if query := uq.withGroupOwner; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[uuid.UUID]*User, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.GroupOwner = []*Group{}
+		}
+		var (
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*User)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   user.GroupOwnerTable,
+				Columns: user.GroupOwnerPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(user.GroupOwnerPrimaryKey[1], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*uuid.UUID)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*uuid.UUID)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := *eout
+				inValue := *ein
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "group_owner": %w`, err)
+		}
+		query.Where(group.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "group_owner" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.GroupOwner = append(nodes[i].Edges.GroupOwner, n)
 			}
 		}
 	}

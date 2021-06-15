@@ -61,19 +61,6 @@ func (f GroupBudgetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return f(ctx, mv)
 }
 
-// The GroupOwnerFunc type is an adapter to allow the use of ordinary
-// function as GroupOwner mutator.
-type GroupOwnerFunc func(context.Context, *ent.GroupOwnerMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f GroupOwnerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.GroupOwnerMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GroupOwnerMutation", m)
-	}
-	return f(ctx, mv)
-}
-
 // The RequestFunc type is an adapter to allow the use of ordinary
 // function as Request mutator.
 type RequestFunc func(context.Context, *ent.RequestMutation) (ent.Value, error)

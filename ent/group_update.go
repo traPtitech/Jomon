@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
-	"github.com/traPtitech/Jomon/ent/groupowner"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
 	"github.com/traPtitech/Jomon/ent/user"
@@ -149,17 +148,17 @@ func (gu *GroupUpdate) AddUser(u ...*User) *GroupUpdate {
 	return gu.AddUserIDs(ids...)
 }
 
-// AddOwnerIDs adds the "owner" edge to the GroupOwner entity by IDs.
+// AddOwnerIDs adds the "owner" edge to the User entity by IDs.
 func (gu *GroupUpdate) AddOwnerIDs(ids ...uuid.UUID) *GroupUpdate {
 	gu.mutation.AddOwnerIDs(ids...)
 	return gu
 }
 
-// AddOwner adds the "owner" edges to the GroupOwner entity.
-func (gu *GroupUpdate) AddOwner(g ...*GroupOwner) *GroupUpdate {
-	ids := make([]uuid.UUID, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// AddOwner adds the "owner" edges to the User entity.
+func (gu *GroupUpdate) AddOwner(u ...*User) *GroupUpdate {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
 	return gu.AddOwnerIDs(ids...)
 }
@@ -226,23 +225,23 @@ func (gu *GroupUpdate) RemoveUser(u ...*User) *GroupUpdate {
 	return gu.RemoveUserIDs(ids...)
 }
 
-// ClearOwner clears all "owner" edges to the GroupOwner entity.
+// ClearOwner clears all "owner" edges to the User entity.
 func (gu *GroupUpdate) ClearOwner() *GroupUpdate {
 	gu.mutation.ClearOwner()
 	return gu
 }
 
-// RemoveOwnerIDs removes the "owner" edge to GroupOwner entities by IDs.
+// RemoveOwnerIDs removes the "owner" edge to User entities by IDs.
 func (gu *GroupUpdate) RemoveOwnerIDs(ids ...uuid.UUID) *GroupUpdate {
 	gu.mutation.RemoveOwnerIDs(ids...)
 	return gu
 }
 
-// RemoveOwner removes "owner" edges to GroupOwner entities.
-func (gu *GroupUpdate) RemoveOwner(g ...*GroupOwner) *GroupUpdate {
-	ids := make([]uuid.UUID, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// RemoveOwner removes "owner" edges to User entities.
+func (gu *GroupUpdate) RemoveOwner(u ...*User) *GroupUpdate {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
 	return gu.RemoveOwnerIDs(ids...)
 }
@@ -508,15 +507,15 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if gu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   group.OwnerTable,
-			Columns: []string{group.OwnerColumn},
+			Columns: group.OwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: groupowner.FieldID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -524,15 +523,15 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := gu.mutation.RemovedOwnerIDs(); len(nodes) > 0 && !gu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   group.OwnerTable,
-			Columns: []string{group.OwnerColumn},
+			Columns: group.OwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: groupowner.FieldID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -543,15 +542,15 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := gu.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   group.OwnerTable,
-			Columns: []string{group.OwnerColumn},
+			Columns: group.OwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: groupowner.FieldID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -750,17 +749,17 @@ func (guo *GroupUpdateOne) AddUser(u ...*User) *GroupUpdateOne {
 	return guo.AddUserIDs(ids...)
 }
 
-// AddOwnerIDs adds the "owner" edge to the GroupOwner entity by IDs.
+// AddOwnerIDs adds the "owner" edge to the User entity by IDs.
 func (guo *GroupUpdateOne) AddOwnerIDs(ids ...uuid.UUID) *GroupUpdateOne {
 	guo.mutation.AddOwnerIDs(ids...)
 	return guo
 }
 
-// AddOwner adds the "owner" edges to the GroupOwner entity.
-func (guo *GroupUpdateOne) AddOwner(g ...*GroupOwner) *GroupUpdateOne {
-	ids := make([]uuid.UUID, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// AddOwner adds the "owner" edges to the User entity.
+func (guo *GroupUpdateOne) AddOwner(u ...*User) *GroupUpdateOne {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
 	return guo.AddOwnerIDs(ids...)
 }
@@ -827,23 +826,23 @@ func (guo *GroupUpdateOne) RemoveUser(u ...*User) *GroupUpdateOne {
 	return guo.RemoveUserIDs(ids...)
 }
 
-// ClearOwner clears all "owner" edges to the GroupOwner entity.
+// ClearOwner clears all "owner" edges to the User entity.
 func (guo *GroupUpdateOne) ClearOwner() *GroupUpdateOne {
 	guo.mutation.ClearOwner()
 	return guo
 }
 
-// RemoveOwnerIDs removes the "owner" edge to GroupOwner entities by IDs.
+// RemoveOwnerIDs removes the "owner" edge to User entities by IDs.
 func (guo *GroupUpdateOne) RemoveOwnerIDs(ids ...uuid.UUID) *GroupUpdateOne {
 	guo.mutation.RemoveOwnerIDs(ids...)
 	return guo
 }
 
-// RemoveOwner removes "owner" edges to GroupOwner entities.
-func (guo *GroupUpdateOne) RemoveOwner(g ...*GroupOwner) *GroupUpdateOne {
-	ids := make([]uuid.UUID, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// RemoveOwner removes "owner" edges to User entities.
+func (guo *GroupUpdateOne) RemoveOwner(u ...*User) *GroupUpdateOne {
+	ids := make([]uuid.UUID, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
 	return guo.RemoveOwnerIDs(ids...)
 }
@@ -1133,15 +1132,15 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	}
 	if guo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   group.OwnerTable,
-			Columns: []string{group.OwnerColumn},
+			Columns: group.OwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: groupowner.FieldID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -1149,15 +1148,15 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	}
 	if nodes := guo.mutation.RemovedOwnerIDs(); len(nodes) > 0 && !guo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   group.OwnerTable,
-			Columns: []string{group.OwnerColumn},
+			Columns: group.OwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: groupowner.FieldID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -1168,15 +1167,15 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	}
 	if nodes := guo.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   group.OwnerTable,
-			Columns: []string{group.OwnerColumn},
+			Columns: group.OwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: groupowner.FieldID,
+					Column: user.FieldID,
 				},
 			},
 		}

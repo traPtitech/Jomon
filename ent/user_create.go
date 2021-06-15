@@ -99,19 +99,34 @@ func (uc *UserCreate) SetID(u uuid.UUID) *UserCreate {
 	return uc
 }
 
-// AddGroupIDs adds the "group" edge to the Group entity by IDs.
-func (uc *UserCreate) AddGroupIDs(ids ...uuid.UUID) *UserCreate {
-	uc.mutation.AddGroupIDs(ids...)
+// AddGroupUserIDs adds the "group_user" edge to the Group entity by IDs.
+func (uc *UserCreate) AddGroupUserIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddGroupUserIDs(ids...)
 	return uc
 }
 
-// AddGroup adds the "group" edges to the Group entity.
-func (uc *UserCreate) AddGroup(g ...*Group) *UserCreate {
+// AddGroupUser adds the "group_user" edges to the Group entity.
+func (uc *UserCreate) AddGroupUser(g ...*Group) *UserCreate {
 	ids := make([]uuid.UUID, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uc.AddGroupIDs(ids...)
+	return uc.AddGroupUserIDs(ids...)
+}
+
+// AddGroupOwnerIDs adds the "group_owner" edge to the Group entity by IDs.
+func (uc *UserCreate) AddGroupOwnerIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddGroupOwnerIDs(ids...)
+	return uc
+}
+
+// AddGroupOwner adds the "group_owner" edges to the Group entity.
+func (uc *UserCreate) AddGroupOwner(g ...*Group) *UserCreate {
+	ids := make([]uuid.UUID, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return uc.AddGroupOwnerIDs(ids...)
 }
 
 // SetCommentID sets the "comment" edge to the Comment entity by ID.
@@ -335,12 +350,31 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.DeletedAt = &value
 	}
-	if nodes := uc.mutation.GroupIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.GroupUserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   user.GroupTable,
-			Columns: user.GroupPrimaryKey,
+			Table:   user.GroupUserTable,
+			Columns: user.GroupUserPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.GroupOwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.GroupOwnerTable,
+			Columns: user.GroupOwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

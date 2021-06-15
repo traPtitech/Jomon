@@ -15,7 +15,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
-	"github.com/traPtitech/Jomon/ent/groupowner"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
 	"github.com/traPtitech/Jomon/ent/user"
@@ -33,7 +32,7 @@ type GroupQuery struct {
 	// eager-loading edges.
 	withGroupBudget       *GroupBudgetQuery
 	withUser              *UserQuery
-	withOwner             *GroupOwnerQuery
+	withOwner             *UserQuery
 	withTransactionDetail *TransactionDetailQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -116,8 +115,8 @@ func (gq *GroupQuery) QueryUser() *UserQuery {
 }
 
 // QueryOwner chains the current query on the "owner" edge.
-func (gq *GroupQuery) QueryOwner() *GroupOwnerQuery {
-	query := &GroupOwnerQuery{config: gq.config}
+func (gq *GroupQuery) QueryOwner() *UserQuery {
+	query := &UserQuery{config: gq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -128,8 +127,8 @@ func (gq *GroupQuery) QueryOwner() *GroupOwnerQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, selector),
-			sqlgraph.To(groupowner.Table, groupowner.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, group.OwnerTable, group.OwnerColumn),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, group.OwnerTable, group.OwnerPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -374,8 +373,8 @@ func (gq *GroupQuery) WithUser(opts ...func(*UserQuery)) *GroupQuery {
 
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
-func (gq *GroupQuery) WithOwner(opts ...func(*GroupOwnerQuery)) *GroupQuery {
-	query := &GroupOwnerQuery{config: gq.config}
+func (gq *GroupQuery) WithOwner(opts ...func(*UserQuery)) *GroupQuery {
+	query := &UserQuery{config: gq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -582,30 +581,66 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 
 	if query := gq.withOwner; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*Group)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Owner = []*GroupOwner{}
+		ids := make(map[uuid.UUID]*Group, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.Owner = []*User{}
 		}
-		query.withFKs = true
-		query.Where(predicate.GroupOwner(func(s *sql.Selector) {
-			s.Where(sql.InValues(group.OwnerColumn, fks...))
-		}))
+		var (
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*Group)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: false,
+				Table:   group.OwnerTable,
+				Columns: group.OwnerPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(group.OwnerPrimaryKey[0], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*uuid.UUID)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*uuid.UUID)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := *eout
+				inValue := *ein
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, gq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "owner": %w`, err)
+		}
+		query.Where(user.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.group_owner
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "group_owner" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_owner" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected "owner" node returned %v`, n.ID)
 			}
-			node.Edges.Owner = append(node.Edges.Owner, n)
+			for i := range nodes {
+				nodes[i].Edges.Owner = append(nodes[i].Edges.Owner, n)
+			}
 		}
 	}
 

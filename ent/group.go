@@ -41,7 +41,7 @@ type GroupEdges struct {
 	// User holds the value of the user edge.
 	User []*User `json:"user,omitempty"`
 	// Owner holds the value of the owner edge.
-	Owner []*GroupOwner `json:"owner,omitempty"`
+	Owner []*User `json:"owner,omitempty"`
 	// TransactionDetail holds the value of the transaction_detail edge.
 	TransactionDetail []*TransactionDetail `json:"transaction_detail,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -69,7 +69,7 @@ func (e GroupEdges) UserOrErr() ([]*User, error) {
 
 // OwnerOrErr returns the Owner value or an error if the edge
 // was not loaded in eager-loading.
-func (e GroupEdges) OwnerOrErr() ([]*GroupOwner, error) {
+func (e GroupEdges) OwnerOrErr() ([]*User, error) {
 	if e.loadedTypes[2] {
 		return e.Owner, nil
 	}
@@ -173,7 +173,7 @@ func (gr *Group) QueryUser() *UserQuery {
 }
 
 // QueryOwner queries the "owner" edge of the Group entity.
-func (gr *Group) QueryOwner() *GroupOwnerQuery {
+func (gr *Group) QueryOwner() *UserQuery {
 	return (&GroupClient{config: gr.config}).QueryOwner(gr)
 }
 

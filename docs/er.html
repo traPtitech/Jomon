@@ -34,11 +34,6 @@ erDiagram
         comment string
         created_at timeDOTTime
     }
-    GroupOwner {
-        id uuidDOTUUID
-        owner string
-        created_at timeDOTTime
-    }
     Request {
         id uuidDOTUUID
         amount int
@@ -85,8 +80,8 @@ erDiagram
     }
     	Comment |o--o| User : "user/comment"
     	Group |o--o{ GroupBudget : "group_budget/group"
-    	Group }o--o{ User : "user/group"
-    	Group |o--o{ GroupOwner : "owner/group"
+    	Group }o--o{ User : "user/group_user"
+    	Group }o--o{ User : "owner/group_owner"
     	Group |o--o{ TransactionDetail : "transaction_detail/group"
     	GroupBudget |o--o| Transaction : "transaction/group_budget"
     	Request |o--o{ RequestStatus : "status/request"

@@ -92,27 +92,6 @@ var (
 			},
 		},
 	}
-	// GroupOwnersColumns holds the columns for the "group_owners" table.
-	GroupOwnersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "owner", Type: field.TypeString},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "group_owner", Type: field.TypeUUID, Nullable: true},
-	}
-	// GroupOwnersTable holds the schema information for the "group_owners" table.
-	GroupOwnersTable = &schema.Table{
-		Name:       "group_owners",
-		Columns:    GroupOwnersColumns,
-		PrimaryKey: []*schema.Column{GroupOwnersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "group_owners_groups_owner",
-				Columns:    []*schema.Column{GroupOwnersColumns[3]},
-				RefColumns: []*schema.Column{GroupsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
 	// RequestsColumns holds the columns for the "requests" table.
 	RequestsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -321,13 +300,37 @@ var (
 			},
 		},
 	}
+	// GroupOwnerColumns holds the columns for the "group_owner" table.
+	GroupOwnerColumns = []*schema.Column{
+		{Name: "group_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// GroupOwnerTable holds the schema information for the "group_owner" table.
+	GroupOwnerTable = &schema.Table{
+		Name:       "group_owner",
+		Columns:    GroupOwnerColumns,
+		PrimaryKey: []*schema.Column{GroupOwnerColumns[0], GroupOwnerColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "group_owner_group_id",
+				Columns:    []*schema.Column{GroupOwnerColumns[0]},
+				RefColumns: []*schema.Column{GroupsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "group_owner_user_id",
+				Columns:    []*schema.Column{GroupOwnerColumns[1]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CommentsTable,
 		FilesTable,
 		GroupsTable,
 		GroupBudgetsTable,
-		GroupOwnersTable,
 		RequestsTable,
 		RequestStatusTable,
 		RequestTargetsTable,
@@ -336,6 +339,7 @@ var (
 		TransactionDetailsTable,
 		UsersTable,
 		GroupUserTable,
+		GroupOwnerTable,
 	}
 )
 
@@ -343,7 +347,6 @@ func init() {
 	CommentsTable.ForeignKeys[0].RefTable = RequestsTable
 	FilesTable.ForeignKeys[0].RefTable = RequestsTable
 	GroupBudgetsTable.ForeignKeys[0].RefTable = GroupsTable
-	GroupOwnersTable.ForeignKeys[0].RefTable = GroupsTable
 	RequestStatusTable.ForeignKeys[0].RefTable = RequestsTable
 	RequestTargetsTable.ForeignKeys[0].RefTable = RequestsTable
 	TagsTable.ForeignKeys[0].RefTable = RequestsTable
@@ -357,4 +360,6 @@ func init() {
 	UsersTable.ForeignKeys[2].RefTable = RequestStatusTable
 	GroupUserTable.ForeignKeys[0].RefTable = GroupsTable
 	GroupUserTable.ForeignKeys[1].RefTable = UsersTable
+	GroupOwnerTable.ForeignKeys[0].RefTable = GroupsTable
+	GroupOwnerTable.ForeignKeys[1].RefTable = UsersTable
 }

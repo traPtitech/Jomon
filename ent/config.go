@@ -28,7 +28,6 @@ type hooks struct {
 	File              []ent.Hook
 	Group             []ent.Hook
 	GroupBudget       []ent.Hook
-	GroupOwner        []ent.Hook
 	Request           []ent.Hook
 	RequestStatus     []ent.Hook
 	RequestTarget     []ent.Hook
