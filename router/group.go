@@ -102,3 +102,32 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 	// TODO: Implement
 }
+
+func (h *Handlers) GetMembers(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
+	// TODO: Implement
+}
+
+func (h *Handlers) PostMember(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
+	// TODO: Implement
+}
+
+func (h *Handlers) DeleteMember(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
+	// TODO: Implement
+}
+
+func (h *Handlers) GetOwners(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
+	// TODO: Implement
+}
+
+func (h *Handlers) PostOwner(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
+	// TODO: Implement
+}
+func (h *Handlers) DeleteOwner(c echo.Context) error {
+	return c.NoContent(http.StatusOK)
+	// TODO: Implement
+}
