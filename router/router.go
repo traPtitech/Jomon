@@ -74,8 +74,7 @@ func SetRouting(e *echo.Echo, h Handlers) {
 		{
 			apiGroups.GET("", h.GetGroups)
 			apiGroups.POST("", h.PostGroup)
-			apiGroups.POST("/:groupID", h.PutGroup)
-			apiGroups.PUT("/:groupID", h.PostGroupUser)
+			apiGroups.PUT("/:groupID", h.PutGroup)
 			apiGroups.DELETE("/:groupID", h.DeleteGroup)
 		}
 

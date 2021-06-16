@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"os"
 
 	"github.com/gorilla/sessions"
@@ -19,11 +18,6 @@ func main() {
 		panic(err)
 	}
 	defer client.Close()
-
-	// Run the auto migration tool.
-	if err := client.Schema.Create(context.Background()); err != nil {
-		panic(err)
-	}
 
 	// Setup model repository
 	repo := model.NewEntRepository(client)

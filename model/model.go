@@ -1,6 +1,7 @@
 package model
 
 import (
+	"context"
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -10,7 +11,7 @@ import (
 
 func SetupEntClient() (*ent.Client, error) {
 	// Logging
-	entOptions := []ent.Option{ent.Debug()}
+	entOptions := []ent.Option{}
 
 	dbUser := testutil.GetEnvOrDefault("MYSQL_USERNAME", "root")
 	dbPass := testutil.GetEnvOrDefault("MYSQL_PASSWORD", "password")
@@ -23,6 +24,10 @@ func SetupEntClient() (*ent.Client, error) {
 	client, err := ent.Open("mysql", dbDsn, entOptions...)
 	if err != nil {
 		return nil, fmt.Errorf("can't connect to DATABASE: %w", err)
+	}
+
+	if err := client.Schema.Create(context.Background()); err != nil {
+		return nil, err
 	}
 
 	return client, nil

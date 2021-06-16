@@ -1,6 +1,8 @@
+.PHONY: up
 up:
 	@docker-compose up --build -d
 
+.PHONY: dev-up
 dev-up:
 	@docker-compose up --build
 
@@ -11,3 +13,7 @@ down:
 .PHONY: test
 test:
 	docker-compose -f server-test.yml run --rm jomon-server
+
+.PHONY: docs
+docs:
+	enter ./ent/schema ./docs/er.html

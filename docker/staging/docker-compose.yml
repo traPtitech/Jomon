@@ -16,7 +16,7 @@ services:
     restart: always
 
   db:
-    image: mariadb
+    image: mariadb:10.3.29
     restart: always
     env_file: ../../.env
     environment:
