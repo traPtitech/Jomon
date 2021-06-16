@@ -546,6 +546,42 @@ paths:
         schema:
           type: string
           format: uuid
+    put:
+      description: グループの情報を変更する。管理者権限またはグループオーナー権限が必要。
+      tags:
+        - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostGroup"
+      responses:
+        "200":
+          description: 変更に成功した。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        "404":
+          $ref: "#/components/responses/404"
+    delete:
+      description: グループを削除する。管理者権限またはグループオーナー権限が必要。
+      tags:
+        - Groups
+      responses:
+        "200":
+          description: 削除に成功した。
+        "404":
+          $ref: "#/components/responses/404"
+  "/groups/{groupID}/members":
+    parameters:
+      - name: groupID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
     get:
       description: 指定したグループに所属しているユーザーを返す。
       tags:
@@ -556,24 +592,12 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/Group"
-                  - type: object
-                    properties:
-                      transactions:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
-                      requests:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
-                      users:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/TrapID"
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                    $ref: "#/components/schemas/TrapID"
         "404":
           $ref: "#/components/responses/404"
     post:
@@ -595,30 +619,14 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/Group"
-                  - type: object
-                    properties:
-                      transactions:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
-                      requests:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
-                      users:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/TrapID"
-                      owners:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/TrapID"
-    put:
-      description: グループの情報を変更する。管理者権限またはグループオーナー権限が必要。
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                    $ref: "#/components/schemas/TrapID"
+    delete:
+      description: ユーザーをグループから削除する。管理者権限またはグループオーナー権限が必要。
       tags:
         - Groups
       requestBody:
@@ -626,46 +634,98 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostGroup"
+              type: object
+              properties:
+                id:
+                  $ref: "#/components/schemas/TrapID"
       responses:
         "200":
-          description: 変更に成功した。
+          description: 削除に成功した。
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/Group"
-                  - type: object
-                    properties:
-                      transactions:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
-                      requests:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
-                      users:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/TrapID"
-                      owners:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/TrapID"
-        "404":
-          $ref: "#/components/responses/404"
-    delete:
-      description: グループを削除する。管理者権限またはグループオーナー権限が必要。
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                    $ref: "#/components/schemas/TrapID"
+  "/groups/{groupID}/owners":
+    parameters:
+      - name: groupID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      description: 指定したグループに所属しているグループオーナーを返す。
       tags:
         - Groups
       responses:
         "200":
-          description: 削除に成功した。
+          description: 取得に成功した。返す
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  owners:
+                    type: array
+                    items:
+                    $ref: "#/components/schemas/TrapID"
         "404":
           $ref: "#/components/responses/404"
+    post:
+      description: グループオーナーをグループに追加する。管理者権限またはグループオーナー権限が必要。
+      tags:
+        - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  $ref: "#/components/schemas/TrapID"
+      responses:
+        "200":
+          description: 追加に成功した。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  owners:
+                    type: array
+                    items:
+                    $ref: "#/components/schemas/TrapID"
+    delete:
+      description: グループオーナーをグループから削除する。管理者権限またはグループオーナー権限が必要。
+      tags:
+        - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  $ref: "#/components/schemas/TrapID"
+      responses:
+        "200":
+          description: 削除に成功した。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  owners:
+                    type: array
+                    items:
+                    $ref: "#/components/schemas/TrapID"
   "/files":
     post:
       description: ファイルをアップロードする。
@@ -791,10 +851,6 @@ components:
         budget:
           type: integer
           example: 250000
-        owners:
-          type: array
-          items:
-            $ref: "#components/schemas/TrapID"
     PostFile:
       type: object
       properties:

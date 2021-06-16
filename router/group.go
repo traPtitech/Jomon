@@ -59,29 +59,33 @@ func (h *Handlers) GetGroups(c echo.Context) error {
 }
 
 func (h *Handlers) PostGroup(c echo.Context) error {
-	var group Group
-	if err := c.Bind(&group); err != nil {
-		return c.NoContent(http.StatusBadRequest)
-	}
+	return c.NoContent(http.StatusOK)
+	// TODO: Implement
+	/*
+		var group Group
+		if err := c.Bind(&group); err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
 
-	ctx := context.Background()
-	created, err := h.Repository.CreateGroup(ctx, group.Name, group.Description, group.Budget, owners)
-	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
-	}
+		ctx := context.Background()
+		created, err := h.Repository.CreateGroup(ctx, group.Name, group.Description, group.Budget, owners)
+		if err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
 
-	res := GroupDetail{
-		ID:          created.ID,
-		Name:        created.Name,
-		Description: created.Description,
-		Budget:      created.Budget,
-		Owners:      created.Owners,
-		Users:       created.Users,
-		CreatedAt:   created.CreatedAt,
-		UpdatedAt:   created.UpdatedAt,
-	}
+		res := GroupDetail{
+			ID:          created.ID,
+			Name:        created.Name,
+			Description: created.Description,
+			Budget:      created.Budget,
+			//Owners:      created.Owners,
+			//Users:       created.Users,
+			CreatedAt: created.CreatedAt,
+			UpdatedAt: created.UpdatedAt,
+		}
 
-	return c.JSON(http.StatusOK, res)
+		return c.JSON(http.StatusOK, res)
+	*/
 }
 
 func (h *Handlers) PostGroupUser(c echo.Context) error {
