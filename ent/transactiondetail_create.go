@@ -66,6 +66,20 @@ func (tdc *TransactionDetailCreate) SetNillableCreatedAt(t *time.Time) *Transact
 	return tdc
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (tdc *TransactionDetailCreate) SetUpdatedAt(t time.Time) *TransactionDetailCreate {
+	tdc.mutation.SetUpdatedAt(t)
+	return tdc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (tdc *TransactionDetailCreate) SetNillableUpdatedAt(t *time.Time) *TransactionDetailCreate {
+	if t != nil {
+		tdc.SetUpdatedAt(*t)
+	}
+	return tdc
+}
+
 // SetID sets the "id" field.
 func (tdc *TransactionDetailCreate) SetID(u uuid.UUID) *TransactionDetailCreate {
 	tdc.mutation.SetID(u)
@@ -185,6 +199,10 @@ func (tdc *TransactionDetailCreate) defaults() {
 		v := transactiondetail.DefaultCreatedAt()
 		tdc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := tdc.mutation.UpdatedAt(); !ok {
+		v := transactiondetail.DefaultUpdatedAt()
+		tdc.mutation.SetUpdatedAt(v)
+	}
 	if _, ok := tdc.mutation.ID(); !ok {
 		v := transactiondetail.DefaultID()
 		tdc.mutation.SetID(v)
@@ -201,6 +219,9 @@ func (tdc *TransactionDetailCreate) check() error {
 	}
 	if _, ok := tdc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+	}
+	if _, ok := tdc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
 	}
 	if _, ok := tdc.mutation.TransactionID(); !ok {
 		return &ValidationError{Name: "transaction", err: errors.New("ent: missing required edge \"transaction\"")}
@@ -257,6 +278,14 @@ func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.
 			Column: transactiondetail.FieldCreatedAt,
 		})
 		_node.CreatedAt = value
+	}
+	if value, ok := tdc.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: transactiondetail.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
 	}
 	if nodes := tdc.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

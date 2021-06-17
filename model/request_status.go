@@ -3,6 +3,9 @@ package model
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type Status int
@@ -63,4 +66,11 @@ func (s *Status) UnmarshalJSON(data []byte) error {
 }
 
 type RequestStatusRepository interface {
+}
+
+type RequestStatus struct {
+	ID        uuid.UUID
+	Status    string
+	Reason    string
+	CreatedAt time.Time
 }

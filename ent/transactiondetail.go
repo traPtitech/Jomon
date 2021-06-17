@@ -26,6 +26,8 @@ type TransactionDetail struct {
 	Target string `json:"target,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TransactionDetailQuery when eager-loading is set.
 	Edges                      TransactionDetailEdges `json:"edges"`
@@ -98,7 +100,7 @@ func (*TransactionDetail) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case transactiondetail.FieldTarget:
 			values[i] = new(sql.NullString)
-		case transactiondetail.FieldCreatedAt:
+		case transactiondetail.FieldCreatedAt, transactiondetail.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case transactiondetail.FieldID:
 			values[i] = new(uuid.UUID)
@@ -146,6 +148,12 @@ func (td *TransactionDetail) assignValues(columns []string, values []interface{}
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				td.CreatedAt = value.Time
+			}
+		case transactiondetail.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				td.UpdatedAt = value.Time
 			}
 		case transactiondetail.ForeignKeys[0]:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -214,6 +222,8 @@ func (td *TransactionDetail) String() string {
 	builder.WriteString(td.Target)
 	builder.WriteString(", created_at=")
 	builder.WriteString(td.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(td.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

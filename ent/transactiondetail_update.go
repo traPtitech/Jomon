@@ -81,6 +81,20 @@ func (tdu *TransactionDetailUpdate) SetNillableCreatedAt(t *time.Time) *Transact
 	return tdu
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (tdu *TransactionDetailUpdate) SetUpdatedAt(t time.Time) *TransactionDetailUpdate {
+	tdu.mutation.SetUpdatedAt(t)
+	return tdu
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (tdu *TransactionDetailUpdate) SetNillableUpdatedAt(t *time.Time) *TransactionDetailUpdate {
+	if t != nil {
+		tdu.SetUpdatedAt(*t)
+	}
+	return tdu
+}
+
 // SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
 func (tdu *TransactionDetailUpdate) SetTransactionID(id uuid.UUID) *TransactionDetailUpdate {
 	tdu.mutation.SetTransactionID(id)
@@ -264,6 +278,13 @@ func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err err
 			Column: transactiondetail.FieldCreatedAt,
 		})
 	}
+	if value, ok := tdu.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: transactiondetail.FieldUpdatedAt,
+		})
+	}
 	if tdu.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -433,6 +454,20 @@ func (tduo *TransactionDetailUpdateOne) SetCreatedAt(t time.Time) *TransactionDe
 func (tduo *TransactionDetailUpdateOne) SetNillableCreatedAt(t *time.Time) *TransactionDetailUpdateOne {
 	if t != nil {
 		tduo.SetCreatedAt(*t)
+	}
+	return tduo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (tduo *TransactionDetailUpdateOne) SetUpdatedAt(t time.Time) *TransactionDetailUpdateOne {
+	tduo.mutation.SetUpdatedAt(t)
+	return tduo
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (tduo *TransactionDetailUpdateOne) SetNillableUpdatedAt(t *time.Time) *TransactionDetailUpdateOne {
+	if t != nil {
+		tduo.SetUpdatedAt(*t)
 	}
 	return tduo
 }
@@ -642,6 +677,13 @@ func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *Tra
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: transactiondetail.FieldCreatedAt,
+		})
+	}
+	if value, ok := tduo.mutation.UpdatedAt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: transactiondetail.FieldUpdatedAt,
 		})
 	}
 	if tduo.mutation.TransactionCleared() {

@@ -140,6 +140,10 @@ func init() {
 	transactiondetailDescCreatedAt := transactiondetailFields[3].Descriptor()
 	// transactiondetail.DefaultCreatedAt holds the default value on creation for the created_at field.
 	transactiondetail.DefaultCreatedAt = transactiondetailDescCreatedAt.Default.(func() time.Time)
+	// transactiondetailDescUpdatedAt is the schema descriptor for updated_at field.
+	transactiondetailDescUpdatedAt := transactiondetailFields[4].Descriptor()
+	// transactiondetail.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	transactiondetail.DefaultUpdatedAt = transactiondetailDescUpdatedAt.Default.(func() time.Time)
 	// transactiondetailDescID is the schema descriptor for id field.
 	transactiondetailDescID := transactiondetailFields[0].Descriptor()
 	// transactiondetail.DefaultID holds the default value on creation for the id field.

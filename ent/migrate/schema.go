@@ -206,6 +206,7 @@ var (
 		{Name: "amount", Type: field.TypeInt, Default: 0},
 		{Name: "target", Type: field.TypeString, Default: ""},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "group_transaction_detail", Type: field.TypeUUID, Nullable: true},
 		{Name: "request_transaction_detail", Type: field.TypeUUID, Nullable: true},
 		{Name: "transaction_detail", Type: field.TypeUUID, Unique: true, Nullable: true},
@@ -218,19 +219,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "transaction_details_groups_transaction_detail",
-				Columns:    []*schema.Column{TransactionDetailsColumns[4]},
+				Columns:    []*schema.Column{TransactionDetailsColumns[5]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "transaction_details_requests_transaction_detail",
-				Columns:    []*schema.Column{TransactionDetailsColumns[5]},
+				Columns:    []*schema.Column{TransactionDetailsColumns[6]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "transaction_details_transactions_detail",
-				Columns:    []*schema.Column{TransactionDetailsColumns[6]},
+				Columns:    []*schema.Column{TransactionDetailsColumns[7]},
 				RefColumns: []*schema.Column{TransactionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
