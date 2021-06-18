@@ -28,13 +28,19 @@ make dev-up
 
 Now, you can send http requests to `localhost:3000`.
 
-You can also run following command in the project root.
+Alternatively, you can run following command in the project root.
 
 ```shell script
 make up
 ```
 
 The server is up without debugging logs.
+
+2. Run following command in the project root when making server down.
+
+```shell script
+make down
+```
 
 
 ## Staging
