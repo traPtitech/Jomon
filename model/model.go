@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/traPtitech/Jomon/ent"
@@ -11,7 +12,12 @@ import (
 
 func SetupEntClient() (*ent.Client, error) {
 	// Logging
-	entOptions := []ent.Option{}
+	var entOptions []ent.Option
+	if os.Getenv("IS_DEBUG_MODE") != "" {
+		entOptions = []ent.Option{}
+	} else {
+		entOptions = []ent.Option{ent.Debug()}
+	}
 
 	dbUser := testutil.GetEnvOrDefault("MYSQL_USERNAME", "root")
 	dbPass := testutil.GetEnvOrDefault("MYSQL_PASSWORD", "password")
@@ -26,8 +32,14 @@ func SetupEntClient() (*ent.Client, error) {
 		return nil, fmt.Errorf("can't connect to DATABASE: %w", err)
 	}
 
-	if err := client.Schema.Create(context.Background()); err != nil {
-		return nil, err
+	if os.Getenv("IS_DEBUG_MODE") != "" {
+		if err := client.Schema.Create(context.Background()); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := client.Debug().Schema.Create(context.Background()); err != nil {
+			return nil, err
+		}
 	}
 
 	return client, nil
