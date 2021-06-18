@@ -26,7 +26,7 @@ func (h *Handlers) GetTags(c echo.Context) error {
 	ctx := context.Background()
 	tags, err := h.Repository.GetTags(ctx)
 	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return internalServerError(err)
 	}
 
 	res := []*TagOverview{}
@@ -46,13 +46,13 @@ func (h *Handlers) GetTags(c echo.Context) error {
 func (h *Handlers) PostTag(c echo.Context) error {
 	var tag Tag
 	if err := c.Bind(&tag); err != nil {
-		return c.NoContent(http.StatusBadRequest)
+		return badRequest(err)
 	}
 
 	ctx := context.Background()
 	created, err := h.Repository.CreateTag(ctx, tag.Name, tag.Description)
 	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return internalServerError(err)
 	}
 
 	res := TagOverview{
@@ -69,20 +69,20 @@ func (h *Handlers) PostTag(c echo.Context) error {
 func (h *Handlers) PutTag(c echo.Context) error {
 	tagID, err := uuid.Parse(c.Param("tagID"))
 	if err != nil {
-		return c.NoContent(http.StatusBadRequest)
+		return badRequest(err)
 	}
 	if tagID == uuid.Nil {
-		return c.NoContent(http.StatusBadRequest)
+		return badRequest(err)
 	}
 	var req Tag
 	if err := c.Bind(&req); err != nil {
-		return c.NoContent(http.StatusBadRequest)
+		return badRequest(err)
 	}
 
 	ctx := context.Background()
 	tag, err := h.Repository.UpdateTag(ctx, tagID, req.Name, req.Description)
 	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return internalServerError(err)
 	}
 
 	res := &TagOverview{
@@ -99,16 +99,16 @@ func (h *Handlers) PutTag(c echo.Context) error {
 func (h *Handlers) DeleteTag(c echo.Context) error {
 	tagID, err := uuid.Parse(c.Param("tagID"))
 	if err != nil {
-		return c.NoContent(http.StatusBadRequest)
+		return badRequest(err)
 	}
 	if tagID == uuid.Nil {
-		return c.NoContent(http.StatusBadRequest)
+		return badRequest(err)
 	}
 
 	ctx := context.Background()
 	err = h.Repository.DeleteTag(ctx, tagID)
 	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return internalServerError(err)
 	}
 
 	return c.NoContent(http.StatusOK)

@@ -18,5 +18,5 @@ type Comment struct {
 type CommentRepository interface {
 	CreateComment(ctx context.Context, comment string, requestID uuid.UUID, userID uuid.UUID) (*Comment, error)
 	UpdateComment(ctx context.Context, comment string, requestID uuid.UUID, commentID uuid.UUID) (*Comment, error)
-	DeleteComment(ctx context.Context, requestID uuid.UUID, commentID uuid.UUID) error
+	// DeleteComment(ctx context.Context, requestID uuid.UUID, commentID uuid.UUID) error
 }

@@ -40,7 +40,7 @@ func (h *Handlers) GetGroups(c echo.Context) error {
 	ctx := context.Background()
 	groups, err := h.Repository.GetGroups(ctx)
 	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return internalServerError(err)
 	}
 
 	res := []*GroupOverview{}
@@ -64,13 +64,13 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 	/*
 		var group Group
 		if err := c.Bind(&group); err != nil {
-			return c.NoContent(http.StatusBadRequest)
+			return badRequest(err)
 		}
 
 		ctx := context.Background()
 		created, err := h.Repository.CreateGroup(ctx, group.Name, group.Description, group.Budget, owners)
 		if err != nil {
-			return c.NoContent(http.StatusInternalServerError)
+			return internalServerError(err)
 		}
 
 		res := GroupDetail{

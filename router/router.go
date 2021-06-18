@@ -26,6 +26,7 @@ func SetRouting(e *echo.Echo, h Handlers) {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 	e.Use(session.Middleware(h.SessionStore))
+	e.HTTPErrorHandler = HTTPErrorHandler
 
 	api := e.Group("/api")
 	{
