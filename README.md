@@ -34,7 +34,7 @@ Alternatively, you can run following command in the project root.
 make up
 ```
 
-The server is up without debugging logs.
+The server is up without logs.
 
 2. Run following command in the project root when making server down.
 
