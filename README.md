@@ -10,24 +10,32 @@
 
 ## Environment
 
-### Server test
+### Testing
 
 1. Run following command in the project root.
 
 ```shell script
-make server-test
+make test
 ```
 
-### Client
+### Running
 
 1. Run following command in the project root.
 
 ```shell script
-make client
+make dev-up
 ```
 
-Now you can access to `http://localhost:3000` for Jomon client page.
-And you can access to `http://localhost:1323` for Jomon mock server using `swagger.yaml`.
+Now, you can send http requests to `localhost:3000`.
+
+You can also run following command in the project root.
+
+```shell script
+make up
+```
+
+The server is up without debugging logs.
+
 
 ## Staging
 
