@@ -554,15 +554,15 @@ func (c *GroupClient) QueryOwner(gr *Group) *UserQuery {
 	return query
 }
 
-// QueryTransactionDetail queries the transaction_detail edge of a Group.
-func (c *GroupClient) QueryTransactionDetail(gr *Group) *TransactionDetailQuery {
-	query := &TransactionDetailQuery{config: c.config}
+// QueryRequest queries the request edge of a Group.
+func (c *GroupClient) QueryRequest(gr *Group) *RequestQuery {
+	query := &RequestQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := gr.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
-			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, group.TransactionDetailTable, group.TransactionDetailColumn),
+			sqlgraph.To(request.Table, request.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.RequestTable, group.RequestColumn),
 		)
 		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
 		return fromV, nil
@@ -846,15 +846,15 @@ func (c *RequestClient) QueryTag(r *Request) *TagQuery {
 	return query
 }
 
-// QueryTransactionDetail queries the transaction_detail edge of a Request.
-func (c *RequestClient) QueryTransactionDetail(r *Request) *TransactionDetailQuery {
-	query := &TransactionDetailQuery{config: c.config}
+// QueryTransaction queries the transaction edge of a Request.
+func (c *RequestClient) QueryTransaction(r *Request) *TransactionQuery {
+	query := &TransactionQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, id),
-			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.TransactionDetailTable, request.TransactionDetailColumn),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.TransactionTable, request.TransactionColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -887,6 +887,22 @@ func (c *RequestClient) QueryUser(r *Request) *UserQuery {
 			sqlgraph.From(request.Table, request.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, request.UserTable, request.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroup queries the group edge of a Request.
+func (c *RequestClient) QueryGroup(r *Request) *GroupQuery {
+	query := &GroupQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(request.Table, request.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, request.GroupTable, request.GroupColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1382,6 +1398,22 @@ func (c *TransactionClient) QueryGroupBudget(t *Transaction) *GroupBudgetQuery {
 	return query
 }
 
+// QueryRequest queries the request edge of a Transaction.
+func (c *TransactionClient) QueryRequest(t *Transaction) *RequestQuery {
+	query := &RequestQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(request.Table, request.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, transaction.RequestTable, transaction.RequestColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TransactionClient) Hooks() []Hook {
 	return c.hooks.Transaction
@@ -1481,38 +1513,6 @@ func (c *TransactionDetailClient) QueryTransaction(td *TransactionDetail) *Trans
 			sqlgraph.From(transactiondetail.Table, transactiondetail.FieldID, id),
 			sqlgraph.To(transaction.Table, transaction.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, transactiondetail.TransactionTable, transactiondetail.TransactionColumn),
-		)
-		fromV = sqlgraph.Neighbors(td.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryRequest queries the request edge of a TransactionDetail.
-func (c *TransactionDetailClient) QueryRequest(td *TransactionDetail) *RequestQuery {
-	query := &RequestQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := td.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(transactiondetail.Table, transactiondetail.FieldID, id),
-			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, transactiondetail.RequestTable, transactiondetail.RequestColumn),
-		)
-		fromV = sqlgraph.Neighbors(td.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryGroup queries the group edge of a TransactionDetail.
-func (c *TransactionDetailClient) QueryGroup(td *TransactionDetail) *GroupQuery {
-	query := &GroupQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := td.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(transactiondetail.Table, transactiondetail.FieldID, id),
-			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, transactiondetail.GroupTable, transactiondetail.GroupColumn),
 		)
 		fromV = sqlgraph.Neighbors(td.driver.Dialect(), step)
 		return fromV, nil

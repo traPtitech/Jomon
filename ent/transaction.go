@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
+	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
 )
@@ -25,6 +26,7 @@ type Transaction struct {
 	// The values are being populated by the TransactionQuery when eager-loading is set.
 	Edges                    TransactionEdges `json:"edges"`
 	group_budget_transaction *uuid.UUID
+	request_transaction      *uuid.UUID
 }
 
 // TransactionEdges holds the relations/edges for other nodes in the graph.
@@ -35,9 +37,11 @@ type TransactionEdges struct {
 	Tag []*Tag `json:"tag,omitempty"`
 	// GroupBudget holds the value of the group_budget edge.
 	GroupBudget *GroupBudget `json:"group_budget,omitempty"`
+	// Request holds the value of the request edge.
+	Request *Request `json:"request,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // DetailOrErr returns the Detail value or an error if the edge
@@ -77,6 +81,20 @@ func (e TransactionEdges) GroupBudgetOrErr() (*GroupBudget, error) {
 	return nil, &NotLoadedError{edge: "group_budget"}
 }
 
+// RequestOrErr returns the Request value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TransactionEdges) RequestOrErr() (*Request, error) {
+	if e.loadedTypes[3] {
+		if e.Request == nil {
+			// The edge request was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: request.Label}
+		}
+		return e.Request, nil
+	}
+	return nil, &NotLoadedError{edge: "request"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -87,6 +105,8 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 		case transaction.FieldID:
 			values[i] = new(uuid.UUID)
 		case transaction.ForeignKeys[0]: // group_budget_transaction
+			values[i] = new(uuid.UUID)
+		case transaction.ForeignKeys[1]: // request_transaction
 			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Transaction", columns[i])
@@ -121,6 +141,12 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 			} else if value != nil {
 				t.group_budget_transaction = value
 			}
+		case transaction.ForeignKeys[1]:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field request_transaction", values[i])
+			} else if value != nil {
+				t.request_transaction = value
+			}
 		}
 	}
 	return nil
@@ -139,6 +165,11 @@ func (t *Transaction) QueryTag() *TagQuery {
 // QueryGroupBudget queries the "group_budget" edge of the Transaction entity.
 func (t *Transaction) QueryGroupBudget() *GroupBudgetQuery {
 	return (&TransactionClient{config: t.config}).QueryGroupBudget(t)
+}
+
+// QueryRequest queries the "request" edge of the Transaction entity.
+func (t *Transaction) QueryRequest() *RequestQuery {
+	return (&TransactionClient{config: t.config}).QueryRequest(t)
 }
 
 // Update returns a builder for updating this Transaction.

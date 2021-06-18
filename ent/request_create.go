@@ -13,11 +13,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
+	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/tag"
-	"github.com/traPtitech/Jomon/ent/transactiondetail"
+	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -34,6 +35,18 @@ func (rc *RequestCreate) SetAmount(i int) *RequestCreate {
 	return rc
 }
 
+// SetTitle sets the "title" field.
+func (rc *RequestCreate) SetTitle(s string) *RequestCreate {
+	rc.mutation.SetTitle(s)
+	return rc
+}
+
+// SetContent sets the "content" field.
+func (rc *RequestCreate) SetContent(s string) *RequestCreate {
+	rc.mutation.SetContent(s)
+	return rc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (rc *RequestCreate) SetCreatedAt(t time.Time) *RequestCreate {
 	rc.mutation.SetCreatedAt(t)
@@ -44,6 +57,20 @@ func (rc *RequestCreate) SetCreatedAt(t time.Time) *RequestCreate {
 func (rc *RequestCreate) SetNillableCreatedAt(t *time.Time) *RequestCreate {
 	if t != nil {
 		rc.SetCreatedAt(*t)
+	}
+	return rc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (rc *RequestCreate) SetUpdatedAt(t time.Time) *RequestCreate {
+	rc.mutation.SetUpdatedAt(t)
+	return rc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (rc *RequestCreate) SetNillableUpdatedAt(t *time.Time) *RequestCreate {
+	if t != nil {
+		rc.SetUpdatedAt(*t)
 	}
 	return rc
 }
@@ -114,19 +141,19 @@ func (rc *RequestCreate) AddTag(t ...*Tag) *RequestCreate {
 	return rc.AddTagIDs(ids...)
 }
 
-// AddTransactionDetailIDs adds the "transaction_detail" edge to the TransactionDetail entity by IDs.
-func (rc *RequestCreate) AddTransactionDetailIDs(ids ...uuid.UUID) *RequestCreate {
-	rc.mutation.AddTransactionDetailIDs(ids...)
+// AddTransactionIDs adds the "transaction" edge to the Transaction entity by IDs.
+func (rc *RequestCreate) AddTransactionIDs(ids ...uuid.UUID) *RequestCreate {
+	rc.mutation.AddTransactionIDs(ids...)
 	return rc
 }
 
-// AddTransactionDetail adds the "transaction_detail" edges to the TransactionDetail entity.
-func (rc *RequestCreate) AddTransactionDetail(t ...*TransactionDetail) *RequestCreate {
+// AddTransaction adds the "transaction" edges to the Transaction entity.
+func (rc *RequestCreate) AddTransaction(t ...*Transaction) *RequestCreate {
 	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return rc.AddTransactionDetailIDs(ids...)
+	return rc.AddTransactionIDs(ids...)
 }
 
 // AddCommentIDs adds the "comment" edge to the Comment entity by IDs.
@@ -161,6 +188,25 @@ func (rc *RequestCreate) SetNillableUserID(id *uuid.UUID) *RequestCreate {
 // SetUser sets the "user" edge to the User entity.
 func (rc *RequestCreate) SetUser(u *User) *RequestCreate {
 	return rc.SetUserID(u.ID)
+}
+
+// SetGroupID sets the "group" edge to the Group entity by ID.
+func (rc *RequestCreate) SetGroupID(id uuid.UUID) *RequestCreate {
+	rc.mutation.SetGroupID(id)
+	return rc
+}
+
+// SetNillableGroupID sets the "group" edge to the Group entity by ID if the given value is not nil.
+func (rc *RequestCreate) SetNillableGroupID(id *uuid.UUID) *RequestCreate {
+	if id != nil {
+		rc = rc.SetGroupID(*id)
+	}
+	return rc
+}
+
+// SetGroup sets the "group" edge to the Group entity.
+func (rc *RequestCreate) SetGroup(g *Group) *RequestCreate {
+	return rc.SetGroupID(g.ID)
 }
 
 // Mutation returns the RequestMutation object of the builder.
@@ -219,6 +265,10 @@ func (rc *RequestCreate) defaults() {
 		v := request.DefaultCreatedAt()
 		rc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := rc.mutation.UpdatedAt(); !ok {
+		v := request.DefaultUpdatedAt()
+		rc.mutation.SetUpdatedAt(v)
+	}
 	if _, ok := rc.mutation.ID(); !ok {
 		v := request.DefaultID()
 		rc.mutation.SetID(v)
@@ -230,8 +280,17 @@ func (rc *RequestCreate) check() error {
 	if _, ok := rc.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New("ent: missing required field \"amount\"")}
 	}
+	if _, ok := rc.mutation.Title(); !ok {
+		return &ValidationError{Name: "title", err: errors.New("ent: missing required field \"title\"")}
+	}
+	if _, ok := rc.mutation.Content(); !ok {
+		return &ValidationError{Name: "content", err: errors.New("ent: missing required field \"content\"")}
+	}
 	if _, ok := rc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+	}
+	if _, ok := rc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
 	}
 	return nil
 }
@@ -270,6 +329,22 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 		})
 		_node.Amount = value
 	}
+	if value, ok := rc.mutation.Title(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: request.FieldTitle,
+		})
+		_node.Title = value
+	}
+	if value, ok := rc.mutation.Content(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: request.FieldContent,
+		})
+		_node.Content = value
+	}
 	if value, ok := rc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -277,6 +352,14 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 			Column: request.FieldCreatedAt,
 		})
 		_node.CreatedAt = value
+	}
+	if value, ok := rc.mutation.UpdatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: request.FieldUpdatedAt,
+		})
+		_node.UpdatedAt = value
 	}
 	if nodes := rc.mutation.StatusIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -354,17 +437,17 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := rc.mutation.TransactionDetailIDs(); len(nodes) > 0 {
+	if nodes := rc.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   request.TransactionDetailTable,
-			Columns: []string{request.TransactionDetailColumn},
+			Table:   request.TransactionTable,
+			Columns: []string{request.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: transactiondetail.FieldID,
+					Column: transaction.FieldID,
 				},
 			},
 		}
@@ -409,6 +492,26 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := rc.mutation.GroupIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   request.GroupTable,
+			Columns: []string{request.GroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.group_request = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

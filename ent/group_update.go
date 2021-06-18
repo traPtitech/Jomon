@@ -14,7 +14,7 @@ import (
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/transactiondetail"
+	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -163,19 +163,19 @@ func (gu *GroupUpdate) AddOwner(u ...*User) *GroupUpdate {
 	return gu.AddOwnerIDs(ids...)
 }
 
-// AddTransactionDetailIDs adds the "transaction_detail" edge to the TransactionDetail entity by IDs.
-func (gu *GroupUpdate) AddTransactionDetailIDs(ids ...uuid.UUID) *GroupUpdate {
-	gu.mutation.AddTransactionDetailIDs(ids...)
+// AddRequestIDs adds the "request" edge to the Request entity by IDs.
+func (gu *GroupUpdate) AddRequestIDs(ids ...uuid.UUID) *GroupUpdate {
+	gu.mutation.AddRequestIDs(ids...)
 	return gu
 }
 
-// AddTransactionDetail adds the "transaction_detail" edges to the TransactionDetail entity.
-func (gu *GroupUpdate) AddTransactionDetail(t ...*TransactionDetail) *GroupUpdate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// AddRequest adds the "request" edges to the Request entity.
+func (gu *GroupUpdate) AddRequest(r ...*Request) *GroupUpdate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
-	return gu.AddTransactionDetailIDs(ids...)
+	return gu.AddRequestIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -246,25 +246,25 @@ func (gu *GroupUpdate) RemoveOwner(u ...*User) *GroupUpdate {
 	return gu.RemoveOwnerIDs(ids...)
 }
 
-// ClearTransactionDetail clears all "transaction_detail" edges to the TransactionDetail entity.
-func (gu *GroupUpdate) ClearTransactionDetail() *GroupUpdate {
-	gu.mutation.ClearTransactionDetail()
+// ClearRequest clears all "request" edges to the Request entity.
+func (gu *GroupUpdate) ClearRequest() *GroupUpdate {
+	gu.mutation.ClearRequest()
 	return gu
 }
 
-// RemoveTransactionDetailIDs removes the "transaction_detail" edge to TransactionDetail entities by IDs.
-func (gu *GroupUpdate) RemoveTransactionDetailIDs(ids ...uuid.UUID) *GroupUpdate {
-	gu.mutation.RemoveTransactionDetailIDs(ids...)
+// RemoveRequestIDs removes the "request" edge to Request entities by IDs.
+func (gu *GroupUpdate) RemoveRequestIDs(ids ...uuid.UUID) *GroupUpdate {
+	gu.mutation.RemoveRequestIDs(ids...)
 	return gu
 }
 
-// RemoveTransactionDetail removes "transaction_detail" edges to TransactionDetail entities.
-func (gu *GroupUpdate) RemoveTransactionDetail(t ...*TransactionDetail) *GroupUpdate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// RemoveRequest removes "request" edges to Request entities.
+func (gu *GroupUpdate) RemoveRequest(r ...*Request) *GroupUpdate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
-	return gu.RemoveTransactionDetailIDs(ids...)
+	return gu.RemoveRequestIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -559,33 +559,33 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if gu.mutation.TransactionDetailCleared() {
+	if gu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.TransactionDetailTable,
-			Columns: []string{group.TransactionDetailColumn},
+			Table:   group.RequestTable,
+			Columns: []string{group.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: transactiondetail.FieldID,
+					Column: request.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.RemovedTransactionDetailIDs(); len(nodes) > 0 && !gu.mutation.TransactionDetailCleared() {
+	if nodes := gu.mutation.RemovedRequestIDs(); len(nodes) > 0 && !gu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.TransactionDetailTable,
-			Columns: []string{group.TransactionDetailColumn},
+			Table:   group.RequestTable,
+			Columns: []string{group.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: transactiondetail.FieldID,
+					Column: request.FieldID,
 				},
 			},
 		}
@@ -594,17 +594,17 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.TransactionDetailIDs(); len(nodes) > 0 {
+	if nodes := gu.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.TransactionDetailTable,
-			Columns: []string{group.TransactionDetailColumn},
+			Table:   group.RequestTable,
+			Columns: []string{group.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: transactiondetail.FieldID,
+					Column: request.FieldID,
 				},
 			},
 		}
@@ -764,19 +764,19 @@ func (guo *GroupUpdateOne) AddOwner(u ...*User) *GroupUpdateOne {
 	return guo.AddOwnerIDs(ids...)
 }
 
-// AddTransactionDetailIDs adds the "transaction_detail" edge to the TransactionDetail entity by IDs.
-func (guo *GroupUpdateOne) AddTransactionDetailIDs(ids ...uuid.UUID) *GroupUpdateOne {
-	guo.mutation.AddTransactionDetailIDs(ids...)
+// AddRequestIDs adds the "request" edge to the Request entity by IDs.
+func (guo *GroupUpdateOne) AddRequestIDs(ids ...uuid.UUID) *GroupUpdateOne {
+	guo.mutation.AddRequestIDs(ids...)
 	return guo
 }
 
-// AddTransactionDetail adds the "transaction_detail" edges to the TransactionDetail entity.
-func (guo *GroupUpdateOne) AddTransactionDetail(t ...*TransactionDetail) *GroupUpdateOne {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// AddRequest adds the "request" edges to the Request entity.
+func (guo *GroupUpdateOne) AddRequest(r ...*Request) *GroupUpdateOne {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
-	return guo.AddTransactionDetailIDs(ids...)
+	return guo.AddRequestIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -847,25 +847,25 @@ func (guo *GroupUpdateOne) RemoveOwner(u ...*User) *GroupUpdateOne {
 	return guo.RemoveOwnerIDs(ids...)
 }
 
-// ClearTransactionDetail clears all "transaction_detail" edges to the TransactionDetail entity.
-func (guo *GroupUpdateOne) ClearTransactionDetail() *GroupUpdateOne {
-	guo.mutation.ClearTransactionDetail()
+// ClearRequest clears all "request" edges to the Request entity.
+func (guo *GroupUpdateOne) ClearRequest() *GroupUpdateOne {
+	guo.mutation.ClearRequest()
 	return guo
 }
 
-// RemoveTransactionDetailIDs removes the "transaction_detail" edge to TransactionDetail entities by IDs.
-func (guo *GroupUpdateOne) RemoveTransactionDetailIDs(ids ...uuid.UUID) *GroupUpdateOne {
-	guo.mutation.RemoveTransactionDetailIDs(ids...)
+// RemoveRequestIDs removes the "request" edge to Request entities by IDs.
+func (guo *GroupUpdateOne) RemoveRequestIDs(ids ...uuid.UUID) *GroupUpdateOne {
+	guo.mutation.RemoveRequestIDs(ids...)
 	return guo
 }
 
-// RemoveTransactionDetail removes "transaction_detail" edges to TransactionDetail entities.
-func (guo *GroupUpdateOne) RemoveTransactionDetail(t ...*TransactionDetail) *GroupUpdateOne {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// RemoveRequest removes "request" edges to Request entities.
+func (guo *GroupUpdateOne) RemoveRequest(r ...*Request) *GroupUpdateOne {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
-	return guo.RemoveTransactionDetailIDs(ids...)
+	return guo.RemoveRequestIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1184,33 +1184,33 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if guo.mutation.TransactionDetailCleared() {
+	if guo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.TransactionDetailTable,
-			Columns: []string{group.TransactionDetailColumn},
+			Table:   group.RequestTable,
+			Columns: []string{group.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: transactiondetail.FieldID,
+					Column: request.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.RemovedTransactionDetailIDs(); len(nodes) > 0 && !guo.mutation.TransactionDetailCleared() {
+	if nodes := guo.mutation.RemovedRequestIDs(); len(nodes) > 0 && !guo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.TransactionDetailTable,
-			Columns: []string{group.TransactionDetailColumn},
+			Table:   group.RequestTable,
+			Columns: []string{group.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: transactiondetail.FieldID,
+					Column: request.FieldID,
 				},
 			},
 		}
@@ -1219,17 +1219,17 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.TransactionDetailIDs(); len(nodes) > 0 {
+	if nodes := guo.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.TransactionDetailTable,
-			Columns: []string{group.TransactionDetailColumn},
+			Table:   group.RequestTable,
+			Columns: []string{group.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: transactiondetail.FieldID,
+					Column: request.FieldID,
 				},
 			},
 		}

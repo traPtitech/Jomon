@@ -12,9 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
 )
@@ -106,44 +104,6 @@ func (tdu *TransactionDetailUpdate) SetTransaction(t *Transaction) *TransactionD
 	return tdu.SetTransactionID(t.ID)
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (tdu *TransactionDetailUpdate) SetRequestID(id uuid.UUID) *TransactionDetailUpdate {
-	tdu.mutation.SetRequestID(id)
-	return tdu
-}
-
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (tdu *TransactionDetailUpdate) SetNillableRequestID(id *uuid.UUID) *TransactionDetailUpdate {
-	if id != nil {
-		tdu = tdu.SetRequestID(*id)
-	}
-	return tdu
-}
-
-// SetRequest sets the "request" edge to the Request entity.
-func (tdu *TransactionDetailUpdate) SetRequest(r *Request) *TransactionDetailUpdate {
-	return tdu.SetRequestID(r.ID)
-}
-
-// SetGroupID sets the "group" edge to the Group entity by ID.
-func (tdu *TransactionDetailUpdate) SetGroupID(id uuid.UUID) *TransactionDetailUpdate {
-	tdu.mutation.SetGroupID(id)
-	return tdu
-}
-
-// SetNillableGroupID sets the "group" edge to the Group entity by ID if the given value is not nil.
-func (tdu *TransactionDetailUpdate) SetNillableGroupID(id *uuid.UUID) *TransactionDetailUpdate {
-	if id != nil {
-		tdu = tdu.SetGroupID(*id)
-	}
-	return tdu
-}
-
-// SetGroup sets the "group" edge to the Group entity.
-func (tdu *TransactionDetailUpdate) SetGroup(g *Group) *TransactionDetailUpdate {
-	return tdu.SetGroupID(g.ID)
-}
-
 // Mutation returns the TransactionDetailMutation object of the builder.
 func (tdu *TransactionDetailUpdate) Mutation() *TransactionDetailMutation {
 	return tdu.mutation
@@ -152,18 +112,6 @@ func (tdu *TransactionDetailUpdate) Mutation() *TransactionDetailMutation {
 // ClearTransaction clears the "transaction" edge to the Transaction entity.
 func (tdu *TransactionDetailUpdate) ClearTransaction() *TransactionDetailUpdate {
 	tdu.mutation.ClearTransaction()
-	return tdu
-}
-
-// ClearRequest clears the "request" edge to the Request entity.
-func (tdu *TransactionDetailUpdate) ClearRequest() *TransactionDetailUpdate {
-	tdu.mutation.ClearRequest()
-	return tdu
-}
-
-// ClearGroup clears the "group" edge to the Group entity.
-func (tdu *TransactionDetailUpdate) ClearGroup() *TransactionDetailUpdate {
-	tdu.mutation.ClearGroup()
 	return tdu
 }
 
@@ -320,76 +268,6 @@ func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tdu.mutation.RequestCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   transactiondetail.RequestTable,
-			Columns: []string{transactiondetail.RequestColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tdu.mutation.RequestIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   transactiondetail.RequestTable,
-			Columns: []string{transactiondetail.RequestColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if tdu.mutation.GroupCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   transactiondetail.GroupTable,
-			Columns: []string{transactiondetail.GroupColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: group.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tdu.mutation.GroupIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   transactiondetail.GroupTable,
-			Columns: []string{transactiondetail.GroupColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: group.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tdu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{transactiondetail.Label}
@@ -483,44 +361,6 @@ func (tduo *TransactionDetailUpdateOne) SetTransaction(t *Transaction) *Transact
 	return tduo.SetTransactionID(t.ID)
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (tduo *TransactionDetailUpdateOne) SetRequestID(id uuid.UUID) *TransactionDetailUpdateOne {
-	tduo.mutation.SetRequestID(id)
-	return tduo
-}
-
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (tduo *TransactionDetailUpdateOne) SetNillableRequestID(id *uuid.UUID) *TransactionDetailUpdateOne {
-	if id != nil {
-		tduo = tduo.SetRequestID(*id)
-	}
-	return tduo
-}
-
-// SetRequest sets the "request" edge to the Request entity.
-func (tduo *TransactionDetailUpdateOne) SetRequest(r *Request) *TransactionDetailUpdateOne {
-	return tduo.SetRequestID(r.ID)
-}
-
-// SetGroupID sets the "group" edge to the Group entity by ID.
-func (tduo *TransactionDetailUpdateOne) SetGroupID(id uuid.UUID) *TransactionDetailUpdateOne {
-	tduo.mutation.SetGroupID(id)
-	return tduo
-}
-
-// SetNillableGroupID sets the "group" edge to the Group entity by ID if the given value is not nil.
-func (tduo *TransactionDetailUpdateOne) SetNillableGroupID(id *uuid.UUID) *TransactionDetailUpdateOne {
-	if id != nil {
-		tduo = tduo.SetGroupID(*id)
-	}
-	return tduo
-}
-
-// SetGroup sets the "group" edge to the Group entity.
-func (tduo *TransactionDetailUpdateOne) SetGroup(g *Group) *TransactionDetailUpdateOne {
-	return tduo.SetGroupID(g.ID)
-}
-
 // Mutation returns the TransactionDetailMutation object of the builder.
 func (tduo *TransactionDetailUpdateOne) Mutation() *TransactionDetailMutation {
 	return tduo.mutation
@@ -529,18 +369,6 @@ func (tduo *TransactionDetailUpdateOne) Mutation() *TransactionDetailMutation {
 // ClearTransaction clears the "transaction" edge to the Transaction entity.
 func (tduo *TransactionDetailUpdateOne) ClearTransaction() *TransactionDetailUpdateOne {
 	tduo.mutation.ClearTransaction()
-	return tduo
-}
-
-// ClearRequest clears the "request" edge to the Request entity.
-func (tduo *TransactionDetailUpdateOne) ClearRequest() *TransactionDetailUpdateOne {
-	tduo.mutation.ClearRequest()
-	return tduo
-}
-
-// ClearGroup clears the "group" edge to the Group entity.
-func (tduo *TransactionDetailUpdateOne) ClearGroup() *TransactionDetailUpdateOne {
-	tduo.mutation.ClearGroup()
 	return tduo
 }
 
@@ -713,76 +541,6 @@ func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *Tra
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: transaction.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if tduo.mutation.RequestCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   transactiondetail.RequestTable,
-			Columns: []string{transactiondetail.RequestColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tduo.mutation.RequestIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   transactiondetail.RequestTable,
-			Columns: []string{transactiondetail.RequestColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if tduo.mutation.GroupCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   transactiondetail.GroupTable,
-			Columns: []string{transactiondetail.GroupColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: group.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tduo.mutation.GroupIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   transactiondetail.GroupTable,
-			Columns: []string{transactiondetail.GroupColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: group.FieldID,
 				},
 			},
 		}

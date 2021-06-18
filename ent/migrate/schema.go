@@ -96,14 +96,25 @@ var (
 	RequestsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "amount", Type: field.TypeInt},
+		{Name: "title", Type: field.TypeString},
+		{Name: "content", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "group_request", Type: field.TypeUUID, Nullable: true},
 	}
 	// RequestsTable holds the schema information for the "requests" table.
 	RequestsTable = &schema.Table{
-		Name:        "requests",
-		Columns:     RequestsColumns,
-		PrimaryKey:  []*schema.Column{RequestsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "requests",
+		Columns:    RequestsColumns,
+		PrimaryKey: []*schema.Column{RequestsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "requests_groups_request",
+				Columns:    []*schema.Column{RequestsColumns[6]},
+				RefColumns: []*schema.Column{GroupsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// RequestStatusColumns holds the columns for the "request_status" table.
 	RequestStatusColumns = []*schema.Column{
@@ -185,6 +196,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "group_budget_transaction", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "request_transaction", Type: field.TypeUUID, Nullable: true},
 	}
 	// TransactionsTable holds the schema information for the "transactions" table.
 	TransactionsTable = &schema.Table{
@@ -198,6 +210,12 @@ var (
 				RefColumns: []*schema.Column{GroupBudgetsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
+			{
+				Symbol:     "transactions_requests_transaction",
+				Columns:    []*schema.Column{TransactionsColumns[3]},
+				RefColumns: []*schema.Column{RequestsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
 		},
 	}
 	// TransactionDetailsColumns holds the columns for the "transaction_details" table.
@@ -207,8 +225,6 @@ var (
 		{Name: "target", Type: field.TypeString, Default: ""},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "group_transaction_detail", Type: field.TypeUUID, Nullable: true},
-		{Name: "request_transaction_detail", Type: field.TypeUUID, Nullable: true},
 		{Name: "transaction_detail", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// TransactionDetailsTable holds the schema information for the "transaction_details" table.
@@ -218,20 +234,8 @@ var (
 		PrimaryKey: []*schema.Column{TransactionDetailsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "transaction_details_groups_transaction_detail",
-				Columns:    []*schema.Column{TransactionDetailsColumns[5]},
-				RefColumns: []*schema.Column{GroupsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "transaction_details_requests_transaction_detail",
-				Columns:    []*schema.Column{TransactionDetailsColumns[6]},
-				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
 				Symbol:     "transaction_details_transactions_detail",
-				Columns:    []*schema.Column{TransactionDetailsColumns[7]},
+				Columns:    []*schema.Column{TransactionDetailsColumns[5]},
 				RefColumns: []*schema.Column{TransactionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -348,14 +352,14 @@ func init() {
 	CommentsTable.ForeignKeys[0].RefTable = RequestsTable
 	FilesTable.ForeignKeys[0].RefTable = RequestsTable
 	GroupBudgetsTable.ForeignKeys[0].RefTable = GroupsTable
+	RequestsTable.ForeignKeys[0].RefTable = GroupsTable
 	RequestStatusTable.ForeignKeys[0].RefTable = RequestsTable
 	RequestTargetsTable.ForeignKeys[0].RefTable = RequestsTable
 	TagsTable.ForeignKeys[0].RefTable = RequestsTable
 	TagsTable.ForeignKeys[1].RefTable = TransactionsTable
 	TransactionsTable.ForeignKeys[0].RefTable = GroupBudgetsTable
-	TransactionDetailsTable.ForeignKeys[0].RefTable = GroupsTable
-	TransactionDetailsTable.ForeignKeys[1].RefTable = RequestsTable
-	TransactionDetailsTable.ForeignKeys[2].RefTable = TransactionsTable
+	TransactionsTable.ForeignKeys[1].RefTable = RequestsTable
+	TransactionDetailsTable.ForeignKeys[0].RefTable = TransactionsTable
 	UsersTable.ForeignKeys[0].RefTable = CommentsTable
 	UsersTable.ForeignKeys[1].RefTable = RequestsTable
 	UsersTable.ForeignKeys[2].RefTable = RequestStatusTable

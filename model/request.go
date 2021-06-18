@@ -1,15 +1,16 @@
 package model
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type RequestRepository interface {
+	GetRequests(ctx context.Context, query RequestQuery) ([]*RequestResponse, error)
+	CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, group Group) (*RequestDetail, error)
 	/*
-		GetRequests(ctx context.Context, query RequestQuery) ([]*RequestResponse, error)
-		CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, group Group) (RequestDetail, error)
 		GetRequest(ctx context.Context, requestID uuid.UUID) (RequestDetail, error)
 		UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, content string, tags []*Tag, group Group) (RequestDetail, error)
 	*/
@@ -19,6 +20,7 @@ type Request struct {
 	ID        uuid.UUID
 	Amount    int
 	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type RequestResponse struct {

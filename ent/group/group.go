@@ -31,8 +31,8 @@ const (
 	EdgeUser = "user"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
-	// EdgeTransactionDetail holds the string denoting the transaction_detail edge name in mutations.
-	EdgeTransactionDetail = "transaction_detail"
+	// EdgeRequest holds the string denoting the request edge name in mutations.
+	EdgeRequest = "request"
 	// Table holds the table name of the group in the database.
 	Table = "groups"
 	// GroupBudgetTable is the table the holds the group_budget relation/edge.
@@ -52,13 +52,13 @@ const (
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
-	// TransactionDetailTable is the table the holds the transaction_detail relation/edge.
-	TransactionDetailTable = "transaction_details"
-	// TransactionDetailInverseTable is the table name for the TransactionDetail entity.
-	// It exists in this package in order to avoid circular dependency with the "transactiondetail" package.
-	TransactionDetailInverseTable = "transaction_details"
-	// TransactionDetailColumn is the table column denoting the transaction_detail relation/edge.
-	TransactionDetailColumn = "group_transaction_detail"
+	// RequestTable is the table the holds the request relation/edge.
+	RequestTable = "requests"
+	// RequestInverseTable is the table name for the Request entity.
+	// It exists in this package in order to avoid circular dependency with the "request" package.
+	RequestInverseTable = "requests"
+	// RequestColumn is the table column denoting the request relation/edge.
+	RequestColumn = "group_request"
 )
 
 // Columns holds all SQL columns for group fields.

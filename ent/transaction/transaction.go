@@ -21,6 +21,8 @@ const (
 	EdgeTag = "tag"
 	// EdgeGroupBudget holds the string denoting the group_budget edge name in mutations.
 	EdgeGroupBudget = "group_budget"
+	// EdgeRequest holds the string denoting the request edge name in mutations.
+	EdgeRequest = "request"
 	// Table holds the table name of the transaction in the database.
 	Table = "transactions"
 	// DetailTable is the table the holds the detail relation/edge.
@@ -44,6 +46,13 @@ const (
 	GroupBudgetInverseTable = "group_budgets"
 	// GroupBudgetColumn is the table column denoting the group_budget relation/edge.
 	GroupBudgetColumn = "group_budget_transaction"
+	// RequestTable is the table the holds the request relation/edge.
+	RequestTable = "transactions"
+	// RequestInverseTable is the table name for the Request entity.
+	// It exists in this package in order to avoid circular dependency with the "request" package.
+	RequestInverseTable = "requests"
+	// RequestColumn is the table column denoting the request relation/edge.
+	RequestColumn = "request_transaction"
 )
 
 // Columns holds all SQL columns for transaction fields.
@@ -56,6 +65,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"group_budget_transaction",
+	"request_transaction",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

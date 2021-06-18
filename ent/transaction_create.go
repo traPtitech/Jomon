@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
+	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -95,6 +96,25 @@ func (tc *TransactionCreate) SetNillableGroupBudgetID(id *uuid.UUID) *Transactio
 // SetGroupBudget sets the "group_budget" edge to the GroupBudget entity.
 func (tc *TransactionCreate) SetGroupBudget(g *GroupBudget) *TransactionCreate {
 	return tc.SetGroupBudgetID(g.ID)
+}
+
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (tc *TransactionCreate) SetRequestID(id uuid.UUID) *TransactionCreate {
+	tc.mutation.SetRequestID(id)
+	return tc
+}
+
+// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
+func (tc *TransactionCreate) SetNillableRequestID(id *uuid.UUID) *TransactionCreate {
+	if id != nil {
+		tc = tc.SetRequestID(*id)
+	}
+	return tc
+}
+
+// SetRequest sets the "request" edge to the Request entity.
+func (tc *TransactionCreate) SetRequest(r *Request) *TransactionCreate {
+	return tc.SetRequestID(r.ID)
 }
 
 // Mutation returns the TransactionMutation object of the builder.
@@ -257,6 +277,26 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.group_budget_transaction = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.RequestIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   transaction.RequestTable,
+			Columns: []string{transaction.RequestColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.request_transaction = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

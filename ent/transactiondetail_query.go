@@ -12,9 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
 )
@@ -30,8 +28,6 @@ type TransactionDetailQuery struct {
 	predicates []predicate.TransactionDetail
 	// eager-loading edges.
 	withTransaction *TransactionQuery
-	withRequest     *RequestQuery
-	withGroup       *GroupQuery
 	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -84,50 +80,6 @@ func (tdq *TransactionDetailQuery) QueryTransaction() *TransactionQuery {
 			sqlgraph.From(transactiondetail.Table, transactiondetail.FieldID, selector),
 			sqlgraph.To(transaction.Table, transaction.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, transactiondetail.TransactionTable, transactiondetail.TransactionColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(tdq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryRequest chains the current query on the "request" edge.
-func (tdq *TransactionDetailQuery) QueryRequest() *RequestQuery {
-	query := &RequestQuery{config: tdq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tdq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := tdq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(transactiondetail.Table, transactiondetail.FieldID, selector),
-			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, transactiondetail.RequestTable, transactiondetail.RequestColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(tdq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryGroup chains the current query on the "group" edge.
-func (tdq *TransactionDetailQuery) QueryGroup() *GroupQuery {
-	query := &GroupQuery{config: tdq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tdq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := tdq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(transactiondetail.Table, transactiondetail.FieldID, selector),
-			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, transactiondetail.GroupTable, transactiondetail.GroupColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tdq.driver.Dialect(), step)
 		return fromU, nil
@@ -317,8 +269,6 @@ func (tdq *TransactionDetailQuery) Clone() *TransactionDetailQuery {
 		order:           append([]OrderFunc{}, tdq.order...),
 		predicates:      append([]predicate.TransactionDetail{}, tdq.predicates...),
 		withTransaction: tdq.withTransaction.Clone(),
-		withRequest:     tdq.withRequest.Clone(),
-		withGroup:       tdq.withGroup.Clone(),
 		// clone intermediate query.
 		sql:  tdq.sql.Clone(),
 		path: tdq.path,
@@ -333,28 +283,6 @@ func (tdq *TransactionDetailQuery) WithTransaction(opts ...func(*TransactionQuer
 		opt(query)
 	}
 	tdq.withTransaction = query
-	return tdq
-}
-
-// WithRequest tells the query-builder to eager-load the nodes that are connected to
-// the "request" edge. The optional arguments are used to configure the query builder of the edge.
-func (tdq *TransactionDetailQuery) WithRequest(opts ...func(*RequestQuery)) *TransactionDetailQuery {
-	query := &RequestQuery{config: tdq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	tdq.withRequest = query
-	return tdq
-}
-
-// WithGroup tells the query-builder to eager-load the nodes that are connected to
-// the "group" edge. The optional arguments are used to configure the query builder of the edge.
-func (tdq *TransactionDetailQuery) WithGroup(opts ...func(*GroupQuery)) *TransactionDetailQuery {
-	query := &GroupQuery{config: tdq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	tdq.withGroup = query
 	return tdq
 }
 
@@ -424,13 +352,11 @@ func (tdq *TransactionDetailQuery) sqlAll(ctx context.Context) ([]*TransactionDe
 		nodes       = []*TransactionDetail{}
 		withFKs     = tdq.withFKs
 		_spec       = tdq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [1]bool{
 			tdq.withTransaction != nil,
-			tdq.withRequest != nil,
-			tdq.withGroup != nil,
 		}
 	)
-	if tdq.withTransaction != nil || tdq.withRequest != nil || tdq.withGroup != nil {
+	if tdq.withTransaction != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -481,64 +407,6 @@ func (tdq *TransactionDetailQuery) sqlAll(ctx context.Context) ([]*TransactionDe
 			}
 			for i := range nodes {
 				nodes[i].Edges.Transaction = n
-			}
-		}
-	}
-
-	if query := tdq.withRequest; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*TransactionDetail)
-		for i := range nodes {
-			if nodes[i].request_transaction_detail == nil {
-				continue
-			}
-			fk := *nodes[i].request_transaction_detail
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(request.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_transaction_detail" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Request = n
-			}
-		}
-	}
-
-	if query := tdq.withGroup; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*TransactionDetail)
-		for i := range nodes {
-			if nodes[i].group_transaction_detail == nil {
-				continue
-			}
-			fk := *nodes[i].group_transaction_detail
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(group.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_transaction_detail" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Group = n
 			}
 		}
 	}

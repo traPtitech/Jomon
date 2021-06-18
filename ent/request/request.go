@@ -15,8 +15,14 @@ const (
 	FieldID = "id"
 	// FieldAmount holds the string denoting the amount field in the database.
 	FieldAmount = "amount"
+	// FieldTitle holds the string denoting the title field in the database.
+	FieldTitle = "title"
+	// FieldContent holds the string denoting the content field in the database.
+	FieldContent = "content"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// EdgeStatus holds the string denoting the status edge name in mutations.
 	EdgeStatus = "status"
 	// EdgeTarget holds the string denoting the target edge name in mutations.
@@ -25,12 +31,14 @@ const (
 	EdgeFile = "file"
 	// EdgeTag holds the string denoting the tag edge name in mutations.
 	EdgeTag = "tag"
-	// EdgeTransactionDetail holds the string denoting the transaction_detail edge name in mutations.
-	EdgeTransactionDetail = "transaction_detail"
+	// EdgeTransaction holds the string denoting the transaction edge name in mutations.
+	EdgeTransaction = "transaction"
 	// EdgeComment holds the string denoting the comment edge name in mutations.
 	EdgeComment = "comment"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeGroup holds the string denoting the group edge name in mutations.
+	EdgeGroup = "group"
 	// Table holds the table name of the request in the database.
 	Table = "requests"
 	// StatusTable is the table the holds the status relation/edge.
@@ -61,13 +69,13 @@ const (
 	TagInverseTable = "tags"
 	// TagColumn is the table column denoting the tag relation/edge.
 	TagColumn = "request_tag"
-	// TransactionDetailTable is the table the holds the transaction_detail relation/edge.
-	TransactionDetailTable = "transaction_details"
-	// TransactionDetailInverseTable is the table name for the TransactionDetail entity.
-	// It exists in this package in order to avoid circular dependency with the "transactiondetail" package.
-	TransactionDetailInverseTable = "transaction_details"
-	// TransactionDetailColumn is the table column denoting the transaction_detail relation/edge.
-	TransactionDetailColumn = "request_transaction_detail"
+	// TransactionTable is the table the holds the transaction relation/edge.
+	TransactionTable = "transactions"
+	// TransactionInverseTable is the table name for the Transaction entity.
+	// It exists in this package in order to avoid circular dependency with the "transaction" package.
+	TransactionInverseTable = "transactions"
+	// TransactionColumn is the table column denoting the transaction relation/edge.
+	TransactionColumn = "request_transaction"
 	// CommentTable is the table the holds the comment relation/edge.
 	CommentTable = "comments"
 	// CommentInverseTable is the table name for the Comment entity.
@@ -82,13 +90,29 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "request_user"
+	// GroupTable is the table the holds the group relation/edge.
+	GroupTable = "requests"
+	// GroupInverseTable is the table name for the Group entity.
+	// It exists in this package in order to avoid circular dependency with the "group" package.
+	GroupInverseTable = "groups"
+	// GroupColumn is the table column denoting the group relation/edge.
+	GroupColumn = "group_request"
 )
 
 // Columns holds all SQL columns for request fields.
 var Columns = []string{
 	FieldID,
 	FieldAmount,
+	FieldTitle,
+	FieldContent,
 	FieldCreatedAt,
+	FieldUpdatedAt,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "requests"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"group_request",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -98,12 +122,19 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
 
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

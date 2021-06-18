@@ -37,7 +37,10 @@ erDiagram
     Request {
         id uuidDOTUUID
         amount int
+        title string
+        content string
         created_at timeDOTTime
+        updated_at timeDOTTime
     }
     RequestStatus {
         id uuidDOTUUID
@@ -68,6 +71,7 @@ erDiagram
         amount int
         target string
         created_at timeDOTTime
+        updated_at timeDOTTime
     }
     User {
         id uuidDOTUUID
@@ -82,13 +86,13 @@ erDiagram
     	Group |o--o{ GroupBudget : "group_budget/group"
     	Group }o--o{ User : "user/group_user"
     	Group }o--o{ User : "owner/group_owner"
-    	Group |o--o{ TransactionDetail : "transaction_detail/group"
+    	Group |o--o{ Request : "request/group"
     	GroupBudget |o--o| Transaction : "transaction/group_budget"
     	Request |o--o{ RequestStatus : "status/request"
     	Request |o--o{ RequestTarget : "target/request"
     	Request |o--o{ File : "file/request"
     	Request |o--o{ Tag : "tag/request"
-    	Request |o--o{ TransactionDetail : "transaction_detail/request"
+    	Request |o--o{ Transaction : "transaction/request"
     	Request |o--o{ Comment : "comment/request"
     	Request |o--o| User : "user/request"
     	RequestStatus |o--o| User : "user/request_status"

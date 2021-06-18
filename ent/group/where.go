@@ -774,25 +774,25 @@ func HasOwnerWith(preds ...predicate.User) predicate.Group {
 	})
 }
 
-// HasTransactionDetail applies the HasEdge predicate on the "transaction_detail" edge.
-func HasTransactionDetail() predicate.Group {
+// HasRequest applies the HasEdge predicate on the "request" edge.
+func HasRequest() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TransactionDetailTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TransactionDetailTable, TransactionDetailColumn),
+			sqlgraph.To(RequestTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RequestTable, RequestColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasTransactionDetailWith applies the HasEdge predicate on the "transaction_detail" edge with a given conditions (other predicates).
-func HasTransactionDetailWith(preds ...predicate.TransactionDetail) predicate.Group {
+// HasRequestWith applies the HasEdge predicate on the "request" edge with a given conditions (other predicates).
+func HasRequestWith(preds ...predicate.Request) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TransactionDetailInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TransactionDetailTable, TransactionDetailColumn),
+			sqlgraph.To(RequestInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RequestTable, RequestColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

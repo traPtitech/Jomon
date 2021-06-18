@@ -16,7 +16,7 @@ import (
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/transactiondetail"
+	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -30,10 +30,10 @@ type GroupQuery struct {
 	fields     []string
 	predicates []predicate.Group
 	// eager-loading edges.
-	withGroupBudget       *GroupBudgetQuery
-	withUser              *UserQuery
-	withOwner             *UserQuery
-	withTransactionDetail *TransactionDetailQuery
+	withGroupBudget *GroupBudgetQuery
+	withUser        *UserQuery
+	withOwner       *UserQuery
+	withRequest     *RequestQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -136,9 +136,9 @@ func (gq *GroupQuery) QueryOwner() *UserQuery {
 	return query
 }
 
-// QueryTransactionDetail chains the current query on the "transaction_detail" edge.
-func (gq *GroupQuery) QueryTransactionDetail() *TransactionDetailQuery {
-	query := &TransactionDetailQuery{config: gq.config}
+// QueryRequest chains the current query on the "request" edge.
+func (gq *GroupQuery) QueryRequest() *RequestQuery {
+	query := &RequestQuery{config: gq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -149,8 +149,8 @@ func (gq *GroupQuery) QueryTransactionDetail() *TransactionDetailQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, selector),
-			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, group.TransactionDetailTable, group.TransactionDetailColumn),
+			sqlgraph.To(request.Table, request.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.RequestTable, group.RequestColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -334,15 +334,15 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		return nil
 	}
 	return &GroupQuery{
-		config:                gq.config,
-		limit:                 gq.limit,
-		offset:                gq.offset,
-		order:                 append([]OrderFunc{}, gq.order...),
-		predicates:            append([]predicate.Group{}, gq.predicates...),
-		withGroupBudget:       gq.withGroupBudget.Clone(),
-		withUser:              gq.withUser.Clone(),
-		withOwner:             gq.withOwner.Clone(),
-		withTransactionDetail: gq.withTransactionDetail.Clone(),
+		config:          gq.config,
+		limit:           gq.limit,
+		offset:          gq.offset,
+		order:           append([]OrderFunc{}, gq.order...),
+		predicates:      append([]predicate.Group{}, gq.predicates...),
+		withGroupBudget: gq.withGroupBudget.Clone(),
+		withUser:        gq.withUser.Clone(),
+		withOwner:       gq.withOwner.Clone(),
+		withRequest:     gq.withRequest.Clone(),
 		// clone intermediate query.
 		sql:  gq.sql.Clone(),
 		path: gq.path,
@@ -382,14 +382,14 @@ func (gq *GroupQuery) WithOwner(opts ...func(*UserQuery)) *GroupQuery {
 	return gq
 }
 
-// WithTransactionDetail tells the query-builder to eager-load the nodes that are connected to
-// the "transaction_detail" edge. The optional arguments are used to configure the query builder of the edge.
-func (gq *GroupQuery) WithTransactionDetail(opts ...func(*TransactionDetailQuery)) *GroupQuery {
-	query := &TransactionDetailQuery{config: gq.config}
+// WithRequest tells the query-builder to eager-load the nodes that are connected to
+// the "request" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GroupQuery) WithRequest(opts ...func(*RequestQuery)) *GroupQuery {
+	query := &RequestQuery{config: gq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	gq.withTransactionDetail = query
+	gq.withRequest = query
 	return gq
 }
 
@@ -462,7 +462,7 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 			gq.withGroupBudget != nil,
 			gq.withUser != nil,
 			gq.withOwner != nil,
-			gq.withTransactionDetail != nil,
+			gq.withRequest != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -644,32 +644,32 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 		}
 	}
 
-	if query := gq.withTransactionDetail; query != nil {
+	if query := gq.withRequest; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[uuid.UUID]*Group)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.TransactionDetail = []*TransactionDetail{}
+			nodes[i].Edges.Request = []*Request{}
 		}
 		query.withFKs = true
-		query.Where(predicate.TransactionDetail(func(s *sql.Selector) {
-			s.Where(sql.InValues(group.TransactionDetailColumn, fks...))
+		query.Where(predicate.Request(func(s *sql.Selector) {
+			s.Where(sql.InValues(group.RequestColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.group_transaction_detail
+			fk := n.group_request
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "group_transaction_detail" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "group_request" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_transaction_detail" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "group_request" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.TransactionDetail = append(node.Edges.TransactionDetail, n)
+			node.Edges.Request = append(node.Edges.Request, n)
 		}
 	}
 

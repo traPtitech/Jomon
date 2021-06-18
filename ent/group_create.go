@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
-	"github.com/traPtitech/Jomon/ent/transactiondetail"
+	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -143,19 +143,19 @@ func (gc *GroupCreate) AddOwner(u ...*User) *GroupCreate {
 	return gc.AddOwnerIDs(ids...)
 }
 
-// AddTransactionDetailIDs adds the "transaction_detail" edge to the TransactionDetail entity by IDs.
-func (gc *GroupCreate) AddTransactionDetailIDs(ids ...uuid.UUID) *GroupCreate {
-	gc.mutation.AddTransactionDetailIDs(ids...)
+// AddRequestIDs adds the "request" edge to the Request entity by IDs.
+func (gc *GroupCreate) AddRequestIDs(ids ...uuid.UUID) *GroupCreate {
+	gc.mutation.AddRequestIDs(ids...)
 	return gc
 }
 
-// AddTransactionDetail adds the "transaction_detail" edges to the TransactionDetail entity.
-func (gc *GroupCreate) AddTransactionDetail(t ...*TransactionDetail) *GroupCreate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// AddRequest adds the "request" edges to the Request entity.
+func (gc *GroupCreate) AddRequest(r ...*Request) *GroupCreate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
-	return gc.AddTransactionDetailIDs(ids...)
+	return gc.AddRequestIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -372,17 +372,17 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := gc.mutation.TransactionDetailIDs(); len(nodes) > 0 {
+	if nodes := gc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.TransactionDetailTable,
-			Columns: []string{group.TransactionDetailColumn},
+			Table:   group.RequestTable,
+			Columns: []string{group.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
-					Column: transactiondetail.FieldID,
+					Column: request.FieldID,
 				},
 			},
 		}

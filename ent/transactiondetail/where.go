@@ -489,62 +489,6 @@ func HasTransactionWith(preds ...predicate.Transaction) predicate.TransactionDet
 	})
 }
 
-// HasRequest applies the HasEdge predicate on the "request" edge.
-func HasRequest() predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(RequestTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasRequestWith applies the HasEdge predicate on the "request" edge with a given conditions (other predicates).
-func HasRequestWith(preds ...predicate.Request) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(RequestInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasGroup applies the HasEdge predicate on the "group" edge.
-func HasGroup() predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GroupTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasGroupWith applies the HasEdge predicate on the "group" edge with a given conditions (other predicates).
-func HasGroupWith(preds ...predicate.Group) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GroupInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.TransactionDetail) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {

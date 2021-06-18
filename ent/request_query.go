@@ -15,12 +15,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
+	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/tag"
-	"github.com/traPtitech/Jomon/ent/transactiondetail"
+	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -34,13 +35,15 @@ type RequestQuery struct {
 	fields     []string
 	predicates []predicate.Request
 	// eager-loading edges.
-	withStatus            *RequestStatusQuery
-	withTarget            *RequestTargetQuery
-	withFile              *FileQuery
-	withTag               *TagQuery
-	withTransactionDetail *TransactionDetailQuery
-	withComment           *CommentQuery
-	withUser              *UserQuery
+	withStatus      *RequestStatusQuery
+	withTarget      *RequestTargetQuery
+	withFile        *FileQuery
+	withTag         *TagQuery
+	withTransaction *TransactionQuery
+	withComment     *CommentQuery
+	withUser        *UserQuery
+	withGroup       *GroupQuery
+	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -165,9 +168,9 @@ func (rq *RequestQuery) QueryTag() *TagQuery {
 	return query
 }
 
-// QueryTransactionDetail chains the current query on the "transaction_detail" edge.
-func (rq *RequestQuery) QueryTransactionDetail() *TransactionDetailQuery {
-	query := &TransactionDetailQuery{config: rq.config}
+// QueryTransaction chains the current query on the "transaction" edge.
+func (rq *RequestQuery) QueryTransaction() *TransactionQuery {
+	query := &TransactionQuery{config: rq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := rq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -178,8 +181,8 @@ func (rq *RequestQuery) QueryTransactionDetail() *TransactionDetailQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
-			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.TransactionDetailTable, request.TransactionDetailColumn),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, request.TransactionTable, request.TransactionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -224,6 +227,28 @@ func (rq *RequestQuery) QueryUser() *UserQuery {
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, request.UserTable, request.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryGroup chains the current query on the "group" edge.
+func (rq *RequestQuery) QueryGroup() *GroupQuery {
+	query := &GroupQuery{config: rq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(request.Table, request.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, request.GroupTable, request.GroupColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -407,18 +432,19 @@ func (rq *RequestQuery) Clone() *RequestQuery {
 		return nil
 	}
 	return &RequestQuery{
-		config:                rq.config,
-		limit:                 rq.limit,
-		offset:                rq.offset,
-		order:                 append([]OrderFunc{}, rq.order...),
-		predicates:            append([]predicate.Request{}, rq.predicates...),
-		withStatus:            rq.withStatus.Clone(),
-		withTarget:            rq.withTarget.Clone(),
-		withFile:              rq.withFile.Clone(),
-		withTag:               rq.withTag.Clone(),
-		withTransactionDetail: rq.withTransactionDetail.Clone(),
-		withComment:           rq.withComment.Clone(),
-		withUser:              rq.withUser.Clone(),
+		config:          rq.config,
+		limit:           rq.limit,
+		offset:          rq.offset,
+		order:           append([]OrderFunc{}, rq.order...),
+		predicates:      append([]predicate.Request{}, rq.predicates...),
+		withStatus:      rq.withStatus.Clone(),
+		withTarget:      rq.withTarget.Clone(),
+		withFile:        rq.withFile.Clone(),
+		withTag:         rq.withTag.Clone(),
+		withTransaction: rq.withTransaction.Clone(),
+		withComment:     rq.withComment.Clone(),
+		withUser:        rq.withUser.Clone(),
+		withGroup:       rq.withGroup.Clone(),
 		// clone intermediate query.
 		sql:  rq.sql.Clone(),
 		path: rq.path,
@@ -469,14 +495,14 @@ func (rq *RequestQuery) WithTag(opts ...func(*TagQuery)) *RequestQuery {
 	return rq
 }
 
-// WithTransactionDetail tells the query-builder to eager-load the nodes that are connected to
-// the "transaction_detail" edge. The optional arguments are used to configure the query builder of the edge.
-func (rq *RequestQuery) WithTransactionDetail(opts ...func(*TransactionDetailQuery)) *RequestQuery {
-	query := &TransactionDetailQuery{config: rq.config}
+// WithTransaction tells the query-builder to eager-load the nodes that are connected to
+// the "transaction" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RequestQuery) WithTransaction(opts ...func(*TransactionQuery)) *RequestQuery {
+	query := &TransactionQuery{config: rq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	rq.withTransactionDetail = query
+	rq.withTransaction = query
 	return rq
 }
 
@@ -499,6 +525,17 @@ func (rq *RequestQuery) WithUser(opts ...func(*UserQuery)) *RequestQuery {
 		opt(query)
 	}
 	rq.withUser = query
+	return rq
+}
+
+// WithGroup tells the query-builder to eager-load the nodes that are connected to
+// the "group" edge. The optional arguments are used to configure the query builder of the edge.
+func (rq *RequestQuery) WithGroup(opts ...func(*GroupQuery)) *RequestQuery {
+	query := &GroupQuery{config: rq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rq.withGroup = query
 	return rq
 }
 
@@ -566,17 +603,25 @@ func (rq *RequestQuery) prepareQuery(ctx context.Context) error {
 func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 	var (
 		nodes       = []*Request{}
+		withFKs     = rq.withFKs
 		_spec       = rq.querySpec()
-		loadedTypes = [7]bool{
+		loadedTypes = [8]bool{
 			rq.withStatus != nil,
 			rq.withTarget != nil,
 			rq.withFile != nil,
 			rq.withTag != nil,
-			rq.withTransactionDetail != nil,
+			rq.withTransaction != nil,
 			rq.withComment != nil,
 			rq.withUser != nil,
+			rq.withGroup != nil,
 		}
 	)
+	if rq.withGroup != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, request.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Request{config: rq.config}
 		nodes = append(nodes, node)
@@ -713,32 +758,32 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 		}
 	}
 
-	if query := rq.withTransactionDetail; query != nil {
+	if query := rq.withTransaction; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[uuid.UUID]*Request)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.TransactionDetail = []*TransactionDetail{}
+			nodes[i].Edges.Transaction = []*Transaction{}
 		}
 		query.withFKs = true
-		query.Where(predicate.TransactionDetail(func(s *sql.Selector) {
-			s.Where(sql.InValues(request.TransactionDetailColumn, fks...))
+		query.Where(predicate.Transaction(func(s *sql.Selector) {
+			s.Where(sql.InValues(request.TransactionColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.request_transaction_detail
+			fk := n.request_transaction
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_transaction_detail" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "request_transaction" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_transaction_detail" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_transaction" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.TransactionDetail = append(node.Edges.TransactionDetail, n)
+			node.Edges.Transaction = append(node.Edges.Transaction, n)
 		}
 	}
 
@@ -796,6 +841,35 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "request_user" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.User = n
+		}
+	}
+
+	if query := rq.withGroup; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Request)
+		for i := range nodes {
+			if nodes[i].group_request == nil {
+				continue
+			}
+			fk := *nodes[i].group_request
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(group.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "group_request" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Group = n
+			}
 		}
 	}
 

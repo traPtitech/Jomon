@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/predicate"
+	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -98,6 +99,25 @@ func (tu *TransactionUpdate) SetGroupBudget(g *GroupBudget) *TransactionUpdate {
 	return tu.SetGroupBudgetID(g.ID)
 }
 
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (tu *TransactionUpdate) SetRequestID(id uuid.UUID) *TransactionUpdate {
+	tu.mutation.SetRequestID(id)
+	return tu
+}
+
+// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableRequestID(id *uuid.UUID) *TransactionUpdate {
+	if id != nil {
+		tu = tu.SetRequestID(*id)
+	}
+	return tu
+}
+
+// SetRequest sets the "request" edge to the Request entity.
+func (tu *TransactionUpdate) SetRequest(r *Request) *TransactionUpdate {
+	return tu.SetRequestID(r.ID)
+}
+
 // Mutation returns the TransactionMutation object of the builder.
 func (tu *TransactionUpdate) Mutation() *TransactionMutation {
 	return tu.mutation
@@ -133,6 +153,12 @@ func (tu *TransactionUpdate) RemoveTag(t ...*Tag) *TransactionUpdate {
 // ClearGroupBudget clears the "group_budget" edge to the GroupBudget entity.
 func (tu *TransactionUpdate) ClearGroupBudget() *TransactionUpdate {
 	tu.mutation.ClearGroupBudget()
+	return tu
+}
+
+// ClearRequest clears the "request" edge to the Request entity.
+func (tu *TransactionUpdate) ClearRequest() *TransactionUpdate {
+	tu.mutation.ClearRequest()
 	return tu
 }
 
@@ -336,6 +362,41 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if tu.mutation.RequestCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   transaction.RequestTable,
+			Columns: []string{transaction.RequestColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RequestIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   transaction.RequestTable,
+			Columns: []string{transaction.RequestColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{transaction.Label}
@@ -422,6 +483,25 @@ func (tuo *TransactionUpdateOne) SetGroupBudget(g *GroupBudget) *TransactionUpda
 	return tuo.SetGroupBudgetID(g.ID)
 }
 
+// SetRequestID sets the "request" edge to the Request entity by ID.
+func (tuo *TransactionUpdateOne) SetRequestID(id uuid.UUID) *TransactionUpdateOne {
+	tuo.mutation.SetRequestID(id)
+	return tuo
+}
+
+// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableRequestID(id *uuid.UUID) *TransactionUpdateOne {
+	if id != nil {
+		tuo = tuo.SetRequestID(*id)
+	}
+	return tuo
+}
+
+// SetRequest sets the "request" edge to the Request entity.
+func (tuo *TransactionUpdateOne) SetRequest(r *Request) *TransactionUpdateOne {
+	return tuo.SetRequestID(r.ID)
+}
+
 // Mutation returns the TransactionMutation object of the builder.
 func (tuo *TransactionUpdateOne) Mutation() *TransactionMutation {
 	return tuo.mutation
@@ -457,6 +537,12 @@ func (tuo *TransactionUpdateOne) RemoveTag(t ...*Tag) *TransactionUpdateOne {
 // ClearGroupBudget clears the "group_budget" edge to the GroupBudget entity.
 func (tuo *TransactionUpdateOne) ClearGroupBudget() *TransactionUpdateOne {
 	tuo.mutation.ClearGroupBudget()
+	return tuo
+}
+
+// ClearRequest clears the "request" edge to the Request entity.
+func (tuo *TransactionUpdateOne) ClearRequest() *TransactionUpdateOne {
+	tuo.mutation.ClearRequest()
 	return tuo
 }
 
@@ -676,6 +762,41 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: groupbudget.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.RequestCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   transaction.RequestTable,
+			Columns: []string{transaction.RequestColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RequestIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   transaction.RequestTable,
+			Columns: []string{transaction.RequestColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
 				},
 			},
 		}

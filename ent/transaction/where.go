@@ -261,6 +261,34 @@ func HasGroupBudgetWith(preds ...predicate.GroupBudget) predicate.Transaction {
 	})
 }
 
+// HasRequest applies the HasEdge predicate on the "request" edge.
+func HasRequest() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RequestTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRequestWith applies the HasEdge predicate on the "request" edge with a given conditions (other predicates).
+func HasRequestWith(preds ...predicate.Request) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RequestInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Transaction) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {

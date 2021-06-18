@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
@@ -20,11 +21,18 @@ type Request struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// Amount holds the value of the "amount" field.
 	Amount int `json:"amount,omitempty"`
+	// Title holds the value of the "title" field.
+	Title string `json:"title,omitempty"`
+	// Content holds the value of the "content" field.
+	Content string `json:"content,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RequestQuery when eager-loading is set.
-	Edges RequestEdges `json:"edges"`
+	Edges         RequestEdges `json:"edges"`
+	group_request *uuid.UUID
 }
 
 // RequestEdges holds the relations/edges for other nodes in the graph.
@@ -37,15 +45,17 @@ type RequestEdges struct {
 	File []*File `json:"file,omitempty"`
 	// Tag holds the value of the tag edge.
 	Tag []*Tag `json:"tag,omitempty"`
-	// TransactionDetail holds the value of the transaction_detail edge.
-	TransactionDetail []*TransactionDetail `json:"transaction_detail,omitempty"`
+	// Transaction holds the value of the transaction edge.
+	Transaction []*Transaction `json:"transaction,omitempty"`
 	// Comment holds the value of the comment edge.
 	Comment []*Comment `json:"comment,omitempty"`
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// Group holds the value of the group edge.
+	Group *Group `json:"group,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [7]bool
+	loadedTypes [8]bool
 }
 
 // StatusOrErr returns the Status value or an error if the edge
@@ -84,13 +94,13 @@ func (e RequestEdges) TagOrErr() ([]*Tag, error) {
 	return nil, &NotLoadedError{edge: "tag"}
 }
 
-// TransactionDetailOrErr returns the TransactionDetail value or an error if the edge
+// TransactionOrErr returns the Transaction value or an error if the edge
 // was not loaded in eager-loading.
-func (e RequestEdges) TransactionDetailOrErr() ([]*TransactionDetail, error) {
+func (e RequestEdges) TransactionOrErr() ([]*Transaction, error) {
 	if e.loadedTypes[4] {
-		return e.TransactionDetail, nil
+		return e.Transaction, nil
 	}
-	return nil, &NotLoadedError{edge: "transaction_detail"}
+	return nil, &NotLoadedError{edge: "transaction"}
 }
 
 // CommentOrErr returns the Comment value or an error if the edge
@@ -116,6 +126,20 @@ func (e RequestEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
+// GroupOrErr returns the Group value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RequestEdges) GroupOrErr() (*Group, error) {
+	if e.loadedTypes[7] {
+		if e.Group == nil {
+			// The edge group was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: group.Label}
+		}
+		return e.Group, nil
+	}
+	return nil, &NotLoadedError{edge: "group"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Request) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -123,9 +147,13 @@ func (*Request) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case request.FieldAmount:
 			values[i] = new(sql.NullInt64)
-		case request.FieldCreatedAt:
+		case request.FieldTitle, request.FieldContent:
+			values[i] = new(sql.NullString)
+		case request.FieldCreatedAt, request.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		case request.FieldID:
+			values[i] = new(uuid.UUID)
+		case request.ForeignKeys[0]: // group_request
 			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Request", columns[i])
@@ -154,11 +182,35 @@ func (r *Request) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				r.Amount = int(value.Int64)
 			}
+		case request.FieldTitle:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field title", values[i])
+			} else if value.Valid {
+				r.Title = value.String
+			}
+		case request.FieldContent:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field content", values[i])
+			} else if value.Valid {
+				r.Content = value.String
+			}
 		case request.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				r.CreatedAt = value.Time
+			}
+		case request.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				r.UpdatedAt = value.Time
+			}
+		case request.ForeignKeys[0]:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field group_request", values[i])
+			} else if value != nil {
+				r.group_request = value
 			}
 		}
 	}
@@ -185,9 +237,9 @@ func (r *Request) QueryTag() *TagQuery {
 	return (&RequestClient{config: r.config}).QueryTag(r)
 }
 
-// QueryTransactionDetail queries the "transaction_detail" edge of the Request entity.
-func (r *Request) QueryTransactionDetail() *TransactionDetailQuery {
-	return (&RequestClient{config: r.config}).QueryTransactionDetail(r)
+// QueryTransaction queries the "transaction" edge of the Request entity.
+func (r *Request) QueryTransaction() *TransactionQuery {
+	return (&RequestClient{config: r.config}).QueryTransaction(r)
 }
 
 // QueryComment queries the "comment" edge of the Request entity.
@@ -198,6 +250,11 @@ func (r *Request) QueryComment() *CommentQuery {
 // QueryUser queries the "user" edge of the Request entity.
 func (r *Request) QueryUser() *UserQuery {
 	return (&RequestClient{config: r.config}).QueryUser(r)
+}
+
+// QueryGroup queries the "group" edge of the Request entity.
+func (r *Request) QueryGroup() *GroupQuery {
+	return (&RequestClient{config: r.config}).QueryGroup(r)
 }
 
 // Update returns a builder for updating this Request.
@@ -225,8 +282,14 @@ func (r *Request) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", r.ID))
 	builder.WriteString(", amount=")
 	builder.WriteString(fmt.Sprintf("%v", r.Amount))
+	builder.WriteString(", title=")
+	builder.WriteString(r.Title)
+	builder.WriteString(", content=")
+	builder.WriteString(r.Content)
 	builder.WriteString(", created_at=")
 	builder.WriteString(r.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(r.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

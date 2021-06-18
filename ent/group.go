@@ -42,8 +42,8 @@ type GroupEdges struct {
 	User []*User `json:"user,omitempty"`
 	// Owner holds the value of the owner edge.
 	Owner []*User `json:"owner,omitempty"`
-	// TransactionDetail holds the value of the transaction_detail edge.
-	TransactionDetail []*TransactionDetail `json:"transaction_detail,omitempty"`
+	// Request holds the value of the request edge.
+	Request []*Request `json:"request,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
@@ -76,13 +76,13 @@ func (e GroupEdges) OwnerOrErr() ([]*User, error) {
 	return nil, &NotLoadedError{edge: "owner"}
 }
 
-// TransactionDetailOrErr returns the TransactionDetail value or an error if the edge
+// RequestOrErr returns the Request value or an error if the edge
 // was not loaded in eager-loading.
-func (e GroupEdges) TransactionDetailOrErr() ([]*TransactionDetail, error) {
+func (e GroupEdges) RequestOrErr() ([]*Request, error) {
 	if e.loadedTypes[3] {
-		return e.TransactionDetail, nil
+		return e.Request, nil
 	}
-	return nil, &NotLoadedError{edge: "transaction_detail"}
+	return nil, &NotLoadedError{edge: "request"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -177,9 +177,9 @@ func (gr *Group) QueryOwner() *UserQuery {
 	return (&GroupClient{config: gr.config}).QueryOwner(gr)
 }
 
-// QueryTransactionDetail queries the "transaction_detail" edge of the Group entity.
-func (gr *Group) QueryTransactionDetail() *TransactionDetailQuery {
-	return (&GroupClient{config: gr.config}).QueryTransactionDetail(gr)
+// QueryRequest queries the "request" edge of the Group entity.
+func (gr *Group) QueryRequest() *RequestQuery {
+	return (&GroupClient{config: gr.config}).QueryRequest(gr)
 }
 
 // Update returns a builder for updating this Group.

@@ -23,10 +23,6 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// EdgeTransaction holds the string denoting the transaction edge name in mutations.
 	EdgeTransaction = "transaction"
-	// EdgeRequest holds the string denoting the request edge name in mutations.
-	EdgeRequest = "request"
-	// EdgeGroup holds the string denoting the group edge name in mutations.
-	EdgeGroup = "group"
 	// Table holds the table name of the transactiondetail in the database.
 	Table = "transaction_details"
 	// TransactionTable is the table the holds the transaction relation/edge.
@@ -36,20 +32,6 @@ const (
 	TransactionInverseTable = "transactions"
 	// TransactionColumn is the table column denoting the transaction relation/edge.
 	TransactionColumn = "transaction_detail"
-	// RequestTable is the table the holds the request relation/edge.
-	RequestTable = "transaction_details"
-	// RequestInverseTable is the table name for the Request entity.
-	// It exists in this package in order to avoid circular dependency with the "request" package.
-	RequestInverseTable = "requests"
-	// RequestColumn is the table column denoting the request relation/edge.
-	RequestColumn = "request_transaction_detail"
-	// GroupTable is the table the holds the group relation/edge.
-	GroupTable = "transaction_details"
-	// GroupInverseTable is the table name for the Group entity.
-	// It exists in this package in order to avoid circular dependency with the "group" package.
-	GroupInverseTable = "groups"
-	// GroupColumn is the table column denoting the group relation/edge.
-	GroupColumn = "group_transaction_detail"
 )
 
 // Columns holds all SQL columns for transactiondetail fields.
@@ -64,8 +46,6 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "transaction_details"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"group_transaction_detail",
-	"request_transaction_detail",
 	"transaction_detail",
 }
 

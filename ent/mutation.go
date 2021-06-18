@@ -1147,32 +1147,32 @@ func (m *FileMutation) ResetEdge(name string) error {
 // GroupMutation represents an operation that mutates the Group nodes in the graph.
 type GroupMutation struct {
 	config
-	op                        Op
-	typ                       string
-	id                        *uuid.UUID
-	name                      *string
-	description               *string
-	budget                    *int
-	addbudget                 *int
-	created_at                *time.Time
-	updated_at                *time.Time
-	deleted_at                *time.Time
-	clearedFields             map[string]struct{}
-	group_budget              map[uuid.UUID]struct{}
-	removedgroup_budget       map[uuid.UUID]struct{}
-	clearedgroup_budget       bool
-	user                      map[uuid.UUID]struct{}
-	removeduser               map[uuid.UUID]struct{}
-	cleareduser               bool
-	owner                     map[uuid.UUID]struct{}
-	removedowner              map[uuid.UUID]struct{}
-	clearedowner              bool
-	transaction_detail        map[uuid.UUID]struct{}
-	removedtransaction_detail map[uuid.UUID]struct{}
-	clearedtransaction_detail bool
-	done                      bool
-	oldValue                  func(context.Context) (*Group, error)
-	predicates                []predicate.Group
+	op                  Op
+	typ                 string
+	id                  *uuid.UUID
+	name                *string
+	description         *string
+	budget              *int
+	addbudget           *int
+	created_at          *time.Time
+	updated_at          *time.Time
+	deleted_at          *time.Time
+	clearedFields       map[string]struct{}
+	group_budget        map[uuid.UUID]struct{}
+	removedgroup_budget map[uuid.UUID]struct{}
+	clearedgroup_budget bool
+	user                map[uuid.UUID]struct{}
+	removeduser         map[uuid.UUID]struct{}
+	cleareduser         bool
+	owner               map[uuid.UUID]struct{}
+	removedowner        map[uuid.UUID]struct{}
+	clearedowner        bool
+	request             map[uuid.UUID]struct{}
+	removedrequest      map[uuid.UUID]struct{}
+	clearedrequest      bool
+	done                bool
+	oldValue            func(context.Context) (*Group, error)
+	predicates          []predicate.Group
 }
 
 var _ ent.Mutation = (*GroupMutation)(nil)
@@ -1682,57 +1682,57 @@ func (m *GroupMutation) ResetOwner() {
 	m.removedowner = nil
 }
 
-// AddTransactionDetailIDs adds the "transaction_detail" edge to the TransactionDetail entity by ids.
-func (m *GroupMutation) AddTransactionDetailIDs(ids ...uuid.UUID) {
-	if m.transaction_detail == nil {
-		m.transaction_detail = make(map[uuid.UUID]struct{})
+// AddRequestIDs adds the "request" edge to the Request entity by ids.
+func (m *GroupMutation) AddRequestIDs(ids ...uuid.UUID) {
+	if m.request == nil {
+		m.request = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.transaction_detail[ids[i]] = struct{}{}
+		m.request[ids[i]] = struct{}{}
 	}
 }
 
-// ClearTransactionDetail clears the "transaction_detail" edge to the TransactionDetail entity.
-func (m *GroupMutation) ClearTransactionDetail() {
-	m.clearedtransaction_detail = true
+// ClearRequest clears the "request" edge to the Request entity.
+func (m *GroupMutation) ClearRequest() {
+	m.clearedrequest = true
 }
 
-// TransactionDetailCleared reports if the "transaction_detail" edge to the TransactionDetail entity was cleared.
-func (m *GroupMutation) TransactionDetailCleared() bool {
-	return m.clearedtransaction_detail
+// RequestCleared reports if the "request" edge to the Request entity was cleared.
+func (m *GroupMutation) RequestCleared() bool {
+	return m.clearedrequest
 }
 
-// RemoveTransactionDetailIDs removes the "transaction_detail" edge to the TransactionDetail entity by IDs.
-func (m *GroupMutation) RemoveTransactionDetailIDs(ids ...uuid.UUID) {
-	if m.removedtransaction_detail == nil {
-		m.removedtransaction_detail = make(map[uuid.UUID]struct{})
+// RemoveRequestIDs removes the "request" edge to the Request entity by IDs.
+func (m *GroupMutation) RemoveRequestIDs(ids ...uuid.UUID) {
+	if m.removedrequest == nil {
+		m.removedrequest = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.removedtransaction_detail[ids[i]] = struct{}{}
+		m.removedrequest[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedTransactionDetail returns the removed IDs of the "transaction_detail" edge to the TransactionDetail entity.
-func (m *GroupMutation) RemovedTransactionDetailIDs() (ids []uuid.UUID) {
-	for id := range m.removedtransaction_detail {
+// RemovedRequest returns the removed IDs of the "request" edge to the Request entity.
+func (m *GroupMutation) RemovedRequestIDs() (ids []uuid.UUID) {
+	for id := range m.removedrequest {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// TransactionDetailIDs returns the "transaction_detail" edge IDs in the mutation.
-func (m *GroupMutation) TransactionDetailIDs() (ids []uuid.UUID) {
-	for id := range m.transaction_detail {
+// RequestIDs returns the "request" edge IDs in the mutation.
+func (m *GroupMutation) RequestIDs() (ids []uuid.UUID) {
+	for id := range m.request {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetTransactionDetail resets all changes to the "transaction_detail" edge.
-func (m *GroupMutation) ResetTransactionDetail() {
-	m.transaction_detail = nil
-	m.clearedtransaction_detail = false
-	m.removedtransaction_detail = nil
+// ResetRequest resets all changes to the "request" edge.
+func (m *GroupMutation) ResetRequest() {
+	m.request = nil
+	m.clearedrequest = false
+	m.removedrequest = nil
 }
 
 // Op returns the operation name.
@@ -1973,8 +1973,8 @@ func (m *GroupMutation) AddedEdges() []string {
 	if m.owner != nil {
 		edges = append(edges, group.EdgeOwner)
 	}
-	if m.transaction_detail != nil {
-		edges = append(edges, group.EdgeTransactionDetail)
+	if m.request != nil {
+		edges = append(edges, group.EdgeRequest)
 	}
 	return edges
 }
@@ -2001,9 +2001,9 @@ func (m *GroupMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case group.EdgeTransactionDetail:
-		ids := make([]ent.Value, 0, len(m.transaction_detail))
-		for id := range m.transaction_detail {
+	case group.EdgeRequest:
+		ids := make([]ent.Value, 0, len(m.request))
+		for id := range m.request {
 			ids = append(ids, id)
 		}
 		return ids
@@ -2023,8 +2023,8 @@ func (m *GroupMutation) RemovedEdges() []string {
 	if m.removedowner != nil {
 		edges = append(edges, group.EdgeOwner)
 	}
-	if m.removedtransaction_detail != nil {
-		edges = append(edges, group.EdgeTransactionDetail)
+	if m.removedrequest != nil {
+		edges = append(edges, group.EdgeRequest)
 	}
 	return edges
 }
@@ -2051,9 +2051,9 @@ func (m *GroupMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case group.EdgeTransactionDetail:
-		ids := make([]ent.Value, 0, len(m.removedtransaction_detail))
-		for id := range m.removedtransaction_detail {
+	case group.EdgeRequest:
+		ids := make([]ent.Value, 0, len(m.removedrequest))
+		for id := range m.removedrequest {
 			ids = append(ids, id)
 		}
 		return ids
@@ -2073,8 +2073,8 @@ func (m *GroupMutation) ClearedEdges() []string {
 	if m.clearedowner {
 		edges = append(edges, group.EdgeOwner)
 	}
-	if m.clearedtransaction_detail {
-		edges = append(edges, group.EdgeTransactionDetail)
+	if m.clearedrequest {
+		edges = append(edges, group.EdgeRequest)
 	}
 	return edges
 }
@@ -2089,8 +2089,8 @@ func (m *GroupMutation) EdgeCleared(name string) bool {
 		return m.cleareduser
 	case group.EdgeOwner:
 		return m.clearedowner
-	case group.EdgeTransactionDetail:
-		return m.clearedtransaction_detail
+	case group.EdgeRequest:
+		return m.clearedrequest
 	}
 	return false
 }
@@ -2116,8 +2116,8 @@ func (m *GroupMutation) ResetEdge(name string) error {
 	case group.EdgeOwner:
 		m.ResetOwner()
 		return nil
-	case group.EdgeTransactionDetail:
-		m.ResetTransactionDetail()
+	case group.EdgeRequest:
+		m.ResetRequest()
 		return nil
 	}
 	return fmt.Errorf("unknown Group edge %s", name)
@@ -2713,36 +2713,41 @@ func (m *GroupBudgetMutation) ResetEdge(name string) error {
 // RequestMutation represents an operation that mutates the Request nodes in the graph.
 type RequestMutation struct {
 	config
-	op                        Op
-	typ                       string
-	id                        *uuid.UUID
-	amount                    *int
-	addamount                 *int
-	created_at                *time.Time
-	clearedFields             map[string]struct{}
-	status                    map[uuid.UUID]struct{}
-	removedstatus             map[uuid.UUID]struct{}
-	clearedstatus             bool
-	target                    map[uuid.UUID]struct{}
-	removedtarget             map[uuid.UUID]struct{}
-	clearedtarget             bool
-	file                      map[uuid.UUID]struct{}
-	removedfile               map[uuid.UUID]struct{}
-	clearedfile               bool
-	tag                       map[uuid.UUID]struct{}
-	removedtag                map[uuid.UUID]struct{}
-	clearedtag                bool
-	transaction_detail        map[uuid.UUID]struct{}
-	removedtransaction_detail map[uuid.UUID]struct{}
-	clearedtransaction_detail bool
-	comment                   map[uuid.UUID]struct{}
-	removedcomment            map[uuid.UUID]struct{}
-	clearedcomment            bool
-	user                      *uuid.UUID
-	cleareduser               bool
-	done                      bool
-	oldValue                  func(context.Context) (*Request, error)
-	predicates                []predicate.Request
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	amount             *int
+	addamount          *int
+	title              *string
+	content            *string
+	created_at         *time.Time
+	updated_at         *time.Time
+	clearedFields      map[string]struct{}
+	status             map[uuid.UUID]struct{}
+	removedstatus      map[uuid.UUID]struct{}
+	clearedstatus      bool
+	target             map[uuid.UUID]struct{}
+	removedtarget      map[uuid.UUID]struct{}
+	clearedtarget      bool
+	file               map[uuid.UUID]struct{}
+	removedfile        map[uuid.UUID]struct{}
+	clearedfile        bool
+	tag                map[uuid.UUID]struct{}
+	removedtag         map[uuid.UUID]struct{}
+	clearedtag         bool
+	transaction        map[uuid.UUID]struct{}
+	removedtransaction map[uuid.UUID]struct{}
+	clearedtransaction bool
+	comment            map[uuid.UUID]struct{}
+	removedcomment     map[uuid.UUID]struct{}
+	clearedcomment     bool
+	user               *uuid.UUID
+	cleareduser        bool
+	group              *uuid.UUID
+	clearedgroup       bool
+	done               bool
+	oldValue           func(context.Context) (*Request, error)
+	predicates         []predicate.Request
 }
 
 var _ ent.Mutation = (*RequestMutation)(nil)
@@ -2886,6 +2891,78 @@ func (m *RequestMutation) ResetAmount() {
 	m.addamount = nil
 }
 
+// SetTitle sets the "title" field.
+func (m *RequestMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *RequestMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the Request entity.
+// If the Request object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RequestMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *RequestMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetContent sets the "content" field.
+func (m *RequestMutation) SetContent(s string) {
+	m.content = &s
+}
+
+// Content returns the value of the "content" field in the mutation.
+func (m *RequestMutation) Content() (r string, exists bool) {
+	v := m.content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old "content" field's value of the Request entity.
+// If the Request object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RequestMutation) OldContent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ResetContent resets all changes to the "content" field.
+func (m *RequestMutation) ResetContent() {
+	m.content = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *RequestMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -2920,6 +2997,42 @@ func (m *RequestMutation) OldCreatedAt(ctx context.Context) (v time.Time, err er
 // ResetCreatedAt resets all changes to the "created_at" field.
 func (m *RequestMutation) ResetCreatedAt() {
 	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *RequestMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *RequestMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Request entity.
+// If the Request object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RequestMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *RequestMutation) ResetUpdatedAt() {
+	m.updated_at = nil
 }
 
 // AddStatuIDs adds the "status" edge to the RequestStatus entity by ids.
@@ -3134,57 +3247,57 @@ func (m *RequestMutation) ResetTag() {
 	m.removedtag = nil
 }
 
-// AddTransactionDetailIDs adds the "transaction_detail" edge to the TransactionDetail entity by ids.
-func (m *RequestMutation) AddTransactionDetailIDs(ids ...uuid.UUID) {
-	if m.transaction_detail == nil {
-		m.transaction_detail = make(map[uuid.UUID]struct{})
+// AddTransactionIDs adds the "transaction" edge to the Transaction entity by ids.
+func (m *RequestMutation) AddTransactionIDs(ids ...uuid.UUID) {
+	if m.transaction == nil {
+		m.transaction = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.transaction_detail[ids[i]] = struct{}{}
+		m.transaction[ids[i]] = struct{}{}
 	}
 }
 
-// ClearTransactionDetail clears the "transaction_detail" edge to the TransactionDetail entity.
-func (m *RequestMutation) ClearTransactionDetail() {
-	m.clearedtransaction_detail = true
+// ClearTransaction clears the "transaction" edge to the Transaction entity.
+func (m *RequestMutation) ClearTransaction() {
+	m.clearedtransaction = true
 }
 
-// TransactionDetailCleared reports if the "transaction_detail" edge to the TransactionDetail entity was cleared.
-func (m *RequestMutation) TransactionDetailCleared() bool {
-	return m.clearedtransaction_detail
+// TransactionCleared reports if the "transaction" edge to the Transaction entity was cleared.
+func (m *RequestMutation) TransactionCleared() bool {
+	return m.clearedtransaction
 }
 
-// RemoveTransactionDetailIDs removes the "transaction_detail" edge to the TransactionDetail entity by IDs.
-func (m *RequestMutation) RemoveTransactionDetailIDs(ids ...uuid.UUID) {
-	if m.removedtransaction_detail == nil {
-		m.removedtransaction_detail = make(map[uuid.UUID]struct{})
+// RemoveTransactionIDs removes the "transaction" edge to the Transaction entity by IDs.
+func (m *RequestMutation) RemoveTransactionIDs(ids ...uuid.UUID) {
+	if m.removedtransaction == nil {
+		m.removedtransaction = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.removedtransaction_detail[ids[i]] = struct{}{}
+		m.removedtransaction[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedTransactionDetail returns the removed IDs of the "transaction_detail" edge to the TransactionDetail entity.
-func (m *RequestMutation) RemovedTransactionDetailIDs() (ids []uuid.UUID) {
-	for id := range m.removedtransaction_detail {
+// RemovedTransaction returns the removed IDs of the "transaction" edge to the Transaction entity.
+func (m *RequestMutation) RemovedTransactionIDs() (ids []uuid.UUID) {
+	for id := range m.removedtransaction {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// TransactionDetailIDs returns the "transaction_detail" edge IDs in the mutation.
-func (m *RequestMutation) TransactionDetailIDs() (ids []uuid.UUID) {
-	for id := range m.transaction_detail {
+// TransactionIDs returns the "transaction" edge IDs in the mutation.
+func (m *RequestMutation) TransactionIDs() (ids []uuid.UUID) {
+	for id := range m.transaction {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetTransactionDetail resets all changes to the "transaction_detail" edge.
-func (m *RequestMutation) ResetTransactionDetail() {
-	m.transaction_detail = nil
-	m.clearedtransaction_detail = false
-	m.removedtransaction_detail = nil
+// ResetTransaction resets all changes to the "transaction" edge.
+func (m *RequestMutation) ResetTransaction() {
+	m.transaction = nil
+	m.clearedtransaction = false
+	m.removedtransaction = nil
 }
 
 // AddCommentIDs adds the "comment" edge to the Comment entity by ids.
@@ -3279,6 +3392,45 @@ func (m *RequestMutation) ResetUser() {
 	m.cleareduser = false
 }
 
+// SetGroupID sets the "group" edge to the Group entity by id.
+func (m *RequestMutation) SetGroupID(id uuid.UUID) {
+	m.group = &id
+}
+
+// ClearGroup clears the "group" edge to the Group entity.
+func (m *RequestMutation) ClearGroup() {
+	m.clearedgroup = true
+}
+
+// GroupCleared reports if the "group" edge to the Group entity was cleared.
+func (m *RequestMutation) GroupCleared() bool {
+	return m.clearedgroup
+}
+
+// GroupID returns the "group" edge ID in the mutation.
+func (m *RequestMutation) GroupID() (id uuid.UUID, exists bool) {
+	if m.group != nil {
+		return *m.group, true
+	}
+	return
+}
+
+// GroupIDs returns the "group" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// GroupID instead. It exists only for internal usage by the builders.
+func (m *RequestMutation) GroupIDs() (ids []uuid.UUID) {
+	if id := m.group; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetGroup resets all changes to the "group" edge.
+func (m *RequestMutation) ResetGroup() {
+	m.group = nil
+	m.clearedgroup = false
+}
+
 // Op returns the operation name.
 func (m *RequestMutation) Op() Op {
 	return m.op
@@ -3293,12 +3445,21 @@ func (m *RequestMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RequestMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 5)
 	if m.amount != nil {
 		fields = append(fields, request.FieldAmount)
 	}
+	if m.title != nil {
+		fields = append(fields, request.FieldTitle)
+	}
+	if m.content != nil {
+		fields = append(fields, request.FieldContent)
+	}
 	if m.created_at != nil {
 		fields = append(fields, request.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, request.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -3310,8 +3471,14 @@ func (m *RequestMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case request.FieldAmount:
 		return m.Amount()
+	case request.FieldTitle:
+		return m.Title()
+	case request.FieldContent:
+		return m.Content()
 	case request.FieldCreatedAt:
 		return m.CreatedAt()
+	case request.FieldUpdatedAt:
+		return m.UpdatedAt()
 	}
 	return nil, false
 }
@@ -3323,8 +3490,14 @@ func (m *RequestMutation) OldField(ctx context.Context, name string) (ent.Value,
 	switch name {
 	case request.FieldAmount:
 		return m.OldAmount(ctx)
+	case request.FieldTitle:
+		return m.OldTitle(ctx)
+	case request.FieldContent:
+		return m.OldContent(ctx)
 	case request.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
+	case request.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Request field %s", name)
 }
@@ -3341,12 +3514,33 @@ func (m *RequestMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAmount(v)
 		return nil
+	case request.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case request.FieldContent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
+		return nil
 	case request.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
+		return nil
+	case request.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Request field %s", name)
@@ -3415,8 +3609,17 @@ func (m *RequestMutation) ResetField(name string) error {
 	case request.FieldAmount:
 		m.ResetAmount()
 		return nil
+	case request.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case request.FieldContent:
+		m.ResetContent()
+		return nil
 	case request.FieldCreatedAt:
 		m.ResetCreatedAt()
+		return nil
+	case request.FieldUpdatedAt:
+		m.ResetUpdatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Request field %s", name)
@@ -3424,7 +3627,7 @@ func (m *RequestMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RequestMutation) AddedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 8)
 	if m.status != nil {
 		edges = append(edges, request.EdgeStatus)
 	}
@@ -3437,14 +3640,17 @@ func (m *RequestMutation) AddedEdges() []string {
 	if m.tag != nil {
 		edges = append(edges, request.EdgeTag)
 	}
-	if m.transaction_detail != nil {
-		edges = append(edges, request.EdgeTransactionDetail)
+	if m.transaction != nil {
+		edges = append(edges, request.EdgeTransaction)
 	}
 	if m.comment != nil {
 		edges = append(edges, request.EdgeComment)
 	}
 	if m.user != nil {
 		edges = append(edges, request.EdgeUser)
+	}
+	if m.group != nil {
+		edges = append(edges, request.EdgeGroup)
 	}
 	return edges
 }
@@ -3477,9 +3683,9 @@ func (m *RequestMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case request.EdgeTransactionDetail:
-		ids := make([]ent.Value, 0, len(m.transaction_detail))
-		for id := range m.transaction_detail {
+	case request.EdgeTransaction:
+		ids := make([]ent.Value, 0, len(m.transaction))
+		for id := range m.transaction {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3493,13 +3699,17 @@ func (m *RequestMutation) AddedIDs(name string) []ent.Value {
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
+	case request.EdgeGroup:
+		if id := m.group; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RequestMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 8)
 	if m.removedstatus != nil {
 		edges = append(edges, request.EdgeStatus)
 	}
@@ -3512,8 +3722,8 @@ func (m *RequestMutation) RemovedEdges() []string {
 	if m.removedtag != nil {
 		edges = append(edges, request.EdgeTag)
 	}
-	if m.removedtransaction_detail != nil {
-		edges = append(edges, request.EdgeTransactionDetail)
+	if m.removedtransaction != nil {
+		edges = append(edges, request.EdgeTransaction)
 	}
 	if m.removedcomment != nil {
 		edges = append(edges, request.EdgeComment)
@@ -3549,9 +3759,9 @@ func (m *RequestMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case request.EdgeTransactionDetail:
-		ids := make([]ent.Value, 0, len(m.removedtransaction_detail))
-		for id := range m.removedtransaction_detail {
+	case request.EdgeTransaction:
+		ids := make([]ent.Value, 0, len(m.removedtransaction))
+		for id := range m.removedtransaction {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3567,7 +3777,7 @@ func (m *RequestMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RequestMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 8)
 	if m.clearedstatus {
 		edges = append(edges, request.EdgeStatus)
 	}
@@ -3580,14 +3790,17 @@ func (m *RequestMutation) ClearedEdges() []string {
 	if m.clearedtag {
 		edges = append(edges, request.EdgeTag)
 	}
-	if m.clearedtransaction_detail {
-		edges = append(edges, request.EdgeTransactionDetail)
+	if m.clearedtransaction {
+		edges = append(edges, request.EdgeTransaction)
 	}
 	if m.clearedcomment {
 		edges = append(edges, request.EdgeComment)
 	}
 	if m.cleareduser {
 		edges = append(edges, request.EdgeUser)
+	}
+	if m.clearedgroup {
+		edges = append(edges, request.EdgeGroup)
 	}
 	return edges
 }
@@ -3604,12 +3817,14 @@ func (m *RequestMutation) EdgeCleared(name string) bool {
 		return m.clearedfile
 	case request.EdgeTag:
 		return m.clearedtag
-	case request.EdgeTransactionDetail:
-		return m.clearedtransaction_detail
+	case request.EdgeTransaction:
+		return m.clearedtransaction
 	case request.EdgeComment:
 		return m.clearedcomment
 	case request.EdgeUser:
 		return m.cleareduser
+	case request.EdgeGroup:
+		return m.clearedgroup
 	}
 	return false
 }
@@ -3620,6 +3835,9 @@ func (m *RequestMutation) ClearEdge(name string) error {
 	switch name {
 	case request.EdgeUser:
 		m.ClearUser()
+		return nil
+	case request.EdgeGroup:
+		m.ClearGroup()
 		return nil
 	}
 	return fmt.Errorf("unknown Request unique edge %s", name)
@@ -3641,14 +3859,17 @@ func (m *RequestMutation) ResetEdge(name string) error {
 	case request.EdgeTag:
 		m.ResetTag()
 		return nil
-	case request.EdgeTransactionDetail:
-		m.ResetTransactionDetail()
+	case request.EdgeTransaction:
+		m.ResetTransaction()
 		return nil
 	case request.EdgeComment:
 		m.ResetComment()
 		return nil
 	case request.EdgeUser:
 		m.ResetUser()
+		return nil
+	case request.EdgeGroup:
+		m.ResetGroup()
 		return nil
 	}
 	return fmt.Errorf("unknown Request edge %s", name)
@@ -5349,6 +5570,8 @@ type TransactionMutation struct {
 	clearedtag          bool
 	group_budget        *uuid.UUID
 	clearedgroup_budget bool
+	request             *uuid.UUID
+	clearedrequest      bool
 	done                bool
 	oldValue            func(context.Context) (*Transaction, error)
 	predicates          []predicate.Transaction
@@ -5606,6 +5829,45 @@ func (m *TransactionMutation) ResetGroupBudget() {
 	m.clearedgroup_budget = false
 }
 
+// SetRequestID sets the "request" edge to the Request entity by id.
+func (m *TransactionMutation) SetRequestID(id uuid.UUID) {
+	m.request = &id
+}
+
+// ClearRequest clears the "request" edge to the Request entity.
+func (m *TransactionMutation) ClearRequest() {
+	m.clearedrequest = true
+}
+
+// RequestCleared reports if the "request" edge to the Request entity was cleared.
+func (m *TransactionMutation) RequestCleared() bool {
+	return m.clearedrequest
+}
+
+// RequestID returns the "request" edge ID in the mutation.
+func (m *TransactionMutation) RequestID() (id uuid.UUID, exists bool) {
+	if m.request != nil {
+		return *m.request, true
+	}
+	return
+}
+
+// RequestIDs returns the "request" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RequestID instead. It exists only for internal usage by the builders.
+func (m *TransactionMutation) RequestIDs() (ids []uuid.UUID) {
+	if id := m.request; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRequest resets all changes to the "request" edge.
+func (m *TransactionMutation) ResetRequest() {
+	m.request = nil
+	m.clearedrequest = false
+}
+
 // Op returns the operation name.
 func (m *TransactionMutation) Op() Op {
 	return m.op
@@ -5719,7 +5981,7 @@ func (m *TransactionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TransactionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.detail != nil {
 		edges = append(edges, transaction.EdgeDetail)
 	}
@@ -5728,6 +5990,9 @@ func (m *TransactionMutation) AddedEdges() []string {
 	}
 	if m.group_budget != nil {
 		edges = append(edges, transaction.EdgeGroupBudget)
+	}
+	if m.request != nil {
+		edges = append(edges, transaction.EdgeRequest)
 	}
 	return edges
 }
@@ -5750,13 +6015,17 @@ func (m *TransactionMutation) AddedIDs(name string) []ent.Value {
 		if id := m.group_budget; id != nil {
 			return []ent.Value{*id}
 		}
+	case transaction.EdgeRequest:
+		if id := m.request; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TransactionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedtag != nil {
 		edges = append(edges, transaction.EdgeTag)
 	}
@@ -5779,7 +6048,7 @@ func (m *TransactionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TransactionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.cleareddetail {
 		edges = append(edges, transaction.EdgeDetail)
 	}
@@ -5788,6 +6057,9 @@ func (m *TransactionMutation) ClearedEdges() []string {
 	}
 	if m.clearedgroup_budget {
 		edges = append(edges, transaction.EdgeGroupBudget)
+	}
+	if m.clearedrequest {
+		edges = append(edges, transaction.EdgeRequest)
 	}
 	return edges
 }
@@ -5802,6 +6074,8 @@ func (m *TransactionMutation) EdgeCleared(name string) bool {
 		return m.clearedtag
 	case transaction.EdgeGroupBudget:
 		return m.clearedgroup_budget
+	case transaction.EdgeRequest:
+		return m.clearedrequest
 	}
 	return false
 }
@@ -5815,6 +6089,9 @@ func (m *TransactionMutation) ClearEdge(name string) error {
 		return nil
 	case transaction.EdgeGroupBudget:
 		m.ClearGroupBudget()
+		return nil
+	case transaction.EdgeRequest:
+		m.ClearRequest()
 		return nil
 	}
 	return fmt.Errorf("unknown Transaction unique edge %s", name)
@@ -5832,6 +6109,9 @@ func (m *TransactionMutation) ResetEdge(name string) error {
 		return nil
 	case transaction.EdgeGroupBudget:
 		m.ResetGroupBudget()
+		return nil
+	case transaction.EdgeRequest:
+		m.ResetRequest()
 		return nil
 	}
 	return fmt.Errorf("unknown Transaction edge %s", name)
@@ -5851,10 +6131,6 @@ type TransactionDetailMutation struct {
 	clearedFields      map[string]struct{}
 	transaction        *uuid.UUID
 	clearedtransaction bool
-	request            *uuid.UUID
-	clearedrequest     bool
-	group              *uuid.UUID
-	clearedgroup       bool
 	done               bool
 	oldValue           func(context.Context) (*TransactionDetail, error)
 	predicates         []predicate.TransactionDetail
@@ -6148,84 +6424,6 @@ func (m *TransactionDetailMutation) ResetTransaction() {
 	m.clearedtransaction = false
 }
 
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *TransactionDetailMutation) SetRequestID(id uuid.UUID) {
-	m.request = &id
-}
-
-// ClearRequest clears the "request" edge to the Request entity.
-func (m *TransactionDetailMutation) ClearRequest() {
-	m.clearedrequest = true
-}
-
-// RequestCleared reports if the "request" edge to the Request entity was cleared.
-func (m *TransactionDetailMutation) RequestCleared() bool {
-	return m.clearedrequest
-}
-
-// RequestID returns the "request" edge ID in the mutation.
-func (m *TransactionDetailMutation) RequestID() (id uuid.UUID, exists bool) {
-	if m.request != nil {
-		return *m.request, true
-	}
-	return
-}
-
-// RequestIDs returns the "request" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// RequestID instead. It exists only for internal usage by the builders.
-func (m *TransactionDetailMutation) RequestIDs() (ids []uuid.UUID) {
-	if id := m.request; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetRequest resets all changes to the "request" edge.
-func (m *TransactionDetailMutation) ResetRequest() {
-	m.request = nil
-	m.clearedrequest = false
-}
-
-// SetGroupID sets the "group" edge to the Group entity by id.
-func (m *TransactionDetailMutation) SetGroupID(id uuid.UUID) {
-	m.group = &id
-}
-
-// ClearGroup clears the "group" edge to the Group entity.
-func (m *TransactionDetailMutation) ClearGroup() {
-	m.clearedgroup = true
-}
-
-// GroupCleared reports if the "group" edge to the Group entity was cleared.
-func (m *TransactionDetailMutation) GroupCleared() bool {
-	return m.clearedgroup
-}
-
-// GroupID returns the "group" edge ID in the mutation.
-func (m *TransactionDetailMutation) GroupID() (id uuid.UUID, exists bool) {
-	if m.group != nil {
-		return *m.group, true
-	}
-	return
-}
-
-// GroupIDs returns the "group" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// GroupID instead. It exists only for internal usage by the builders.
-func (m *TransactionDetailMutation) GroupIDs() (ids []uuid.UUID) {
-	if id := m.group; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetGroup resets all changes to the "group" edge.
-func (m *TransactionDetailMutation) ResetGroup() {
-	m.group = nil
-	m.clearedgroup = false
-}
-
 // Op returns the operation name.
 func (m *TransactionDetailMutation) Op() Op {
 	return m.op
@@ -6405,15 +6603,9 @@ func (m *TransactionDetailMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TransactionDetailMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 1)
 	if m.transaction != nil {
 		edges = append(edges, transactiondetail.EdgeTransaction)
-	}
-	if m.request != nil {
-		edges = append(edges, transactiondetail.EdgeRequest)
-	}
-	if m.group != nil {
-		edges = append(edges, transactiondetail.EdgeGroup)
 	}
 	return edges
 }
@@ -6426,21 +6618,13 @@ func (m *TransactionDetailMutation) AddedIDs(name string) []ent.Value {
 		if id := m.transaction; id != nil {
 			return []ent.Value{*id}
 		}
-	case transactiondetail.EdgeRequest:
-		if id := m.request; id != nil {
-			return []ent.Value{*id}
-		}
-	case transactiondetail.EdgeGroup:
-		if id := m.group; id != nil {
-			return []ent.Value{*id}
-		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TransactionDetailMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -6454,15 +6638,9 @@ func (m *TransactionDetailMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TransactionDetailMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 1)
 	if m.clearedtransaction {
 		edges = append(edges, transactiondetail.EdgeTransaction)
-	}
-	if m.clearedrequest {
-		edges = append(edges, transactiondetail.EdgeRequest)
-	}
-	if m.clearedgroup {
-		edges = append(edges, transactiondetail.EdgeGroup)
 	}
 	return edges
 }
@@ -6473,10 +6651,6 @@ func (m *TransactionDetailMutation) EdgeCleared(name string) bool {
 	switch name {
 	case transactiondetail.EdgeTransaction:
 		return m.clearedtransaction
-	case transactiondetail.EdgeRequest:
-		return m.clearedrequest
-	case transactiondetail.EdgeGroup:
-		return m.clearedgroup
 	}
 	return false
 }
@@ -6488,12 +6662,6 @@ func (m *TransactionDetailMutation) ClearEdge(name string) error {
 	case transactiondetail.EdgeTransaction:
 		m.ClearTransaction()
 		return nil
-	case transactiondetail.EdgeRequest:
-		m.ClearRequest()
-		return nil
-	case transactiondetail.EdgeGroup:
-		m.ClearGroup()
-		return nil
 	}
 	return fmt.Errorf("unknown TransactionDetail unique edge %s", name)
 }
@@ -6504,12 +6672,6 @@ func (m *TransactionDetailMutation) ResetEdge(name string) error {
 	switch name {
 	case transactiondetail.EdgeTransaction:
 		m.ResetTransaction()
-		return nil
-	case transactiondetail.EdgeRequest:
-		m.ResetRequest()
-		return nil
-	case transactiondetail.EdgeGroup:
-		m.ResetGroup()
 		return nil
 	}
 	return fmt.Errorf("unknown TransactionDetail edge %s", name)

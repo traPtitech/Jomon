@@ -40,6 +40,6 @@ func (Group) Edges() []ent.Edge {
 		edge.To("group_budget", GroupBudget.Type),
 		edge.To("user", User.Type),
 		edge.To("owner", User.Type),
-		edge.To("transaction_detail", TransactionDetail.Type),
+		edge.To("request", Request.Type),
 	}
 }

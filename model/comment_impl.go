@@ -6,6 +6,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/comment"
+	"github.com/traPtitech/Jomon/ent/request"
 )
 
 func (repo *EntRepository) CreateComment(ctx context.Context, comment string, requestID uuid.UUID, userID uuid.UUID) (*Comment, error) {
@@ -31,6 +33,25 @@ func (repo *EntRepository) UpdateComment(ctx context.Context, comment string, re
 		return nil, err
 	}
 	return ConvertEntCommentToModelComment(updated), nil
+}
+
+func (repo *EntRepository) DeleteComment(ctx context.Context, requestID uuid.UUID, commentID uuid.UUID) error {
+	comment, err := repo.client.Comment.
+		Query().
+		Where(
+			comment.HasRequestWith(
+				request.ID(requestID),
+			),
+		).
+		Where(comment.IDEQ(commentID)).
+		Only(ctx)
+	if err != nil {
+		return err
+	}
+	err = repo.client.Comment.
+		DeleteOne(comment).
+		Exec(ctx)
+	return err
 }
 
 func ConvertEntCommentToModelComment(entcomment *ent.Comment) *Comment {

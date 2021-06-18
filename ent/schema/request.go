@@ -20,7 +20,11 @@ func (Request) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
 		field.Int("amount"),
+		field.String("title"),
+		field.String("content"),
 		field.Time("created_at").
+			Default(time.Now),
+		field.Time("updated_at").
 			Default(time.Now),
 	}
 }
@@ -32,9 +36,12 @@ func (Request) Edges() []ent.Edge {
 		edge.To("target", RequestTarget.Type),
 		edge.To("file", File.Type),
 		edge.To("tag", Tag.Type),
-		edge.To("transaction_detail", TransactionDetail.Type),
+		edge.To("transaction", Transaction.Type),
 		edge.To("comment", Comment.Type),
 		edge.To("user", User.Type).
+			Unique(),
+		edge.From("group", Group.Type).
+			Ref("request").
 			Unique(),
 	}
 }

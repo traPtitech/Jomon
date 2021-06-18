@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/predicate"
+	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -33,6 +34,7 @@ type TransactionQuery struct {
 	withDetail      *TransactionDetailQuery
 	withTag         *TagQuery
 	withGroupBudget *GroupBudgetQuery
+	withRequest     *RequestQuery
 	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -129,6 +131,28 @@ func (tq *TransactionQuery) QueryGroupBudget() *GroupBudgetQuery {
 			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
 			sqlgraph.To(groupbudget.Table, groupbudget.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, transaction.GroupBudgetTable, transaction.GroupBudgetColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRequest chains the current query on the "request" edge.
+func (tq *TransactionQuery) QueryRequest() *RequestQuery {
+	query := &RequestQuery{config: tq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
+			sqlgraph.To(request.Table, request.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, transaction.RequestTable, transaction.RequestColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -320,6 +344,7 @@ func (tq *TransactionQuery) Clone() *TransactionQuery {
 		withDetail:      tq.withDetail.Clone(),
 		withTag:         tq.withTag.Clone(),
 		withGroupBudget: tq.withGroupBudget.Clone(),
+		withRequest:     tq.withRequest.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
@@ -356,6 +381,17 @@ func (tq *TransactionQuery) WithGroupBudget(opts ...func(*GroupBudgetQuery)) *Tr
 		opt(query)
 	}
 	tq.withGroupBudget = query
+	return tq
+}
+
+// WithRequest tells the query-builder to eager-load the nodes that are connected to
+// the "request" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TransactionQuery) WithRequest(opts ...func(*RequestQuery)) *TransactionQuery {
+	query := &RequestQuery{config: tq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withRequest = query
 	return tq
 }
 
@@ -425,13 +461,14 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context) ([]*Transaction, error) 
 		nodes       = []*Transaction{}
 		withFKs     = tq.withFKs
 		_spec       = tq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			tq.withDetail != nil,
 			tq.withTag != nil,
 			tq.withGroupBudget != nil,
+			tq.withRequest != nil,
 		}
 	)
-	if tq.withGroupBudget != nil {
+	if tq.withGroupBudget != nil || tq.withRequest != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -539,6 +576,35 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context) ([]*Transaction, error) 
 			}
 			for i := range nodes {
 				nodes[i].Edges.GroupBudget = n
+			}
+		}
+	}
+
+	if query := tq.withRequest; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Transaction)
+		for i := range nodes {
+			if nodes[i].request_transaction == nil {
+				continue
+			}
+			fk := *nodes[i].request_transaction
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(request.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "request_transaction" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Request = n
 			}
 		}
 	}

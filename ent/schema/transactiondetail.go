@@ -37,11 +37,5 @@ func (TransactionDetail) Edges() []ent.Edge {
 			Ref("detail").
 			Unique().
 			Required(),
-		edge.From("request", Request.Type).
-			Ref("transaction_detail").
-			Unique(),
-		edge.From("group", Group.Type).
-			Ref("transaction_detail").
-			Unique(),
 	}
 }

@@ -9,8 +9,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/ent/group"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
 )
@@ -30,23 +28,17 @@ type TransactionDetail struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TransactionDetailQuery when eager-loading is set.
-	Edges                      TransactionDetailEdges `json:"edges"`
-	group_transaction_detail   *uuid.UUID
-	request_transaction_detail *uuid.UUID
-	transaction_detail         *uuid.UUID
+	Edges              TransactionDetailEdges `json:"edges"`
+	transaction_detail *uuid.UUID
 }
 
 // TransactionDetailEdges holds the relations/edges for other nodes in the graph.
 type TransactionDetailEdges struct {
 	// Transaction holds the value of the transaction edge.
 	Transaction *Transaction `json:"transaction,omitempty"`
-	// Request holds the value of the request edge.
-	Request *Request `json:"request,omitempty"`
-	// Group holds the value of the group edge.
-	Group *Group `json:"group,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [1]bool
 }
 
 // TransactionOrErr returns the Transaction value or an error if the edge
@@ -63,34 +55,6 @@ func (e TransactionDetailEdges) TransactionOrErr() (*Transaction, error) {
 	return nil, &NotLoadedError{edge: "transaction"}
 }
 
-// RequestOrErr returns the Request value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TransactionDetailEdges) RequestOrErr() (*Request, error) {
-	if e.loadedTypes[1] {
-		if e.Request == nil {
-			// The edge request was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: request.Label}
-		}
-		return e.Request, nil
-	}
-	return nil, &NotLoadedError{edge: "request"}
-}
-
-// GroupOrErr returns the Group value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TransactionDetailEdges) GroupOrErr() (*Group, error) {
-	if e.loadedTypes[2] {
-		if e.Group == nil {
-			// The edge group was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: group.Label}
-		}
-		return e.Group, nil
-	}
-	return nil, &NotLoadedError{edge: "group"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*TransactionDetail) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -104,11 +68,7 @@ func (*TransactionDetail) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullTime)
 		case transactiondetail.FieldID:
 			values[i] = new(uuid.UUID)
-		case transactiondetail.ForeignKeys[0]: // group_transaction_detail
-			values[i] = new(uuid.UUID)
-		case transactiondetail.ForeignKeys[1]: // request_transaction_detail
-			values[i] = new(uuid.UUID)
-		case transactiondetail.ForeignKeys[2]: // transaction_detail
+		case transactiondetail.ForeignKeys[0]: // transaction_detail
 			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type TransactionDetail", columns[i])
@@ -157,18 +117,6 @@ func (td *TransactionDetail) assignValues(columns []string, values []interface{}
 			}
 		case transactiondetail.ForeignKeys[0]:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field group_transaction_detail", values[i])
-			} else if value != nil {
-				td.group_transaction_detail = value
-			}
-		case transactiondetail.ForeignKeys[1]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field request_transaction_detail", values[i])
-			} else if value != nil {
-				td.request_transaction_detail = value
-			}
-		case transactiondetail.ForeignKeys[2]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field transaction_detail", values[i])
 			} else if value != nil {
 				td.transaction_detail = value
@@ -181,16 +129,6 @@ func (td *TransactionDetail) assignValues(columns []string, values []interface{}
 // QueryTransaction queries the "transaction" edge of the TransactionDetail entity.
 func (td *TransactionDetail) QueryTransaction() *TransactionQuery {
 	return (&TransactionDetailClient{config: td.config}).QueryTransaction(td)
-}
-
-// QueryRequest queries the "request" edge of the TransactionDetail entity.
-func (td *TransactionDetail) QueryRequest() *RequestQuery {
-	return (&TransactionDetailClient{config: td.config}).QueryRequest(td)
-}
-
-// QueryGroup queries the "group" edge of the TransactionDetail entity.
-func (td *TransactionDetail) QueryGroup() *GroupQuery {
-	return (&TransactionDetailClient{config: td.config}).QueryGroup(td)
 }
 
 // Update returns a builder for updating this TransactionDetail.
