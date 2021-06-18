@@ -4,7 +4,7 @@
     <strong>An accounting support system</strong>
   </p>
   <p>
-    <a href="https://apis.trap.jp/?urls.primaryName=Jomon#/">Jomon API</a>
+    <a href="https://apis.trap.jp/?urls.primaryName=Jomon#/">Jomon API</a>&emsp;<a href="https://github.com/traPtitech/Jomon-UI">Jomon-UI</a>
   <p>
 </div>
 
@@ -34,7 +34,7 @@ Alternatively, you can run following command in the project root.
 make up
 ```
 
-The server is up without debugging logs.
+The server is up without logs.
 
 2. Run following command in the project root when making server down.
 
