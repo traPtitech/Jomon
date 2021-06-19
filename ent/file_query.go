@@ -292,12 +292,12 @@ func (fq *FileQuery) WithRequest(opts ...func(*RequestQuery)) *FileQuery {
 // Example:
 //
 //	var v []struct {
-//		MimeType string `json:"mime_type,omitempty"`
+//		Name string `json:"name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.File.Query().
-//		GroupBy(file.FieldMimeType).
+//		GroupBy(file.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -319,11 +319,11 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 // Example:
 //
 //	var v []struct {
-//		MimeType string `json:"mime_type,omitempty"`
+//		Name string `json:"name,omitempty"`
 //	}
 //
 //	client.File.Query().
-//		Select(file.FieldMimeType).
+//		Select(file.FieldName).
 //		Scan(ctx, &v)
 //
 func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {

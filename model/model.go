@@ -14,9 +14,9 @@ func SetupEntClient() (*ent.Client, error) {
 	// Logging
 	var entOptions []ent.Option
 	if os.Getenv("IS_DEBUG_MODE") != "" {
-		entOptions = []ent.Option{}
-	} else {
 		entOptions = []ent.Option{ent.Debug()}
+	} else {
+		entOptions = []ent.Option{}
 	}
 
 	dbUser := testutil.GetEnvOrDefault("MYSQL_USERNAME", "root")
@@ -33,11 +33,11 @@ func SetupEntClient() (*ent.Client, error) {
 	}
 
 	if os.Getenv("IS_DEBUG_MODE") != "" {
-		if err := client.Schema.Create(context.Background()); err != nil {
+		if err := client.Debug().Schema.Create(context.Background()); err != nil {
 			return nil, err
 		}
 	} else {
-		if err := client.Debug().Schema.Create(context.Background()); err != nil {
+		if err := client.Schema.Create(context.Background()); err != nil {
 			return nil, err
 		}
 	}

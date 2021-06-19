@@ -29,6 +29,12 @@ func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 	return fu
 }
 
+// SetName sets the "name" field.
+func (fu *FileUpdate) SetName(s string) *FileUpdate {
+	fu.mutation.SetName(s)
+	return fu
+}
+
 // SetMimeType sets the "mime_type" field.
 func (fu *FileUpdate) SetMimeType(s string) *FileUpdate {
 	fu.mutation.SetMimeType(s)
@@ -168,6 +174,13 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := fu.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: file.FieldName,
+		})
+	}
 	if value, ok := fu.mutation.MimeType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -247,6 +260,12 @@ type FileUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *FileMutation
+}
+
+// SetName sets the "name" field.
+func (fuo *FileUpdateOne) SetName(s string) *FileUpdateOne {
+	fuo.mutation.SetName(s)
+	return fuo
 }
 
 // SetMimeType sets the "mime_type" field.
@@ -411,6 +430,13 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := fuo.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: file.FieldName,
+		})
 	}
 	if value, ok := fuo.mutation.MimeType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

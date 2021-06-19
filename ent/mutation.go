@@ -658,6 +658,7 @@ type FileMutation struct {
 	op             Op
 	typ            string
 	id             *uuid.UUID
+	name           *string
 	mime_type      *string
 	created_at     *time.Time
 	deleted_at     *time.Time
@@ -752,6 +753,42 @@ func (m *FileMutation) ID() (id uuid.UUID, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// SetName sets the "name" field.
+func (m *FileMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *FileMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the File entity.
+// If the File object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FileMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *FileMutation) ResetName() {
+	m.name = nil
 }
 
 // SetMimeType sets the "mime_type" field.
@@ -928,7 +965,10 @@ func (m *FileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FileMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
+	if m.name != nil {
+		fields = append(fields, file.FieldName)
+	}
 	if m.mime_type != nil {
 		fields = append(fields, file.FieldMimeType)
 	}
@@ -946,6 +986,8 @@ func (m *FileMutation) Fields() []string {
 // schema.
 func (m *FileMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case file.FieldName:
+		return m.Name()
 	case file.FieldMimeType:
 		return m.MimeType()
 	case file.FieldCreatedAt:
@@ -961,6 +1003,8 @@ func (m *FileMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *FileMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case file.FieldName:
+		return m.OldName(ctx)
 	case file.FieldMimeType:
 		return m.OldMimeType(ctx)
 	case file.FieldCreatedAt:
@@ -976,6 +1020,13 @@ func (m *FileMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *FileMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case file.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
 	case file.FieldMimeType:
 		v, ok := value.(string)
 		if !ok {
@@ -1055,6 +1106,9 @@ func (m *FileMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *FileMutation) ResetField(name string) error {
 	switch name {
+	case file.FieldName:
+		m.ResetName()
+		return nil
 	case file.FieldMimeType:
 		m.ResetMimeType()
 		return nil

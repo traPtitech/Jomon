@@ -20,6 +20,7 @@ services:
       MARIADB_PASSWORD: password
       MARIADB_HOSTNAME: db
       MARIADB_DATABASE: jomon
+    env_file: ./.env
     ports:
       - "1323:1323"
     volumes:

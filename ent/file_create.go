@@ -22,6 +22,12 @@ type FileCreate struct {
 	hooks    []Hook
 }
 
+// SetName sets the "name" field.
+func (fc *FileCreate) SetName(s string) *FileCreate {
+	fc.mutation.SetName(s)
+	return fc
+}
+
 // SetMimeType sets the "mime_type" field.
 func (fc *FileCreate) SetMimeType(s string) *FileCreate {
 	fc.mutation.SetMimeType(s)
@@ -145,6 +151,9 @@ func (fc *FileCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (fc *FileCreate) check() error {
+	if _, ok := fc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
 	if _, ok := fc.mutation.MimeType(); !ok {
 		return &ValidationError{Name: "mime_type", err: errors.New("ent: missing required field \"mime_type\"")}
 	}
@@ -179,6 +188,14 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 	if id, ok := fc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := fc.mutation.Name(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: file.FieldName,
+		})
+		_node.Name = value
 	}
 	if value, ok := fc.mutation.MimeType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

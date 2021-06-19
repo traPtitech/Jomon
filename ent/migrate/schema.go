@@ -34,6 +34,7 @@ var (
 	// FilesColumns holds the columns for the "files" table.
 	FilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString},
 		{Name: "mime_type", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
@@ -47,7 +48,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "files_requests_file",
-				Columns:    []*schema.Column{FilesColumns[4]},
+				Columns:    []*schema.Column{FilesColumns[5]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

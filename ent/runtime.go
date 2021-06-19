@@ -41,7 +41,7 @@ func init() {
 	fileFields := schema.File{}.Fields()
 	_ = fileFields
 	// fileDescCreatedAt is the schema descriptor for created_at field.
-	fileDescCreatedAt := fileFields[2].Descriptor()
+	fileDescCreatedAt := fileFields[3].Descriptor()
 	// file.DefaultCreatedAt holds the default value on creation for the created_at field.
 	file.DefaultCreatedAt = fileDescCreatedAt.Default.(func() time.Time)
 	// fileDescID is the schema descriptor for id field.

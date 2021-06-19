@@ -11,7 +11,7 @@ type Swift struct {
 	conn      *swift.Connection
 }
 
-func NewSwiftStorage(container string, userName string, apiKey string, tenant string, tenantID string, authURL string) (Swift, error) {
+func NewSwiftStorage(container string, userName string, apiKey string, tenant string, tenantID string, authURL string) (Storage, error) {
 	conn := &swift.Connection{
 		AuthUrl:  authURL,
 		UserName: userName,
@@ -21,14 +21,14 @@ func NewSwiftStorage(container string, userName string, apiKey string, tenant st
 	}
 
 	if err := conn.Authenticate(); err != nil {
-		return Swift{}, err
+		return &Swift{}, err
 	}
 
 	if _, _, err := conn.Container(container); err != nil {
-		return Swift{}, err
+		return &Swift{}, err
 	}
 
-	s := Swift{
+	s := &Swift{
 		container: container,
 		conn:      conn,
 	}

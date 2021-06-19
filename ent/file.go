@@ -18,6 +18,8 @@ type File struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
 	// MimeType holds the value of the "mime_type" field.
 	MimeType string `json:"mime_type,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -58,7 +60,7 @@ func (*File) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case file.FieldMimeType:
+		case file.FieldName, file.FieldMimeType:
 			values[i] = new(sql.NullString)
 		case file.FieldCreatedAt, file.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -86,6 +88,12 @@ func (f *File) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				f.ID = *value
+			}
+		case file.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				f.Name = value.String
 			}
 		case file.FieldMimeType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -145,6 +153,8 @@ func (f *File) String() string {
 	var builder strings.Builder
 	builder.WriteString("File(")
 	builder.WriteString(fmt.Sprintf("id=%v", f.ID))
+	builder.WriteString(", name=")
+	builder.WriteString(f.Name)
 	builder.WriteString(", mime_type=")
 	builder.WriteString(f.MimeType)
 	builder.WriteString(", created_at=")

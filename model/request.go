@@ -9,7 +9,7 @@ import (
 
 type RequestRepository interface {
 	GetRequests(ctx context.Context, query RequestQuery) ([]*RequestResponse, error)
-	CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, group Group) (*RequestDetail, error)
+	CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, group Group, files []*File) (*RequestDetail, error)
 	/*
 		GetRequest(ctx context.Context, requestID uuid.UUID) (RequestDetail, error)
 		UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, content string, tags []*Tag, group Group) (RequestDetail, error)

@@ -11,16 +11,16 @@ type Local struct {
 	localDir string
 }
 
-func NewLocalStorage(dir string) (Local, error) {
+func NewLocalStorage(dir string) (Storage, error) {
 	fi, err := os.Stat(dir)
 	if err != nil {
-		return Local{}, errors.New("dir doesn't exist")
+		return &Local{}, errors.New("dir doesn't exist")
 	}
 	if !fi.IsDir() {
-		return Local{}, errors.New("dir is not a directory")
+		return &Local{}, errors.New("dir is not a directory")
 	}
 
-	return Local{localDir: dir}, nil
+	return &Local{localDir: dir}, nil
 }
 
 func (l *Local) Save(filename string, src io.Reader) error {

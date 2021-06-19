@@ -23,6 +23,5 @@ RUN apk --update --no-cache add ca-certificates \
 
 WORKDIR /app
 COPY --from=server-build /Jomon ./
-COPY --from=client-build /github.com/traPtitech/Jomon/client/dist ./client/dist/
 
 ENTRYPOINT ./Jomon

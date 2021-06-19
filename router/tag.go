@@ -22,6 +22,10 @@ type TagOverview struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+type TagResponse struct {
+	Tags []*TagOverview `json:"tags"`
+}
+
 func (h *Handlers) GetTags(c echo.Context) error {
 	ctx := context.Background()
 	tags, err := h.Repository.GetTags(ctx)
@@ -40,7 +44,7 @@ func (h *Handlers) GetTags(c echo.Context) error {
 		})
 	}
 
-	return c.JSON(http.StatusOK, res)
+	return c.JSON(http.StatusOK, &TagResponse{res})
 }
 
 func (h *Handlers) PostTag(c echo.Context) error {

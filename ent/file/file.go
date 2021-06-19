@@ -13,6 +13,8 @@ const (
 	Label = "file"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
 	// FieldMimeType holds the string denoting the mime_type field in the database.
 	FieldMimeType = "mime_type"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -35,6 +37,7 @@ const (
 // Columns holds all SQL columns for file fields.
 var Columns = []string{
 	FieldID,
+	FieldName,
 	FieldMimeType,
 	FieldCreatedAt,
 	FieldDeletedAt,
