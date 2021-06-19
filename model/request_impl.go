@@ -60,7 +60,7 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 	return reqres, nil
 }
 
-func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, group Group) (*RequestDetail, error) {
+func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, group Group, files []*File) (*RequestDetail, error) {
 	// TODO: WIP
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
