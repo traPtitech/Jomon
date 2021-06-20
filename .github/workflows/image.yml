@@ -4,6 +4,7 @@ on:
   push:
     branches: 
       - master
+      
 
 env:
   IMAGE_NAME: jomon
