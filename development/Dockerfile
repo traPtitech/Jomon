@@ -22,6 +22,8 @@ RUN wget https://github.com/go-task/task/releases/download/v3.0.0/task_linux_386
     && tar -C /usr/local/bin -zxvf task_linux_386.tar.gz task \
     && rm task_linux_386.tar.gz
 
+RUN go get -u github.com/cosmtrek/air
+
 WORKDIR /src
 
 COPY go.mod go.sum ./

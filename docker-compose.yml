@@ -14,7 +14,7 @@ services:
       context: ./
       dockerfile: ./development/Dockerfile
     entrypoint: dockerize -wait tcp://db:3306 -timeout 60s
-    command: task -w
+    command: "air -c .air.toml"
     environment:
       MARIADB_USERNAME: root
       MARIADB_PASSWORD: password
