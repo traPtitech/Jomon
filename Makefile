@@ -1,10 +1,6 @@
 .PHONY: up
 up:
-	@docker-compose up --build -d
-
-.PHONY: dev-up
-dev-up:
-	@docker-compose -f docker-compose.dev.yml up --build
+	@docker-compose up --build
 
 .PHONY: down
 down:
