@@ -23,7 +23,7 @@ make test
 1. Run following command in the project root.
 
 ```shell script
-make dev-up
+make up
 ```
 
 Now, you can send http requests to `localhost:3000`.
