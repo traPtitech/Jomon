@@ -27,6 +27,7 @@ services:
       - "./:/src"
     depends_on:
       - db
+    tty: true
 
   db:
     image: mariadb:10.3.29
