@@ -88,6 +88,32 @@ func (repo *EntRepository) OpenFile(ctx context.Context, fileID uuid.UUID) (io.R
 	return repo.storage.Open(filename)
 }
 
+func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID, requestID uuid.UUID) error {
+	file, err := repo.client.File.
+		Query().
+		Where(file.IDEQ(fileID)).
+		Only(ctx)
+	if err != nil {
+		return err
+	}
+	ext, err := mime.ExtensionsByType(file.MimeType)
+	if err != nil {
+		return err
+	} else if len(ext) == 0 {
+		return fmt.Errorf("%s is not registered", file.MimeType)
+	}
+
+	filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
+
+	if err := repo.client.File.
+		DeleteOne(file).
+		Exec(ctx); err != nil {
+		return err
+	}
+
+	return repo.storage.Delete(filename)
+}
+
 func ConvertEntFileToModelFile(entfile *ent.File) *File {
 	return &File{
 		ID:        entfile.ID,

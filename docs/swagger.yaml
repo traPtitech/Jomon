@@ -961,12 +961,14 @@ components:
         content:
           type: string
           example: "サーバー代 1200円"
-        tags:
+        tag_ids:
           type: array
           items:
-            $ref: "#/components/schemas/PostTag"
-        group:
-          $ref: "#/components/schemas/PostGroup"
+            type: string
+            format: uuid
+        group_id:
+          type: string
+          format: uuid
     Transaction:
       type: object
       properties:

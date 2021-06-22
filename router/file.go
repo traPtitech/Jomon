@@ -10,7 +10,7 @@ import (
 )
 
 type FileResponse struct {
-	FileIDs []*uuid.UUID `json:"file_ids"`
+	FileID uuid.UUID `json:"file_id"`
 }
 
 var acceptedMimeTypes = map[string]bool{
@@ -28,12 +28,11 @@ func (h *Handlers) PostFile(c echo.Context) error {
 	if err != nil {
 		return internalServerError(err)
 	}
-	var fileIDs []*uuid.UUID
 	files, ok := form.File["file"]
 	if !ok || len(files) != 1 {
 		return badRequest(fmt.Errorf("invalid file"))
 	}
-	file := files[0]
+	reqfile := files[0]
 	names, ok := form.Value["name"]
 	if !ok || len(names) != 1 {
 		return badRequest(fmt.Errorf("invalid file name"))
@@ -48,23 +47,22 @@ func (h *Handlers) PostFile(c echo.Context) error {
 		return badRequest(err)
 	}
 
-	mimetype := file.Header.Get(echo.HeaderContentType)
+	mimetype := reqfile.Header.Get(echo.HeaderContentType)
 	if !acceptedMimeTypes[mimetype] {
 		return c.NoContent(http.StatusUnsupportedMediaType)
 	}
 
-	src, err := file.Open()
+	src, err := reqfile.Open()
 	if err != nil {
 		return internalServerError(err)
 	}
 	defer src.Close()
 
-	fileID, err := h.Service.CreateFile(src, name, mimetype, requestID)
+	file, err := h.Service.CreateFile(src, name, mimetype, requestID)
 	if err != nil {
 		return internalServerError(err)
 	}
-	fileIDs = append(fileIDs, &fileID.ID)
-	return c.JSON(http.StatusOK, &FileResponse{fileIDs})
+	return c.JSON(http.StatusOK, &FileResponse{file.ID})
 }
 
 func (h *Handlers) GetFile(c echo.Context) error {
@@ -102,6 +100,19 @@ func (h *Handlers) GetFile(c echo.Context) error {
 }
 
 func (h *Handlers) DeleteFile(c echo.Context) error {
+	fileID, err := uuid.Parse(c.Param("fileID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	requestID, err := uuid.Parse(c.Param("requestID"))
+	if err != nil {
+		return badRequest(err)
+	}
+
+	err = h.Service.DeleteFile(fileID, requestID)
+	if err != nil {
+		return internalServerError(err)
+	}
+
 	return c.NoContent(http.StatusOK)
-	// TODO: Implement
 }

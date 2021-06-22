@@ -64,3 +64,17 @@ func (mr *MockCommentRepositoryMockRecorder) UpdateComment(ctx, comment, request
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateComment", reflect.TypeOf((*MockCommentRepository)(nil).UpdateComment), ctx, comment, requestID, commentID)
 }
+
+// DeleteComment mocks base method
+func (m *MockCommentRepository) DeleteComment(ctx context.Context, requestID, commentID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteComment", ctx, requestID, commentID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteComment indicates an expected call of DeleteComment
+func (mr *MockCommentRepositoryMockRecorder) DeleteComment(ctx, requestID, commentID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteComment", reflect.TypeOf((*MockCommentRepository)(nil).DeleteComment), ctx, requestID, commentID)
+}

@@ -60,11 +60,19 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 	return reqres, nil
 }
 
-func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, group Group, files []*File) (*RequestDetail, error) {
+func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, group *Group, files []*File) (*RequestDetail, error) {
 	// TODO: WIP
 	var tagIDs []uuid.UUID
-	for _, tag := range tags {
-		tagIDs = append(tagIDs, tag.ID)
+	if len(tags) != 0 {
+		for _, tag := range tags {
+			tagIDs = append(tagIDs, tag.ID)
+		}
+	}
+	var fileIDs []uuid.UUID
+	if len(files) != 0 {
+		for _, file := range files {
+			fileIDs = append(fileIDs, file.ID)
+		}
 	}
 	created, err := repo.client.Request.
 		Create().
@@ -72,16 +80,19 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 		SetAmount(amount).
 		SetContent(content).
 		AddTagIDs(tagIDs...).
+		AddFileIDs(fileIDs...).
 		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
-	_, err = repo.client.Group.
-		UpdateOneID(group.ID).
-		AddRequest(created).
-		Save(ctx)
-	if err != nil {
-		return nil, err
+	if group != nil {
+		_, err = repo.client.Group.
+			UpdateOneID(group.ID).
+			AddRequest(created).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 	reqdetail := &RequestDetail{
 		ID:      created.ID,
@@ -89,7 +100,7 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 		Title:   created.Title,
 		Content: created.Content,
 		Tags:    tags,
-		Group:   group,
+		Group:   *group,
 	}
 	return reqdetail, nil
 }
