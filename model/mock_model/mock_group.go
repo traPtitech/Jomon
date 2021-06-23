@@ -51,6 +51,21 @@ func (mr *MockGroupRepositoryMockRecorder) CreateGroup(ctx, name, description, b
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGroup", reflect.TypeOf((*MockGroupRepository)(nil).CreateGroup), ctx, name, description, budget, owners)
 }
 
+// CreateMember mocks base method.
+func (m *MockGroupRepository) CreateMember(ctx context.Context, groupID, userID uuid.UUID) (*model.Member, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateMember", ctx, groupID, userID)
+	ret0, _ := ret[0].(*model.Member)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateMember indicates an expected call of CreateMember.
+func (mr *MockGroupRepositoryMockRecorder) CreateMember(ctx, groupID, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateMember", reflect.TypeOf((*MockGroupRepository)(nil).CreateMember), ctx, groupID, userID)
+}
+
 // DeleteMember mocks base method.
 func (m *MockGroupRepository) DeleteMember(ctx context.Context, groupID, userID uuid.UUID) error {
 	m.ctrl.T.Helper()
@@ -108,19 +123,4 @@ func (m *MockGroupRepository) GetMembers(ctx context.Context, groupID uuid.UUID)
 func (mr *MockGroupRepositoryMockRecorder) GetMembers(ctx, groupID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMembers", reflect.TypeOf((*MockGroupRepository)(nil).GetMembers), ctx, groupID)
-}
-
-// PostMember mocks base method.
-func (m *MockGroupRepository) PostMember(ctx context.Context, groupID, userID uuid.UUID) (*model.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PostMember", ctx, groupID, userID)
-	ret0, _ := ret[0].(*model.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// PostMember indicates an expected call of PostMember.
-func (mr *MockGroupRepositoryMockRecorder) PostMember(ctx, groupID, userID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostMember", reflect.TypeOf((*MockGroupRepository)(nil).PostMember), ctx, groupID, userID)
 }
