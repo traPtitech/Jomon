@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	
 )
 
 type Group struct {
@@ -105,8 +106,12 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 }
 
 func (h *Handlers) GetMembers(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	ctx := c.Request().Context()
+	members, err := h.Repository.GetMembers(ctx)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	return c.NoContent(http.StatusOK, members)
 }
 
 func (h *Handlers) PostMember(c echo.Context) error {
