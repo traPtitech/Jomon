@@ -21,3 +21,8 @@ type Group struct {
 	UpdatedAt   time.Time
 	DeletedAt   *time.Time
 }
+
+func GetMembers(ctx context.Context) ([]*Group, error) {
+	var members []*Group
+	err := 
+}
