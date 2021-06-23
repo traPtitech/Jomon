@@ -5,18 +5,6 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/client"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 10
-    reviewers:
-      - FujishigeTemma
-    target-branch: "master"
-    labels:
-      - "dependencies"
-      - "npm"
-    
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
