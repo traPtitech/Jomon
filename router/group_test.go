@@ -286,7 +286,9 @@ func TestHndlers_PostMember(t *testing.T) {
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			CreateMember(ctx, group.ID, user.ID).
-			Return(&model.Member{user.ID}, nil)
+			Return(&model.Member{
+				ID: user.ID,
+			}, nil)
 
 		req := Member{
 			ID: user.ID,
