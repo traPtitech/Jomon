@@ -95,7 +95,7 @@ erDiagram
     	Request |o--o{ Tag : "tag/request"
     	Request |o--o{ Transaction : "transaction/request"
     	Request |o--o{ Comment : "comment/request"
-    	Request |o--o| User : "user/request"
+    	Request }o--o| User : "user/request"
     	RequestStatus |o--o| User : "user/request_status"
     	Transaction |o--o| TransactionDetail : "detail/transaction"
     	Transaction |o--o{ Tag : "tag/transaction"

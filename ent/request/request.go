@@ -84,7 +84,7 @@ const (
 	// CommentColumn is the table column denoting the comment relation/edge.
 	CommentColumn = "request_comment"
 	// UserTable is the table the holds the user relation/edge.
-	UserTable = "users"
+	UserTable = "requests"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
@@ -113,6 +113,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"group_request",
+	"request_user",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

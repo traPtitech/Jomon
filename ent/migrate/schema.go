@@ -15,6 +15,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "comment_user", Type: field.TypeUUID, Nullable: true},
 		{Name: "request_comment", Type: field.TypeUUID, Nullable: true},
 	}
 	// CommentsTable holds the schema information for the "comments" table.
@@ -24,8 +25,14 @@ var (
 		PrimaryKey: []*schema.Column{CommentsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "comments_requests_comment",
+				Symbol:     "comments_users_user",
 				Columns:    []*schema.Column{CommentsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "comments_requests_comment",
+				Columns:    []*schema.Column{CommentsColumns[6]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -102,6 +109,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "group_request", Type: field.TypeUUID, Nullable: true},
+		{Name: "request_user", Type: field.TypeUUID, Nullable: true},
 	}
 	// RequestsTable holds the schema information for the "requests" table.
 	RequestsTable = &schema.Table{
@@ -115,6 +123,12 @@ var (
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
+			{
+				Symbol:     "requests_users_user",
+				Columns:    []*schema.Column{RequestsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
 		},
 	}
 	// RequestStatusColumns holds the columns for the "request_status" table.
@@ -124,6 +138,7 @@ var (
 		{Name: "reason", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "request_status", Type: field.TypeUUID, Nullable: true},
+		{Name: "request_status_user", Type: field.TypeUUID, Nullable: true},
 	}
 	// RequestStatusTable holds the schema information for the "request_status" table.
 	RequestStatusTable = &schema.Table{
@@ -135,6 +150,12 @@ var (
 				Symbol:     "request_status_requests_status",
 				Columns:    []*schema.Column{RequestStatusColumns[4]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "request_status_users_user",
+				Columns:    []*schema.Column{RequestStatusColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -251,35 +272,13 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "comment_user", Type: field.TypeUUID, Unique: true, Nullable: true},
-		{Name: "request_user", Type: field.TypeUUID, Unique: true, Nullable: true},
-		{Name: "request_status_user", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
-		Name:       "users",
-		Columns:    UsersColumns,
-		PrimaryKey: []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "users_comments_user",
-				Columns:    []*schema.Column{UsersColumns[7]},
-				RefColumns: []*schema.Column{CommentsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "users_requests_user",
-				Columns:    []*schema.Column{UsersColumns[8]},
-				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "users_request_status_user",
-				Columns:    []*schema.Column{UsersColumns[9]},
-				RefColumns: []*schema.Column{RequestStatusColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
+		Name:        "users",
+		Columns:     UsersColumns,
+		PrimaryKey:  []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
 	}
 	// GroupUserColumns holds the columns for the "group_user" table.
 	GroupUserColumns = []*schema.Column{
@@ -350,20 +349,20 @@ var (
 )
 
 func init() {
-	CommentsTable.ForeignKeys[0].RefTable = RequestsTable
+	CommentsTable.ForeignKeys[0].RefTable = UsersTable
+	CommentsTable.ForeignKeys[1].RefTable = RequestsTable
 	FilesTable.ForeignKeys[0].RefTable = RequestsTable
 	GroupBudgetsTable.ForeignKeys[0].RefTable = GroupsTable
 	RequestsTable.ForeignKeys[0].RefTable = GroupsTable
+	RequestsTable.ForeignKeys[1].RefTable = UsersTable
 	RequestStatusTable.ForeignKeys[0].RefTable = RequestsTable
+	RequestStatusTable.ForeignKeys[1].RefTable = UsersTable
 	RequestTargetsTable.ForeignKeys[0].RefTable = RequestsTable
 	TagsTable.ForeignKeys[0].RefTable = RequestsTable
 	TagsTable.ForeignKeys[1].RefTable = TransactionsTable
 	TransactionsTable.ForeignKeys[0].RefTable = GroupBudgetsTable
 	TransactionsTable.ForeignKeys[1].RefTable = RequestsTable
 	TransactionDetailsTable.ForeignKeys[0].RefTable = TransactionsTable
-	UsersTable.ForeignKeys[0].RefTable = CommentsTable
-	UsersTable.ForeignKeys[1].RefTable = RequestsTable
-	UsersTable.ForeignKeys[2].RefTable = RequestStatusTable
 	GroupUserTable.ForeignKeys[0].RefTable = GroupsTable
 	GroupUserTable.ForeignKeys[1].RefTable = UsersTable
 	GroupOwnerTable.ForeignKeys[0].RefTable = GroupsTable

@@ -2,10 +2,13 @@ package model
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/request"
+	"github.com/traPtitech/Jomon/ent/requeststatus"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) ([]*RequestResponse, error) {
@@ -55,12 +58,16 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 
 	var reqres []*RequestResponse
 	for _, request := range requests {
-		reqres = append(reqres, ConvertEntRequestResponseToModelRequestResponse(request, request.Edges.Tag, request.Edges.Group, request.Edges.User.Edges.RequestStatus, request.Edges.User))
+		status, err := request.QueryStatus().First(ctx)
+		if err != nil {
+			return nil, err
+		}
+		reqres = append(reqres, ConvertEntRequestResponseToModelRequestResponse(request, request.Edges.Tag, request.Edges.Group, status, request.Edges.User))
 	}
 	return reqres, nil
 }
 
-func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, group Group, files []*File) (*RequestDetail, error) {
+func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, group *Group, userID uuid.UUID) (*RequestDetail, error) {
 	// TODO: WIP
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
@@ -71,25 +78,49 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 		SetTitle(title).
 		SetAmount(amount).
 		SetContent(content).
+		SetCreatedAt(time.Now()).
+		SetUpdatedAt(time.Now()).
+		SetUserID(userID).
 		AddTagIDs(tagIDs...).
 		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
-	_, err = repo.client.Group.
-		UpdateOneID(group.ID).
-		AddRequest(created).
+	user, err := created.QueryUser().Select(user.FieldID).First(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if group != nil {
+		_, err = repo.client.Group.
+			UpdateOneID(group.ID).
+			AddRequest(created).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+	status, err := repo.client.RequestStatus.
+		Create().
+		SetStatus(requeststatus.StatusSubmitted).
+		SetReason("").
+		SetCreatedAt(time.Now()).
+		SetRequest(created).
+		SetUser(user).
 		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
 	reqdetail := &RequestDetail{
-		ID:      created.ID,
-		Amount:  created.Amount,
-		Title:   created.Title,
-		Content: created.Content,
-		Tags:    tags,
-		Group:   group,
+		ID:        created.ID,
+		Status:    string(status.Status),
+		Amount:    created.Amount,
+		Title:     created.Title,
+		Content:   created.Content,
+		Tags:      tags,
+		Group:     group,
+		CreatedAt: created.CreatedAt,
+		UpdatedAt: created.UpdatedAt,
+		CreatedBy: user.ID,
 	}
 	return reqdetail, nil
 }

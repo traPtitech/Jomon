@@ -11,12 +11,12 @@ import (
 )
 
 type Request struct {
-	CreatedBy uuid.UUID `json:"created_by"`
-	Amount    int       `json:"amount"`
-	Title     string    `json:"title"`
-	Content   string    `json:"content"`
-	Tags      []*Tag    `json:"tags"`
-	Group     *Group    `json:"group"`
+	CreatedBy uuid.UUID    `json:"created_by"`
+	Amount    int          `json:"amount"`
+	Title     string       `json:"title"`
+	Content   string       `json:"content"`
+	Tags      []*uuid.UUID `json:"tags"`
+	Group     *uuid.UUID   `json:"group"`
 }
 
 type RequestResponse struct {
@@ -89,7 +89,67 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 }
 
 func (h *Handlers) PostRequest(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
+	var req Request
+	var err error
+	if err := c.Bind(&req); err != nil {
+		return badRequest(err)
+	}
+	var tags []*model.Tag
+	for _, tagID := range req.Tags {
+		ctx := context.Background()
+		tag, err := h.Repository.GetTag(ctx, *tagID)
+		if err != nil {
+			return internalServerError(err)
+		}
+		tags = append(tags, tag)
+	}
+	var group *model.Group
+	if req.Group != nil {
+		ctx := context.Background()
+		group, err = h.Repository.GetGroup(ctx, *req.Group)
+		if err != nil {
+			return internalServerError(err)
+		}
+	}
+	ctx := context.Background()
+	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, group, req.CreatedBy)
+	if err != nil {
+		return internalServerError(err)
+	}
+	var resgroup *GroupOverview
+	if group != nil {
+		resgroup = &GroupOverview{
+			ID:          request.Group.ID,
+			Name:        request.Group.Name,
+			Description: request.Group.Description,
+			Budget:      request.Group.Budget,
+			CreatedAt:   request.Group.CreatedAt,
+			UpdatedAt:   request.Group.UpdatedAt,
+		}
+	}
+	var restags []*TagOverview
+	for _, tag := range request.Tags {
+		restags = append(restags, &TagOverview{
+			ID:          tag.ID,
+			Name:        tag.Name,
+			Description: tag.Description,
+			CreatedAt:   tag.CreatedAt,
+			UpdatedAt:   tag.UpdatedAt,
+		})
+	}
+	res := &RequestResponse{
+		ID:        request.ID,
+		Status:    request.Status,
+		CreatedAt: request.CreatedAt,
+		UpdatedAt: request.UpdatedAt,
+		CreatedBy: request.CreatedBy,
+		Amount:    request.Amount,
+		Title:     request.Title,
+		Content:   request.Content,
+		Tags:      restags,
+		Group:     resgroup,
+	}
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handlers) GetRequest(c echo.Context) error {
