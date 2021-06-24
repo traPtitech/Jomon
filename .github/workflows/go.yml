@@ -76,9 +76,4 @@ jobs:
         MARIADB_USERNAME: root
         MARIADB_PASSWORD: password
         MARIADB_DATABASE: jomon
-        MARIADB_HOSTNAME: "localhost"
-        MARIADB_PORT: 50000
-        UPLOAD_DIR: "./uploads"
-
-    - name: Upload coverage to Codecov
-      run: bash <(curl -s https://codecov.io/bash)
+        MARIADB_HOSTNAME: "127.0.0.1:50000"
