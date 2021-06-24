@@ -33,7 +33,7 @@ type RequestResponse struct {
 	Title     string
 	Content   string
 	Tags      []*Tag
-	Group     Group
+	Group     *Group
 }
 
 type RequestDetail struct {
