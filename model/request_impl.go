@@ -15,12 +15,14 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 	// Querying
 	var requests []*ent.Request
 	var err error
-	if *query.Sort == "created_at" {
+	if query.Sort == nil || *query.Sort == "created_at" {
 		requests, err = repo.client.Request.
 			Query().
 			WithTag().
 			WithGroup().
-			WithStatus().
+			WithStatus(func(q *ent.RequestStatusQuery) {
+				q.Order(ent.Desc(requeststatus.FieldCreatedAt)).Limit(1)
+			}).
 			WithUser().
 			Order(ent.Desc(request.FieldCreatedAt)).
 			All(ctx)
@@ -29,7 +31,9 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 			Query().
 			WithTag().
 			WithGroup().
-			WithStatus().
+			WithStatus(func(q *ent.RequestStatusQuery) {
+				q.Order(ent.Desc(requeststatus.FieldCreatedAt)).Limit(1)
+			}).
 			WithUser().
 			Order(ent.Asc(request.FieldCreatedAt)).
 			All(ctx)
@@ -38,7 +42,9 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 			Query().
 			WithTag().
 			WithGroup().
-			WithStatus().
+			WithStatus(func(q *ent.RequestStatusQuery) {
+				q.Order(ent.Desc(requeststatus.FieldCreatedAt)).Limit(1)
+			}).
 			WithUser().
 			Order(ent.Desc(request.FieldTitle)).
 			All(ctx)
@@ -47,7 +53,9 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 			Query().
 			WithTag().
 			WithGroup().
-			WithStatus().
+			WithStatus(func(q *ent.RequestStatusQuery) {
+				q.Order(ent.Desc(requeststatus.FieldCreatedAt)).Limit(1)
+			}).
 			WithUser().
 			Order(ent.Asc(request.FieldTitle)).
 			All(ctx)
@@ -58,11 +66,7 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 
 	var reqres []*RequestResponse
 	for _, request := range requests {
-		status, err := request.QueryStatus().First(ctx)
-		if err != nil {
-			return nil, err
-		}
-		reqres = append(reqres, ConvertEntRequestResponseToModelRequestResponse(request, request.Edges.Tag, request.Edges.Group, status, request.Edges.User))
+		reqres = append(reqres, ConvertEntRequestResponseToModelRequestResponse(request, request.Edges.Tag, request.Edges.Group, request.Edges.Status[0], request.Edges.User))
 	}
 	return reqres, nil
 }
@@ -126,6 +130,9 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 }
 
 func ConvertEntRequestToModelRequest(request *ent.Request) *Request {
+	if request == nil {
+		return nil
+	}
 	return &Request{
 		ID:        request.ID,
 		Amount:    request.Amount,
@@ -134,6 +141,9 @@ func ConvertEntRequestToModelRequest(request *ent.Request) *Request {
 }
 
 func ConvertEntRequestResponseToModelRequestResponse(request *ent.Request, tags []*ent.Tag, group *ent.Group, status *ent.RequestStatus, user *ent.User) *RequestResponse {
+	if request == nil {
+		return nil
+	}
 	var modeltags []*Tag
 	for _, tag := range tags {
 		modeltags = append(modeltags, ConvertEntTagToModelTag(tag))
@@ -148,6 +158,6 @@ func ConvertEntRequestResponseToModelRequestResponse(request *ent.Request, tags 
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      modeltags,
-		Group:     *ConvertEntGroupToModelGroup(group),
+		Group:     ConvertEntGroupToModelGroup(group),
 	}
 }

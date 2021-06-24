@@ -47,6 +47,9 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 }
 
 func ConvertEntGroupToModelGroup(entgroup *ent.Group) *Group {
+	if entgroup == nil {
+		return nil
+	}
 	return &Group{
 		ID:          entgroup.ID,
 		Name:        entgroup.Name,
