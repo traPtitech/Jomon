@@ -226,7 +226,7 @@ func (rq *RequestQuery) QueryUser() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, request.UserTable, request.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, request.UserTable, request.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -616,7 +616,7 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			rq.withGroup != nil,
 		}
 	)
-	if rq.withGroup != nil {
+	if rq.withUser != nil || rq.withGroup != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -817,30 +817,31 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 	}
 
 	if query := rq.withUser; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*Request)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Request)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
+			if nodes[i].request_user == nil {
+				continue
+			}
+			fk := *nodes[i].request_user
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.withFKs = true
-		query.Where(predicate.User(func(s *sql.Selector) {
-			s.Where(sql.InValues(request.UserColumn, fks...))
-		}))
+		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.request_user
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_user" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_user" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_user" returned %v`, n.ID)
 			}
-			node.Edges.User = n
+			for i := range nodes {
+				nodes[i].Edges.User = n
+			}
 		}
 	}
 

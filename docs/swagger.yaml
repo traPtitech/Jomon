@@ -964,9 +964,11 @@ components:
         tags:
           type: array
           items:
-            $ref: "#/components/schemas/PostTag"
+            type: string
+            format: uuid
         group:
-          $ref: "#/components/schemas/PostGroup"
+          type: string
+          format: uuid
     Transaction:
       type: object
       properties:
