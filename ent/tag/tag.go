@@ -29,12 +29,12 @@ const (
 	EdgeTransaction = "transaction"
 	// Table holds the table name of the tag in the database.
 	Table = "tags"
-	// RequestTable is the table the holds the request relation/edge. The primary key declared below.
+	// RequestTable is the table that holds the request relation/edge. The primary key declared below.
 	RequestTable = "request_tag"
 	// RequestInverseTable is the table name for the Request entity.
 	// It exists in this package in order to avoid circular dependency with the "request" package.
 	RequestInverseTable = "requests"
-	// TransactionTable is the table the holds the transaction relation/edge. The primary key declared below.
+	// TransactionTable is the table that holds the transaction relation/edge. The primary key declared below.
 	TransactionTable = "transaction_tag"
 	// TransactionInverseTable is the table name for the Transaction entity.
 	// It exists in this package in order to avoid circular dependency with the "transaction" package.

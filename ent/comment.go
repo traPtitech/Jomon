@@ -85,9 +85,9 @@ func (*Comment) scanValues(columns []string) ([]interface{}, error) {
 		case comment.FieldID:
 			values[i] = new(uuid.UUID)
 		case comment.ForeignKeys[0]: // comment_user
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case comment.ForeignKeys[1]: // request_comment
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Comment", columns[i])
 		}
@@ -135,16 +135,18 @@ func (c *Comment) assignValues(columns []string, values []interface{}) error {
 				*c.DeletedAt = value.Time
 			}
 		case comment.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field comment_user", values[i])
-			} else if value != nil {
-				c.comment_user = value
+			} else if value.Valid {
+				c.comment_user = new(uuid.UUID)
+				*c.comment_user = *value.S.(*uuid.UUID)
 			}
 		case comment.ForeignKeys[1]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field request_comment", values[i])
-			} else if value != nil {
-				c.request_comment = value
+			} else if value.Valid {
+				c.request_comment = new(uuid.UUID)
+				*c.request_comment = *value.S.(*uuid.UUID)
 			}
 		}
 	}

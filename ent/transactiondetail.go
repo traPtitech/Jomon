@@ -69,7 +69,7 @@ func (*TransactionDetail) scanValues(columns []string) ([]interface{}, error) {
 		case transactiondetail.FieldID:
 			values[i] = new(uuid.UUID)
 		case transactiondetail.ForeignKeys[0]: // transaction_detail
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type TransactionDetail", columns[i])
 		}
@@ -116,10 +116,11 @@ func (td *TransactionDetail) assignValues(columns []string, values []interface{}
 				td.UpdatedAt = value.Time
 			}
 		case transactiondetail.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field transaction_detail", values[i])
-			} else if value != nil {
-				td.transaction_detail = value
+			} else if value.Valid {
+				td.transaction_detail = new(uuid.UUID)
+				*td.transaction_detail = *value.S.(*uuid.UUID)
 			}
 		}
 	}

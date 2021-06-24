@@ -155,9 +155,9 @@ func (*Request) scanValues(columns []string) ([]interface{}, error) {
 		case request.FieldID:
 			values[i] = new(uuid.UUID)
 		case request.ForeignKeys[0]: // group_request
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case request.ForeignKeys[1]: // request_user
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Request", columns[i])
 		}
@@ -210,16 +210,18 @@ func (r *Request) assignValues(columns []string, values []interface{}) error {
 				r.UpdatedAt = value.Time
 			}
 		case request.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field group_request", values[i])
-			} else if value != nil {
-				r.group_request = value
+			} else if value.Valid {
+				r.group_request = new(uuid.UUID)
+				*r.group_request = *value.S.(*uuid.UUID)
 			}
 		case request.ForeignKeys[1]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field request_user", values[i])
-			} else if value != nil {
-				r.request_user = value
+			} else if value.Valid {
+				r.request_user = new(uuid.UUID)
+				*r.request_user = *value.S.(*uuid.UUID)
 			}
 		}
 	}

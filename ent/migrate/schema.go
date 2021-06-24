@@ -73,10 +73,9 @@ var (
 	}
 	// GroupsTable holds the schema information for the "groups" table.
 	GroupsTable = &schema.Table{
-		Name:        "groups",
-		Columns:     GroupsColumns,
-		PrimaryKey:  []*schema.Column{GroupsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "groups",
+		Columns:    GroupsColumns,
+		PrimaryKey: []*schema.Column{GroupsColumns[0]},
 	}
 	// GroupBudgetsColumns holds the columns for the "group_budgets" table.
 	GroupBudgetsColumns = []*schema.Column{
@@ -193,10 +192,9 @@ var (
 	}
 	// TagsTable holds the schema information for the "tags" table.
 	TagsTable = &schema.Table{
-		Name:        "tags",
-		Columns:     TagsColumns,
-		PrimaryKey:  []*schema.Column{TagsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "tags",
+		Columns:    TagsColumns,
+		PrimaryKey: []*schema.Column{TagsColumns[0]},
 	}
 	// TransactionsColumns holds the columns for the "transactions" table.
 	TransactionsColumns = []*schema.Column{
@@ -260,10 +258,9 @@ var (
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
-		Name:        "users",
-		Columns:     UsersColumns,
-		PrimaryKey:  []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
 	// GroupUserColumns holds the columns for the "group_user" table.
 	GroupUserColumns = []*schema.Column{
