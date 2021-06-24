@@ -78,3 +78,4 @@ jobs:
         MARIADB_DATABASE: jomon
         MARIADB_HOSTNAME: "localhost"
         MARIADB_PORT: 50000
+        UPLOAD_DIR: "./uploads"
