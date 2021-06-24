@@ -10,7 +10,6 @@ type Repository interface {
 	FileRepository
 	GroupBudgetRepository
 	GroupRepository
-	RequestFileRepository
 	RequestStatusRepository
 	RequestTagRepository
 	RequestTargetRepository
