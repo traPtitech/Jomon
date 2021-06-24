@@ -63,6 +63,18 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 			})
 		}
 
+		var resgroup *GroupOverview
+		if request.Group != nil {
+			resgroup = &GroupOverview{
+				ID:          request.Group.ID,
+				Name:        request.Group.Name,
+				Description: request.Group.Description,
+				Budget:      request.Group.Budget,
+				CreatedAt:   request.Group.CreatedAt,
+				UpdatedAt:   request.Group.UpdatedAt,
+			}
+		}
+
 		res := &RequestResponse{
 			ID:        request.ID,
 			Status:    request.Status,
@@ -73,14 +85,7 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 			Title:     request.Title,
 			Content:   request.Content,
 			Tags:      tags,
-			Group: &GroupOverview{
-				ID:          request.Group.ID,
-				Name:        request.Group.Name,
-				Description: request.Group.Description,
-				Budget:      request.Group.Budget,
-				CreatedAt:   request.Group.CreatedAt,
-				UpdatedAt:   request.Group.UpdatedAt,
-			},
+			Group:     resgroup,
 		}
 		requests = append(requests, res)
 	}

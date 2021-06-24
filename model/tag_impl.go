@@ -66,6 +66,9 @@ func (repo *EntRepository) DeleteTag(ctx context.Context, tagID uuid.UUID) error
 }
 
 func ConvertEntTagToModelTag(enttag *ent.Tag) *Tag {
+	if enttag == nil {
+		return nil
+	}
 	return &Tag{
 		ID:          enttag.ID,
 		Name:        enttag.Name,
