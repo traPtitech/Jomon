@@ -27,8 +27,9 @@ type RequestStatus struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RequestStatusQuery when eager-loading is set.
-	Edges          RequestStatusEdges `json:"edges"`
-	request_status *uuid.UUID
+	Edges               RequestStatusEdges `json:"edges"`
+	request_status      *uuid.UUID
+	request_status_user *uuid.UUID
 }
 
 // RequestStatusEdges holds the relations/edges for other nodes in the graph.
@@ -83,6 +84,8 @@ func (*RequestStatus) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(uuid.UUID)
 		case requeststatus.ForeignKeys[0]: // request_status
 			values[i] = new(uuid.UUID)
+		case requeststatus.ForeignKeys[1]: // request_status_user
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type RequestStatus", columns[i])
 		}
@@ -127,6 +130,12 @@ func (rs *RequestStatus) assignValues(columns []string, values []interface{}) er
 				return fmt.Errorf("unexpected type %T for field request_status", values[i])
 			} else if value != nil {
 				rs.request_status = value
+			}
+		case requeststatus.ForeignKeys[1]:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field request_status_user", values[i])
+			} else if value != nil {
+				rs.request_status_user = value
 			}
 		}
 	}

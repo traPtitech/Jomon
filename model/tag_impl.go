@@ -23,6 +23,17 @@ func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
 	return modeltags, nil
 }
 
+func (repo *EntRepository) GetTag(ctx context.Context, tagID uuid.UUID) (*Tag, error) {
+	tag, err := repo.client.Tag.
+		Query().
+		Where(tag.IDEQ(tagID)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ConvertEntTagToModelTag(tag), nil
+}
+
 func (repo *EntRepository) CreateTag(ctx context.Context, name string, description string) (*Tag, error) {
 	created, err := repo.client.Tag.
 		Create().

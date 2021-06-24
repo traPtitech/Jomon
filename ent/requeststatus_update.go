@@ -253,7 +253,7 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	}
 	if rsu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   requeststatus.UserTable,
 			Columns: []string{requeststatus.UserColumn},
@@ -269,7 +269,7 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	}
 	if nodes := rsu.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   requeststatus.UserTable,
 			Columns: []string{requeststatus.UserColumn},
@@ -551,7 +551,7 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 	}
 	if rsuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   requeststatus.UserTable,
 			Columns: []string{requeststatus.UserColumn},
@@ -567,7 +567,7 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 	}
 	if nodes := rsuo.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   requeststatus.UserTable,
 			Columns: []string{requeststatus.UserColumn},
