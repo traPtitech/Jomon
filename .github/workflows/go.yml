@@ -76,4 +76,4 @@ jobs:
         MARIADB_USERNAME: root
         MARIADB_PASSWORD: password
         MARIADB_DATABASE: jomon
-        MARIADB_HOSTNAME: "127.0.0.1:50000"
+        MARIADB_HOSTNAME: "localhost:50000"
