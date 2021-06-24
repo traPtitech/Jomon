@@ -6,6 +6,9 @@
   <p>
     <a href="https://apis.trap.jp/?urls.primaryName=Jomon#/">Jomon API</a>&emsp;<a href="https://github.com/traPtitech/Jomon-UI">Jomon-UI</a>
   <p>
+  <p>
+    <a href="https://github.com/traPtitech/Jomon/actions/workflows/image.yml"><img src="https://github.com/traPtitech/Jomon/actions/workflows/image.yml/badge.svg"></a><a href="https://github.com/traPtitech/Jomon/actions/workflows/go.yml">&ensp;<img src="https://github.com/traPtitech/Jomon/actions/workflows/go.yml/badge.svg"></a>
+  </p>
 </div>
 
 ## Environment
