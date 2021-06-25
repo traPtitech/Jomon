@@ -6,17 +6,20 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
+	"github.com/traPtitech/Jomon/ent/requesttarget"
+	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
 func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) ([]*RequestResponse, error) {
 	// Querying
-	var requests []*ent.Request
+	var requestsq *ent.RequestQuery
 	var err error
 	if query.Sort == nil || *query.Sort == "created_at" {
-		requests, err = repo.client.Request.
+		requestsq = repo.client.Request.
 			Query().
 			WithTag().
 			WithGroup().
@@ -24,10 +27,9 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 				q.Order(ent.Desc(requeststatus.FieldCreatedAt)).Limit(1)
 			}).
 			WithUser().
-			Order(ent.Desc(request.FieldCreatedAt)).
-			All(ctx)
+			Order(ent.Desc(request.FieldCreatedAt))
 	} else if *query.Sort == "-created_at" {
-		requests, err = repo.client.Request.
+		requestsq = repo.client.Request.
 			Query().
 			WithTag().
 			WithGroup().
@@ -35,10 +37,9 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 				q.Order(ent.Desc(requeststatus.FieldCreatedAt)).Limit(1)
 			}).
 			WithUser().
-			Order(ent.Asc(request.FieldCreatedAt)).
-			All(ctx)
+			Order(ent.Asc(request.FieldCreatedAt))
 	} else if *query.Sort == "title" {
-		requests, err = repo.client.Request.
+		requestsq = repo.client.Request.
 			Query().
 			WithTag().
 			WithGroup().
@@ -46,10 +47,9 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 				q.Order(ent.Desc(requeststatus.FieldCreatedAt)).Limit(1)
 			}).
 			WithUser().
-			Order(ent.Desc(request.FieldTitle)).
-			All(ctx)
+			Order(ent.Desc(request.FieldTitle))
 	} else if *query.Sort == "-title" {
-		requests, err = repo.client.Request.
+		requestsq = repo.client.Request.
 			Query().
 			WithTag().
 			WithGroup().
@@ -57,9 +57,53 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 				q.Order(ent.Desc(requeststatus.FieldCreatedAt)).Limit(1)
 			}).
 			WithUser().
-			Order(ent.Asc(request.FieldTitle)).
-			All(ctx)
+			Order(ent.Asc(request.FieldTitle))
 	}
+
+	if query.Target != nil && *query.Target != "" {
+		requestsq = requestsq.
+			Where(
+				request.HasTargetWith(
+					requesttarget.TargetEQ(*query.Target),
+				),
+			)
+	}
+
+	if query.Year != nil && *query.Year != 0 {
+		requestsq = requestsq.
+			Where(request.CreatedAtGTE(time.Date(*query.Year, 4, 1, 0, 0, 0, 0, time.Local))).
+			Where(request.CreatedAtLT(time.Date(*query.Year+1, 4, 1, 0, 0, 0, 0, time.Local)))
+	}
+
+	if query.Since != nil && !(*query.Since).IsZero() {
+		requestsq = requestsq.
+			Where(request.CreatedAtGTE(*query.Since))
+	}
+
+	if query.Until != nil && !(*query.Until).IsZero() {
+		requestsq = requestsq.
+			Where(request.CreatedAtLT(*query.Until))
+	}
+
+	if query.Tag != nil && *query.Tag != "" {
+		requestsq = requestsq.
+			Where(
+				request.HasTagWith(
+					tag.NameEQ(*query.Tag),
+				),
+			)
+	}
+
+	if query.Group != nil && *query.Group != "" {
+		requestsq = requestsq.
+			Where(
+				request.HasGroupWith(
+					group.NameEQ(*query.Group),
+				),
+			)
+	}
+
+	requests, err := requestsq.All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -160,6 +204,62 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 		CreatedBy: request.Edges.User.ID,
 	}
 	return reqdetail, nil
+}
+
+func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, content string, tags []*Tag, group *Group) (*RequestDetail, error) {
+	var tagIDs []uuid.UUID
+	for _, tag := range tags {
+		tagIDs = append(tagIDs, tag.ID)
+	}
+	updated, err := repo.client.Request.
+		UpdateOneID(requestID).
+		SetAmount(amount).
+		SetTitle(title).
+		SetContent(content).
+		ClearTag().
+		AddTagIDs(tagIDs...).
+		ClearGroup().
+		SetUpdatedAt(time.Now()).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if group != nil {
+		_, err = repo.client.Group.
+			UpdateOneID(group.ID).
+			ClearRequest().
+			AddRequest(updated).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var modeltags []*Tag
+	for _, tag := range updated.Edges.Tag {
+		modeltags = append(modeltags, ConvertEntTagToModelTag(tag))
+	}
+	modelgroup := ConvertEntGroupToModelGroup(updated.Edges.Group)
+	reqdetail := &RequestDetail{
+		ID:        updated.ID,
+		Status:    string(updated.Edges.Status[0].Status),
+		Amount:    updated.Amount,
+		Title:     updated.Title,
+		Content:   updated.Content,
+		Tags:      modeltags,
+		Group:     modelgroup,
+		CreatedAt: updated.CreatedAt,
+		UpdatedAt: updated.UpdatedAt,
+		CreatedBy: updated.Edges.User.ID,
+	}
+	return reqdetail, nil
+	/*
+			UpdateOneID(tagID).
+		SetName(name).
+		SetDescription(description).
+		SetUpdatedAt(time.Now()).
+		Save(ctx)
+	*/
 }
 
 func ConvertEntRequestToModelRequest(request *ent.Request) *Request {
