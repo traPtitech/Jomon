@@ -83,7 +83,7 @@ erDiagram
         updated_at timeDOTTime
         deleted_at timeDOTTime
     }
-    	Comment |o--o| User : "user/comment"
+    	Comment }o--o| User : "user/comment"
     	Group |o--o{ GroupBudget : "group_budget/group"
     	Group }o--o{ User : "user/group_user"
     	Group }o--o{ User : "owner/group_owner"
@@ -92,13 +92,13 @@ erDiagram
     	Request |o--o{ RequestStatus : "status/request"
     	Request |o--o{ RequestTarget : "target/request"
     	Request |o--o{ File : "file/request"
-    	Request |o--o{ Tag : "tag/request"
+    	Request }o--o{ Tag : "tag/request"
     	Request |o--o{ Transaction : "transaction/request"
     	Request |o--o{ Comment : "comment/request"
     	Request }o--o| User : "user/request"
-    	RequestStatus |o--o| User : "user/request_status"
+    	RequestStatus }o--o| User : "user/request_status"
     	Transaction |o--o| TransactionDetail : "detail/transaction"
-    	Transaction |o--o{ Tag : "tag/transaction"
+    	Transaction }o--o{ Tag : "tag/transaction"
 		</div>
 	<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 	<script>
