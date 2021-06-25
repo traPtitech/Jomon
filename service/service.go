@@ -3,6 +3,7 @@ package service
 import (
 	"io"
 	"os"
+	"time"
 
 	"github.com/traPtitech/Jomon/model"
 	storagePkg "github.com/traPtitech/Jomon/storage"
@@ -12,6 +13,8 @@ type Service interface {
 	CreateFile(src io.Reader, mimetype string) (File, error)
 	GetAccessToken(code string, codeVerifier string) (AuthResponse, error)
 	GetClientId() string
+	StrToDate(str string) (time.Time, error)
+	StrToTime(str string) (time.Time, error)
 }
 type Services struct {
 	Repository model.Repository
