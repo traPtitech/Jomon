@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -45,7 +46,42 @@ type CommentDetail struct {
 
 func (h *Handlers) GetRequests(c echo.Context) error {
 	ctx := context.Background()
-	modelrequests, err := h.Repository.GetRequests(ctx, model.RequestQuery{})
+	sort := c.QueryParam("sort")
+	target := c.QueryParam("target")
+	var year int
+	var err error
+	if c.QueryParam("year") != "" {
+		year, err = strconv.Atoi(c.QueryParam("year"))
+		if err != nil {
+			return badRequest(err)
+		}
+	}
+	var since time.Time
+	if c.QueryParam("since") != "" {
+		since, err = h.Service.StrToDate(c.QueryParam("since"))
+		if err != nil {
+			return badRequest(err)
+		}
+	}
+	var until time.Time
+	if c.QueryParam("until") != "" {
+		until, err = h.Service.StrToDate(c.QueryParam("until"))
+		if err != nil {
+			return badRequest(err)
+		}
+	}
+	tag := c.QueryParam("tag")
+	group := c.QueryParam("group")
+	query := model.RequestQuery{
+		Sort:   &sort,
+		Target: &target,
+		Year:   &year,
+		Since:  &since,
+		Until:  &until,
+		Tag:    &tag,
+		Group:  &group,
+	}
+	modelrequests, err := h.Repository.GetRequests(ctx, query)
 	if err != nil {
 		return internalServerError(err)
 	}
