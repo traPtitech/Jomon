@@ -32,13 +32,11 @@ const (
 	DetailInverseTable = "transaction_details"
 	// DetailColumn is the table column denoting the detail relation/edge.
 	DetailColumn = "transaction_detail"
-	// TagTable is the table the holds the tag relation/edge.
-	TagTable = "tags"
+	// TagTable is the table the holds the tag relation/edge. The primary key declared below.
+	TagTable = "transaction_tag"
 	// TagInverseTable is the table name for the Tag entity.
 	// It exists in this package in order to avoid circular dependency with the "tag" package.
 	TagInverseTable = "tags"
-	// TagColumn is the table column denoting the tag relation/edge.
-	TagColumn = "transaction_tag"
 	// GroupBudgetTable is the table the holds the group_budget relation/edge.
 	GroupBudgetTable = "transactions"
 	// GroupBudgetInverseTable is the table name for the GroupBudget entity.
@@ -67,6 +65,12 @@ var ForeignKeys = []string{
 	"group_budget_transaction",
 	"request_transaction",
 }
+
+var (
+	// TagPrimaryKey and TagColumn2 are the table columns denoting the
+	// primary key for the tag relation (M2M).
+	TagPrimaryKey = []string{"transaction_id", "tag_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
