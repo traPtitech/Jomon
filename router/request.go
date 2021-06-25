@@ -158,8 +158,49 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 }
 
 func (h *Handlers) GetRequest(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	requestID, err := uuid.Parse(c.Param("requestID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	ctx := context.Background()
+	request, err := h.Repository.GetRequest(ctx, requestID)
+	if err != nil {
+		return internalServerError(err)
+	}
+	var resgroup *GroupOverview
+	if request.Group != nil {
+		resgroup = &GroupOverview{
+			ID:          request.Group.ID,
+			Name:        request.Group.Name,
+			Description: request.Group.Description,
+			Budget:      request.Group.Budget,
+			CreatedAt:   request.Group.CreatedAt,
+			UpdatedAt:   request.Group.UpdatedAt,
+		}
+	}
+	var restags []*TagOverview
+	for _, tag := range request.Tags {
+		restags = append(restags, &TagOverview{
+			ID:          tag.ID,
+			Name:        tag.Name,
+			Description: tag.Description,
+			CreatedAt:   tag.CreatedAt,
+			UpdatedAt:   tag.UpdatedAt,
+		})
+	}
+	res := &RequestResponse{
+		ID:        request.ID,
+		Status:    request.Status,
+		CreatedAt: request.CreatedAt,
+		UpdatedAt: request.UpdatedAt,
+		CreatedBy: request.CreatedBy,
+		Amount:    request.Amount,
+		Title:     request.Title,
+		Content:   request.Content,
+		Tags:      restags,
+		Group:     resgroup,
+	}
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handlers) PutRequest(c echo.Context) error {
