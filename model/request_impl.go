@@ -128,6 +128,40 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 	return reqdetail, nil
 }
 
+func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) (*RequestDetail, error) {
+	request, err := repo.client.Request.
+		Query().
+		Where(request.IDEQ(requestID)).
+		WithTag().
+		WithGroup().
+		WithStatus(func(q *ent.RequestStatusQuery) {
+			q.Order(ent.Desc(requeststatus.FieldCreatedAt)).Limit(1)
+		}).
+		WithUser().
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var tags []*Tag
+	for _, tag := range request.Edges.Tag {
+		tags = append(tags, ConvertEntTagToModelTag(tag))
+	}
+	group := ConvertEntGroupToModelGroup(request.Edges.Group)
+	reqdetail := &RequestDetail{
+		ID:        request.ID,
+		Status:    string(request.Edges.Status[0].Status),
+		Amount:    request.Amount,
+		Title:     request.Title,
+		Content:   request.Content,
+		Tags:      tags,
+		Group:     group,
+		CreatedAt: request.CreatedAt,
+		UpdatedAt: request.UpdatedAt,
+		CreatedBy: request.Edges.User.ID,
+	}
+	return reqdetail, nil
+}
+
 func ConvertEntRequestToModelRequest(request *ent.Request) *Request {
 	if request == nil {
 		return nil
