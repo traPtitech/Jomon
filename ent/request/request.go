@@ -62,13 +62,11 @@ const (
 	FileInverseTable = "files"
 	// FileColumn is the table column denoting the file relation/edge.
 	FileColumn = "request_file"
-	// TagTable is the table the holds the tag relation/edge.
-	TagTable = "tags"
+	// TagTable is the table the holds the tag relation/edge. The primary key declared below.
+	TagTable = "request_tag"
 	// TagInverseTable is the table name for the Tag entity.
 	// It exists in this package in order to avoid circular dependency with the "tag" package.
 	TagInverseTable = "tags"
-	// TagColumn is the table column denoting the tag relation/edge.
-	TagColumn = "request_tag"
 	// TransactionTable is the table the holds the transaction relation/edge.
 	TransactionTable = "transactions"
 	// TransactionInverseTable is the table name for the Transaction entity.
@@ -115,6 +113,12 @@ var ForeignKeys = []string{
 	"group_request",
 	"request_user",
 }
+
+var (
+	// TagPrimaryKey and TagColumn2 are the table columns denoting the
+	// primary key for the tag relation (M2M).
+	TagPrimaryKey = []string{"request_id", "tag_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
