@@ -33,6 +33,20 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 	return ConvertEntGroupToModelGroup(created), nil
 }
 
+func (repo *EntRepository) GetOwners(ctx context.Context, GroupID string) ([]*Owners, error) {
+	owners, err := repo.client.Group.
+		Query().
+		Where(Group.ID(GroupID)).
+		QueryOwner().
+		All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return owners, nil
+}
+
 func ConvertEntGroupToModelGroup(entgroup *ent.Group) *Group {
 	return &Group{
 		ID:          entgroup.ID,

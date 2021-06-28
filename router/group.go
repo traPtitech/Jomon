@@ -16,6 +16,10 @@ type Group struct {
 	Owners      []*uuid.UUID `json:"owners"`
 }
 
+type Owners struct {
+	Owners string `json:"owners"`
+}
+
 type GroupOverview struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
@@ -119,8 +123,13 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 }
 
 func (h *Handlers) GetOwners(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	ctx := context.Background()
+	GroupID := c.Param("groupID")
+	owners, err := h.Repository.GetOwners(ctx, GroupID)
+	if err != nil {
+		return internalServerError(err)
+	}
+	return c.JSON(http.StatusOK, owners)
 }
 
 func (h *Handlers) PostOwner(c echo.Context) error {
