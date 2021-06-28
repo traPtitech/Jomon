@@ -4,6 +4,9 @@ import (
 	"context"
 
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/group"
+
+	"github.com/google/uuid"
 )
 
 func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
@@ -33,18 +36,21 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 	return ConvertEntGroupToModelGroup(created), nil
 }
 
-func (repo *EntRepository) GetOwners(ctx context.Context, GroupID string) ([]*Owners, error) {
-	owners, err := repo.client.Group.
+func (repo *EntRepository) GetOwners(ctx context.Context, GroupID uuid.UUID) (*Owners, error) {
+	groupowner, err := repo.client.Group.
 		Query().
-		Where(Group.ID(GroupID)).
+		Where(group.IDEQ(GroupID)).
 		QueryOwner().
-		All(ctx)
+		Only(ctx)
 
 	if err != nil {
 		return nil, err
 	}
+	owner := &Owners{
+		Owners: groupowner.Name,
+	}
 
-	return owners, nil
+	return owner, nil
 }
 
 func ConvertEntGroupToModelGroup(entgroup *ent.Group) *Group {

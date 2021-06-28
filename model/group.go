@@ -10,7 +10,7 @@ import (
 type GroupRepository interface {
 	GetGroups(ctx context.Context) ([]*Group, error)
 	CreateGroup(ctx context.Context, name string, description string, budget *int, owners *[]User) (*Group, error)
-	GetOwners(ctx context.Context, GroupID string) ([]*Owners, error)
+	GetOwners(ctx context.Context, GroupID uuid.UUID) (*Owners, error)
 }
 
 type Group struct {

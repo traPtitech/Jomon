@@ -124,7 +124,10 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 
 func (h *Handlers) GetOwners(c echo.Context) error {
 	ctx := context.Background()
-	GroupID := c.Param("groupID")
+	GroupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return badRequest(err)
+	}
 	owners, err := h.Repository.GetOwners(ctx, GroupID)
 	if err != nil {
 		return internalServerError(err)
