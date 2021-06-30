@@ -253,13 +253,6 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		CreatedBy: updated.Edges.User.ID,
 	}
 	return reqdetail, nil
-	/*
-			UpdateOneID(tagID).
-		SetName(name).
-		SetDescription(description).
-		SetUpdatedAt(time.Now()).
-		Save(ctx)
-	*/
 }
 
 func ConvertEntRequestToModelRequest(request *ent.Request) *Request {
