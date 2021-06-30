@@ -52,7 +52,5 @@ services:
         - PMA_HOST=db
         - PMA_USER=root
         - PMA_PASSWORD=password
-    links:
-        - db
     ports:
         - 8888:80
