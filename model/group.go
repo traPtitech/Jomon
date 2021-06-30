@@ -24,5 +24,5 @@ type Group struct {
 }
 
 type Owners struct {
-	Owners string `json:"owners"`
+	Owners uuid.UUID `json:"owners"`
 }

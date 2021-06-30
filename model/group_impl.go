@@ -42,14 +42,12 @@ func (repo *EntRepository) GetOwners(ctx context.Context, GroupID uuid.UUID) (*O
 		Where(group.IDEQ(GroupID)).
 		QueryOwner().
 		Only(ctx)
-
 	if err != nil {
 		return nil, err
 	}
 	owner := &Owners{
-		Owners: groupowner.Name,
+		Owners: groupowner.ID,
 	}
-
 	return owner, nil
 }
 
