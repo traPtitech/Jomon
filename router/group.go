@@ -20,6 +20,9 @@ type Owner struct {
 	ID uuid.UUID `json:"id"`
 }
 
+type OwnerResponse struct {
+	Owners []uuid.UUID `json:"owners"`
+}
 type GroupOverview struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
@@ -132,7 +135,13 @@ func (h *Handlers) GetOwners(c echo.Context) error {
 	if err != nil {
 		return internalServerError(err)
 	}
-	return c.JSON(http.StatusOK, owners)
+
+	var res []uuid.UUID
+	for _, owner := range owners {
+		res = append(res, owner.Owner)
+	}
+
+	return c.JSON(http.StatusOK, &OwnerResponse{res})
 }
 
 func (h *Handlers) PostOwner(c echo.Context) error {
@@ -145,10 +154,15 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 	if err := c.Bind(&owner); err != nil {
 		return badRequest(err)
 	}
-	res, err := h.Repository.CreateOwner(ctx, GroupID, owner.ID)
+	createowner, err := h.Repository.CreateOwner(ctx, GroupID, owner.ID)
 	if err != nil {
 		return internalServerError(err)
 	}
+
+	res := &Owner{
+		ID: createowner.Owner,
+	}
+
 	return c.JSON(http.StatusOK, res)
 }
 
