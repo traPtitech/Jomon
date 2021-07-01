@@ -153,6 +153,19 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 }
 
 func (h *Handlers) DeleteOwner(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	ctx := context.Background()
+	GroupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	var owner Owner
+	if err := c.Bind(&owner); err != nil {
+		return badRequest(err)
+	}
+
+	res, err := h.Repository.DeleteOwners(ctx, GroupID, owner.ID)
+	if err != nil {
+		return internalServerError(err)
+	}
+	return c.JSON(http.StatusOK, res)
 }
