@@ -16,8 +16,8 @@ type Group struct {
 	Owners      []*uuid.UUID `json:"owners"`
 }
 
-type Owners struct {
-	Owners string `json:"owners"`
+type Owner struct {
+	ID uuid.UUID `json:id`
 }
 
 type GroupOverview struct {
@@ -136,9 +136,25 @@ func (h *Handlers) GetOwners(c echo.Context) error {
 }
 
 func (h *Handlers) PostOwner(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	ctx := context.Background()
+	var owner Owner
+	GroupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	if err := c.Bind(&owner); err != nil {
+		return badRequest(err)
+	}
+	
+	res,err := h.Repository.CreateOwners(ctx, GroupID, owner.ID)
+
+	if err != nil {
+		return internalServerError(err)
+	}
+	
+	return c.JSON(http.StatusOK, res)
 }
+
 func (h *Handlers) DeleteOwner(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 	// TODO: Implement

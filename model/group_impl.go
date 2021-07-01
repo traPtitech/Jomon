@@ -51,6 +51,22 @@ func (repo *EntRepository) GetOwners(ctx context.Context, GroupID uuid.UUID) (*O
 	return owner, nil
 }
 
+func (repo *EntRepository) CreateOwners(ctx context.Context, GroupID uuid.UUID, OwnerID uuid.UUID) (*Owners, error) {
+	_, err := repo.client.Group.
+		Update().
+		Where(group.IDEQ(GroupID)).
+		AddOwnerIDs(OwnerID).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resowner := &Owners{
+		Owners: OwnerID,
+	}
+	return resowner, nil
+
+}
+
 func ConvertEntGroupToModelGroup(entgroup *ent.Group) *Group {
 	return &Group{
 		ID:          entgroup.ID,
