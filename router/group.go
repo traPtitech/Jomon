@@ -128,7 +128,7 @@ func (h *Handlers) GetOwners(c echo.Context) error {
 	if err != nil {
 		return badRequest(err)
 	}
-	owners, err := h.Repository.GetOwners(ctx, GroupID)
+	owners, err := h.Repository.GetOwner(ctx, GroupID)
 	if err != nil {
 		return internalServerError(err)
 	}
@@ -145,7 +145,7 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 	if err := c.Bind(&owner); err != nil {
 		return badRequest(err)
 	}
-	res, err := h.Repository.CreateOwners(ctx, GroupID, owner.ID)
+	res, err := h.Repository.CreateOwner(ctx, GroupID, owner.ID)
 	if err != nil {
 		return internalServerError(err)
 	}
@@ -163,9 +163,10 @@ func (h *Handlers) DeleteOwner(c echo.Context) error {
 		return badRequest(err)
 	}
 
-	res, err := h.Repository.DeleteOwners(ctx, GroupID, owner.ID)
+	err = h.Repository.DeleteOwner(ctx, GroupID, owner.ID)
 	if err != nil {
 		return internalServerError(err)
 	}
-	return c.JSON(http.StatusOK, res)
+
+	return c.NoContent(http.StatusOK)
 }
