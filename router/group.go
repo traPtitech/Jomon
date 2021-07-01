@@ -17,7 +17,7 @@ type Group struct {
 }
 
 type Owner struct {
-	ID uuid.UUID `json:id`
+	ID uuid.UUID `json:"id"`
 }
 
 type GroupOverview struct {
@@ -145,13 +145,10 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 	if err := c.Bind(&owner); err != nil {
 		return badRequest(err)
 	}
-	
-	res,err := h.Repository.CreateOwners(ctx, GroupID, owner.ID)
-
+	res, err := h.Repository.CreateOwners(ctx, GroupID, owner.ID)
 	if err != nil {
 		return internalServerError(err)
 	}
-	
 	return c.JSON(http.StatusOK, res)
 }
 
