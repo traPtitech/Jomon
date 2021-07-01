@@ -75,5 +75,7 @@ jobs:
       env:
         MARIADB_USERNAME: root
         MARIADB_PASSWORD: password
-        MARIADB_HOSTNAME: "localhost:50000"
         MARIADB_DATABASE: jomon
+        MARIADB_HOSTNAME: "localhost"
+        MARIADB_PORT: 50000
+        UPLOAD_DIR: "./uploads"
