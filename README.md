@@ -21,7 +21,7 @@
 
 2. Run following command in the project root.
 ```shell script
-MYSQL_HOSTNAME=localhost go test -v -cover -race ./...
+MARIADB_HOSTNAME=localhost go test -v -cover -race ./...
 ```
 
 ### Running
