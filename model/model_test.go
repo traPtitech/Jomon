@@ -16,6 +16,7 @@ func SetupTestEntClient(t *testing.T) (*ent.Client, error) {
 	entOptions := []enttest.Option{
 		enttest.WithOptions(ent.Log(t.Log)),
 	}
+	// check
 	dbUser := testutil.GetEnvOrDefault("MYSQL_USERNAME", "root")
 	dbPass := testutil.GetEnvOrDefault("MYSQL_PASSWORD", "password")
 	dbHost := testutil.GetEnvOrDefault("MYSQL_HOSTNAME", "test-db")

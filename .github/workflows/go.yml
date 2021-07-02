@@ -43,7 +43,7 @@ jobs:
       mariadb:
         image: mariadb:10.3.29
         ports:
-          - 50000:3306
+          - 50000:3307
         env:
           MYSQL_ROOT_PASSWORD: password
           MYSQL_DATABASE: jomon
