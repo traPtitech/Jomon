@@ -75,9 +75,10 @@ jobs:
       env:
         MARIADB_USERNAME: root
         MARIADB_PASSWORD: password
-        MARIADB_HOSTNAME: "localhost:50000"
         MARIADB_DATABASE: jomon
-        MYSQL_HOSTNAME: mariadb
+        MARIADB_HOSTNAME: "localhost"
+        MARIADB_PORT: 50000
+        UPLOAD_DIR: "./uploads"
 
     - name: Upload coverage to Codecov
       run: bash <(curl -s https://codecov.io/bash)
