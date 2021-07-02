@@ -18,9 +18,9 @@ func SetupTestEntClient(t *testing.T) (*ent.Client, error) {
 	}
 	dbUser := testutil.GetEnvOrDefault("MYSQL_USERNAME", "root")
 	dbPass := testutil.GetEnvOrDefault("MYSQL_PASSWORD", "password")
-	dbHost := testutil.GetEnvOrDefault("MYSQL_HOSTNAME", "db")
+	dbHost := testutil.GetEnvOrDefault("MYSQL_HOSTNAME", "test-db")
 	dbName := testutil.GetEnvOrDefault("MYSQL_DATABASE", "jomon")
-	dbPort := testutil.GetEnvOrDefault("MYSQL_PORT", "3306")
+	dbPort := testutil.GetEnvOrDefault("MYSQL_PORT", "3307")
 
 	dbDsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
 

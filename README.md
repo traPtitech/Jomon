@@ -17,9 +17,11 @@
 
 ### Testing
 
-1. Run following command in the project root.
+1. Make server running.
+
+2. Run following command in the project root.
 ```shell script
-make test
+MYSQL_HOSTNAME=localhost go test -v -cover -race ./...
 ```
 
 ### Running
@@ -37,7 +39,6 @@ Now, you can send http requests to `localhost:3000`.
 ```shell script
 make down
 ```
-
 
 ## Staging
 
