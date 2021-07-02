@@ -9,7 +9,7 @@
   <p>
     <a href="https://github.com/traPtitech/Jomon/actions/workflows/image.yml"><img src="https://github.com/traPtitech/Jomon/actions/workflows/image.yml/badge.svg"></a>
     <a href="https://github.com/traPtitech/Jomon/actions/workflows/go.yml"><img src="https://github.com/traPtitech/Jomon/actions/workflows/go.yml/badge.svg"></a>
-    <a href="https://codecov.io/gh/traPtitech/Jomon"><img src="https://codecov.io/gh/traPtitech/Jomon/branch/master/graph/badge.svg"></a>
+    <a href="https://codecov.io/gh/traPtitech/Jomon"><img src="https://codecov.io/gh/traPtitech/Jomon/branch/v2/graph/badge.svg?token=kPPuCDXudP"></a>
   </p>
 </div>
 
