@@ -18,12 +18,11 @@ func SetupEntClient() (*ent.Client, error) {
 	} else {
 		entOptions = []ent.Option{}
 	}
-
-	dbUser := testutil.GetEnvOrDefault("MYSQL_USERNAME", "root")
-	dbPass := testutil.GetEnvOrDefault("MYSQL_PASSWORD", "password")
-	dbHost := testutil.GetEnvOrDefault("MYSQL_HOSTNAME", "db")
-	dbName := testutil.GetEnvOrDefault("MYSQL_DATABASE", "jomon")
-	dbPort := testutil.GetEnvOrDefault("MYSQL_PORT", "3306")
+	dbUser := testutil.GetEnvOrDefault("MARIADB_USERNAME", "root")
+	dbPass := testutil.GetEnvOrDefault("MARIADB_PASSWORD", "password")
+	dbHost := testutil.GetEnvOrDefault("MARIADB_HOSTNAME", "db")
+	dbName := testutil.GetEnvOrDefault("MARIADB_DATABASE", "jomon")
+	dbPort := testutil.GetEnvOrDefault("MARIADB_PORT", "3306")
 
 	dbDsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
 

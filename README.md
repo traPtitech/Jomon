@@ -9,6 +9,7 @@
   <p>
     <a href="https://github.com/traPtitech/Jomon/actions/workflows/image.yml"><img src="https://github.com/traPtitech/Jomon/actions/workflows/image.yml/badge.svg"></a>
     <a href="https://github.com/traPtitech/Jomon/actions/workflows/go.yml"><img src="https://github.com/traPtitech/Jomon/actions/workflows/go.yml/badge.svg"></a>
+    <a href="https://codecov.io/gh/traPtitech/Jomon"><img src="https://codecov.io/gh/traPtitech/Jomon/branch/master/graph/badge.svg"></a>
   </p>
 </div>
 
@@ -16,10 +17,11 @@
 
 ### Testing
 
-1. Run following command in the project root.
+1. Make server running.
 
+2. Run following command in the project root.
 ```shell script
-make test
+MARIADB_HOSTNAME=localhost go test -v -cover -race ./...
 ```
 
 ### Running
@@ -37,7 +39,6 @@ Now, you can send http requests to `localhost:3000`.
 ```shell script
 make down
 ```
-
 
 ## Staging
 
