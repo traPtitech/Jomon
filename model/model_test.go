@@ -16,6 +16,7 @@ func SetupTestEntClient(t *testing.T) (*ent.Client, error) {
 	entOptions := []enttest.Option{
 		enttest.WithOptions(ent.Log(t.Log)),
 	}
+	// checks
 	dbUser := testutil.GetEnvOrDefault("MARIADB_USERNAME", "root")
 	dbPass := testutil.GetEnvOrDefault("MARIADB_PASSWORD", "password")
 	dbHost := testutil.GetEnvOrDefault("MARIADB_HOSTNAME", "test-db")
