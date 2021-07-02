@@ -36,7 +36,7 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 	return ConvertEntGroupToModelGroup(created), nil
 }
 
-func (repo *EntRepository) GetOwner(ctx context.Context, GroupID uuid.UUID) ([]*Owner, error) {
+func (repo *EntRepository) GetOwners(ctx context.Context, GroupID uuid.UUID) ([]*Owner, error) {
 	groupowners, err := repo.client.Group.
 		Query().
 		Where(group.IDEQ(GroupID)).
@@ -47,7 +47,7 @@ func (repo *EntRepository) GetOwner(ctx context.Context, GroupID uuid.UUID) ([]*
 	}
 	owners := []*Owner{}
 	for _, groupowner := range groupowners {
-		owners = append(owners, &Owner{Owner: groupowner.ID})
+		owners = append(owners, &Owner{ID: groupowner.ID})
 	}
 
 	return owners, nil
@@ -63,7 +63,7 @@ func (repo *EntRepository) CreateOwner(ctx context.Context, GroupID uuid.UUID, O
 		return nil, err
 	}
 	resowner := &Owner{
-		Owner: OwnerID,
+		ID: OwnerID,
 	}
 	return resowner, nil
 

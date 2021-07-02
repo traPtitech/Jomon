@@ -674,6 +674,8 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/TrapID"
+        "404":
+          $ref: "#/components/responses/404"
     post:
       description: グループオーナーをグループに追加する。管理者権限またはグループオーナー権限が必要。
       tags:
@@ -698,8 +700,8 @@ paths:
                   owners:
                     type: object
                     properties:
-                        id:
-                          $ref: "#/components/schemas/TrapID"
+                      id:
+                        $ref: "#/components/schemas/TrapID"
     delete:
       description: グループオーナーをグループから削除する。管理者権限またはグループオーナー権限が必要。
       tags:

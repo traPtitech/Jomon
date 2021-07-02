@@ -131,14 +131,14 @@ func (h *Handlers) GetOwners(c echo.Context) error {
 	if err != nil {
 		return badRequest(err)
 	}
-	owners, err := h.Repository.GetOwner(ctx, GroupID)
+	owners, err := h.Repository.GetOwners(ctx, GroupID)
 	if err != nil {
 		return internalServerError(err)
 	}
 
 	var res []uuid.UUID
 	for _, owner := range owners {
-		res = append(res, owner.Owner)
+		res = append(res, owner.ID)
 	}
 
 	return c.JSON(http.StatusOK, &OwnerResponse{res})
@@ -160,7 +160,7 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 	}
 
 	res := &Owner{
-		ID: createowner.Owner,
+		ID: createowner.ID,
 	}
 
 	return c.JSON(http.StatusOK, res)
