@@ -235,6 +235,14 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 			return nil, err
 		}
 	}
+	status, err := updated.QueryStatus().Select(requeststatus.FieldStatus).First(ctx)
+	if err != nil {
+		return nil, err
+	}
+	user, err := updated.QueryUser().Select(user.FieldID).First(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var modeltags []*Tag
 	for _, tag := range updated.Edges.Tag {
 		modeltags = append(modeltags, ConvertEntTagToModelTag(tag))
@@ -242,7 +250,7 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	modelgroup := ConvertEntGroupToModelGroup(updated.Edges.Group)
 	reqdetail := &RequestDetail{
 		ID:        updated.ID,
-		Status:    string(updated.Edges.Status[0].Status),
+		Status:    string(status.Status),
 		Amount:    updated.Amount,
 		Title:     updated.Title,
 		Content:   updated.Content,
@@ -250,7 +258,7 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		Group:     modelgroup,
 		CreatedAt: updated.CreatedAt,
 		UpdatedAt: updated.UpdatedAt,
-		CreatedBy: updated.Edges.User.ID,
+		CreatedBy: user.ID,
 	}
 	return reqdetail, nil
 }
