@@ -17,16 +17,16 @@
 
 ### Testing
 
-1. Make server running.
+1. Make the server running.
 
-2. Run following command in the project root.
+2. Run the following command in the project root.
 ```shell script
 MARIADB_HOSTNAME=localhost go test -v -cover -race ./...
 ```
 
 ### Running
 
-1. Run following command in the project root.
+1. Run the following command in the project root.
 
 ```shell script
 make up
@@ -34,7 +34,7 @@ make up
 
 Now, you can send http requests to `localhost:3000`.
 
-2. Run following command in the project root when making server down.
+2. Run the following command in the project root when making the server down.
 
 ```shell script
 make down
@@ -42,11 +42,11 @@ make down
 
 ## Staging
 
-1.Enter the server for Jomon staging server and run following comand in the project root.
+1.Enter the server for Jomon staging server and run the following command in the project root.
 
 ```shell script
 sudo docker pull docker.pkg.github.com/traptitech/jomon/jomon:latest
 sudo docker run -d -p 1323:1323 --env-file .env docker.pkg.github.com/traptitech/jomon/jomon
 ```
 
-(At first,you need to set .env file)
+(At first, you need to set .env file)
