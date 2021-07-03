@@ -20,6 +20,14 @@ type Request struct {
 	Group     *uuid.UUID   `json:"group"`
 }
 
+type PutRequest struct {
+	Amount  int          `json:"amount"`
+	Title   string       `json:"title"`
+	Content string       `json:"content"`
+	Tags    []*uuid.UUID `json:"tags"`
+	Group   *uuid.UUID   `json:"group"`
+}
+
 type RequestResponse struct {
 	ID        uuid.UUID      `json:"id"`
 	Status    string         `json:"status"`
@@ -132,7 +140,7 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 func (h *Handlers) PostRequest(c echo.Context) error {
 	var req Request
 	var err error
-	if err := c.Bind(&req); err != nil {
+	if err = c.Bind(&req); err != nil {
 		return badRequest(err)
 	}
 	var tags []*model.Tag
@@ -240,8 +248,76 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 }
 
 func (h *Handlers) PutRequest(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	var req PutRequest
+	var err error
+	requestID, err := uuid.Parse(c.Param("requestID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	if requestID == uuid.Nil {
+		return badRequest(err)
+	}
+
+	if err := c.Bind(&req); err != nil {
+		return badRequest(err)
+	}
+	var tags []*model.Tag
+	for _, tagID := range req.Tags {
+		ctx := context.Background()
+		tag, err := h.Repository.GetTag(ctx, *tagID)
+		if err != nil {
+			return internalServerError(err)
+		}
+		tags = append(tags, tag)
+	}
+	var group *model.Group
+	if req.Group != nil {
+		ctx := context.Background()
+		group, err = h.Repository.GetGroup(ctx, *req.Group)
+		if err != nil {
+			return internalServerError(err)
+		}
+	}
+	ctx := context.Background()
+	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Amount, req.Title, req.Content, tags, group)
+	if err != nil {
+		return internalServerError(err)
+	}
+
+	var resgroup *GroupOverview
+	if group != nil {
+		resgroup = &GroupOverview{
+			ID:          request.Group.ID,
+			Name:        request.Group.Name,
+			Description: request.Group.Description,
+			Budget:      request.Group.Budget,
+			CreatedAt:   request.Group.CreatedAt,
+			UpdatedAt:   request.Group.UpdatedAt,
+		}
+	}
+	var restags []*TagOverview
+	for _, tag := range request.Tags {
+		restags = append(restags, &TagOverview{
+			ID:          tag.ID,
+			Name:        tag.Name,
+			Description: tag.Description,
+			CreatedAt:   tag.CreatedAt,
+			UpdatedAt:   tag.UpdatedAt,
+		})
+	}
+	res := &RequestResponse{
+		ID:        request.ID,
+		Status:    request.Status,
+		CreatedAt: request.CreatedAt,
+		UpdatedAt: request.UpdatedAt,
+		CreatedBy: request.CreatedBy,
+		Amount:    request.Amount,
+		Title:     request.Title,
+		Content:   request.Content,
+		Tags:      restags,
+		Group:     resgroup,
+	}
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handlers) PostComment(c echo.Context) error {
