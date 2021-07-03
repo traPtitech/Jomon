@@ -1,13 +1,6 @@
 package model
 
-import (
-	"context"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/traPtitech/Jomon/testutil/random"
-)
-
+/*
 func TestEntRepository_GetRequests(t *testing.T) {
 	client, storage, err := setup(t)
 	assert.NoError(t, err)
@@ -30,3 +23,4 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		// TODO: impl
 	})
 }
+*/
