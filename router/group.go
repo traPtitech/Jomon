@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	
 )
 
 type Group struct {
@@ -15,6 +14,10 @@ type Group struct {
 	Description string       `json:"description"`
 	Budget      *int         `json:"budget"`
 	Owners      []*uuid.UUID `json:"owners"`
+}
+
+type GroupResponse struct {
+	Members []*Group `json:"member"`
 }
 
 type GroupOverview struct {
@@ -106,12 +109,24 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 }
 
 func (h *Handlers) GetMembers(c echo.Context) error {
-	ctx := c.Request().Context()
-	members, err := h.Repository.GetMembers(ctx)
+	ctx := context.Background()
+	groupID := c.Param("groupID")
+	members, err := h.Repository.GetMembers(ctx, groupID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	return c.NoContent(http.StatusOK, members)
+
+	res := []*Group{}
+	for _, member := range members {
+		res = append(res, &Group{
+			Name:        member.Name,
+			Description: member.Description,
+			Budget:      member.Budget,
+			Owners:      member.Owners,
+		})
+	}
+
+	return c.JSON(http.StatusOK, &GroupResponse{res})
 }
 
 func (h *Handlers) PostMember(c echo.Context) error {
