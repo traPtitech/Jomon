@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	
 )
 
 type Group struct {
@@ -15,6 +14,10 @@ type Group struct {
 	Description string       `json:"description"`
 	Budget      *int         `json:"budget"`
 	Owners      []*uuid.UUID `json:"owners"`
+}
+
+type GroupResponse struct {
+	Members []*Group `json:"member"`
 }
 
 type GroupOverview struct {
