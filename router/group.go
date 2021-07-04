@@ -174,7 +174,6 @@ func (h *Handlers) PostMember(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-
 	res := created.ID
 
 	return c.JSON(http.StatusOK, &Member{res})
