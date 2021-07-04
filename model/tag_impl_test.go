@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
@@ -55,6 +56,16 @@ func TestEntRepository_CreateTag(t *testing.T) {
 		assert.Equal(t, name, tag.Name)
 		assert.Equal(t, description, tag.Description)
 	})
+
+	t.Run("MissingName", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		name := ""
+		description := random.AlphaNumeric(t, 30)
+		_, err := repo.CreateTag(ctx, name, description)
+
+		assert.Error(t, err)
+	})
 }
 
 func TestEntRepository_UpdateTag(t *testing.T) {
@@ -93,6 +104,18 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 		assert.Equal(t, tag.Name, updated.Name)
 		assert.Equal(t, description, updated.Description)
 	})
+
+	t.Run("MissingName", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
+		assert.NoError(t, err)
+
+		name := ""
+		_, err = repo.UpdateTag(ctx, tag.ID, name, tag.Description)
+
+		assert.Error(t, err)
+	})
 }
 
 func TestEntRepository_DeleteTag(t *testing.T) {
@@ -110,5 +133,13 @@ func TestEntRepository_DeleteTag(t *testing.T) {
 
 		err = repo.DeleteTag(ctx, tag.ID)
 		assert.NoError(t, err)
+	})
+
+	t.Run("UnknownTag", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+
+		err = repo.DeleteTag(ctx, uuid.New())
+		assert.Error(t, err)
 	})
 }

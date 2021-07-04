@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
-	"github.com/traPtitech/Jomon/ent/tag"
 )
 
 func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
@@ -49,15 +48,8 @@ func (repo *EntRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name 
 }
 
 func (repo *EntRepository) DeleteTag(ctx context.Context, tagID uuid.UUID) error {
-	tag, err := repo.client.Tag.
-		Query().
-		Where(tag.IDEQ(tagID)).
-		Only(ctx)
-	if err != nil {
-		return err
-	}
-	err = repo.client.Tag.
-		DeleteOne(tag).
+	err := repo.client.Tag.
+		DeleteOneID(tagID).
 		Exec(ctx)
 	return err
 }
