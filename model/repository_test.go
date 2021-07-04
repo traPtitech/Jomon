@@ -10,12 +10,11 @@ import (
 	"github.com/traPtitech/Jomon/testutil"
 )
 
-func setup(t *testing.T) (*ent.Client, storage.Storage, error) {
+func setup(t *testing.T, ctx context.Context) (*ent.Client, storage.Storage, error) {
 	client, err := SetupTestEntClient(t)
 	if err != nil {
 		return nil, nil, err
 	}
-	ctx := context.Background()
 	err = dropAll(ctx, client)
 	if err != nil {
 		return nil, nil, err

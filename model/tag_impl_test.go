@@ -10,16 +10,16 @@ import (
 )
 
 func TestEntRepository_GetTags(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t)
+	client2, storage2, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
 		tag1, _ := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		tag2, _ := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 
@@ -44,8 +44,6 @@ func TestEntRepository_GetTags(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
-
 		got, err := repo2.GetTags(ctx)
 		assert.NoError(t, err)
 		assert.Len(t, got, 0)
@@ -53,13 +51,13 @@ func TestEntRepository_GetTags(t *testing.T) {
 }
 
 func TestEntRepository_CreateTag(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
 		name := random.AlphaNumeric(t, 20)
 		description := random.AlphaNumeric(t, 30)
 		tag, err := repo.CreateTag(ctx, name, description)
@@ -71,7 +69,6 @@ func TestEntRepository_CreateTag(t *testing.T) {
 
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
 		name := ""
 		description := random.AlphaNumeric(t, 30)
 		_, err := repo.CreateTag(ctx, name, description)
@@ -81,13 +78,13 @@ func TestEntRepository_CreateTag(t *testing.T) {
 }
 
 func TestEntRepository_UpdateTag(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success1", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		assert.NoError(t, err)
 
@@ -103,7 +100,6 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		assert.NoError(t, err)
 
@@ -119,7 +115,6 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		assert.NoError(t, err)
 
@@ -131,13 +126,13 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 }
 
 func TestEntRepository_DeleteTag(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
 		name := random.AlphaNumeric(t, 20)
 		description := random.AlphaNumeric(t, 30)
 		tag, err := repo.CreateTag(ctx, name, description)
@@ -149,8 +144,6 @@ func TestEntRepository_DeleteTag(t *testing.T) {
 
 	t.Run("UnknownTag", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
-
 		err = repo.DeleteTag(ctx, uuid.New())
 		assert.Error(t, err)
 	})
