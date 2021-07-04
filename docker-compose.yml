@@ -63,19 +63,19 @@ services:
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     environment:
-        - PMA_ARBITRARY=1
-        - PMA_HOST=db
-        - PMA_USER=root
-        - PMA_PASSWORD=password
+      - PMA_ARBITRARY=1
+      - PMA_HOST=db
+      - PMA_USER=root
+      - PMA_PASSWORD=password
     ports:
-        - 8888:80
+      - 8888:80
 
   test-phpmyadmin:
     image: phpmyadmin/phpmyadmin
     environment:
-        - PMA_ARBITRARY=1
-        - PMA_HOST=test-db
-        - PMA_USER=root
-        - PMA_PASSWORD=password
+      - PMA_ARBITRARY=1
+      - PMA_HOST=test-db
+      - PMA_USER=root
+      - PMA_PASSWORD=password
     ports:
-        - 8889:80
+      - 8889:80

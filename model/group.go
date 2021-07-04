@@ -6,14 +6,15 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/ent/group"
 )
 
 type GroupRepository interface {
 	GetGroups(ctx context.Context) ([]*Group, error)
 	GetGroup(ctx context.Context, groupID uuid.UUID) (*Group, error)
 	CreateGroup(ctx context.Context, name string, description string, budget *int, owners *[]User) (*Group, error)
-	GetMembers(ctx context.Context, groupID string) ([]*Group, error)
+	GetMembers(ctx context.Context, groupID uuid.UUID) ([]*User, error)
+	PostMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*User, error)
+	DeleteMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) error
 }
 
 type Group struct {
@@ -24,16 +25,4 @@ type Group struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   *time.Time
-}
-
-func (repo *EntRepository) GetMembers(ctx context.Context, groupID string) ([]*Group, error) {
-	members, err := repo.client.Group.Where(group.IDEQ(groupID))
-	if err != nil {
-		return nil, err
-	}
-	modelmembers := []*Group{}
-	for _, member := range members {
-		modelmembers = append(modelmembers, ConvertEntGroupToModelGroup(member))
-	}
-	return modelmembers, nil
 }
