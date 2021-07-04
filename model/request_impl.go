@@ -218,7 +218,6 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		SetContent(content).
 		ClearTag().
 		AddTagIDs(tagIDs...).
-		ClearGroup().
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
@@ -243,8 +242,12 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	if err != nil {
 		return nil, err
 	}
+	enttags, err := updated.QueryTag().All(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var modeltags []*Tag
-	for _, tag := range updated.Edges.Tag {
+	for _, tag := range enttags {
 		modeltags = append(modeltags, ConvertEntTagToModelTag(tag))
 	}
 	modelgroup := ConvertEntGroupToModelGroup(updated.Edges.Group)
