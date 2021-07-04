@@ -157,7 +157,6 @@ func (h *Handlers) PostMember(c echo.Context) error {
 	if err != nil {
 		return internalServerError(err)
 	}
-
 	res := created.ID
 
 	return c.JSON(http.StatusOK, &Member{res})
