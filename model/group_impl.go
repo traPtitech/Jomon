@@ -63,6 +63,7 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	members, err := gotGroup.
 		QueryUser().
 		All(ctx)
+
 	if err != nil {
 		return nil, err
 	}
