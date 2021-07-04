@@ -6,6 +6,7 @@ import (
 
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/storage"
+	"github.com/traPtitech/Jomon/testutil"
 )
 
 func setup(t *testing.T) (*ent.Client, storage.Storage, error) {
@@ -14,7 +15,7 @@ func setup(t *testing.T) (*ent.Client, storage.Storage, error) {
 		return nil, nil, err
 	}
 	os.Mkdir(os.Getenv("UPLOAD_DIR"), 0777)
-	storage, err := storage.NewLocalStorage(os.Getenv("UPLOAD_DIR"))
+	storage, err := storage.NewLocalStorage(testutil.GetEnvOrDefault("UPLOAD_DIR", "./uploads"))
 	if err != nil {
 		return nil, nil, err
 	}
