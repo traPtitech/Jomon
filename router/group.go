@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/model"
 )
 
 type Group struct {
@@ -38,6 +39,10 @@ type GroupDetail struct {
 	Users       []*uuid.UUID `json:"users"`
 	CreatedAt   time.Time    `json:"created_at"`
 	UpdatedAt   time.Time    `json:"updated_at"`
+}
+
+type MemberResponse struct {
+	Members []uuid.UUID `json:"members"`
 }
 
 func (h *Handlers) GetGroups(c echo.Context) error {
@@ -109,33 +114,73 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 
 func (h *Handlers) GetMembers(c echo.Context) error {
 	ctx := context.Background()
-	groupID := c.Param("groupID")
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	if groupID == uuid.Nil {
+		return badRequest(err)
+	}
+
 	members, err := h.Repository.GetMembers(ctx, groupID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return internalServerError(err)
 	}
 
-	res := []*Group{}
+	var res []uuid.UUID
 	for _, member := range members {
-		res = append(res, &Group{
-			Name:        member.Name,
-			Description: member.Description,
-			Budget:      member.Budget,
-			Owners:      member.Owners,
-		})
+		res = append(res, member.ID)
 	}
 
-	return c.JSON(http.StatusOK, &GroupResponse{res})
+	return c.JSON(http.StatusOK, &MemberResponse{res})
 }
 
 func (h *Handlers) PostMember(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	var member model.User
+	if err := c.Bind(&member); err != nil {
+		return badRequest(err)
+	}
+
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	if groupID == uuid.Nil {
+		return badRequest(err)
+	}
+
+	ctx := context.Background()
+	created, err := h.Repository.PostMember(ctx, groupID, member.ID)
+	if err != nil {
+		return internalServerError(err)
+	}
+
+	res := created.ID
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handlers) DeleteMember(c echo.Context) error {
+	var member model.User
+	if err := c.Bind(&member); err != nil {
+		return badRequest(err)
+	}
+
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	if groupID == uuid.Nil {
+		return badRequest(err)
+	}
+
+	ctx := context.Background()
+	err = h.Repository.DeleteMember(ctx, groupID, member.ID)
+	if err != nil {
+		return internalServerError(err)
+	}
+
 	return c.NoContent(http.StatusOK)
-	// TODO: Implement
 }
 
 func (h *Handlers) GetOwners(c echo.Context) error {
