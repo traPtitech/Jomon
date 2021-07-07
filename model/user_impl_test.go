@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
@@ -12,6 +13,9 @@ func TestEntRepository_GetUsers(t *testing.T) {
 	client, storage, err := setup(t)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
+	client2, storage2, err := setup(t)
+	assert.NoError(t, err)
+	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -44,6 +48,14 @@ func TestEntRepository_GetUsers(t *testing.T) {
 			assert.Equal(t, got[1].Admin, user1.Admin)
 		}
 	})
+	t.Run("Success2", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+
+		got, err := repo2.GetUsers(ctx)
+		assert.NoError(t, err)
+		assert.Len(t, got, 0)
+	})
 }
 
 func TestEntRepository_CreateUser(t *testing.T) {
@@ -65,12 +77,27 @@ func TestEntRepository_CreateUser(t *testing.T) {
 		assert.Equal(t, user.DisplayName, dn)
 		assert.Equal(t, user.Admin, admin)
 	})
+
+	t.Run("MissingName", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+
+		name := ""
+		dn := random.AlphaNumeric(t, 20)
+		admin := random.Numeric(t, 2) == 1
+
+		_, err := repo.CreateUser(ctx, name, dn, admin)
+		assert.Error(t, err)
+	})
 }
 
 func TestEntRepository_GetUserByName(t *testing.T) {
 	client, storage, err := setup(t)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
+	client2, storage2, err := setup(t)
+	assert.NoError(t, err)
+	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -89,12 +116,22 @@ func TestEntRepository_GetUserByName(t *testing.T) {
 		assert.Equal(t, user.DisplayName, got.DisplayName)
 		assert.Equal(t, user.Admin, got.Admin)
 	})
+
+	t.Run("UnknownName", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		_, err = repo2.GetUserByName(ctx, random.AlphaNumeric(t, 20))
+		assert.Error(t, err)
+	})
 }
 
 func TestEntRepository_GetUserByID(t *testing.T) {
 	client, storage, err := setup(t)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
+	client2, storage2, err := setup(t)
+	assert.NoError(t, err)
+	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -112,6 +149,13 @@ func TestEntRepository_GetUserByID(t *testing.T) {
 		assert.Equal(t, user.Name, got.Name)
 		assert.Equal(t, user.DisplayName, got.DisplayName)
 		assert.Equal(t, user.Admin, got.Admin)
+	})
+
+	t.Run("UnknownUserID", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		_, err := repo2.GetUserByID(ctx, uuid.New())
+		assert.Error(t, err)
 	})
 }
 
@@ -141,5 +185,23 @@ func TestEntRepository_UpdateUser(t *testing.T) {
 		assert.Equal(t, got.Name, uname)
 		assert.Equal(t, got.DisplayName, udn)
 		assert.Equal(t, got.Admin, uadmin)
+	})
+
+	t.Run("MissingName", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+
+		name := random.AlphaNumeric(t, 20)
+		dn := random.AlphaNumeric(t, 20)
+		admin := random.Numeric(t, 2) == 1
+
+		user, err := repo.CreateUser(ctx, name, dn, admin)
+		assert.NoError(t, err)
+
+		uname := ""
+		udn := random.AlphaNumeric(t, 20)
+		uadmin := random.Numeric(t, 2) == 1
+		_, err = repo.UpdateUser(ctx, user.ID, uname, udn, uadmin)
+		assert.Error(t, err)
 	})
 }

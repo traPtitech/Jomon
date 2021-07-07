@@ -20,7 +20,8 @@ func (User) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
 		field.String("name").
-			Unique(),
+			Unique().
+			NotEmpty(),
 		field.String("display_name"),
 		field.Bool("admin").
 			Default(false),
