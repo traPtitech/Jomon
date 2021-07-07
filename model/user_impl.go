@@ -72,6 +72,9 @@ func (repo *EntRepository) UpdateUser(ctx context.Context, userID uuid.UUID, nam
 	return ConvertEntUserToModelUser(user), nil
 }
 func ConvertEntUserToModelUser(user *ent.User) *User {
+	if user == nil {
+		return nil
+	}
 	return &User{
 		ID:          user.ID,
 		Name:        user.Name,
