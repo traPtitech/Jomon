@@ -697,11 +697,8 @@ paths:
               schema:
                 type: object
                 properties:
-                  owners:
-                    type: object
-                    properties:
-                      id:
-                        $ref: "#/components/schemas/TrapID"
+                  id:
+                    $ref: "#/components/schemas/TrapID"
     delete:
       description: グループオーナーをグループから削除する。管理者権限またはグループオーナー権限が必要。
       tags:

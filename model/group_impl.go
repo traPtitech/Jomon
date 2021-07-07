@@ -36,10 +36,10 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 	return ConvertEntGroupToModelGroup(created), nil
 }
 
-func (repo *EntRepository) GetOwners(ctx context.Context, GroupID uuid.UUID) ([]*Owner, error) {
+func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]*Owner, error) {
 	groupowners, err := repo.client.Group.
 		Query().
-		Where(group.IDEQ(GroupID)).
+		Where(group.IDEQ(groupID)).
 		QueryOwner().
 		All(ctx)
 	if err != nil {
@@ -53,27 +53,27 @@ func (repo *EntRepository) GetOwners(ctx context.Context, GroupID uuid.UUID) ([]
 	return owners, nil
 }
 
-func (repo *EntRepository) CreateOwner(ctx context.Context, GroupID uuid.UUID, OwnerID uuid.UUID) (*Owner, error) {
+func (repo *EntRepository) CreateOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) (*Owner, error) {
 	_, err := repo.client.Group.
 		Update().
-		Where(group.IDEQ(GroupID)).
-		AddOwnerIDs(OwnerID).
+		Where(group.IDEQ(groupID)).
+		AddOwnerIDs(ownerID).
 		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
 	resowner := &Owner{
-		ID: OwnerID,
+		ID: ownerID,
 	}
 	return resowner, nil
 
 }
 
-func (repo *EntRepository) DeleteOwner(ctx context.Context, GroupID uuid.UUID, OwnerID uuid.UUID) error {
+func (repo *EntRepository) DeleteOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) error {
 	_, err := repo.client.Group.
 		Update().
-		Where(group.IDEQ(GroupID)).
-		RemoveOwnerIDs(OwnerID).
+		Where(group.IDEQ(groupID)).
+		RemoveOwnerIDs(ownerID).
 		Save(ctx)
 
 	return err
