@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"encoding/json"
 	"net/http/httptest"
 	"strings"
@@ -120,13 +121,13 @@ func (th *TestHandlers) doRequest(t *testing.T, method string, path string, reqB
 	return rec.Code, rec
 }
 
-/*
 func (th *TestHandlers) doRequestWithLogin(t *testing.T, accessUser *model.User, method string, path string, reqBody interface{}, resBody interface{}) (statusCode int, rec *httptest.ResponseRecorder) {
 	t.Helper()
 
+	ctx := context.Background()
 	th.Repository.MockUserRepository.
 		EXPECT().
-		GetUserByID(accessUser.ID).
+		GetUserByID(ctx, accessUser.ID).
 		Return(accessUser, nil).
 		AnyTimes()
 
@@ -149,34 +150,6 @@ func (th *TestHandlers) doRequestWithLogin(t *testing.T, accessUser *model.User,
 	return rec.Code, rec
 }
 
-func (th *TestHandlers) doRequestWithAdminMode(t *testing.T, accessUser *model.User, method string, path string, reqBody interface{}, resBody interface{}) (statusCode int, rec *httptest.ResponseRecorder) {
-	t.Helper()
-
-	th.Repository.MockUserRepository.
-		EXPECT().
-		GetUserByID(accessUser.ID).
-		Return(accessUser, nil)
-
-	req := httptest.NewRequest(method, path, requestEncode(t, reqBody))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec = httptest.NewRecorder()
-
-	sess, err := th.Handler.SessionStore.Get(req, th.Handler.SessionName)
-	require.NoError(t, err)
-	sess.Values["userID"] = accessUser.ID.String()
-	sess.Values["adminMode"] = true
-	err = sess.Save(req, rec)
-	require.NoError(t, err)
-
-	th.Echo.ServeHTTP(rec, req)
-
-	if resBody != nil {
-		responseDecode(t, rec, resBody)
-	}
-
-	return rec.Code, rec
-}
-*/
 func requestEncode(t *testing.T, body interface{}) *strings.Reader {
 	t.Helper()
 
@@ -192,6 +165,7 @@ func responseDecode(t *testing.T, rec *httptest.ResponseRecorder, i interface{})
 	err := json.Unmarshal(rec.Body.Bytes(), i)
 	require.NoError(t, err)
 }
+
 func mustMakeUser(t *testing.T, admin bool) *model.User {
 	t.Helper()
 	date := time.Now()

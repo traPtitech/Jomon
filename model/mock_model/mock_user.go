@@ -7,6 +7,7 @@ package mock_model
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 	model "github.com/traPtitech/Jomon/model"
 	reflect "reflect"
 )
@@ -47,4 +48,19 @@ func (m *MockUserRepository) GetMe(ctx context.Context, name string) (*model.Use
 func (mr *MockUserRepositoryMockRecorder) GetMe(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMe", reflect.TypeOf((*MockUserRepository)(nil).GetMe), ctx, name)
+}
+
+// GetUserByID mocks base method
+func (m *MockUserRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (*model.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByID", ctx, userID)
+	ret0, _ := ret[0].(*model.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByID indicates an expected call of GetUserByID
+func (mr *MockUserRepositoryMockRecorder) GetUserByID(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockUserRepository)(nil).GetUserByID), ctx, userID)
 }
