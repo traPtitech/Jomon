@@ -229,3 +229,45 @@ func TestHandlers_PutTag(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
 }
+
+func TestHandlers_DeleteTag(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		th, err := SetupTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		id := uuid.New()
+
+		ctx := context.Background()
+		th.Repository.MockTagRepository.
+			EXPECT().
+			DeleteTag(ctx, id).
+			Return(nil)
+
+		path := fmt.Sprintf("/api/tags/%s", id.String())
+		statusCode, _ := th.doRequest(t, echo.DELETE, path, nil, nil)
+		assert.Equal(t, http.StatusOK, statusCode)
+	})
+
+	t.Run("UnknownID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		th, err := SetupTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		id := uuid.New()
+
+		ctx := context.Background()
+		th.Repository.MockTagRepository.
+			EXPECT().
+			DeleteTag(ctx, id).
+			Return(errors.New("Tag not found"))
+
+		path := fmt.Sprintf("/api/tags/%s", id.String())
+		statusCode, _ := th.doRequest(t, echo.DELETE, path, nil, nil)
+		assert.Equal(t, http.StatusInternalServerError, statusCode)
+	})
+}
