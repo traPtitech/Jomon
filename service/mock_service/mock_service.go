@@ -6,6 +6,7 @@ package mock_service
 
 import (
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 	service "github.com/traPtitech/Jomon/service"
 	io "io"
 	reflect "reflect"
@@ -35,18 +36,18 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // CreateFile mocks base method
-func (m *MockService) CreateFile(src io.Reader, mimetype string) (service.File, error) {
+func (m *MockService) CreateFile(src io.Reader, name, mimetype string, requestID uuid.UUID) (*service.File, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateFile", src, mimetype)
-	ret0, _ := ret[0].(service.File)
+	ret := m.ctrl.Call(m, "CreateFile", src, name, mimetype, requestID)
+	ret0, _ := ret[0].(*service.File)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateFile indicates an expected call of CreateFile
-func (mr *MockServiceMockRecorder) CreateFile(src, mimetype interface{}) *gomock.Call {
+func (mr *MockServiceMockRecorder) CreateFile(src, name, mimetype, requestID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFile", reflect.TypeOf((*MockService)(nil).CreateFile), src, mimetype)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFile", reflect.TypeOf((*MockService)(nil).CreateFile), src, name, mimetype, requestID)
 }
 
 // GetAccessToken mocks base method
@@ -76,4 +77,19 @@ func (m *MockService) GetClientId() string {
 func (mr *MockServiceMockRecorder) GetClientId() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClientId", reflect.TypeOf((*MockService)(nil).GetClientId))
+}
+
+// GetMe mocks base method
+func (m *MockService) GetMe(token string) (*service.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMe", token)
+	ret0, _ := ret[0].(*service.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMe indicates an expected call of GetMe
+func (mr *MockServiceMockRecorder) GetMe(token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMe", reflect.TypeOf((*MockService)(nil).GetMe), token)
 }
