@@ -88,6 +88,22 @@ func TestHandlers_GetTags(t *testing.T) {
 		assert.Equal(t, http.StatusOK, statusCode)
 		assert.Len(t, resBody.Tags, 0)
 	})
+
+	t.Run("FailedToGetTags", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		th, err := SetupTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		ctx := context.Background()
+		th.Repository.MockTagRepository.
+			EXPECT().
+			GetTags(ctx).
+			Return(nil, errors.New("failed to get tags."))
+
+		statusCode, _ := th.doRequest(t, echo.GET, "/api/tags", nil, nil)
+		assert.Equal(t, http.StatusInternalServerError, statusCode)
+	})
 }
 
 func TestHandlers_PostTag(t *testing.T) {
