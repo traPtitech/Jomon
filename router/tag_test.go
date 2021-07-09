@@ -99,7 +99,7 @@ func TestHandlers_GetTags(t *testing.T) {
 		th.Repository.MockTagRepository.
 			EXPECT().
 			GetTags(ctx).
-			Return(nil, errors.New("failed to get tags."))
+			Return(nil, errors.New("Failed to get tags."))
 
 		statusCode, _ := th.doRequest(t, echo.GET, "/api/tags", nil, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)

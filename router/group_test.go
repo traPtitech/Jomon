@@ -109,7 +109,7 @@ func TestHandlers_GetGroups(t *testing.T) {
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			GetGroups(ctx).
-			Return(nil, errors.New("failed to get groups"))
+			Return(nil, errors.New("Failed to get groups"))
 
 		statusCode, _ := th.doRequest(t, echo.GET, "/api/groups", nil, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
