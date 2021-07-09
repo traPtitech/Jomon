@@ -21,7 +21,7 @@ type Services struct {
 	Storage    storagePkg.Storage
 }
 
-func NewServices(repo model.Repository, storage storagePkg.Storage) (*Services, error) {
+func NewServices(repo model.Repository, storage storagePkg.Storage) (Service, error) {
 	traQClientID := os.Getenv("TRAQ_CLIENT_ID")
 	/*
 		webhookSecret := os.Getenv("WEBHOOK_SECRET")
