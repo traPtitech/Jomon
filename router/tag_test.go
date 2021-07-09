@@ -162,7 +162,7 @@ func TestHandlers_PostTag(t *testing.T) {
 		th.Repository.MockTagRepository.
 			EXPECT().
 			CreateTag(ctx, tag.Name, tag.Description).
-			Return(nil, errors.New("Tag name can't empty."))
+			Return(nil, errors.New("Tag name can't be empty."))
 
 		req := Tag{
 			Name:        tag.Name,
@@ -232,7 +232,7 @@ func TestHandlers_PutTag(t *testing.T) {
 		th.Repository.MockTagRepository.
 			EXPECT().
 			UpdateTag(ctx, tag.ID, tag.Name, tag.Description).
-			Return(nil, errors.New("Tag name can't empty."))
+			Return(nil, errors.New("Tag name can't be empty."))
 
 		req := Tag{
 			Name:        tag.Name,
