@@ -79,6 +79,7 @@ func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, 
 		UpdateOneID(groupID).
 		AddUserIDs(userID).
 		Save(ctx)
+
 	if err != nil {
 		return nil, err
 	}
