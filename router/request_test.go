@@ -163,3 +163,117 @@ func TestHandlers_GetRequests(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
 }
+
+func TestHandlers_PostRequest(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		th, err := SetupTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		req := &Request{
+			CreatedBy: uuid.New(),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			Amount:    random.Numeric(t, 1000000),
+		}
+		var tags []*model.Tag
+		var group *model.Group
+
+		date := time.Now()
+
+		ctx := context.Background()
+		th.Repository.MockRequestRepository.
+			EXPECT().
+			CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, group, req.CreatedBy).
+			Return(&model.RequestDetail{
+				ID:        uuid.New(),
+				Status:    model.Submitted.String(),
+				Amount:    req.Amount,
+				Title:     req.Title,
+				Content:   req.Content,
+				Comments:  []*model.Comment{},
+				Files:     []*uuid.UUID{},
+				Statuses:  []*model.RequestStatus{},
+				Tags:      tags,
+				Group:     group,
+				CreatedAt: date,
+				UpdatedAt: date,
+				CreatedBy: req.CreatedBy,
+			}, nil)
+
+		var resBody RequestResponse
+		statusCode, _ := th.doRequest(t, echo.POST, "/api/requests", &req, &resBody)
+		assert.Equal(t, http.StatusOK, statusCode)
+		assert.Equal(t, resBody.Title, req.Title)
+		assert.Equal(t, resBody.Content, req.Content)
+		assert.Equal(t, resBody.Amount, req.Amount)
+		assert.Equal(t, resBody.CreatedBy, req.CreatedBy)
+	})
+
+	t.Run("SuccessWithTags", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		th, err := SetupTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		date := time.Now()
+
+		tag1 := &model.Tag{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		tags := []*model.Tag{tag1}
+		var group *model.Group
+
+		req := &Request{
+			CreatedBy: uuid.New(),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			Amount:    random.Numeric(t, 1000000),
+			Tags:      []*uuid.UUID{&tag1.ID},
+		}
+
+		ctx := context.Background()
+		th.Repository.MockTagRepository.
+			EXPECT().
+			GetTag(ctx, tag1.ID).
+			Return(tag1, nil)
+		th.Repository.MockRequestRepository.
+			EXPECT().
+			CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, group, req.CreatedBy).
+			Return(&model.RequestDetail{
+				ID:        uuid.New(),
+				Status:    model.Submitted.String(),
+				Amount:    req.Amount,
+				Title:     req.Title,
+				Content:   req.Content,
+				Comments:  []*model.Comment{},
+				Files:     []*uuid.UUID{},
+				Statuses:  []*model.RequestStatus{},
+				Tags:      tags,
+				Group:     group,
+				CreatedAt: date,
+				UpdatedAt: date,
+				CreatedBy: req.CreatedBy,
+			}, nil)
+
+		var resBody RequestResponse
+		statusCode, _ := th.doRequest(t, echo.POST, "/api/requests", &req, &resBody)
+		assert.Equal(t, http.StatusOK, statusCode)
+		assert.Equal(t, resBody.Title, req.Title)
+		assert.Equal(t, resBody.Content, req.Content)
+		assert.Equal(t, resBody.Amount, req.Amount)
+		assert.Equal(t, resBody.CreatedBy, req.CreatedBy)
+		if assert.Len(t, resBody.Tags, 1) {
+			assert.Equal(t, resBody.Tags[0].ID, tag1.ID)
+			assert.Equal(t, resBody.Tags[0].Name, tag1.Name)
+			assert.Equal(t, resBody.Tags[0].Description, tag1.Description)
+		}
+	})
+}
