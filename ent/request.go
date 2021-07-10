@@ -33,6 +33,7 @@ type Request struct {
 	// The values are being populated by the RequestQuery when eager-loading is set.
 	Edges         RequestEdges `json:"edges"`
 	group_request *uuid.UUID
+	request_user  *uuid.UUID
 }
 
 // RequestEdges holds the relations/edges for other nodes in the graph.
@@ -155,6 +156,8 @@ func (*Request) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(uuid.UUID)
 		case request.ForeignKeys[0]: // group_request
 			values[i] = new(uuid.UUID)
+		case request.ForeignKeys[1]: // request_user
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Request", columns[i])
 		}
@@ -211,6 +214,12 @@ func (r *Request) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field group_request", values[i])
 			} else if value != nil {
 				r.group_request = value
+			}
+		case request.ForeignKeys[1]:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field request_user", values[i])
+			} else if value != nil {
+				r.request_user = value
 			}
 		}
 	}

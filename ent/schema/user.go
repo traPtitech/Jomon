@@ -42,13 +42,10 @@ func (User) Edges() []ent.Edge {
 		edge.From("group_owner", Group.Type).
 			Ref("owner"),
 		edge.From("comment", Comment.Type).
-			Ref("user").
-			Unique(),
+			Ref("user"),
 		edge.From("request_status", RequestStatus.Type).
-			Ref("user").
-			Unique(),
+			Ref("user"),
 		edge.From("request", Request.Type).
-			Ref("user").
-			Unique(),
+			Ref("user"),
 	}
 }

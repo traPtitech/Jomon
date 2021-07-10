@@ -275,10 +275,10 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   transaction.TagTable,
-			Columns: []string{transaction.TagColumn},
+			Columns: transaction.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -291,10 +291,10 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tu.mutation.RemovedTagIDs(); len(nodes) > 0 && !tu.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   transaction.TagTable,
-			Columns: []string{transaction.TagColumn},
+			Columns: transaction.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -310,10 +310,10 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := tu.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   transaction.TagTable,
-			Columns: []string{transaction.TagColumn},
+			Columns: transaction.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -683,10 +683,10 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	}
 	if tuo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   transaction.TagTable,
-			Columns: []string{transaction.TagColumn},
+			Columns: transaction.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -699,10 +699,10 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	}
 	if nodes := tuo.mutation.RemovedTagIDs(); len(nodes) > 0 && !tuo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   transaction.TagTable,
-			Columns: []string{transaction.TagColumn},
+			Columns: transaction.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -718,10 +718,10 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	}
 	if nodes := tuo.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   transaction.TagTable,
-			Columns: []string{transaction.TagColumn},
+			Columns: transaction.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

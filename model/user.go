@@ -19,4 +19,5 @@ type User struct {
 
 type UserRepository interface {
 	GetMe(ctx context.Context, name string) (*User, error)
+	GetUserByID(ctx context.Context, userID uuid.UUID) (*User, error)
 }

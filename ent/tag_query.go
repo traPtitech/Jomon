@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -30,7 +31,6 @@ type TagQuery struct {
 	// eager-loading edges.
 	withRequest     *RequestQuery
 	withTransaction *TransactionQuery
-	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -81,7 +81,7 @@ func (tq *TagQuery) QueryRequest() *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, tag.RequestTable, tag.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, tag.RequestTable, tag.RequestPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -103,7 +103,7 @@ func (tq *TagQuery) QueryTransaction() *TransactionQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, selector),
 			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, tag.TransactionTable, tag.TransactionColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, tag.TransactionTable, tag.TransactionPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -386,19 +386,12 @@ func (tq *TagQuery) prepareQuery(ctx context.Context) error {
 func (tq *TagQuery) sqlAll(ctx context.Context) ([]*Tag, error) {
 	var (
 		nodes       = []*Tag{}
-		withFKs     = tq.withFKs
 		_spec       = tq.querySpec()
 		loadedTypes = [2]bool{
 			tq.withRequest != nil,
 			tq.withTransaction != nil,
 		}
 	)
-	if tq.withRequest != nil || tq.withTransaction != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, tag.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Tag{config: tq.config}
 		nodes = append(nodes, node)
@@ -420,59 +413,131 @@ func (tq *TagQuery) sqlAll(ctx context.Context) ([]*Tag, error) {
 	}
 
 	if query := tq.withRequest; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*Tag)
-		for i := range nodes {
-			if nodes[i].request_tag == nil {
-				continue
-			}
-			fk := *nodes[i].request_tag
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[uuid.UUID]*Tag, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.Request = []*Request{}
 		}
-		query.Where(request.IDIn(ids...))
+		var (
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*Tag)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   tag.RequestTable,
+				Columns: tag.RequestPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(tag.RequestPrimaryKey[1], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*uuid.UUID)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*uuid.UUID)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := *eout
+				inValue := *ein
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, tq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "request": %w`, err)
+		}
+		query.Where(request.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_tag" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected "request" node returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Request = n
+				nodes[i].Edges.Request = append(nodes[i].Edges.Request, n)
 			}
 		}
 	}
 
 	if query := tq.withTransaction; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*Tag)
-		for i := range nodes {
-			if nodes[i].transaction_tag == nil {
-				continue
-			}
-			fk := *nodes[i].transaction_tag
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[uuid.UUID]*Tag, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.Transaction = []*Transaction{}
 		}
-		query.Where(transaction.IDIn(ids...))
+		var (
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*Tag)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   tag.TransactionTable,
+				Columns: tag.TransactionPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(tag.TransactionPrimaryKey[1], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*uuid.UUID)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*uuid.UUID)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := *eout
+				inValue := *ein
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, tq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "transaction": %w`, err)
+		}
+		query.Where(transaction.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "transaction_tag" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected "transaction" node returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Transaction = n
+				nodes[i].Edges.Transaction = append(nodes[i].Edges.Transaction, n)
 			}
 		}
 	}

@@ -30,6 +30,7 @@ type Comment struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CommentQuery when eager-loading is set.
 	Edges           CommentEdges `json:"edges"`
+	comment_user    *uuid.UUID
 	request_comment *uuid.UUID
 }
 
@@ -83,7 +84,9 @@ func (*Comment) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullTime)
 		case comment.FieldID:
 			values[i] = new(uuid.UUID)
-		case comment.ForeignKeys[0]: // request_comment
+		case comment.ForeignKeys[0]: // comment_user
+			values[i] = new(uuid.UUID)
+		case comment.ForeignKeys[1]: // request_comment
 			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Comment", columns[i])
@@ -132,6 +135,12 @@ func (c *Comment) assignValues(columns []string, values []interface{}) error {
 				*c.DeletedAt = value.Time
 			}
 		case comment.ForeignKeys[0]:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field comment_user", values[i])
+			} else if value != nil {
+				c.comment_user = value
+			}
+		case comment.ForeignKeys[1]:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field request_comment", values[i])
 			} else if value != nil {
