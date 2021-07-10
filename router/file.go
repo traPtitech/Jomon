@@ -104,12 +104,8 @@ func (h *Handlers) DeleteFile(c echo.Context) error {
 	if err != nil {
 		return badRequest(err)
 	}
-	requestID, err := uuid.Parse(c.Param("requestID"))
-	if err != nil {
-		return badRequest(err)
-	}
 
-	err = h.Service.DeleteFile(fileID, requestID)
+	err = h.Service.DeleteFile(fileID)
 	if err != nil {
 		return internalServerError(err)
 	}

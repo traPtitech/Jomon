@@ -4,12 +4,14 @@ import (
 	"io"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/model"
 	storagePkg "github.com/traPtitech/Jomon/storage"
 )
 
 type Service interface {
 	CreateFile(src io.Reader, mimetype string) (File, error)
+	DeleteFile(fileID uuid.UUID) error
 	GetAccessToken(code string, codeVerifier string) (AuthResponse, error)
 	GetClientId() string
 }

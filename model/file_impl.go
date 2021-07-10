@@ -88,7 +88,7 @@ func (repo *EntRepository) OpenFile(ctx context.Context, fileID uuid.UUID) (io.R
 	return repo.storage.Open(filename)
 }
 
-func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID, requestID uuid.UUID) error {
+func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) error {
 	file, err := repo.client.File.
 		Query().
 		Where(file.IDEQ(fileID)).
@@ -105,13 +105,31 @@ func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID, req
 
 	filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
 
+	err = repo.storage.Delete(filename)
+	if err != nil {
+		return err
+	}
+
+	request, err := file.QueryRequest().First(ctx)
+
+	if err != nil {
+		return err
+	}
+
 	if err := repo.client.File.
 		DeleteOne(file).
 		Exec(ctx); err != nil {
 		return err
 	}
 
-	return repo.storage.Delete(filename)
+	if err = request.
+		Update().
+		RemoveFileIDs(fileID).
+		Exec(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ConvertEntFileToModelFile(entfile *ent.File) *File {

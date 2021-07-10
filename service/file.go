@@ -44,9 +44,9 @@ func (s *Services) OpenFile(fileID uuid.UUID) (io.ReadCloser, error) {
 	return f, nil
 }
 
-func (s *Services) DeleteFile(fileID uuid.UUID, requestID uuid.UUID) error {
+func (s *Services) DeleteFile(fileID uuid.UUID) error {
 	ctx := context.Background()
-	return s.Repository.DeleteFile(ctx, fileID, requestID)
+	return s.Repository.DeleteFile(ctx, fileID)
 }
 
 func ConvertModelFileToServiceFile(modelfile *model.File) *File {
