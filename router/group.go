@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/traPtitech/Jomon/model"
 )
 
 type Group struct {
@@ -15,10 +14,6 @@ type Group struct {
 	Description string       `json:"description"`
 	Budget      *int         `json:"budget"`
 	Owners      []*uuid.UUID `json:"owners"`
-}
-
-type GroupResponse struct {
-	Members []*Group `json:"member"`
 }
 
 type GroupOverview struct {
@@ -42,7 +37,11 @@ type GroupDetail struct {
 }
 
 type MemberResponse struct {
-	Members []uuid.UUID `json:"members"`
+	ID []uuid.UUID `json:"id"`
+}
+
+type Member struct {
+	ID uuid.UUID `json:"id"`
 }
 
 func (h *Handlers) GetGroups(c echo.Context) error {
@@ -136,7 +135,7 @@ func (h *Handlers) GetMembers(c echo.Context) error {
 }
 
 func (h *Handlers) PostMember(c echo.Context) error {
-	var member model.User
+	var member Member
 	if err := c.Bind(&member); err != nil {
 		return badRequest(err)
 	}
@@ -157,11 +156,11 @@ func (h *Handlers) PostMember(c echo.Context) error {
 
 	res := created.ID
 
-	return c.JSON(http.StatusOK, res)
+	return c.JSON(http.StatusOK, &Member{res})
 }
 
 func (h *Handlers) DeleteMember(c echo.Context) error {
-	var member model.User
+	var member Member
 	if err := c.Bind(&member); err != nil {
 		return badRequest(err)
 	}
