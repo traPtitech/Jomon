@@ -79,4 +79,3 @@ services:
       - PMA_PASSWORD=password
     ports:
       - 8889:80
-
