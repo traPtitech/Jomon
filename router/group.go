@@ -16,10 +16,6 @@ type Group struct {
 	Owners      []*uuid.UUID `json:"owners"`
 }
 
-type GroupResponse struct {
-	Members []*Group `json:"member"`
-}
-
 type GroupOverview struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
