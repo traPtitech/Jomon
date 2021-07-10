@@ -15,6 +15,7 @@ import (
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
+// Test /api/requests. this test uses mock, so query tests are in model.
 func TestHandlers_GetRequests(t *testing.T) {
 	t.Parallel()
 
