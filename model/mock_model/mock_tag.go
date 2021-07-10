@@ -50,6 +50,21 @@ func (mr *MockTagRepositoryMockRecorder) GetTags(ctx interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTags", reflect.TypeOf((*MockTagRepository)(nil).GetTags), ctx)
 }
 
+// GetTag mocks base method
+func (m *MockTagRepository) GetTag(ctx context.Context, tagID uuid.UUID) (*model.Tag, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTag", ctx, tagID)
+	ret0, _ := ret[0].(*model.Tag)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTag indicates an expected call of GetTag
+func (mr *MockTagRepositoryMockRecorder) GetTag(ctx, tagID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTag", reflect.TypeOf((*MockTagRepository)(nil).GetTag), ctx, tagID)
+}
+
 // CreateTag mocks base method
 func (m *MockTagRepository) CreateTag(ctx context.Context, name, description string) (*model.Tag, error) {
 	m.ctrl.T.Helper()
