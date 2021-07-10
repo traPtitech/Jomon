@@ -49,14 +49,11 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 }
 
 func (repo *EntRepository) PostMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*User, error) {
-	group, err := repo.client.Group.Query().Where(group.IDEQ(groupID)).First(ctx)
+	_, err := repo.client.Group.Update().Where(group.IDEQ(groupID)).AddUserIDs(userID).Save(ctx)
 	if err != nil {
 		return nil, err
 	}
-	_, err = group.Update().AddUserIDs(userID).Save(ctx)
-	if err != nil {
-		return nil, err
-	}
+
 	created, err := repo.client.User.Query().Where(user.IDEQ(userID)).First(ctx)
 	if err != nil {
 		return nil, err
@@ -65,17 +62,11 @@ func (repo *EntRepository) PostMember(ctx context.Context, groupID uuid.UUID, us
 }
 
 func (repo *EntRepository) DeleteMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) error {
-	group, err := repo.client.Group.Query().Where(group.IDEQ(groupID)).First(ctx)
+	_, err := repo.client.Group.Update().Where(group.IDEQ(groupID)).RemoveUserIDs(userID).Save(ctx)
 	if err != nil {
 		return err
 	}
-
-	_, err = group.Update().RemoveUserIDs(userID).Save(ctx)
-	if err != nil {
-		return err
-	}
-
-	return err
+	return nil
 }
 
 func ConvertEntGroupToModelGroup(entgroup *ent.Group) *Group {
