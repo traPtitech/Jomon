@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/group"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
@@ -97,11 +98,12 @@ func (repo *EntRepository) DeleteMember(ctx context.Context, groupID uuid.UUID, 
 	if gotUser == nil {
 		return errors.New("unknown user id")
 	}
-	
+
 	_, err = repo.client.Group.
 		UpdateOneID(groupID).
 		RemoveUserIDs(userID).
 		Save(ctx)
+
 	if err != nil {
 		return err
 	}
