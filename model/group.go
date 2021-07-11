@@ -13,7 +13,7 @@ type GroupRepository interface {
 	GetGroup(ctx context.Context, groupID uuid.UUID) (*Group, error)
 	CreateGroup(ctx context.Context, name string, description string, budget *int, owners *[]User) (*Group, error)
 	GetMembers(ctx context.Context, groupID uuid.UUID) ([]*User, error)
-	CreateMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*MemberID, error)
+	CreateMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*Member, error)
 	DeleteMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) error
 }
 
@@ -27,6 +27,6 @@ type Group struct {
 	DeletedAt   *time.Time
 }
 
-type MemberID struct {
+type Member struct {
 	ID uuid.UUID
 }
