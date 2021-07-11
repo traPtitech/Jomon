@@ -71,7 +71,6 @@ func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, 
 	if err != nil {
 		return nil, err
 	}
-
 	created := &Member{userID}
 	return created, nil
 }
