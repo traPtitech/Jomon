@@ -5,9 +5,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/traPtitech/Jomon/ent"
-	"github.com/traPtitech/Jomon/storage"
 	"github.com/traPtitech/Jomon/storage/mock_storage"
-	"github.com/traPtitech/Jomon/testutil"
 )
 
 func setup(t *testing.T) (*ent.Client, *mock_storage.MockStorage, error) {
