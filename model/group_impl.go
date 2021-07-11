@@ -37,10 +37,10 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 
 func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*User, error) {
 	members, err := repo.client.Group.
-	Query().
-	Where(group.IDEQ(groupID)).
-	QueryUser().
-	All(ctx)
+			Query().
+			Where(group.IDEQ(groupID)).
+			QueryUser().
+			All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -51,22 +51,26 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	return modelmembers, nil
 }
 
-func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*User, error) {
+func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*MemberID, error) {
 	_, err := repo.client.Group.
-	Update().
-	Where(group.IDEQ(groupID)).
-	AddUserIDs(userID).
-	Save(ctx)
+			Update().
+			Where(group.IDEQ(groupID)).
+			AddUserIDs(userID).
+			Save(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	created := &User{ID: userID}
+	created := &MemberID{userID}
 	return created, nil
 }
 
 func (repo *EntRepository) DeleteMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) error {
-	_, err := repo.client.Group.Update().Where(group.IDEQ(groupID)).RemoveUserIDs(userID).Save(ctx)
+	_, err := repo.client.Group.
+			Update().
+			Where(group.IDEQ(groupID)).
+			RemoveUserIDs(userID).
+			Save(ctx)
 	if err != nil {
 		return err
 	}
