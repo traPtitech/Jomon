@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/group"
-	"github.com/traPtitech/Jomon/ent/user"
 )
 
 func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
@@ -37,7 +36,11 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 }
 
 func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*User, error) {
-	members, err := repo.client.Group.Query().Where(group.IDEQ(groupID)).QueryUser().All(ctx)
+	members, err := repo.client.Group.
+	Query().
+	Where(group.IDEQ(groupID)).
+	QueryUser().
+	All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -48,17 +51,18 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	return modelmembers, nil
 }
 
-func (repo *EntRepository) PostMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*User, error) {
-	_, err := repo.client.Group.Update().Where(group.IDEQ(groupID)).AddUserIDs(userID).Save(ctx)
+func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*User, error) {
+	_, err := repo.client.Group.
+	Update().
+	Where(group.IDEQ(groupID)).
+	AddUserIDs(userID).
+	Save(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	created, err := repo.client.User.Query().Where(user.IDEQ(userID)).First(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return ConvertEntUserToModelUser(created), nil
+	created := &User{ID: userID}
+	return created, nil
 }
 
 func (repo *EntRepository) DeleteMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) error {
