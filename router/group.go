@@ -38,7 +38,7 @@ type GroupDetail struct {
 }
 
 type MemberResponse struct {
-	ID []uuid.UUID `json:"id"`
+	ID []uuid.UUID `json:"members"`
 }
 
 type Member struct {
@@ -114,7 +114,6 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 }
 
 func (h *Handlers) GetMembers(c echo.Context) error {
-	ctx := context.Background()
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
 		c.Logger().Error(err)
@@ -125,6 +124,7 @@ func (h *Handlers) GetMembers(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
+	ctx := context.Background()
 	members, err := h.Repository.GetMembers(ctx, groupID)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -161,7 +161,7 @@ func (h *Handlers) PostMember(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	created, err := h.Repository.PostMember(ctx, groupID, member.ID)
+	created, err := h.Repository.CreateMember(ctx, groupID, member.ID)
 	if err != nil {
 		if ent.IsConstraintError(err) {
 			c.Logger().Error(err)
