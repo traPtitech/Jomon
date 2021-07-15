@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/user"
 )
@@ -11,6 +12,17 @@ func (repo *EntRepository) GetMe(ctx context.Context, name string) (*User, error
 	user, err := repo.client.User.
 		Query().
 		Where(user.NameEQ(name)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ConvertEntUserToModelUser(user), nil
+}
+
+func (repo *EntRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (*User, error) {
+	user, err := repo.client.User.
+		Query().
+		Where(user.IDEQ(userID)).
 		Only(ctx)
 	if err != nil {
 		return nil, err
