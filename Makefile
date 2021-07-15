@@ -1,6 +1,6 @@
 .PHONY: up
 up:
-	@docker-compose up --build
+	@docker-compose up -d --build
 
 .PHONY: down
 down:

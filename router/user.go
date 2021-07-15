@@ -32,7 +32,8 @@ func (h *Handlers) GetUsers(c echo.Context) error {
 	ctx := context.Background()
 	users, err := h.Repository.GetUsers(ctx)
 	if err != nil {
-		internalServerError(err)
+		c.Logger().Error(err)
+		return c.NoContent(http.StatusInternalServerError)
 	}
 	res := []*UserOverview{}
 	for _, user := range users {

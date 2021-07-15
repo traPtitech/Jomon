@@ -8,25 +8,25 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockRequestFileRepository is a mock of RequestFileRepository interface
+// MockRequestFileRepository is a mock of RequestFileRepository interface.
 type MockRequestFileRepository struct {
 	ctrl     *gomock.Controller
 	recorder *MockRequestFileRepositoryMockRecorder
 }
 
-// MockRequestFileRepositoryMockRecorder is the mock recorder for MockRequestFileRepository
+// MockRequestFileRepositoryMockRecorder is the mock recorder for MockRequestFileRepository.
 type MockRequestFileRepositoryMockRecorder struct {
 	mock *MockRequestFileRepository
 }
 
-// NewMockRequestFileRepository creates a new mock instance
+// NewMockRequestFileRepository creates a new mock instance.
 func NewMockRequestFileRepository(ctrl *gomock.Controller) *MockRequestFileRepository {
 	mock := &MockRequestFileRepository{ctrl: ctrl}
 	mock.recorder = &MockRequestFileRepositoryMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockRequestFileRepository) EXPECT() *MockRequestFileRepositoryMockRecorder {
 	return m.recorder
 }

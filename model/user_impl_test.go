@@ -10,10 +10,11 @@ import (
 )
 
 func TestEntRepository_GetUsers(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t)
+	client2, storage2, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
@@ -59,7 +60,8 @@ func TestEntRepository_GetUsers(t *testing.T) {
 }
 
 func TestEntRepository_CreateUser(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -92,10 +94,11 @@ func TestEntRepository_CreateUser(t *testing.T) {
 }
 
 func TestEntRepository_GetUserByName(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t)
+	client2, storage2, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
@@ -126,10 +129,11 @@ func TestEntRepository_GetUserByName(t *testing.T) {
 }
 
 func TestEntRepository_GetUserByID(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t)
+	client2, storage2, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
@@ -160,7 +164,8 @@ func TestEntRepository_GetUserByID(t *testing.T) {
 }
 
 func TestEntRepository_UpdateUser(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
