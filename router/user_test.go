@@ -88,25 +88,25 @@ func TestHandlers_GetUsers(t *testing.T) {
 			GetUsers(ctx).
 			Return(users, nil)
 
-		var resBody TagResponse
-		statusCode, _ := th.doRequest(t, echo.GET, "/api/tags", nil, &resBody)
+		var resBody UserResponse
+		statusCode, _ := th.doRequest(t, echo.GET, "/api/users", nil, &resBody)
 		assert.Equal(t, http.StatusOK, statusCode)
-		assert.Len(t, resBody.Tags, 0)
+		assert.Len(t, resBody.Users, 0)
 	})
 
-	t.Run("FailedToGetTags", func(t *testing.T) {
+	t.Run("FailedToGetUsers", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		th, err := SetupTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 
 		ctx := context.Background()
-		th.Repository.MockTagRepository.
+		th.Repository.MockUserRepository.
 			EXPECT().
-			GetTags(ctx).
-			Return(nil, errors.New("Failed to get tags."))
+			GetUsers(ctx).
+			Return(nil, errors.New("Failed to get users."))
 
-		statusCode, _ := th.doRequest(t, echo.GET, "/api/tags", nil, nil)
+		statusCode, _ := th.doRequest(t, echo.GET, "/api/users", nil, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
 }
