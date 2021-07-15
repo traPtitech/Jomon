@@ -33,7 +33,7 @@ func (s *Services) GetMe(token string) (*User, error) {
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	body, err := s.sendReq(req)
+	body, err := sendReq(req)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (s *Services) GetMe(token string) (*User, error) {
 	return ConvertModelUserToServiceUser(*user), nil
 }
 
-func (*Services) sendReq(req *http.Request) ([]byte, error) {
+func sendReq(req *http.Request) ([]byte, error) {
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
