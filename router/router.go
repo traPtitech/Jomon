@@ -83,7 +83,6 @@ func SetRouting(e *echo.Echo, h Handlers) {
 			apiGroups.GET("/:groupID/owners", h.GetOwners)
 			apiGroups.POST("/:groupID/owners", h.PostOwner)
 			apiGroups.DELETE("/:groupID/owners", h.DeleteOwner)
-
 		}
 
 		apiUsers := api.Group("/users", h.AuthUserMiddleware)
