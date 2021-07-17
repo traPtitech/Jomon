@@ -4,6 +4,10 @@ import (
 	"context"
 
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/group"
+	"github.com/traPtitech/Jomon/ent/user"
+
+	"github.com/google/uuid"
 )
 
 func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
@@ -31,6 +35,50 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 		return nil, err
 	}
 	return ConvertEntGroupToModelGroup(created), nil
+}
+
+func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]*Owner, error) {
+	groupowners, err := repo.client.Group.
+		Query().
+		Where(group.IDEQ(groupID)).
+		QueryOwner().
+		Select(user.FieldID).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	owners := []*Owner{}
+	for _, groupowner := range groupowners {
+		owners = append(owners, &Owner{ID: groupowner.ID})
+	}
+
+	return owners, nil
+}
+
+func (repo *EntRepository) CreateOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) (*Owner, error) {
+	_, err := repo.client.Group.
+		Update().
+		Where(group.IDEQ(groupID)).
+		AddOwnerIDs(ownerID).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resowner := &Owner{
+		ID: ownerID,
+	}
+	return resowner, nil
+
+}
+
+func (repo *EntRepository) DeleteOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) error {
+	_, err := repo.client.Group.
+		Update().
+		Where(group.IDEQ(groupID)).
+		RemoveOwnerIDs(ownerID).
+		Save(ctx)
+
+	return err
 }
 
 func ConvertEntGroupToModelGroup(entgroup *ent.Group) *Group {

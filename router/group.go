@@ -16,6 +16,13 @@ type Group struct {
 	Owners      []*uuid.UUID `json:"owners"`
 }
 
+type Owner struct {
+	ID uuid.UUID `json:"id"`
+}
+
+type OwnerResponse struct {
+	Owners []uuid.UUID `json:"owners"`
+}
 type GroupOverview struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
@@ -119,15 +126,61 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 }
 
 func (h *Handlers) GetOwners(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	ctx := context.Background()
+	GroupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	owners, err := h.Repository.GetOwners(ctx, GroupID)
+	if err != nil {
+		return internalServerError(err)
+	}
+
+	var res []uuid.UUID
+	for _, owner := range owners {
+		res = append(res, owner.ID)
+	}
+
+	return c.JSON(http.StatusOK, &OwnerResponse{res})
 }
 
 func (h *Handlers) PostOwner(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	ctx := context.Background()
+	var owner Owner
+	GroupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	if err := c.Bind(&owner); err != nil {
+		return badRequest(err)
+	}
+	createowner, err := h.Repository.CreateOwner(ctx, GroupID, owner.ID)
+	if err != nil {
+		return internalServerError(err)
+	}
+
+	res := &Owner{
+		ID: createowner.ID,
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
+
 func (h *Handlers) DeleteOwner(c echo.Context) error {
+	ctx := context.Background()
+	GroupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	var owner Owner
+	if err := c.Bind(&owner); err != nil {
+		return badRequest(err)
+	}
+
+	err = h.Repository.DeleteOwner(ctx, GroupID, owner.ID)
+	if err != nil {
+		return internalServerError(err)
+	}
+
 	return c.NoContent(http.StatusOK)
-	// TODO: Implement
 }

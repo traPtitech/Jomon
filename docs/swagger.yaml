@@ -673,7 +673,7 @@ paths:
                   owners:
                     type: array
                     items:
-                    $ref: "#/components/schemas/TrapID"
+                      $ref: "#/components/schemas/TrapID"
         "404":
           $ref: "#/components/responses/404"
     post:
@@ -697,9 +697,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  owners:
-                    type: array
-                    items:
+                  id:
                     $ref: "#/components/schemas/TrapID"
     delete:
       description: グループオーナーをグループから削除する。管理者権限またはグループオーナー権限が必要。
@@ -717,15 +715,7 @@ paths:
       responses:
         "200":
           description: 削除に成功した。
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  owners:
-                    type: array
-                    items:
-                    $ref: "#/components/schemas/TrapID"
+
   "/files":
     post:
       description: ファイルをアップロードする。
