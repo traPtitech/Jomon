@@ -5,6 +5,7 @@ import (
 
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/group"
+	"github.com/traPtitech/Jomon/ent/user"
 
 	"github.com/google/uuid"
 )
@@ -41,6 +42,7 @@ func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]
 		Query().
 		Where(group.IDEQ(groupID)).
 		QueryOwner().
+		Select(user.FieldID).
 		All(ctx)
 	if err != nil {
 		return nil, err
