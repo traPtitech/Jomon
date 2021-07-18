@@ -36,6 +36,14 @@ type GroupDetail struct {
 	UpdatedAt   time.Time    `json:"updated_at"`
 }
 
+type MemberResponse struct {
+	ID []uuid.UUID `json:"members"`
+}
+
+type Member struct {
+	ID uuid.UUID `json:"id"`
+}
+
 func (h *Handlers) GetGroups(c echo.Context) error {
 	ctx := context.Background()
 	groups, err := h.Repository.GetGroups(ctx)
@@ -104,18 +112,74 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 }
 
 func (h *Handlers) GetMembers(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	if groupID == uuid.Nil {
+		return badRequest(err)
+	}
+
+	ctx := context.Background()
+	members, err := h.Repository.GetMembers(ctx, groupID)
+	if err != nil {
+		return internalServerError(err)
+	}
+
+	var res []uuid.UUID
+	for _, member := range members {
+		res = append(res, member.ID)
+	}
+
+	return c.JSON(http.StatusOK, &MemberResponse{res})
 }
 
 func (h *Handlers) PostMember(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	var member Member
+	if err := c.Bind(&member); err != nil {
+		return badRequest(err)
+	}
+
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	if groupID == uuid.Nil {
+		return badRequest(err)
+	}
+
+	ctx := context.Background()
+	created, err := h.Repository.CreateMember(ctx, groupID, member.ID)
+	if err != nil {
+		return internalServerError(err)
+	}
+
+	res := created.ID
+
+	return c.JSON(http.StatusOK, &Member{res})
 }
 
 func (h *Handlers) DeleteMember(c echo.Context) error {
+	var member Member
+	if err := c.Bind(&member); err != nil {
+		return badRequest(err)
+	}
+
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return badRequest(err)
+	}
+	if groupID == uuid.Nil {
+		return badRequest(err)
+	}
+
+	ctx := context.Background()
+	err = h.Repository.DeleteMember(ctx, groupID, member.ID)
+	if err != nil {
+		return internalServerError(err)
+	}
+
 	return c.NoContent(http.StatusOK)
-	// TODO: Implement
 }
 
 func (h *Handlers) GetOwners(c echo.Context) error {

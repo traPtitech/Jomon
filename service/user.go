@@ -44,7 +44,7 @@ func (s *Services) GetMe(token string) (*User, error) {
 	}
 
 	ctx := context.Background()
-	user, err := s.Repository.GetMe(ctx, traqUser.Name)
+	user, err := s.Repository.GetUserByName(ctx, traqUser.Name)
 	if err != nil {
 		return nil, err
 	}

@@ -3,7 +3,9 @@ package model
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/group"
 )
 
 func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
@@ -31,6 +33,48 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 		return nil, err
 	}
 	return ConvertEntGroupToModelGroup(created), nil
+}
+
+func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*User, error) {
+	members, err := repo.client.Group.
+		Query().
+		Where(group.IDEQ(groupID)).
+		QueryUser().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	modelmembers := []*User{}
+	for _, member := range members {
+		modelmembers = append(modelmembers, ConvertEntUserToModelUser(member))
+	}
+	return modelmembers, nil
+}
+
+func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*Member, error) {
+	_, err := repo.client.Group.
+		Update().
+		Where(group.IDEQ(groupID)).
+		AddUserIDs(userID).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	created := &Member{userID}
+	return created, nil
+}
+
+func (repo *EntRepository) DeleteMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) error {
+	_, err := repo.client.Group.
+		Update().
+		Where(group.IDEQ(groupID)).
+		RemoveUserIDs(userID).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func ConvertEntGroupToModelGroup(entgroup *ent.Group) *Group {

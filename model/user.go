@@ -18,5 +18,9 @@ type User struct {
 }
 
 type UserRepository interface {
-	GetMe(ctx context.Context, name string) (*User, error)
+	GetUserByName(ctx context.Context, name string) (*User, error)
+	GetUsers(ctx context.Context) ([]*User, error)
+	CreateUser(ctx context.Context, name string, dn string, admin bool) (*User, error)
+	GetUserByID(ctx context.Context, userID uuid.UUID) (*User, error)
+	UpdateUser(ctx context.Context, userID uuid.UUID, name string, dn string, admin bool) (*User, error)
 }
