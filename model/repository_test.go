@@ -14,7 +14,7 @@ func setup(t *testing.T) (*ent.Client, storage.Storage, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	os.Mkdir(os.Getenv("UPLOAD_DIR"), 0777)
+	os.Mkdir(testutil.GetEnvOrDefault("UPLOAD_DIR", "./uploads"), 0777)
 	storage, err := storage.NewLocalStorage(testutil.GetEnvOrDefault("UPLOAD_DIR", "./uploads"))
 	if err != nil {
 		return nil, nil, err
