@@ -104,7 +104,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	res, err := h.Service.GetAccessToken(code, codeVerifier)
+	res, err := (*h.Service).GetAccessToken(code, codeVerifier)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -112,7 +112,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	sess.Values[sessionAccessTokenKey] = res.AccessToken
 	sess.Values[sessionRefreshTokenKey] = res.RefreshToken
 
-	user, err := h.Service.GetMe(res.AccessToken)
+	user, err := (*h.Service).GetMe(res.AccessToken)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -147,7 +147,7 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 	params := PKCEParams{
 		CodeChallenge:       getCodeChallenge(bytesCodeVerifier),
 		CodeChallengeMethod: "S256",
-		ClientID:            h.Service.GetClientId(),
+		ClientID:            (*h.Service).GetClientId(),
 		ResponseType:        "code",
 	}
 

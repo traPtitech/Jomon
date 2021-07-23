@@ -15,7 +15,7 @@ import (
 type Handlers struct {
 	Repository   model.Repository
 	Logger       *zap.Logger
-	Service      service.Service
+	Service      *service.Service
 	SessionName  string
 	SessionStore sessions.Store
 }
