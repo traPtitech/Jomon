@@ -11,6 +11,7 @@ import (
 
 type Service interface {
 	CreateFile(src io.Reader, mimetype string) (File, error)
+	OpenFile(fileID uuid.UUID, mimetype string) (io.ReadCloser, error)
 	DeleteFile(fileID uuid.UUID) error
 	GetAccessToken(code string, codeVerifier string) (AuthResponse, error)
 	GetClientId() string

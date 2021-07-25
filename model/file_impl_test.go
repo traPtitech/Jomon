@@ -2,11 +2,9 @@ package model
 
 import (
 	"context"
-	"mime"
 	"strings"
 	"testing"
 
-	gomock "github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
@@ -31,15 +29,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 		mimetype := "image/png"
 
-		ext, err := mime.ExtensionsByType(mimetype)
-		assert.NoError(t, err)
-		assert.True(t, len(ext) != 0)
-
 		src := strings.NewReader(sampleText)
-
-		storage.EXPECT().
-			Save(gomock.Any(), src).
-			Return(nil)
 
 		name := random.AlphaNumeric(t, 20)
 

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"mime"
@@ -33,27 +32,29 @@ func (s *Services) CreateFile(src io.Reader, id uuid.UUID, mimetype string) erro
 	return err
 }
 
-func (s *Services) GetFile(fileID uuid.UUID) (*File, error) {
-	ctx := context.Background()
-	file, err := s.Repository.GetFile(ctx, fileID)
+func (s *Services) OpenFile(fileID uuid.UUID, mimetype string) (io.ReadCloser, error) {
+	ext, err := mime.ExtensionsByType(mimetype)
 	if err != nil {
 		return nil, err
+	} else if len(ext) == 0 {
+		return nil, fmt.Errorf("%s is not registered", mimetype)
 	}
-	return ConvertModelFileToServiceFile(file), nil
+
+	filename := fmt.Sprintf("%s%s", fileID.String(), ext[0])
+
+	return s.Storage.Open(filename)
 }
 
-func (s *Services) OpenFile(fileID uuid.UUID) (io.ReadCloser, error) {
-	ctx := context.Background()
-	f, err := s.Repository.OpenFile(ctx, fileID)
+func (s *Services) DeleteFile(fileID uuid.UUID, mimetype string) error {
+	ext, err := mime.ExtensionsByType(mimetype)
 	if err != nil {
-		return nil, err
+		return err
+	} else if len(ext) == 0 {
+		return fmt.Errorf("%s is not registered", mimetype)
 	}
-	return f, nil
-}
+	filename := fmt.Sprintf("%s%s", fileID.String(), ext[0])
 
-func (s *Services) DeleteFile(fileID uuid.UUID) error {
-	ctx := context.Background()
-	return s.Repository.DeleteFile(ctx, fileID)
+	return s.Storage.Delete(filename)
 }
 
 func ConvertModelFileToServiceFile(modelfile *model.File) *File {

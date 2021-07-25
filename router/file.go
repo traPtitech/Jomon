@@ -78,7 +78,9 @@ func (h *Handlers) GetFile(c echo.Context) error {
 	if err != nil {
 		return badRequest(err)
 	}
-	file, err := h.Service.GetFile(fileID)
+
+	ctx := context.Background()
+	file, err := h.Repository.GetFile(ctx, fileID)
 	if err != nil {
 		internalServerError(err)
 	}
@@ -95,7 +97,8 @@ func (h *Handlers) GetFile(c echo.Context) error {
 			return c.NoContent(http.StatusNotModified)
 		}
 	}
-	f, err := h.Service.OpenFile(fileID)
+
+	f, err := h.Service.OpenFile(file.ID, file.MimeType)
 	if err != nil {
 		return internalServerError(err)
 	}
@@ -113,7 +116,12 @@ func (h *Handlers) DeleteFile(c echo.Context) error {
 		return badRequest(err)
 	}
 
-	err = h.Service.DeleteFile(fileID)
+	ctx := context.Background()
+	file, err := h.Repository.DeleteFile(ctx, fileID)
+	if err != nil {
+		return internalServerError(err)
+	}
+	err = h.Service.DeleteFile(fileID, file.MimeType)
 	if err != nil {
 		return internalServerError(err)
 	}

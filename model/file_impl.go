@@ -54,7 +54,7 @@ func (repo *EntRepository) GetFile(ctx context.Context, fileID uuid.UUID) (*File
 	return ConvertEntFileToModelFile(file), nil
 }
 
-func (repo *EntRepository) OpenFile(ctx context.Context, fileID uuid.UUID) (io.ReadCloser, error) {
+func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) (*File, error) {
 	file, err := repo.client.File.
 		Query().
 		Where(file.IDEQ(fileID)).
@@ -71,51 +71,31 @@ func (repo *EntRepository) OpenFile(ctx context.Context, fileID uuid.UUID) (io.R
 
 	filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
 
-	return repo.storage.Open(filename)
-}
-
-func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) error {
-	file, err := repo.client.File.
-		Query().
-		Where(file.IDEQ(fileID)).
-		Only(ctx)
-	if err != nil {
-		return err
-	}
-	ext, err := mime.ExtensionsByType(file.MimeType)
-	if err != nil {
-		return err
-	} else if len(ext) == 0 {
-		return fmt.Errorf("%s is not registered", file.MimeType)
-	}
-
-	filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
-
 	err = repo.storage.Delete(filename)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	request, err := file.QueryRequest().First(ctx)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := repo.client.File.
 		DeleteOne(file).
 		Exec(ctx); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err = request.
 		Update().
 		RemoveFileIDs(fileID).
 		Exec(ctx); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return ConvertEntFileToModelFile(file), nil
 }
 
 func ConvertEntFileToModelFile(entfile *ent.File) *File {
