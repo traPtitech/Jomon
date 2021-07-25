@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -58,10 +59,17 @@ func (h *Handlers) PostFile(c echo.Context) error {
 	}
 	defer src.Close()
 
-	file, err := h.Service.CreateFile(src, name, mimetype, requestID)
+	ctx := context.Background()
+	file, err := h.Repository.CreateFile(ctx, src, name, mimetype, requestID)
 	if err != nil {
 		return internalServerError(err)
 	}
+
+	err = h.Service.CreateFile(src, file.ID, mimetype)
+	if err != nil {
+		return internalServerError(err)
+	}
+
 	return c.JSON(http.StatusOK, &FileResponse{file.ID})
 }
 

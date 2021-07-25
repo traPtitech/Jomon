@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"mime"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,14 +18,19 @@ type File struct {
 	CreatedAt time.Time
 }
 
-func (s *Services) CreateFile(src io.Reader, name string, mimetype string, requestID uuid.UUID) (*File, error) {
-	ctx := context.Background()
-	modelfile, err := s.Repository.CreateFile(ctx, src, name, mimetype, requestID)
+func (s *Services) CreateFile(src io.Reader, id uuid.UUID, mimetype string) error {
+	ext, err := mime.ExtensionsByType(mimetype)
 	if err != nil {
-		return nil, err
+		return err
+	} else if len(ext) == 0 {
+		return fmt.Errorf("%s is not registered", mimetype)
 	}
 
-	return ConvertModelFileToServiceFile(modelfile), nil
+	filename := fmt.Sprintf("%s%s", id.String(), ext[0])
+
+	err = s.Storage.Save(filename, src)
+
+	return err
 }
 
 func (s *Services) GetFile(fileID uuid.UUID) (*File, error) {
