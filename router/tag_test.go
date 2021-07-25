@@ -239,10 +239,59 @@ func TestHandlers_PutTag(t *testing.T) {
 			Description: tag.Description,
 		}
 
-		var resBody TagOverview
 		path := fmt.Sprintf("/api/tags/%s", tag.ID.String())
-		statusCode, _ := th.doRequest(t, echo.PUT, path, &req, &resBody)
+		statusCode, _ := th.doRequest(t, echo.PUT, path, &req, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
+	})
+
+	t.Run("InvalidUUID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		th, err := SetupTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		date := time.Now()
+
+		tag := &model.Tag{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		req := Tag{
+			Name:        tag.Name,
+			Description: tag.Description,
+		}
+
+		path := "/api/tags/hoge" // Invalid UUID
+		statusCode, _ := th.doRequest(t, echo.PUT, path, &req, nil)
+		assert.Equal(t, http.StatusBadRequest, statusCode)
+	})
+
+	t.Run("NilUUID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		th, err := SetupTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		date := time.Now()
+
+		tag := &model.Tag{
+			ID:          uuid.Nil,
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		req := Tag{
+			Name:        tag.Name,
+			Description: tag.Description,
+		}
+
+		path := fmt.Sprintf("/api/tags/%s", tag.ID.String())
+		statusCode, _ := th.doRequest(t, echo.PUT, path, &req, nil)
+		assert.Equal(t, http.StatusBadRequest, statusCode)
 	})
 }
 
@@ -285,5 +334,27 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		path := fmt.Sprintf("/api/tags/%s", id.String())
 		statusCode, _ := th.doRequest(t, echo.DELETE, path, nil, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
+	})
+
+	t.Run("InvalidUUID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		th, err := SetupTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		path := "/api/tags/hoge"
+		statusCode, _ := th.doRequest(t, echo.DELETE, path, nil, nil)
+		assert.Equal(t, http.StatusBadRequest, statusCode)
+	})
+
+	t.Run("NilUUID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		th, err := SetupTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		path := fmt.Sprintf("/api/tags/%s", uuid.Nil)
+		statusCode, _ := th.doRequest(t, echo.DELETE, path, nil, nil)
+		assert.Equal(t, http.StatusBadRequest, statusCode)
 	})
 }
