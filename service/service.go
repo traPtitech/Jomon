@@ -4,14 +4,16 @@ import (
 	"io"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/model"
 	storagePkg "github.com/traPtitech/Jomon/storage"
 )
 
 type Service interface {
-	CreateFile(src io.Reader, mimetype string) (File, error)
+	CreateFile(src io.Reader, name string, mimetype string, requestID uuid.UUID) (*File, error)
 	GetAccessToken(code string, codeVerifier string) (AuthResponse, error)
 	GetClientId() string
+	GetMe(token string) (*User, error)
 }
 type Services struct {
 	Repository model.Repository
@@ -19,7 +21,7 @@ type Services struct {
 	Storage    storagePkg.Storage
 }
 
-func NewServices(repo model.Repository, storage storagePkg.Storage) (*Services, error) {
+func NewServices(repo model.Repository, storage storagePkg.Storage) (Service, error) {
 	traQClientID := os.Getenv("TRAQ_CLIENT_ID")
 	/*
 		webhookSecret := os.Getenv("WEBHOOK_SECRET")
