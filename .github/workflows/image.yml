@@ -10,13 +10,21 @@ env:
   IMAGE_TAG: latest
 
 jobs:
-  build:
+  image:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - name: Login GitHub Registry
-        run: docker login docker.pkg.github.com -u traPtitech -p ${{ secrets.GITHUB_TOKEN }}
-      - name: Build Image
-        run: docker build -t docker.pkg.github.com/traptitech/jomon/${IMAGE_NAME}:${IMAGE_TAG} .
-      - name: Push image to GitHub Registry
-        run: docker push docker.pkg.github.com/traptitech/jomon/${IMAGE_NAME}:${IMAGE_TAG}
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: traptitech
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ghcr.io/traptitech/${{ env.IMAGE_NAME }}:latest
+            ghcr.io/traptitech/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
