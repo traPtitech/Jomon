@@ -42,7 +42,7 @@ func (h *Handlers) PostFile(c echo.Context) error {
 	}
 	defer src.Close()
 
-	fileID, err := (*h.Service).CreateFile(src, name, mimetype, requestID)
+	fileID, err := h.Service.CreateFile(src, name, mimetype, requestID)
 	if err != nil {
 		return internalServerError(err)
 	}

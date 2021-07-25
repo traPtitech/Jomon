@@ -61,7 +61,7 @@ func main() {
 	handlers := router.Handlers{
 		Repository:   repo,
 		Logger:       logger,
-		Service:      &services,
+		Service:      services,
 		SessionName:  "session",
 		SessionStore: sessions.NewCookieStore([]byte("session")),
 	}

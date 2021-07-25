@@ -16,7 +16,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/model/mock_model"
-	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/service/mock_service"
 	"github.com/traPtitech/Jomon/testutil/random"
 	"go.uber.org/zap"
@@ -46,7 +45,7 @@ type TestHandlers struct {
 	Handler      *Handlers
 	Repository   *Repository
 	Logger       *zap.Logger
-	Service      *service.Service
+	Service      *Service
 	SessionName  string
 	SessionStore sessions.Store
 	Echo         *echo.Echo
@@ -70,7 +69,7 @@ func NewMockEntRepository(ctrl *gomock.Controller) *Repository {
 	}
 }
 
-func NewMockService(ctrl *gomock.Controller) service.Service {
+func NewMockService(ctrl *gomock.Controller) *Service {
 	return &Service{
 		MockService: mock_service.NewMockService(ctrl),
 	}
@@ -88,7 +87,7 @@ func SetupTestHandlers(t *testing.T, ctrl *gomock.Controller) (*TestHandlers, er
 	h := Handlers{
 		Repository:   repository,
 		Logger:       logger,
-		Service:      &service,
+		Service:      service,
 		SessionName:  sessionName,
 		SessionStore: sessionStore,
 	}
@@ -101,7 +100,7 @@ func SetupTestHandlers(t *testing.T, ctrl *gomock.Controller) (*TestHandlers, er
 		Handler:      &h,
 		Repository:   repository,
 		Logger:       logger,
-		Service:      &service,
+		Service:      service,
 		SessionName:  sessionName,
 		SessionStore: sessionStore,
 		Echo:         e,
