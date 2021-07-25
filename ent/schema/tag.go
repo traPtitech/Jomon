@@ -19,7 +19,8 @@ func (Tag) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
-		field.String("name"),
+		field.String("name").
+			NotEmpty(),
 		field.String("description"),
 		field.Time("created_at").
 			Default(time.Now),

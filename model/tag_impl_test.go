@@ -4,18 +4,24 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
 func TestEntRepository_GetTags(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
+		got, err := repo.GetTags(ctx)
+		assert.NoError(t, err)
+		assert.Len(t, got, 0)
+	})
+
+	t.Run("Success2", func(t *testing.T) {
 		tag1, _ := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		tag2, _ := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 
@@ -40,13 +46,13 @@ func TestEntRepository_GetTags(t *testing.T) {
 }
 
 func TestEntRepository_CreateTag(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
 		name := random.AlphaNumeric(t, 20)
 		description := random.AlphaNumeric(t, 30)
 		tag, err := repo.CreateTag(ctx, name, description)
@@ -55,16 +61,25 @@ func TestEntRepository_CreateTag(t *testing.T) {
 		assert.Equal(t, name, tag.Name)
 		assert.Equal(t, description, tag.Description)
 	})
+
+	t.Run("MissingName", func(t *testing.T) {
+		t.Parallel()
+		name := ""
+		description := random.AlphaNumeric(t, 30)
+		_, err := repo.CreateTag(ctx, name, description)
+
+		assert.Error(t, err)
+	})
 }
 
 func TestEntRepository_UpdateTag(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success1", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		assert.NoError(t, err)
 
@@ -80,7 +95,6 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		assert.NoError(t, err)
 
@@ -93,16 +107,27 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 		assert.Equal(t, tag.Name, updated.Name)
 		assert.Equal(t, description, updated.Description)
 	})
+
+	t.Run("MissingName", func(t *testing.T) {
+		t.Parallel()
+		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
+		assert.NoError(t, err)
+
+		name := ""
+		_, err = repo.UpdateTag(ctx, tag.ID, name, tag.Description)
+
+		assert.Error(t, err)
+	})
 }
 
 func TestEntRepository_DeleteTag(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
 		name := random.AlphaNumeric(t, 20)
 		description := random.AlphaNumeric(t, 30)
 		tag, err := repo.CreateTag(ctx, name, description)
@@ -110,5 +135,11 @@ func TestEntRepository_DeleteTag(t *testing.T) {
 
 		err = repo.DeleteTag(ctx, tag.ID)
 		assert.NoError(t, err)
+	})
+
+	t.Run("UnknownTag", func(t *testing.T) {
+		t.Parallel()
+		err = repo.DeleteTag(ctx, uuid.New())
+		assert.Error(t, err)
 	})
 }

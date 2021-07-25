@@ -31,12 +31,14 @@ func SetupEntClient() (*ent.Client, error) {
 		return nil, fmt.Errorf("can't connect to DATABASE: %w", err)
 	}
 
+	ctx := context.Background()
+
 	if os.Getenv("IS_DEBUG_MODE") != "" {
-		if err := client.Debug().Schema.Create(context.Background()); err != nil {
+		if err := client.Debug().Schema.Create(ctx); err != nil {
 			return nil, err
 		}
 	} else {
-		if err := client.Schema.Create(context.Background()); err != nil {
+		if err := client.Schema.Create(ctx); err != nil {
 			return nil, err
 		}
 	}

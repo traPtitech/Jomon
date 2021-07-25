@@ -26,8 +26,10 @@ func SetupTestEntClient(t *testing.T) (*ent.Client, error) {
 
 	client := enttest.Open(t, "mysql", dbDsn, entOptions...)
 
+	ctx := context.Background()
+
 	if err := client.Schema.Create(
-		context.Background(),
+		ctx,
 		migrate.WithDropIndex(true),
 		migrate.WithDropColumn(true),
 	); err != nil {
