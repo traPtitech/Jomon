@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -26,7 +25,7 @@ type TraQUser struct {
 	Bot  bool   `json:"bot"`
 }
 
-func (s *Services) GetMe(token string) (*User, error) {
+func (s *Services) GetMe(token string) (*TraQUser, error) {
 	req, err := http.NewRequest("GET", TraQBaseURL+"/users/me", nil)
 	if err != nil {
 		return nil, err
@@ -43,13 +42,7 @@ func (s *Services) GetMe(token string) (*User, error) {
 		return nil, err
 	}
 
-	ctx := context.Background()
-	user, err := s.Repository.GetUserByName(ctx, traqUser.Name)
-	if err != nil {
-		return nil, err
-	}
-
-	return ConvertModelUserToServiceUser(*user), nil
+	return &traqUser, nil
 }
 
 func (*Services) sendReq(req *http.Request) ([]byte, error) {

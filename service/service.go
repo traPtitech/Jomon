@@ -17,9 +17,8 @@ type Service interface {
 	GetClientId() string
 }
 type Services struct {
-	Repository model.Repository
-	Auth       Auth
-	Storage    storagePkg.Storage
+	Auth    Auth
+	Storage storagePkg.Storage
 }
 
 func NewServices(repo model.Repository, storage storagePkg.Storage) (*Services, error) {
@@ -30,7 +29,6 @@ func NewServices(repo model.Repository, storage storagePkg.Storage) (*Services, 
 		webhookId := os.Getenv("WEBHOOK_ID")
 	*/
 	return &Services{
-		Repository: repo,
 		Auth: Auth{
 			ClientID: traQClientID,
 		},
