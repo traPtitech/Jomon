@@ -11,11 +11,12 @@ import (
 )
 
 func setup(t *testing.T, ctx context.Context) (*ent.Client, storage.Storage, error) {
+	t.Helper()
 	client, err := SetupTestEntClient(t)
 	if err != nil {
 		return nil, nil, err
 	}
-	err = dropAll(ctx, client)
+	err = dropAll(t, ctx, client)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -27,7 +28,8 @@ func setup(t *testing.T, ctx context.Context) (*ent.Client, storage.Storage, err
 	return client, storage, nil
 }
 
-func dropAll(ctx context.Context, client *ent.Client) error {
+func dropAll(t *testing.T, ctx context.Context, client *ent.Client) error {
+	t.Helper()
 	_, err := client.Comment.Delete().Exec(ctx)
 	if err != nil {
 		return err
