@@ -3,7 +3,7 @@ name: Build image
 on: 
   push:
     branches: 
-      - master
+      - v2
 
 env:
   IMAGE_NAME: jomon
