@@ -2,11 +2,13 @@ package router
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/service"
 )
 
 type User struct {
@@ -16,12 +18,12 @@ type User struct {
 }
 
 type UserOverview struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	DisplayName string    `json:"display_name"`
-	Admin       bool      `json:"admin"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	Name        string     `json:"name"`
+	DisplayName string     `json:"display_name"`
+	Admin       bool       `json:"admin"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
+	DeletedAt   *time.Time `json:"deleted_at"`
 }
 
 type UserResponse struct {
@@ -38,12 +40,12 @@ func (h *Handlers) GetUsers(c echo.Context) error {
 	res := []*UserOverview{}
 	for _, user := range users {
 		res = append(res, &UserOverview{
-			ID:          user.ID,
 			Name:        user.Name,
 			DisplayName: user.DisplayName,
 			Admin:       user.Admin,
 			CreatedAt:   user.CreatedAt,
 			UpdatedAt:   user.UpdatedAt,
+			DeletedAt:   user.DeletedAt,
 		})
 	}
 	return c.JSON(http.StatusOK, &UserResponse{res})
@@ -55,6 +57,30 @@ func (h *Handlers) PutUsers(c echo.Context) error {
 }
 
 func (h *Handlers) GetMe(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	sess, err := session.Get(sessionKey, c)
+	if err != nil {
+		c.Logger().Error(err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	traqUser, ok := sess.Values[sessionUserKey].(*service.User)
+	if !ok {
+		c.Logger().Error(errors.New("failed to get users."))
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	ctx := context.Background()
+	user, err := h.Repository.GetUserByName(ctx, traqUser.Name)
+	if err != nil {
+		c.Logger().Error(err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	res := &UserOverview{
+		Name:        user.Name,
+		DisplayName: user.DisplayName,
+		Admin:       user.Admin,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
+		DeletedAt:   user.DeletedAt,
+	}
+	return c.JSON(http.StatusOK, res)
 }

@@ -18,6 +18,7 @@ type Handlers struct {
 	Service      service.Service
 	SessionName  string
 	SessionStore sessions.Store
+	AuthUser     func(c echo.Context) (echo.Context, error)
 }
 
 func SetRouting(e *echo.Echo, h Handlers) {

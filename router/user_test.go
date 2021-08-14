@@ -21,7 +21,8 @@ func TestHandlers_GetUsers(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -50,34 +51,32 @@ func TestHandlers_GetUsers(t *testing.T) {
 			Return(users, nil)
 
 		var resBody UserResponse
-		statusCode, _ := th.doRequest(t, echo.GET, "/api/users", nil, &resBody)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/users", nil, &resBody)
 		assert.Equal(t, http.StatusOK, statusCode)
-		assert.Len(t, resBody.Users, 2)
-		if resBody.Users[0].ID == user1.ID {
-			assert.Equal(t, resBody.Users[0].ID, user1.ID)
-			assert.Equal(t, resBody.Users[0].Name, user1.Name)
-			assert.Equal(t, resBody.Users[0].DisplayName, user1.DisplayName)
-			assert.Equal(t, resBody.Users[0].Admin, user1.Admin)
-			assert.Equal(t, resBody.Users[1].ID, user2.ID)
-			assert.Equal(t, resBody.Users[1].Name, user2.Name)
-			assert.Equal(t, resBody.Users[1].DisplayName, user2.DisplayName)
-			assert.Equal(t, resBody.Users[1].Admin, user2.Admin)
-		} else {
-			assert.Equal(t, resBody.Users[1].ID, user1.ID)
-			assert.Equal(t, resBody.Users[1].Name, user1.Name)
-			assert.Equal(t, resBody.Users[1].DisplayName, user1.DisplayName)
-			assert.Equal(t, resBody.Users[1].Admin, user1.Admin)
-			assert.Equal(t, resBody.Users[0].ID, user2.ID)
-			assert.Equal(t, resBody.Users[0].Name, user2.Name)
-			assert.Equal(t, resBody.Users[0].DisplayName, user2.DisplayName)
-			assert.Equal(t, resBody.Users[0].Admin, user2.Admin)
+		if assert.Len(t, resBody.Users, 2) {
+			if resBody.Users[0].Name == user1.Name {
+				assert.Equal(t, resBody.Users[0].Name, user1.Name)
+				assert.Equal(t, resBody.Users[0].DisplayName, user1.DisplayName)
+				assert.Equal(t, resBody.Users[0].Admin, user1.Admin)
+				assert.Equal(t, resBody.Users[1].Name, user2.Name)
+				assert.Equal(t, resBody.Users[1].DisplayName, user2.DisplayName)
+				assert.Equal(t, resBody.Users[1].Admin, user2.Admin)
+			} else {
+				assert.Equal(t, resBody.Users[1].Name, user1.Name)
+				assert.Equal(t, resBody.Users[1].DisplayName, user1.DisplayName)
+				assert.Equal(t, resBody.Users[1].Admin, user1.Admin)
+				assert.Equal(t, resBody.Users[0].Name, user2.Name)
+				assert.Equal(t, resBody.Users[0].DisplayName, user2.DisplayName)
+				assert.Equal(t, resBody.Users[0].Admin, user2.Admin)
+			}
 		}
 	})
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		users := []*model.User{}
@@ -89,7 +88,7 @@ func TestHandlers_GetUsers(t *testing.T) {
 			Return(users, nil)
 
 		var resBody UserResponse
-		statusCode, _ := th.doRequest(t, echo.GET, "/api/users", nil, &resBody)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/users", nil, &resBody)
 		assert.Equal(t, http.StatusOK, statusCode)
 		assert.Len(t, resBody.Users, 0)
 	})
@@ -97,16 +96,17 @@ func TestHandlers_GetUsers(t *testing.T) {
 	t.Run("FailedToGetUsers", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		ctx := context.Background()
 		th.Repository.MockUserRepository.
 			EXPECT().
 			GetUsers(ctx).
-			Return(nil, errors.New("Failed to get users."))
+			Return(nil, errors.New("failed to get users."))
 
-		statusCode, _ := th.doRequest(t, echo.GET, "/api/users", nil, nil)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/users", nil, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
 }
