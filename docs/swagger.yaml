@@ -807,7 +807,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/User"
+              $ref: "#/components/schemas/PostUser"
       responses:
         '200':
           description: "取得に成功した。返す"
@@ -1107,7 +1107,17 @@ components:
         deletedAt:
           type: "string"
           format: "date-time"
-
+    PostUser:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "nagatech"
+        displayName:
+          type: "string"
+          example: "ながてち"
+        admin:
+          type: "boolean"
   responses:
     400:
       description: 不正なリクエスト。

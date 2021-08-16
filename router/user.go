@@ -25,6 +25,12 @@ type UserOverview struct {
 	DeletedAt   *time.Time `json:"deleted_at"`
 }
 
+type PostUser struct {
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
+	Admin       bool   `json:"admin"`
+}
+
 type UserResponse struct {
 	Users []*UserOverview `json:"users"`
 }
@@ -51,7 +57,7 @@ func (h *Handlers) GetUsers(c echo.Context) error {
 }
 
 func (h *Handlers) PutUser(c echo.Context) error {
-	var updateUser UserOverview
+	var updateUser PostUser
 	if err := c.Bind(&updateUser); err != nil {
 		return badRequest(err)
 	}
