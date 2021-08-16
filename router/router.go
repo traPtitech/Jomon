@@ -88,7 +88,7 @@ func SetRouting(e *echo.Echo, h Handlers) {
 		apiUsers := api.Group("/users", h.AuthUserMiddleware)
 		{
 			apiUsers.GET("", h.GetUsers)
-			apiUsers.PUT("", h.PutUsers)
+			apiUsers.PUT("", h.PutUser)
 			apiUsers.GET("/me", h.GetMe)
 		}
 	}

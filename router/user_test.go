@@ -111,6 +111,55 @@ func TestHandlers_GetUsers(t *testing.T) {
 	})
 }
 
+func TestHandlers_PutUser(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		accessUser := mustMakeUser(t, false)
+		user := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		assert.NoError(t, err)
+		date := time.Now()
+
+		updateUser := &model.User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       true,
+			CreatedAt:   user.CreatedAt,
+			UpdatedAt:   date,
+		}
+
+		req := &UserOverview{
+			Name:        updateUser.Name,
+			DisplayName: updateUser.DisplayName,
+			Admin:       updateUser.Admin,
+			CreatedAt:   updateUser.CreatedAt,
+			UpdatedAt:   updateUser.UpdatedAt,
+			DeletedAt:   updateUser.DeletedAt,
+		}
+
+		ctx := context.Background()
+		th.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByName(ctx, updateUser.Name).
+			Return(user, nil)
+		th.Repository.MockUserRepository.
+			EXPECT().
+			UpdateUser(ctx, user.ID, updateUser.Name, updateUser.DisplayName, updateUser.Admin).
+			Return(updateUser, nil)
+
+		var resBody UserOverview
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.PUT, "/api/users", &req, &resBody)
+		assert.Equal(t, http.StatusOK, statusCode)
+		assert.Equal(t, updateUser.Name, resBody.Name)
+		assert.Equal(t, updateUser.DisplayName, resBody.DisplayName)
+		assert.Equal(t, updateUser.Admin, resBody.Admin)
+	})
+}
+
 func TestHandlers_GetMe(t *testing.T) {
 	t.Parallel()
 

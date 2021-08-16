@@ -50,9 +50,28 @@ func (h *Handlers) GetUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, &UserResponse{res})
 }
 
-func (h *Handlers) PutUsers(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+func (h *Handlers) PutUser(c echo.Context) error {
+	var updateUser UserOverview
+	if err := c.Bind(&updateUser); err != nil {
+		return badRequest(err)
+	}
+	ctx := context.Background()
+	user, err := h.Repository.GetUserByName(ctx, updateUser.Name)
+	if err != nil {
+		return internalServerError(err)
+	}
+	res, err := h.Repository.UpdateUser(ctx, user.ID, updateUser.Name, updateUser.DisplayName, updateUser.Admin)
+	if err != nil {
+		return internalServerError(err)
+	}
+	return c.JSON(http.StatusOK, &UserOverview{
+		Name:        res.Name,
+		DisplayName: res.DisplayName,
+		Admin:       res.Admin,
+		CreatedAt:   res.CreatedAt,
+		UpdatedAt:   res.UpdatedAt,
+		DeletedAt:   res.DeletedAt,
+	})
 }
 
 func (h *Handlers) GetMe(c echo.Context) error {
