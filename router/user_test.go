@@ -110,3 +110,45 @@ func TestHandlers_GetUsers(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
 }
+
+func TestHandlers_GetMe(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		assert.NoError(t, err)
+
+		ctx := context.Background()
+		th.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByName(ctx, accessUser.Name).
+			Return(accessUser, nil)
+
+		var resBody UserOverview
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/users/me", nil, &resBody)
+		assert.Equal(t, http.StatusOK, statusCode)
+		assert.Equal(t, accessUser.Name, resBody.Name)
+		assert.Equal(t, accessUser.DisplayName, resBody.DisplayName)
+		assert.Equal(t, accessUser.Admin, resBody.Admin)
+	})
+
+	t.Run("FailedToGetUsers", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		assert.NoError(t, err)
+
+		ctx := context.Background()
+		th.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByName(ctx, accessUser.Name).
+			Return(nil, errors.New("failed to get users."))
+
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/users/me", nil, nil)
+		assert.Equal(t, http.StatusInternalServerError, statusCode)
+	})
+}

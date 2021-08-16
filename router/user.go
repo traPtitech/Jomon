@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/service"
 )
@@ -57,7 +56,7 @@ func (h *Handlers) PutUsers(c echo.Context) error {
 }
 
 func (h *Handlers) GetMe(c echo.Context) error {
-	sess, err := session.Get(sessionKey, c)
+	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 	if err != nil {
 		c.Logger().Error(err)
 		return c.NoContent(http.StatusInternalServerError)
