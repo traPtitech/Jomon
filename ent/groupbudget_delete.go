@@ -20,9 +20,9 @@ type GroupBudgetDelete struct {
 	mutation *GroupBudgetMutation
 }
 
-// Where adds a new predicate to the GroupBudgetDelete builder.
+// Where appends a list predicates to the GroupBudgetDelete builder.
 func (gbd *GroupBudgetDelete) Where(ps ...predicate.GroupBudget) *GroupBudgetDelete {
-	gbd.mutation.predicates = append(gbd.mutation.predicates, ps...)
+	gbd.mutation.Where(ps...)
 	return gbd
 }
 
@@ -46,6 +46,9 @@ func (gbd *GroupBudgetDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(gbd.hooks) - 1; i >= 0; i-- {
+			if gbd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gbd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gbd.mutation); err != nil {

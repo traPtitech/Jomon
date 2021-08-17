@@ -87,9 +87,9 @@ func (*Tag) scanValues(columns []string) ([]interface{}, error) {
 		case tag.FieldID:
 			values[i] = new(uuid.UUID)
 		case tag.ForeignKeys[0]: // request_tag
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case tag.ForeignKeys[1]: // transaction_tag
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Tag", columns[i])
 		}
@@ -143,16 +143,18 @@ func (t *Tag) assignValues(columns []string, values []interface{}) error {
 				*t.DeletedAt = value.Time
 			}
 		case tag.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field request_tag", values[i])
-			} else if value != nil {
-				t.request_tag = value
+			} else if value.Valid {
+				t.request_tag = new(uuid.UUID)
+				*t.request_tag = *value.S.(*uuid.UUID)
 			}
 		case tag.ForeignKeys[1]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field transaction_tag", values[i])
-			} else if value != nil {
-				t.transaction_tag = value
+			} else if value.Valid {
+				t.transaction_tag = new(uuid.UUID)
+				*t.transaction_tag = *value.S.(*uuid.UUID)
 			}
 		}
 	}

@@ -20,9 +20,9 @@ type TransactionDetailDelete struct {
 	mutation *TransactionDetailMutation
 }
 
-// Where adds a new predicate to the TransactionDetailDelete builder.
+// Where appends a list predicates to the TransactionDetailDelete builder.
 func (tdd *TransactionDetailDelete) Where(ps ...predicate.TransactionDetail) *TransactionDetailDelete {
-	tdd.mutation.predicates = append(tdd.mutation.predicates, ps...)
+	tdd.mutation.Where(ps...)
 	return tdd
 }
 
@@ -46,6 +46,9 @@ func (tdd *TransactionDetailDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(tdd.hooks) - 1; i >= 0; i-- {
+			if tdd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tdd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tdd.mutation); err != nil {

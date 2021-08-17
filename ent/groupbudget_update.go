@@ -25,9 +25,9 @@ type GroupBudgetUpdate struct {
 	mutation *GroupBudgetMutation
 }
 
-// Where adds a new predicate for the GroupBudgetUpdate builder.
+// Where appends a list predicates to the GroupBudgetUpdate builder.
 func (gbu *GroupBudgetUpdate) Where(ps ...predicate.GroupBudget) *GroupBudgetUpdate {
-	gbu.mutation.predicates = append(gbu.mutation.predicates, ps...)
+	gbu.mutation.Where(ps...)
 	return gbu
 }
 
@@ -151,6 +151,9 @@ func (gbu *GroupBudgetUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(gbu.hooks) - 1; i >= 0; i-- {
+			if gbu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gbu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gbu.mutation); err != nil {
@@ -315,8 +318,8 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, gbu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{groupbudget.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -458,6 +461,9 @@ func (gbuo *GroupBudgetUpdateOne) Save(ctx context.Context) (*GroupBudget, error
 			return node, err
 		})
 		for i := len(gbuo.hooks) - 1; i >= 0; i-- {
+			if gbuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gbuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gbuo.mutation); err != nil {
@@ -642,8 +648,8 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 	if err = sqlgraph.UpdateNode(ctx, gbuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{groupbudget.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

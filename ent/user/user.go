@@ -37,31 +37,31 @@ const (
 	EdgeRequest = "request"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// GroupUserTable is the table the holds the group_user relation/edge. The primary key declared below.
+	// GroupUserTable is the table that holds the group_user relation/edge. The primary key declared below.
 	GroupUserTable = "group_user"
 	// GroupUserInverseTable is the table name for the Group entity.
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	GroupUserInverseTable = "groups"
-	// GroupOwnerTable is the table the holds the group_owner relation/edge. The primary key declared below.
+	// GroupOwnerTable is the table that holds the group_owner relation/edge. The primary key declared below.
 	GroupOwnerTable = "group_owner"
 	// GroupOwnerInverseTable is the table name for the Group entity.
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	GroupOwnerInverseTable = "groups"
-	// CommentTable is the table the holds the comment relation/edge.
+	// CommentTable is the table that holds the comment relation/edge.
 	CommentTable = "users"
 	// CommentInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
 	CommentInverseTable = "comments"
 	// CommentColumn is the table column denoting the comment relation/edge.
 	CommentColumn = "comment_user"
-	// RequestStatusTable is the table the holds the request_status relation/edge.
+	// RequestStatusTable is the table that holds the request_status relation/edge.
 	RequestStatusTable = "users"
 	// RequestStatusInverseTable is the table name for the RequestStatus entity.
 	// It exists in this package in order to avoid circular dependency with the "requeststatus" package.
 	RequestStatusInverseTable = "request_status"
 	// RequestStatusColumn is the table column denoting the request_status relation/edge.
 	RequestStatusColumn = "request_status_user"
-	// RequestTable is the table the holds the request relation/edge.
+	// RequestTable is the table that holds the request relation/edge.
 	RequestTable = "users"
 	// RequestInverseTable is the table name for the Request entity.
 	// It exists in this package in order to avoid circular dependency with the "request" package.

@@ -326,8 +326,8 @@ func (tdq *TransactionDetailQuery) GroupBy(field string, fields ...string) *Tran
 //		Select(transactiondetail.FieldAmount).
 //		Scan(ctx, &v)
 //
-func (tdq *TransactionDetailQuery) Select(field string, fields ...string) *TransactionDetailSelect {
-	tdq.fields = append([]string{field}, fields...)
+func (tdq *TransactionDetailQuery) Select(fields ...string) *TransactionDetailSelect {
+	tdq.fields = append(tdq.fields, fields...)
 	return &TransactionDetailSelect{TransactionDetailQuery: tdq}
 }
 
@@ -478,10 +478,14 @@ func (tdq *TransactionDetailQuery) querySpec() *sqlgraph.QuerySpec {
 func (tdq *TransactionDetailQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(tdq.driver.Dialect())
 	t1 := builder.Table(transactiondetail.Table)
-	selector := builder.Select(t1.Columns(transactiondetail.Columns...)...).From(t1)
+	columns := tdq.fields
+	if len(columns) == 0 {
+		columns = transactiondetail.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if tdq.sql != nil {
 		selector = tdq.sql
-		selector.Select(selector.Columns(transactiondetail.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range tdq.predicates {
 		p(selector)
@@ -749,13 +753,24 @@ func (tdgb *TransactionDetailGroupBy) sqlScan(ctx context.Context, v interface{}
 }
 
 func (tdgb *TransactionDetailGroupBy) sqlQuery() *sql.Selector {
-	selector := tdgb.sql
-	columns := make([]string, 0, len(tdgb.fields)+len(tdgb.fns))
-	columns = append(columns, tdgb.fields...)
+	selector := tdgb.sql.Select()
+	aggregation := make([]string, 0, len(tdgb.fns))
 	for _, fn := range tdgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(tdgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(tdgb.fields)+len(tdgb.fns))
+		for _, f := range tdgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(tdgb.fields...)...)
 }
 
 // TransactionDetailSelect is the builder for selecting fields of TransactionDetail entities.
@@ -971,16 +986,10 @@ func (tds *TransactionDetailSelect) BoolX(ctx context.Context) bool {
 
 func (tds *TransactionDetailSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := tds.sqlQuery().Query()
+	query, args := tds.sql.Query()
 	if err := tds.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (tds *TransactionDetailSelect) sqlQuery() sql.Querier {
-	selector := tds.sql
-	selector.Select(selector.Columns(tds.fields...)...)
-	return selector
 }
