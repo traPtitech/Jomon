@@ -100,11 +100,17 @@ func (rtc *RequestTargetCreate) Save(ctx context.Context) (*RequestTarget, error
 				return nil, err
 			}
 			rtc.mutation = mutation
-			node, err = rtc.sqlSave(ctx)
+			if node, err = rtc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(rtc.hooks) - 1; i >= 0; i-- {
+			if rtc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = rtc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, rtc.mutation); err != nil {
@@ -123,6 +129,19 @@ func (rtc *RequestTargetCreate) SaveX(ctx context.Context) *RequestTarget {
 	return v
 }
 
+// Exec executes the query.
+func (rtc *RequestTargetCreate) Exec(ctx context.Context) error {
+	_, err := rtc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (rtc *RequestTargetCreate) ExecX(ctx context.Context) {
+	if err := rtc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (rtc *RequestTargetCreate) defaults() {
 	if _, ok := rtc.mutation.CreatedAt(); !ok {
@@ -138,10 +157,10 @@ func (rtc *RequestTargetCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (rtc *RequestTargetCreate) check() error {
 	if _, ok := rtc.mutation.Target(); !ok {
-		return &ValidationError{Name: "target", err: errors.New("ent: missing required field \"target\"")}
+		return &ValidationError{Name: "target", err: errors.New(`ent: missing required field "target"`)}
 	}
 	if _, ok := rtc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
 	if _, ok := rtc.mutation.RequestID(); !ok {
 		return &ValidationError{Name: "request", err: errors.New("ent: missing required edge \"request\"")}
@@ -152,8 +171,8 @@ func (rtc *RequestTargetCreate) check() error {
 func (rtc *RequestTargetCreate) sqlSave(ctx context.Context) (*RequestTarget, error) {
 	_node, _spec := rtc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, rtc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -251,17 +270,19 @@ func (rtcb *RequestTargetCreateBulk) Save(ctx context.Context) ([]*RequestTarget
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, rtcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, rtcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, rtcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -285,4 +306,17 @@ func (rtcb *RequestTargetCreateBulk) SaveX(ctx context.Context) []*RequestTarget
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (rtcb *RequestTargetCreateBulk) Exec(ctx context.Context) error {
+	_, err := rtcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (rtcb *RequestTargetCreateBulk) ExecX(ctx context.Context) {
+	if err := rtcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

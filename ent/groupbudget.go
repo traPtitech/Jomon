@@ -84,7 +84,7 @@ func (*GroupBudget) scanValues(columns []string) ([]interface{}, error) {
 		case groupbudget.FieldID:
 			values[i] = new(uuid.UUID)
 		case groupbudget.ForeignKeys[0]: // group_group_budget
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type GroupBudget", columns[i])
 		}
@@ -126,10 +126,11 @@ func (gb *GroupBudget) assignValues(columns []string, values []interface{}) erro
 				gb.CreatedAt = value.Time
 			}
 		case groupbudget.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field group_group_budget", values[i])
-			} else if value != nil {
-				gb.group_group_budget = value
+			} else if value.Valid {
+				gb.group_group_budget = new(uuid.UUID)
+				*gb.group_group_budget = *value.S.(*uuid.UUID)
 			}
 		}
 	}

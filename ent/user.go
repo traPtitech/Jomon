@@ -131,11 +131,11 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 		case user.FieldID:
 			values[i] = new(uuid.UUID)
 		case user.ForeignKeys[0]: // comment_user
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case user.ForeignKeys[1]: // request_user
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case user.ForeignKeys[2]: // request_status_user
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}
@@ -195,22 +195,25 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				*u.DeletedAt = value.Time
 			}
 		case user.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field comment_user", values[i])
-			} else if value != nil {
-				u.comment_user = value
+			} else if value.Valid {
+				u.comment_user = new(uuid.UUID)
+				*u.comment_user = *value.S.(*uuid.UUID)
 			}
 		case user.ForeignKeys[1]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field request_user", values[i])
-			} else if value != nil {
-				u.request_user = value
+			} else if value.Valid {
+				u.request_user = new(uuid.UUID)
+				*u.request_user = *value.S.(*uuid.UUID)
 			}
 		case user.ForeignKeys[2]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field request_status_user", values[i])
-			} else if value != nil {
-				u.request_status_user = value
+			} else if value.Valid {
+				u.request_status_user = new(uuid.UUID)
+				*u.request_status_user = *value.S.(*uuid.UUID)
 			}
 		}
 	}

@@ -6,13 +6,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
-
-	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/model"
 )
 
 type User struct {
-	ID          uuid.UUID `json:"id"`
 	DisplayName string    `json:"display_name"`
 	Name        string    `json:"name"`
 	Admin       bool      `json:"admin"`
@@ -21,31 +17,31 @@ type User struct {
 }
 
 type TraQUser struct {
-	Name string `json:"name"`
-	Bot  bool   `json:"bot"`
+	DisplayName string `json:"display_name"`
+	Name        string `json:"name"`
 }
 
-func (s *Services) GetMe(token string) (*TraQUser, error) {
+func (s *Services) GetMe(token string) (*User, error) {
 	req, err := http.NewRequest("GET", TraQBaseURL+"/users/me", nil)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	body, err := s.sendReq(req)
+	body, err := sendReq(req)
 	if err != nil {
 		return nil, err
 	}
 
-	traqUser := TraQUser{}
-	if err = json.Unmarshal(body, &traqUser); err != nil {
+	user := User{}
+	if err = json.Unmarshal(body, &user); err != nil {
 		return nil, err
 	}
 
-	return &traqUser, nil
+	return &user, nil
 }
 
-func (*Services) sendReq(req *http.Request) ([]byte, error) {
+func sendReq(req *http.Request) ([]byte, error) {
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -56,15 +52,4 @@ func (*Services) sendReq(req *http.Request) ([]byte, error) {
 
 	defer res.Body.Close()
 	return ioutil.ReadAll(res.Body)
-}
-
-func ConvertModelUserToServiceUser(user model.User) *User {
-	return &User{
-		ID:          user.ID,
-		Name:        user.Name,
-		DisplayName: user.DisplayName,
-		Admin:       user.Admin,
-		CreatedAt:   user.CreatedAt,
-		UpdatedAt:   user.UpdatedAt,
-	}
 }

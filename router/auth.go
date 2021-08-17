@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	crand "crypto/rand"
 	"crypto/sha256"
 	"encoding/binary"
@@ -45,19 +44,16 @@ func (h Handlers) AuthUser(c echo.Context) (echo.Context, error) {
 		if err != nil {
 			return nil, c.NoContent(http.StatusInternalServerError)
 		}
-
 		sess.Options = &sessions.Options{
 			Path:     "/",
 			MaxAge:   sessionDuration,
 			HttpOnly: true,
 		}
-
 		accTok, ok := sess.Values[sessionAccessTokenKey].(string)
 		if !ok || accTok == "" {
 			return nil, c.NoContent(http.StatusUnauthorized)
 		}
 		c.Set(contextAccessTokenKey, accTok)
-
 		user, ok := sess.Values[sessionUserKey].(*service.User)
 		if !ok {
 			user, err = h.Service.GetMe(accTok)
@@ -65,20 +61,16 @@ func (h Handlers) AuthUser(c echo.Context) (echo.Context, error) {
 			if err := sess.Save(c.Request(), c.Response()); err != nil {
 				return nil, c.NoContent(http.StatusInternalServerError)
 			}
-
 			if err != nil {
 				return nil, c.NoContent(http.StatusInternalServerError)
 			}
 		}
-
 		admins, err := h.Service.Administrators.GetAdministratorList()
 		if err != nil {
 			return nil, c.NoContent(http.StatusInternalServerError)
 		}
 		user.GiveIsUserAdmin(admins)
-
 		c.Set(contextUserKey, user)
-
 		return c, nil
 	*/
 }
@@ -113,17 +105,10 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	sess.Values[sessionAccessTokenKey] = res.AccessToken
 	sess.Values[sessionRefreshTokenKey] = res.RefreshToken
 
-	traqUser, err := h.Service.GetMe(res.AccessToken)
+	user, err := h.Service.GetMe(res.AccessToken)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
-
-	ctx := context.Background()
-	user, err := h.Repository.GetUserByName(ctx, traqUser.Name)
-	if err != nil {
-		return internalServerError(err)
-	}
-
 	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {

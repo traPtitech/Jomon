@@ -25,9 +25,9 @@ type RequestStatusUpdate struct {
 	mutation *RequestStatusMutation
 }
 
-// Where adds a new predicate for the RequestStatusUpdate builder.
+// Where appends a list predicates to the RequestStatusUpdate builder.
 func (rsu *RequestStatusUpdate) Where(ps ...predicate.RequestStatus) *RequestStatusUpdate {
-	rsu.mutation.predicates = append(rsu.mutation.predicates, ps...)
+	rsu.mutation.Where(ps...)
 	return rsu
 }
 
@@ -130,6 +130,9 @@ func (rsu *RequestStatusUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(rsu.hooks) - 1; i >= 0; i-- {
+			if rsu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = rsu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, rsu.mutation); err != nil {
@@ -289,8 +292,8 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	if n, err = sqlgraph.UpdateNodes(ctx, rsu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{requeststatus.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -411,6 +414,9 @@ func (rsuo *RequestStatusUpdateOne) Save(ctx context.Context) (*RequestStatus, e
 			return node, err
 		})
 		for i := len(rsuo.hooks) - 1; i >= 0; i-- {
+			if rsuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = rsuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, rsuo.mutation); err != nil {
@@ -590,8 +596,8 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 	if err = sqlgraph.UpdateNode(ctx, rsuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{requeststatus.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

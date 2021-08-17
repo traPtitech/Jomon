@@ -12,7 +12,8 @@ import (
 )
 
 func TestEntRepository_CreateFile(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -43,7 +44,8 @@ func TestEntRepository_CreateFile(t *testing.T) {
 }
 
 func TestEntRepository_GetFile(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -77,7 +79,8 @@ func TestEntRepository_GetFile(t *testing.T) {
 }
 
 func TestEntRepository_DeleteFile(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
