@@ -1093,18 +1093,18 @@ components:
         name:
           type: "string"
           example: "nagatech"
-        displayName:
+        display_name:
           type: "string"
           example: "ながてち"
         admin:
           type: "boolean"
-        createdAt:
+        created_at:
           type: "string"
           format: "date-time"
-        updatedAt:
+        updated_at:
           type: "string"
           format: "date-time"
-        deletedAt:
+        deleted_at:
           type: "string"
           format: "date-time"
     PostUser:
@@ -1113,7 +1113,7 @@ components:
         name:
           type: "string"
           example: "nagatech"
-        displayName:
+        display_name:
           type: "string"
           example: "ながてち"
         admin:
