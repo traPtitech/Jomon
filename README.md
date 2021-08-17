@@ -45,8 +45,8 @@ make down
 1.Enter the server for Jomon staging server and run the following command in the project root.
 
 ```shell script
-sudo docker pull docker.pkg.github.com/traptitech/jomon/jomon:latest
-sudo docker run -d -p 1323:1323 --env-file .env docker.pkg.github.com/traptitech/jomon/jomon
+sudo docker pull ghcr.io/traptitech/jomon:latest
+sudo docker run -d -p 1323:1323 --env-file .env ghcr.io/traptitech/jomon
 ```
 
 (At first, you need to set .env file)

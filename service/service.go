@@ -1,3 +1,4 @@
+//go:generate mockgen -source=$GOFILE -destination=mock_$GOPACKAGE/mock_$GOFILE -package=mock_$GOPACKAGE
 package service
 
 import (
@@ -10,11 +11,12 @@ import (
 )
 
 type Service interface {
-	CreateFile(src io.Reader, mimetype string) (File, error)
+	CreateFile(src io.Reader, id uuid.UUID, mimetype string) error
 	OpenFile(fileID uuid.UUID, mimetype string) (io.ReadCloser, error)
-	DeleteFile(fileID uuid.UUID) error
+	DeleteFile(fileID uuid.UUID, mimetype string) error
 	GetAccessToken(code string, codeVerifier string) (AuthResponse, error)
 	GetClientId() string
+	GetMe(token string) (*User, error)
 }
 type Services struct {
 	Auth    Auth
