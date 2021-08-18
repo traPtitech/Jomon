@@ -69,13 +69,6 @@ func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) (*F
 		return nil, fmt.Errorf("%s is not registered", file.MimeType)
 	}
 
-	filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
-
-	err = repo.storage.Delete(filename)
-	if err != nil {
-		return nil, err
-	}
-
 	request, err := file.QueryRequest().First(ctx)
 
 	if err != nil {

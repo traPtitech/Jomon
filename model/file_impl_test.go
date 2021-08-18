@@ -2,9 +2,6 @@ package model
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"mime"
 	"strings"
 	"testing"
 
@@ -158,13 +155,6 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 		file, err := repo.CreateFile(ctx, src, name, mimetype, request.ID)
 		assert.NoError(t, err)
 
-		ext, err := mime.ExtensionsByType(file.MimeType)
-		assert.NoError(t, err)
-
-		storage.EXPECT().
-			Delete(fmt.Sprintf("%s%s", file.ID.String(), ext[0])).
-			Return(nil)
-
 		got, err := repo.DeleteFile(ctx, file.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, file.ID, got.ID)
@@ -227,39 +217,6 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 
 		file, err := repo.CreateFile(ctx, src, name, mimetype, request.ID)
 		assert.NoError(t, err)
-
-		_, err = repo.DeleteFile(ctx, file.ID)
-		assert.Error(t, err)
-	})
-
-	t.Run("FailedToDelete", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-
-		var tags []*Tag
-		var group *Group
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), false)
-		assert.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
-		assert.NoError(t, err)
-
-		sampleText := "sampleData"
-
-		mimetype := "image/png"
-
-		src := strings.NewReader(sampleText)
-
-		name := random.AlphaNumeric(t, 20)
-
-		file, err := repo.CreateFile(ctx, src, name, mimetype, request.ID)
-		assert.NoError(t, err)
-
-		ext, err := mime.ExtensionsByType(file.MimeType)
-		assert.NoError(t, err)
-
-		storage.EXPECT().
-			Delete(fmt.Sprintf("%s%s", file.ID.String(), ext[0])).
-			Return(errors.New("failed to delete file"))
 
 		_, err = repo.DeleteFile(ctx, file.ID)
 		assert.Error(t, err)
