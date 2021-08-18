@@ -173,6 +173,11 @@ func (fc *FileCreate) check() error {
 	if _, ok := fc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
 	}
+	if v, ok := fc.mutation.Name(); ok {
+		if err := file.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "name": %w`, err)}
+		}
+	}
 	if _, ok := fc.mutation.MimeType(); !ok {
 		return &ValidationError{Name: "mime_type", err: errors.New(`ent: missing required field "mime_type"`)}
 	}
