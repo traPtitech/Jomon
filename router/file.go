@@ -49,7 +49,6 @@ func (h *Handlers) PostFile(c echo.Context) error {
 	}
 
 	mimetype := reqfile.Header.Get(echo.HeaderContentType)
-	fmt.Printf("debug: %v\n", mimetype)
 	if !acceptedMimeTypes[mimetype] {
 		return c.NoContent(http.StatusUnsupportedMediaType)
 	}

@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -67,5 +68,91 @@ func TestHandlers_PostFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		th.Echo.ServeHTTP(rec, req)
 		assert.Equal(t, http.StatusOK, rec.Code)
+	})
+
+	t.Run("FailedToRepositoryCreateFile", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		assert.NoError(t, err)
+
+		request := uuid.New()
+
+		pr, pw := io.Pipe()
+		writer := multipart.NewWriter(pw)
+		go func() {
+			defer writer.Close()
+			writer.WriteField("name", "test")
+			writer.WriteField("request_id", request.String())
+			part := make(textproto.MIMEHeader)
+			part.Set("Content-Type", "image/jpeg")
+			part.Set("Content-Disposition", `form-data; name="file"; filename="test.jpg"`)
+			pw, err := writer.CreatePart(part)
+			assert.NoError(t, err)
+			file, err := base64.RawStdEncoding.DecodeString(testJpeg)
+			assert.NoError(t, err)
+			_, err = pw.Write(file)
+			assert.NoError(t, err)
+		}()
+
+		ctx := context.Background()
+		th.Repository.MockFileRepository.
+			EXPECT().
+			CreateFile(ctx, gomock.Any(), "test", "image/jpeg", request).
+			Return(nil, errors.New("failed to create file"))
+
+		req := httptest.NewRequest(echo.POST, "/api/files", pr)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		rec := httptest.NewRecorder()
+		th.Echo.ServeHTTP(rec, req)
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	})
+
+	t.Run("FailedToServiceCreateFile", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		assert.NoError(t, err)
+
+		request := uuid.New()
+
+		pr, pw := io.Pipe()
+		writer := multipart.NewWriter(pw)
+		go func() {
+			defer writer.Close()
+			writer.WriteField("name", "test")
+			writer.WriteField("request_id", request.String())
+			part := make(textproto.MIMEHeader)
+			part.Set("Content-Type", "image/jpeg")
+			part.Set("Content-Disposition", `form-data; name="file"; filename="test.jpg"`)
+			pw, err := writer.CreatePart(part)
+			assert.NoError(t, err)
+			file, err := base64.RawStdEncoding.DecodeString(testJpeg)
+			assert.NoError(t, err)
+			_, err = pw.Write(file)
+			assert.NoError(t, err)
+		}()
+
+		file := &model.File{
+			ID: uuid.New(),
+		}
+
+		ctx := context.Background()
+		th.Repository.MockFileRepository.
+			EXPECT().
+			CreateFile(ctx, gomock.Any(), "test", "image/jpeg", request).
+			Return(file, nil)
+		th.Service.MockService.
+			EXPECT().
+			CreateFile(gomock.Any(), file.ID, "image/jpeg").
+			Return(errors.New("failed to create file"))
+
+		req := httptest.NewRequest(echo.POST, "/api/files", pr)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		rec := httptest.NewRecorder()
+		th.Echo.ServeHTTP(rec, req)
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	})
 }
