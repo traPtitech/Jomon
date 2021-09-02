@@ -22,7 +22,8 @@ func TestHandlers_GetTags(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -49,7 +50,7 @@ func TestHandlers_GetTags(t *testing.T) {
 			Return(tags, nil)
 
 		var resBody TagResponse
-		statusCode, _ := th.doRequest(t, echo.GET, "/api/tags", nil, &resBody)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/tags", nil, &resBody)
 		assert.Equal(t, http.StatusOK, statusCode)
 		assert.Len(t, resBody.Tags, 2)
 		if resBody.Tags[0].ID == tag1.ID {
@@ -72,7 +73,8 @@ func TestHandlers_GetTags(t *testing.T) {
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		tags := []*model.Tag{}
@@ -84,7 +86,7 @@ func TestHandlers_GetTags(t *testing.T) {
 			Return(tags, nil)
 
 		var resBody TagResponse
-		statusCode, _ := th.doRequest(t, echo.GET, "/api/tags", nil, &resBody)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/tags", nil, &resBody)
 		assert.Equal(t, http.StatusOK, statusCode)
 		assert.Len(t, resBody.Tags, 0)
 	})
@@ -92,7 +94,8 @@ func TestHandlers_GetTags(t *testing.T) {
 	t.Run("FailedToGetTags", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		ctx := context.Background()
@@ -101,7 +104,7 @@ func TestHandlers_GetTags(t *testing.T) {
 			GetTags(ctx).
 			Return(nil, errors.New("Failed to get tags."))
 
-		statusCode, _ := th.doRequest(t, echo.GET, "/api/tags", nil, nil)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/tags", nil, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
 }
@@ -112,7 +115,8 @@ func TestHandlers_PostTag(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -136,7 +140,7 @@ func TestHandlers_PostTag(t *testing.T) {
 		}
 
 		var resBody TagOverview
-		statusCode, _ := th.doRequest(t, echo.POST, "/api/tags", &req, &resBody)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.POST, "/api/tags", &req, &resBody)
 		assert.Equal(t, http.StatusOK, statusCode)
 		assert.Equal(t, tag.ID, resBody.ID)
 		assert.Equal(t, tag.Name, resBody.Name)
@@ -146,7 +150,8 @@ func TestHandlers_PostTag(t *testing.T) {
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -170,7 +175,7 @@ func TestHandlers_PostTag(t *testing.T) {
 		}
 
 		var resBody TagOverview
-		statusCode, _ := th.doRequest(t, echo.POST, "/api/tags", &req, &resBody)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.POST, "/api/tags", &req, &resBody)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
 }
@@ -181,7 +186,8 @@ func TestHandlers_PutTag(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -206,7 +212,7 @@ func TestHandlers_PutTag(t *testing.T) {
 
 		var resBody TagOverview
 		path := fmt.Sprintf("/api/tags/%s", tag.ID.String())
-		statusCode, _ := th.doRequest(t, echo.PUT, path, &req, &resBody)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.PUT, path, &req, &resBody)
 		assert.Equal(t, http.StatusOK, statusCode)
 		assert.Equal(t, tag.ID, resBody.ID)
 		assert.Equal(t, tag.Name, resBody.Name)
@@ -216,7 +222,8 @@ func TestHandlers_PutTag(t *testing.T) {
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -240,14 +247,15 @@ func TestHandlers_PutTag(t *testing.T) {
 		}
 
 		path := fmt.Sprintf("/api/tags/%s", tag.ID.String())
-		statusCode, _ := th.doRequest(t, echo.PUT, path, &req, nil)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.PUT, path, &req, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -265,14 +273,15 @@ func TestHandlers_PutTag(t *testing.T) {
 		}
 
 		path := "/api/tags/hoge" // Invalid UUID
-		statusCode, _ := th.doRequest(t, echo.PUT, path, &req, nil)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.PUT, path, &req, nil)
 		assert.Equal(t, http.StatusBadRequest, statusCode)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -290,7 +299,7 @@ func TestHandlers_PutTag(t *testing.T) {
 		}
 
 		path := fmt.Sprintf("/api/tags/%s", tag.ID.String())
-		statusCode, _ := th.doRequest(t, echo.PUT, path, &req, nil)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.PUT, path, &req, nil)
 		assert.Equal(t, http.StatusBadRequest, statusCode)
 	})
 }
@@ -301,7 +310,8 @@ func TestHandlers_DeleteTag(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		id := uuid.New()
@@ -313,14 +323,15 @@ func TestHandlers_DeleteTag(t *testing.T) {
 			Return(nil)
 
 		path := fmt.Sprintf("/api/tags/%s", id.String())
-		statusCode, _ := th.doRequest(t, echo.DELETE, path, nil, nil)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, path, nil, nil)
 		assert.Equal(t, http.StatusOK, statusCode)
 	})
 
 	t.Run("UnknownID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		id := uuid.New()
@@ -332,29 +343,31 @@ func TestHandlers_DeleteTag(t *testing.T) {
 			Return(errors.New("Tag not found"))
 
 		path := fmt.Sprintf("/api/tags/%s", id.String())
-		statusCode, _ := th.doRequest(t, echo.DELETE, path, nil, nil)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, path, nil, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		path := "/api/tags/hoge"
-		statusCode, _ := th.doRequest(t, echo.DELETE, path, nil, nil)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, path, nil, nil)
 		assert.Equal(t, http.StatusBadRequest, statusCode)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		path := fmt.Sprintf("/api/tags/%s", uuid.Nil)
-		statusCode, _ := th.doRequest(t, echo.DELETE, path, nil, nil)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, path, nil, nil)
 		assert.Equal(t, http.StatusBadRequest, statusCode)
 	})
 }

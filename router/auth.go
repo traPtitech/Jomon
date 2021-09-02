@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/service"
 )
 
 const (
@@ -36,43 +37,75 @@ type PKCEParams struct {
 	ResponseType        string `json:"response_type"`
 }
 
-func (h Handlers) AuthUser(c echo.Context) (echo.Context, error) {
-	return c, nil
-	//TODO: Implement
-	/*
-		sess, err := session.Get(sessionKey, c)
-		if err != nil {
-			return nil, c.NoContent(http.StatusInternalServerError)
-		}
-		sess.Options = &sessions.Options{
-			Path:     "/",
-			MaxAge:   sessionDuration,
-			HttpOnly: true,
-		}
-		accTok, ok := sess.Values[sessionAccessTokenKey].(string)
-		if !ok || accTok == "" {
-			return nil, c.NoContent(http.StatusUnauthorized)
-		}
-		c.Set(contextAccessTokenKey, accTok)
-		user, ok := sess.Values[sessionUserKey].(*service.User)
-		if !ok {
-			user, err = h.Service.GetMe(accTok)
-			sess.Values[sessionUserKey] = user
-			if err := sess.Save(c.Request(), c.Response()); err != nil {
-				return nil, c.NoContent(http.StatusInternalServerError)
-			}
+func (h Handlers) CreateAuthUser() Handlers {
+	return Handlers{
+		Repository:   h.Repository,
+		Logger:       h.Logger,
+		Service:      h.Service,
+		SessionName:  h.SessionName,
+		SessionStore: h.SessionStore,
+		AuthUser: func(c echo.Context) (echo.Context, error) {
+			sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 			if err != nil {
 				return nil, c.NoContent(http.StatusInternalServerError)
 			}
-		}
-		admins, err := h.Service.Administrators.GetAdministratorList()
-		if err != nil {
-			return nil, c.NoContent(http.StatusInternalServerError)
-		}
-		user.GiveIsUserAdmin(admins)
-		c.Set(contextUserKey, user)
-		return c, nil
-	*/
+
+			sess.Options = &sessions.Options{
+				Path:     "/",
+				MaxAge:   sessionDuration,
+				HttpOnly: true,
+			}
+
+			accTok, ok := sess.Values[sessionAccessTokenKey].(string)
+			if !ok || accTok == "" {
+				return nil, c.NoContent(http.StatusUnauthorized)
+			}
+			c.Set(contextAccessTokenKey, accTok)
+
+			user, ok := sess.Values[sessionUserKey].(*service.User)
+			if !ok {
+				user, err = h.Service.GetMe(accTok)
+				sess.Values[sessionUserKey] = user
+				if err := sess.Save(c.Request(), c.Response()); err != nil {
+					return nil, internalServerError(err)
+				}
+
+				if err != nil {
+					return nil, internalServerError(err)
+				}
+			}
+
+			c.Set(contextUserKey, user)
+
+			return c, nil
+		},
+	}
+}
+
+func (h Handlers) createMockAuthUser(user *service.User) Handlers {
+	return Handlers{
+		Repository:   h.Repository,
+		Logger:       h.Logger,
+		Service:      h.Service,
+		SessionName:  h.SessionName,
+		SessionStore: h.SessionStore,
+		AuthUser: func(c echo.Context) (echo.Context, error) {
+			sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+			if err != nil {
+				return nil, c.NoContent(http.StatusInternalServerError)
+			}
+
+			sess.Options = &sessions.Options{
+				Path:     "/",
+				MaxAge:   sessionDuration,
+				HttpOnly: true,
+			}
+
+			c.Set(contextUserKey, user)
+
+			return c, nil
+		},
+	}
 }
 
 func (h Handlers) AuthCallback(c echo.Context) error {
@@ -81,7 +114,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	sess, err := session.Get(sessionKey, c)
+	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}

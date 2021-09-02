@@ -21,7 +21,8 @@ func TestHandlers_GetGroups(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -55,7 +56,7 @@ func TestHandlers_GetGroups(t *testing.T) {
 			Return(groups, nil)
 
 		var resBody []*GroupOverview
-		statusCode, _ := th.doRequest(t, echo.GET, "/api/groups", nil, &resBody)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/groups", nil, &resBody)
 		assert.Equal(t, http.StatusOK, statusCode)
 		assert.Len(t, resBody, 2)
 		if resBody[0].ID == group1.ID {
@@ -82,7 +83,8 @@ func TestHandlers_GetGroups(t *testing.T) {
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		groups := []*model.Group{}
@@ -94,7 +96,7 @@ func TestHandlers_GetGroups(t *testing.T) {
 			Return(groups, nil)
 
 		var resBody []*GroupOverview
-		statusCode, _ := th.doRequest(t, echo.GET, "/api/groups", nil, &resBody)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/groups", nil, &resBody)
 		assert.Equal(t, http.StatusOK, statusCode)
 		assert.Len(t, resBody, 0)
 	})
@@ -102,7 +104,8 @@ func TestHandlers_GetGroups(t *testing.T) {
 	t.Run("FailedToGetGroups", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := SetupTestHandlers(t, ctrl)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		ctx := context.Background()
@@ -111,7 +114,7 @@ func TestHandlers_GetGroups(t *testing.T) {
 			GetGroups(ctx).
 			Return(nil, errors.New("Failed to get groups"))
 
-		statusCode, _ := th.doRequest(t, echo.GET, "/api/groups", nil, nil)
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/groups", nil, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
 }

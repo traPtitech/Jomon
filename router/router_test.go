@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"encoding/gob"
 	"encoding/json"
 	"net/http/httptest"
 	"strings"
@@ -13,9 +14,10 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/model/mock_model"
+	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/service/mock_service"
 	"github.com/traPtitech/Jomon/testutil/random"
 	"go.uber.org/zap"
@@ -48,6 +50,7 @@ type TestHandlers struct {
 	Service      *Service
 	SessionName  string
 	SessionStore sessions.Store
+	AuthUser     func(c echo.Context) (echo.Context, error)
 	Echo         *echo.Echo
 }
 
@@ -75,22 +78,30 @@ func NewMockService(ctrl *gomock.Controller) *Service {
 	}
 }
 
-func SetupTestHandlers(t *testing.T, ctrl *gomock.Controller) (*TestHandlers, error) {
+func SetupTestHandlers(t *testing.T, ctrl *gomock.Controller, accessUser *model.User) (*TestHandlers, error) {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		return nil, err
 	}
 	repository := NewMockEntRepository(ctrl)
-	service := NewMockService(ctrl)
+	mockService := NewMockService(ctrl)
 	sessionStore := sessions.NewCookieStore([]byte("session"))
 	sessionName := "session"
 	h := Handlers{
 		Repository:   repository,
 		Logger:       logger,
-		Service:      service,
+		Service:      mockService,
 		SessionName:  sessionName,
 		SessionStore: sessionStore,
 	}
+
+	h = h.createMockAuthUser(&service.User{
+		DisplayName: accessUser.DisplayName,
+		Name:        accessUser.Name,
+		Admin:       accessUser.Admin,
+		CreatedAt:   accessUser.CreatedAt,
+		UpdatedAt:   accessUser.UpdatedAt,
+	})
 
 	e := echo.New()
 	e.Use(session.Middleware(h.SessionStore))
@@ -100,7 +111,7 @@ func SetupTestHandlers(t *testing.T, ctrl *gomock.Controller) (*TestHandlers, er
 		Handler:      &h,
 		Repository:   repository,
 		Logger:       logger,
-		Service:      service,
+		Service:      mockService,
 		SessionName:  sessionName,
 		SessionStore: sessionStore,
 		Echo:         e,
@@ -127,7 +138,7 @@ func (th *TestHandlers) doRequestWithLogin(t *testing.T, accessUser *model.User,
 	ctx := context.Background()
 	th.Repository.MockUserRepository.
 		EXPECT().
-		GetUserByID(ctx, accessUser.ID).
+		GetUserByName(ctx, accessUser.Name).
 		Return(accessUser, nil).
 		AnyTimes()
 
@@ -136,10 +147,17 @@ func (th *TestHandlers) doRequestWithLogin(t *testing.T, accessUser *model.User,
 	rec = httptest.NewRecorder()
 
 	sess, err := th.Handler.SessionStore.Get(req, th.Handler.SessionName)
-	require.NoError(t, err)
-	sess.Values["userID"] = accessUser.ID.String()
+	assert.NoError(t, err)
+	sess.Values[sessionUserKey] = &service.User{
+		DisplayName: accessUser.DisplayName,
+		Name:        accessUser.Name,
+		Admin:       accessUser.Admin,
+		CreatedAt:   accessUser.CreatedAt,
+		UpdatedAt:   accessUser.UpdatedAt,
+	}
+	gob.Register(service.User{})
 	err = sess.Save(req, rec)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	th.Echo.ServeHTTP(rec, req)
 
@@ -154,7 +172,7 @@ func requestEncode(t *testing.T, body interface{}) *strings.Reader {
 	t.Helper()
 
 	b, err := json.Marshal(body)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 
 	return strings.NewReader(string(b))
 }
@@ -163,7 +181,7 @@ func responseDecode(t *testing.T, rec *httptest.ResponseRecorder, i interface{})
 	t.Helper()
 
 	err := json.Unmarshal(rec.Body.Bytes(), i)
-	require.NoError(t, err)
+	assert.NoError(t, err)
 }
 
 func mustMakeUser(t *testing.T, admin bool) *model.User {

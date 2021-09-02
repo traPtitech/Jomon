@@ -66,6 +66,8 @@ func main() {
 		SessionStore: sessions.NewCookieStore([]byte("session")),
 	}
 
+	handlers = handlers.CreateAuthUser()
+
 	e := echo.New()
 
 	router.SetRouting(e, handlers)
