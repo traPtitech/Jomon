@@ -244,6 +244,17 @@ func TestHandlers_GetFile(t *testing.T) {
 		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, fmt.Sprintf("/api/files/%s", file.ID), nil, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
+
+	t.Run("UnknownFile", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		assert.NoError(t, err)
+
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/files/po", nil, nil)
+		assert.Equal(t, http.StatusBadRequest, statusCode)
+	})
 }
 
 func TestHandlers_DeleteFile(t *testing.T) {
@@ -326,5 +337,16 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, fmt.Sprintf("/api/files/%s", file.ID), nil, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
+	})
+
+	t.Run("UnknownFile", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		accessUser := mustMakeUser(t, false)
+		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		assert.NoError(t, err)
+
+		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, "/api/files/po", nil, nil)
+		assert.Equal(t, http.StatusBadRequest, statusCode)
 	})
 }
