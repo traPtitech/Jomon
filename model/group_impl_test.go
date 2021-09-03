@@ -19,10 +19,12 @@ func TestEntRepository_GetMembers(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		owner1, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		owner2, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		owner, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		budget := rand.Int()
-		group, _ := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner1, *owner2})
+		group, _ := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+    got, err := repo.GetMembers(ctx, group.ID)
+		assert.NoError(t, err)
+		assert.Equal(t, got, []*User{})
 
 		user1, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		user2, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
@@ -32,7 +34,7 @@ func TestEntRepository_GetMembers(t *testing.T) {
 		assert.Equal(t, member1.ID, user1.ID)
 		assert.Equal(t, member2.ID, user2.ID)
 
-		got, err := repo.GetMembers(ctx, group.ID)
+		got, err = repo.GetMembers(ctx, group.ID)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) && got[0].ID == user1.ID {
 			assert.Equal(t, got[0].ID, user1.ID)
@@ -60,18 +62,14 @@ func TestEntRepository_CreateMember(t *testing.T) {
 	t.Run("sucsess", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		owner1, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		owner2, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		owner, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		budget := rand.Int()
-		group, _ := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner1, *owner2})
+		group, _ := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
 
-		user1, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		user2, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-
-		member1, _ := repo.CreateMember(ctx, group.ID, user1.ID)
-		member2, _ := repo.CreateMember(ctx, group.ID, user2.ID)
-		assert.Equal(t, member1.ID, user1.ID)
-		assert.Equal(t, member2.ID, user2.ID)
+		user, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		member, _ := repo.CreateMember(ctx, group.ID, user.ID)
+		
+		assert.Equal(t, member.ID, user.ID)
 	})
 }
 
@@ -83,24 +81,14 @@ func TestEntRepository_DeleteMember(t *testing.T) {
 	t.Run("sucsess", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		owner1, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		owner2, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		owner, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		budget := rand.Int()
-		group, _ := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner1, *owner2})
+		group, _ := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
 
-		user1, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		user2, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-
-		member1, _ := repo.CreateMember(ctx, group.ID, user1.ID)
-		member2, _ := repo.CreateMember(ctx, group.ID, user2.ID)
-
-		err = repo.DeleteMember(ctx, group.ID, member1.ID)
+		user, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+    member, _ := repo.CreateMember(ctx, group.ID, user.ID)
+		
+		err = repo.DeleteMember(ctx, group.ID, member.ID)
 		assert.NoError(t, err)
-		err = repo.DeleteMember(ctx, group.ID, member2.ID)
-		assert.NoError(t, err)
-
-		got, err := repo.GetMembers(ctx, group.ID)
-		assert.NoError(t, err)
-		assert.Equal(t, got, []*User{})
 	})
 }
