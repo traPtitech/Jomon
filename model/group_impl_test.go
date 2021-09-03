@@ -116,7 +116,7 @@ func TestEntRepository_CreateMember(t *testing.T) {
 
 		_, err = repo.CreateMember(ctx, group.ID, uuid.New())
 		assert.Error(t, err)
-	})
+  })
 }
 
 func TestEntRepository_DeleteMember(t *testing.T) {
