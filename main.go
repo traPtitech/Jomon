@@ -43,7 +43,7 @@ func main() {
 	// Setup model repository
 	repo := model.NewEntRepository(client, strg)
 	// Setup service
-	services, err := service.NewServices(repo, strg)
+	services, err := service.NewServices(strg)
 	if err != nil {
 		panic(err)
 	}

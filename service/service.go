@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/model"
 	storagePkg "github.com/traPtitech/Jomon/storage"
 )
 
@@ -23,7 +22,7 @@ type Services struct {
 	Storage storagePkg.Storage
 }
 
-func NewServices(repo model.Repository, storage storagePkg.Storage) (*Services, error) {
+func NewServices(storage storagePkg.Storage) (*Services, error) {
 	traQClientID := os.Getenv("TRAQ_CLIENT_ID")
 	/*
 		webhookSecret := os.Getenv("WEBHOOK_SECRET")
