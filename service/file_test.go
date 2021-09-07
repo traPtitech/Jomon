@@ -69,6 +69,25 @@ func TestService_CreateFile(t *testing.T) {
 		err = s.CreateFile(r, fileID, mimetype)
 		assert.Error(t, err)
 	})
+
+	t.Run("UnknownMimetype", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		file, err := base64.RawStdEncoding.DecodeString(testJpeg)
+		require.NoError(t, err)
+		r := bytes.NewReader(file)
+
+		fileID := uuid.New()
+		mimetype := "po"
+
+		strg := NewMockStorage(ctrl)
+		s, err := NewServices(strg)
+		require.NoError(t, err)
+
+		err = s.CreateFile(r, fileID, mimetype)
+		assert.Error(t, err)
+	})
 }
 
 func TestService_OpenFile(t *testing.T) {
@@ -121,6 +140,21 @@ func TestService_OpenFile(t *testing.T) {
 		_, err = s.OpenFile(fileID, mimetype)
 		assert.Error(t, err)
 	})
+
+	t.Run("UnknownMimetype", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		fileID := uuid.New()
+		mimetype := "po"
+
+		strg := NewMockStorage(ctrl)
+		s, err := NewServices(strg)
+		require.NoError(t, err)
+
+		_, err = s.OpenFile(fileID, mimetype)
+		assert.Error(t, err)
+	})
 }
 
 func TestService_DeleteFile(t *testing.T) {
@@ -161,6 +195,21 @@ func TestService_DeleteFile(t *testing.T) {
 		strg.EXPECT().
 			Delete(fmt.Sprintf("%s%s", fileID.String(), ext[0])).
 			Return(errors.New("failed to delete file"))
+		s, err := NewServices(strg)
+		require.NoError(t, err)
+
+		err = s.DeleteFile(fileID, mimetype)
+		assert.Error(t, err)
+	})
+
+	t.Run("UnknownMimetype", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		fileID := uuid.New()
+		mimetype := "po"
+
+		strg := NewMockStorage(ctrl)
 		s, err := NewServices(strg)
 		require.NoError(t, err)
 
