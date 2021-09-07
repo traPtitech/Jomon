@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"mime"
@@ -43,6 +44,31 @@ func TestService_CreateFile(t *testing.T) {
 		err = s.CreateFile(r, fileID, mimetype)
 		assert.NoError(t, err)
 	})
+
+	t.Run("FailedToSave", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		file, err := base64.RawStdEncoding.DecodeString(testJpeg)
+		require.NoError(t, err)
+		r := bytes.NewReader(file)
+
+		fileID := uuid.New()
+		mimetype := "image/jpeg"
+
+		ext, err := mime.ExtensionsByType(mimetype)
+		require.NoError(t, err)
+
+		strg := NewMockStorage(ctrl)
+		strg.EXPECT().
+			Save(fmt.Sprintf("%s%s", fileID.String(), ext[0]), r).
+			Return(errors.New("failed to save file"))
+		s, err := NewServices(strg)
+		require.NoError(t, err)
+
+		err = s.CreateFile(r, fileID, mimetype)
+		assert.Error(t, err)
+	})
 }
 
 func TestService_OpenFile(t *testing.T) {
@@ -74,6 +100,27 @@ func TestService_OpenFile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, got)
 	})
+
+	t.Run("FailedToOpen", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		fileID := uuid.New()
+		mimetype := "image/jpeg"
+
+		ext, err := mime.ExtensionsByType(mimetype)
+		require.NoError(t, err)
+
+		strg := NewMockStorage(ctrl)
+		strg.EXPECT().
+			Open(fmt.Sprintf("%s%s", fileID.String(), ext[0])).
+			Return(nil, errors.New("failed to open file"))
+		s, err := NewServices(strg)
+		require.NoError(t, err)
+
+		_, err = s.OpenFile(fileID, mimetype)
+		assert.Error(t, err)
+	})
 }
 
 func TestService_DeleteFile(t *testing.T) {
@@ -98,5 +145,26 @@ func TestService_DeleteFile(t *testing.T) {
 
 		err = s.DeleteFile(fileID, mimetype)
 		assert.NoError(t, err)
+	})
+
+	t.Run("FailedToDelete", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		fileID := uuid.New()
+		mimetype := "image/jpeg"
+
+		ext, err := mime.ExtensionsByType(mimetype)
+		require.NoError(t, err)
+
+		strg := NewMockStorage(ctrl)
+		strg.EXPECT().
+			Delete(fmt.Sprintf("%s%s", fileID.String(), ext[0])).
+			Return(errors.New("failed to delete file"))
+		s, err := NewServices(strg)
+		require.NoError(t, err)
+
+		err = s.DeleteFile(fileID, mimetype)
+		assert.Error(t, err)
 	})
 }
