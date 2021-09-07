@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/model"
 )
 
 type File struct {
@@ -55,13 +54,4 @@ func (s *Services) DeleteFile(fileID uuid.UUID, mimetype string) error {
 	filename := fmt.Sprintf("%s%s", fileID.String(), ext[0])
 
 	return s.Storage.Delete(filename)
-}
-
-func ConvertModelFileToServiceFile(modelfile *model.File) *File {
-	return &File{
-		ID:        modelfile.ID,
-		Name:      modelfile.Name,
-		MimeType:  modelfile.MimeType,
-		CreatedAt: modelfile.CreatedAt,
-	}
 }
