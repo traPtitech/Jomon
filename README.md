@@ -21,7 +21,7 @@
 
 2. Run the following command in the project root.
 ```shell script
-MARIADB_HOSTNAME=localhost go test -v -cover -race ./...
+make test
 ```
 
 ### Running

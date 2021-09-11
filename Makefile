@@ -8,8 +8,8 @@ down:
 
 .PHONY: test
 test:
-	docker-compose -f server-test.yml run --rm jomon-server
+	@MARIADB_HOSTNAME=localhost go test -v -cover -race ./...
 
 .PHONY: docs
 docs:
-	enter ./ent/schema ./docs/er.html
+	@enter ./ent/schema ./docs/er.html
