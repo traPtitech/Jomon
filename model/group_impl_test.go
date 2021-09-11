@@ -2,37 +2,43 @@ package model
 
 import (
 	"context"
-	"math/rand"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
-//TestEntRepository_GetMembersのto do 1,CreateGroupをする 2,CreateUserをする 3,CreateMemberをする 4,GetMembersをする
-
 func TestEntRepository_GetMembers(t *testing.T) {
-	client, storage, err := setup(t)
-	assert.NoError(t, err)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
-	t.Run("success", func(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
-		owner, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		budget := rand.Int()
-		group, _ := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
-    got, err := repo.GetMembers(ctx, group.ID)
+		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		require.NoError(t, err)
+
+		got, err := repo.GetMembers(ctx, group.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, got, []*User{})
 
-		user1, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		user2, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
+		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
 
-		member1, _ := repo.CreateMember(ctx, group.ID, user1.ID)
-		member2, _ := repo.CreateMember(ctx, group.ID, user2.ID)
-		assert.Equal(t, member1.ID, user1.ID)
-		assert.Equal(t, member2.ID, user2.ID)
+		member1, err := repo.CreateMember(ctx, group.ID, user1.ID)
+		require.NoError(t, err)
+		member2, err := repo.CreateMember(ctx, group.ID, user2.ID)
+		require.NoError(t, err)
+		require.Equal(t, member1.ID, user1.ID)
+		require.Equal(t, member2.ID, user2.ID)
 
 		got, err = repo.GetMembers(ctx, group.ID)
 		assert.NoError(t, err)
@@ -55,39 +61,54 @@ func TestEntRepository_GetMembers(t *testing.T) {
 }
 
 func TestEntRepository_CreateMember(t *testing.T) {
-	client, storage, err := setup(t)
-	assert.NoError(t, err)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
-	t.Run("sucsess", func(t *testing.T) {
+	t.Run("Sucsess", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
-		owner, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		budget := rand.Int()
-		group, _ := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		require.NoError(t, err)
 
-		user, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		member, _ := repo.CreateMember(ctx, group.ID, user.ID)
-		
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
+
+		member, err := repo.CreateMember(ctx, group.ID, user.ID)
+		assert.NoError(t, err)
 		assert.Equal(t, member.ID, user.ID)
+
+		FalseMember, err := repo.CreateMember(ctx, uuid.New(), user.ID)
+		if FalseMember == nil {
+			assert.NoError(t, err)
+		}
+
 	})
 }
 
 func TestEntRepository_DeleteMember(t *testing.T) {
-	client, storage, err := setup(t)
-	assert.NoError(t, err)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
-	t.Run("sucsess", func(t *testing.T) {
+	t.Run("Sucsess", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
-		owner, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		budget := rand.Int()
-		group, _ := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		require.NoError(t, err)
 
-		user, _ := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-    member, _ := repo.CreateMember(ctx, group.ID, user.ID)
-		
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
+		member, err := repo.CreateMember(ctx, group.ID, user.ID)
+		require.NoError(t, err)
+		require.Equal(t, member.ID, user.ID)
+
 		err = repo.DeleteMember(ctx, group.ID, member.ID)
 		assert.NoError(t, err)
 	})
