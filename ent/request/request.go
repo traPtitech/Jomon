@@ -41,54 +41,54 @@ const (
 	EdgeGroup = "group"
 	// Table holds the table name of the request in the database.
 	Table = "requests"
-	// StatusTable is the table the holds the status relation/edge.
+	// StatusTable is the table that holds the status relation/edge.
 	StatusTable = "request_status"
 	// StatusInverseTable is the table name for the RequestStatus entity.
 	// It exists in this package in order to avoid circular dependency with the "requeststatus" package.
 	StatusInverseTable = "request_status"
 	// StatusColumn is the table column denoting the status relation/edge.
 	StatusColumn = "request_status"
-	// TargetTable is the table the holds the target relation/edge.
+	// TargetTable is the table that holds the target relation/edge.
 	TargetTable = "request_targets"
 	// TargetInverseTable is the table name for the RequestTarget entity.
 	// It exists in this package in order to avoid circular dependency with the "requesttarget" package.
 	TargetInverseTable = "request_targets"
 	// TargetColumn is the table column denoting the target relation/edge.
 	TargetColumn = "request_target"
-	// FileTable is the table the holds the file relation/edge.
+	// FileTable is the table that holds the file relation/edge.
 	FileTable = "files"
 	// FileInverseTable is the table name for the File entity.
 	// It exists in this package in order to avoid circular dependency with the "file" package.
 	FileInverseTable = "files"
 	// FileColumn is the table column denoting the file relation/edge.
 	FileColumn = "request_file"
-	// TagTable is the table the holds the tag relation/edge. The primary key declared below.
+	// TagTable is the table that holds the tag relation/edge. The primary key declared below.
 	TagTable = "request_tag"
 	// TagInverseTable is the table name for the Tag entity.
 	// It exists in this package in order to avoid circular dependency with the "tag" package.
 	TagInverseTable = "tags"
-	// TransactionTable is the table the holds the transaction relation/edge.
+	// TransactionTable is the table that holds the transaction relation/edge.
 	TransactionTable = "transactions"
 	// TransactionInverseTable is the table name for the Transaction entity.
 	// It exists in this package in order to avoid circular dependency with the "transaction" package.
 	TransactionInverseTable = "transactions"
 	// TransactionColumn is the table column denoting the transaction relation/edge.
 	TransactionColumn = "request_transaction"
-	// CommentTable is the table the holds the comment relation/edge.
+	// CommentTable is the table that holds the comment relation/edge.
 	CommentTable = "comments"
 	// CommentInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
 	CommentInverseTable = "comments"
 	// CommentColumn is the table column denoting the comment relation/edge.
 	CommentColumn = "request_comment"
-	// UserTable is the table the holds the user relation/edge.
+	// UserTable is the table that holds the user relation/edge.
 	UserTable = "requests"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "request_user"
-	// GroupTable is the table the holds the group relation/edge.
+	// GroupTable is the table that holds the group relation/edge.
 	GroupTable = "requests"
 	// GroupInverseTable is the table name for the Group entity.
 	// It exists in this package in order to avoid circular dependency with the "group" package.

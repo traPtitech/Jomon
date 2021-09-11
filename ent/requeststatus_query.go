@@ -362,8 +362,8 @@ func (rsq *RequestStatusQuery) GroupBy(field string, fields ...string) *RequestS
 //		Select(requeststatus.FieldStatus).
 //		Scan(ctx, &v)
 //
-func (rsq *RequestStatusQuery) Select(field string, fields ...string) *RequestStatusSelect {
-	rsq.fields = append([]string{field}, fields...)
+func (rsq *RequestStatusQuery) Select(fields ...string) *RequestStatusSelect {
+	rsq.fields = append(rsq.fields, fields...)
 	return &RequestStatusSelect{RequestStatusQuery: rsq}
 }
 
@@ -544,10 +544,14 @@ func (rsq *RequestStatusQuery) querySpec() *sqlgraph.QuerySpec {
 func (rsq *RequestStatusQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(rsq.driver.Dialect())
 	t1 := builder.Table(requeststatus.Table)
-	selector := builder.Select(t1.Columns(requeststatus.Columns...)...).From(t1)
+	columns := rsq.fields
+	if len(columns) == 0 {
+		columns = requeststatus.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if rsq.sql != nil {
 		selector = rsq.sql
-		selector.Select(selector.Columns(requeststatus.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range rsq.predicates {
 		p(selector)
@@ -815,13 +819,24 @@ func (rsgb *RequestStatusGroupBy) sqlScan(ctx context.Context, v interface{}) er
 }
 
 func (rsgb *RequestStatusGroupBy) sqlQuery() *sql.Selector {
-	selector := rsgb.sql
-	columns := make([]string, 0, len(rsgb.fields)+len(rsgb.fns))
-	columns = append(columns, rsgb.fields...)
+	selector := rsgb.sql.Select()
+	aggregation := make([]string, 0, len(rsgb.fns))
 	for _, fn := range rsgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(rsgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(rsgb.fields)+len(rsgb.fns))
+		for _, f := range rsgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(rsgb.fields...)...)
 }
 
 // RequestStatusSelect is the builder for selecting fields of RequestStatus entities.
@@ -1037,16 +1052,10 @@ func (rss *RequestStatusSelect) BoolX(ctx context.Context) bool {
 
 func (rss *RequestStatusSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := rss.sqlQuery().Query()
+	query, args := rss.sql.Query()
 	if err := rss.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (rss *RequestStatusSelect) sqlQuery() sql.Querier {
-	selector := rss.sql
-	selector.Select(selector.Columns(rss.fields...)...)
-	return selector
 }

@@ -114,11 +114,17 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 				return nil, err
 			}
 			fc.mutation = mutation
-			node, err = fc.sqlSave(ctx)
+			if node, err = fc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(fc.hooks) - 1; i >= 0; i-- {
+			if fc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = fc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, fc.mutation); err != nil {
@@ -137,6 +143,19 @@ func (fc *FileCreate) SaveX(ctx context.Context) *File {
 	return v
 }
 
+// Exec executes the query.
+func (fc *FileCreate) Exec(ctx context.Context) error {
+	_, err := fc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (fc *FileCreate) ExecX(ctx context.Context) {
+	if err := fc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (fc *FileCreate) defaults() {
 	if _, ok := fc.mutation.CreatedAt(); !ok {
@@ -152,13 +171,13 @@ func (fc *FileCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (fc *FileCreate) check() error {
 	if _, ok := fc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
 	}
 	if _, ok := fc.mutation.MimeType(); !ok {
-		return &ValidationError{Name: "mime_type", err: errors.New("ent: missing required field \"mime_type\"")}
+		return &ValidationError{Name: "mime_type", err: errors.New(`ent: missing required field "mime_type"`)}
 	}
 	if _, ok := fc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
 	return nil
 }
@@ -166,10 +185,13 @@ func (fc *FileCreate) check() error {
 func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 	_node, _spec := fc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, fc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(uuid.UUID)
 	}
 	return _node, nil
 }
@@ -273,17 +295,19 @@ func (fcb *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, fcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, fcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, fcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -307,4 +331,17 @@ func (fcb *FileCreateBulk) SaveX(ctx context.Context) []*File {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (fcb *FileCreateBulk) Exec(ctx context.Context) error {
+	_, err := fcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (fcb *FileCreateBulk) ExecX(ctx context.Context) {
+	if err := fcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

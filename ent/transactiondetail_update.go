@@ -24,9 +24,9 @@ type TransactionDetailUpdate struct {
 	mutation *TransactionDetailMutation
 }
 
-// Where adds a new predicate for the TransactionDetailUpdate builder.
+// Where appends a list predicates to the TransactionDetailUpdate builder.
 func (tdu *TransactionDetailUpdate) Where(ps ...predicate.TransactionDetail) *TransactionDetailUpdate {
-	tdu.mutation.predicates = append(tdu.mutation.predicates, ps...)
+	tdu.mutation.Where(ps...)
 	return tdu
 }
 
@@ -141,6 +141,9 @@ func (tdu *TransactionDetailUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(tdu.hooks) - 1; i >= 0; i-- {
+			if tdu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tdu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tdu.mutation); err != nil {
@@ -271,8 +274,8 @@ func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err err
 	if n, err = sqlgraph.UpdateNodes(ctx, tdu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{transactiondetail.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -405,6 +408,9 @@ func (tduo *TransactionDetailUpdateOne) Save(ctx context.Context) (*TransactionD
 			return node, err
 		})
 		for i := len(tduo.hooks) - 1; i >= 0; i-- {
+			if tduo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tduo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tduo.mutation); err != nil {
@@ -555,8 +561,8 @@ func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *Tra
 	if err = sqlgraph.UpdateNode(ctx, tduo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{transactiondetail.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
