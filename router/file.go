@@ -21,14 +21,16 @@ var acceptedMimeTypes = map[string]bool{
 func (h *Handlers) PostFile(c echo.Context) error {
 	form, err := c.MultipartForm()
 	if err != nil {
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	var fileIDs []*uuid.UUID
 	file := form.File["file"][0]
 	name := form.Value["name"][0]
 	requestID, err := uuid.Parse(form.Value["request_id"][0])
 	if err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	mimetype := file.Header.Get(echo.HeaderContentType)
@@ -38,13 +40,15 @@ func (h *Handlers) PostFile(c echo.Context) error {
 
 	src, err := file.Open()
 	if err != nil {
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	defer src.Close()
 
 	fileID, err := h.Service.CreateFile(src, name, mimetype, requestID)
 	if err != nil {
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	fileIDs = append(fileIDs, &fileID.ID)
 	return c.JSON(http.StatusOK, &FileResponse{fileIDs})

@@ -47,7 +47,8 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 	ctx := context.Background()
 	modelrequests, err := h.Repository.GetRequests(ctx, model.RequestQuery{})
 	if err != nil {
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	var tags []*TagOverview
@@ -105,25 +106,30 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 func (h *Handlers) PostComment(c echo.Context) error {
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if requestID == uuid.Nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	var req Comment
 	if err := c.Bind(&req); err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	user, ok := c.Get(contextUserKey).(model.User)
 	if !ok || user.ID == uuid.Nil {
-		return unauthorized(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
 	}
 	ctx := context.Background()
 	comment, err := h.Repository.CreateComment(ctx, req.Comment, requestID, user.ID)
 	if err != nil {
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	res := &CommentDetail{
 		ID:        comment.ID,
@@ -138,28 +144,34 @@ func (h *Handlers) PostComment(c echo.Context) error {
 func (h *Handlers) PutComment(c echo.Context) error {
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if requestID == uuid.Nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	commentID, err := uuid.Parse(c.Param("commentID"))
 	if err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if commentID == uuid.Nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	var req Comment
 	if err := c.Bind(&req); err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
 	comment, err := h.Repository.UpdateComment(ctx, req.Comment, requestID, commentID)
 	if err != nil {
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	res := &CommentDetail{
 		ID:        comment.ID,
