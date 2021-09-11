@@ -59,16 +59,18 @@ func (h *Handlers) GetUsers(c echo.Context) error {
 func (h *Handlers) PutUser(c echo.Context) error {
 	var updateUser PostUser
 	if err := c.Bind(&updateUser); err != nil {
-		return badRequest(err)
+		return c.NoContent(http.StatusBadRequest)
 	}
 	ctx := context.Background()
 	user, err := h.Repository.GetUserByName(ctx, updateUser.Name)
 	if err != nil {
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return c.NoContent(http.StatusInternalServerError)
 	}
 	res, err := h.Repository.UpdateUser(ctx, user.ID, updateUser.Name, updateUser.DisplayName, updateUser.Admin)
 	if err != nil {
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return c.NoContent(http.StatusInternalServerError)
 	}
 	return c.JSON(http.StatusOK, &UserOverview{
 		Name:        res.Name,

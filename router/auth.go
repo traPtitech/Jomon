@@ -67,11 +67,8 @@ func (h Handlers) CreateAuthUser() Handlers {
 				user, err = h.Service.GetMe(accTok)
 				sess.Values[sessionUserKey] = user
 				if err := sess.Save(c.Request(), c.Response()); err != nil {
-					return nil, internalServerError(err)
-				}
-
-				if err != nil {
-					return nil, internalServerError(err)
+					c.Logger().Error(err)
+					return nil, c.NoContent(http.StatusInternalServerError)
 				}
 			}
 

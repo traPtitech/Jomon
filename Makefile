@@ -8,7 +8,7 @@ down:
 
 .PHONY: test
 test:
-	@MARIADB_HOSTNAME=localhost go test -v -cover -race ./...
+	@MARIADB_HOSTNAME=localhost go test -cover -race ./...
 
 .PHONY: docs
 docs:
