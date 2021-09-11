@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/traPtitech/Jomon/ent"
@@ -18,9 +17,6 @@ func setup(t *testing.T, ctx context.Context) (*ent.Client, storage.Storage, err
 	}
 	err = dropAll(t, ctx, client)
 	if err != nil {
-		return nil, nil, err
-	}
-	if err := os.Mkdir(os.Getenv("UPLOAD_DIR"), 0777); err != nil {
 		return nil, nil, err
 	}
 	strg, err := storage.NewLocalStorage(testutil.GetEnvOrDefault("UPLOAD_DIR", "./uploads"))
