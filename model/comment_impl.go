@@ -20,9 +20,10 @@ func (repo *EntRepository) CreateComment(ctx context.Context, comment string, re
 	if err != nil {
 		return nil, err
 	}
-	return ConvertEntCommentToModelComment(created), nil
+	return convertEntCommentToModelComment(created), nil
 }
 
+// TODO: add edge to request
 func (repo *EntRepository) UpdateComment(ctx context.Context, comment string, requestID uuid.UUID, commentID uuid.UUID) (*Comment, error) {
 	updated, err := repo.client.Comment.
 		UpdateOneID(commentID).
@@ -32,7 +33,7 @@ func (repo *EntRepository) UpdateComment(ctx context.Context, comment string, re
 	if err != nil {
 		return nil, err
 	}
-	return ConvertEntCommentToModelComment(updated), nil
+	return convertEntCommentToModelComment(updated), nil
 }
 
 func (repo *EntRepository) DeleteComment(ctx context.Context, requestID uuid.UUID, commentID uuid.UUID) error {
@@ -54,12 +55,12 @@ func (repo *EntRepository) DeleteComment(ctx context.Context, requestID uuid.UUI
 	return err
 }
 
-func ConvertEntCommentToModelComment(entcomment *ent.Comment) *Comment {
+func convertEntCommentToModelComment(comment *ent.Comment) *Comment {
 	return &Comment{
-		ID:        entcomment.ID,
-		User:      entcomment.Edges.User.ID,
-		Comment:   entcomment.Comment,
-		CreatedAt: entcomment.CreatedAt,
-		UpdatedAt: entcomment.UpdatedAt,
+		ID:        comment.ID,
+		User:      comment.Edges.User.ID,
+		Comment:   comment.Comment,
+		CreatedAt: comment.CreatedAt,
+		UpdatedAt: comment.UpdatedAt,
 	}
 }

@@ -105,7 +105,7 @@ func ConvertEntRequestToModelRequest(request *ent.Request) *Request {
 func ConvertEntRequestResponseToModelRequestResponse(request *ent.Request, tags []*ent.Tag, group *ent.Group, status *ent.RequestStatus, user *ent.User) *RequestResponse {
 	var modeltags []*Tag
 	for _, tag := range tags {
-		modeltags = append(modeltags, ConvertEntTagToModelTag(tag))
+		modeltags = append(modeltags, convertEntTagToModelTag(tag))
 	}
 	return &RequestResponse{
 		ID:        request.ID,
@@ -117,6 +117,6 @@ func ConvertEntRequestResponseToModelRequestResponse(request *ent.Request, tags 
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      modeltags,
-		Group:     *ConvertEntGroupToModelGroup(group),
+		Group:     *convertEntGroupToModelGroup(group),
 	}
 }
