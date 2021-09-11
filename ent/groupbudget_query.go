@@ -363,8 +363,8 @@ func (gbq *GroupBudgetQuery) GroupBy(field string, fields ...string) *GroupBudge
 //		Select(groupbudget.FieldAmount).
 //		Scan(ctx, &v)
 //
-func (gbq *GroupBudgetQuery) Select(field string, fields ...string) *GroupBudgetSelect {
-	gbq.fields = append([]string{field}, fields...)
+func (gbq *GroupBudgetQuery) Select(fields ...string) *GroupBudgetSelect {
+	gbq.fields = append(gbq.fields, fields...)
 	return &GroupBudgetSelect{GroupBudgetQuery: gbq}
 }
 
@@ -544,10 +544,14 @@ func (gbq *GroupBudgetQuery) querySpec() *sqlgraph.QuerySpec {
 func (gbq *GroupBudgetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(gbq.driver.Dialect())
 	t1 := builder.Table(groupbudget.Table)
-	selector := builder.Select(t1.Columns(groupbudget.Columns...)...).From(t1)
+	columns := gbq.fields
+	if len(columns) == 0 {
+		columns = groupbudget.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if gbq.sql != nil {
 		selector = gbq.sql
-		selector.Select(selector.Columns(groupbudget.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range gbq.predicates {
 		p(selector)
@@ -815,13 +819,24 @@ func (gbgb *GroupBudgetGroupBy) sqlScan(ctx context.Context, v interface{}) erro
 }
 
 func (gbgb *GroupBudgetGroupBy) sqlQuery() *sql.Selector {
-	selector := gbgb.sql
-	columns := make([]string, 0, len(gbgb.fields)+len(gbgb.fns))
-	columns = append(columns, gbgb.fields...)
+	selector := gbgb.sql.Select()
+	aggregation := make([]string, 0, len(gbgb.fns))
 	for _, fn := range gbgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(gbgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(gbgb.fields)+len(gbgb.fns))
+		for _, f := range gbgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(gbgb.fields...)...)
 }
 
 // GroupBudgetSelect is the builder for selecting fields of GroupBudget entities.
@@ -1037,16 +1052,10 @@ func (gbs *GroupBudgetSelect) BoolX(ctx context.Context) bool {
 
 func (gbs *GroupBudgetSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := gbs.sqlQuery().Query()
+	query, args := gbs.sql.Query()
 	if err := gbs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (gbs *GroupBudgetSelect) sqlQuery() sql.Querier {
-	selector := gbs.sql
-	selector.Select(selector.Columns(gbs.fields...)...)
-	return selector
 }

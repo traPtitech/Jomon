@@ -67,7 +67,7 @@ func (*File) scanValues(columns []string) ([]interface{}, error) {
 		case file.FieldID:
 			values[i] = new(uuid.UUID)
 		case file.ForeignKeys[0]: // request_file
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type File", columns[i])
 		}
@@ -115,10 +115,11 @@ func (f *File) assignValues(columns []string, values []interface{}) error {
 				*f.DeletedAt = value.Time
 			}
 		case file.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field request_file", values[i])
-			} else if value != nil {
-				f.request_file = value
+			} else if value.Valid {
+				f.request_file = new(uuid.UUID)
+				*f.request_file = *value.S.(*uuid.UUID)
 			}
 		}
 	}

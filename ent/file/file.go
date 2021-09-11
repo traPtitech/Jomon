@@ -25,7 +25,7 @@ const (
 	EdgeRequest = "request"
 	// Table holds the table name of the file in the database.
 	Table = "files"
-	// RequestTable is the table the holds the request relation/edge.
+	// RequestTable is the table that holds the request relation/edge.
 	RequestTable = "files"
 	// RequestInverseTable is the table name for the Request entity.
 	// It exists in this package in order to avoid circular dependency with the "request" package.

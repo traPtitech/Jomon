@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/tag"
 )
 
 func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
@@ -20,6 +21,17 @@ func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
 		modeltags = append(modeltags, ConvertEntTagToModelTag(tag))
 	}
 	return modeltags, nil
+}
+
+func (repo *EntRepository) GetTag(ctx context.Context, tagID uuid.UUID) (*Tag, error) {
+	tag, err := repo.client.Tag.
+		Query().
+		Where(tag.IDEQ(tagID)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ConvertEntTagToModelTag(tag), nil
 }
 
 func (repo *EntRepository) CreateTag(ctx context.Context, name string, description string) (*Tag, error) {

@@ -1,8 +1,10 @@
+//go:generate mockgen -source=$GOFILE -destination=mock_$GOPACKAGE/mock_$GOFILE -package=mock_$GOPACKAGE
 package service
 
 import (
 	"io"
 	"os"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/model"
@@ -14,6 +16,8 @@ type Service interface {
 	GetAccessToken(code string, codeVerifier string) (AuthResponse, error)
 	GetClientId() string
 	GetMe(token string) (*User, error)
+	StrToDate(str string) (time.Time, error)
+	StrToTime(str string) (time.Time, error)
 }
 type Services struct {
 	Repository model.Repository

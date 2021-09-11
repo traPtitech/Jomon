@@ -20,9 +20,9 @@ type RequestStatusDelete struct {
 	mutation *RequestStatusMutation
 }
 
-// Where adds a new predicate to the RequestStatusDelete builder.
+// Where appends a list predicates to the RequestStatusDelete builder.
 func (rsd *RequestStatusDelete) Where(ps ...predicate.RequestStatus) *RequestStatusDelete {
-	rsd.mutation.predicates = append(rsd.mutation.predicates, ps...)
+	rsd.mutation.Where(ps...)
 	return rsd
 }
 
@@ -46,6 +46,9 @@ func (rsd *RequestStatusDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(rsd.hooks) - 1; i >= 0; i-- {
+			if rsd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = rsd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, rsd.mutation); err != nil {
