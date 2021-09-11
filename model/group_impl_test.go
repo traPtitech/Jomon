@@ -65,7 +65,7 @@ func TestEntRepository_CreateMember(t *testing.T) {
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
-	t.Run("Sucsess", func(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
@@ -82,9 +82,11 @@ func TestEntRepository_CreateMember(t *testing.T) {
 		assert.Equal(t, member.ID, user.ID)
 
 		FalseMember, err := repo.CreateMember(ctx, uuid.New(), user.ID)
-		if FalseMember == nil {
-			assert.NoError(t, err)
-		}
+		assert.NoError(t, err)
+		assert.Equal(t, FalseMember, user.ID)
+		// if FalseMember == nil {
+		// 	assert.NoError(t, err)
+		// }
 
 	})
 }
@@ -94,7 +96,7 @@ func TestEntRepository_DeleteMember(t *testing.T) {
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
-	t.Run("Sucsess", func(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)

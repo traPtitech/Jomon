@@ -2,7 +2,7 @@ package model
 
 import (
 	"context"
-	"errors"
+	// "errors"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
@@ -62,21 +62,21 @@ func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, 
 		return nil, err
 	}
 
-	var groups []*Group
-	groups, err = repo.GetGroups(ctx)
-	if err != nil {
-		return nil, err
-	}
-	groupIDExist := false
-	for _, v := range groups {
-		if v.ID == groupID {
-			groupIDExist = true
-		}
-	}
-	if groupIDExist == false {
-		err = errors.New("存在しないgroupIDです。")
-		return nil, err
-	}
+	// var groups []*Group
+	// groups, err = repo.GetGroups(ctx)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// groupIDExist := false
+	// for _, v := range groups {
+	// 	if v.ID == groupID {
+	// 		groupIDExist = true
+	// 	}
+	// }
+	// if groupIDExist == false {
+	// 	err = errors.New("存在しないgroupIDです。")
+	// 	return nil, err
+	// }
 
 	created := &Member{userID}
 	return created, nil
