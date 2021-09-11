@@ -97,9 +97,11 @@ func TestEntRepository_CreateMember(t *testing.T) {
 		assert.Equal(t, member.ID, user.ID)
 
 		FalseMember, err := repo.CreateMember(ctx, uuid.New(), user.ID)
-		if FalseMember == nil {
-			assert.NoError(t, err)
-		}
+		assert.NoError(t, err)
+		assert.Equal(t, FalseMember, user.ID)
+		// if FalseMember == nil {
+		// 	assert.NoError(t, err)
+		// }
 
 	})
 
