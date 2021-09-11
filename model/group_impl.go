@@ -64,8 +64,8 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 
 func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*Member, error) {
 	_, err := repo.client.Group.
-		Update().
-		Where(group.IDEQ(groupID)).
+		UpdateOneID(groupID).
+		SetName("group").
 		AddUserIDs(userID).
 		Save(ctx)
 	if err != nil {
