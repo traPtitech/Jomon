@@ -39,26 +39,11 @@ services:
       TZ: Asia/Tokyo
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
     volumes:
-      - "./docker/mysql.cnf:/etc/mysql/conf.d/mysql.cnf"
+      - "./docker/mysql:/docker-entrypoint-initdb.d"
     expose:
       - "3306"
     ports:
       - "3306:3306"
-
-  test-db:
-    image: mariadb:10.3.29
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: jomon
-      TZ: Asia/Tokyo
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
-    volumes:
-      - "./docker/mysql.cnf:/etc/mysql/conf.d/mysql.cnf"
-    expose:
-      - "3307"
-    ports:
-      - "3307:3306"
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -69,13 +54,3 @@ services:
         - PMA_PASSWORD=password
     ports:
         - 8888:80
-
-  test-phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    environment:
-        - PMA_ARBITRARY=1
-        - PMA_HOST=test-db
-        - PMA_USER=root
-        - PMA_PASSWORD=password
-    ports:
-        - 8889:80
