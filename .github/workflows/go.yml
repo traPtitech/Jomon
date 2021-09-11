@@ -78,7 +78,7 @@ jobs:
         MARIADB_DATABASE: jomon
         MARIADB_HOSTNAME: "localhost"
         MARIADB_PORT: 50000
-        UPLOAD_DIR: "./uploads"
+        UPLOAD_DIR: $(GITHUB_WORKSPACE)/uploads
 
     - name: Upload coverage to Codecov
       run: bash <(curl -s https://codecov.io/bash)
