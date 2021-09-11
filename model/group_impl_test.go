@@ -95,6 +95,12 @@ func TestEntRepository_CreateMember(t *testing.T) {
 		member, err := repo.CreateMember(ctx, group.ID, user.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, member.ID, user.ID)
+
+		FalseMember, err := repo.CreateMember(ctx, uuid.New(), user.ID)
+		if FalseMember == nil {
+			assert.NoError(t, err)
+		}
+
 	})
 
 	t.Run("UnknownGroup", func(t *testing.T) {
