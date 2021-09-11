@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/tag"
 )
 
 func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
