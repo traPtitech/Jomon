@@ -1,3 +1,4 @@
+//go:generate mockgen -source=$GOFILE -destination=mock_$GOPACKAGE/mock_$GOFILE -package=mock_$GOPACKAGE
 package model
 
 import (
@@ -9,6 +10,7 @@ import (
 
 type GroupRepository interface {
 	GetGroups(ctx context.Context) ([]*Group, error)
+	GetGroup(ctx context.Context, groupID uuid.UUID) (*Group, error)
 	CreateGroup(ctx context.Context, name string, description string, budget *int, owners *[]User) (*Group, error)
 }
 

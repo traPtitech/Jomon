@@ -27,14 +27,14 @@ const (
 	EdgeUser = "user"
 	// Table holds the table name of the comment in the database.
 	Table = "comments"
-	// RequestTable is the table the holds the request relation/edge.
+	// RequestTable is the table that holds the request relation/edge.
 	RequestTable = "comments"
 	// RequestInverseTable is the table name for the Request entity.
 	// It exists in this package in order to avoid circular dependency with the "request" package.
 	RequestInverseTable = "requests"
 	// RequestColumn is the table column denoting the request relation/edge.
 	RequestColumn = "request_comment"
-	// UserTable is the table the holds the user relation/edge.
+	// UserTable is the table that holds the user relation/edge.
 	UserTable = "users"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.

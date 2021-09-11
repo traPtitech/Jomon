@@ -120,11 +120,17 @@ func (gbc *GroupBudgetCreate) Save(ctx context.Context) (*GroupBudget, error) {
 				return nil, err
 			}
 			gbc.mutation = mutation
-			node, err = gbc.sqlSave(ctx)
+			if node, err = gbc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(gbc.hooks) - 1; i >= 0; i-- {
+			if gbc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gbc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gbc.mutation); err != nil {
@@ -143,6 +149,19 @@ func (gbc *GroupBudgetCreate) SaveX(ctx context.Context) *GroupBudget {
 	return v
 }
 
+// Exec executes the query.
+func (gbc *GroupBudgetCreate) Exec(ctx context.Context) error {
+	_, err := gbc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (gbc *GroupBudgetCreate) ExecX(ctx context.Context) {
+	if err := gbc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (gbc *GroupBudgetCreate) defaults() {
 	if _, ok := gbc.mutation.CreatedAt(); !ok {
@@ -158,10 +177,10 @@ func (gbc *GroupBudgetCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (gbc *GroupBudgetCreate) check() error {
 	if _, ok := gbc.mutation.Amount(); !ok {
-		return &ValidationError{Name: "amount", err: errors.New("ent: missing required field \"amount\"")}
+		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "amount"`)}
 	}
 	if _, ok := gbc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
 	if _, ok := gbc.mutation.GroupID(); !ok {
 		return &ValidationError{Name: "group", err: errors.New("ent: missing required edge \"group\"")}
@@ -172,10 +191,13 @@ func (gbc *GroupBudgetCreate) check() error {
 func (gbc *GroupBudgetCreate) sqlSave(ctx context.Context) (*GroupBudget, error) {
 	_node, _spec := gbc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gbc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(uuid.UUID)
 	}
 	return _node, nil
 }
@@ -290,17 +312,19 @@ func (gbcb *GroupBudgetCreateBulk) Save(ctx context.Context) ([]*GroupBudget, er
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, gbcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, gbcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, gbcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -324,4 +348,17 @@ func (gbcb *GroupBudgetCreateBulk) SaveX(ctx context.Context) []*GroupBudget {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (gbcb *GroupBudgetCreateBulk) Exec(ctx context.Context) error {
+	_, err := gbcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (gbcb *GroupBudgetCreateBulk) ExecX(ctx context.Context) {
+	if err := gbcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -25,28 +25,28 @@ const (
 	EdgeRequest = "request"
 	// Table holds the table name of the transaction in the database.
 	Table = "transactions"
-	// DetailTable is the table the holds the detail relation/edge.
+	// DetailTable is the table that holds the detail relation/edge.
 	DetailTable = "transaction_details"
 	// DetailInverseTable is the table name for the TransactionDetail entity.
 	// It exists in this package in order to avoid circular dependency with the "transactiondetail" package.
 	DetailInverseTable = "transaction_details"
 	// DetailColumn is the table column denoting the detail relation/edge.
 	DetailColumn = "transaction_detail"
-	// TagTable is the table the holds the tag relation/edge.
+	// TagTable is the table that holds the tag relation/edge.
 	TagTable = "tags"
 	// TagInverseTable is the table name for the Tag entity.
 	// It exists in this package in order to avoid circular dependency with the "tag" package.
 	TagInverseTable = "tags"
 	// TagColumn is the table column denoting the tag relation/edge.
 	TagColumn = "transaction_tag"
-	// GroupBudgetTable is the table the holds the group_budget relation/edge.
+	// GroupBudgetTable is the table that holds the group_budget relation/edge.
 	GroupBudgetTable = "transactions"
 	// GroupBudgetInverseTable is the table name for the GroupBudget entity.
 	// It exists in this package in order to avoid circular dependency with the "groupbudget" package.
 	GroupBudgetInverseTable = "group_budgets"
 	// GroupBudgetColumn is the table column denoting the group_budget relation/edge.
 	GroupBudgetColumn = "group_budget_transaction"
-	// RequestTable is the table the holds the request relation/edge.
+	// RequestTable is the table that holds the request relation/edge.
 	RequestTable = "transactions"
 	// RequestInverseTable is the table name for the Request entity.
 	// It exists in this package in order to avoid circular dependency with the "request" package.
