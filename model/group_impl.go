@@ -3,7 +3,6 @@ package model
 import (
 	"context"
 	"errors"
-	// "errors"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
