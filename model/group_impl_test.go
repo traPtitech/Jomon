@@ -16,7 +16,7 @@ func TestEntRepository_GetMembers(t *testing.T) {
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
-	t.Run("Success1", func(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
@@ -117,6 +117,7 @@ func TestEntRepository_CreateFalseMember(t *testing.T) {
 		t.Parallel()
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
+		
 		_, err = repo.CreateMember(ctx, uuid.New(), user.ID)
 		assert.Error(t, err)
 	})
