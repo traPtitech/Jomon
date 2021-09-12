@@ -37,20 +37,17 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 }
 
 func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*User, error) {
-	groups, err := repo.GetGroups(ctx)
+	gotGroup, err := repo.client.Group.
+		Query().
+		Where(group.IDEQ(groupID)).
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	groupIDExist := false
-	for _, v := range groups {
-		if v.ID == groupID {
-			groupIDExist = true
-		}
-	}
-	if groupIDExist == false {
+	if len(gotGroup) == 0 {
 		return nil, errors.New("Unknown groupID")
 	}
-	
+
 	members, err := repo.client.Group.
 		Query().
 		Where(group.IDEQ(groupID)).
