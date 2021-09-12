@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
@@ -36,6 +37,20 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 }
 
 func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*User, error) {
+	groups, err := repo.GetGroups(ctx)
+	if err != nil {
+		return nil, err
+	}
+	groupIDExist := false
+	for _, v := range groups {
+		if v.ID == groupID {
+			groupIDExist = true
+		}
+	}
+	if groupIDExist == false {
+		return nil, errors.New("Unknown groupID")
+	}
+	
 	members, err := repo.client.Group.
 		Query().
 		Where(group.IDEQ(groupID)).
@@ -66,8 +81,8 @@ func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, 
 
 func (repo *EntRepository) DeleteMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) error {
 	_, err := repo.client.Group.
-		Update().
-		Where(group.IDEQ(groupID)).
+		UpdateOneID(groupID).
+		SetName("group").
 		RemoveUserIDs(userID).
 		Save(ctx)
 	if err != nil {
