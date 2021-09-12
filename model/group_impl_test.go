@@ -103,7 +103,7 @@ func TestEntRepository_CreateFalseMember(t *testing.T) {
 	client, storage, err := setup(t, ctx)
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
-	
+
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
@@ -132,7 +132,7 @@ func TestEntRepository_CreateFalseMember(t *testing.T) {
 
 		_, err = repo.CreateMember(ctx, group.ID, uuid.New())
 		assert.Error(t, err)
-  })
+	})
 }
 
 func TestEntRepository_DeleteMember(t *testing.T) {
