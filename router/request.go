@@ -61,21 +61,24 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 	if c.QueryParam("year") != "" {
 		year, err = strconv.Atoi(c.QueryParam("year"))
 		if err != nil {
-			return badRequest(err)
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 	}
 	var since time.Time
 	if c.QueryParam("since") != "" {
 		since, err = h.Service.StrToDate(c.QueryParam("since"))
 		if err != nil {
-			return badRequest(err)
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 	}
 	var until time.Time
 	if c.QueryParam("until") != "" {
 		until, err = h.Service.StrToDate(c.QueryParam("until"))
 		if err != nil {
-			return badRequest(err)
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 	}
 	tag := c.QueryParam("tag")
@@ -142,14 +145,16 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 	var req Request
 	var err error
 	if err = c.Bind(&req); err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	var tags []*model.Tag
 	for _, tagID := range req.Tags {
 		ctx := context.Background()
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
-			return internalServerError(err)
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 		tags = append(tags, tag)
 	}
@@ -158,13 +163,15 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		ctx := context.Background()
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
-			return internalServerError(err)
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
 	ctx := context.Background()
 	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, group, req.CreatedBy)
 	if err != nil {
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	var resgroup *GroupOverview
 	if group != nil {
@@ -205,12 +212,14 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 func (h *Handlers) GetRequest(c echo.Context) error {
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	ctx := context.Background()
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	var resgroup *GroupOverview
 	if request.Group != nil {
@@ -253,21 +262,25 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	var err error
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if requestID == uuid.Nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	if err := c.Bind(&req); err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	var tags []*model.Tag
 	for _, tagID := range req.Tags {
 		ctx := context.Background()
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
-			return internalServerError(err)
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 		tags = append(tags, tag)
 	}
@@ -276,13 +289,15 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		ctx := context.Background()
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
-			return internalServerError(err)
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
 	ctx := context.Background()
 	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Amount, req.Title, req.Content, tags, group)
 	if err != nil {
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	var resgroup *GroupOverview
