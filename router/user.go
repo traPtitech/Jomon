@@ -1,112 +1,77 @@
 package router
 
 import (
-	"context"
-	"errors"
 	"net/http"
-	"time"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/traPtitech/Jomon/service"
 )
 
 type User struct {
-	Name        string `json:"name"`
-	DisplayName string `json:"display_name"`
-	Admin       bool   `json:"admin"`
-}
-
-type UserOverview struct {
-	Name        string     `json:"name"`
-	DisplayName string     `json:"display_name"`
-	Admin       bool       `json:"admin"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	DeletedAt   *time.Time `json:"deleted_at"`
-}
-
-type PostUser struct {
-	Name        string `json:"name"`
-	DisplayName string `json:"display_name"`
-	Admin       bool   `json:"admin"`
-}
-
-type UserResponse struct {
-	Users []*UserOverview `json:"users"`
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	DisplayName string    `json:"display_name"`
+	Admin       bool      `json:"admin"`
 }
 
 func (h *Handlers) GetUsers(c echo.Context) error {
-	ctx := context.Background()
-	users, err := h.Repository.GetUsers(ctx)
+	users, err := h.Repository.GetUsers(c.Request().Context())
 	if err != nil {
-		c.Logger().Error(err)
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	res := []*UserOverview{}
+
+	res := make([]User, 0, len(users))
 	for _, user := range users {
-		res = append(res, &UserOverview{
+		res = append(res, User{
+			ID:          user.ID,
 			Name:        user.Name,
 			DisplayName: user.DisplayName,
 			Admin:       user.Admin,
-			CreatedAt:   user.CreatedAt,
-			UpdatedAt:   user.UpdatedAt,
-			DeletedAt:   user.DeletedAt,
 		})
 	}
-	return c.JSON(http.StatusOK, &UserResponse{res})
+
+	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PutUser(c echo.Context) error {
-	var updateUser PostUser
-	if err := c.Bind(&updateUser); err != nil {
+type PutUserRequest struct {
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
+	Admin       bool   `json:"admin"`
+}
+
+func (h *Handlers) UpdateUserInfo(c echo.Context) error {
+	var newUser PutUserRequest
+	if err := c.Bind(&newUser); err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
-	ctx := context.Background()
-	user, err := h.Repository.GetUserByName(ctx, updateUser.Name)
+
+	user, err := h.Repository.GetUserByName(c.Request().Context(), newUser.Name)
 	if err != nil {
-		c.Logger().Error(err)
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusBadRequest, "no such user")
 	}
-	res, err := h.Repository.UpdateUser(ctx, user.ID, updateUser.Name, updateUser.DisplayName, updateUser.Admin)
+
+	updated, err := h.Repository.UpdateUser(c.Request().Context(), user.ID, newUser.Name, newUser.DisplayName, newUser.Admin)
 	if err != nil {
-		c.Logger().Error(err)
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	return c.JSON(http.StatusOK, &UserOverview{
-		Name:        res.Name,
-		DisplayName: res.DisplayName,
-		Admin:       res.Admin,
-		CreatedAt:   res.CreatedAt,
-		UpdatedAt:   res.UpdatedAt,
-		DeletedAt:   res.DeletedAt,
+
+	return c.JSON(http.StatusOK, User{
+		ID:          user.ID,
+		Name:        updated.Name,
+		DisplayName: updated.DisplayName,
+		Admin:       updated.Admin,
 	})
 }
 
 func (h *Handlers) GetMe(c echo.Context) error {
 	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 	if err != nil {
-		c.Logger().Error(err)
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	traqUser, ok := sess.Values[sessionUserKey].(*service.User)
+	user, ok := sess.Values[sessionUserKey].(User)
 	if !ok {
-		c.Logger().Error(errors.New("failed to get users."))
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user info")
 	}
 
-	ctx := context.Background()
-	user, err := h.Repository.GetUserByName(ctx, traqUser.Name)
-	if err != nil {
-		c.Logger().Error(err)
-		return c.NoContent(http.StatusInternalServerError)
-	}
-	res := &UserOverview{
-		Name:        user.Name,
-		DisplayName: user.DisplayName,
-		Admin:       user.Admin,
-		CreatedAt:   user.CreatedAt,
-		UpdatedAt:   user.UpdatedAt,
-		DeletedAt:   user.DeletedAt,
-	}
-	return c.JSON(http.StatusOK, res)
+	return c.JSON(http.StatusOK, user)
 }

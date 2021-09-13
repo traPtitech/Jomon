@@ -99,7 +99,7 @@ func (mr *MockUserRepositoryMockRecorder) GetUsers(ctx interface{}) *gomock.Call
 // UpdateUser mocks base method.
 func (m *MockUserRepository) UpdateUser(ctx context.Context, userID uuid.UUID, name, dn string, admin bool) (*model.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUser", ctx, userID, name, dn, admin)
+	ret := m.ctrl.Call(m, "UpdateUserInfo", ctx, userID, name, dn, admin)
 	ret0, _ := ret[0].(*model.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -108,5 +108,5 @@ func (m *MockUserRepository) UpdateUser(ctx context.Context, userID uuid.UUID, n
 // UpdateUser indicates an expected call of UpdateUser.
 func (mr *MockUserRepositoryMockRecorder) UpdateUser(ctx, userID, name, dn, admin interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockUserRepository)(nil).UpdateUser), ctx, userID, name, dn, admin)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserInfo", reflect.TypeOf((*MockUserRepository)(nil).UpdateUser), ctx, userID, name, dn, admin)
 }

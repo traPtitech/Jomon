@@ -30,7 +30,6 @@ func (h *Handlers) GetTags(c echo.Context) error {
 	ctx := context.Background()
 	tags, err := h.Repository.GetTags(ctx)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -51,14 +50,12 @@ func (h *Handlers) GetTags(c echo.Context) error {
 func (h *Handlers) PostTag(c echo.Context) error {
 	var tag Tag
 	if err := c.Bind(&tag); err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
 	created, err := h.Repository.CreateTag(ctx, tag.Name, tag.Description)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -76,23 +73,19 @@ func (h *Handlers) PostTag(c echo.Context) error {
 func (h *Handlers) PutTag(c echo.Context) error {
 	tagID, err := uuid.Parse(c.Param("tagID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if tagID == uuid.Nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	var req Tag
 	if err := c.Bind(&req); err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
 	tag, err := h.Repository.UpdateTag(ctx, tagID, req.Name, req.Description)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -110,18 +103,15 @@ func (h *Handlers) PutTag(c echo.Context) error {
 func (h *Handlers) DeleteTag(c echo.Context) error {
 	tagID, err := uuid.Parse(c.Param("tagID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if tagID == uuid.Nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
 	err = h.Repository.DeleteTag(ctx, tagID)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 

@@ -15,14 +15,14 @@ import (
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
+// TODO: 直す
 func TestHandlers_GetGroups(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		th, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -83,8 +83,8 @@ func TestHandlers_GetGroups(t *testing.T) {
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		groups := []*model.Group{}
@@ -104,8 +104,8 @@ func TestHandlers_GetGroups(t *testing.T) {
 	t.Run("FailedToGetGroups", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		ctx := context.Background()

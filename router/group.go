@@ -40,7 +40,6 @@ func (h *Handlers) GetGroups(c echo.Context) error {
 	ctx := context.Background()
 	groups, err := h.Repository.GetGroups(ctx)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -69,7 +68,7 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 		}
 
 		ctx := context.Background()
-		created, err := h.Repository.CreateGroup(ctx, group.Name, group.Description, group.Budget, owners)
+		created, err := h.MockRepository.CreateGroup(ctx, group.Name, group.Description, group.Budget, owners)
 		if err != nil {
 			return internalServerError(err)
 		}

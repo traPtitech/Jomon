@@ -16,14 +16,15 @@ import (
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
+// TODO: 直す
 func TestHandlers_GetTags(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -73,8 +74,8 @@ func TestHandlers_GetTags(t *testing.T) {
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		tags := []*model.Tag{}
@@ -94,8 +95,8 @@ func TestHandlers_GetTags(t *testing.T) {
 	t.Run("FailedToGetTags", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		ctx := context.Background()
@@ -109,14 +110,15 @@ func TestHandlers_GetTags(t *testing.T) {
 	})
 }
 
+// TODO: 直す
 func TestHandlers_PostTag(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -150,8 +152,8 @@ func TestHandlers_PostTag(t *testing.T) {
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -180,14 +182,15 @@ func TestHandlers_PostTag(t *testing.T) {
 	})
 }
 
+// TODO: 直す
 func TestHandlers_PutTag(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -222,8 +225,8 @@ func TestHandlers_PutTag(t *testing.T) {
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -254,8 +257,8 @@ func TestHandlers_PutTag(t *testing.T) {
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -280,8 +283,8 @@ func TestHandlers_PutTag(t *testing.T) {
 	t.Run("NilUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 		date := time.Now()
 
@@ -304,14 +307,15 @@ func TestHandlers_PutTag(t *testing.T) {
 	})
 }
 
+// TODO: 直す
 func TestHandlers_DeleteTag(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		id := uuid.New()
@@ -330,8 +334,8 @@ func TestHandlers_DeleteTag(t *testing.T) {
 	t.Run("UnknownID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		id := uuid.New()
@@ -350,8 +354,8 @@ func TestHandlers_DeleteTag(t *testing.T) {
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		path := "/api/tags/hoge"
@@ -362,8 +366,8 @@ func TestHandlers_DeleteTag(t *testing.T) {
 	t.Run("NilUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := mustMakeUser(t, false)
-		th, err := SetupTestHandlers(t, ctrl, accessUser)
+		accessUser := makeUser(t, false)
+		th, err := NewTestServer(t, ctrl, accessUser)
 		assert.NoError(t, err)
 
 		path := fmt.Sprintf("/api/tags/%s", uuid.Nil)
