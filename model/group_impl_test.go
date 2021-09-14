@@ -11,7 +11,8 @@ import (
 )
 
 func TestEntRepository_GetMembers(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -76,7 +77,8 @@ func TestEntRepository_GetMembers(t *testing.T) {
 }
 
 func TestEntRepository_CreateMember(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -121,7 +123,8 @@ func TestEntRepository_CreateMember(t *testing.T) {
 }
 
 func TestEntRepository_DeleteMember(t *testing.T) {
-	client, storage, err := setup(t)
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
