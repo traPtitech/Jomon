@@ -124,3 +124,4 @@ func (mr *MockServiceMockRecorder) StrToTime(str interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StrToTime", reflect.TypeOf((*MockService)(nil).StrToTime), str)
 }
+

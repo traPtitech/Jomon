@@ -16,7 +16,7 @@ func setup(t *testing.T, ctx context.Context) (*ent.Client, storage.Storage, err
 	if err != nil {
 		return nil, nil, err
 	}
-
+	
 	err = dropAll(t, ctx, client)
 	if err != nil {
 		return nil, nil, err
