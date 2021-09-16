@@ -70,10 +70,6 @@ func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, 
 	if err != nil {
 		return nil, err
 	}
-<<<<<<< HEAD
-=======
-
->>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 	created := &Member{userID}
 	return created, nil
 }

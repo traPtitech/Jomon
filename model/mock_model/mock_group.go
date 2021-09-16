@@ -108,8 +108,4 @@ func (m *MockGroupRepository) GetMembers(ctx context.Context, groupID uuid.UUID)
 func (mr *MockGroupRepositoryMockRecorder) GetMembers(ctx, groupID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMembers", reflect.TypeOf((*MockGroupRepository)(nil).GetMembers), ctx, groupID)
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569

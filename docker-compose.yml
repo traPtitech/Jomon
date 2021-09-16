@@ -78,8 +78,5 @@ services:
       - PMA_USER=root
       - PMA_PASSWORD=password
     ports:
-<<<<<<< HEAD
       - 8889:80
-=======
-      - 8889:80
->>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
+
