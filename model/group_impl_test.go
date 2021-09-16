@@ -18,6 +18,10 @@ func TestEntRepository_GetMembers(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+<<<<<<< HEAD
+=======
+		ctx := context.Background()
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 		budget := random.Numeric(t, 100000)
@@ -83,6 +87,10 @@ func TestEntRepository_CreateMember(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+<<<<<<< HEAD
+=======
+		ctx := context.Background()
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 		budget := random.Numeric(t, 100000)
@@ -99,6 +107,10 @@ func TestEntRepository_CreateMember(t *testing.T) {
 
 	t.Run("UnknownGroup", func(t *testing.T) {
 		t.Parallel()
+<<<<<<< HEAD
+=======
+		ctx := context.Background()
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 		_, err = repo.CreateMember(ctx, uuid.New(), user.ID)
@@ -127,6 +139,10 @@ func TestEntRepository_DeleteMember(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+<<<<<<< HEAD
+=======
+		ctx := context.Background()
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 		budget := random.Numeric(t, 100000)

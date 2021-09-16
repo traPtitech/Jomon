@@ -6,6 +6,7 @@ package mock_model
 
 import (
 	context "context"
+<<<<<<< HEAD
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -14,37 +15,66 @@ import (
 )
 
 // MockUserRepository is a mock of UserRepository interface.
+=======
+	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
+	model "github.com/traPtitech/Jomon/model"
+	reflect "reflect"
+)
+
+// MockUserRepository is a mock of UserRepository interface
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 type MockUserRepository struct {
 	ctrl     *gomock.Controller
 	recorder *MockUserRepositoryMockRecorder
 }
 
+<<<<<<< HEAD
 // MockUserRepositoryMockRecorder is the mock recorder for MockUserRepository.
+=======
+// MockUserRepositoryMockRecorder is the mock recorder for MockUserRepository
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 type MockUserRepositoryMockRecorder struct {
 	mock *MockUserRepository
 }
 
+<<<<<<< HEAD
 // NewMockUserRepository creates a new mock instance.
+=======
+// NewMockUserRepository creates a new mock instance
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 func NewMockUserRepository(ctrl *gomock.Controller) *MockUserRepository {
 	mock := &MockUserRepository{ctrl: ctrl}
 	mock.recorder = &MockUserRepositoryMockRecorder{mock}
 	return mock
 }
 
+<<<<<<< HEAD
 // EXPECT returns an object that allows the caller to indicate expected use.
+=======
+// EXPECT returns an object that allows the caller to indicate expected use
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 func (m *MockUserRepository) EXPECT() *MockUserRepositoryMockRecorder {
 	return m.recorder
 }
 
+<<<<<<< HEAD
 // CreateUser mocks base method.
 func (m *MockUserRepository) CreateUser(ctx context.Context, name, dn string, admin bool) (*model.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", ctx, name, dn, admin)
+=======
+// GetUserByName mocks base method
+func (m *MockUserRepository) GetUserByName(ctx context.Context, name string) (*model.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByName", ctx, name)
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 	ret0, _ := ret[0].(*model.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
+<<<<<<< HEAD
 // CreateUser indicates an expected call of CreateUser.
 func (mr *MockUserRepositoryMockRecorder) CreateUser(ctx, name, dn, admin interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
@@ -56,10 +86,24 @@ func (m *MockUserRepository) GetUserByID(ctx context.Context, userID uuid.UUID) 
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserByID", ctx, userID)
 	ret0, _ := ret[0].(*model.User)
+=======
+// GetUserByName indicates an expected call of GetUserByName
+func (mr *MockUserRepositoryMockRecorder) GetUserByName(ctx, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByName", reflect.TypeOf((*MockUserRepository)(nil).GetUserByName), ctx, name)
+}
+
+// GetUsers mocks base method
+func (m *MockUserRepository) GetUsers(ctx context.Context) ([]*model.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUsers", ctx)
+	ret0, _ := ret[0].([]*model.User)
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
+<<<<<<< HEAD
 // GetUserByID indicates an expected call of GetUserByID.
 func (mr *MockUserRepositoryMockRecorder) GetUserByID(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
@@ -70,11 +114,24 @@ func (mr *MockUserRepositoryMockRecorder) GetUserByID(ctx, userID interface{}) *
 func (m *MockUserRepository) GetUserByName(ctx context.Context, name string) (*model.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserByName", ctx, name)
+=======
+// GetUsers indicates an expected call of GetUsers
+func (mr *MockUserRepositoryMockRecorder) GetUsers(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockUserRepository)(nil).GetUsers), ctx)
+}
+
+// CreateUser mocks base method
+func (m *MockUserRepository) CreateUser(ctx context.Context, name, dn string, admin bool) (*model.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUser", ctx, name, dn, admin)
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 	ret0, _ := ret[0].(*model.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
+<<<<<<< HEAD
 // GetUserByName indicates an expected call of GetUserByName.
 func (mr *MockUserRepositoryMockRecorder) GetUserByName(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
@@ -86,10 +143,24 @@ func (m *MockUserRepository) GetUsers(ctx context.Context) ([]*model.User, error
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUsers", ctx)
 	ret0, _ := ret[0].([]*model.User)
+=======
+// CreateUser indicates an expected call of CreateUser
+func (mr *MockUserRepositoryMockRecorder) CreateUser(ctx, name, dn, admin interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockUserRepository)(nil).CreateUser), ctx, name, dn, admin)
+}
+
+// GetUserByID mocks base method
+func (m *MockUserRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (*model.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByID", ctx, userID)
+	ret0, _ := ret[0].(*model.User)
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
+<<<<<<< HEAD
 // GetUsers indicates an expected call of GetUsers.
 func (mr *MockUserRepositoryMockRecorder) GetUsers(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
@@ -97,6 +168,15 @@ func (mr *MockUserRepositoryMockRecorder) GetUsers(ctx interface{}) *gomock.Call
 }
 
 // UpdateUser mocks base method.
+=======
+// GetUserByID indicates an expected call of GetUserByID
+func (mr *MockUserRepositoryMockRecorder) GetUserByID(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByID", reflect.TypeOf((*MockUserRepository)(nil).GetUserByID), ctx, userID)
+}
+
+// UpdateUser mocks base method
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 func (m *MockUserRepository) UpdateUser(ctx context.Context, userID uuid.UUID, name, dn string, admin bool) (*model.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateUser", ctx, userID, name, dn, admin)
@@ -105,7 +185,11 @@ func (m *MockUserRepository) UpdateUser(ctx context.Context, userID uuid.UUID, n
 	return ret0, ret1
 }
 
+<<<<<<< HEAD
 // UpdateUser indicates an expected call of UpdateUser.
+=======
+// UpdateUser indicates an expected call of UpdateUser
+>>>>>>> 894e3e324c7bd810f1f210fbf313cb97e8038569
 func (mr *MockUserRepositoryMockRecorder) UpdateUser(ctx, userID, name, dn, admin interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockUserRepository)(nil).UpdateUser), ctx, userID, name, dn, admin)
