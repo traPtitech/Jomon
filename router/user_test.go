@@ -122,7 +122,6 @@ func TestHandlers_GetUsers(t *testing.T) {
 	})
 }
 
-// TODO: 直す
 func TestHandlers_UpdateUserInfo(t *testing.T) {
 	t.Parallel()
 
@@ -275,7 +274,6 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 	})
 }
 
-// TODO: 直す
 func TestHandlers_GetMe(t *testing.T) {
 	t.Parallel()
 	t.Run("Success", func(t *testing.T) {
