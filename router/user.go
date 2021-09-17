@@ -47,7 +47,7 @@ func (h *Handlers) UpdateUserInfo(c echo.Context) error {
 
 	user, err := h.Repository.GetUserByName(c.Request().Context(), newUser.Name)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "no such user")
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	updated, err := h.Repository.UpdateUser(c.Request().Context(), user.ID, newUser.Name, newUser.DisplayName, newUser.Admin)
