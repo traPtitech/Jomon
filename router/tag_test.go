@@ -1,6 +1,22 @@
 package router
 
-/*
+import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/testutil/random"
+)
+
 // TODO: 直す
 func TestHandlers_GetTags(t *testing.T) {
 	t.Parallel()
@@ -8,9 +24,7 @@ func TestHandlers_GetTags(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
-		assert.NoError(t, err)
+
 		date := time.Now()
 
 		tag1 := &model.Tag{
@@ -29,72 +43,81 @@ func TestHandlers_GetTags(t *testing.T) {
 		}
 		tags := []*model.Tag{tag1, tag2}
 
-		ctx := context.Background()
-		th.Repository.MockTagRepository.
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/tags", nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockTagRepository.
 			EXPECT().
-			GetTags(ctx).
+			GetTags(c.Request().Context()).
 			Return(tags, nil)
 
-		var resBody TagResponse
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/tags", nil, &resBody)
-		assert.Equal(t, http.StatusOK, statusCode)
-		assert.Len(t, resBody.Tags, 2)
-		if resBody.Tags[0].ID == tag1.ID {
-			assert.Equal(t, resBody.Tags[0].ID, tag1.ID)
-			assert.Equal(t, resBody.Tags[0].Name, tag1.Name)
-			assert.Equal(t, resBody.Tags[0].Description, tag1.Description)
-			assert.Equal(t, resBody.Tags[1].ID, tag2.ID)
-			assert.Equal(t, resBody.Tags[1].Name, tag2.Name)
-			assert.Equal(t, resBody.Tags[1].Description, tag2.Description)
-		} else {
-			assert.Equal(t, resBody.Tags[0].ID, tag2.ID)
-			assert.Equal(t, resBody.Tags[0].Name, tag2.Name)
-			assert.Equal(t, resBody.Tags[0].Description, tag2.Description)
-			assert.Equal(t, resBody.Tags[1].ID, tag1.ID)
-			assert.Equal(t, resBody.Tags[1].Name, tag1.Name)
-			assert.Equal(t, resBody.Tags[1].Description, tag1.Description)
+		resOverview := []*TagOverview{}
+		for _, tag := range tags {
+			resOverview = append(resOverview, &TagOverview{
+				ID:          tag.ID,
+				Name:        tag.Name,
+				Description: tag.Description,
+				CreatedAt:   tag.CreatedAt,
+				UpdatedAt:   tag.UpdatedAt,
+			})
+		}
+		res := TagResponse{resOverview}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.GetTags(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
 	})
+	/*
+		t.Run("Success2", func(t *testing.T) {
+			t.Parallel()
+			ctrl := gomock.NewController(t)
+			accessUser := makeUser(t, false)
+			th, err := NewTestServer(t, ctrl, accessUser)
+			assert.NoError(t, err)
 
-	t.Run("Success2", func(t *testing.T) {
-		t.Parallel()
-		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
-		assert.NoError(t, err)
+			tags := []*model.Tag{}
 
-		tags := []*model.Tag{}
+			ctx := context.Background()
+			th.Repository.MockTagRepository.
+				EXPECT().
+				GetTags(ctx).
+				Return(tags, nil)
 
-		ctx := context.Background()
-		th.Repository.MockTagRepository.
-			EXPECT().
-			GetTags(ctx).
-			Return(tags, nil)
+			var resBody TagResponse
+			statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/tags", nil, &resBody)
+			assert.Equal(t, http.StatusOK, statusCode)
+			assert.Len(t, resBody.Tags, 0)
+		})
 
-		var resBody TagResponse
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/tags", nil, &resBody)
-		assert.Equal(t, http.StatusOK, statusCode)
-		assert.Len(t, resBody.Tags, 0)
-	})
+		t.Run("FailedToGetTags", func(t *testing.T) {
+			t.Parallel()
+			ctrl := gomock.NewController(t)
+			accessUser := makeUser(t, false)
+			th, err := NewTestServer(t, ctrl, accessUser)
+			assert.NoError(t, err)
 
-	t.Run("FailedToGetTags", func(t *testing.T) {
-		t.Parallel()
-		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
-		assert.NoError(t, err)
+			ctx := context.Background()
+			th.Repository.MockTagRepository.
+				EXPECT().
+				GetTags(ctx).
+				Return(nil, errors.New("Failed to get tags."))
 
-		ctx := context.Background()
-		th.Repository.MockTagRepository.
-			EXPECT().
-			GetTags(ctx).
-			Return(nil, errors.New("Failed to get tags."))
-
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/tags", nil, nil)
-		assert.Equal(t, http.StatusInternalServerError, statusCode)
-	})
+			statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/tags", nil, nil)
+			assert.Equal(t, http.StatusInternalServerError, statusCode)
+		})
+	*/
 }
 
+/*
 // TODO: 直す
 func TestHandlers_PostTag(t *testing.T) {
 	t.Parallel()
