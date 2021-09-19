@@ -2,6 +2,7 @@ package router
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -76,45 +77,62 @@ func TestHandlers_GetTags(t *testing.T) {
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
 	})
-	/*
-		t.Run("Success2", func(t *testing.T) {
-			t.Parallel()
-			ctrl := gomock.NewController(t)
-			accessUser := makeUser(t, false)
-			th, err := NewTestServer(t, ctrl, accessUser)
-			assert.NoError(t, err)
 
-			tags := []*model.Tag{}
+	t.Run("Success2", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
 
-			ctx := context.Background()
-			th.Repository.MockTagRepository.
-				EXPECT().
-				GetTags(ctx).
-				Return(tags, nil)
+		tags := []*model.Tag{}
 
-			var resBody TagResponse
-			statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/tags", nil, &resBody)
-			assert.Equal(t, http.StatusOK, statusCode)
-			assert.Len(t, resBody.Tags, 0)
-		})
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/tags", nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
 
-		t.Run("FailedToGetTags", func(t *testing.T) {
-			t.Parallel()
-			ctrl := gomock.NewController(t)
-			accessUser := makeUser(t, false)
-			th, err := NewTestServer(t, ctrl, accessUser)
-			assert.NoError(t, err)
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockTagRepository.
+			EXPECT().
+			GetTags(c.Request().Context()).
+			Return(tags, nil)
 
-			ctx := context.Background()
-			th.Repository.MockTagRepository.
-				EXPECT().
-				GetTags(ctx).
-				Return(nil, errors.New("Failed to get tags."))
+		resOverview := []*TagOverview{}
+		res := TagResponse{resOverview}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
 
-			statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/tags", nil, nil)
-			assert.Equal(t, http.StatusInternalServerError, statusCode)
-		})
-	*/
+		if assert.NoError(t, h.Handlers.GetTags(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("FailedToGetTags", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/tags", nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		mocErr := errors.New("failed to get tags")
+		h.Repository.MockTagRepository.
+			EXPECT().
+			GetTags(c.Request().Context()).
+			Return(nil, mocErr)
+
+		err = h.Handlers.GetTags(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		}
+	})
 }
 
 /*
