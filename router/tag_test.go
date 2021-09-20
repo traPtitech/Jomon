@@ -1,6 +1,7 @@
 package router
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -135,7 +136,6 @@ func TestHandlers_GetTags(t *testing.T) {
 	})
 }
 
-/*
 // TODO: 直す
 func TestHandlers_PostTag(t *testing.T) {
 	t.Parallel()
@@ -143,9 +143,6 @@ func TestHandlers_PostTag(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
-		assert.NoError(t, err)
 		date := time.Now()
 
 		tag := &model.Tag{
@@ -156,25 +153,46 @@ func TestHandlers_PostTag(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
-		ctx := context.Background()
-		th.Repository.MockTagRepository.
-			EXPECT().
-			CreateTag(ctx, tag.Name, tag.Description).
-			Return(tag, nil)
-
-		req := Tag{
+		reqTag := Tag{
 			Name:        tag.Name,
 			Description: tag.Description,
 		}
+		reqBody, err := json.Marshal(reqTag)
+		require.NoError(t, err)
 
-		var resBody TagOverview
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.POST, "/api/tags", &req, &resBody)
-		assert.Equal(t, http.StatusOK, statusCode)
-		assert.Equal(t, tag.ID, resBody.ID)
-		assert.Equal(t, tag.Name, resBody.Name)
-		assert.Equal(t, tag.Description, resBody.Description)
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPost, "/api/tags", bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		h.Repository.MockTagRepository.
+			EXPECT().
+			CreateTag(c.Request().Context(), tag.Name, tag.Description).
+			Return(tag, nil)
+
+		res := TagOverview{
+			ID:          tag.ID,
+			Name:        tag.Name,
+			Description: tag.Description,
+			CreatedAt:   tag.CreatedAt,
+			UpdatedAt:   tag.UpdatedAt,
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PostTag(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
 	})
+}
 
+/*
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
@@ -207,6 +225,7 @@ func TestHandlers_PostTag(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
 }
+
 
 // TODO: 直す
 func TestHandlers_PutTag(t *testing.T) {
@@ -332,6 +351,7 @@ func TestHandlers_PutTag(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, statusCode)
 	})
 }
+
 
 // TODO: 直す
 func TestHandlers_DeleteTag(t *testing.T) {
