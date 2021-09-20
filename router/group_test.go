@@ -136,7 +136,6 @@ func TestHandlers_GetMembers(t *testing.T) {
 			Budget:      &budget,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		user1 := &model.User{
@@ -146,7 +145,6 @@ func TestHandlers_GetMembers(t *testing.T) {
 			Admin:       true,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 		user2 := &model.User{
 			ID:          uuid.New(),
@@ -155,7 +153,6 @@ func TestHandlers_GetMembers(t *testing.T) {
 			Admin:       true,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 		members := []*model.User{user1, user2}
 
@@ -194,7 +191,6 @@ func TestHandlers_GetMembers(t *testing.T) {
 			Budget:      &budget,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		ctx := context.Background()
@@ -251,7 +247,7 @@ func TestHandlers_GetMembers(t *testing.T) {
 	})
 }
 
-func TestHndlers_PostMember(t *testing.T) {
+func TestHandlers_PostMember(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
@@ -269,7 +265,6 @@ func TestHndlers_PostMember(t *testing.T) {
 			Budget:      &budget,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		user := &model.User{
@@ -279,14 +274,13 @@ func TestHndlers_PostMember(t *testing.T) {
 			Admin:       true,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		ctx := context.Background()
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			CreateMember(ctx, group.ID, user.ID).
-			Return(&model.Member{user.ID}, nil)
+			Return(&model.Member{ID: user.ID}, nil)
 
 		req := Member{
 			ID: user.ID,
@@ -313,7 +307,6 @@ func TestHndlers_PostMember(t *testing.T) {
 			Admin:       true,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		req := Member{
@@ -339,7 +332,6 @@ func TestHndlers_PostMember(t *testing.T) {
 			Admin:       true,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		req := Member{
@@ -351,7 +343,7 @@ func TestHndlers_PostMember(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, statusCode)
 	})
 
-	t.Run("UnkonwnGroupID", func(t *testing.T) {
+	t.Run("UnknownGroupID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		th, err := SetupTestHandlers(t, ctrl)
@@ -365,26 +357,25 @@ func TestHndlers_PostMember(t *testing.T) {
 			Admin:       true,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
-		unkonwnGroupID := uuid.New()
+		unknownGroupID := uuid.New()
 		ctx := context.Background()
 		th.Repository.MockGroupRepository.
 			EXPECT().
-			CreateMember(ctx, unkonwnGroupID, user.ID).
+			CreateMember(ctx, unknownGroupID, user.ID).
 			Return(nil, errors.New("unknown group id"))
 
 		req := Member{
 			ID: user.ID,
 		}
 
-		path := fmt.Sprintf("/api/groups/%s/members", unkonwnGroupID.String())
+		path := fmt.Sprintf("/api/groups/%s/members", unknownGroupID.String())
 		statusCode, _ := th.doRequest(t, echo.POST, path, &req, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
 
-	t.Run("UnkonwnUserID", func(t *testing.T) {
+	t.Run("UnknownUserID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		th, err := SetupTestHandlers(t, ctrl)
@@ -399,18 +390,17 @@ func TestHndlers_PostMember(t *testing.T) {
 			Budget:      &budget,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
-		unkonwnUserID := uuid.New()
+		unknownUserID := uuid.New()
 		ctx := context.Background()
 		th.Repository.MockGroupRepository.
 			EXPECT().
-			CreateMember(ctx, group.ID, unkonwnUserID).
+			CreateMember(ctx, group.ID, unknownUserID).
 			Return(nil, errors.New("unknown user id"))
 
 		req := Member{
-			ID: unkonwnUserID,
+			ID: unknownUserID,
 		}
 
 		path := fmt.Sprintf("/api/groups/%s/members", group.ID.String())
@@ -437,7 +427,6 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			Budget:      &budget,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		user := &model.User{
@@ -447,14 +436,13 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			Admin:       true,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		ctx := context.Background()
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			CreateMember(ctx, group.ID, user.ID).
-			Return(&model.Member{user.ID}, nil)
+			Return(&model.Member{ID: user.ID}, nil)
 
 		req := Member{
 			ID: user.ID,
@@ -489,7 +477,6 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			Budget:      &budget,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		user := &model.User{
@@ -499,14 +486,13 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			Admin:       true,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		ctx := context.Background()
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			CreateMember(ctx, group.ID, user.ID).
-			Return(&model.Member{user.ID}, nil)
+			Return(&model.Member{ID: user.ID}, nil)
 
 		req := Member{
 			ID: user.ID,
@@ -537,7 +523,6 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			Budget:      &budget,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		user := &model.User{
@@ -547,14 +532,13 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			Admin:       true,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		ctx := context.Background()
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			CreateMember(ctx, group.ID, user.ID).
-			Return(&model.Member{user.ID}, nil)
+			Return(&model.Member{ID: user.ID}, nil)
 
 		req := Member{
 			ID: user.ID,
@@ -585,7 +569,6 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			Budget:      &budget,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		user := &model.User{
@@ -595,14 +578,13 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			Admin:       true,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		ctx := context.Background()
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			CreateMember(ctx, group.ID, user.ID).
-			Return(&model.Member{user.ID}, nil)
+			Return(&model.Member{ID: user.ID}, nil)
 
 		req := Member{
 			ID: user.ID,
@@ -617,7 +599,7 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			DeleteMember(ctx, unknownGroupID, user.ID).
-			Return(errors.New("unkown group id"))
+			Return(errors.New("unknown group id"))
 
 		path2 := fmt.Sprintf("/api/groups/%s/members", unknownGroupID.String())
 		statusCode2, _ := th.doRequest(t, echo.DELETE, path2, &req, nil)
@@ -639,7 +621,6 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			Budget:      &budget,
 			CreatedAt:   date,
 			UpdatedAt:   date,
-			DeletedAt:   &date,
 		}
 
 		unknownMemberID := uuid.New()
@@ -647,7 +628,7 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			DeleteMember(ctx, group.ID, unknownMemberID).
-			Return(errors.New("unkown member id"))
+			Return(errors.New("unknown member id"))
 
 		req := Member{
 			ID: unknownMemberID,
