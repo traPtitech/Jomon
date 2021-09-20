@@ -375,7 +375,7 @@ func TestHandlers_PostMember(t *testing.T) {
 
 		path := fmt.Sprintf("/api/groups/%s/members", unknownGroupID.String())
 		statusCode, _ := th.doRequest(t, echo.POST, path, &req, nil)
-		assert.Equal(t, http.StatusInternalServerError, statusCode)
+		assert.Equal(t, http.StatusBadRequest, statusCode)
 	})
 
 	t.Run("UnknownUserID", func(t *testing.T) {
