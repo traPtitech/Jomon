@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/ent"
 )
 
 type Group struct {
@@ -151,6 +152,9 @@ func (h *Handlers) PostMember(c echo.Context) error {
 	ctx := context.Background()
 	created, err := h.Repository.CreateMember(ctx, groupID, member.ID)
 	if err != nil {
+		if ent.IsConstraintError(err) {
+			return badRequest(err)
+		}
 		return internalServerError(err)
 	}
 	
