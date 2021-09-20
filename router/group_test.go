@@ -280,7 +280,9 @@ func TestHandlers_PostMember(t *testing.T) {
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			CreateMember(ctx, group.ID, user.ID).
-			Return(&model.Member{ID: user.ID}, nil)
+			Return(&model.Member{
+				ID: user.ID,
+			}, nil)
 
 		req := Member{
 			ID: user.ID,
@@ -441,25 +443,16 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		ctx := context.Background()
 		th.Repository.MockGroupRepository.
 			EXPECT().
-			CreateMember(ctx, group.ID, user.ID).
-			Return(&model.Member{ID: user.ID}, nil)
+			DeleteMember(ctx, group.ID, user.ID).
+			Return(nil)
 
 		req := Member{
 			ID: user.ID,
 		}
 
-		var resBody Member
 		path := fmt.Sprintf("/api/groups/%s/members", group.ID.String())
-		statusCode, _ := th.doRequest(t, echo.POST, path, &req, &resBody)
-		require.Equal(t, http.StatusOK, statusCode)
-
-		th.Repository.MockGroupRepository.
-			EXPECT().
-			DeleteMember(ctx, group.ID, user.ID).
-			Return(nil)
-
-		statusCode2, _ := th.doRequest(t, echo.DELETE, path, &req, nil)
-		assert.Equal(t, http.StatusOK, statusCode2)
+		statusCode, _ := th.doRequest(t, echo.DELETE, path, &req, nil)
+		assert.Equal(t, http.StatusOK, statusCode)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
@@ -469,16 +462,6 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		require.NoError(t, err)
 		date := time.Now()
 
-		budget := random.Numeric(t, 1000000)
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -488,24 +471,13 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
-		ctx := context.Background()
-		th.Repository.MockGroupRepository.
-			EXPECT().
-			CreateMember(ctx, group.ID, user.ID).
-			Return(&model.Member{ID: user.ID}, nil)
-
 		req := Member{
 			ID: user.ID,
 		}
 
-		var resBody Member
-		path := fmt.Sprintf("/api/groups/%s/members", group.ID.String())
-		statusCode, _ := th.doRequest(t, echo.POST, path, &req, &resBody)
-		require.Equal(t, http.StatusOK, statusCode)
-
-		path2 := "/api/groups/hoge/members" // Invalid UUID
-		statusCode2, _ := th.doRequest(t, echo.DELETE, path2, &req, nil)
-		assert.Equal(t, http.StatusBadRequest, statusCode2)
+		path := "/api/groups/hoge/members" // Invalid UUID
+		statusCode, _ := th.doRequest(t, echo.DELETE, path, &req, nil)
+		assert.Equal(t, http.StatusBadRequest, statusCode)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -515,16 +487,6 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		require.NoError(t, err)
 		date := time.Now()
 
-		budget := random.Numeric(t, 1000000)
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -534,24 +496,13 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
-		ctx := context.Background()
-		th.Repository.MockGroupRepository.
-			EXPECT().
-			CreateMember(ctx, group.ID, user.ID).
-			Return(&model.Member{ID: user.ID}, nil)
-
 		req := Member{
 			ID: user.ID,
 		}
 
-		var resBody Member
-		path := fmt.Sprintf("/api/groups/%s/members", group.ID.String())
-		statusCode, _ := th.doRequest(t, echo.POST, path, &req, &resBody)
-		require.Equal(t, http.StatusOK, statusCode)
-
-		path2 := fmt.Sprintf("/api/groups/%s/members", uuid.Nil.String())
-		statusCode2, _ := th.doRequest(t, echo.DELETE, path2, &req, nil)
-		assert.Equal(t, http.StatusBadRequest, statusCode2)
+		path := fmt.Sprintf("/api/groups/%s/members", uuid.Nil.String())
+		statusCode, _ := th.doRequest(t, echo.DELETE, path, &req, nil)
+		assert.Equal(t, http.StatusBadRequest, statusCode)
 	})
 
 	t.Run("UnknownGroupID", func(t *testing.T) {
@@ -561,16 +512,6 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		require.NoError(t, err)
 		date := time.Now()
 
-		budget := random.Numeric(t, 1000000)
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -580,30 +521,20 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
-		ctx := context.Background()
-		th.Repository.MockGroupRepository.
-			EXPECT().
-			CreateMember(ctx, group.ID, user.ID).
-			Return(&model.Member{ID: user.ID}, nil)
-
 		req := Member{
 			ID: user.ID,
 		}
 
-		var resBody Member
-		path := fmt.Sprintf("/api/groups/%s/members", group.ID.String())
-		statusCode, _ := th.doRequest(t, echo.POST, path, &req, &resBody)
-		require.Equal(t, http.StatusOK, statusCode)
-
+		ctx := context.Background()
 		unknownGroupID := uuid.New()
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			DeleteMember(ctx, unknownGroupID, user.ID).
 			Return(errors.New("unknown group id"))
 
-		path2 := fmt.Sprintf("/api/groups/%s/members", unknownGroupID.String())
-		statusCode2, _ := th.doRequest(t, echo.DELETE, path2, &req, nil)
-		assert.Equal(t, http.StatusInternalServerError, statusCode2)
+		path := fmt.Sprintf("/api/groups/%s/members", unknownGroupID.String())
+		statusCode, _ := th.doRequest(t, echo.DELETE, path, &req, nil)
+		assert.Equal(t, http.StatusInternalServerError, statusCode)
 	})
 
 	t.Run("UnknownMemberID", func(t *testing.T) {
