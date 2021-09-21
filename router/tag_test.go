@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -234,8 +235,6 @@ func TestHandlers_PostTag(t *testing.T) {
 	})
 }
 
-/*
-
 // TODO: 直す
 func TestHandlers_PutTag(t *testing.T) {
 	t.Parallel()
@@ -243,9 +242,6 @@ func TestHandlers_PutTag(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
-		assert.NoError(t, err)
 		date := time.Now()
 
 		tag := &model.Tag{
@@ -256,26 +252,57 @@ func TestHandlers_PutTag(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
-		ctx := context.Background()
-		th.Repository.MockTagRepository.
-			EXPECT().
-			UpdateTag(ctx, tag.ID, tag.Name, tag.Description).
-			Return(tag, nil)
-
-		req := Tag{
+		reqTag := Tag{
 			Name:        tag.Name,
-			Description: tag.Description,
+			Description: random.AlphaNumeric(t, 50),
+		}
+		reqBody, err := json.Marshal(reqTag)
+		require.NoError(t, err)
+
+		updateTag := &model.Tag{
+			ID:          tag.ID,
+			Name:        reqTag.Name,
+			Description: reqTag.Description,
+			CreatedAt:   date,
+			UpdatedAt:   time.Now(),
 		}
 
-		var resBody TagOverview
-		path := fmt.Sprintf("/api/tags/%s", tag.ID.String())
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.PUT, path, &req, &resBody)
-		assert.Equal(t, http.StatusOK, statusCode)
-		assert.Equal(t, tag.ID, resBody.ID)
-		assert.Equal(t, tag.Name, resBody.Name)
-		assert.Equal(t, tag.Description, resBody.Description)
-	})
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/tags/%s", tag.ID), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/tags/:tagID")
+		c.SetParamNames("tagID")
+		c.SetParamValues(tag.ID.String())
 
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		h.Repository.MockTagRepository.
+			EXPECT().
+			UpdateTag(c.Request().Context(), tag.ID, reqTag.Name, reqTag.Description).
+			Return(updateTag, nil)
+
+		res := TagOverview{
+			ID:          updateTag.ID,
+			Name:        updateTag.Name,
+			Description: updateTag.Description,
+			CreatedAt:   updateTag.CreatedAt,
+			UpdatedAt:   updateTag.UpdatedAt,
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PutTag(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+}
+
+/*
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
