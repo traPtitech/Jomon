@@ -49,7 +49,8 @@ func (h *Handlers) GetGroups(c echo.Context) error {
 	ctx := context.Background()
 	groups, err := h.Repository.GetGroups(ctx)
 	if err != nil {
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	res := []*GroupOverview{}
