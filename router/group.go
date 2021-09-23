@@ -116,19 +116,23 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 func (h *Handlers) GetMembers(c echo.Context) error {
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
 	members, err := h.Repository.GetMembers(ctx, groupID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			return notFound(err)
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	var res []uuid.UUID
@@ -142,24 +146,29 @@ func (h *Handlers) GetMembers(c echo.Context) error {
 func (h *Handlers) PostMember(c echo.Context) error {
 	var member Member
 	if err := c.Bind(&member); err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
 	created, err := h.Repository.CreateMember(ctx, groupID, member.ID)
 	if err != nil {
 		if ent.IsConstraintError(err) {
-			return badRequest(err)
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	res := created.ID
@@ -170,24 +179,29 @@ func (h *Handlers) PostMember(c echo.Context) error {
 func (h *Handlers) DeleteMember(c echo.Context) error {
 	var member Member
 	if err := c.Bind(&member); err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		return badRequest(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
 	err = h.Repository.DeleteMember(ctx, groupID, member.ID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			return notFound(err)
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		return internalServerError(err)
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.NoContent(http.StatusOK)
