@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/testutil/random"
@@ -237,14 +238,17 @@ func TestHandlers_GetMembers(t *testing.T) {
 
 		unknownID := uuid.New()
 		ctx := context.Background()
+		var e *ent.NotFoundError
+		errors.As(errors.New("unknown id"), &e)
+
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			GetMembers(ctx, unknownID).
-			Return(nil, errors.New("Group not found"))
+			Return(nil, e)
 
 		path := fmt.Sprintf("/api/groups/%s/members", unknownID.String())
 		statusCode, _ := th.doRequest(t, echo.GET, path, nil, nil)
-		assert.Equal(t, http.StatusInternalServerError, statusCode)
+		assert.Equal(t, http.StatusNotFound, statusCode)
 	})
 }
 
@@ -364,10 +368,13 @@ func TestHandlers_PostMember(t *testing.T) {
 
 		unknownGroupID := uuid.New()
 		ctx := context.Background()
+		var e *ent.ConstraintError
+		errors.As(errors.New("unknown group id"), &e)
+
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			CreateMember(ctx, unknownGroupID, user.ID).
-			Return(nil, errors.New("unknown group id"))
+			Return(nil, e)
 
 		req := Member{
 			ID: user.ID,
@@ -397,10 +404,13 @@ func TestHandlers_PostMember(t *testing.T) {
 
 		unknownUserID := uuid.New()
 		ctx := context.Background()
+		var e *ent.ConstraintError
+		errors.As(errors.New("unknown user id"), &e)
+
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			CreateMember(ctx, group.ID, unknownUserID).
-			Return(nil, errors.New("unknown user id"))
+			Return(nil, e)
 
 		req := Member{
 			ID: unknownUserID,
@@ -408,7 +418,7 @@ func TestHandlers_PostMember(t *testing.T) {
 
 		path := fmt.Sprintf("/api/groups/%s/members", group.ID.String())
 		statusCode, _ := th.doRequest(t, echo.POST, path, &req, nil)
-		assert.Equal(t, http.StatusInternalServerError, statusCode)
+		assert.Equal(t, http.StatusBadRequest, statusCode)
 	})
 }
 
@@ -538,14 +548,17 @@ func TestHandlers_DeleteMember(t *testing.T) {
 
 		ctx := context.Background()
 		unknownGroupID := uuid.New()
+		var e *ent.NotFoundError
+		errors.As(errors.New("unknown group id"), &e)
+
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			DeleteMember(ctx, unknownGroupID, user.ID).
-			Return(errors.New("unknown group id"))
+			Return(e)
 
 		path := fmt.Sprintf("/api/groups/%s/members", unknownGroupID.String())
 		statusCode, _ := th.doRequest(t, echo.DELETE, path, &req, nil)
-		assert.Equal(t, http.StatusInternalServerError, statusCode)
+		assert.Equal(t, http.StatusNotFound, statusCode)
 	})
 
 	t.Run("UnknownMemberID", func(t *testing.T) {
@@ -567,10 +580,13 @@ func TestHandlers_DeleteMember(t *testing.T) {
 
 		unknownMemberID := uuid.New()
 		ctx := context.Background()
+		var e *ent.NotFoundError
+		errors.As(errors.New("unknown member id"), &e)
+
 		th.Repository.MockGroupRepository.
 			EXPECT().
 			DeleteMember(ctx, group.ID, unknownMemberID).
-			Return(errors.New("unknown member id"))
+			Return(e)
 
 		req := Member{
 			ID: unknownMemberID,
@@ -578,7 +594,7 @@ func TestHandlers_DeleteMember(t *testing.T) {
 
 		path := fmt.Sprintf("/api/groups/%s/members", group.ID.String())
 		statusCode, _ := th.doRequest(t, echo.DELETE, path, &req, nil)
-		assert.Equal(t, http.StatusInternalServerError, statusCode)
+		assert.Equal(t, http.StatusNotFound, statusCode)
 	})
 
 }
