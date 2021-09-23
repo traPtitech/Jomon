@@ -124,6 +124,9 @@ func (h *Handlers) GetMembers(c echo.Context) error {
 	ctx := context.Background()
 	members, err := h.Repository.GetMembers(ctx, groupID)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return notFound(err)
+		}
 		return internalServerError(err)
 	}
 
@@ -157,7 +160,7 @@ func (h *Handlers) PostMember(c echo.Context) error {
 		}
 		return internalServerError(err)
 	}
-	
+
 	res := created.ID
 
 	return c.JSON(http.StatusOK, &Member{res})
@@ -180,6 +183,9 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 	ctx := context.Background()
 	err = h.Repository.DeleteMember(ctx, groupID, member.ID)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return notFound(err)
+		}
 		return internalServerError(err)
 	}
 
