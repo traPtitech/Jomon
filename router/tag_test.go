@@ -300,47 +300,10 @@ func TestHandlers_PutTag(t *testing.T) {
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
 	})
-}
 
-/*
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
-		assert.NoError(t, err)
-		date := time.Now()
-
-		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        "",
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-
-		ctx := context.Background()
-		th.Repository.MockTagRepository.
-			EXPECT().
-			UpdateTag(ctx, tag.ID, tag.Name, tag.Description).
-			Return(nil, errors.New("Tag name can't be empty."))
-
-		req := Tag{
-			Name:        tag.Name,
-			Description: tag.Description,
-		}
-
-		path := fmt.Sprintf("/api/tags/%s", tag.ID.String())
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.PUT, path, &req, nil)
-		assert.Equal(t, http.StatusInternalServerError, statusCode)
-	})
-
-	t.Run("InvalidUUID", func(t *testing.T) {
-		t.Parallel()
-		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
-		assert.NoError(t, err)
 		date := time.Now()
 
 		tag := &model.Tag{
@@ -351,22 +314,83 @@ func TestHandlers_PutTag(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
-		req := Tag{
-			Name:        tag.Name,
+		reqTag := Tag{
+			Name:        "",
 			Description: tag.Description,
 		}
+		reqBody, err := json.Marshal(reqTag)
+		require.NoError(t, err)
 
-		path := "/api/tags/hoge" // Invalid UUID
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.PUT, path, &req, nil)
-		assert.Equal(t, http.StatusBadRequest, statusCode)
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/tags/%s", tag.ID), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/tags/:tagID")
+		c.SetParamNames("tagID")
+		c.SetParamValues(tag.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		mocErr := errors.New("Tag name can't be empty.")
+		h.Repository.MockTagRepository.
+			EXPECT().
+			UpdateTag(c.Request().Context(), tag.ID, reqTag.Name, reqTag.Description).
+			Return(nil, mocErr)
+
+		err = h.Handlers.PutTag(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		}
+	})
+
+	t.Run("InvalidUUID", func(t *testing.T) {
+
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		tag := &model.Tag{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		reqTag := Tag{
+			Name:        tag.Name,
+			Description: random.AlphaNumeric(t, 50),
+		}
+		reqBody, err := json.Marshal(reqTag)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, "/api/tags/hoge", bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/tags/:tagID")
+		c.SetParamNames("tagID")
+		c.SetParamValues("hoge")
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		_, resErr := uuid.Parse("hoge")
+
+		err = h.Handlers.PutTag(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
-		assert.NoError(t, err)
 		date := time.Now()
 
 		tag := &model.Tag{
@@ -377,18 +401,34 @@ func TestHandlers_PutTag(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
-		req := Tag{
+		reqTag := Tag{
 			Name:        tag.Name,
-			Description: tag.Description,
+			Description: random.AlphaNumeric(t, 50),
 		}
+		reqBody, err := json.Marshal(reqTag)
+		require.NoError(t, err)
 
-		path := fmt.Sprintf("/api/tags/%s", tag.ID.String())
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.PUT, path, &req, nil)
-		assert.Equal(t, http.StatusBadRequest, statusCode)
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/tags/%s", tag.ID), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/tags/:tagID")
+		c.SetParamNames("tagID")
+		c.SetParamValues(tag.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		err = h.Handlers.PutTag(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID")), err)
+		}
 	})
 }
 
-
+/*
 // TODO: 直す
 func TestHandlers_DeleteTag(t *testing.T) {
 	t.Parallel()

@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -76,7 +77,7 @@ func (h *Handlers) PutTag(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if tagID == uuid.Nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID"))
 	}
 	var req Tag
 	if err := c.Bind(&req); err != nil {
