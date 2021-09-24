@@ -8,9 +8,9 @@ down:
 
 .PHONY: test
 test:
-	@mkdir -p $(CURDIR)/uplaods
-	@MARIADB_HOSTNAME=localhost UPLOAD_DIR=$(CURDIR)/uplaods go test -cover -race ./...
-	@rmdir $(CURDIR)/uplaods
+	@mkdir -p $(CURDIR)/uploads
+	@MARIADB_HOSTNAME=localhost UPLOAD_DIR=$(CURDIR)/uploads go test -race -coverprofile=coverage.out -covermode=atomic ./...
+	@rmdir $(CURDIR)/uploads
 
 .PHONY: docs
 docs:
