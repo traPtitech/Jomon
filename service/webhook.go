@@ -12,28 +12,17 @@ import (
 	"path"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
 type WebhookApplication struct {
-	ApplicationID uuid.UUID                `json:"application_id"`
-	CurrentDetail WebhookApplicationDetail `json:"current_detail"`
-}
-
-type WebhookApplicationDetail struct {
-	UpdateUser User   `json:"update_user"`
-	Type       string `json:"type"`
-	Title      string `json:"title"`
-	Remarks    string `json:"remarks"`
-	Amount     int    `json:"amount"`
-	PaidAt     PaidAt `json:"paid_at"`
-}
-
-type PaidAt struct {
-	PaidAt time.Time `gorm:"type:date;not null"`
+	ID        uuid.UUID `json:"id"`
+	CreatedBy uuid.UUID `json:"created_by"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	Amount    int       `json:"amount"`
 }
 
 type WebhookRepository interface {
@@ -46,6 +35,14 @@ type webhookRepository struct {
 	id        string
 }
 
+func NewWebhookRepository(secret string, channelID string, id string) WebhookRepository {
+	return &webhookRepository{
+		secret: secret,
+		channelId: channelID,
+		id: id,
+	}
+}
+
 func (repo *webhookRepository) WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 	resApp := new(WebhookApplication)
 	err := json.Unmarshal(resBody, resApp)
@@ -55,14 +52,11 @@ func (repo *webhookRepository) WebhookEventHandler(c echo.Context, reqBody, resB
 	var content string
 
 	content += "## 申請書が作成されました" + "\n"
-	content += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.CurrentDetail.Title, "https://jomon.trap.jp", resApp.ApplicationID) + "\n"
-	content += fmt.Sprintf("- 支払日: %s", resApp.CurrentDetail.PaidAt.PaidAt.Format("2006-01-02")) + "\n"
-	content += fmt.Sprintf("- 支払金額: %s", strconv.Itoa(resApp.CurrentDetail.Amount)) + "\n"
+	content += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
+	content += fmt.Sprintf("- 支払金額: %s", strconv.Itoa(resApp.Amount)) + "\n"
 	content += "\n"
-	content += resApp.CurrentDetail.Remarks
 
 	_ = RequestWebhook(content, repo.secret, repo.channelId, repo.id, 1)
-
 }
 
 func RequestWebhook(message, secret, channelID, webhookID string, embed int) error {
@@ -85,10 +79,10 @@ func RequestWebhook(message, secret, channelID, webhookID string, embed int) err
 	if channelID != "" {
 		req.Header.Set("X-TRAQ-Channel-Id", channelID)
 	}
-	
+
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err 
+		return err
 	}
 	if res.StatusCode >= 400 {
 		return errors.New(http.StatusText(res.StatusCode))

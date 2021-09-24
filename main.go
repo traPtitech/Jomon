@@ -58,12 +58,18 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+  webhookSecret := os.Getenv("WEBHOOK_SECRET")
+	webhookChannelId := os.Getenv("WEBHOOK_CHANNEL_ID")
+	webhookId := os.Getenv("WEBHOOK_ID")
+	
 	handlers := router.Handlers{
 		Repository:   repo,
 		Logger:       logger,
 		Service:      services,
 		SessionName:  "session",
 		SessionStore: sessions.NewCookieStore([]byte("session")),
+		Webhook: service.NewWebhookRepository(webhookSecret, webhookChannelId, webhookId),
 	}
 
 	e := echo.New()
