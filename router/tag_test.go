@@ -20,6 +20,7 @@ import (
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
+// fixed
 func TestHandlers_GetTags(t *testing.T) {
 	t.Parallel()
 
