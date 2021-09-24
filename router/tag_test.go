@@ -20,7 +20,6 @@ import (
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
-// TODO: 直す
 func TestHandlers_GetTags(t *testing.T) {
 	t.Parallel()
 
@@ -137,7 +136,6 @@ func TestHandlers_GetTags(t *testing.T) {
 	})
 }
 
-// TODO: 直す
 func TestHandlers_PostTag(t *testing.T) {
 	t.Parallel()
 
@@ -235,7 +233,6 @@ func TestHandlers_PostTag(t *testing.T) {
 	})
 }
 
-// TODO: 直す
 func TestHandlers_PutTag(t *testing.T) {
 	t.Parallel()
 
@@ -347,7 +344,6 @@ func TestHandlers_PutTag(t *testing.T) {
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
-
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		date := time.Now()
@@ -428,7 +424,6 @@ func TestHandlers_PutTag(t *testing.T) {
 	})
 }
 
-// TODO: 直す
 func TestHandlers_DeleteTag(t *testing.T) {
 	t.Parallel()
 
