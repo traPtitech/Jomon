@@ -96,29 +96,11 @@ func TestEntRepository_CreateMember(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, member.ID, user.ID)
 	})
-}
-
-func TestEntRepository_CreateFalseMember(t *testing.T) {
-	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
-	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-
-	t.Run("Success", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		require.NoError(t, err)
-		_, err = repo.CreateMember(ctx, uuid.New(), user.ID)
-		assert.Error(t, err)
-	})
 
 	t.Run("UnknownGroup", func(t *testing.T) {
 		t.Parallel()
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
-		
 		_, err = repo.CreateMember(ctx, uuid.New(), user.ID)
 		assert.Error(t, err)
 	})

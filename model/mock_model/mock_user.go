@@ -48,6 +48,7 @@ func (m *MockUserRepository) CreateUser(ctx context.Context, name, dn string, ad
 // CreateUser indicates an expected call of CreateUser.
 func (mr *MockUserRepositoryMockRecorder) CreateUser(ctx, name, dn, admin interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
+
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockUserRepository)(nil).CreateUser), ctx, name, dn, admin)
 }
 

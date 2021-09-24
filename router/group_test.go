@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/ent"
-	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
@@ -454,10 +453,8 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		ctx := context.Background()
 		th.Repository.MockGroupRepository.
 			EXPECT().
-			CreateMember(ctx, group.ID, user.ID).
-			Return(&model.Member{
-				ID: user.ID,
-			}, nil)
+			DeleteMember(ctx, group.ID, user.ID).
+			Return(nil)
 
 		req := Member{
 			ID: user.ID,
@@ -483,14 +480,6 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			CreatedAt:   date,
 			UpdatedAt:   date,
 		}
-
-		ctx := context.Background()
-		th.Repository.MockGroupRepository.
-			EXPECT().
-			CreateMember(ctx, group.ID, user.ID).
-			Return(&model.Member{
-				ID: user.ID,
-			}, nil)
 
 		req := Member{
 			ID: user.ID,
