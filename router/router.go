@@ -18,6 +18,7 @@ type Handlers struct {
 	Service      service.Service
 	SessionName  string
 	SessionStore sessions.Store
+	Webhook service.WebhookRepository
 }
 
 func SetRouting(e *echo.Echo, h Handlers) {
@@ -38,7 +39,7 @@ func SetRouting(e *echo.Echo, h Handlers) {
 		apiRequests := api.Group("/requests", h.AuthUserMiddleware)
 		{
 			apiRequests.GET("", h.GetRequests)
-			apiRequests.POST("", h.PostRequest)
+			apiRequests.POST("", h.PostRequest, middleware.BodyDump(h.Webhook.WebhookEventHandler))
 			apiRequests.GET("/:requestID", h.GetRequest)
 			apiRequests.PUT("/:requestID", h.PutRequest)
 			apiRequests.POST("/:requestID/comments", h.PostComment)
