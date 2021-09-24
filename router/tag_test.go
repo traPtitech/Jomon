@@ -428,7 +428,6 @@ func TestHandlers_PutTag(t *testing.T) {
 	})
 }
 
-/*
 // TODO: 直す
 func TestHandlers_DeleteTag(t *testing.T) {
 	t.Parallel()
@@ -436,65 +435,168 @@ func TestHandlers_DeleteTag(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
+		date := time.Now()
+
+		tag := &model.Tag{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		reqTag := Tag{
+			Name:        tag.Name,
+			Description: random.AlphaNumeric(t, 50),
+		}
+		reqBody, err := json.Marshal(reqTag)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/tags/%s", tag.ID), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/tags/:tagID")
+		c.SetParamNames("tagID")
+		c.SetParamValues(tag.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 
-		id := uuid.New()
-
-		ctx := context.Background()
-		th.Repository.MockTagRepository.
+		h.Repository.MockTagRepository.
 			EXPECT().
-			DeleteTag(ctx, id).
+			DeleteTag(c.Request().Context(), tag.ID).
 			Return(nil)
 
-		path := fmt.Sprintf("/api/tags/%s", id.String())
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, path, nil, nil)
-		assert.Equal(t, http.StatusOK, statusCode)
+		if assert.NoError(t, h.Handlers.DeleteTag(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+		}
 	})
 
 	t.Run("UnknownID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
+		date := time.Now()
+
+		tag := &model.Tag{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		reqTag := Tag{
+			Name:        tag.Name,
+			Description: random.AlphaNumeric(t, 50),
+		}
+		reqBody, err := json.Marshal(reqTag)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/tags/%s", tag.ID), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/tags/:tagID")
+		c.SetParamNames("tagID")
+		c.SetParamValues(tag.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 
-		id := uuid.New()
-
-		ctx := context.Background()
-		th.Repository.MockTagRepository.
+		mocErr := errors.New("Unknown Tag ID")
+		h.Repository.MockTagRepository.
 			EXPECT().
-			DeleteTag(ctx, id).
-			Return(errors.New("Tag not found"))
+			DeleteTag(c.Request().Context(), tag.ID).
+			Return(mocErr)
 
-		path := fmt.Sprintf("/api/tags/%s", id.String())
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, path, nil, nil)
-		assert.Equal(t, http.StatusInternalServerError, statusCode)
+		err = h.Handlers.DeleteTag(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		}
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
+		date := time.Now()
+
+		tag := &model.Tag{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		reqTag := Tag{
+			Name:        tag.Name,
+			Description: random.AlphaNumeric(t, 50),
+		}
+		reqBody, err := json.Marshal(reqTag)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodDelete, "/api/tags/hoge", bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/tags/:tagID")
+		c.SetParamNames("tagID")
+		c.SetParamValues("hoge")
+
+		_, resErr := uuid.Parse("hoge")
+
+		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 
-		path := "/api/tags/hoge"
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, path, nil, nil)
-		assert.Equal(t, http.StatusBadRequest, statusCode)
+		err = h.Handlers.DeleteTag(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
+		date := time.Now()
+
+		tag := &model.Tag{
+			ID:          uuid.Nil,
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		reqTag := Tag{
+			Name:        tag.Name,
+			Description: random.AlphaNumeric(t, 50),
+		}
+		reqBody, err := json.Marshal(reqTag)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/tags/%s", tag.ID), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/tags/:tagID")
+		c.SetParamNames("tagID")
+		c.SetParamValues(tag.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 
-		path := fmt.Sprintf("/api/tags/%s", uuid.Nil)
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, path, nil, nil)
-		assert.Equal(t, http.StatusBadRequest, statusCode)
+		err = h.Handlers.DeleteTag(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID")), err)
+		}
 	})
 }
-*/

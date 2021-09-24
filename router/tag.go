@@ -107,7 +107,7 @@ func (h *Handlers) DeleteTag(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if tagID == uuid.Nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID"))
 	}
 
 	ctx := context.Background()
