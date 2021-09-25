@@ -1,6 +1,23 @@
 package router
 
-/*
+import (
+	"encoding/json"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/testutil/random"
+)
+
 // TODO: 直す
 func TestHandlers_GetGroups(t *testing.T) {
 	t.Parallel()
@@ -8,8 +25,7 @@ func TestHandlers_GetGroups(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		th, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+
 		date := time.Now()
 
 		budget1 := random.Numeric(t, 1000000)
@@ -35,73 +51,92 @@ func TestHandlers_GetGroups(t *testing.T) {
 
 		groups := []*model.Group{group1, group2}
 
-		ctx := context.Background()
-		th.Repository.MockGroupRepository.
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/groups", nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockGroupRepository.
 			EXPECT().
-			GetGroups(ctx).
+			GetGroups(c.Request().Context()).
 			Return(groups, nil)
 
-		var resBody []*GroupOverview
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/groups", nil, &resBody)
-		assert.Equal(t, http.StatusOK, statusCode)
-		assert.Len(t, resBody, 2)
-		if resBody[0].ID == group1.ID {
-			assert.Equal(t, group1.ID, resBody[0].ID)
-			assert.Equal(t, group1.Name, resBody[0].Name)
-			assert.Equal(t, group1.Description, resBody[0].Description)
-			assert.Equal(t, group1.Budget, resBody[0].Budget)
-			assert.Equal(t, group2.ID, resBody[1].ID)
-			assert.Equal(t, group2.Name, resBody[1].Name)
-			assert.Equal(t, group2.Description, resBody[1].Description)
-			assert.Equal(t, group2.Budget, resBody[1].Budget)
-		} else {
-			assert.Equal(t, group2.ID, resBody[0].ID)
-			assert.Equal(t, group2.Name, resBody[0].Name)
-			assert.Equal(t, group2.Description, resBody[0].Description)
-			assert.Equal(t, group2.Budget, resBody[0].Budget)
-			assert.Equal(t, group1.ID, resBody[1].ID)
-			assert.Equal(t, group1.Name, resBody[1].Name)
-			assert.Equal(t, group1.Description, resBody[1].Description)
-			assert.Equal(t, group1.Budget, resBody[1].Budget)
+		resOverview := []*GroupOverview{}
+		for _, group := range groups {
+			resOverview = append(resOverview, &GroupOverview{
+				ID:          group.ID,
+				Name:        group.Name,
+				Description: group.Description,
+				Budget:      group.Budget,
+				CreatedAt:   group.CreatedAt,
+				UpdatedAt:   group.UpdatedAt,
+			})
+		}
+		resBody, err := json.Marshal(resOverview)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.GetGroups(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
 	})
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
-		assert.NoError(t, err)
 
 		groups := []*model.Group{}
 
-		ctx := context.Background()
-		th.Repository.MockGroupRepository.
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/groups", nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockGroupRepository.
 			EXPECT().
-			GetGroups(ctx).
+			GetGroups(c.Request().Context()).
 			Return(groups, nil)
 
-		var resBody []*GroupOverview
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/groups", nil, &resBody)
-		assert.Equal(t, http.StatusOK, statusCode)
-		assert.Len(t, resBody, 0)
+		resOverview := []*GroupOverview{}
+		resBody, err := json.Marshal(resOverview)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.GetGroups(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
 	})
 
 	t.Run("FailedToGetGroups", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
-		th, err := NewTestServer(t, ctrl, accessUser)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/groups", nil)
 		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
 
-		ctx := context.Background()
-		th.Repository.MockGroupRepository.
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		mocErr := errors.New("failed to get groups")
+		h.Repository.MockGroupRepository.
 			EXPECT().
-			GetGroups(ctx).
-			Return(nil, errors.New("Failed to get groups"))
+			GetGroups(c.Request().Context()).
+			Return(nil, mocErr)
 
-		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/groups", nil, nil)
-		assert.Equal(t, http.StatusInternalServerError, statusCode)
+		err = h.Handlers.GetGroups(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		}
 	})
 }
-*/
