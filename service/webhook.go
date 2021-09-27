@@ -23,6 +23,16 @@ type WebhookApplication struct {
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
 	Amount    int       `json:"amount"`
+	Tags      []*Tags   `json:"tags"`
+	Group     *Group    `json:"group"`
+}
+
+type Tags struct {
+	Description string `json:"description"`
+}
+
+type Group struct {
+	Description string `json:"description"`
 }
 
 type WebhookRepository interface {
@@ -37,9 +47,9 @@ type webhookRepository struct {
 
 func NewWebhookRepository(secret string, channelID string, id string) WebhookRepository {
 	return &webhookRepository{
-		secret: secret,
+		secret:    secret,
 		channelId: channelID,
-		id: id,
+		id:        id,
 	}
 }
 
@@ -49,14 +59,34 @@ func (repo *webhookRepository) WebhookEventHandler(c echo.Context, reqBody, resB
 	if err != nil {
 		return
 	}
-	var content string
+	var message string
 
-	content += "## 申請書が作成されました" + "\n"
-	content += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
-	content += fmt.Sprintf("- 支払金額: %s", strconv.Itoa(resApp.Amount)) + "\n"
-	content += "\n"
+	if strings.Contains(c.Request().URL.Path, "/api/requests") && c.Request().Method == http.MethodPost {
+		message += "## 申請書が作成されました" + "\n"
+	} else if c.Request().Method == http.MethodPut {
+		message += "## 申請書が更新されました" + "\n"
+	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
+		// To do
+	}
 
-	_ = RequestWebhook(content, repo.secret, repo.channelId, repo.id, 1)
+	message += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
+	message += fmt.Sprintf("- コンテンツ: %s", resApp.Content) + "\n"
+	message += fmt.Sprintf("- 支払金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
+
+	if resApp.Group != nil {
+		message += fmt.Sprintf("- 請求先グループ: %s", resApp.Group.Description) + "\n"
+	}
+
+	if resApp.Tags != nil {
+		message += "- タグ: "
+		for _, tag := range resApp.Tags {
+			message += tag.Description + " "
+		}
+	}
+
+	message += "\n"
+
+	_ = RequestWebhook(message, repo.secret, repo.channelId, repo.id, 1)
 }
 
 func RequestWebhook(message, secret, channelID, webhookID string, embed int) error {

@@ -55,14 +55,14 @@ const (
 	// CommentColumn is the table column denoting the comment relation/edge.
 	CommentColumn = "comment_user"
 	// RequestStatusTable is the table that holds the request_status relation/edge.
-	RequestStatusTable = "users"
+	RequestStatusTable = "request_status"
 	// RequestStatusInverseTable is the table name for the RequestStatus entity.
 	// It exists in this package in order to avoid circular dependency with the "requeststatus" package.
 	RequestStatusInverseTable = "request_status"
 	// RequestStatusColumn is the table column denoting the request_status relation/edge.
 	RequestStatusColumn = "request_status_user"
 	// RequestTable is the table that holds the request relation/edge.
-	RequestTable = "users"
+	RequestTable = "requests"
 	// RequestInverseTable is the table name for the Request entity.
 	// It exists in this package in order to avoid circular dependency with the "request" package.
 	RequestInverseTable = "requests"
@@ -85,8 +85,6 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"comment_user",
-	"request_user",
-	"request_status_user",
 }
 
 var (

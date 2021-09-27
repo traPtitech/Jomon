@@ -638,10 +638,10 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if ru.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   request.TagTable,
-			Columns: []string{request.TagColumn},
+			Columns: request.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -654,10 +654,10 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := ru.mutation.RemovedTagIDs(); len(nodes) > 0 && !ru.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   request.TagTable,
-			Columns: []string{request.TagColumn},
+			Columns: request.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -673,10 +673,10 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := ru.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   request.TagTable,
-			Columns: []string{request.TagColumn},
+			Columns: request.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -800,7 +800,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if ru.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   request.UserTable,
 			Columns: []string{request.UserColumn},
@@ -816,7 +816,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := ru.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   request.UserTable,
 			Columns: []string{request.UserColumn},
@@ -1513,10 +1513,10 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	}
 	if ruo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   request.TagTable,
-			Columns: []string{request.TagColumn},
+			Columns: request.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -1529,10 +1529,10 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	}
 	if nodes := ruo.mutation.RemovedTagIDs(); len(nodes) > 0 && !ruo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   request.TagTable,
-			Columns: []string{request.TagColumn},
+			Columns: request.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -1548,10 +1548,10 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	}
 	if nodes := ruo.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   request.TagTable,
-			Columns: []string{request.TagColumn},
+			Columns: request.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -1675,7 +1675,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	}
 	if ruo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   request.UserTable,
 			Columns: []string{request.UserColumn},
@@ -1691,7 +1691,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	}
 	if nodes := ruo.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   request.UserTable,
 			Columns: []string{request.UserColumn},

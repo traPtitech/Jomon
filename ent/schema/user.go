@@ -45,10 +45,8 @@ func (User) Edges() []ent.Edge {
 			Ref("user").
 			Unique(),
 		edge.From("request_status", RequestStatus.Type).
-			Ref("user").
-			Unique(),
+			Ref("user"),
 		edge.From("request", Request.Type).
-			Ref("user").
-			Unique(),
+			Ref("user"),
 	}
 }

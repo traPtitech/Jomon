@@ -5,38 +5,39 @@
 package mock_service
 
 import (
-	gomock "github.com/golang/mock/gomock"
-	uuid "github.com/google/uuid"
-	service "github.com/traPtitech/Jomon/service"
 	io "io"
 	reflect "reflect"
 	time "time"
+
+	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
+	service "github.com/traPtitech/Jomon/service"
 )
 
-// MockService is a mock of Service interface
+// MockService is a mock of Service interface.
 type MockService struct {
 	ctrl     *gomock.Controller
 	recorder *MockServiceMockRecorder
 }
 
-// MockServiceMockRecorder is the mock recorder for MockService
+// MockServiceMockRecorder is the mock recorder for MockService.
 type MockServiceMockRecorder struct {
 	mock *MockService
 }
 
-// NewMockService creates a new mock instance
+// NewMockService creates a new mock instance.
 func NewMockService(ctrl *gomock.Controller) *MockService {
 	mock := &MockService{ctrl: ctrl}
 	mock.recorder = &MockServiceMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockService) EXPECT() *MockServiceMockRecorder {
 	return m.recorder
 }
 
-// CreateFile mocks base method
+// CreateFile mocks base method.
 func (m *MockService) CreateFile(src io.Reader, name, mimetype string, requestID uuid.UUID) (*service.File, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateFile", src, name, mimetype, requestID)
@@ -45,13 +46,13 @@ func (m *MockService) CreateFile(src io.Reader, name, mimetype string, requestID
 	return ret0, ret1
 }
 
-// CreateFile indicates an expected call of CreateFile
+// CreateFile indicates an expected call of CreateFile.
 func (mr *MockServiceMockRecorder) CreateFile(src, name, mimetype, requestID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFile", reflect.TypeOf((*MockService)(nil).CreateFile), src, name, mimetype, requestID)
 }
 
-// GetAccessToken mocks base method
+// GetAccessToken mocks base method.
 func (m *MockService) GetAccessToken(code, codeVerifier string) (service.AuthResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccessToken", code, codeVerifier)
@@ -60,13 +61,13 @@ func (m *MockService) GetAccessToken(code, codeVerifier string) (service.AuthRes
 	return ret0, ret1
 }
 
-// GetAccessToken indicates an expected call of GetAccessToken
+// GetAccessToken indicates an expected call of GetAccessToken.
 func (mr *MockServiceMockRecorder) GetAccessToken(code, codeVerifier interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccessToken", reflect.TypeOf((*MockService)(nil).GetAccessToken), code, codeVerifier)
 }
 
-// GetClientId mocks base method
+// GetClientId mocks base method.
 func (m *MockService) GetClientId() string {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetClientId")
@@ -74,13 +75,13 @@ func (m *MockService) GetClientId() string {
 	return ret0
 }
 
-// GetClientId indicates an expected call of GetClientId
+// GetClientId indicates an expected call of GetClientId.
 func (mr *MockServiceMockRecorder) GetClientId() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClientId", reflect.TypeOf((*MockService)(nil).GetClientId))
 }
 
-// GetMe mocks base method
+// GetMe mocks base method.
 func (m *MockService) GetMe(token string) (*service.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetMe", token)
@@ -89,13 +90,13 @@ func (m *MockService) GetMe(token string) (*service.User, error) {
 	return ret0, ret1
 }
 
-// GetMe indicates an expected call of GetMe
+// GetMe indicates an expected call of GetMe.
 func (mr *MockServiceMockRecorder) GetMe(token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMe", reflect.TypeOf((*MockService)(nil).GetMe), token)
 }
 
-// StrToDate mocks base method
+// StrToDate mocks base method.
 func (m *MockService) StrToDate(str string) (time.Time, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StrToDate", str)
@@ -104,13 +105,13 @@ func (m *MockService) StrToDate(str string) (time.Time, error) {
 	return ret0, ret1
 }
 
-// StrToDate indicates an expected call of StrToDate
+// StrToDate indicates an expected call of StrToDate.
 func (mr *MockServiceMockRecorder) StrToDate(str interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StrToDate", reflect.TypeOf((*MockService)(nil).StrToDate), str)
 }
 
-// StrToTime mocks base method
+// StrToTime mocks base method.
 func (m *MockService) StrToTime(str string) (time.Time, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "StrToTime", str)
@@ -119,9 +120,8 @@ func (m *MockService) StrToTime(str string) (time.Time, error) {
 	return ret0, ret1
 }
 
-// StrToTime indicates an expected call of StrToTime
+// StrToTime indicates an expected call of StrToTime.
 func (mr *MockServiceMockRecorder) StrToTime(str interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StrToTime", reflect.TypeOf((*MockService)(nil).StrToTime), str)
 }
-

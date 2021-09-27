@@ -148,42 +148,34 @@ func (uc *UserCreate) SetComment(c *Comment) *UserCreate {
 	return uc.SetCommentID(c.ID)
 }
 
-// SetRequestStatusID sets the "request_status" edge to the RequestStatus entity by ID.
-func (uc *UserCreate) SetRequestStatusID(id uuid.UUID) *UserCreate {
-	uc.mutation.SetRequestStatusID(id)
+// AddRequestStatuIDs adds the "request_status" edge to the RequestStatus entity by IDs.
+func (uc *UserCreate) AddRequestStatuIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddRequestStatuIDs(ids...)
 	return uc
 }
 
-// SetNillableRequestStatusID sets the "request_status" edge to the RequestStatus entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableRequestStatusID(id *uuid.UUID) *UserCreate {
-	if id != nil {
-		uc = uc.SetRequestStatusID(*id)
+// AddRequestStatus adds the "request_status" edges to the RequestStatus entity.
+func (uc *UserCreate) AddRequestStatus(r ...*RequestStatus) *UserCreate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
+	return uc.AddRequestStatuIDs(ids...)
+}
+
+// AddRequestIDs adds the "request" edge to the Request entity by IDs.
+func (uc *UserCreate) AddRequestIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddRequestIDs(ids...)
 	return uc
 }
 
-// SetRequestStatus sets the "request_status" edge to the RequestStatus entity.
-func (uc *UserCreate) SetRequestStatus(r *RequestStatus) *UserCreate {
-	return uc.SetRequestStatusID(r.ID)
-}
-
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (uc *UserCreate) SetRequestID(id uuid.UUID) *UserCreate {
-	uc.mutation.SetRequestID(id)
-	return uc
-}
-
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableRequestID(id *uuid.UUID) *UserCreate {
-	if id != nil {
-		uc = uc.SetRequestID(*id)
+// AddRequest adds the "request" edges to the Request entity.
+func (uc *UserCreate) AddRequest(r ...*Request) *UserCreate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
-	return uc
-}
-
-// SetRequest sets the "request" edge to the Request entity.
-func (uc *UserCreate) SetRequest(r *Request) *UserCreate {
-	return uc.SetRequestID(r.ID)
+	return uc.AddRequestIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -432,7 +424,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if nodes := uc.mutation.RequestStatusIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.RequestStatusTable,
 			Columns: []string{user.RequestStatusColumn},
@@ -447,12 +439,11 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_status_user = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.RequestTable,
 			Columns: []string{user.RequestColumn},
@@ -467,7 +458,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_user = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
