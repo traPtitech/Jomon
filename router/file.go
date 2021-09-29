@@ -92,7 +92,7 @@ func (h *Handlers) GetFile(c echo.Context) error {
 	ctx := context.Background()
 	file, err := h.Repository.GetFile(ctx, fileID)
 	if err != nil {
-		internalServerError(err)
+		return internalServerError(err)
 	}
 
 	modifiedAt := file.CreatedAt.Truncate(time.Second)
