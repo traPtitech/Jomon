@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"fmt"
+	"mime"
 	"net/http"
 	"time"
 
@@ -65,7 +66,16 @@ func (h *Handlers) PostFile(c echo.Context) error {
 		return internalServerError(err)
 	}
 
-	err = h.Service.CreateFile(src, file.ID, mimetype)
+	ext, err := mime.ExtensionsByType(mimetype)
+	if err != nil {
+		return internalServerError(err)
+	} else if len(ext) == 0 {
+		return internalServerError(fmt.Errorf("%s is not registered", mimetype))
+	}
+
+	filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
+
+	err = h.Storage.Save(filename, src)
 	if err != nil {
 		return internalServerError(err)
 	}
@@ -98,7 +108,18 @@ func (h *Handlers) GetFile(c echo.Context) error {
 		}
 	}
 
-	f, err := h.Service.OpenFile(file.ID, file.MimeType)
+	mimetype := file.MimeType
+
+	ext, err := mime.ExtensionsByType(mimetype)
+	if err != nil {
+		return internalServerError(err)
+	} else if len(ext) == 0 {
+		return internalServerError(fmt.Errorf("%s is not registered", mimetype))
+	}
+
+	filename := fmt.Sprintf("%s%s", fileID.String(), ext[0])
+
+	f, err := h.Storage.Open(filename)
 	if err != nil {
 		return internalServerError(err)
 	}
@@ -121,7 +142,17 @@ func (h *Handlers) DeleteFile(c echo.Context) error {
 	if err != nil {
 		return internalServerError(err)
 	}
-	err = h.Service.DeleteFile(fileID, file.MimeType)
+
+	mimetype := file.MimeType
+	ext, err := mime.ExtensionsByType(mimetype)
+	if err != nil {
+		return internalServerError(err)
+	} else if len(ext) == 0 {
+		return internalServerError(fmt.Errorf("%s is not registered", mimetype))
+	}
+	filename := fmt.Sprintf("%s%s", fileID.String(), ext[0])
+
+	err = h.Storage.Delete(filename)
 	if err != nil {
 		return internalServerError(err)
 	}

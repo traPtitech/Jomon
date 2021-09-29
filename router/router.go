@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
+	"github.com/traPtitech/Jomon/storage"
 	"go.uber.org/zap"
 )
 
@@ -16,6 +17,7 @@ type Handlers struct {
 	Repository   model.Repository
 	Logger       *zap.Logger
 	Service      service.Service
+	Storage      storage.Storage
 	SessionName  string
 	SessionStore sessions.Store
 	AuthUser     func(c echo.Context) (echo.Context, error)
@@ -57,7 +59,7 @@ func SetRouting(e *echo.Echo, h Handlers) {
 			apiComments.PUT("/:transactionID", h.PutTransaction)
 		}
 
-		apiFiles := api.Group("/files", h.AuthUserMiddleware)
+		apiFiles := api.Group("/files")
 		{
 			apiFiles.POST("", h.PostFile)
 			apiFiles.GET("/:fileID", h.GetFile)

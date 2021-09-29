@@ -12,9 +12,9 @@ import (
 
 func TestEntRepository_CreateFile(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, err := setup(t, ctx)
 	assert.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -86,9 +86,9 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 func TestEntRepository_GetFile(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, err := setup(t, ctx)
 	assert.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -129,9 +129,9 @@ func TestEntRepository_GetFile(t *testing.T) {
 
 func TestEntRepository_DeleteFile(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, err := setup(t, ctx)
 	assert.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()

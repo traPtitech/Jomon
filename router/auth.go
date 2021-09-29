@@ -42,6 +42,7 @@ func (h Handlers) CreateAuthUser() Handlers {
 		Repository:   h.Repository,
 		Logger:       h.Logger,
 		Service:      h.Service,
+		Storage:      h.Storage,
 		SessionName:  h.SessionName,
 		SessionStore: h.SessionStore,
 		AuthUser: func(c echo.Context) (echo.Context, error) {
@@ -87,6 +88,7 @@ func (h Handlers) createMockAuthUser(user *service.User) Handlers {
 		Repository:   h.Repository,
 		Logger:       h.Logger,
 		Service:      h.Service,
+		Storage:      h.Storage,
 		SessionName:  h.SessionName,
 		SessionStore: h.SessionStore,
 		AuthUser: func(c echo.Context) (echo.Context, error) {

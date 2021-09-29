@@ -6,9 +6,7 @@ package mock_service
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	uuid "github.com/google/uuid"
 	service "github.com/traPtitech/Jomon/service"
-	io "io"
 	reflect "reflect"
 )
 
@@ -33,49 +31,6 @@ func NewMockService(ctrl *gomock.Controller) *MockService {
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockService) EXPECT() *MockServiceMockRecorder {
 	return m.recorder
-}
-
-// CreateFile mocks base method
-func (m *MockService) CreateFile(src io.Reader, id uuid.UUID, mimetype string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateFile", src, id, mimetype)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CreateFile indicates an expected call of CreateFile
-func (mr *MockServiceMockRecorder) CreateFile(src, id, mimetype interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFile", reflect.TypeOf((*MockService)(nil).CreateFile), src, id, mimetype)
-}
-
-// OpenFile mocks base method
-func (m *MockService) OpenFile(fileID uuid.UUID, mimetype string) (io.ReadCloser, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "OpenFile", fileID, mimetype)
-	ret0, _ := ret[0].(io.ReadCloser)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// OpenFile indicates an expected call of OpenFile
-func (mr *MockServiceMockRecorder) OpenFile(fileID, mimetype interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OpenFile", reflect.TypeOf((*MockService)(nil).OpenFile), fileID, mimetype)
-}
-
-// DeleteFile mocks base method
-func (m *MockService) DeleteFile(fileID uuid.UUID, mimetype string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteFile", fileID, mimetype)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteFile indicates an expected call of DeleteFile
-func (mr *MockServiceMockRecorder) DeleteFile(fileID, mimetype interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteFile", reflect.TypeOf((*MockService)(nil).DeleteFile), fileID, mimetype)
 }
 
 // GetAccessToken mocks base method

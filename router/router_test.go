@@ -19,6 +19,7 @@ import (
 	"github.com/traPtitech/Jomon/model/mock_model"
 	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/service/mock_service"
+	"github.com/traPtitech/Jomon/storage/mock_storage"
 	"github.com/traPtitech/Jomon/testutil/random"
 	"go.uber.org/zap"
 )
@@ -43,11 +44,16 @@ type Service struct {
 	*mock_service.MockService
 }
 
+type Storage struct {
+	*mock_storage.MockStorage
+}
+
 type TestHandlers struct {
 	Handler      *Handlers
 	Repository   *Repository
 	Logger       *zap.Logger
 	Service      *Service
+	Storage      *Storage
 	SessionName  string
 	SessionStore sessions.Store
 	AuthUser     func(c echo.Context) (echo.Context, error)
@@ -78,6 +84,12 @@ func NewMockService(ctrl *gomock.Controller) *Service {
 	}
 }
 
+func NewMockStorage(ctrl *gomock.Controller) *Storage {
+	return &Storage{
+		MockStorage: mock_storage.NewMockStorage(ctrl),
+	}
+}
+
 func SetupTestHandlers(t *testing.T, ctrl *gomock.Controller, accessUser *model.User) (*TestHandlers, error) {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
@@ -85,12 +97,14 @@ func SetupTestHandlers(t *testing.T, ctrl *gomock.Controller, accessUser *model.
 	}
 	repository := NewMockEntRepository(ctrl)
 	mockService := NewMockService(ctrl)
+	mockStorage := NewMockStorage(ctrl)
 	sessionStore := sessions.NewCookieStore([]byte("session"))
 	sessionName := "session"
 	h := Handlers{
 		Repository:   repository,
 		Logger:       logger,
 		Service:      mockService,
+		Storage:      mockStorage,
 		SessionName:  sessionName,
 		SessionStore: sessionStore,
 	}
@@ -112,6 +126,7 @@ func SetupTestHandlers(t *testing.T, ctrl *gomock.Controller, accessUser *model.
 		Repository:   repository,
 		Logger:       logger,
 		Service:      mockService,
+		Storage:      mockStorage,
 		SessionName:  sessionName,
 		SessionStore: sessionStore,
 		Echo:         e,

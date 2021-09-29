@@ -41,9 +41,9 @@ func main() {
 		}
 	}
 	// Setup model repository
-	repo := model.NewEntRepository(client, strg)
+	repo := model.NewEntRepository(client)
 	// Setup service
-	services, err := service.NewServices(strg)
+	services, err := service.NewServices()
 	if err != nil {
 		panic(err)
 	}
@@ -62,6 +62,7 @@ func main() {
 		Repository:   repo,
 		Logger:       logger,
 		Service:      services,
+		Storage:      strg,
 		SessionName:  "session",
 		SessionStore: sessions.NewCookieStore([]byte("session")),
 	}

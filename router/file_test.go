@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -62,9 +63,15 @@ func TestHandlers_PostFile(t *testing.T) {
 			EXPECT().
 			CreateFile(ctx, gomock.Any(), "test", "image/jpeg", request).
 			Return(file, nil)
-		th.Service.MockService.
+
+		ext, err := mime.ExtensionsByType("image/jpeg")
+		require.NoError(t, err)
+
+		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
+
+		th.Storage.MockStorage.
 			EXPECT().
-			CreateFile(gomock.Any(), file.ID, "image/jpeg").
+			Save(filename, gomock.Any()).
 			Return(nil)
 
 		req := httptest.NewRequest(echo.POST, "/api/files", pr)
@@ -148,10 +155,16 @@ func TestHandlers_PostFile(t *testing.T) {
 			EXPECT().
 			CreateFile(ctx, gomock.Any(), "test", "image/jpeg", request).
 			Return(file, nil)
-		th.Service.MockService.
+
+		ext, err := mime.ExtensionsByType("image/jpeg")
+		require.NoError(t, err)
+
+		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
+
+		th.Storage.MockStorage.
 			EXPECT().
-			CreateFile(gomock.Any(), file.ID, "image/jpeg").
-			Return(errors.New("failed to create file"))
+			Save(filename, gomock.Any()).
+			Return(errors.New("failed to save file"))
 
 		req := httptest.NewRequest(echo.POST, "/api/files", pr)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
@@ -186,9 +199,15 @@ func TestHandlers_GetFile(t *testing.T) {
 			EXPECT().
 			GetFile(ctx, file.ID).
 			Return(file, nil)
-		th.Service.MockService.
+
+		ext, err := mime.ExtensionsByType(file.MimeType)
+		require.NoError(t, err)
+
+		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
+
+		th.Storage.MockStorage.
 			EXPECT().
-			OpenFile(file.ID, file.MimeType).
+			Open(filename).
 			Return(r, nil)
 
 		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, fmt.Sprintf("/api/files/%s", file.ID), nil, nil)
@@ -236,10 +255,16 @@ func TestHandlers_GetFile(t *testing.T) {
 			EXPECT().
 			GetFile(ctx, file.ID).
 			Return(file, nil)
-		th.Service.MockService.
+
+		ext, err := mime.ExtensionsByType(file.MimeType)
+		require.NoError(t, err)
+
+		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
+
+		th.Storage.MockStorage.
 			EXPECT().
-			OpenFile(file.ID, file.MimeType).
-			Return(nil, errors.New("file could not be opened"))
+			Open(filename).
+			Return(nil, errors.New("failed to open file"))
 
 		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, fmt.Sprintf("/api/files/%s", file.ID), nil, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)
@@ -279,9 +304,14 @@ func TestHandlers_DeleteFile(t *testing.T) {
 			DeleteFile(ctx, file.ID).
 			Return(file, nil)
 
-		th.Service.MockService.
+		ext, err := mime.ExtensionsByType(file.MimeType)
+		require.NoError(t, err)
+
+		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
+
+		th.Storage.MockStorage.
 			EXPECT().
-			DeleteFile(file.ID, file.MimeType).
+			Delete(filename).
 			Return(nil)
 
 		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, fmt.Sprintf("/api/files/%s", file.ID), nil, nil)
@@ -330,10 +360,16 @@ func TestHandlers_DeleteFile(t *testing.T) {
 			DeleteFile(ctx, file.ID).
 			Return(file, nil)
 
-		th.Service.MockService.
+		mimetype := file.MimeType
+		ext, err := mime.ExtensionsByType(mimetype)
+		require.NoError(t, err)
+
+		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
+
+		th.Storage.MockStorage.
 			EXPECT().
-			DeleteFile(file.ID, file.MimeType).
-			Return(errors.New("file could not be deleted"))
+			Delete(filename).
+			Return(errors.New("failed to delete file"))
 
 		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, fmt.Sprintf("/api/files/%s", file.ID), nil, nil)
 		assert.Equal(t, http.StatusInternalServerError, statusCode)

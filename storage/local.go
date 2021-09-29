@@ -11,7 +11,7 @@ type Local struct {
 	localDir string
 }
 
-func NewLocalStorage(dir string) (Storage, error) {
+func NewLocalStorage(dir string) (*Local, error) {
 	fi, err := os.Stat(dir)
 	if err != nil {
 		return &Local{}, errors.New("dir doesn't exist")
