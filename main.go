@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/gorilla/sessions"
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/router"
@@ -60,21 +59,12 @@ func main() {
 		panic(err)
 	}
 
-	err = godotenv.Load("./.env")
-	if err != nil {
-		panic(err)
-	}
-	webhookSecret := os.Getenv("WEBHOOK_SECRET")
-	webhookChannelId := os.Getenv("WEBHOOK_CHANNEL_ID")
-	webhookId := os.Getenv("WEBHOOK_ID")
-
 	handlers := router.Handlers{
 		Repository:   repo,
 		Logger:       logger,
 		Service:      services,
 		SessionName:  "session",
 		SessionStore: sessions.NewCookieStore([]byte("session")),
-		Webhook:      service.NewWebhookRepository(webhookSecret, webhookChannelId, webhookId),
 	}
 
 	e := echo.New()

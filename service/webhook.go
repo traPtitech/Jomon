@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 )
 
@@ -35,25 +36,13 @@ type Group struct {
 	Description string `json:"description"`
 }
 
-type WebhookRepository interface {
-	WebhookEventHandler(c echo.Context, reqBody, resBody []byte)
+type Webhook struct {
+	Secret    string
+	ChannelId string
+	ID        string
 }
 
-type webhookRepository struct {
-	secret    string
-	channelId string
-	id        string
-}
-
-func NewWebhookRepository(secret string, channelID string, id string) WebhookRepository {
-	return &webhookRepository{
-		secret:    secret,
-		channelId: channelID,
-		id:        id,
-	}
-}
-
-func (repo *webhookRepository) WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
+func (s *Services) WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 	resApp := new(WebhookApplication)
 	err := json.Unmarshal(resBody, resApp)
 	if err != nil {
@@ -70,7 +59,6 @@ func (repo *webhookRepository) WebhookEventHandler(c echo.Context, reqBody, resB
 	}
 
 	message += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
-	message += fmt.Sprintf("- コンテンツ: %s", resApp.Content) + "\n"
 	message += fmt.Sprintf("- 支払金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
 
 	if resApp.Group != nil {
@@ -80,13 +68,19 @@ func (repo *webhookRepository) WebhookEventHandler(c echo.Context, reqBody, resB
 	if resApp.Tags != nil {
 		message += "- タグ: "
 		for _, tag := range resApp.Tags {
-			message += tag.Description + " "
+			message += tag.Description + "\n"
 		}
 	}
 
+	message += resApp.Content + "\n"
 	message += "\n"
 
-	_ = RequestWebhook(message, repo.secret, repo.channelId, repo.id, 1)
+	err = godotenv.Load("./.env")
+	if err != nil {
+		panic(err)
+	}
+
+	_ = RequestWebhook(message, s.Webhook.Secret, s.Webhook.ChannelId, s.Webhook.ID, 1)
 }
 
 func RequestWebhook(message, secret, channelID, webhookID string, embed int) error {

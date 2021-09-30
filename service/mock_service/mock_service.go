@@ -11,6 +11,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
+	echo "github.com/labstack/echo/v4"
 	service "github.com/traPtitech/Jomon/service"
 )
 
@@ -124,4 +125,16 @@ func (m *MockService) StrToTime(str string) (time.Time, error) {
 func (mr *MockServiceMockRecorder) StrToTime(str interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StrToTime", reflect.TypeOf((*MockService)(nil).StrToTime), str)
+}
+
+// WebhookEventHandler mocks base method.
+func (m *MockService) WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "WebhookEventHandler", c, reqBody, resBody)
+}
+
+// WebhookEventHandler indicates an expected call of WebhookEventHandler.
+func (mr *MockServiceMockRecorder) WebhookEventHandler(c, reqBody, resBody interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WebhookEventHandler", reflect.TypeOf((*MockService)(nil).WebhookEventHandler), c, reqBody, resBody)
 }

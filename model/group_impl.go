@@ -112,6 +112,9 @@ func (repo *EntRepository) DeleteMember(ctx context.Context, groupID uuid.UUID, 
 }
 
 func ConvertEntGroupToModelGroup(entgroup *ent.Group) *Group {
+	if entgroup == nil {
+		return nil
+	}
 	return &Group{
 		ID:          entgroup.ID,
 		Name:        entgroup.Name,

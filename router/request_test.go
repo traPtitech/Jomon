@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
@@ -171,9 +173,9 @@ func TestHandlers_PostRequest(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		th, err := SetupTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
-		req := &Request{
+		req := Request{
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
@@ -275,5 +277,157 @@ func TestHandlers_PostRequest(t *testing.T) {
 			assert.Equal(t, resBody.Tags[0].Name, tag1.Name)
 			assert.Equal(t, resBody.Tags[0].Description, tag1.Description)
 		}
+	})
+}
+
+func TestHandlers_PutRequest(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		th, err := SetupTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		date := time.Now()
+
+		request := Request{
+			CreatedBy: uuid.New(),
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+		}
+		var tags []*model.Tag
+		amount := random.Numeric(t, 100000)
+		requestID := uuid.New()
+
+		budget := random.Numeric(t, 1000000)
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		ctx := context.Background()
+		th.Repository.MockGroupRepository.
+			EXPECT().
+			GetGroup(ctx, group.ID).
+			Return(group, nil)
+		th.Repository.MockRequestRepository.
+			EXPECT().
+			UpdateRequest(ctx, requestID, amount, request.Title, request.Content, tags, group).
+			Return(&model.RequestDetail{
+				ID:        request.CreatedBy,
+				Status:    model.Submitted.String(),
+				Amount:    amount,
+				Title:     request.Title,
+				Content:   request.Content,
+				Tags:      tags,
+				Group:     group,
+				CreatedAt: date,
+				UpdatedAt: date,
+			}, nil)
+
+		var reqtags []*uuid.UUID
+		req := PutRequest{
+			Amount:  amount,
+			Title:   request.Title,
+			Content: request.Content,
+			Tags:    reqtags,
+			Group:   &group.ID,
+		}
+
+		var resBody RequestResponse
+		path := fmt.Sprintf("/api/requests/%s", requestID.String())
+		StatusCode, _ := th.doRequest(t, echo.PUT, path, &req, &resBody)
+		assert.Equal(t, http.StatusOK, StatusCode)
+	})
+
+	t.Run("SuccessWithTag", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		th, err := SetupTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		date := time.Now()
+
+		request := Request{
+			CreatedBy: uuid.New(),
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+		}
+
+		tag1 := &model.Tag{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 30),
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		tag2 := &model.Tag{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 30),
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		tags := []*model.Tag{tag1, tag2}
+
+		amount := random.Numeric(t, 100000)
+		requestID := uuid.New()
+
+		budget := random.Numeric(t, 1000000)
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		ctx := context.Background()
+		th.Repository.MockTagRepository.
+			EXPECT().
+			GetTag(ctx, tag1.ID).
+			Return(tag1, nil)
+		th.Repository.MockTagRepository.
+			EXPECT().
+			GetTag(ctx, tag2.ID).
+			Return(tag2, nil)
+		th.Repository.MockGroupRepository.
+			EXPECT().
+			GetGroup(ctx, group.ID).
+			Return(group, nil)
+		th.Repository.MockRequestRepository.
+			EXPECT().
+			UpdateRequest(ctx, requestID, amount, request.Title, request.Content, tags, group).
+			Return(&model.RequestDetail{
+				ID:        request.CreatedBy,
+				Status:    model.Submitted.String(),
+				Amount:    amount,
+				Title:     request.Title,
+				Content:   request.Content,
+				Tags:      tags,
+				Group:     group,
+				CreatedAt: date,
+				UpdatedAt: date,
+			}, nil)
+
+		reqtags := []*uuid.UUID{&tag1.ID, &tag2.ID}
+		req := PutRequest{
+			Amount:  amount,
+			Title:   request.Title,
+			Content: request.Content,
+			Tags:    reqtags,
+			Group:   &group.ID,
+		}
+
+		var resBody RequestResponse
+		path := fmt.Sprintf("/api/requests/%s", requestID.String())
+		StatusCode, _ := th.doRequest(t, echo.PUT, path, &req, &resBody)
+		assert.Equal(t, http.StatusOK, StatusCode)
 	})
 }

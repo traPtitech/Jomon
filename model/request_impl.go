@@ -250,7 +250,11 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	for _, tag := range enttags {
 		modeltags = append(modeltags, ConvertEntTagToModelTag(tag))
 	}
-	modelgroup := ConvertEntGroupToModelGroup(updated.Edges.Group)
+	entgroup, err := updated.QueryGroup().Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	modelgroup := ConvertEntGroupToModelGroup(entgroup)
 	reqdetail := &RequestDetail{
 		ID:        updated.ID,
 		Status:    string(status.Status),
@@ -265,6 +269,7 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	}
 	return reqdetail, nil
 }
+// このままだとnil *Group はGroupをなしにするのでなくそのままってかんじ
 
 func ConvertEntRequestToModelRequest(request *ent.Request) *Request {
 	if request == nil {
