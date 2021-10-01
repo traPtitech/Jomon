@@ -29,16 +29,17 @@ type PutRequest struct {
 }
 
 type RequestResponse struct {
-	ID        uuid.UUID      `json:"id"`
-	Status    string         `json:"status"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	CreatedBy uuid.UUID      `json:"created_by"`
-	Amount    int            `json:"amount"`
-	Title     string         `json:"title"`
-	Content   string         `json:"content"`
-	Tags      []*TagOverview `json:"tags"`
-	Group     *GroupOverview `json:"group"`
+	ID        uuid.UUID        `json:"id"`
+	Status    string           `json:"status"`
+	CreatedAt time.Time        `json:"created_at"`
+	UpdatedAt time.Time        `json:"updated_at"`
+	CreatedBy uuid.UUID        `json:"created_by"`
+	Amount    int              `json:"amount"`
+	Title     string           `json:"title"`
+	Content   string           `json:"content"`
+	Tags      []*TagOverview   `json:"tags"`
+	Group     *GroupOverview   `json:"group"`
+	Comments  []*CommentDetail `json:"comments"`
 }
 
 type Comment struct {
@@ -168,6 +169,13 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		}
 	}
 	ctx := context.Background()
+	user, err := h.Repository.GetUserByID(ctx, req.CreatedBy)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	c.Set(contextUserKey, *user)
+
 	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, group, req.CreatedBy)
 	if err != nil {
 		c.Logger().Error(err)
@@ -299,6 +307,18 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+	modelcomments, err := h.Repository.GetComments(ctx, requestID)
+	var comments []*CommentDetail
+	for _, modelcomment := range modelcomments {
+		comment := &CommentDetail{
+			ID: modelcomment.ID,
+			User: modelcomment.User,
+			Comment: modelcomment.Comment,
+			CreatedAt: modelcomment.CreatedAt,
+			UpdatedAt: modelcomment.UpdatedAt,
+		}
+		comments = append(comments, comment)
+	}
 
 	var resgroup *GroupOverview
 	if group != nil {
@@ -332,6 +352,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		Content:   request.Content,
 		Tags:      restags,
 		Group:     resgroup,
+		Comments:  comments,
 	}
 	return c.JSON(http.StatusOK, res)
 }

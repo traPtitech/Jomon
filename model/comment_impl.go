@@ -8,7 +8,27 @@ import (
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/request"
+	
 )
+
+func (repo *EntRepository) GetComments(ctx context.Context, requestID uuid.UUID) ([]*Comment, error) {
+	comments, err := repo.client.Comment.
+		Query().
+		Where(
+			comment.HasRequestWith(
+				request.ID(requestID),
+			),
+		).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	modelcomments := []*Comment{}
+	for _, comment := range comments {
+		modelcomments = append(modelcomments, ConvertEntCommentToModelComment(comment))
+	}
+	return modelcomments, nil
+}
 
 func (repo *EntRepository) CreateComment(ctx context.Context, comment string, requestID uuid.UUID, userID uuid.UUID) (*Comment, error) {
 	created, err := repo.client.Comment.
@@ -55,6 +75,9 @@ func (repo *EntRepository) DeleteComment(ctx context.Context, requestID uuid.UUI
 }
 
 func ConvertEntCommentToModelComment(entcomment *ent.Comment) *Comment {
+	if entcomment == nil {
+		return nil
+	}
 	return &Comment{
 		ID:        entcomment.ID,
 		User:      entcomment.Edges.User.ID,
