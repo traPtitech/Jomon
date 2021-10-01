@@ -329,6 +329,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 				CreatedAt: date,
 				UpdatedAt: date,
 			}, nil)
+		th.Repository.MockCommentRepository.
+			EXPECT().
+			GetComments(ctx, requestID).
+			Return([]*model.Comment{}, nil)
 
 		var reqtags []*uuid.UUID
 		req := PutRequest{
@@ -415,6 +419,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 				CreatedAt: date,
 				UpdatedAt: date,
 			}, nil)
+		th.Repository.MockCommentRepository.
+			EXPECT().
+			GetComments(ctx, requestID).
+			Return([]*model.Comment{}, nil)
 
 		reqtags := []*uuid.UUID{&tag1.ID, &tag2.ID}
 		req := PutRequest{
@@ -431,3 +439,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 		assert.Equal(t, http.StatusOK, StatusCode)
 	})
 }
+
+// func TestHandlers_PostComment(t *testing.T) {
+// 	t.Parallel()
+
+// 	t.Run("Success")
+// }

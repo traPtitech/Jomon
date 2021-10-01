@@ -169,13 +169,6 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		}
 	}
 	ctx := context.Background()
-	user, err := h.Repository.GetUserByID(ctx, req.CreatedBy)
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-	c.Set(contextUserKey, *user)
-
 	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, group, req.CreatedBy)
 	if err != nil {
 		c.Logger().Error(err)
@@ -229,6 +222,18 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+	modelcomments, err := h.Repository.GetComments(ctx, requestID)
+	var comments []*CommentDetail
+	for _, modelcomment := range modelcomments {
+		comment := &CommentDetail{
+			ID:        modelcomment.ID,
+			User:      modelcomment.User,
+			Comment:   modelcomment.Comment,
+			CreatedAt: modelcomment.CreatedAt,
+			UpdatedAt: modelcomment.UpdatedAt,
+		}
+		comments = append(comments, comment)
+	}
 	var resgroup *GroupOverview
 	if request.Group != nil {
 		resgroup = &GroupOverview{
@@ -261,6 +266,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 		Content:   request.Content,
 		Tags:      restags,
 		Group:     resgroup,
+		Comments:  comments,
 	}
 	return c.JSON(http.StatusOK, res)
 }
@@ -311,9 +317,9 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	var comments []*CommentDetail
 	for _, modelcomment := range modelcomments {
 		comment := &CommentDetail{
-			ID: modelcomment.ID,
-			User: modelcomment.User,
-			Comment: modelcomment.Comment,
+			ID:        modelcomment.ID,
+			User:      modelcomment.User,
+			Comment:   modelcomment.Comment,
 			CreatedAt: modelcomment.CreatedAt,
 			UpdatedAt: modelcomment.UpdatedAt,
 		}
