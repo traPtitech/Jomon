@@ -65,21 +65,6 @@ func (mr *MockTagRepositoryMockRecorder) CreateTag(ctx, name, description interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTag", reflect.TypeOf((*MockTagRepository)(nil).CreateTag), ctx, name, description)
 }
 
-// GetTag mocks base method
-func (m *MockTagRepository) GetTag(ctx context.Context, tagID uuid.UUID) (*model.Tag, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTag", ctx, tagID)
-	ret0, _ := ret[0].(*model.Tag)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTag indicates an expected call of GetTag
-func (mr *MockTagRepositoryMockRecorder) GetTag(ctx, tagID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTag", reflect.TypeOf((*MockTagRepository)(nil).GetTag), ctx, tagID)
-}
-
 // UpdateTag mocks base method
 func (m *MockTagRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name, description string) (*model.Tag, error) {
 	m.ctrl.T.Helper()
@@ -107,34 +92,4 @@ func (m *MockTagRepository) DeleteTag(ctx context.Context, tagID uuid.UUID) erro
 func (mr *MockTagRepositoryMockRecorder) DeleteTag(ctx, tagID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTag", reflect.TypeOf((*MockTagRepository)(nil).DeleteTag), ctx, tagID)
-}
-
-// GetTagTransactions mocks base method
-func (m *MockTagRepository) GetTagTransactions(ctx context.Context, tagID uuid.UUID) ([]*model.Transaction, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTagTransactions", ctx, tagID)
-	ret0, _ := ret[0].([]*model.Transaction)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTagTransactions indicates an expected call of GetTagTransactions
-func (mr *MockTagRepositoryMockRecorder) GetTagTransactions(ctx, tagID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTagTransactions", reflect.TypeOf((*MockTagRepository)(nil).GetTagTransactions), ctx, tagID)
-}
-
-// GetTagRequests mocks base method
-func (m *MockTagRepository) GetTagRequests(ctx context.Context, tagID uuid.UUID) ([]*model.Request, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTagRequests", ctx, tagID)
-	ret0, _ := ret[0].([]*model.Request)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTagRequests indicates an expected call of GetTagRequests
-func (mr *MockTagRepositoryMockRecorder) GetTagRequests(ctx, tagID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTagRequests", reflect.TypeOf((*MockTagRepository)(nil).GetTagRequests), ctx, tagID)
 }

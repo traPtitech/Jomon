@@ -2,11 +2,13 @@ package router
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/ent"
 )
 
 type Group struct {
@@ -34,6 +36,14 @@ type GroupDetail struct {
 	Users       []*uuid.UUID `json:"users"`
 	CreatedAt   time.Time    `json:"created_at"`
 	UpdatedAt   time.Time    `json:"updated_at"`
+}
+
+type MemberResponse struct {
+	ID []uuid.UUID `json:"members"`
+}
+
+type Member struct {
+	ID uuid.UUID `json:"id"`
 }
 
 func (h *Handlers) GetGroups(c echo.Context) error {
@@ -104,18 +114,97 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 }
 
 func (h *Handlers) GetMembers(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if groupID == uuid.Nil {
+		c.Logger().Error(errors.New("invalid UUID"))
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+	}
+
+	ctx := context.Background()
+	members, err := h.Repository.GetMembers(ctx, groupID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	var res []uuid.UUID
+	for _, member := range members {
+		res = append(res, member.ID)
+	}
+
+	return c.JSON(http.StatusOK, &MemberResponse{res})
 }
 
 func (h *Handlers) PostMember(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	var member Member
+	if err := c.Bind(&member); err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if groupID == uuid.Nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	ctx := context.Background()
+	created, err := h.Repository.CreateMember(ctx, groupID, member.ID)
+	if err != nil {
+		if ent.IsConstraintError(err) {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	res := created.ID
+
+	return c.JSON(http.StatusOK, &Member{res})
 }
 
 func (h *Handlers) DeleteMember(c echo.Context) error {
+	var member Member
+	if err := c.Bind(&member); err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if groupID == uuid.Nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	ctx := context.Background()
+	err = h.Repository.DeleteMember(ctx, groupID, member.ID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
 	return c.NoContent(http.StatusOK)
-	// TODO: Implement
 }
 
 func (h *Handlers) GetOwners(c echo.Context) error {
