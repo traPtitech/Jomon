@@ -82,7 +82,7 @@ func (*RequestStatus) scanValues(columns []string) ([]interface{}, error) {
 		case requeststatus.FieldID:
 			values[i] = new(uuid.UUID)
 		case requeststatus.ForeignKeys[0]: // request_status
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type RequestStatus", columns[i])
 		}
@@ -123,10 +123,11 @@ func (rs *RequestStatus) assignValues(columns []string, values []interface{}) er
 				rs.CreatedAt = value.Time
 			}
 		case requeststatus.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field request_status", values[i])
-			} else if value != nil {
-				rs.request_status = value
+			} else if value.Valid {
+				rs.request_status = new(uuid.UUID)
+				*rs.request_status = *value.S.(*uuid.UUID)
 			}
 		}
 	}

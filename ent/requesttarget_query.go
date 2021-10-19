@@ -326,8 +326,8 @@ func (rtq *RequestTargetQuery) GroupBy(field string, fields ...string) *RequestT
 //		Select(requesttarget.FieldTarget).
 //		Scan(ctx, &v)
 //
-func (rtq *RequestTargetQuery) Select(field string, fields ...string) *RequestTargetSelect {
-	rtq.fields = append([]string{field}, fields...)
+func (rtq *RequestTargetQuery) Select(fields ...string) *RequestTargetSelect {
+	rtq.fields = append(rtq.fields, fields...)
 	return &RequestTargetSelect{RequestTargetQuery: rtq}
 }
 
@@ -478,10 +478,14 @@ func (rtq *RequestTargetQuery) querySpec() *sqlgraph.QuerySpec {
 func (rtq *RequestTargetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(rtq.driver.Dialect())
 	t1 := builder.Table(requesttarget.Table)
-	selector := builder.Select(t1.Columns(requesttarget.Columns...)...).From(t1)
+	columns := rtq.fields
+	if len(columns) == 0 {
+		columns = requesttarget.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if rtq.sql != nil {
 		selector = rtq.sql
-		selector.Select(selector.Columns(requesttarget.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range rtq.predicates {
 		p(selector)
@@ -749,13 +753,24 @@ func (rtgb *RequestTargetGroupBy) sqlScan(ctx context.Context, v interface{}) er
 }
 
 func (rtgb *RequestTargetGroupBy) sqlQuery() *sql.Selector {
-	selector := rtgb.sql
-	columns := make([]string, 0, len(rtgb.fields)+len(rtgb.fns))
-	columns = append(columns, rtgb.fields...)
+	selector := rtgb.sql.Select()
+	aggregation := make([]string, 0, len(rtgb.fns))
 	for _, fn := range rtgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(rtgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(rtgb.fields)+len(rtgb.fns))
+		for _, f := range rtgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(rtgb.fields...)...)
 }
 
 // RequestTargetSelect is the builder for selecting fields of RequestTarget entities.
@@ -971,16 +986,10 @@ func (rts *RequestTargetSelect) BoolX(ctx context.Context) bool {
 
 func (rts *RequestTargetSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := rts.sqlQuery().Query()
+	query, args := rts.sql.Query()
 	if err := rts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (rts *RequestTargetSelect) sqlQuery() sql.Querier {
-	selector := rts.sql
-	selector.Select(selector.Columns(rts.fields...)...)
-	return selector
 }

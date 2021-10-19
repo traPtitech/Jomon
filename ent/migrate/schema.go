@@ -66,10 +66,9 @@ var (
 	}
 	// GroupsTable holds the schema information for the "groups" table.
 	GroupsTable = &schema.Table{
-		Name:        "groups",
-		Columns:     GroupsColumns,
-		PrimaryKey:  []*schema.Column{GroupsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "groups",
+		Columns:    GroupsColumns,
+		PrimaryKey: []*schema.Column{GroupsColumns[0]},
 	}
 	// GroupBudgetsColumns holds the columns for the "group_budgets" table.
 	GroupBudgetsColumns = []*schema.Column{

@@ -35,24 +35,24 @@ const (
 	EdgeRequest = "request"
 	// Table holds the table name of the group in the database.
 	Table = "groups"
-	// GroupBudgetTable is the table the holds the group_budget relation/edge.
+	// GroupBudgetTable is the table that holds the group_budget relation/edge.
 	GroupBudgetTable = "group_budgets"
 	// GroupBudgetInverseTable is the table name for the GroupBudget entity.
 	// It exists in this package in order to avoid circular dependency with the "groupbudget" package.
 	GroupBudgetInverseTable = "group_budgets"
 	// GroupBudgetColumn is the table column denoting the group_budget relation/edge.
 	GroupBudgetColumn = "group_group_budget"
-	// UserTable is the table the holds the user relation/edge. The primary key declared below.
+	// UserTable is the table that holds the user relation/edge. The primary key declared below.
 	UserTable = "group_user"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
-	// OwnerTable is the table the holds the owner relation/edge. The primary key declared below.
+	// OwnerTable is the table that holds the owner relation/edge. The primary key declared below.
 	OwnerTable = "group_owner"
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
-	// RequestTable is the table the holds the request relation/edge.
+	// RequestTable is the table that holds the request relation/edge.
 	RequestTable = "requests"
 	// RequestInverseTable is the table name for the Request entity.
 	// It exists in this package in order to avoid circular dependency with the "request" package.

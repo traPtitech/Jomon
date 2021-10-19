@@ -105,9 +105,9 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 		case transaction.FieldID:
 			values[i] = new(uuid.UUID)
 		case transaction.ForeignKeys[0]: // group_budget_transaction
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case transaction.ForeignKeys[1]: // request_transaction
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Transaction", columns[i])
 		}
@@ -136,16 +136,18 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 				t.CreatedAt = value.Time
 			}
 		case transaction.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field group_budget_transaction", values[i])
-			} else if value != nil {
-				t.group_budget_transaction = value
+			} else if value.Valid {
+				t.group_budget_transaction = new(uuid.UUID)
+				*t.group_budget_transaction = *value.S.(*uuid.UUID)
 			}
 		case transaction.ForeignKeys[1]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field request_transaction", values[i])
-			} else if value != nil {
-				t.request_transaction = value
+			} else if value.Valid {
+				t.request_transaction = new(uuid.UUID)
+				*t.request_transaction = *value.S.(*uuid.UUID)
 			}
 		}
 	}

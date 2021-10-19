@@ -19,7 +19,7 @@ func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
 	}
 	modelgroups := []*Group{}
 	for _, group := range groups {
-		modelgroups = append(modelgroups, ConvertEntGroupToModelGroup(group))
+		modelgroups = append(modelgroups, convertEntGroupToModelGroup(group))
 	}
 	return modelgroups, nil
 }
@@ -34,7 +34,7 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 	if err != nil {
 		return nil, err
 	}
-	return ConvertEntGroupToModelGroup(created), nil
+	return convertEntGroupToModelGroup(created), nil
 }
 
 func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*User, error) {
@@ -57,7 +57,7 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	}
 	modelmembers := []*User{}
 	for _, member := range members {
-		modelmembers = append(modelmembers, ConvertEntUserToModelUser(member))
+		modelmembers = append(modelmembers, convertEntUserToModelUser(member))
 	}
 	return modelmembers, nil
 }
@@ -85,7 +85,7 @@ func (repo *EntRepository) DeleteMember(ctx context.Context, groupID uuid.UUID, 
 	if gotUser == nil {
 		return errors.New("unknown user id")
 	}
-	
+
 	_, err = repo.client.Group.
 		UpdateOneID(groupID).
 		RemoveUserIDs(userID).
@@ -96,14 +96,14 @@ func (repo *EntRepository) DeleteMember(ctx context.Context, groupID uuid.UUID, 
 	return nil
 }
 
-func ConvertEntGroupToModelGroup(entgroup *ent.Group) *Group {
+func convertEntGroupToModelGroup(group *ent.Group) *Group {
 	return &Group{
-		ID:          entgroup.ID,
-		Name:        entgroup.Name,
-		Description: entgroup.Description,
-		Budget:      entgroup.Budget,
-		CreatedAt:   entgroup.CreatedAt,
-		UpdatedAt:   entgroup.UpdatedAt,
-		DeletedAt:   entgroup.DeletedAt,
+		ID:          group.ID,
+		Name:        group.Name,
+		Description: group.Description,
+		Budget:      group.Budget,
+		CreatedAt:   group.CreatedAt,
+		UpdatedAt:   group.UpdatedAt,
+		DeletedAt:   group.DeletedAt,
 	}
 }

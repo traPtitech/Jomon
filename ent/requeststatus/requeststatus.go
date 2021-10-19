@@ -26,14 +26,14 @@ const (
 	EdgeUser = "user"
 	// Table holds the table name of the requeststatus in the database.
 	Table = "request_status"
-	// RequestTable is the table the holds the request relation/edge.
+	// RequestTable is the table that holds the request relation/edge.
 	RequestTable = "request_status"
 	// RequestInverseTable is the table name for the Request entity.
 	// It exists in this package in order to avoid circular dependency with the "request" package.
 	RequestInverseTable = "requests"
 	// RequestColumn is the table column denoting the request relation/edge.
 	RequestColumn = "request_status"
-	// UserTable is the table the holds the user relation/edge.
+	// UserTable is the table that holds the user relation/edge.
 	UserTable = "users"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.

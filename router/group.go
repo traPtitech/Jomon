@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -49,7 +50,6 @@ func (h *Handlers) GetGroups(c echo.Context) error {
 	ctx := context.Background()
 	groups, err := h.Repository.GetGroups(ctx)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -78,7 +78,7 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 		}
 
 		ctx := context.Background()
-		created, err := h.Repository.CreateGroup(ctx, group.Name, group.Description, group.Budget, owners)
+		created, err := h.MockRepository.CreateGroup(ctx, group.Name, group.Description, group.Budget, owners)
 		if err != nil {
 			return internalServerError(err)
 		}
@@ -120,8 +120,8 @@ func (h *Handlers) GetMembers(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		c.Logger().Error(errors.New("invalid UUID"))
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
 	ctx := context.Background()
@@ -156,8 +156,8 @@ func (h *Handlers) PostMember(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		c.Logger().Error(errors.New("invalid UUID"))
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
 	ctx := context.Background()
@@ -189,8 +189,8 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		c.Logger().Error(errors.New("invalid UUID"))
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
 	ctx := context.Background()
