@@ -4,10 +4,8 @@ import (
 	"os"
 
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/router"
-	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/storage"
 	"go.uber.org/zap"
 )
@@ -40,13 +38,8 @@ func main() {
 			panic(err)
 		}
 	}
-	// Setup model repository
-	repo := model.NewEntRepository(client)
-	// Setup service
-	services, err := service.NewServices()
-	if err != nil {
-		panic(err)
-	}
+	// Setup repository
+	repo := model.NewEntRepository(client, strg)
 
 	// Setup server
 	var logger *zap.Logger
@@ -60,18 +53,13 @@ func main() {
 	}
 	handlers := router.Handlers{
 		Repository:   repo,
-		Logger:       logger,
-		Service:      services,
 		Storage:      strg,
+		Logger:       logger,
 		SessionName:  "session",
 		SessionStore: sessions.NewCookieStore([]byte("session")),
 	}
 
-	handlers = handlers.CreateAuthUser()
-
-	e := echo.New()
-
-	router.SetRouting(e, handlers)
+	server := router.NewServer(handlers)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -79,5 +67,5 @@ func main() {
 	}
 
 	// Start server
-	e.Logger.Fatal("failed to start server", e.Start(":"+port))
+	logger.Fatal("failed to start server", zap.Error(server.Start(":"+port)))
 }

@@ -7,6 +7,7 @@ package mock_model
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 	model "github.com/traPtitech/Jomon/model"
 	reflect "reflect"
 )
@@ -62,4 +63,48 @@ func (m *MockGroupRepository) CreateGroup(ctx context.Context, name, description
 func (mr *MockGroupRepositoryMockRecorder) CreateGroup(ctx, name, description, budget, owners interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGroup", reflect.TypeOf((*MockGroupRepository)(nil).CreateGroup), ctx, name, description, budget, owners)
+}
+
+// GetMembers mocks base method
+func (m *MockGroupRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*model.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMembers", ctx, groupID)
+	ret0, _ := ret[0].([]*model.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMembers indicates an expected call of GetMembers
+func (mr *MockGroupRepositoryMockRecorder) GetMembers(ctx, groupID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMembers", reflect.TypeOf((*MockGroupRepository)(nil).GetMembers), ctx, groupID)
+}
+
+// CreateMember mocks base method
+func (m *MockGroupRepository) CreateMember(ctx context.Context, groupID, userID uuid.UUID) (*model.Member, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateMember", ctx, groupID, userID)
+	ret0, _ := ret[0].(*model.Member)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateMember indicates an expected call of CreateMember
+func (mr *MockGroupRepositoryMockRecorder) CreateMember(ctx, groupID, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateMember", reflect.TypeOf((*MockGroupRepository)(nil).CreateMember), ctx, groupID, userID)
+}
+
+// DeleteMember mocks base method
+func (m *MockGroupRepository) DeleteMember(ctx context.Context, groupID, userID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteMember", ctx, groupID, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteMember indicates an expected call of DeleteMember
+func (mr *MockGroupRepositoryMockRecorder) DeleteMember(ctx, groupID, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMember", reflect.TypeOf((*MockGroupRepository)(nil).DeleteMember), ctx, groupID, userID)
 }

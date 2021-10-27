@@ -1,14 +1,14 @@
 package router
 
 import (
-	crand "crypto/rand"
 	"crypto/sha256"
-	"encoding/binary"
-	"log"
+	"encoding/base64"
+	"fmt"
 	"math/rand"
 	"net/http"
+	"sync"
+	"time"
 
-	"github.com/dvsekhvalnov/jose2go/base64url"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -18,9 +18,7 @@ import (
 const (
 	sessionDuration        = 24 * 60 * 60 * 7
 	sessionKey             = "sessions"
-	sessionAccessTokenKey  = "access_token"
 	sessionCodeVerifierKey = "code_verifier"
-	sessionRefreshTokenKey = "refresh_token"
 	sessionUserKey         = "user"
 )
 
@@ -30,95 +28,15 @@ type AuthResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-type PKCEParams struct {
-	CodeChallenge       string `json:"code_challenge"`
-	CodeChallengeMethod string `json:"code_challenge_method"`
-	ClientID            string `json:"client_id"`
-	ResponseType        string `json:"response_type"`
-}
-
-func (h Handlers) CreateAuthUser() Handlers {
-	return Handlers{
-		Repository:   h.Repository,
-		Logger:       h.Logger,
-		Service:      h.Service,
-		Storage:      h.Storage,
-		SessionName:  h.SessionName,
-		SessionStore: h.SessionStore,
-		AuthUser: func(c echo.Context) (echo.Context, error) {
-			sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
-			if err != nil {
-				return nil, c.NoContent(http.StatusInternalServerError)
-			}
-
-			sess.Options = &sessions.Options{
-				Path:     "/",
-				MaxAge:   sessionDuration,
-				HttpOnly: true,
-			}
-
-			accTok, ok := sess.Values[sessionAccessTokenKey].(string)
-			if !ok || accTok == "" {
-				return nil, c.NoContent(http.StatusUnauthorized)
-			}
-			c.Set(contextAccessTokenKey, accTok)
-
-			user, ok := sess.Values[sessionUserKey].(*service.User)
-			if !ok {
-				user, err = h.Service.GetMe(accTok)
-				sess.Values[sessionUserKey] = user
-				if err := sess.Save(c.Request(), c.Response()); err != nil {
-					return nil, internalServerError(err)
-				}
-
-				if err != nil {
-					return nil, internalServerError(err)
-				}
-			}
-
-			c.Set(contextUserKey, user)
-
-			return c, nil
-		},
-	}
-}
-
-func (h Handlers) createMockAuthUser(user *service.User) Handlers {
-	return Handlers{
-		Repository:   h.Repository,
-		Logger:       h.Logger,
-		Service:      h.Service,
-		Storage:      h.Storage,
-		SessionName:  h.SessionName,
-		SessionStore: h.SessionStore,
-		AuthUser: func(c echo.Context) (echo.Context, error) {
-			sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
-			if err != nil {
-				return nil, c.NoContent(http.StatusInternalServerError)
-			}
-
-			sess.Options = &sessions.Options{
-				Path:     "/",
-				MaxAge:   sessionDuration,
-				HttpOnly: true,
-			}
-
-			c.Set(contextUserKey, user)
-
-			return c, nil
-		},
-	}
-}
-
 func (h Handlers) AuthCallback(c echo.Context) error {
 	code := c.QueryParam("code")
 	if len(code) == 0 {
-		return c.NoContent(http.StatusBadRequest)
+		return echo.NewHTTPError(http.StatusBadRequest, "code is required")
 	}
 
 	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	sess.Options = &sessions.Options{
@@ -129,25 +47,26 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
 	if !ok {
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.ErrInternalServerError
 	}
 
-	res, err := h.Service.GetAccessToken(code, codeVerifier)
+	res, err := service.RequestAccessToken(code, codeVerifier)
 	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	sess.Values[sessionAccessTokenKey] = res.AccessToken
-	sess.Values[sessionRefreshTokenKey] = res.RefreshToken
+	// 以後、使わないので捨てる。セッションの長さはJomon固有にする。
+	//sess.Values[sessionAccessTokenKey] = res.AccessToken
+	//sess.Values[sessionRefreshTokenKey] = res.RefreshToken
 
-	user, err := h.Service.GetMe(res.AccessToken)
+	user, err := service.FetchTraQUserInfo(res.AccessToken)
 	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.ErrInternalServerError
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/")
@@ -156,7 +75,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 func (h Handlers) GeneratePKCE(c echo.Context) error {
 	sess, err := session.Get(sessionKey, c)
 	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	sess.Options = &sessions.Options{
@@ -165,68 +84,51 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 		HttpOnly: true,
 	}
 
-	bytesCodeVerifier := generateCodeVerifier()
-	codeVerifier := string(bytesCodeVerifier)
-	sess.Values[sessionCodeVerifierKey] = codeVerifier
-	if err := sess.Save(c.Request(), c.Response()); err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+	codeVerifier := randAlphabetAndNumberString(43)
+	sess.Values["codeVerifier"] = codeVerifier
+
+	codeVerifierHash := sha256.Sum256([]byte(codeVerifier))
+	encoder := base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_").WithPadding(base64.NoPadding)
+
+	codeChallengeMethod := "S256"
+
+	err = sess.Save(c.Request(), c.Response())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	params := PKCEParams{
-		CodeChallenge:       getCodeChallenge(bytesCodeVerifier),
-		CodeChallengeMethod: "S256",
-		ClientID:            h.Service.GetClientId(),
-		ResponseType:        "code",
-	}
-
-	return c.JSON(http.StatusOK, params)
-
+	return c.Redirect(http.StatusFound, fmt.Sprintf("%s/oauth2/authorize?response_type=code&client_id=%s&code_challenge=%s&code_challenge_method=%s", service.TraQBaseURL, service.JomonClientID, encoder.EncodeToString(codeVerifierHash[:]), codeChallengeMethod))
 }
 
-var src cryptoSource
-var randSrc = rand.New(src)
+var randSrcPool = sync.Pool{
+	New: func() interface{} {
+		return rand.NewSource(time.Now().UnixNano())
+	},
+}
 
 const (
-	// omit `.` and `~` to improve performance
-	letters       = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
-	letterIdxBits = 6
-	letterIdxMask = 1<<letterIdxBits - 1
-	letterIdxMax  = 63 / letterIdxBits
+	rs6Letters       = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+	rs6LetterIdxBits = 6
+	rs6LetterIdxMask = 1<<rs6LetterIdxBits - 1
+	rs6LetterIdxMax  = 63 / rs6LetterIdxBits
 )
 
-func generateCodeVerifier() []byte {
-	bytesCodeVerifier := make([]byte, 128)
-	cache, remain := randSrc.Int63(), letterIdxMax
-	for i := 0; i < 128; i++ {
+func randAlphabetAndNumberString(n int) string {
+	b := make([]byte, n)
+	randSrc := randSrcPool.Get().(rand.Source)
+	cache, remain := randSrc.Int63(), rs6LetterIdxMax
+	for i := n - 1; i >= 0; {
 		if remain == 0 {
-			cache, remain = randSrc.Int63(), letterIdxMax
+			cache, remain = randSrc.Int63(), rs6LetterIdxMax
 		}
-		idx := int(cache & letterIdxMask)
-		bytesCodeVerifier[i] = letters[idx]
-		cache >>= letterIdxBits
+		idx := int(cache & rs6LetterIdxMask)
+		if idx < len(rs6Letters) {
+			b[i] = rs6Letters[idx]
+			i--
+		}
+		cache >>= rs6LetterIdxBits
 		remain--
 	}
-
-	return bytesCodeVerifier
-}
-
-func getCodeChallenge(cv []byte) string {
-	bytesCodeChallenge := sha256.Sum256(cv)
-	return base64url.Encode(bytesCodeChallenge[:])
-}
-
-type cryptoSource struct{}
-
-func (s cryptoSource) Seed(seed int64) {}
-
-func (s cryptoSource) Int63() int64 {
-	return int64(s.Uint64() & ^uint64(1<<63))
-}
-
-func (s cryptoSource) Uint64() (v uint64) {
-	err := binary.Read(crand.Reader, binary.BigEndian, &v)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return v
+	randSrcPool.Put(randSrc)
+	return string(b)
 }

@@ -5,19 +5,25 @@ import (
 	"testing"
 
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/storage"
+	"github.com/traPtitech/Jomon/testutil"
 )
 
-func setup(t *testing.T, ctx context.Context) (*ent.Client, error) {
+func setup(t *testing.T, ctx context.Context) (*ent.Client, storage.Storage, error) {
 	t.Helper()
 	client, err := SetupTestEntClient(t)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	err = dropAll(t, ctx, client)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return client, nil
+	strg, err := storage.NewLocalStorage(testutil.GetEnvOrDefault("UPLOAD_DIR", "./uploads"))
+	if err != nil {
+		return nil, nil, err
+	}
+	return client, strg, nil
 }
 
 func dropAll(t *testing.T, ctx context.Context, client *ent.Client) error {
