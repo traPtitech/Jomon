@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/model"
 	storagePkg "github.com/traPtitech/Jomon/storage"
@@ -30,10 +29,6 @@ type Services struct {
 }
 
 func NewServices(repo model.Repository, storage storagePkg.Storage) (Service, error) {
-	err := godotenv.Load("./.env")
-	if err != nil {
-		panic(err)
-	}
 	traQClientID := os.Getenv("TRAQ_CLIENT_ID")
 	webhookSecret := os.Getenv("WEBHOOK_SECRET")
 	webhookChannelId := os.Getenv("WEBHOOK_CHANNEL_ID")
