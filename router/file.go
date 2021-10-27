@@ -28,56 +28,56 @@ var acceptedMimeTypes = map[string]bool{
 func (h *Handlers) PostFile(c echo.Context) error {
 	form, err := c.MultipartForm()
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	files, ok := form.File["file"]
 	if !ok || len(files) != 1 {
-		return badRequest(fmt.Errorf("invalid file"))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid file"))
 	}
 	reqfile := files[0]
 	names, ok := form.Value["name"]
 	if !ok || len(names) != 1 {
-		return badRequest(fmt.Errorf("invalid file name"))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid file name"))
 	}
 	name := names[0]
 	requestIDs, ok := form.Value["request_id"]
 	if !ok || len(requestIDs) != 1 {
-		return badRequest(fmt.Errorf("invalid file request id"))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid file request id"))
 	}
 	requestID, err := uuid.Parse(requestIDs[0])
 	if err != nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	mimetype := reqfile.Header.Get(echo.HeaderContentType)
 	if !acceptedMimeTypes[mimetype] {
-		return c.NoContent(http.StatusUnsupportedMediaType)
+		return echo.NewHTTPError(http.StatusUnsupportedMediaType, fmt.Errorf("unsupported media type"))
 	}
 
 	src, err := reqfile.Open()
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	defer src.Close()
 
 	ctx := context.Background()
 	file, err := h.Repository.CreateFile(ctx, src, name, mimetype, requestID)
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	ext, err := mime.ExtensionsByType(mimetype)
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	} else if len(ext) == 0 {
-		return internalServerError(fmt.Errorf("%s is not registered", mimetype))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("%s is not registered", mimetype))
 	}
 
 	filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
 
 	err = h.Storage.Save(filename, src)
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, &FileResponse{file.ID})
@@ -86,13 +86,13 @@ func (h *Handlers) PostFile(c echo.Context) error {
 func (h *Handlers) GetFile(c echo.Context) error {
 	fileID, err := uuid.Parse(c.Param("fileID"))
 	if err != nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
 	file, err := h.Repository.GetFile(ctx, fileID)
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	modifiedAt := file.CreatedAt.Truncate(time.Second)
@@ -101,10 +101,10 @@ func (h *Handlers) GetFile(c echo.Context) error {
 	if im != "" {
 		imt, err := http.ParseTime(im)
 		if err != nil {
-			return badRequest(err)
+			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		if modifiedAt.Before(imt) || modifiedAt.Equal(imt) {
-			return c.NoContent(http.StatusNotModified)
+			return echo.NewHTTPError(http.StatusNotModified, fmt.Errorf("not modified"))
 		}
 	}
 
@@ -112,16 +112,16 @@ func (h *Handlers) GetFile(c echo.Context) error {
 
 	ext, err := mime.ExtensionsByType(mimetype)
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	} else if len(ext) == 0 {
-		return internalServerError(fmt.Errorf("%s is not registered", mimetype))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("%s is not registered", mimetype))
 	}
 
 	filename := fmt.Sprintf("%s%s", fileID.String(), ext[0])
 
 	f, err := h.Storage.Open(filename)
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	defer f.Close()
 
@@ -134,27 +134,27 @@ func (h *Handlers) GetFile(c echo.Context) error {
 func (h *Handlers) DeleteFile(c echo.Context) error {
 	fileID, err := uuid.Parse(c.Param("fileID"))
 	if err != nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
 	file, err := h.Repository.DeleteFile(ctx, fileID)
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	mimetype := file.MimeType
 	ext, err := mime.ExtensionsByType(mimetype)
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	} else if len(ext) == 0 {
-		return internalServerError(fmt.Errorf("%s is not registered", mimetype))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("%s is not registered", mimetype))
 	}
 	filename := fmt.Sprintf("%s%s", fileID.String(), ext[0])
 
 	err = h.Storage.Delete(filename)
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.NoContent(http.StatusOK)
