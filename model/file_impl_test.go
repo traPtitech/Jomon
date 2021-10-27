@@ -12,7 +12,7 @@ import (
 
 func TestEntRepository_CreateFile(t *testing.T) {
 	ctx := context.Background()
-	client, err := setup(t, ctx)
+	client, _, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -22,9 +22,8 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 		var tags []*Tag
 		var group *Group
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), false)
-		assert.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
+		var files []*File
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, files)
 		assert.NoError(t, err)
 
 		sampleText := "sampleData"
@@ -68,9 +67,8 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 		var tags []*Tag
 		var group *Group
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), false)
-		assert.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
+		var files []*File
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, files)
 		assert.NoError(t, err)
 
 		sampleText := "sampleData"
@@ -86,7 +84,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 func TestEntRepository_GetFile(t *testing.T) {
 	ctx := context.Background()
-	client, err := setup(t, ctx)
+	client, _, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -96,9 +94,8 @@ func TestEntRepository_GetFile(t *testing.T) {
 
 		var tags []*Tag
 		var group *Group
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), false)
-		assert.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
+		var files []*File
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, files)
 		assert.NoError(t, err)
 
 		sampleText := "sampleData"
@@ -129,7 +126,7 @@ func TestEntRepository_GetFile(t *testing.T) {
 
 func TestEntRepository_DeleteFile(t *testing.T) {
 	ctx := context.Background()
-	client, err := setup(t, ctx)
+	client, _, err := setup(t, ctx)
 	assert.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -139,9 +136,8 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 
 		var tags []*Tag
 		var group *Group
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), false)
-		assert.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
+		var files []*File
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, files)
 		assert.NoError(t, err)
 
 		sampleText := "sampleData"
@@ -176,9 +172,8 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 
 		var tags []*Tag
 		var group *Group
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), false)
-		assert.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
+		var files []*File
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, files)
 		assert.NoError(t, err)
 
 		sampleText := "sampleData"
@@ -202,9 +197,8 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 
 		var tags []*Tag
 		var group *Group
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), false)
-		assert.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
+		var files []*File
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, files)
 		assert.NoError(t, err)
 
 		sampleText := "sampleData"

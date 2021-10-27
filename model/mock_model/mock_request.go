@@ -50,7 +50,7 @@ func (mr *MockRequestRepositoryMockRecorder) GetRequests(ctx, query interface{})
 }
 
 // CreateRequest mocks base method
-func (m *MockRequestRepository) CreateRequest(ctx context.Context, amount int, title, content string, tags []*model.Tag, group model.Group, files []*model.File) (*model.RequestDetail, error) {
+func (m *MockRequestRepository) CreateRequest(ctx context.Context, amount int, title, content string, tags []*model.Tag, group *model.Group, files []*model.File) (*model.RequestDetail, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateRequest", ctx, amount, title, content, tags, group, files)
 	ret0, _ := ret[0].(*model.RequestDetail)

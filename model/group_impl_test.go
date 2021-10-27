@@ -12,9 +12,9 @@ import (
 
 func TestEntRepository_GetMembers(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, _, err := setup(t, ctx)
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -77,9 +77,9 @@ func TestEntRepository_GetMembers(t *testing.T) {
 
 func TestEntRepository_CreateMember(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, _, err := setup(t, ctx)
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -121,9 +121,9 @@ func TestEntRepository_CreateMember(t *testing.T) {
 
 func TestEntRepository_DeleteMember(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, _, err := setup(t, ctx)
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()

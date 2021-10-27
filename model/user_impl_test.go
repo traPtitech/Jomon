@@ -11,12 +11,12 @@ import (
 
 func TestEntRepository_GetUsers(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, _, err := setup(t, ctx)
 	assert.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx)
+	repo := NewEntRepository(client)
+	client2, _, err := setup(t, ctx)
 	assert.NoError(t, err)
-	repo2 := NewEntRepository(client2, storage2)
+	repo2 := NewEntRepository(client2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -61,9 +61,9 @@ func TestEntRepository_GetUsers(t *testing.T) {
 
 func TestEntRepository_CreateUser(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, _, err := setup(t, ctx)
 	assert.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -95,12 +95,12 @@ func TestEntRepository_CreateUser(t *testing.T) {
 
 func TestEntRepository_GetUserByName(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, _, err := setup(t, ctx)
 	assert.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx)
+	repo := NewEntRepository(client)
+	client2, _, err := setup(t, ctx)
 	assert.NoError(t, err)
-	repo2 := NewEntRepository(client2, storage2)
+	repo2 := NewEntRepository(client2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -130,12 +130,12 @@ func TestEntRepository_GetUserByName(t *testing.T) {
 
 func TestEntRepository_GetUserByID(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, _, err := setup(t, ctx)
 	assert.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx)
+	repo := NewEntRepository(client)
+	client2, _, err := setup(t, ctx)
 	assert.NoError(t, err)
-	repo2 := NewEntRepository(client2, storage2)
+	repo2 := NewEntRepository(client2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -165,9 +165,9 @@ func TestEntRepository_GetUserByID(t *testing.T) {
 
 func TestEntRepository_UpdateUser(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, _, err := setup(t, ctx)
 	assert.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()

@@ -39,7 +39,7 @@ func main() {
 		}
 	}
 	// Setup repository
-	repo := model.NewEntRepository(client, strg)
+	repo := model.NewEntRepository(client)
 
 	// Setup server
 	var logger *zap.Logger
