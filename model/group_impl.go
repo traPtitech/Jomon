@@ -69,7 +69,7 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	}
 	modelmembers := []*User{}
 	for _, member := range members {
-		modelmembers = append(modelmembers, ConvertEntUserToModelUser(member))
+		modelmembers = append(modelmembers, convertEntUserToModelUser(member))
 	}
 	return modelmembers, nil
 }

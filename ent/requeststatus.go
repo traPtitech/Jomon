@@ -27,9 +27,8 @@ type RequestStatus struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RequestStatusQuery when eager-loading is set.
-	Edges               RequestStatusEdges `json:"edges"`
-	request_status      *uuid.UUID
-	request_status_user *uuid.UUID
+	Edges          RequestStatusEdges `json:"edges"`
+	request_status *uuid.UUID
 }
 
 // RequestStatusEdges holds the relations/edges for other nodes in the graph.

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -103,7 +104,7 @@ func (rsq *RequestStatusQuery) QueryUser() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requeststatus.Table, requeststatus.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, requeststatus.UserTable, requeststatus.UserColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, requeststatus.UserTable, requeststatus.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rsq.driver.Dialect(), step)
 		return fromU, nil
@@ -393,7 +394,7 @@ func (rsq *RequestStatusQuery) sqlAll(ctx context.Context) ([]*RequestStatus, er
 			rsq.withUser != nil,
 		}
 	)
-	if rsq.withRequest != nil || rsq.withUser != nil {
+	if rsq.withRequest != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -449,31 +450,30 @@ func (rsq *RequestStatusQuery) sqlAll(ctx context.Context) ([]*RequestStatus, er
 	}
 
 	if query := rsq.withUser; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*RequestStatus)
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*RequestStatus)
 		for i := range nodes {
-			if nodes[i].request_status_user == nil {
-				continue
-			}
-			fk := *nodes[i].request_status_user
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
 		}
-		query.Where(user.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sql.InValues(requeststatus.UserColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.request_status_user
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "request_status_user" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_status_user" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_status_user" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.User = n
-			}
+			node.Edges.User = n
 		}
 	}
 

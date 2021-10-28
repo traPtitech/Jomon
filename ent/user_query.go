@@ -153,7 +153,7 @@ func (uq *UserQuery) QueryRequestStatus() *RequestStatusQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(requeststatus.Table, requeststatus.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.RequestStatusTable, user.RequestStatusColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, user.RequestStatusTable, user.RequestStatusColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -175,7 +175,7 @@ func (uq *UserQuery) QueryRequest() *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.RequestTable, user.RequestColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, user.RequestTable, user.RequestColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -504,7 +504,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			uq.withRequest != nil,
 		}
 	)
-	if uq.withComment != nil {
+	if uq.withComment != nil || uq.withRequestStatus != nil || uq.withRequest != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -690,60 +690,60 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 
 	if query := uq.withRequestStatus; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*User)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*User)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.RequestStatus = []*RequestStatus{}
+			if nodes[i].request_status_user == nil {
+				continue
+			}
+			fk := *nodes[i].request_status_user
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.withFKs = true
-		query.Where(predicate.RequestStatus(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.RequestStatusColumn, fks...))
-		}))
+		query.Where(requeststatus.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.request_status_user
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_status_user" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_status_user" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_status_user" returned %v`, n.ID)
 			}
-			node.Edges.RequestStatus = append(node.Edges.RequestStatus, n)
+			for i := range nodes {
+				nodes[i].Edges.RequestStatus = n
+			}
 		}
 	}
 
 	if query := uq.withRequest; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*User)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*User)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Request = []*Request{}
+			if nodes[i].request_user == nil {
+				continue
+			}
+			fk := *nodes[i].request_user
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.withFKs = true
-		query.Where(predicate.Request(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.RequestColumn, fks...))
-		}))
+		query.Where(request.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.request_user
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_user" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_user" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_user" returned %v`, n.ID)
 			}
-			node.Edges.Request = append(node.Edges.Request, n)
+			for i := range nodes {
+				nodes[i].Edges.Request = n
+			}
 		}
 	}
 

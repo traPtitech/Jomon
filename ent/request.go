@@ -33,7 +33,6 @@ type Request struct {
 	// The values are being populated by the RequestQuery when eager-loading is set.
 	Edges         RequestEdges `json:"edges"`
 	group_request *uuid.UUID
-	request_user  *uuid.UUID
 }
 
 // RequestEdges holds the relations/edges for other nodes in the graph.

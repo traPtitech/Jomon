@@ -85,6 +85,8 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"comment_user",
+	"request_user",
+	"request_status_user",
 }
 
 var (
