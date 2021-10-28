@@ -313,122 +313,136 @@ func TestHandlers_GetFile(t *testing.T) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 		}
 	})
-	/*
 
-	   	t.Run("UnknownFile", func(t *testing.T) {
-	   		t.Parallel()
-	   		ctrl := gomock.NewController(t)
-	   		accessUser := mustMakeUser(t, false)
-	   		th, err := SetupTestHandlers(t, ctrl, accessUser)
-	   		assert.NoError(t, err)
+	t.Run("UnknownFile", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
 
-	   		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.GET, "/api/files/po", nil, nil)
-	   		assert.Equal(t, http.StatusBadRequest, statusCode)
-	   	})
-	   }
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/files/po", nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/files/:fileID")
+		c.SetParamNames("fileID")
+		c.SetParamValues("po")
 
-	   func TestHandlers_DeleteFile(t *testing.T) {
-	   	t.Parallel()
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
 
-	   	t.Run("Success", func(t *testing.T) {
-	   		t.Parallel()
-	   		ctrl := gomock.NewController(t)
-	   		accessUser := mustMakeUser(t, false)
-	   		th, err := SetupTestHandlers(t, ctrl, accessUser)
-	   		assert.NoError(t, err)
+		_, mocErr := uuid.Parse("po")
 
-	   		file := &model.File{
-	   			ID:        uuid.New(),
-	   			MimeType:  "image/jpeg",
-	   			CreatedAt: time.Now(),
-	   		}
-
-	   		ctx := context.Background()
-	   		th.Repository.MockFileRepository.
-	   			EXPECT().
-	   			DeleteFile(ctx, file.ID).
-	   			Return(file, nil)
-
-	   		ext, err := mime.ExtensionsByType(file.MimeType)
-	   		require.NoError(t, err)
-
-	   		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
-
-	   		th.Storage.MockStorage.
-	   			EXPECT().
-	   			Delete(filename).
-	   			Return(nil)
-
-	   		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, fmt.Sprintf("/api/files/%s", file.ID), nil, nil)
-	   		assert.Equal(t, http.StatusOK, statusCode)
-	   	})
-
-	   	t.Run("FailedToRepositoryDeleteFile", func(t *testing.T) {
-	   		t.Parallel()
-	   		ctrl := gomock.NewController(t)
-	   		accessUser := mustMakeUser(t, false)
-	   		th, err := SetupTestHandlers(t, ctrl, accessUser)
-	   		assert.NoError(t, err)
-
-	   		file := &model.File{
-	   			ID:        uuid.New(),
-	   			MimeType:  "image/jpeg",
-	   			CreatedAt: time.Now(),
-	   		}
-
-	   		ctx := context.Background()
-	   		th.Repository.MockFileRepository.
-	   			EXPECT().
-	   			DeleteFile(ctx, file.ID).
-	   			Return(nil, errors.New("file could not be deleted"))
-
-	   		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, fmt.Sprintf("/api/files/%s", file.ID), nil, nil)
-	   		assert.Equal(t, http.StatusInternalServerError, statusCode)
-	   	})
-
-	   	t.Run("FailedToServiceDeleteFile", func(t *testing.T) {
-	   		t.Parallel()
-	   		ctrl := gomock.NewController(t)
-	   		accessUser := mustMakeUser(t, false)
-	   		th, err := SetupTestHandlers(t, ctrl, accessUser)
-	   		assert.NoError(t, err)
-
-	   		file := &model.File{
-	   			ID:        uuid.New(),
-	   			MimeType:  "image/jpeg",
-	   			CreatedAt: time.Now(),
-	   		}
-
-	   		ctx := context.Background()
-	   		th.Repository.MockFileRepository.
-	   			EXPECT().
-	   			DeleteFile(ctx, file.ID).
-	   			Return(file, nil)
-
-	   		mimetype := file.MimeType
-	   		ext, err := mime.ExtensionsByType(mimetype)
-	   		require.NoError(t, err)
-
-	   		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
-
-	   		th.Storage.MockStorage.
-	   			EXPECT().
-	   			Delete(filename).
-	   			Return(errors.New("failed to delete file"))
-
-	   		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, fmt.Sprintf("/api/files/%s", file.ID), nil, nil)
-	   		assert.Equal(t, http.StatusInternalServerError, statusCode)
-	   	})
-
-	   	t.Run("UnknownFile", func(t *testing.T) {
-	   		t.Parallel()
-	   		ctrl := gomock.NewController(t)
-	   		accessUser := mustMakeUser(t, false)
-	   		th, err := SetupTestHandlers(t, ctrl, accessUser)
-	   		assert.NoError(t, err)
-
-	   		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, "/api/files/po", nil, nil)
-	   		assert.Equal(t, http.StatusBadRequest, statusCode)
-	   	})
-	*/
+		err = h.Handlers.GetFile(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
+		}
+	})
 }
+
+/*
+
+   func TestHandlers_DeleteFile(t *testing.T) {
+   	t.Parallel()
+
+   	t.Run("Success", func(t *testing.T) {
+   		t.Parallel()
+   		ctrl := gomock.NewController(t)
+   		accessUser := mustMakeUser(t, false)
+   		th, err := SetupTestHandlers(t, ctrl, accessUser)
+   		assert.NoError(t, err)
+
+   		file := &model.File{
+   			ID:        uuid.New(),
+   			MimeType:  "image/jpeg",
+   			CreatedAt: time.Now(),
+   		}
+
+   		ctx := context.Background()
+   		th.Repository.MockFileRepository.
+   			EXPECT().
+   			DeleteFile(ctx, file.ID).
+   			Return(file, nil)
+
+   		ext, err := mime.ExtensionsByType(file.MimeType)
+   		require.NoError(t, err)
+
+   		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
+
+   		th.Storage.MockStorage.
+   			EXPECT().
+   			Delete(filename).
+   			Return(nil)
+
+   		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, fmt.Sprintf("/api/files/%s", file.ID), nil, nil)
+   		assert.Equal(t, http.StatusOK, statusCode)
+   	})
+
+   	t.Run("FailedToRepositoryDeleteFile", func(t *testing.T) {
+   		t.Parallel()
+   		ctrl := gomock.NewController(t)
+   		accessUser := mustMakeUser(t, false)
+   		th, err := SetupTestHandlers(t, ctrl, accessUser)
+   		assert.NoError(t, err)
+
+   		file := &model.File{
+   			ID:        uuid.New(),
+   			MimeType:  "image/jpeg",
+   			CreatedAt: time.Now(),
+   		}
+
+   		ctx := context.Background()
+   		th.Repository.MockFileRepository.
+   			EXPECT().
+   			DeleteFile(ctx, file.ID).
+   			Return(nil, errors.New("file could not be deleted"))
+
+   		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, fmt.Sprintf("/api/files/%s", file.ID), nil, nil)
+   		assert.Equal(t, http.StatusInternalServerError, statusCode)
+   	})
+
+   	t.Run("FailedToServiceDeleteFile", func(t *testing.T) {
+   		t.Parallel()
+   		ctrl := gomock.NewController(t)
+   		accessUser := mustMakeUser(t, false)
+   		th, err := SetupTestHandlers(t, ctrl, accessUser)
+   		assert.NoError(t, err)
+
+   		file := &model.File{
+   			ID:        uuid.New(),
+   			MimeType:  "image/jpeg",
+   			CreatedAt: time.Now(),
+   		}
+
+   		ctx := context.Background()
+   		th.Repository.MockFileRepository.
+   			EXPECT().
+   			DeleteFile(ctx, file.ID).
+   			Return(file, nil)
+
+   		mimetype := file.MimeType
+   		ext, err := mime.ExtensionsByType(mimetype)
+   		require.NoError(t, err)
+
+   		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
+
+   		th.Storage.MockStorage.
+   			EXPECT().
+   			Delete(filename).
+   			Return(errors.New("failed to delete file"))
+
+   		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, fmt.Sprintf("/api/files/%s", file.ID), nil, nil)
+   		assert.Equal(t, http.StatusInternalServerError, statusCode)
+   	})
+
+   	t.Run("UnknownFile", func(t *testing.T) {
+   		t.Parallel()
+   		ctrl := gomock.NewController(t)
+   		accessUser := mustMakeUser(t, false)
+   		th, err := SetupTestHandlers(t, ctrl, accessUser)
+   		assert.NoError(t, err)
+
+   		statusCode, _ := th.doRequestWithLogin(t, accessUser, echo.DELETE, "/api/files/po", nil, nil)
+   		assert.Equal(t, http.StatusBadRequest, statusCode)
+   	})
+*/
