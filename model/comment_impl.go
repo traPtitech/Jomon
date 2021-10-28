@@ -8,7 +8,6 @@ import (
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/request"
-	
 )
 
 func (repo *EntRepository) GetComments(ctx context.Context, requestID uuid.UUID) ([]*Comment, error) {
@@ -43,6 +42,7 @@ func (repo *EntRepository) CreateComment(ctx context.Context, comment string, re
 	return ConvertEntCommentToModelComment(created), nil
 }
 
+// TODO: add edge to request
 func (repo *EntRepository) UpdateComment(ctx context.Context, comment string, requestID uuid.UUID, commentID uuid.UUID) (*Comment, error) {
 	updated, err := repo.client.Comment.
 		UpdateOneID(commentID).
@@ -74,15 +74,12 @@ func (repo *EntRepository) DeleteComment(ctx context.Context, requestID uuid.UUI
 	return err
 }
 
-func ConvertEntCommentToModelComment(entcomment *ent.Comment) *Comment {
-	if entcomment == nil {
-		return nil
-	}
+func ConvertEntCommentToModelComment(comment *ent.Comment) *Comment {
 	return &Comment{
-		ID:        entcomment.ID,
-		User:      entcomment.Edges.User.ID,
-		Comment:   entcomment.Comment,
-		CreatedAt: entcomment.CreatedAt,
-		UpdatedAt: entcomment.UpdatedAt,
+		ID:        comment.ID,
+		User:      comment.Edges.User.ID,
+		Comment:   comment.Comment,
+		CreatedAt: comment.CreatedAt,
+		UpdatedAt: comment.UpdatedAt,
 	}
 }

@@ -1,6 +1,6 @@
 .PHONY: up
 up:
-	@docker-compose up --build
+	@docker-compose up -d --build
 
 .PHONY: down
 down:
@@ -8,7 +8,9 @@ down:
 
 .PHONY: test
 test:
-	@MARIADB_HOSTNAME=localhost go test -v -cover -race ./...
+	@mkdir -p $(CURDIR)/uploads
+	@MARIADB_HOSTNAME=localhost UPLOAD_DIR=$(CURDIR)/uploads go test -cover -race ./...
+	@rmdir $(CURDIR)/uploads
 
 .PHONY: docs
 docs:

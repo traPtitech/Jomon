@@ -774,6 +774,56 @@ paths:
         "404":
           $ref: "#/components/responses/404"
 
+
+  /users:
+    get:
+      tags:
+      - "Users"
+      description: "ユーザー一覧を取得する。"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/User"
+    put:
+      tags:
+      - "Users"
+      description: "ユーザーの情報を変更する。主に権限の変更用。管理者権限またはグループオーナー権限が必要。"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostUser"
+      responses:
+        '200':
+          description: "取得に成功した。返す"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '400':
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/403"
+
+  /users/me:
+    get:
+      tags:
+      - "Users"
+      description: "自分の情報を取得する。存在しない場合はユーザーを作成する。"
+      responses:
+        '200':
+          description: "取得に成功した。返す"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
 components:
   schemas:
     StatusEnum:
@@ -1028,6 +1078,37 @@ components:
         created_at:
           type: string
           format: date-time
+    User:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "nagatech"
+        display_name:
+          type: "string"
+          example: "ながてち"
+        admin:
+          type: "boolean"
+        created_at:
+          type: "string"
+          format: "date-time"
+        updated_at:
+          type: "string"
+          format: "date-time"
+        deleted_at:
+          type: "string"
+          format: "date-time"
+    PostUser:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "nagatech"
+        display_name:
+          type: "string"
+          example: "ながてち"
+        admin:
+          type: "boolean"
   responses:
     400:
       description: 不正なリクエスト。

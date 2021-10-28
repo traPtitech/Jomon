@@ -62,11 +62,13 @@ const (
 	FileInverseTable = "files"
 	// FileColumn is the table column denoting the file relation/edge.
 	FileColumn = "request_file"
-	// TagTable is the table that holds the tag relation/edge. The primary key declared below.
-	TagTable = "request_tag"
+	// TagTable is the table that holds the tag relation/edge.
+	TagTable = "tags"
 	// TagInverseTable is the table name for the Tag entity.
 	// It exists in this package in order to avoid circular dependency with the "tag" package.
 	TagInverseTable = "tags"
+	// TagColumn is the table column denoting the tag relation/edge.
+	TagColumn = "request_tag"
 	// TransactionTable is the table that holds the transaction relation/edge.
 	TransactionTable = "transactions"
 	// TransactionInverseTable is the table name for the Transaction entity.
@@ -82,7 +84,7 @@ const (
 	// CommentColumn is the table column denoting the comment relation/edge.
 	CommentColumn = "request_comment"
 	// UserTable is the table that holds the user relation/edge.
-	UserTable = "requests"
+	UserTable = "users"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"

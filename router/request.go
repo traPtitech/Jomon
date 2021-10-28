@@ -3,7 +3,6 @@ package router
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -55,45 +54,46 @@ type CommentDetail struct {
 
 func (h *Handlers) GetRequests(c echo.Context) error {
 	ctx := context.Background()
-	sort := c.QueryParam("sort")
-	target := c.QueryParam("target")
-	var year int
-	var err error
-	if c.QueryParam("year") != "" {
-		year, err = strconv.Atoi(c.QueryParam("year"))
-		if err != nil {
-			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusBadRequest, err)
-		}
-	}
-	var since time.Time
-	if c.QueryParam("since") != "" {
-		since, err = h.Service.StrToDate(c.QueryParam("since"))
-		if err != nil {
-			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusBadRequest, err)
-		}
-	}
-	var until time.Time
-	if c.QueryParam("until") != "" {
-		until, err = h.Service.StrToDate(c.QueryParam("until"))
-		if err != nil {
-			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusBadRequest, err)
-		}
-	}
-	tag := c.QueryParam("tag")
-	group := c.QueryParam("group")
-	query := model.RequestQuery{
-		Sort:   &sort,
-		Target: &target,
-		Year:   &year,
-		Since:  &since,
-		Until:  &until,
-		Tag:    &tag,
-		Group:  &group,
-	}
-	modelrequests, err := h.Repository.GetRequests(ctx, query)
+	// sort := c.QueryParam("sort")
+	// target := c.QueryParam("target")
+	// var year int
+	// var err error
+	// if c.QueryParam("year") != "" {
+	// 	year, err = strconv.Atoi(c.QueryParam("year"))
+	// 	if err != nil {
+	// 		c.Logger().Error(err)
+	// 		return echo.NewHTTPError(http.StatusBadRequest, err)
+	// 	}
+	// }
+	// var since time.Time
+	// if c.QueryParam("since") != "" {
+	// 	since, err = h.Service.StrToDate(c.QueryParam("since"))
+	// 	if err != nil {
+	// 		c.Logger().Error(err)
+	// 		return echo.NewHTTPError(http.StatusBadRequest, err)
+	// 	}
+	// }
+	// var until time.Time
+	// if c.QueryParam("until") != "" {
+	// 	until, err = h.Service.StrToDate(c.QueryParam("until"))
+	// 	if err != nil {
+	// 		c.Logger().Error(err)
+	// 		return echo.NewHTTPError(http.StatusBadRequest, err)
+	// 	}
+	// }
+	// tag := c.QueryParam("tag")
+	// group := c.QueryParam("group")
+	// query := model.RequestQuery{
+	// 	Sort:   &sort,
+	// 	Target: &target,
+	// 	Year:   &year,
+	// 	Since:  &since,
+	// 	Until:  &until,
+	// 	Tag:    &tag,
+	// 	Group:  &group,
+	// }
+
+	modelrequests, err := h.Repository.GetRequests(ctx, model.RequestQuery{})
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -380,7 +380,7 @@ func (h *Handlers) PostComment(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	user, ok := c.Get(contextUserKey).(model.User)
+	user, ok := c.Get(sessionUserKey).(model.User)
 	if !ok || user.ID == uuid.Nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusUnauthorized, err)

@@ -34,7 +34,7 @@ const (
 	// RequestColumn is the table column denoting the request relation/edge.
 	RequestColumn = "request_status"
 	// UserTable is the table that holds the user relation/edge.
-	UserTable = "request_status"
+	UserTable = "users"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"

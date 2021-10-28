@@ -10,6 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
+	"github.com/traPtitech/Jomon/ent/request"
+	"github.com/traPtitech/Jomon/ent/requeststatus"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -32,8 +34,10 @@ type User struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges        UserEdges `json:"edges"`
-	comment_user *uuid.UUID
+	Edges               UserEdges `json:"edges"`
+	comment_user        *uuid.UUID
+	request_user        *uuid.UUID
+	request_status_user *uuid.UUID
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -45,9 +49,9 @@ type UserEdges struct {
 	// Comment holds the value of the comment edge.
 	Comment *Comment `json:"comment,omitempty"`
 	// RequestStatus holds the value of the request_status edge.
-	RequestStatus []*RequestStatus `json:"request_status,omitempty"`
+	RequestStatus *RequestStatus `json:"request_status,omitempty"`
 	// Request holds the value of the request edge.
-	Request []*Request `json:"request,omitempty"`
+	Request *Request `json:"request,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [5]bool
@@ -86,18 +90,28 @@ func (e UserEdges) CommentOrErr() (*Comment, error) {
 }
 
 // RequestStatusOrErr returns the RequestStatus value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) RequestStatusOrErr() ([]*RequestStatus, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) RequestStatusOrErr() (*RequestStatus, error) {
 	if e.loadedTypes[3] {
+		if e.RequestStatus == nil {
+			// The edge request_status was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: requeststatus.Label}
+		}
 		return e.RequestStatus, nil
 	}
 	return nil, &NotLoadedError{edge: "request_status"}
 }
 
 // RequestOrErr returns the Request value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) RequestOrErr() ([]*Request, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) RequestOrErr() (*Request, error) {
 	if e.loadedTypes[4] {
+		if e.Request == nil {
+			// The edge request was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: request.Label}
+		}
 		return e.Request, nil
 	}
 	return nil, &NotLoadedError{edge: "request"}
@@ -117,7 +131,11 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 		case user.FieldID:
 			values[i] = new(uuid.UUID)
 		case user.ForeignKeys[0]: // comment_user
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+			values[i] = new(uuid.UUID)
+		case user.ForeignKeys[1]: // request_user
+			values[i] = new(uuid.UUID)
+		case user.ForeignKeys[2]: // request_status_user
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}
@@ -177,11 +195,22 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				*u.DeletedAt = value.Time
 			}
 		case user.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
+			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field comment_user", values[i])
-			} else if value.Valid {
-				u.comment_user = new(uuid.UUID)
-				*u.comment_user = *value.S.(*uuid.UUID)
+			} else if value != nil {
+				u.comment_user = value
+			}
+		case user.ForeignKeys[1]:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field request_user", values[i])
+			} else if value != nil {
+				u.request_user = value
+			}
+		case user.ForeignKeys[2]:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field request_status_user", values[i])
+			} else if value != nil {
+				u.request_status_user = value
 			}
 		}
 	}

@@ -20,7 +20,8 @@ func (User) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
 		field.String("name").
-			Unique(),
+			Unique().
+			NotEmpty(),
 		field.String("display_name"),
 		field.Bool("admin").
 			Default(false),
@@ -45,8 +46,10 @@ func (User) Edges() []ent.Edge {
 			Ref("user").
 			Unique(),
 		edge.From("request_status", RequestStatus.Type).
-			Ref("user"),
+			Ref("user").
+			Unique(),
 		edge.From("request", Request.Type).
-			Ref("user"),
+			Ref("user").
+			Unique(),
 	}
 }

@@ -55,14 +55,14 @@ const (
 	// CommentColumn is the table column denoting the comment relation/edge.
 	CommentColumn = "comment_user"
 	// RequestStatusTable is the table that holds the request_status relation/edge.
-	RequestStatusTable = "request_status"
+	RequestStatusTable = "users"
 	// RequestStatusInverseTable is the table name for the RequestStatus entity.
 	// It exists in this package in order to avoid circular dependency with the "requeststatus" package.
 	RequestStatusInverseTable = "request_status"
 	// RequestStatusColumn is the table column denoting the request_status relation/edge.
 	RequestStatusColumn = "request_status_user"
 	// RequestTable is the table that holds the request relation/edge.
-	RequestTable = "requests"
+	RequestTable = "users"
 	// RequestInverseTable is the table name for the Request entity.
 	// It exists in this package in order to avoid circular dependency with the "request" package.
 	RequestInverseTable = "requests"
@@ -112,6 +112,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// NameValidator is a validator for the "name" field. It is called by the builders before save.
+	NameValidator func(string) error
 	// DefaultAdmin holds the default value on creation for the "admin" field.
 	DefaultAdmin bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
