@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -42,7 +43,10 @@ type Webhook struct {
 	ID        string
 }
 
-func (s *Services) WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
+func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
+	webhookSecret := os.Getenv("WEBHOOK_SECRET")
+  webhookChannelId := os.Getenv("WEBHOOK_CHANNEL_ID")
+  webhookId := os.Getenv("WEBHOOK_ID")
 	resApp := new(WebhookApplication)
 	err := json.Unmarshal(resBody, resApp)
 	if err != nil {
@@ -80,7 +84,7 @@ func (s *Services) WebhookEventHandler(c echo.Context, reqBody, resBody []byte) 
 		panic(err)
 	}
 
-	_ = RequestWebhook(message, s.Webhook.Secret, s.Webhook.ChannelId, s.Webhook.ID, 1)
+	_ = RequestWebhook(message, webhookSecret, webhookChannelId, webhookId, 1)
 }
 
 func RequestWebhook(message, secret, channelID, webhookID string, embed int) error {

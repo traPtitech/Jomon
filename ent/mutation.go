@@ -6837,9 +6837,11 @@ type UserMutation struct {
 	clearedgroup_owner    bool
 	comment               *uuid.UUID
 	clearedcomment        bool
-	request_status        *uuid.UUID
+	request_status        map[uuid.UUID]struct{}
+	removedrequest_status map[uuid.UUID]struct{}
 	clearedrequest_status bool
-	request               *uuid.UUID
+	request               map[uuid.UUID]struct{}
+	removedrequest        map[uuid.UUID]struct{}
 	clearedrequest        bool
 	done                  bool
 	oldValue              func(context.Context) (*User, error)
@@ -7307,9 +7309,14 @@ func (m *UserMutation) ResetComment() {
 	m.clearedcomment = false
 }
 
-// SetRequestStatusID sets the "request_status" edge to the RequestStatus entity by id.
-func (m *UserMutation) SetRequestStatusID(id uuid.UUID) {
-	m.request_status = &id
+// AddRequestStatuIDs adds the "request_status" edge to the RequestStatus entity by ids.
+func (m *UserMutation) AddRequestStatuIDs(ids ...uuid.UUID) {
+	if m.request_status == nil {
+		m.request_status = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.request_status[ids[i]] = struct{}{}
+	}
 }
 
 // ClearRequestStatus clears the "request_status" edge to the RequestStatus entity.
@@ -7322,20 +7329,29 @@ func (m *UserMutation) RequestStatusCleared() bool {
 	return m.clearedrequest_status
 }
 
-// RequestStatusID returns the "request_status" edge ID in the mutation.
-func (m *UserMutation) RequestStatusID() (id uuid.UUID, exists bool) {
-	if m.request_status != nil {
-		return *m.request_status, true
+// RemoveRequestStatuIDs removes the "request_status" edge to the RequestStatus entity by IDs.
+func (m *UserMutation) RemoveRequestStatuIDs(ids ...uuid.UUID) {
+	if m.removedrequest_status == nil {
+		m.removedrequest_status = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.request_status, ids[i])
+		m.removedrequest_status[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRequestStatus returns the removed IDs of the "request_status" edge to the RequestStatus entity.
+func (m *UserMutation) RemovedRequestStatusIDs() (ids []uuid.UUID) {
+	for id := range m.removedrequest_status {
+		ids = append(ids, id)
 	}
 	return
 }
 
 // RequestStatusIDs returns the "request_status" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// RequestStatusID instead. It exists only for internal usage by the builders.
 func (m *UserMutation) RequestStatusIDs() (ids []uuid.UUID) {
-	if id := m.request_status; id != nil {
-		ids = append(ids, *id)
+	for id := range m.request_status {
+		ids = append(ids, id)
 	}
 	return
 }
@@ -7344,11 +7360,17 @@ func (m *UserMutation) RequestStatusIDs() (ids []uuid.UUID) {
 func (m *UserMutation) ResetRequestStatus() {
 	m.request_status = nil
 	m.clearedrequest_status = false
+	m.removedrequest_status = nil
 }
 
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *UserMutation) SetRequestID(id uuid.UUID) {
-	m.request = &id
+// AddRequestIDs adds the "request" edge to the Request entity by ids.
+func (m *UserMutation) AddRequestIDs(ids ...uuid.UUID) {
+	if m.request == nil {
+		m.request = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.request[ids[i]] = struct{}{}
+	}
 }
 
 // ClearRequest clears the "request" edge to the Request entity.
@@ -7361,20 +7383,29 @@ func (m *UserMutation) RequestCleared() bool {
 	return m.clearedrequest
 }
 
-// RequestID returns the "request" edge ID in the mutation.
-func (m *UserMutation) RequestID() (id uuid.UUID, exists bool) {
-	if m.request != nil {
-		return *m.request, true
+// RemoveRequestIDs removes the "request" edge to the Request entity by IDs.
+func (m *UserMutation) RemoveRequestIDs(ids ...uuid.UUID) {
+	if m.removedrequest == nil {
+		m.removedrequest = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.request, ids[i])
+		m.removedrequest[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRequest returns the removed IDs of the "request" edge to the Request entity.
+func (m *UserMutation) RemovedRequestIDs() (ids []uuid.UUID) {
+	for id := range m.removedrequest {
+		ids = append(ids, id)
 	}
 	return
 }
 
 // RequestIDs returns the "request" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// RequestID instead. It exists only for internal usage by the builders.
 func (m *UserMutation) RequestIDs() (ids []uuid.UUID) {
-	if id := m.request; id != nil {
-		ids = append(ids, *id)
+	for id := range m.request {
+		ids = append(ids, id)
 	}
 	return
 }
@@ -7383,6 +7414,7 @@ func (m *UserMutation) RequestIDs() (ids []uuid.UUID) {
 func (m *UserMutation) ResetRequest() {
 	m.request = nil
 	m.clearedrequest = false
+	m.removedrequest = nil
 }
 
 // Where appends a list predicates to the UserMutation builder.
@@ -7637,13 +7669,17 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			return []ent.Value{*id}
 		}
 	case user.EdgeRequestStatus:
-		if id := m.request_status; id != nil {
-			return []ent.Value{*id}
+		ids := make([]ent.Value, 0, len(m.request_status))
+		for id := range m.request_status {
+			ids = append(ids, id)
 		}
+		return ids
 	case user.EdgeRequest:
-		if id := m.request; id != nil {
-			return []ent.Value{*id}
+		ids := make([]ent.Value, 0, len(m.request))
+		for id := range m.request {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -7656,6 +7692,12 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedgroup_owner != nil {
 		edges = append(edges, user.EdgeGroupOwner)
+	}
+	if m.removedrequest_status != nil {
+		edges = append(edges, user.EdgeRequestStatus)
+	}
+	if m.removedrequest != nil {
+		edges = append(edges, user.EdgeRequest)
 	}
 	return edges
 }
@@ -7673,6 +7715,18 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	case user.EdgeGroupOwner:
 		ids := make([]ent.Value, 0, len(m.removedgroup_owner))
 		for id := range m.removedgroup_owner {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeRequestStatus:
+		ids := make([]ent.Value, 0, len(m.removedrequest_status))
+		for id := range m.removedrequest_status {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeRequest:
+		ids := make([]ent.Value, 0, len(m.removedrequest))
+		for id := range m.removedrequest {
 			ids = append(ids, id)
 		}
 		return ids
@@ -7725,12 +7779,6 @@ func (m *UserMutation) ClearEdge(name string) error {
 	switch name {
 	case user.EdgeComment:
 		m.ClearComment()
-		return nil
-	case user.EdgeRequestStatus:
-		m.ClearRequestStatus()
-		return nil
-	case user.EdgeRequest:
-		m.ClearRequest()
 		return nil
 	}
 	return fmt.Errorf("unknown User unique edge %s", name)
