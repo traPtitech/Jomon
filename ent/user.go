@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -32,8 +31,7 @@ type User struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges        UserEdges `json:"edges"`
-	comment_user *uuid.UUID
+	Edges UserEdges `json:"edges"`
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -43,7 +41,7 @@ type UserEdges struct {
 	// GroupOwner holds the value of the group_owner edge.
 	GroupOwner []*Group `json:"group_owner,omitempty"`
 	// Comment holds the value of the comment edge.
-	Comment *Comment `json:"comment,omitempty"`
+	Comment []*Comment `json:"comment,omitempty"`
 	// RequestStatus holds the value of the request_status edge.
 	RequestStatus []*RequestStatus `json:"request_status,omitempty"`
 	// Request holds the value of the request edge.
@@ -72,14 +70,9 @@ func (e UserEdges) GroupOwnerOrErr() ([]*Group, error) {
 }
 
 // CommentOrErr returns the Comment value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) CommentOrErr() (*Comment, error) {
+// was not loaded in eager-loading.
+func (e UserEdges) CommentOrErr() ([]*Comment, error) {
 	if e.loadedTypes[2] {
-		if e.Comment == nil {
-			// The edge comment was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: comment.Label}
-		}
 		return e.Comment, nil
 	}
 	return nil, &NotLoadedError{edge: "comment"}
@@ -116,8 +109,6 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullTime)
 		case user.FieldID:
 			values[i] = new(uuid.UUID)
-		case user.ForeignKeys[0]: // comment_user
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}
@@ -175,13 +166,6 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.DeletedAt = new(time.Time)
 				*u.DeletedAt = value.Time
-			}
-		case user.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field comment_user", values[i])
-			} else if value.Valid {
-				u.comment_user = new(uuid.UUID)
-				*u.comment_user = *value.S.(*uuid.UUID)
 			}
 		}
 	}

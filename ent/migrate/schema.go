@@ -15,6 +15,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "comment_user", Type: field.TypeUUID, Nullable: true},
 		{Name: "request_comment", Type: field.TypeUUID, Nullable: true},
 	}
 	// CommentsTable holds the schema information for the "comments" table.
@@ -24,8 +25,14 @@ var (
 		PrimaryKey: []*schema.Column{CommentsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "comments_requests_comment",
+				Symbol:     "comments_users_user",
 				Columns:    []*schema.Column{CommentsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "comments_requests_comment",
+				Columns:    []*schema.Column{CommentsColumns[6]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -257,21 +264,12 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "comment_user", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "users_comments_user",
-				Columns:    []*schema.Column{UsersColumns[7]},
-				RefColumns: []*schema.Column{CommentsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 	}
 	// GroupUserColumns holds the columns for the "group_user" table.
 	GroupUserColumns = []*schema.Column{
@@ -368,7 +366,8 @@ var (
 )
 
 func init() {
-	CommentsTable.ForeignKeys[0].RefTable = RequestsTable
+	CommentsTable.ForeignKeys[0].RefTable = UsersTable
+	CommentsTable.ForeignKeys[1].RefTable = RequestsTable
 	FilesTable.ForeignKeys[0].RefTable = RequestsTable
 	GroupBudgetsTable.ForeignKeys[0].RefTable = GroupsTable
 	RequestsTable.ForeignKeys[0].RefTable = GroupsTable
@@ -380,7 +379,6 @@ func init() {
 	TransactionsTable.ForeignKeys[0].RefTable = GroupBudgetsTable
 	TransactionsTable.ForeignKeys[1].RefTable = RequestsTable
 	TransactionDetailsTable.ForeignKeys[0].RefTable = TransactionsTable
-	UsersTable.ForeignKeys[0].RefTable = CommentsTable
 	GroupUserTable.ForeignKeys[0].RefTable = GroupsTable
 	GroupUserTable.ForeignKeys[1].RefTable = UsersTable
 	GroupOwnerTable.ForeignKeys[0].RefTable = GroupsTable

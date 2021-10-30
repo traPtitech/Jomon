@@ -302,7 +302,7 @@ func (c *CommentClient) QueryUser(co *Comment) *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(comment.Table, comment.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, comment.UserTable, comment.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, comment.UserTable, comment.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
 		return fromV, nil
@@ -1650,7 +1650,7 @@ func (c *UserClient) QueryComment(u *User) *CommentQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(comment.Table, comment.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, user.CommentTable, user.CommentColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.CommentTable, user.CommentColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

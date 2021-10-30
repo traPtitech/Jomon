@@ -36,7 +36,6 @@ type UserQuery struct {
 	withComment       *CommentQuery
 	withRequestStatus *RequestStatusQuery
 	withRequest       *RequestQuery
-	withFKs           bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -131,7 +130,7 @@ func (uq *UserQuery) QueryComment() *CommentQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(comment.Table, comment.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, user.CommentTable, user.CommentColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.CommentTable, user.CommentColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -494,7 +493,6 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
-		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
 		loadedTypes = [5]bool{
 			uq.withGroupUser != nil,
@@ -504,12 +502,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			uq.withRequest != nil,
 		}
 	)
-	if uq.withComment != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
@@ -661,31 +653,31 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 
 	if query := uq.withComment; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*User)
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*User)
 		for i := range nodes {
-			if nodes[i].comment_user == nil {
-				continue
-			}
-			fk := *nodes[i].comment_user
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Comment = []*Comment{}
 		}
-		query.Where(comment.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.Comment(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.CommentColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.comment_user
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "comment_user" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "comment_user" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "comment_user" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Comment = n
-			}
+			node.Edges.Comment = append(node.Edges.Comment, n)
 		}
 	}
 

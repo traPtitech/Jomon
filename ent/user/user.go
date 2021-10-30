@@ -48,7 +48,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	GroupOwnerInverseTable = "groups"
 	// CommentTable is the table that holds the comment relation/edge.
-	CommentTable = "users"
+	CommentTable = "comments"
 	// CommentInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
 	CommentInverseTable = "comments"
@@ -81,12 +81,6 @@ var Columns = []string{
 	FieldDeletedAt,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"comment_user",
-}
-
 var (
 	// GroupUserPrimaryKey and GroupUserColumn2 are the table columns denoting the
 	// primary key for the group_user relation (M2M).
@@ -100,11 +94,6 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

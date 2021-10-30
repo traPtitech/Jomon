@@ -18,13 +18,14 @@ func (repo *EntRepository) GetComments(ctx context.Context, requestID uuid.UUID)
 				request.ID(requestID),
 			),
 		).
+		WithUser().
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	modelcomments := []*Comment{}
 	for _, comment := range comments {
-		modelcomments = append(modelcomments, ConvertEntCommentToModelComment(comment))
+		modelcomments = append(modelcomments, ConvertEntCommentToModelComment(comment, comment.Edges.User.ID))
 	}
 	return modelcomments, nil
 }
@@ -39,20 +40,28 @@ func (repo *EntRepository) CreateComment(ctx context.Context, comment string, re
 	if err != nil {
 		return nil, err
 	}
-	return ConvertEntCommentToModelComment(created), nil
+	return ConvertEntCommentToModelComment(created, userID), nil
 }
 
 // TODO: add edge to request
-func (repo *EntRepository) UpdateComment(ctx context.Context, comment string, requestID uuid.UUID, commentID uuid.UUID) (*Comment, error) {
+func (repo *EntRepository) UpdateComment(ctx context.Context, commentContent string, requestID uuid.UUID, commentID uuid.UUID) (*Comment, error) {
 	updated, err := repo.client.Comment.
 		UpdateOneID(commentID).
-		SetComment(comment).
+		SetComment(commentContent).
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return ConvertEntCommentToModelComment(updated), nil
+	updatedWithUser, err := repo.client.Comment.
+		Query().
+		Where(comment.IDEQ(commentID)).
+		WithUser().
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ConvertEntCommentToModelComment(updated, updatedWithUser.Edges.User.ID), nil
 }
 
 func (repo *EntRepository) DeleteComment(ctx context.Context, requestID uuid.UUID, commentID uuid.UUID) error {
@@ -74,10 +83,10 @@ func (repo *EntRepository) DeleteComment(ctx context.Context, requestID uuid.UUI
 	return err
 }
 
-func ConvertEntCommentToModelComment(comment *ent.Comment) *Comment {
+func ConvertEntCommentToModelComment(comment *ent.Comment, userID uuid.UUID) *Comment {
 	return &Comment{
 		ID:        comment.ID,
-		User:      comment.Edges.User.ID,
+		User:      userID,
 		Comment:   comment.Comment,
 		CreatedAt: comment.CreatedAt,
 		UpdatedAt: comment.UpdatedAt,

@@ -676,7 +676,7 @@ func HasComment() predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(CommentTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, CommentTable, CommentColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, CommentTable, CommentColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -688,7 +688,7 @@ func HasCommentWith(preds ...predicate.Comment) predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(CommentInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, CommentTable, CommentColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, CommentTable, CommentColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -129,23 +129,19 @@ func (uc *UserCreate) AddGroupOwner(g ...*Group) *UserCreate {
 	return uc.AddGroupOwnerIDs(ids...)
 }
 
-// SetCommentID sets the "comment" edge to the Comment entity by ID.
-func (uc *UserCreate) SetCommentID(id uuid.UUID) *UserCreate {
-	uc.mutation.SetCommentID(id)
+// AddCommentIDs adds the "comment" edge to the Comment entity by IDs.
+func (uc *UserCreate) AddCommentIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddCommentIDs(ids...)
 	return uc
 }
 
-// SetNillableCommentID sets the "comment" edge to the Comment entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableCommentID(id *uuid.UUID) *UserCreate {
-	if id != nil {
-		uc = uc.SetCommentID(*id)
+// AddComment adds the "comment" edges to the Comment entity.
+func (uc *UserCreate) AddComment(c ...*Comment) *UserCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return uc
-}
-
-// SetComment sets the "comment" edge to the Comment entity.
-func (uc *UserCreate) SetComment(c *Comment) *UserCreate {
-	return uc.SetCommentID(c.ID)
+	return uc.AddCommentIDs(ids...)
 }
 
 // AddRequestStatuIDs adds the "request_status" edge to the RequestStatus entity by IDs.
@@ -409,7 +405,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if nodes := uc.mutation.CommentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.CommentTable,
 			Columns: []string{user.CommentColumn},
@@ -424,7 +420,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.comment_user = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.mutation.RequestStatusIDs(); len(nodes) > 0 {
