@@ -43,7 +43,7 @@ func (h Handlers) AccessLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFun
 				if ok {
 					tmp.Error = errorRuntime.Error()
 				} else {
-					tmp.Error = "no data"
+					tmp.Error = ""
 				}
 				logger.Info("server error", zap.Object("field", tmp))
 			case httpCode >= 400:
@@ -51,7 +51,7 @@ func (h Handlers) AccessLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFun
 				if ok {
 					tmp.Error = errorRuntime.Error()
 				} else {
-					tmp.Error = "no data"
+					tmp.Error = ""
 				}
 				logger.Info("client error", zap.Object("field", tmp))
 			case httpCode >= 300:
