@@ -42,16 +42,12 @@ func (h Handlers) AccessLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFun
 				errorRuntime, ok := c.Get("Error").(error)
 				if ok {
 					tmp.Error = errorRuntime.Error()
-				} else {
-					tmp.Error = ""
 				}
 				logger.Info("server error", zap.Object("field", tmp))
 			case httpCode >= 400:
 				errorRuntime, ok := c.Get("Error").(error)
 				if ok {
 					tmp.Error = errorRuntime.Error()
-				} else {
-					tmp.Error = ""
 				}
 				logger.Info("client error", zap.Object("field", tmp))
 			case httpCode >= 300:
