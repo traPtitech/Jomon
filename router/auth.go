@@ -10,14 +10,12 @@ import (
 	"time"
 
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/service"
 )
 
 const (
 	sessionDuration        = 24 * 60 * 60 * 7
-	sessionKey             = "sessions"
 	sessionCodeVerifierKey = "code_verifier"
 	sessionUserKey         = "user"
 )
@@ -73,7 +71,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 }
 
 func (h Handlers) GeneratePKCE(c echo.Context) error {
-	sess, err := session.Get(sessionKey, c)
+	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -85,7 +83,7 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 	}
 
 	codeVerifier := randAlphabetAndNumberString(43)
-	sess.Values["codeVerifier"] = codeVerifier
+	sess.Values[sessionCodeVerifierKey] = codeVerifier
 
 	codeVerifierHash := sha256.Sum256([]byte(codeVerifier))
 	encoder := base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_").WithPadding(base64.NoPadding)
