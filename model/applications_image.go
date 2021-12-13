@@ -126,5 +126,9 @@ func (repo *applicationsImageRepository) DeleteApplicationsImage(appImg Applicat
 		}
 	}
 
+	if err := db.Delete(appImg).Error; err != nil {
+		return err
+	}
+
 	return fmt.Errorf("image not found")
 }
