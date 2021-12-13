@@ -3,11 +3,12 @@ package model
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gofrs/uuid"
-	storagePkg "github.com/traPtitech/Jomon/storage"
 	"io"
 	"mime"
 	"time"
+
+	"github.com/gofrs/uuid"
+	storagePkg "github.com/traPtitech/Jomon/storage"
 )
 
 type ApplicationsImage struct {
@@ -90,9 +91,19 @@ func (repo *applicationsImageRepository) OpenApplicationsImage(appImg Applicatio
 		return nil, fmt.Errorf("%s is not registered", appImg.MimeType)
 	}
 
-	filename := fmt.Sprintf("%s%s", appImg.ID.String(), ext[0])
+	filenames := []string{}
+	for _, ex := range ext {
+		filenames = append(filenames, fmt.Sprintf("%s%s", appImg.ID.String(), ex))
+	}
 
-	return repo.storage.Open(filename)
+	for _, filename := range filenames {
+		rd, err := repo.storage.Open(filename)
+		if err == nil {
+			return rd, nil
+		}
+	}
+
+	return nil, fmt.Errorf("image not found")
 }
 
 func (repo *applicationsImageRepository) DeleteApplicationsImage(appImg ApplicationsImage) error {
@@ -103,11 +114,17 @@ func (repo *applicationsImageRepository) DeleteApplicationsImage(appImg Applicat
 		return fmt.Errorf("%s is not registered", appImg.MimeType)
 	}
 
-	filename := fmt.Sprintf("%s%s", appImg.ID.String(), ext[0])
-
-	if err := db.Delete(appImg).Error; err != nil {
-		return err
+	filenames := []string{}
+	for _, ex := range ext {
+		filenames = append(filenames, fmt.Sprintf("%s%s", appImg.ID.String(), ex))
 	}
 
-	return repo.storage.Delete(filename)
+	for _, filename := range filenames {
+		err := repo.storage.Delete(filename)
+		if err == nil {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("image not found")
 }
