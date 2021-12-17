@@ -788,7 +788,7 @@ components:
         owners:
           type: array
           items:
-            $ref: "#components/schemas/TrapID"
+            $ref: "#/components/schemas/TrapID"
     PostFile:
       type: object
       properties:
