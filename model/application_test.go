@@ -141,7 +141,7 @@ func TestPatchApplication(t *testing.T) {
 		asr.Equal(title, app.LatestApplicationsDetail.Title)
 		asr.Equal(remarks, app.LatestApplicationsDetail.Remarks)
 		asr.Equal(amount, app.LatestApplicationsDetail.Amount)
-		asr.Equal(paidAt.Truncate(time.Hour*24), app.LatestApplicationsDetail.PaidAt.PaidAt)
+		asr.Equal(paidAt.Format("2006-01-02"), app.LatestApplicationsDetail.PaidAt.PaidAt.Format("2006-01-02"))
 	})
 
 	t.Run("shouldFail", func(t *testing.T) {

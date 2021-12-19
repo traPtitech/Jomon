@@ -1,11 +1,12 @@
 package model
 
 import (
+	"testing"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/tools/container/intsets"
-	"testing"
-	"time"
 )
 
 func TestCreateApplicationsDetail(t *testing.T) {
@@ -63,7 +64,7 @@ func TestPutApplicationsDetail(t *testing.T) {
 		asr.Equal(newDetail.Title, oldDetail.Title)
 		asr.Equal(newDetail.Remarks, oldDetail.Remarks)
 		asr.Equal(newDetail.Amount, oldDetail.Amount)
-		asr.Equal(newDetail.PaidAt.PaidAt, oldDetail.PaidAt.PaidAt.Truncate(time.Hour*24))
+		asr.Equal(newDetail.PaidAt.PaidAt.Format("2006-01-02"), oldDetail.PaidAt.PaidAt.Format("2006-01-02"))
 	})
 
 	t.Run("shouldFail", func(t *testing.T) {
