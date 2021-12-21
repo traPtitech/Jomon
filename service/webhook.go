@@ -19,7 +19,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type WebhookApplication struct {
+type RequestApplication struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedBy uuid.UUID `json:"created_by"`
 	Title     string    `json:"title"`
@@ -27,6 +27,10 @@ type WebhookApplication struct {
 	Amount    int       `json:"amount"`
 	Tags      []*Tags   `json:"tags"`
 	Group     *Group    `json:"group"`
+}
+
+type CommentApplication struct {
+	Comment string `json:"comment"`
 }
 
 type Tags struct {
@@ -45,41 +49,55 @@ type Webhook struct {
 
 func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 	webhookSecret := os.Getenv("WEBHOOK_SECRET")
-  webhookChannelId := os.Getenv("WEBHOOK_CHANNEL_ID")
-  webhookId := os.Getenv("WEBHOOK_ID")
-	resApp := new(WebhookApplication)
-	err := json.Unmarshal(resBody, resApp)
-	if err != nil {
-		return
-	}
+	webhookChannelId := os.Getenv("WEBHOOK_CHANNEL_ID")
+	webhookId := os.Getenv("WEBHOOK_ID")
 	var message string
 
-	if strings.Contains(c.Request().URL.Path, "/api/requests") && c.Request().Method == http.MethodPost {
-		message += "## 申請書が作成されました" + "\n"
-	} else if c.Request().Method == http.MethodPut {
-		message += "## 申請書が更新されました" + "\n"
-	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
-		// To do
-	}
+	if strings.Contains(c.Request().URL.Path, "/api/requests") {
+		if strings.Contains(c.Request().URL.Path, "/comments") {
+			resApp := new(CommentApplication)
+			err := json.Unmarshal(resBody, resApp)
+			if err != nil {
+				return
+			}
 
-	message += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
-	message += fmt.Sprintf("- 支払金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
+			message += "## コメントが追加されました"
+			message += "\n"
+			message += resApp.Comment
+		} else {
+			resApp := new(RequestApplication)
+			err := json.Unmarshal(resBody, resApp)
+			if err != nil {
+				return
+			}
+			if c.Request().Method == http.MethodPost {
+				message += "## 申請書が作成されました" + "\n"
+			} else if c.Request().Method == http.MethodPut {
+				message += "## 申請書が更新されました" + "\n"
+			}
 
-	if resApp.Group != nil {
-		message += fmt.Sprintf("- 請求先グループ: %s", resApp.Group.Description) + "\n"
-	}
+			message += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
+			message += fmt.Sprintf("- 支払金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
 
-	if resApp.Tags != nil {
-		message += "- タグ: "
-		for _, tag := range resApp.Tags {
-			message += tag.Description + "\n"
+			if resApp.Group != nil {
+				message += fmt.Sprintf("- 請求先グループ: %s", resApp.Group.Description) + "\n"
+			}
+
+			if resApp.Tags != nil {
+				message += "- タグ: "
+				for _, tag := range resApp.Tags {
+					message += tag.Description + "\n"
+				}
+
+				message += "\n"
+				message += resApp.Content + "\n"
+			}
 		}
+	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
+		//TODO
 	}
 
-	message += resApp.Content + "\n"
-	message += "\n"
-
-	err = godotenv.Load("./.env")
+	err := godotenv.Load("./.env")
 	if err != nil {
 		panic(err)
 	}
