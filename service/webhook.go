@@ -30,7 +30,9 @@ type RequestApplication struct {
 }
 
 type CommentApplication struct {
-	Comment string `json:"comment"`
+	ID      uuid.UUID `json:"id"`
+	User    uuid.UUID `json:"user"`
+	Comment string    `json:"comment"`
 }
 
 type Tags struct {
@@ -60,10 +62,17 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			if err != nil {
 				return
 			}
+			splitedPath := strings.Split(c.Request().URL.Path, "/")
 
-			message += "## コメントが追加されました"
-			message += "\n"
-			message += resApp.Comment
+			message += fmt.Sprintf("## :comment:[リクエスト](%s/requests/%s)", "https://jomon.trap.jp", splitedPath[3])
+			message += "に対する"
+			message += fmt.Sprintf("[コメント](%s/requests/%s/comments/%s)", "https://jomon.trap.jp", splitedPath[3], resApp.ID)
+			message += "が作成されました" + "\n"
+
+			//TODO userName
+			message += fmt.Sprintf("- 作成者: @%s", "kounosuke")
+			message += "\n" + "\n"
+			message += resApp.Comment + "\n"
 		} else {
 			resApp := new(RequestApplication)
 			err := json.Unmarshal(resBody, resApp)
@@ -71,9 +80,9 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				return
 			}
 			if c.Request().Method == http.MethodPost {
-				message += "## 申請書が作成されました" + "\n"
+				message += "## :receipt:申請書が作成されました" + "\n"
 			} else if c.Request().Method == http.MethodPut {
-				message += "## 申請書が更新されました" + "\n"
+				message += "## :receipt:申請書が更新されました" + "\n"
 			}
 
 			message += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
@@ -86,12 +95,12 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			if resApp.Tags != nil {
 				message += "- タグ: "
 				for _, tag := range resApp.Tags {
-					message += tag.Description + "\n"
+					message += tag.Description + "、"
 				}
-
-				message += "\n"
-				message += resApp.Content + "\n"
+				message = message[:len(message)-len("、")]
 			}
+			message += "\n" + "\n"
+			message += resApp.Content + "\n"			
 		}
 	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
 		//TODO
