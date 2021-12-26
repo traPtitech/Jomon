@@ -66,9 +66,16 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	user, err := h.Repository.GetUserByName(ctx, u.Name)
+	modelUser, err := h.Repository.GetUserByName(ctx, u.Name)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	user := &User{
+		ID:          modelUser.ID,
+		Name:        modelUser.Name,
+		DisplayName: modelUser.DisplayName,
+		Admin:       modelUser.Admin,
 	}
 
 	sess.Values[sessionUserKey] = user
