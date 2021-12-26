@@ -605,61 +605,61 @@ func TestHandlers_PutRequest(t *testing.T) {
 	})
 }
 
-func TestHandlers_PostComment(t *testing.T) {
-	t.Parallel()
+// func TestHandlers_PostComment(t *testing.T) {
+// 	t.Parallel()
 
-	t.Run("Success", func(t *testing.T) {
-		t.Parallel()
-		ctrl := gomock.NewController(t)
+// 	t.Run("Success", func(t *testing.T) {
+// 		t.Parallel()
+// 		ctrl := gomock.NewController(t)
 
-		date := time.Now()
+// 		date := time.Now()
 
-		comment := &model.Comment{
-			ID:        uuid.New(),
-			User:      uuid.New(),
-			Comment:   random.AlphaNumeric(t, 20),
-			CreatedAt: date,
-			UpdatedAt: date,
-		}
+// 		comment := &model.Comment{
+// 			ID:        uuid.New(),
+// 			User:      uuid.New(),
+// 			Comment:   random.AlphaNumeric(t, 20),
+// 			CreatedAt: date,
+// 			UpdatedAt: date,
+// 		}
 
-		requestID := uuid.New()
-		reqComment := Comment{
-			Comment: comment.Comment,
-		}
-		reqBody, err := json.Marshal(reqComment)
-		require.NoError(t, err)
+// 		requestID := uuid.New()
+// 		reqComment := Comment{
+// 			Comment: comment.Comment,
+// 		}
+// 		reqBody, err := json.Marshal(reqComment)
+// 		require.NoError(t, err)
 
-		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/requests/%s/comments", requestID), bytes.NewReader(reqBody))
-		assert.NoError(t, err)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/comments")
-		c.SetParamNames("requestID")
-		c.SetParamValues(requestID.String())
+// 		e := echo.New()
+// 		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/requests/%s/comments", requestID), bytes.NewReader(reqBody))
+// 		assert.NoError(t, err)
+// 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+// 		rec := httptest.NewRecorder()
+// 		c := e.NewContext(req, rec)
+// 		c.SetPath("api/requests/:requestID/comments")
+// 		c.SetParamNames("requestID")
+// 		c.SetParamValues(requestID.String())
 
-		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+// 		h, err := NewTestHandlers(t, ctrl)
+// 		assert.NoError(t, err)
 
-		h.Repository.MockCommentRepository.
-			EXPECT().
-			CreateComment(c.Request().Context(), comment.Comment, requestID, comment.User).
-			Return(comment, nil)
+// 		h.Repository.MockCommentRepository.
+// 			EXPECT().
+// 			CreateComment(c.Request().Context(), comment.Comment, requestID, comment.User).
+// 			Return(comment, nil)
 
-		res := &CommentDetail{
-			ID:        comment.ID,
-			User:      comment.User,
-			Comment:   comment.Comment,
-			CreatedAt: comment.CreatedAt,
-			UpdatedAt: comment.UpdatedAt,
-		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
+// 		res := &CommentDetail{
+// 			ID:        comment.ID,
+// 			User:      comment.User,
+// 			Comment:   comment.Comment,
+// 			CreatedAt: comment.CreatedAt,
+// 			UpdatedAt: comment.UpdatedAt,
+// 		}
+// 		resBody, err := json.Marshal(res)
+// 		require.NoError(t, err)
 
-		if assert.NoError(t, h.Handlers.PostComment(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
-	})
-}
+// 		if assert.NoError(t, h.Handlers.PostComment(c)) {
+// 			assert.Equal(t, http.StatusOK, rec.Code)
+// 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+// 		}
+// 	})
+// }

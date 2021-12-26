@@ -15,7 +15,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -41,6 +41,13 @@ type Tags struct {
 
 type Group struct {
 	Description string `json:"description"`
+}
+
+type User struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	DisplayName string    `json:"display_name"`
+	Admin       bool      `json:"admin"`
 }
 
 type Webhook struct {
@@ -69,8 +76,12 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			message += fmt.Sprintf("[コメント](%s/requests/%s/comments/%s)", "https://jomon.trap.jp", splitedPath[3], resApp.ID)
 			message += "が作成されました" + "\n"
 
-			//TODO userName
-			message += fmt.Sprintf("- 作成者: @%s", "kounosuke")
+			sess, _ := session.Get("session", c)
+			bodyUser, _ := sess.Values["user"].([]byte)
+			user := new(User)
+			_ = json.Unmarshal(bodyUser, user)
+
+			message += fmt.Sprintf("- 作成者: @%s", user.Name)
 			message += "\n" + "\n"
 			message += resApp.Comment + "\n"
 		} else {
@@ -100,15 +111,10 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				message = message[:len(message)-len("、")]
 			}
 			message += "\n" + "\n"
-			message += resApp.Content + "\n"			
+			message += resApp.Content + "\n"
 		}
 	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
 		//TODO
-	}
-
-	err := godotenv.Load("./.env")
-	if err != nil {
-		panic(err)
 	}
 
 	_ = RequestWebhook(message, webhookSecret, webhookChannelId, webhookId, 1)

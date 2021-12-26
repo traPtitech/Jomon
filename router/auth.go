@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -75,8 +76,12 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		DisplayName: modelUser.DisplayName,
 		Admin:       modelUser.Admin,
 	}
+	bodyUser, err := json.Marshal(user)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
 
-	sess.Values[sessionUserKey] = user
+	sess.Values[sessionUserKey] = bodyUser
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {
 		return echo.ErrInternalServerError

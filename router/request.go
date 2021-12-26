@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -382,18 +383,21 @@ func (h *Handlers) PostComment(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	// user, ok := c.Get(sessionUserKey).(model.User)
-	// if !ok || user.ID == uuid.Nil {
-	// 	c.Logger().Error(err)
-	// 	return echo.NewHTTPError(http.StatusUnauthorized, err)
-	// }
-
-	// traQからとってくるんじゃなくてとりあえずuaerはpypmyadminでつくってテスト
-	userID, err := uuid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6")
+	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, nil)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	user := model.User{ID: userID}
+	bodyUser, ok := sess.Values[sessionUserKey].([]byte)
+	if !ok  {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusUnauthorized, err)
+	}
+	user := new(User)
+	err = json.Unmarshal(bodyUser, user)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
 
 	ctx := context.Background()
 	comment, err := h.Repository.CreateComment(ctx, req.Comment, requestID, user.ID)

@@ -66,7 +66,7 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		_, ok := sess.Values[sessionUserKey].(User)
+		_, ok := sess.Values[sessionUserKey].([]byte)
 		if !ok {
 			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
 		}
