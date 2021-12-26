@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
@@ -57,10 +58,17 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	//sess.Values[sessionAccessTokenKey] = res.AccessToken
 	//sess.Values[sessionRefreshTokenKey] = res.RefreshToken
 
-	user, err := service.FetchTraQUserInfo(res.AccessToken)
+	u, err := service.FetchTraQUserInfo(res.AccessToken)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+
+	ctx := context.Background()
+	user, err := h.Repository.GetUserByName(ctx, u.Name)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
 	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {
