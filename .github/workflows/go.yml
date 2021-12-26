@@ -1,9 +1,5 @@
 name: Go
-on:
-  push:
-    paths:
-    - "**.go"
-    - "go.mod"
+on: [push, pull_request]
 
 jobs:
 
