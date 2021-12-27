@@ -36,11 +36,11 @@ type CommentApplication struct {
 }
 
 type Tags struct {
-	Description string `json:"description"`
+	Name string `json:"name"`
 }
 
 type Group struct {
-	Description string `json:"description"`
+	Name string `json:"name"`
 }
 
 type User struct {
@@ -100,15 +100,15 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			message += fmt.Sprintf("- 支払金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
 
 			if resApp.Group != nil {
-				message += fmt.Sprintf("- 請求先グループ: %s", resApp.Group.Description) + "\n"
+				message += fmt.Sprintf("- 請求先グループ: %s", resApp.Group.Name) + "\n"
 			}
 
 			if resApp.Tags != nil {
 				message += "- タグ: "
 				for _, tag := range resApp.Tags {
-					message += tag.Description + "、"
+					message += tag.Name + ", "
 				}
-				message = message[:len(message)-len("、")]
+				message = message[:len(message)-len(", ")]
 			}
 			message += "\n" + "\n"
 			message += resApp.Content + "\n"
