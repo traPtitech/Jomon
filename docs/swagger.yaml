@@ -736,7 +736,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  file_id:
+                  id:
                     type: string
                     format: uuid
         "400":
@@ -771,6 +771,27 @@ paths:
           description: 正常に取り消すことができた。
         "403":
           $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+  "/files/{fileID}/meta":
+    parameters:
+      - name: fileID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - Files
+      description: 指定されたファイルのメタデータを返す
+      responses:
+        "200":
+          description: 該当するファイルのメタデータが存在した 返す
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileMeta"
         "404":
           $ref: "#/components/responses/404"
 
@@ -913,6 +934,19 @@ components:
         name:
           type: string
           example: "hoge.png"
+    FileMeta:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        mime_type:
+          type: string
+        created_at:
+          type: string
+          format: date-time
     Target:
       type: string
       example: "hoge株式会社"

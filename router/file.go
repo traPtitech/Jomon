@@ -3,7 +3,6 @@ package router
 import (
 	"context"
 	"fmt"
-	"mime"
 	"net/http"
 	"time"
 
@@ -12,7 +11,14 @@ import (
 )
 
 type FileResponse struct {
-	FileID uuid.UUID `json:"file_id"`
+	ID uuid.UUID `json:"id"`
+}
+
+type FileMetaResponse struct {
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	MimeType  string    `json:"mime_type"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 var acceptedMimeTypes = map[string]bool{
@@ -66,16 +72,7 @@ func (h *Handlers) PostFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	ext, err := mime.ExtensionsByType(mimetype)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	} else if len(ext) == 0 {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("%s is not registered", mimetype))
-	}
-
-	filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
-
-	err = h.Storage.Save(filename, src)
+	err = h.Storage.Save(file.ID.String(), src)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -108,18 +105,7 @@ func (h *Handlers) GetFile(c echo.Context) error {
 		}
 	}
 
-	mimetype := file.MimeType
-
-	ext, err := mime.ExtensionsByType(mimetype)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	} else if len(ext) == 0 {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("%s is not registered", mimetype))
-	}
-
-	filename := fmt.Sprintf("%s%s", fileID.String(), ext[0])
-
-	f, err := h.Storage.Open(filename)
+	f, err := h.Storage.Open(fileID.String())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -131,6 +117,26 @@ func (h *Handlers) GetFile(c echo.Context) error {
 	return c.Stream(http.StatusOK, file.MimeType, f)
 }
 
+func (h *Handlers) GetFileMeta(c echo.Context) error {
+	fileID, err := uuid.Parse(c.Param("fileID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	ctx := context.Background()
+	file, err := h.Repository.GetFile(ctx, fileID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, &FileMetaResponse{
+		ID:        file.ID,
+		Name:      file.Name,
+		MimeType:  file.MimeType,
+		CreatedAt: file.CreatedAt,
+	})
+}
+
 func (h *Handlers) DeleteFile(c echo.Context) error {
 	fileID, err := uuid.Parse(c.Param("fileID"))
 	if err != nil {
@@ -138,21 +144,12 @@ func (h *Handlers) DeleteFile(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	file, err := h.Repository.DeleteFile(ctx, fileID)
+	_, err = h.Repository.DeleteFile(ctx, fileID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	mimetype := file.MimeType
-	ext, err := mime.ExtensionsByType(mimetype)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	} else if len(ext) == 0 {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("%s is not registered", mimetype))
-	}
-	filename := fmt.Sprintf("%s%s", fileID.String(), ext[0])
-
-	err = h.Storage.Delete(filename)
+	err = h.Storage.Delete(fileID.String())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
