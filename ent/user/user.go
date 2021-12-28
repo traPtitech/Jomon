@@ -48,21 +48,21 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	GroupOwnerInverseTable = "groups"
 	// CommentTable is the table that holds the comment relation/edge.
-	CommentTable = "users"
+	CommentTable = "comments"
 	// CommentInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
 	CommentInverseTable = "comments"
 	// CommentColumn is the table column denoting the comment relation/edge.
 	CommentColumn = "comment_user"
 	// RequestStatusTable is the table that holds the request_status relation/edge.
-	RequestStatusTable = "users"
+	RequestStatusTable = "request_status"
 	// RequestStatusInverseTable is the table name for the RequestStatus entity.
 	// It exists in this package in order to avoid circular dependency with the "requeststatus" package.
 	RequestStatusInverseTable = "request_status"
 	// RequestStatusColumn is the table column denoting the request_status relation/edge.
 	RequestStatusColumn = "request_status_user"
 	// RequestTable is the table that holds the request relation/edge.
-	RequestTable = "users"
+	RequestTable = "requests"
 	// RequestInverseTable is the table name for the Request entity.
 	// It exists in this package in order to avoid circular dependency with the "request" package.
 	RequestInverseTable = "requests"
@@ -81,14 +81,6 @@ var Columns = []string{
 	FieldDeletedAt,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"comment_user",
-	"request_user",
-	"request_status_user",
-}
-
 var (
 	// GroupUserPrimaryKey and GroupUserColumn2 are the table columns denoting the
 	// primary key for the group_user relation (M2M).
@@ -102,11 +94,6 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

@@ -5,49 +5,50 @@
 package mock_storage
 
 import (
-	gomock "github.com/golang/mock/gomock"
 	io "io"
 	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
-// MockStorage is a mock of Storage interface
+// MockStorage is a mock of Storage interface.
 type MockStorage struct {
 	ctrl     *gomock.Controller
 	recorder *MockStorageMockRecorder
 }
 
-// MockStorageMockRecorder is the mock recorder for MockStorage
+// MockStorageMockRecorder is the mock recorder for MockStorage.
 type MockStorageMockRecorder struct {
 	mock *MockStorage
 }
 
-// NewMockStorage creates a new mock instance
+// NewMockStorage creates a new mock instance.
 func NewMockStorage(ctrl *gomock.Controller) *MockStorage {
 	mock := &MockStorage{ctrl: ctrl}
 	mock.recorder = &MockStorageMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockStorage) EXPECT() *MockStorageMockRecorder {
 	return m.recorder
 }
 
-// Save mocks base method
-func (m *MockStorage) Save(filename string, src io.Reader) error {
+// Delete mocks base method.
+func (m *MockStorage) Delete(filename string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", filename, src)
+	ret := m.ctrl.Call(m, "Delete", filename)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Save indicates an expected call of Save
-func (mr *MockStorageMockRecorder) Save(filename, src interface{}) *gomock.Call {
+// Delete indicates an expected call of Delete.
+func (mr *MockStorageMockRecorder) Delete(filename interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockStorage)(nil).Save), filename, src)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockStorage)(nil).Delete), filename)
 }
 
-// Open mocks base method
+// Open mocks base method.
 func (m *MockStorage) Open(filename string) (io.ReadCloser, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Open", filename)
@@ -56,22 +57,22 @@ func (m *MockStorage) Open(filename string) (io.ReadCloser, error) {
 	return ret0, ret1
 }
 
-// Open indicates an expected call of Open
+// Open indicates an expected call of Open.
 func (mr *MockStorageMockRecorder) Open(filename interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Open", reflect.TypeOf((*MockStorage)(nil).Open), filename)
 }
 
-// Delete mocks base method
-func (m *MockStorage) Delete(filename string) error {
+// Save mocks base method.
+func (m *MockStorage) Save(filename string, src io.Reader) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", filename)
+	ret := m.ctrl.Call(m, "Save", filename, src)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Delete indicates an expected call of Delete
-func (mr *MockStorageMockRecorder) Delete(filename interface{}) *gomock.Call {
+// Save indicates an expected call of Save.
+func (mr *MockStorageMockRecorder) Save(filename, src interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockStorage)(nil).Delete), filename)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockStorage)(nil).Save), filename, src)
 }
