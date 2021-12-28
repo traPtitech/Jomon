@@ -7,14 +7,15 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
 func TestEntRepository_CreateFile(t *testing.T) {
 	ctx := context.Background()
-	client, _, err := setup(t, ctx)
-	assert.NoError(t, err)
-	repo := NewEntRepository(client)
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
+	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -22,8 +23,9 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 		var tags []*Tag
 		var group *Group
-		var files []*File
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, files)
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
 		assert.NoError(t, err)
 
 		sampleText := "sampleData"
@@ -67,8 +69,9 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 		var tags []*Tag
 		var group *Group
-		var files []*File
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, files)
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
 		assert.NoError(t, err)
 
 		sampleText := "sampleData"
@@ -84,9 +87,9 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 func TestEntRepository_GetFile(t *testing.T) {
 	ctx := context.Background()
-	client, _, err := setup(t, ctx)
-	assert.NoError(t, err)
-	repo := NewEntRepository(client)
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
+	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -94,8 +97,9 @@ func TestEntRepository_GetFile(t *testing.T) {
 
 		var tags []*Tag
 		var group *Group
-		var files []*File
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, files)
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
 		assert.NoError(t, err)
 
 		sampleText := "sampleData"
@@ -126,9 +130,9 @@ func TestEntRepository_GetFile(t *testing.T) {
 
 func TestEntRepository_DeleteFile(t *testing.T) {
 	ctx := context.Background()
-	client, _, err := setup(t, ctx)
-	assert.NoError(t, err)
-	repo := NewEntRepository(client)
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
+	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -136,8 +140,9 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 
 		var tags []*Tag
 		var group *Group
-		var files []*File
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, files)
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
 		assert.NoError(t, err)
 
 		sampleText := "sampleData"
@@ -172,8 +177,9 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 
 		var tags []*Tag
 		var group *Group
-		var files []*File
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, files)
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
 		assert.NoError(t, err)
 
 		sampleText := "sampleData"
@@ -197,8 +203,9 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 
 		var tags []*Tag
 		var group *Group
-		var files []*File
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, files)
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
 		assert.NoError(t, err)
 
 		sampleText := "sampleData"

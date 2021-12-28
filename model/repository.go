@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/traPtitech/Jomon/ent"
+	storagePkg "github.com/traPtitech/Jomon/storage"
 )
 
 type Repository interface {
@@ -21,12 +22,14 @@ type Repository interface {
 }
 
 type EntRepository struct {
-	client *ent.Client
+	client  *ent.Client
+	storage storagePkg.Storage
 }
 
-func NewEntRepository(client *ent.Client) Repository {
+func NewEntRepository(client *ent.Client, storage storagePkg.Storage) Repository {
 	repo := &EntRepository{
-		client: client,
+		client:  client,
+		storage: storage,
 	}
 	return repo
 }
