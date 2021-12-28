@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"mime"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -20,6 +19,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/testutil/random"
 )
 
 var testJpeg = `/9j/4AAQSkZJRgABAQIAOAA4AAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////2wBDAf//////////////////////////////////////////////////////////////////////////////////////wAARCAABAAEDAREAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwBKBH//2Q`
@@ -67,14 +67,9 @@ func TestHandlers_PostFile(t *testing.T) {
 			CreateFile(c.Request().Context(), gomock.Any(), "test", "image/jpeg", request).
 			Return(file, nil)
 
-		ext, err := mime.ExtensionsByType("image/jpeg")
-		require.NoError(t, err)
-
-		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
-
 		h.Storage.
 			EXPECT().
-			Save(filename, gomock.Any()).
+			Save(file.ID.String(), gomock.Any()).
 			Return(nil)
 
 		if assert.NoError(t, h.Handlers.PostFile(c)) {
@@ -166,16 +161,11 @@ func TestHandlers_PostFile(t *testing.T) {
 			CreateFile(c.Request().Context(), gomock.Any(), "test", "image/jpeg", request).
 			Return(file, nil)
 
-		ext, err := mime.ExtensionsByType("image/jpeg")
-		require.NoError(t, err)
-
-		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
-
 		mocErr := errors.New("failed to save file")
 
 		h.Storage.
 			EXPECT().
-			Save(filename, gomock.Any()).
+			Save(file.ID.String(), gomock.Any()).
 			Return(mocErr)
 
 		err = h.Handlers.PostFile(c)
@@ -194,6 +184,7 @@ func TestHandlers_GetFile(t *testing.T) {
 
 		file := &model.File{
 			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
 			CreatedAt: time.Now(),
 		}
@@ -219,14 +210,9 @@ func TestHandlers_GetFile(t *testing.T) {
 			GetFile(c.Request().Context(), file.ID).
 			Return(file, nil)
 
-		ext, err := mime.ExtensionsByType(file.MimeType)
-		require.NoError(t, err)
-
-		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
-
 		h.Storage.
 			EXPECT().
-			Open(filename).
+			Open(file.ID.String()).
 			Return(r, nil)
 
 		if assert.NoError(t, h.Handlers.GetFile(c)) {
@@ -240,6 +226,7 @@ func TestHandlers_GetFile(t *testing.T) {
 
 		file := &model.File{
 			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
 			CreatedAt: time.Now(),
 		}
@@ -275,6 +262,7 @@ func TestHandlers_GetFile(t *testing.T) {
 
 		file := &model.File{
 			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
 			CreatedAt: time.Now(),
 		}
@@ -296,16 +284,11 @@ func TestHandlers_GetFile(t *testing.T) {
 			GetFile(c.Request().Context(), file.ID).
 			Return(file, nil)
 
-		ext, err := mime.ExtensionsByType(file.MimeType)
-		require.NoError(t, err)
-
-		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
-
 		mocErr := errors.New("failed to open file")
 
 		h.Storage.
 			EXPECT().
-			Open(filename).
+			Open(file.ID.String()).
 			Return(nil, mocErr)
 
 		err = h.Handlers.GetFile(c)
@@ -340,6 +323,104 @@ func TestHandlers_GetFile(t *testing.T) {
 	})
 }
 
+func TestHandlers_GetFileMeta(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		file := &model.File{
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			MimeType:  "image/jpeg",
+			CreatedAt: time.Now(),
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/files/%s/meta", file.ID), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/files/:fileID/meta")
+		c.SetParamNames("fileID")
+		c.SetParamValues(file.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockFileRepository.
+			EXPECT().
+			GetFile(c.Request().Context(), file.ID).
+			Return(file, nil)
+
+		if assert.NoError(t, h.Handlers.GetFileMeta(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+		}
+	})
+
+	t.Run("FailedToGetFile", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		file := &model.File{
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			MimeType:  "image/jpeg",
+			CreatedAt: time.Now(),
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/files/%s/meta", file.ID), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/files/:fileID/meta")
+		c.SetParamNames("fileID")
+		c.SetParamValues(file.ID.String())
+
+		mocErr := errors.New("file not found")
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockFileRepository.
+			EXPECT().
+			GetFile(c.Request().Context(), file.ID).
+			Return(nil, mocErr)
+
+		err = h.Handlers.GetFileMeta(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		}
+	})
+
+	t.Run("UnknownFile", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/files/po/meta", nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/files/:fileID/meta")
+		c.SetParamNames("fileID")
+		c.SetParamValues("po")
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		_, mocErr := uuid.Parse("po")
+
+		err = h.Handlers.GetFileMeta(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
+		}
+	})
+}
+
 func TestHandlers_DeleteFile(t *testing.T) {
 	t.Parallel()
 
@@ -349,6 +430,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 		file := &model.File{
 			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
 			CreatedAt: time.Now(),
 		}
@@ -370,14 +452,9 @@ func TestHandlers_DeleteFile(t *testing.T) {
 			DeleteFile(c.Request().Context(), file.ID).
 			Return(file, nil)
 
-		ext, err := mime.ExtensionsByType(file.MimeType)
-		require.NoError(t, err)
-
-		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
-
 		h.Storage.
 			EXPECT().
-			Delete(filename).
+			Delete(file.ID.String()).
 			Return(nil)
 
 		if assert.NoError(t, h.Handlers.DeleteFile(c)) {
@@ -391,6 +468,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 		file := &model.File{
 			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
 			CreatedAt: time.Now(),
 		}
@@ -447,16 +525,11 @@ func TestHandlers_DeleteFile(t *testing.T) {
 			DeleteFile(c.Request().Context(), file.ID).
 			Return(file, nil)
 
-		ext, err := mime.ExtensionsByType(file.MimeType)
-		require.NoError(t, err)
-
-		filename := fmt.Sprintf("%s%s", file.ID.String(), ext[0])
-
 		mocErr := errors.New("failed to delete file")
 
 		h.Storage.
 			EXPECT().
-			Delete(filename).
+			Delete(file.ID.String()).
 			Return(mocErr)
 
 		err = h.Handlers.DeleteFile(c)
