@@ -22,6 +22,7 @@ services:
       MARIADB_DATABASE: jomon
       IS_DEBUG_MODE: "true"
       UPLOAD_DIR: ./uploads
+    env_file: .env
     ports:
       - "1323:1323"
     volumes:

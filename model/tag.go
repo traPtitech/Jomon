@@ -19,6 +19,7 @@ type Tag struct {
 
 type TagRepository interface {
 	GetTags(ctx context.Context) ([]*Tag, error)
+	GetTag(ctx context.Context, tagID uuid.UUID) (*Tag, error)
 	CreateTag(ctx context.Context, name string, description string) (*Tag, error)
 	UpdateTag(ctx context.Context, tagID uuid.UUID, name string, description string) (*Tag, error)
 	DeleteTag(ctx context.Context, tagID uuid.UUID) error

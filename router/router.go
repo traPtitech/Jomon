@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/storage"
 )
 
@@ -40,10 +41,10 @@ func NewServer(h Handlers) *echo.Echo {
 		apiRequests := api.Group("/requests", h.CheckLoginMiddleware)
 		{
 			apiRequests.GET("", h.GetRequests)
-			apiRequests.POST("", h.PostRequest)
+			apiRequests.POST("", h.PostRequest, middleware.BodyDump(service.WebhookEventHandler))
 			apiRequests.GET("/:requestID", h.GetRequest)
-			apiRequests.PUT("/:requestID", h.PutRequest)
-			apiRequests.POST("/:requestID/comments", h.PostComment)
+			apiRequests.PUT("/:requestID", h.PutRequest, middleware.BodyDump(service.WebhookEventHandler))
+			apiRequests.POST("/:requestID/comments", h.PostComment, middleware.BodyDump(service.WebhookEventHandler))
 			apiRequests.PUT("/:requestID/comments/:commentID", h.PutComment)
 			apiRequests.DELETE("/:requestID/comments/:commentID", h.DeleteComment)
 			apiRequests.PUT("/:requestID/status", h.PutStatus)
@@ -57,7 +58,7 @@ func NewServer(h Handlers) *echo.Echo {
 			apiComments.PUT("/:transactionID", h.PutTransaction)
 		}
 
-		apiFiles := api.Group("/files")
+		apiFiles := api.Group("/files", h.CheckLoginMiddleware)
 		{
 			apiFiles.POST("", h.PostFile)
 			apiFiles.GET("/:fileID", h.GetFile)
