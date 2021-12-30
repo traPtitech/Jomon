@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -219,6 +220,11 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
+	if requestID == uuid.Nil {
+		c.Logger().Error(errors.New("invalid UUID"))
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+	}
+
 	ctx := context.Background()
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
@@ -388,7 +394,7 @@ func (h *Handlers) PostComment(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	bodyUser, ok := sess.Values[sessionUserKey].([]byte)
-	if !ok  {
+	if !ok {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusUnauthorized, err)
 	}
