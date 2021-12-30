@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
 )
@@ -228,10 +229,18 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 	ctx := context.Background()
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	modelcomments, err := h.Repository.GetComments(ctx, requestID)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
 	var comments []*CommentDetail
 	for _, modelcomment := range modelcomments {
 		comment := &CommentDetail{

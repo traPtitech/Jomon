@@ -16,6 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
@@ -639,7 +640,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 		}
 	})
 
-	t.Run("SuccessWithComment", func(t *testing.T) {
+	t.Run("SuccessWithComments", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		date := time.Now()
@@ -732,7 +733,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		
+
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, "/api/requests/hoge", nil)
 		assert.NoError(t, err)
@@ -750,14 +751,14 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 		err = h.Handlers.GetRequest(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err) 
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 		}
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		
+
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests/%s", uuid.Nil), nil)
 		assert.NoError(t, err)
@@ -775,7 +776,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 		err = h.Handlers.GetRequest(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err) 
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 		}
 	})
 
@@ -786,7 +787,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 		unknownID := uuid.New()
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests/%s", unknownID), nil)
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests/%s", unknownID.String()), nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -795,14 +796,19 @@ func TestHandlers_GetRequest(t *testing.T) {
 		c.SetParamNames("requestID")
 		c.SetParamValues(unknownID.String())
 
+		var resErr *ent.NotFoundError
+		errors.As(errors.New("unknown id"), &resErr)
+
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-
-		
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(c.Request().Context(), unknownID).
+			Return(nil, resErr)
 
 		err = h.Handlers.GetRequest(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err) 
+			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 		}
 	})
 }

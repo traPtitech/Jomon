@@ -166,7 +166,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 	t.Run("UnknownUser", func(t *testing.T) {
 		t.Parallel()
 		amount := random.Numeric(t, 100000)
-		title := ""
+		title := random.AlphaNumeric(t, 40)
 		content := random.AlphaNumeric(t, 100)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
