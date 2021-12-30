@@ -298,8 +298,8 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if requestID == uuid.Nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		c.Logger().Error(errors.New("invalid UUID"))
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
 	if err := c.Bind(&req); err != nil {
@@ -380,7 +380,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, res)
 }
-
+// TODO return Not Found
 func (h *Handlers) PostComment(c echo.Context) error {
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
@@ -429,7 +429,7 @@ func (h *Handlers) PostComment(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, res)
 }
-
+//TODO return Not Found
 func (h *Handlers) PutComment(c echo.Context) error {
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
