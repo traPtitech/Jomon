@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/group"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
@@ -95,6 +96,7 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 		Query().
 		Where(group.IDEQ(groupID)).
 		QueryUser().
+		Select(user.FieldID).
 		All(ctx)
 
 	if err != nil {
