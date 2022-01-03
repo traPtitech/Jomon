@@ -16,3 +16,14 @@ updates:
     labels:
       - "dependencies"
       - "go"
+
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+    reviewers:
+      - FujishigeTemma
+      - cskd8
+    labels:
+      - "dependencies"
