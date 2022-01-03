@@ -218,11 +218,14 @@ func (h *Handlers) GetOwners(c echo.Context) error {
 	ctx := context.Background()
 	GroupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	owners, err := h.Repository.GetOwners(ctx, GroupID)
 	if err != nil {
-		return internalServerError(err)
+		if ent.IsNotFound(err) {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	var res []uuid.UUID
@@ -238,14 +241,17 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 	var owner Owner
 	GroupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if err := c.Bind(&owner); err != nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	createowner, err := h.Repository.CreateOwner(ctx, GroupID, owner.ID)
 	if err != nil {
-		return internalServerError(err)
+		if ent.IsConstraintError(err) {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	res := &Owner{
@@ -259,16 +265,19 @@ func (h *Handlers) DeleteOwner(c echo.Context) error {
 	ctx := context.Background()
 	GroupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	var owner Owner
 	if err := c.Bind(&owner); err != nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	err = h.Repository.DeleteOwner(ctx, GroupID, owner.ID)
 	if err != nil {
-		return internalServerError(err)
+		if ent.IsNotFound(err) {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.NoContent(http.StatusOK)
