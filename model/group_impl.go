@@ -48,7 +48,7 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 	return ConvertEntGroupToModelGroup(created), nil
 }
 
-func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*User, error) {
+func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*Member, error) {
 	gotGroup, err := repo.client.Group.
 		Query().
 		Where(group.IDEQ(groupID)).
@@ -67,9 +67,10 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	if err != nil {
 		return nil, err
 	}
-	modelmembers := []*User{}
+	modelmembers := []*Member{}
 	for _, member := range members {
-		modelmembers = append(modelmembers, convertEntUserToModelUser(member))
+		user := convertEntUserToModelUser(member)
+		modelmembers = append(modelmembers, &Member{user.ID})
 	}
 	return modelmembers, nil
 }
@@ -83,7 +84,7 @@ func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, 
 	if err != nil {
 		return nil, err
 	}
-	
+
 	created := &Member{userID}
 	return created, nil
 }
