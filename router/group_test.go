@@ -644,7 +644,7 @@ func TestHandlers_DeleteMember(t *testing.T) {
 
 		_, resErr := uuid.Parse(c.Param("groupID"))
 
-		err = h.Handlers.PostMember(c)
+		err = h.Handlers.DeleteMember(c)
 		if assert.Error(t, err) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 		}
@@ -675,7 +675,7 @@ func TestHandlers_DeleteMember(t *testing.T) {
 
 		resErr := errors.New("invalid UUID")
 
-		err = h.Handlers.PostMember(c)
+		err = h.Handlers.DeleteMember(c)
 		if assert.Error(t, err) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 		}
