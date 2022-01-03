@@ -58,13 +58,6 @@ func TestEntRepository_GetMembers(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, got, []*Member{})
 	})
-
-	t.Run("UnknownGroup", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		_, err = repo.GetMembers(ctx, uuid.New())
-		assert.Error(t, err)
-	})
 }
 
 func TestEntRepository_CreateMember(t *testing.T) {
@@ -141,19 +134,6 @@ func TestEntRepository_DeleteMember(t *testing.T) {
 		require.NoError(t, err)
 
 		err = repo.DeleteMember(ctx, uuid.New(), user.ID)
-		assert.Error(t, err)
-	})
-
-	t.Run("UnknownUser", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		require.NoError(t, err)
-		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
-		require.NoError(t, err)
-
-		err = repo.DeleteMember(ctx, group.ID, uuid.New())
 		assert.Error(t, err)
 	})
 }
