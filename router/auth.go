@@ -56,10 +56,6 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	// 以後、使わないので捨てる。セッションの長さはJomon固有にする。
-	//sess.Values[sessionAccessTokenKey] = res.AccessToken
-	//sess.Values[sessionRefreshTokenKey] = res.RefreshToken
-
 	u, err := service.FetchTraQUserInfo(res.AccessToken)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
