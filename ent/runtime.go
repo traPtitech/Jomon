@@ -108,6 +108,10 @@ func init() {
 	requesttarget.DefaultID = requesttargetDescID.Default.(func() uuid.UUID)
 	tagFields := schema.Tag{}.Fields()
 	_ = tagFields
+	// tagDescName is the schema descriptor for name field.
+	tagDescName := tagFields[1].Descriptor()
+	// tag.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	tag.NameValidator = tagDescName.Validators[0].(func(string) error)
 	// tagDescCreatedAt is the schema descriptor for created_at field.
 	tagDescCreatedAt := tagFields[3].Descriptor()
 	// tag.DefaultCreatedAt holds the default value on creation for the created_at field.
@@ -154,6 +158,10 @@ func init() {
 	transactiondetail.DefaultID = transactiondetailDescID.Default.(func() uuid.UUID)
 	userFields := schema.User{}.Fields()
 	_ = userFields
+	// userDescName is the schema descriptor for name field.
+	userDescName := userFields[1].Descriptor()
+	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	user.NameValidator = userDescName.Validators[0].(func(string) error)
 	// userDescAdmin is the schema descriptor for admin field.
 	userDescAdmin := userFields[3].Descriptor()
 	// user.DefaultAdmin holds the default value on creation for the admin field.

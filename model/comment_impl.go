@@ -10,6 +10,26 @@ import (
 	"github.com/traPtitech/Jomon/ent/request"
 )
 
+func (repo *EntRepository) GetComments(ctx context.Context, requestID uuid.UUID) ([]*Comment, error) {
+	comments, err := repo.client.Comment.
+		Query().
+		Where(
+			comment.HasRequestWith(
+				request.ID(requestID),
+			),
+		).
+		WithUser().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	modelcomments := []*Comment{}
+	for _, comment := range comments {
+		modelcomments = append(modelcomments, ConvertEntCommentToModelComment(comment, comment.Edges.User.ID))
+	}
+	return modelcomments, nil
+}
+
 func (repo *EntRepository) CreateComment(ctx context.Context, comment string, requestID uuid.UUID, userID uuid.UUID) (*Comment, error) {
 	created, err := repo.client.Comment.
 		Create().
@@ -20,19 +40,28 @@ func (repo *EntRepository) CreateComment(ctx context.Context, comment string, re
 	if err != nil {
 		return nil, err
 	}
-	return ConvertEntCommentToModelComment(created), nil
+	return ConvertEntCommentToModelComment(created, userID), nil
 }
 
-func (repo *EntRepository) UpdateComment(ctx context.Context, comment string, requestID uuid.UUID, commentID uuid.UUID) (*Comment, error) {
+// TODO: add edge to request
+func (repo *EntRepository) UpdateComment(ctx context.Context, commentContent string, requestID uuid.UUID, commentID uuid.UUID) (*Comment, error) {
 	updated, err := repo.client.Comment.
 		UpdateOneID(commentID).
-		SetComment(comment).
+		SetComment(commentContent).
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return ConvertEntCommentToModelComment(updated), nil
+	updatedWithUser, err := repo.client.Comment.
+		Query().
+		Where(comment.IDEQ(commentID)).
+		WithUser().
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ConvertEntCommentToModelComment(updated, updatedWithUser.Edges.User.ID), nil
 }
 
 func (repo *EntRepository) DeleteComment(ctx context.Context, requestID uuid.UUID, commentID uuid.UUID) error {
@@ -54,12 +83,12 @@ func (repo *EntRepository) DeleteComment(ctx context.Context, requestID uuid.UUI
 	return err
 }
 
-func ConvertEntCommentToModelComment(entcomment *ent.Comment) *Comment {
+func ConvertEntCommentToModelComment(comment *ent.Comment, userID uuid.UUID) *Comment {
 	return &Comment{
-		ID:        entcomment.ID,
-		User:      entcomment.Edges.User.ID,
-		Comment:   entcomment.Comment,
-		CreatedAt: entcomment.CreatedAt,
-		UpdatedAt: entcomment.UpdatedAt,
+		ID:        comment.ID,
+		User:      userID,
+		Comment:   comment.Comment,
+		CreatedAt: comment.CreatedAt,
+		UpdatedAt: comment.UpdatedAt,
 	}
 }

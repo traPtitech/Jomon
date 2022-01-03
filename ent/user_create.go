@@ -129,61 +129,49 @@ func (uc *UserCreate) AddGroupOwner(g ...*Group) *UserCreate {
 	return uc.AddGroupOwnerIDs(ids...)
 }
 
-// SetCommentID sets the "comment" edge to the Comment entity by ID.
-func (uc *UserCreate) SetCommentID(id uuid.UUID) *UserCreate {
-	uc.mutation.SetCommentID(id)
+// AddCommentIDs adds the "comment" edge to the Comment entity by IDs.
+func (uc *UserCreate) AddCommentIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddCommentIDs(ids...)
 	return uc
 }
 
-// SetNillableCommentID sets the "comment" edge to the Comment entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableCommentID(id *uuid.UUID) *UserCreate {
-	if id != nil {
-		uc = uc.SetCommentID(*id)
+// AddComment adds the "comment" edges to the Comment entity.
+func (uc *UserCreate) AddComment(c ...*Comment) *UserCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
+	return uc.AddCommentIDs(ids...)
+}
+
+// AddRequestStatuIDs adds the "request_status" edge to the RequestStatus entity by IDs.
+func (uc *UserCreate) AddRequestStatuIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddRequestStatuIDs(ids...)
 	return uc
 }
 
-// SetComment sets the "comment" edge to the Comment entity.
-func (uc *UserCreate) SetComment(c *Comment) *UserCreate {
-	return uc.SetCommentID(c.ID)
-}
-
-// SetRequestStatusID sets the "request_status" edge to the RequestStatus entity by ID.
-func (uc *UserCreate) SetRequestStatusID(id uuid.UUID) *UserCreate {
-	uc.mutation.SetRequestStatusID(id)
-	return uc
-}
-
-// SetNillableRequestStatusID sets the "request_status" edge to the RequestStatus entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableRequestStatusID(id *uuid.UUID) *UserCreate {
-	if id != nil {
-		uc = uc.SetRequestStatusID(*id)
+// AddRequestStatus adds the "request_status" edges to the RequestStatus entity.
+func (uc *UserCreate) AddRequestStatus(r ...*RequestStatus) *UserCreate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
+	return uc.AddRequestStatuIDs(ids...)
+}
+
+// AddRequestIDs adds the "request" edge to the Request entity by IDs.
+func (uc *UserCreate) AddRequestIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddRequestIDs(ids...)
 	return uc
 }
 
-// SetRequestStatus sets the "request_status" edge to the RequestStatus entity.
-func (uc *UserCreate) SetRequestStatus(r *RequestStatus) *UserCreate {
-	return uc.SetRequestStatusID(r.ID)
-}
-
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (uc *UserCreate) SetRequestID(id uuid.UUID) *UserCreate {
-	uc.mutation.SetRequestID(id)
-	return uc
-}
-
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableRequestID(id *uuid.UUID) *UserCreate {
-	if id != nil {
-		uc = uc.SetRequestID(*id)
+// AddRequest adds the "request" edges to the Request entity.
+func (uc *UserCreate) AddRequest(r ...*Request) *UserCreate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
-	return uc
-}
-
-// SetRequest sets the "request" edge to the Request entity.
-func (uc *UserCreate) SetRequest(r *Request) *UserCreate {
-	return uc.SetRequestID(r.ID)
+	return uc.AddRequestIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -213,11 +201,17 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 				return nil, err
 			}
 			uc.mutation = mutation
-			node, err = uc.sqlSave(ctx)
+			if node, err = uc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(uc.hooks) - 1; i >= 0; i-- {
+			if uc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
@@ -234,6 +228,19 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (uc *UserCreate) Exec(ctx context.Context) error {
+	_, err := uc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (uc *UserCreate) ExecX(ctx context.Context) {
+	if err := uc.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 // defaults sets the default values of the builder before save.
@@ -259,19 +266,24 @@ func (uc *UserCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
+	}
+	if v, ok := uc.mutation.Name(); ok {
+		if err := user.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "name": %w`, err)}
+		}
 	}
 	if _, ok := uc.mutation.DisplayName(); !ok {
-		return &ValidationError{Name: "display_name", err: errors.New("ent: missing required field \"display_name\"")}
+		return &ValidationError{Name: "display_name", err: errors.New(`ent: missing required field "display_name"`)}
 	}
 	if _, ok := uc.mutation.Admin(); !ok {
-		return &ValidationError{Name: "admin", err: errors.New("ent: missing required field \"admin\"")}
+		return &ValidationError{Name: "admin", err: errors.New(`ent: missing required field "admin"`)}
 	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
 	if _, ok := uc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New("ent: missing required field \"updated_at\"")}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
 	}
 	return nil
 }
@@ -279,10 +291,13 @@ func (uc *UserCreate) check() error {
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	_node, _spec := uc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(uuid.UUID)
 	}
 	return _node, nil
 }
@@ -390,7 +405,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if nodes := uc.mutation.CommentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.CommentTable,
 			Columns: []string{user.CommentColumn},
@@ -405,12 +420,11 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.comment_user = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.mutation.RequestStatusIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.RequestStatusTable,
 			Columns: []string{user.RequestStatusColumn},
@@ -425,12 +439,11 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_status_user = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.RequestTable,
 			Columns: []string{user.RequestColumn},
@@ -445,7 +458,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_user = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -480,17 +492,19 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ucb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ucb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, ucb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -514,4 +528,17 @@ func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (ucb *UserCreateBulk) Exec(ctx context.Context) error {
+	_, err := ucb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ucb *UserCreateBulk) ExecX(ctx context.Context) {
+	if err := ucb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

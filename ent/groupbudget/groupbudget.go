@@ -25,14 +25,14 @@ const (
 	EdgeTransaction = "transaction"
 	// Table holds the table name of the groupbudget in the database.
 	Table = "group_budgets"
-	// GroupTable is the table the holds the group relation/edge.
+	// GroupTable is the table that holds the group relation/edge.
 	GroupTable = "group_budgets"
 	// GroupInverseTable is the table name for the Group entity.
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	GroupInverseTable = "groups"
 	// GroupColumn is the table column denoting the group relation/edge.
 	GroupColumn = "group_group_budget"
-	// TransactionTable is the table the holds the transaction relation/edge.
+	// TransactionTable is the table that holds the transaction relation/edge.
 	TransactionTable = "transactions"
 	// TransactionInverseTable is the table name for the Transaction entity.
 	// It exists in this package in order to avoid circular dependency with the "transaction" package.

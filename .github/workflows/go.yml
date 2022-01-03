@@ -51,16 +51,16 @@ jobs:
     steps:
 
     - name: Set up Go 1.16
-      uses: actions/setup-go@v1
+      uses: actions/setup-go@v2
       with:
         go-version: 1.16
       id: go
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
 
     - name: Check cache
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -70,10 +70,20 @@ jobs:
     - name: Download dependencies
       run: go mod download
 
+    - name: Create uploads directory
+      run: mkdir -p $GITHUB_WORKSPACE/uploads
+
+    - name: Set UPLOAD_DIR env
+      run: echo "UPLOAD_DIR=$GITHUB_WORKSPACE/uploads" >> $GITHUB_ENV
+
     - name: Test
-      run: go test -v ./...
+      run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
       env:
         MARIADB_USERNAME: root
         MARIADB_PASSWORD: password
-        MARIADB_HOSTNAME: "localhost:50000"
         MARIADB_DATABASE: jomon
+        MARIADB_HOSTNAME: "localhost"
+        MARIADB_PORT: 50000
+
+    - name: Upload coverage to Codecov
+      run: bash <(curl -s https://codecov.io/bash)

@@ -30,9 +30,9 @@ type RequestUpdate struct {
 	mutation *RequestMutation
 }
 
-// Where adds a new predicate for the RequestUpdate builder.
+// Where appends a list predicates to the RequestUpdate builder.
 func (ru *RequestUpdate) Where(ps ...predicate.Request) *RequestUpdate {
-	ru.mutation.predicates = append(ru.mutation.predicates, ps...)
+	ru.mutation.Where(ps...)
 	return ru
 }
 
@@ -380,6 +380,9 @@ func (ru *RequestUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(ru.hooks) - 1; i >= 0; i-- {
+			if ru.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ru.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ru.mutation); err != nil {
@@ -635,10 +638,10 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if ru.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   request.TagTable,
-			Columns: []string{request.TagColumn},
+			Columns: request.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -651,10 +654,10 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := ru.mutation.RemovedTagIDs(); len(nodes) > 0 && !ru.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   request.TagTable,
-			Columns: []string{request.TagColumn},
+			Columns: request.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -670,10 +673,10 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := ru.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   request.TagTable,
-			Columns: []string{request.TagColumn},
+			Columns: request.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -797,7 +800,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if ru.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   request.UserTable,
 			Columns: []string{request.UserColumn},
@@ -813,7 +816,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := ru.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   request.UserTable,
 			Columns: []string{request.UserColumn},
@@ -868,8 +871,8 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{request.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -1235,6 +1238,9 @@ func (ruo *RequestUpdateOne) Save(ctx context.Context) (*Request, error) {
 			return node, err
 		})
 		for i := len(ruo.hooks) - 1; i >= 0; i-- {
+			if ruo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ruo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ruo.mutation); err != nil {
@@ -1507,10 +1513,10 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	}
 	if ruo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   request.TagTable,
-			Columns: []string{request.TagColumn},
+			Columns: request.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -1523,10 +1529,10 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	}
 	if nodes := ruo.mutation.RemovedTagIDs(); len(nodes) > 0 && !ruo.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   request.TagTable,
-			Columns: []string{request.TagColumn},
+			Columns: request.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -1542,10 +1548,10 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	}
 	if nodes := ruo.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   request.TagTable,
-			Columns: []string{request.TagColumn},
+			Columns: request.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -1669,7 +1675,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	}
 	if ruo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   request.UserTable,
 			Columns: []string{request.UserColumn},
@@ -1685,7 +1691,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	}
 	if nodes := ruo.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.M2O,
 			Inverse: false,
 			Table:   request.UserTable,
 			Columns: []string{request.UserColumn},
@@ -1743,8 +1749,8 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 	if err = sqlgraph.UpdateNode(ctx, ruo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{request.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

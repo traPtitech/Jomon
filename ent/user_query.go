@@ -36,7 +36,6 @@ type UserQuery struct {
 	withComment       *CommentQuery
 	withRequestStatus *RequestStatusQuery
 	withRequest       *RequestQuery
-	withFKs           bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -131,7 +130,7 @@ func (uq *UserQuery) QueryComment() *CommentQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(comment.Table, comment.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, user.CommentTable, user.CommentColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.CommentTable, user.CommentColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -153,7 +152,7 @@ func (uq *UserQuery) QueryRequestStatus() *RequestStatusQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(requeststatus.Table, requeststatus.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, user.RequestStatusTable, user.RequestStatusColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.RequestStatusTable, user.RequestStatusColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -175,7 +174,7 @@ func (uq *UserQuery) QueryRequest() *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, user.RequestTable, user.RequestColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.RequestTable, user.RequestColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -470,8 +469,8 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 //		Select(user.FieldName).
 //		Scan(ctx, &v)
 //
-func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
-	uq.fields = append([]string{field}, fields...)
+func (uq *UserQuery) Select(fields ...string) *UserSelect {
+	uq.fields = append(uq.fields, fields...)
 	return &UserSelect{UserQuery: uq}
 }
 
@@ -494,7 +493,6 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
-		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
 		loadedTypes = [5]bool{
 			uq.withGroupUser != nil,
@@ -504,12 +502,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			uq.withRequest != nil,
 		}
 	)
-	if uq.withComment != nil || uq.withRequestStatus != nil || uq.withRequest != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
@@ -552,7 +544,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				s.Where(sql.InValues(user.GroupUserPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -617,7 +609,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				s.Where(sql.InValues(user.GroupOwnerPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)
@@ -661,89 +653,89 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 
 	if query := uq.withComment; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*User)
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*User)
 		for i := range nodes {
-			if nodes[i].comment_user == nil {
-				continue
-			}
-			fk := *nodes[i].comment_user
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Comment = []*Comment{}
 		}
-		query.Where(comment.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.Comment(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.CommentColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.comment_user
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "comment_user" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "comment_user" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "comment_user" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Comment = n
-			}
+			node.Edges.Comment = append(node.Edges.Comment, n)
 		}
 	}
 
 	if query := uq.withRequestStatus; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*User)
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*User)
 		for i := range nodes {
-			if nodes[i].request_status_user == nil {
-				continue
-			}
-			fk := *nodes[i].request_status_user
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.RequestStatus = []*RequestStatus{}
 		}
-		query.Where(requeststatus.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.RequestStatus(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.RequestStatusColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.request_status_user
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "request_status_user" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_status_user" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_status_user" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.RequestStatus = n
-			}
+			node.Edges.RequestStatus = append(node.Edges.RequestStatus, n)
 		}
 	}
 
 	if query := uq.withRequest; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*User)
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*User)
 		for i := range nodes {
-			if nodes[i].request_user == nil {
-				continue
-			}
-			fk := *nodes[i].request_user
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Request = []*Request{}
 		}
-		query.Where(request.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.Request(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.RequestColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.request_user
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "request_user" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_user" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_user" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Request = n
-			}
+			node.Edges.Request = append(node.Edges.Request, n)
 		}
 	}
 
@@ -814,10 +806,14 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(uq.driver.Dialect())
 	t1 := builder.Table(user.Table)
-	selector := builder.Select(t1.Columns(user.Columns...)...).From(t1)
+	columns := uq.fields
+	if len(columns) == 0 {
+		columns = user.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if uq.sql != nil {
 		selector = uq.sql
-		selector.Select(selector.Columns(user.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range uq.predicates {
 		p(selector)
@@ -1085,13 +1081,24 @@ func (ugb *UserGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
-	selector := ugb.sql
-	columns := make([]string, 0, len(ugb.fields)+len(ugb.fns))
-	columns = append(columns, ugb.fields...)
+	selector := ugb.sql.Select()
+	aggregation := make([]string, 0, len(ugb.fns))
 	for _, fn := range ugb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(ugb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(ugb.fields)+len(ugb.fns))
+		for _, f := range ugb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(ugb.fields...)...)
 }
 
 // UserSelect is the builder for selecting fields of User entities.
@@ -1307,16 +1314,10 @@ func (us *UserSelect) BoolX(ctx context.Context) bool {
 
 func (us *UserSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := us.sqlQuery().Query()
+	query, args := us.sql.Query()
 	if err := us.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (us *UserSelect) sqlQuery() sql.Querier {
-	selector := us.sql
-	selector.Select(selector.Columns(us.fields...)...)
-	return selector
 }

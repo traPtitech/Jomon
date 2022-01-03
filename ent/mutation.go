@@ -143,8 +143,8 @@ func (m *CommentMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *CommentMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -385,6 +385,11 @@ func (m *CommentMutation) UserIDs() (ids []uuid.UUID) {
 func (m *CommentMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
+}
+
+// Where appends a list predicates to the CommentMutation builder.
+func (m *CommentMutation) Where(ps ...predicate.Comment) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -746,8 +751,8 @@ func (m *FileMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *FileMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -949,6 +954,11 @@ func (m *FileMutation) RequestIDs() (ids []uuid.UUID) {
 func (m *FileMutation) ResetRequest() {
 	m.request = nil
 	m.clearedrequest = false
+}
+
+// Where appends a list predicates to the FileMutation builder.
+func (m *FileMutation) Where(ps ...predicate.File) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -1305,8 +1315,8 @@ func (m *GroupMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *GroupMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -1603,6 +1613,7 @@ func (m *GroupMutation) RemoveGroupBudgetIDs(ids ...uuid.UUID) {
 		m.removedgroup_budget = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.group_budget, ids[i])
 		m.removedgroup_budget[ids[i]] = struct{}{}
 	}
 }
@@ -1656,6 +1667,7 @@ func (m *GroupMutation) RemoveUserIDs(ids ...uuid.UUID) {
 		m.removeduser = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.user, ids[i])
 		m.removeduser[ids[i]] = struct{}{}
 	}
 }
@@ -1709,6 +1721,7 @@ func (m *GroupMutation) RemoveOwnerIDs(ids ...uuid.UUID) {
 		m.removedowner = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.owner, ids[i])
 		m.removedowner[ids[i]] = struct{}{}
 	}
 }
@@ -1762,6 +1775,7 @@ func (m *GroupMutation) RemoveRequestIDs(ids ...uuid.UUID) {
 		m.removedrequest = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.request, ids[i])
 		m.removedrequest[ids[i]] = struct{}{}
 	}
 }
@@ -1787,6 +1801,11 @@ func (m *GroupMutation) ResetRequest() {
 	m.request = nil
 	m.clearedrequest = false
 	m.removedrequest = nil
+}
+
+// Where appends a list predicates to the GroupMutation builder.
+func (m *GroupMutation) Where(ps ...predicate.Group) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -2273,8 +2292,8 @@ func (m *GroupBudgetMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *GroupBudgetMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -2499,6 +2518,11 @@ func (m *GroupBudgetMutation) TransactionIDs() (ids []uuid.UUID) {
 func (m *GroupBudgetMutation) ResetTransaction() {
 	m.transaction = nil
 	m.clearedtransaction = false
+}
+
+// Where appends a list predicates to the GroupBudgetMutation builder.
+func (m *GroupBudgetMutation) Where(ps ...predicate.GroupBudget) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -2880,8 +2904,8 @@ func (m *RequestMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *RequestMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -3115,6 +3139,7 @@ func (m *RequestMutation) RemoveStatuIDs(ids ...uuid.UUID) {
 		m.removedstatus = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.status, ids[i])
 		m.removedstatus[ids[i]] = struct{}{}
 	}
 }
@@ -3168,6 +3193,7 @@ func (m *RequestMutation) RemoveTargetIDs(ids ...uuid.UUID) {
 		m.removedtarget = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.target, ids[i])
 		m.removedtarget[ids[i]] = struct{}{}
 	}
 }
@@ -3221,6 +3247,7 @@ func (m *RequestMutation) RemoveFileIDs(ids ...uuid.UUID) {
 		m.removedfile = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.file, ids[i])
 		m.removedfile[ids[i]] = struct{}{}
 	}
 }
@@ -3274,6 +3301,7 @@ func (m *RequestMutation) RemoveTagIDs(ids ...uuid.UUID) {
 		m.removedtag = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.tag, ids[i])
 		m.removedtag[ids[i]] = struct{}{}
 	}
 }
@@ -3327,6 +3355,7 @@ func (m *RequestMutation) RemoveTransactionIDs(ids ...uuid.UUID) {
 		m.removedtransaction = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.transaction, ids[i])
 		m.removedtransaction[ids[i]] = struct{}{}
 	}
 }
@@ -3380,6 +3409,7 @@ func (m *RequestMutation) RemoveCommentIDs(ids ...uuid.UUID) {
 		m.removedcomment = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.comment, ids[i])
 		m.removedcomment[ids[i]] = struct{}{}
 	}
 }
@@ -3483,6 +3513,11 @@ func (m *RequestMutation) GroupIDs() (ids []uuid.UUID) {
 func (m *RequestMutation) ResetGroup() {
 	m.group = nil
 	m.clearedgroup = false
+}
+
+// Where appends a list predicates to the RequestMutation builder.
+func (m *RequestMutation) Where(ps ...predicate.Request) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -4024,8 +4059,8 @@ func (m *RequestStatusMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *RequestStatusMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -4217,6 +4252,11 @@ func (m *RequestStatusMutation) UserIDs() (ids []uuid.UUID) {
 func (m *RequestStatusMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
+}
+
+// Where appends a list predicates to the RequestStatusMutation builder.
+func (m *RequestStatusMutation) Where(ps ...predicate.RequestStatus) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -4551,8 +4591,8 @@ func (m *RequestTargetMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *RequestTargetMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -4718,6 +4758,11 @@ func (m *RequestTargetMutation) RequestIDs() (ids []uuid.UUID) {
 func (m *RequestTargetMutation) ResetRequest() {
 	m.request = nil
 	m.clearedrequest = false
+}
+
+// Where appends a list predicates to the RequestTargetMutation builder.
+func (m *RequestTargetMutation) Where(ps ...predicate.RequestTarget) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -4962,7 +5007,8 @@ type TagMutation struct {
 	updated_at         *time.Time
 	deleted_at         *time.Time
 	clearedFields      map[string]struct{}
-	request            *uuid.UUID
+	request            map[uuid.UUID]struct{}
+	removedrequest     map[uuid.UUID]struct{}
 	clearedrequest     bool
 	transaction        *uuid.UUID
 	clearedtransaction bool
@@ -5047,8 +5093,8 @@ func (m *TagMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *TagMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -5249,9 +5295,14 @@ func (m *TagMutation) ResetDeletedAt() {
 	delete(m.clearedFields, tag.FieldDeletedAt)
 }
 
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *TagMutation) SetRequestID(id uuid.UUID) {
-	m.request = &id
+// AddRequestIDs adds the "request" edge to the Request entity by ids.
+func (m *TagMutation) AddRequestIDs(ids ...uuid.UUID) {
+	if m.request == nil {
+		m.request = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.request[ids[i]] = struct{}{}
+	}
 }
 
 // ClearRequest clears the "request" edge to the Request entity.
@@ -5264,20 +5315,29 @@ func (m *TagMutation) RequestCleared() bool {
 	return m.clearedrequest
 }
 
-// RequestID returns the "request" edge ID in the mutation.
-func (m *TagMutation) RequestID() (id uuid.UUID, exists bool) {
-	if m.request != nil {
-		return *m.request, true
+// RemoveRequestIDs removes the "request" edge to the Request entity by IDs.
+func (m *TagMutation) RemoveRequestIDs(ids ...uuid.UUID) {
+	if m.removedrequest == nil {
+		m.removedrequest = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.request, ids[i])
+		m.removedrequest[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRequest returns the removed IDs of the "request" edge to the Request entity.
+func (m *TagMutation) RemovedRequestIDs() (ids []uuid.UUID) {
+	for id := range m.removedrequest {
+		ids = append(ids, id)
 	}
 	return
 }
 
 // RequestIDs returns the "request" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// RequestID instead. It exists only for internal usage by the builders.
 func (m *TagMutation) RequestIDs() (ids []uuid.UUID) {
-	if id := m.request; id != nil {
-		ids = append(ids, *id)
+	for id := range m.request {
+		ids = append(ids, id)
 	}
 	return
 }
@@ -5286,6 +5346,7 @@ func (m *TagMutation) RequestIDs() (ids []uuid.UUID) {
 func (m *TagMutation) ResetRequest() {
 	m.request = nil
 	m.clearedrequest = false
+	m.removedrequest = nil
 }
 
 // SetTransactionID sets the "transaction" edge to the Transaction entity by id.
@@ -5325,6 +5386,11 @@ func (m *TagMutation) TransactionIDs() (ids []uuid.UUID) {
 func (m *TagMutation) ResetTransaction() {
 	m.transaction = nil
 	m.clearedtransaction = false
+}
+
+// Where appends a list predicates to the TagMutation builder.
+func (m *TagMutation) Where(ps ...predicate.Tag) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -5532,9 +5598,11 @@ func (m *TagMutation) AddedEdges() []string {
 func (m *TagMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case tag.EdgeRequest:
-		if id := m.request; id != nil {
-			return []ent.Value{*id}
+		ids := make([]ent.Value, 0, len(m.request))
+		for id := range m.request {
+			ids = append(ids, id)
 		}
+		return ids
 	case tag.EdgeTransaction:
 		if id := m.transaction; id != nil {
 			return []ent.Value{*id}
@@ -5546,6 +5614,9 @@ func (m *TagMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TagMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
+	if m.removedrequest != nil {
+		edges = append(edges, tag.EdgeRequest)
+	}
 	return edges
 }
 
@@ -5553,6 +5624,12 @@ func (m *TagMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *TagMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case tag.EdgeRequest:
+		ids := make([]ent.Value, 0, len(m.removedrequest))
+		for id := range m.removedrequest {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
@@ -5585,9 +5662,6 @@ func (m *TagMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *TagMutation) ClearEdge(name string) error {
 	switch name {
-	case tag.EdgeRequest:
-		m.ClearRequest()
-		return nil
 	case tag.EdgeTransaction:
 		m.ClearTransaction()
 		return nil
@@ -5707,8 +5781,8 @@ func (m *TransactionMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *TransactionMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -5817,6 +5891,7 @@ func (m *TransactionMutation) RemoveTagIDs(ids ...uuid.UUID) {
 		m.removedtag = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.tag, ids[i])
 		m.removedtag[ids[i]] = struct{}{}
 	}
 }
@@ -5920,6 +5995,11 @@ func (m *TransactionMutation) RequestIDs() (ids []uuid.UUID) {
 func (m *TransactionMutation) ResetRequest() {
 	m.request = nil
 	m.clearedrequest = false
+}
+
+// Where appends a list predicates to the TransactionMutation builder.
+func (m *TransactionMutation) Where(ps ...predicate.Transaction) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -6266,8 +6346,8 @@ func (m *TransactionDetailMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *TransactionDetailMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -6476,6 +6556,11 @@ func (m *TransactionDetailMutation) TransactionIDs() (ids []uuid.UUID) {
 func (m *TransactionDetailMutation) ResetTransaction() {
 	m.transaction = nil
 	m.clearedtransaction = false
+}
+
+// Where appends a list predicates to the TransactionDetailMutation builder.
+func (m *TransactionDetailMutation) Where(ps ...predicate.TransactionDetail) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -6750,11 +6835,14 @@ type UserMutation struct {
 	group_owner           map[uuid.UUID]struct{}
 	removedgroup_owner    map[uuid.UUID]struct{}
 	clearedgroup_owner    bool
-	comment               *uuid.UUID
+	comment               map[uuid.UUID]struct{}
+	removedcomment        map[uuid.UUID]struct{}
 	clearedcomment        bool
-	request_status        *uuid.UUID
+	request_status        map[uuid.UUID]struct{}
+	removedrequest_status map[uuid.UUID]struct{}
 	clearedrequest_status bool
-	request               *uuid.UUID
+	request               map[uuid.UUID]struct{}
+	removedrequest        map[uuid.UUID]struct{}
 	clearedrequest        bool
 	done                  bool
 	oldValue              func(context.Context) (*User, error)
@@ -6837,8 +6925,8 @@ func (m *UserMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *UserMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -7101,6 +7189,7 @@ func (m *UserMutation) RemoveGroupUserIDs(ids ...uuid.UUID) {
 		m.removedgroup_user = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.group_user, ids[i])
 		m.removedgroup_user[ids[i]] = struct{}{}
 	}
 }
@@ -7154,6 +7243,7 @@ func (m *UserMutation) RemoveGroupOwnerIDs(ids ...uuid.UUID) {
 		m.removedgroup_owner = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.group_owner, ids[i])
 		m.removedgroup_owner[ids[i]] = struct{}{}
 	}
 }
@@ -7181,9 +7271,14 @@ func (m *UserMutation) ResetGroupOwner() {
 	m.removedgroup_owner = nil
 }
 
-// SetCommentID sets the "comment" edge to the Comment entity by id.
-func (m *UserMutation) SetCommentID(id uuid.UUID) {
-	m.comment = &id
+// AddCommentIDs adds the "comment" edge to the Comment entity by ids.
+func (m *UserMutation) AddCommentIDs(ids ...uuid.UUID) {
+	if m.comment == nil {
+		m.comment = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.comment[ids[i]] = struct{}{}
+	}
 }
 
 // ClearComment clears the "comment" edge to the Comment entity.
@@ -7196,20 +7291,29 @@ func (m *UserMutation) CommentCleared() bool {
 	return m.clearedcomment
 }
 
-// CommentID returns the "comment" edge ID in the mutation.
-func (m *UserMutation) CommentID() (id uuid.UUID, exists bool) {
-	if m.comment != nil {
-		return *m.comment, true
+// RemoveCommentIDs removes the "comment" edge to the Comment entity by IDs.
+func (m *UserMutation) RemoveCommentIDs(ids ...uuid.UUID) {
+	if m.removedcomment == nil {
+		m.removedcomment = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.comment, ids[i])
+		m.removedcomment[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedComment returns the removed IDs of the "comment" edge to the Comment entity.
+func (m *UserMutation) RemovedCommentIDs() (ids []uuid.UUID) {
+	for id := range m.removedcomment {
+		ids = append(ids, id)
 	}
 	return
 }
 
 // CommentIDs returns the "comment" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// CommentID instead. It exists only for internal usage by the builders.
 func (m *UserMutation) CommentIDs() (ids []uuid.UUID) {
-	if id := m.comment; id != nil {
-		ids = append(ids, *id)
+	for id := range m.comment {
+		ids = append(ids, id)
 	}
 	return
 }
@@ -7218,11 +7322,17 @@ func (m *UserMutation) CommentIDs() (ids []uuid.UUID) {
 func (m *UserMutation) ResetComment() {
 	m.comment = nil
 	m.clearedcomment = false
+	m.removedcomment = nil
 }
 
-// SetRequestStatusID sets the "request_status" edge to the RequestStatus entity by id.
-func (m *UserMutation) SetRequestStatusID(id uuid.UUID) {
-	m.request_status = &id
+// AddRequestStatuIDs adds the "request_status" edge to the RequestStatus entity by ids.
+func (m *UserMutation) AddRequestStatuIDs(ids ...uuid.UUID) {
+	if m.request_status == nil {
+		m.request_status = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.request_status[ids[i]] = struct{}{}
+	}
 }
 
 // ClearRequestStatus clears the "request_status" edge to the RequestStatus entity.
@@ -7235,20 +7345,29 @@ func (m *UserMutation) RequestStatusCleared() bool {
 	return m.clearedrequest_status
 }
 
-// RequestStatusID returns the "request_status" edge ID in the mutation.
-func (m *UserMutation) RequestStatusID() (id uuid.UUID, exists bool) {
-	if m.request_status != nil {
-		return *m.request_status, true
+// RemoveRequestStatuIDs removes the "request_status" edge to the RequestStatus entity by IDs.
+func (m *UserMutation) RemoveRequestStatuIDs(ids ...uuid.UUID) {
+	if m.removedrequest_status == nil {
+		m.removedrequest_status = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.request_status, ids[i])
+		m.removedrequest_status[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRequestStatus returns the removed IDs of the "request_status" edge to the RequestStatus entity.
+func (m *UserMutation) RemovedRequestStatusIDs() (ids []uuid.UUID) {
+	for id := range m.removedrequest_status {
+		ids = append(ids, id)
 	}
 	return
 }
 
 // RequestStatusIDs returns the "request_status" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// RequestStatusID instead. It exists only for internal usage by the builders.
 func (m *UserMutation) RequestStatusIDs() (ids []uuid.UUID) {
-	if id := m.request_status; id != nil {
-		ids = append(ids, *id)
+	for id := range m.request_status {
+		ids = append(ids, id)
 	}
 	return
 }
@@ -7257,11 +7376,17 @@ func (m *UserMutation) RequestStatusIDs() (ids []uuid.UUID) {
 func (m *UserMutation) ResetRequestStatus() {
 	m.request_status = nil
 	m.clearedrequest_status = false
+	m.removedrequest_status = nil
 }
 
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *UserMutation) SetRequestID(id uuid.UUID) {
-	m.request = &id
+// AddRequestIDs adds the "request" edge to the Request entity by ids.
+func (m *UserMutation) AddRequestIDs(ids ...uuid.UUID) {
+	if m.request == nil {
+		m.request = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.request[ids[i]] = struct{}{}
+	}
 }
 
 // ClearRequest clears the "request" edge to the Request entity.
@@ -7274,20 +7399,29 @@ func (m *UserMutation) RequestCleared() bool {
 	return m.clearedrequest
 }
 
-// RequestID returns the "request" edge ID in the mutation.
-func (m *UserMutation) RequestID() (id uuid.UUID, exists bool) {
-	if m.request != nil {
-		return *m.request, true
+// RemoveRequestIDs removes the "request" edge to the Request entity by IDs.
+func (m *UserMutation) RemoveRequestIDs(ids ...uuid.UUID) {
+	if m.removedrequest == nil {
+		m.removedrequest = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.request, ids[i])
+		m.removedrequest[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedRequest returns the removed IDs of the "request" edge to the Request entity.
+func (m *UserMutation) RemovedRequestIDs() (ids []uuid.UUID) {
+	for id := range m.removedrequest {
+		ids = append(ids, id)
 	}
 	return
 }
 
 // RequestIDs returns the "request" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// RequestID instead. It exists only for internal usage by the builders.
 func (m *UserMutation) RequestIDs() (ids []uuid.UUID) {
-	if id := m.request; id != nil {
-		ids = append(ids, *id)
+	for id := range m.request {
+		ids = append(ids, id)
 	}
 	return
 }
@@ -7296,6 +7430,12 @@ func (m *UserMutation) RequestIDs() (ids []uuid.UUID) {
 func (m *UserMutation) ResetRequest() {
 	m.request = nil
 	m.clearedrequest = false
+	m.removedrequest = nil
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -7541,17 +7681,23 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 		}
 		return ids
 	case user.EdgeComment:
-		if id := m.comment; id != nil {
-			return []ent.Value{*id}
+		ids := make([]ent.Value, 0, len(m.comment))
+		for id := range m.comment {
+			ids = append(ids, id)
 		}
+		return ids
 	case user.EdgeRequestStatus:
-		if id := m.request_status; id != nil {
-			return []ent.Value{*id}
+		ids := make([]ent.Value, 0, len(m.request_status))
+		for id := range m.request_status {
+			ids = append(ids, id)
 		}
+		return ids
 	case user.EdgeRequest:
-		if id := m.request; id != nil {
-			return []ent.Value{*id}
+		ids := make([]ent.Value, 0, len(m.request))
+		for id := range m.request {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -7564,6 +7710,15 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedgroup_owner != nil {
 		edges = append(edges, user.EdgeGroupOwner)
+	}
+	if m.removedcomment != nil {
+		edges = append(edges, user.EdgeComment)
+	}
+	if m.removedrequest_status != nil {
+		edges = append(edges, user.EdgeRequestStatus)
+	}
+	if m.removedrequest != nil {
+		edges = append(edges, user.EdgeRequest)
 	}
 	return edges
 }
@@ -7581,6 +7736,24 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	case user.EdgeGroupOwner:
 		ids := make([]ent.Value, 0, len(m.removedgroup_owner))
 		for id := range m.removedgroup_owner {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeComment:
+		ids := make([]ent.Value, 0, len(m.removedcomment))
+		for id := range m.removedcomment {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeRequestStatus:
+		ids := make([]ent.Value, 0, len(m.removedrequest_status))
+		for id := range m.removedrequest_status {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeRequest:
+		ids := make([]ent.Value, 0, len(m.removedrequest))
+		for id := range m.removedrequest {
 			ids = append(ids, id)
 		}
 		return ids
@@ -7631,15 +7804,6 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *UserMutation) ClearEdge(name string) error {
 	switch name {
-	case user.EdgeComment:
-		m.ClearComment()
-		return nil
-	case user.EdgeRequestStatus:
-		m.ClearRequestStatus()
-		return nil
-	case user.EdgeRequest:
-		m.ClearRequest()
-		return nil
 	}
 	return fmt.Errorf("unknown User unique edge %s", name)
 }

@@ -25,7 +25,7 @@ const (
 	EdgeTransaction = "transaction"
 	// Table holds the table name of the transactiondetail in the database.
 	Table = "transaction_details"
-	// TransactionTable is the table the holds the transaction relation/edge.
+	// TransactionTable is the table that holds the transaction relation/edge.
 	TransactionTable = "transaction_details"
 	// TransactionInverseTable is the table name for the Transaction entity.
 	// It exists in this package in order to avoid circular dependency with the "transaction" package.

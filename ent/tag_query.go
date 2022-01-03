@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -81,7 +82,7 @@ func (tq *TagQuery) QueryRequest() *RequestQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, tag.RequestTable, tag.RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, tag.RequestTable, tag.RequestPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -362,8 +363,8 @@ func (tq *TagQuery) GroupBy(field string, fields ...string) *TagGroupBy {
 //		Select(tag.FieldName).
 //		Scan(ctx, &v)
 //
-func (tq *TagQuery) Select(field string, fields ...string) *TagSelect {
-	tq.fields = append([]string{field}, fields...)
+func (tq *TagQuery) Select(fields ...string) *TagSelect {
+	tq.fields = append(tq.fields, fields...)
 	return &TagSelect{TagQuery: tq}
 }
 
@@ -393,7 +394,7 @@ func (tq *TagQuery) sqlAll(ctx context.Context) ([]*Tag, error) {
 			tq.withTransaction != nil,
 		}
 	)
-	if tq.withRequest != nil || tq.withTransaction != nil {
+	if tq.withTransaction != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -420,30 +421,66 @@ func (tq *TagQuery) sqlAll(ctx context.Context) ([]*Tag, error) {
 	}
 
 	if query := tq.withRequest; query != nil {
-		ids := make([]uuid.UUID, 0, len(nodes))
-		nodeids := make(map[uuid.UUID][]*Tag)
-		for i := range nodes {
-			if nodes[i].request_tag == nil {
-				continue
-			}
-			fk := *nodes[i].request_tag
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[uuid.UUID]*Tag, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.Request = []*Request{}
 		}
-		query.Where(request.IDIn(ids...))
+		var (
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*Tag)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: true,
+				Table:   tag.RequestTable,
+				Columns: tag.RequestPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(tag.RequestPrimaryKey[1], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*uuid.UUID)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*uuid.UUID)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := *eout
+				inValue := *ein
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, tq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "request": %w`, err)
+		}
+		query.Where(request.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_tag" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected "request" node returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Request = n
+				nodes[i].Edges.Request = append(nodes[i].Edges.Request, n)
 			}
 		}
 	}
@@ -544,10 +581,14 @@ func (tq *TagQuery) querySpec() *sqlgraph.QuerySpec {
 func (tq *TagQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(tq.driver.Dialect())
 	t1 := builder.Table(tag.Table)
-	selector := builder.Select(t1.Columns(tag.Columns...)...).From(t1)
+	columns := tq.fields
+	if len(columns) == 0 {
+		columns = tag.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if tq.sql != nil {
 		selector = tq.sql
-		selector.Select(selector.Columns(tag.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range tq.predicates {
 		p(selector)
@@ -815,13 +856,24 @@ func (tgb *TagGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (tgb *TagGroupBy) sqlQuery() *sql.Selector {
-	selector := tgb.sql
-	columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
-	columns = append(columns, tgb.fields...)
+	selector := tgb.sql.Select()
+	aggregation := make([]string, 0, len(tgb.fns))
 	for _, fn := range tgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(tgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
+		for _, f := range tgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(tgb.fields...)...)
 }
 
 // TagSelect is the builder for selecting fields of Tag entities.
@@ -1037,16 +1089,10 @@ func (ts *TagSelect) BoolX(ctx context.Context) bool {
 
 func (ts *TagSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ts.sqlQuery().Query()
+	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ts *TagSelect) sqlQuery() sql.Querier {
-	selector := ts.sql
-	selector.Select(selector.Columns(ts.fields...)...)
-	return selector
 }

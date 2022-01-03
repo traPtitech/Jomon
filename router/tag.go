@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -30,7 +31,7 @@ func (h *Handlers) GetTags(c echo.Context) error {
 	ctx := context.Background()
 	tags, err := h.Repository.GetTags(ctx)
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	res := []*TagOverview{}
@@ -50,13 +51,13 @@ func (h *Handlers) GetTags(c echo.Context) error {
 func (h *Handlers) PostTag(c echo.Context) error {
 	var tag Tag
 	if err := c.Bind(&tag); err != nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
 	created, err := h.Repository.CreateTag(ctx, tag.Name, tag.Description)
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	res := TagOverview{
@@ -73,20 +74,20 @@ func (h *Handlers) PostTag(c echo.Context) error {
 func (h *Handlers) PutTag(c echo.Context) error {
 	tagID, err := uuid.Parse(c.Param("tagID"))
 	if err != nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if tagID == uuid.Nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID"))
 	}
 	var req Tag
 	if err := c.Bind(&req); err != nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
 	tag, err := h.Repository.UpdateTag(ctx, tagID, req.Name, req.Description)
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	res := &TagOverview{
@@ -103,16 +104,16 @@ func (h *Handlers) PutTag(c echo.Context) error {
 func (h *Handlers) DeleteTag(c echo.Context) error {
 	tagID, err := uuid.Parse(c.Param("tagID"))
 	if err != nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if tagID == uuid.Nil {
-		return badRequest(err)
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID"))
 	}
 
 	ctx := context.Background()
 	err = h.Repository.DeleteTag(ctx, tagID)
 	if err != nil {
-		return internalServerError(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.NoContent(http.StatusOK)

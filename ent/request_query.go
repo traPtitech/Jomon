@@ -160,7 +160,7 @@ func (rq *RequestQuery) QueryTag() *TagQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(tag.Table, tag.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.TagTable, request.TagColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, request.TagTable, request.TagPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -226,7 +226,7 @@ func (rq *RequestQuery) QueryUser() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, request.UserTable, request.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, request.UserTable, request.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
 		return fromU, nil
@@ -579,8 +579,8 @@ func (rq *RequestQuery) GroupBy(field string, fields ...string) *RequestGroupBy 
 //		Select(request.FieldAmount).
 //		Scan(ctx, &v)
 //
-func (rq *RequestQuery) Select(field string, fields ...string) *RequestSelect {
-	rq.fields = append([]string{field}, fields...)
+func (rq *RequestQuery) Select(fields ...string) *RequestSelect {
+	rq.fields = append(rq.fields, fields...)
 	return &RequestSelect{RequestQuery: rq}
 }
 
@@ -616,7 +616,7 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 			rq.withGroup != nil,
 		}
 	)
-	if rq.withGroup != nil {
+	if rq.withUser != nil || rq.withGroup != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -731,30 +731,66 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 
 	if query := rq.withTag; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*Request)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Tag = []*Tag{}
+		ids := make(map[uuid.UUID]*Request, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.Tag = []*Tag{}
 		}
-		query.withFKs = true
-		query.Where(predicate.Tag(func(s *sql.Selector) {
-			s.Where(sql.InValues(request.TagColumn, fks...))
-		}))
+		var (
+			edgeids []uuid.UUID
+			edges   = make(map[uuid.UUID][]*Request)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: false,
+				Table:   request.TagTable,
+				Columns: request.TagPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(request.TagPrimaryKey[0], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*uuid.UUID)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*uuid.UUID)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := *eout
+				inValue := *ein
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, rq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "tag": %w`, err)
+		}
+		query.Where(tag.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.request_tag
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_tag" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_tag" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected "tag" node returned %v`, n.ID)
 			}
-			node.Edges.Tag = append(node.Edges.Tag, n)
+			for i := range nodes {
+				nodes[i].Edges.Tag = append(nodes[i].Edges.Tag, n)
+			}
 		}
 	}
 
@@ -817,30 +853,31 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 	}
 
 	if query := rq.withUser; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*Request)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Request)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
+			if nodes[i].request_user == nil {
+				continue
+			}
+			fk := *nodes[i].request_user
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.withFKs = true
-		query.Where(predicate.User(func(s *sql.Selector) {
-			s.Where(sql.InValues(request.UserColumn, fks...))
-		}))
+		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.request_user
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_user" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_user" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_user" returned %v`, n.ID)
 			}
-			node.Edges.User = n
+			for i := range nodes {
+				nodes[i].Edges.User = n
+			}
 		}
 	}
 
@@ -940,10 +977,14 @@ func (rq *RequestQuery) querySpec() *sqlgraph.QuerySpec {
 func (rq *RequestQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(rq.driver.Dialect())
 	t1 := builder.Table(request.Table)
-	selector := builder.Select(t1.Columns(request.Columns...)...).From(t1)
+	columns := rq.fields
+	if len(columns) == 0 {
+		columns = request.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if rq.sql != nil {
 		selector = rq.sql
-		selector.Select(selector.Columns(request.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range rq.predicates {
 		p(selector)
@@ -1211,13 +1252,24 @@ func (rgb *RequestGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (rgb *RequestGroupBy) sqlQuery() *sql.Selector {
-	selector := rgb.sql
-	columns := make([]string, 0, len(rgb.fields)+len(rgb.fns))
-	columns = append(columns, rgb.fields...)
+	selector := rgb.sql.Select()
+	aggregation := make([]string, 0, len(rgb.fns))
 	for _, fn := range rgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(rgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(rgb.fields)+len(rgb.fns))
+		for _, f := range rgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(rgb.fields...)...)
 }
 
 // RequestSelect is the builder for selecting fields of Request entities.
@@ -1433,16 +1485,10 @@ func (rs *RequestSelect) BoolX(ctx context.Context) bool {
 
 func (rs *RequestSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := rs.sqlQuery().Query()
+	query, args := rs.sql.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (rs *RequestSelect) sqlQuery() sql.Querier {
-	selector := rs.sql
-	selector.Select(selector.Columns(rs.fields...)...)
-	return selector
 }

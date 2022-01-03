@@ -1,6 +1,6 @@
 .PHONY: up
 up:
-	@docker-compose up --build
+	@docker-compose up -d --build
 
 .PHONY: down
 down:
@@ -8,8 +8,10 @@ down:
 
 .PHONY: test
 test:
-	docker-compose -f server-test.yml run --rm jomon-server
+	@mkdir -p $(CURDIR)/uploads
+	@MARIADB_HOSTNAME=localhost UPLOAD_DIR=$(CURDIR)/uploads go test -cover -race ./...
+	@rmdir $(CURDIR)/uploads
 
 .PHONY: docs
 docs:
-	enter ./ent/schema ./docs/er.html
+	@enter ./ent/schema ./docs/er.html

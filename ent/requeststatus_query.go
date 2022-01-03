@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -104,7 +103,7 @@ func (rsq *RequestStatusQuery) QueryUser() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(requeststatus.Table, requeststatus.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, requeststatus.UserTable, requeststatus.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, requeststatus.UserTable, requeststatus.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rsq.driver.Dialect(), step)
 		return fromU, nil
@@ -363,8 +362,8 @@ func (rsq *RequestStatusQuery) GroupBy(field string, fields ...string) *RequestS
 //		Select(requeststatus.FieldStatus).
 //		Scan(ctx, &v)
 //
-func (rsq *RequestStatusQuery) Select(field string, fields ...string) *RequestStatusSelect {
-	rsq.fields = append([]string{field}, fields...)
+func (rsq *RequestStatusQuery) Select(fields ...string) *RequestStatusSelect {
+	rsq.fields = append(rsq.fields, fields...)
 	return &RequestStatusSelect{RequestStatusQuery: rsq}
 }
 
@@ -394,7 +393,7 @@ func (rsq *RequestStatusQuery) sqlAll(ctx context.Context) ([]*RequestStatus, er
 			rsq.withUser != nil,
 		}
 	)
-	if rsq.withRequest != nil {
+	if rsq.withRequest != nil || rsq.withUser != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -450,30 +449,31 @@ func (rsq *RequestStatusQuery) sqlAll(ctx context.Context) ([]*RequestStatus, er
 	}
 
 	if query := rsq.withUser; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*RequestStatus)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*RequestStatus)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
+			if nodes[i].request_status_user == nil {
+				continue
+			}
+			fk := *nodes[i].request_status_user
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.withFKs = true
-		query.Where(predicate.User(func(s *sql.Selector) {
-			s.Where(sql.InValues(requeststatus.UserColumn, fks...))
-		}))
+		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.request_status_user
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "request_status_user" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "request_status_user" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "request_status_user" returned %v`, n.ID)
 			}
-			node.Edges.User = n
+			for i := range nodes {
+				nodes[i].Edges.User = n
+			}
 		}
 	}
 
@@ -544,10 +544,14 @@ func (rsq *RequestStatusQuery) querySpec() *sqlgraph.QuerySpec {
 func (rsq *RequestStatusQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(rsq.driver.Dialect())
 	t1 := builder.Table(requeststatus.Table)
-	selector := builder.Select(t1.Columns(requeststatus.Columns...)...).From(t1)
+	columns := rsq.fields
+	if len(columns) == 0 {
+		columns = requeststatus.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if rsq.sql != nil {
 		selector = rsq.sql
-		selector.Select(selector.Columns(requeststatus.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range rsq.predicates {
 		p(selector)
@@ -815,13 +819,24 @@ func (rsgb *RequestStatusGroupBy) sqlScan(ctx context.Context, v interface{}) er
 }
 
 func (rsgb *RequestStatusGroupBy) sqlQuery() *sql.Selector {
-	selector := rsgb.sql
-	columns := make([]string, 0, len(rsgb.fields)+len(rsgb.fns))
-	columns = append(columns, rsgb.fields...)
+	selector := rsgb.sql.Select()
+	aggregation := make([]string, 0, len(rsgb.fns))
 	for _, fn := range rsgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(rsgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(rsgb.fields)+len(rsgb.fns))
+		for _, f := range rsgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(rsgb.fields...)...)
 }
 
 // RequestStatusSelect is the builder for selecting fields of RequestStatus entities.
@@ -1037,16 +1052,10 @@ func (rss *RequestStatusSelect) BoolX(ctx context.Context) bool {
 
 func (rss *RequestStatusSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := rss.sqlQuery().Query()
+	query, args := rss.sql.Query()
 	if err := rss.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (rss *RequestStatusSelect) sqlQuery() sql.Querier {
-	selector := rss.sql
-	selector.Select(selector.Columns(rss.fields...)...)
-	return selector
 }

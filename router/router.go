@@ -7,26 +7,28 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"go.uber.org/zap"
+
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
-	"go.uber.org/zap"
+	"github.com/traPtitech/Jomon/storage"
 )
 
 type Handlers struct {
 	Repository   model.Repository
+	Storage      storage.Storage
 	Logger       *zap.Logger
-	Service      service.Services
 	SessionName  string
 	SessionStore sessions.Store
 }
 
-func SetRouting(e *echo.Echo, h Handlers) {
-	e.Debug = (os.Getenv("IS_DEBUG_MODE") != "")
+func NewServer(h Handlers) *echo.Echo {
+	e := echo.New()
+	e.Debug = os.Getenv("IS_DEBUG_MODE") != ""
 	e.Use(h.AccessLoggingMiddleware(h.Logger))
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 	e.Use(session.Middleware(h.SessionStore))
-	e.HTTPErrorHandler = HTTPErrorHandler
 
 	api := e.Group("/api")
 	{
@@ -36,19 +38,19 @@ func SetRouting(e *echo.Echo, h Handlers) {
 			apiAuth.GET("/genpkce", h.GeneratePKCE)
 		}
 
-		apiRequests := api.Group("/requests", h.AuthUserMiddleware)
+		apiRequests := api.Group("/requests", h.CheckLoginMiddleware)
 		{
 			apiRequests.GET("", h.GetRequests)
-			apiRequests.POST("", h.PostRequest)
+			apiRequests.POST("", h.PostRequest, middleware.BodyDump(service.WebhookEventHandler))
 			apiRequests.GET("/:requestID", h.GetRequest)
-			apiRequests.PUT("/:requestID", h.PutRequest)
-			apiRequests.POST("/:requestID/comments", h.PostComment)
+			apiRequests.PUT("/:requestID", h.PutRequest, middleware.BodyDump(service.WebhookEventHandler))
+			apiRequests.POST("/:requestID/comments", h.PostComment, middleware.BodyDump(service.WebhookEventHandler))
 			apiRequests.PUT("/:requestID/comments/:commentID", h.PutComment)
 			apiRequests.DELETE("/:requestID/comments/:commentID", h.DeleteComment)
 			apiRequests.PUT("/:requestID/status", h.PutStatus)
 		}
 
-		apiComments := api.Group("/transactions", h.AuthUserMiddleware)
+		apiComments := api.Group("/transactions", h.CheckLoginMiddleware)
 		{
 			apiComments.GET("", h.GetTransactions)
 			apiComments.POST("", h.PostTransaction)
@@ -56,14 +58,14 @@ func SetRouting(e *echo.Echo, h Handlers) {
 			apiComments.PUT("/:transactionID", h.PutTransaction)
 		}
 
-		apiFiles := api.Group("/files", h.AuthUserMiddleware)
+		apiFiles := api.Group("/files", h.CheckLoginMiddleware)
 		{
 			apiFiles.POST("", h.PostFile)
 			apiFiles.GET("/:fileID", h.GetFile)
 			apiFiles.DELETE("/:fileID", h.DeleteFile)
 		}
 
-		apiTags := api.Group("/tags", h.AuthUserMiddleware)
+		apiTags := api.Group("/tags", h.CheckLoginMiddleware)
 		{
 			apiTags.GET("", h.GetTags)
 			apiTags.POST("", h.PostTag)
@@ -71,7 +73,7 @@ func SetRouting(e *echo.Echo, h Handlers) {
 			apiTags.DELETE("/:tagID", h.DeleteTag)
 		}
 
-		apiGroups := api.Group("/groups", h.AuthUserMiddleware)
+		apiGroups := api.Group("/groups", h.CheckLoginMiddleware)
 		{
 			apiGroups.GET("", h.GetGroups)
 			apiGroups.POST("", h.PostGroup)
@@ -83,14 +85,15 @@ func SetRouting(e *echo.Echo, h Handlers) {
 			apiGroups.GET("/:groupID/owners", h.GetOwners)
 			apiGroups.POST("/:groupID/owners", h.PostOwner)
 			apiGroups.DELETE("/:groupID/owners", h.DeleteOwner)
-
 		}
 
-		apiUsers := api.Group("/users", h.AuthUserMiddleware)
+		apiUsers := api.Group("/users", h.CheckLoginMiddleware)
 		{
 			apiUsers.GET("", h.GetUsers)
-			apiUsers.PUT("", h.PutUsers)
+			apiUsers.PUT("", h.UpdateUserInfo)
 			apiUsers.GET("/me", h.GetMe)
 		}
 	}
+
+	return e
 }

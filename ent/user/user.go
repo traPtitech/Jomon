@@ -37,32 +37,32 @@ const (
 	EdgeRequest = "request"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// GroupUserTable is the table the holds the group_user relation/edge. The primary key declared below.
+	// GroupUserTable is the table that holds the group_user relation/edge. The primary key declared below.
 	GroupUserTable = "group_user"
 	// GroupUserInverseTable is the table name for the Group entity.
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	GroupUserInverseTable = "groups"
-	// GroupOwnerTable is the table the holds the group_owner relation/edge. The primary key declared below.
+	// GroupOwnerTable is the table that holds the group_owner relation/edge. The primary key declared below.
 	GroupOwnerTable = "group_owner"
 	// GroupOwnerInverseTable is the table name for the Group entity.
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	GroupOwnerInverseTable = "groups"
-	// CommentTable is the table the holds the comment relation/edge.
-	CommentTable = "users"
+	// CommentTable is the table that holds the comment relation/edge.
+	CommentTable = "comments"
 	// CommentInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
 	CommentInverseTable = "comments"
 	// CommentColumn is the table column denoting the comment relation/edge.
 	CommentColumn = "comment_user"
-	// RequestStatusTable is the table the holds the request_status relation/edge.
-	RequestStatusTable = "users"
+	// RequestStatusTable is the table that holds the request_status relation/edge.
+	RequestStatusTable = "request_status"
 	// RequestStatusInverseTable is the table name for the RequestStatus entity.
 	// It exists in this package in order to avoid circular dependency with the "requeststatus" package.
 	RequestStatusInverseTable = "request_status"
 	// RequestStatusColumn is the table column denoting the request_status relation/edge.
 	RequestStatusColumn = "request_status_user"
-	// RequestTable is the table the holds the request relation/edge.
-	RequestTable = "users"
+	// RequestTable is the table that holds the request relation/edge.
+	RequestTable = "requests"
 	// RequestInverseTable is the table name for the Request entity.
 	// It exists in this package in order to avoid circular dependency with the "request" package.
 	RequestInverseTable = "requests"
@@ -81,14 +81,6 @@ var Columns = []string{
 	FieldDeletedAt,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"comment_user",
-	"request_user",
-	"request_status_user",
-}
-
 var (
 	// GroupUserPrimaryKey and GroupUserColumn2 are the table columns denoting the
 	// primary key for the group_user relation (M2M).
@@ -105,15 +97,12 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
-			return true
-		}
-	}
 	return false
 }
 
 var (
+	// NameValidator is a validator for the "name" field. It is called by the builders before save.
+	NameValidator func(string) error
 	// DefaultAdmin holds the default value on creation for the "admin" field.
 	DefaultAdmin bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.

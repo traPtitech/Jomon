@@ -22,6 +22,7 @@ services:
       MARIADB_DATABASE: jomon
       IS_DEBUG_MODE: "true"
       UPLOAD_DIR: ./uploads
+    env_file: .env
     ports:
       - "1323:1323"
     volumes:
@@ -39,8 +40,18 @@ services:
       TZ: Asia/Tokyo
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
     volumes:
-      - "./docker/mysql.cnf:/etc/mysql/conf.d/mysql.cnf"
+      - "./docker/mysql:/docker-entrypoint-initdb.d"
     expose:
       - "3306"
     ports:
       - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=db
+      - PMA_USER=root
+      - PMA_PASSWORD=password
+    ports:
+      - 8888:80

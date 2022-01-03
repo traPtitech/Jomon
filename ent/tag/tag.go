@@ -29,14 +29,12 @@ const (
 	EdgeTransaction = "transaction"
 	// Table holds the table name of the tag in the database.
 	Table = "tags"
-	// RequestTable is the table the holds the request relation/edge.
-	RequestTable = "tags"
+	// RequestTable is the table that holds the request relation/edge. The primary key declared below.
+	RequestTable = "request_tag"
 	// RequestInverseTable is the table name for the Request entity.
 	// It exists in this package in order to avoid circular dependency with the "request" package.
 	RequestInverseTable = "requests"
-	// RequestColumn is the table column denoting the request relation/edge.
-	RequestColumn = "request_tag"
-	// TransactionTable is the table the holds the transaction relation/edge.
+	// TransactionTable is the table that holds the transaction relation/edge.
 	TransactionTable = "tags"
 	// TransactionInverseTable is the table name for the Transaction entity.
 	// It exists in this package in order to avoid circular dependency with the "transaction" package.
@@ -58,9 +56,14 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tags"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"request_tag",
 	"transaction_tag",
 }
+
+var (
+	// RequestPrimaryKey and RequestColumn2 are the table columns denoting the
+	// primary key for the request relation (M2M).
+	RequestPrimaryKey = []string{"request_id", "tag_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -78,6 +81,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// NameValidator is a validator for the "name" field. It is called by the builders before save.
+	NameValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.

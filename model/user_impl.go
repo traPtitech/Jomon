@@ -2,12 +2,38 @@ package model
 
 import (
 	"context"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
-func (repo *EntRepository) GetMe(ctx context.Context, name string) (*User, error) {
+func (repo *EntRepository) CreateUser(ctx context.Context, name string, dn string, admin bool) (*User, error) {
+	user, err := repo.client.User.
+		Create().
+		SetName(name).
+		SetDisplayName(dn).
+		SetAdmin(admin).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return convertEntUserToModelUser(user), nil
+}
+
+func (repo *EntRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (*User, error) {
+	user, err := repo.client.User.
+		Query().
+		Where(user.IDEQ(userID)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return convertEntUserToModelUser(user), nil
+}
+
+func (repo *EntRepository) GetUserByName(ctx context.Context, name string) (*User, error) {
 	user, err := repo.client.User.
 		Query().
 		Where(user.NameEQ(name)).
@@ -15,10 +41,41 @@ func (repo *EntRepository) GetMe(ctx context.Context, name string) (*User, error
 	if err != nil {
 		return nil, err
 	}
-	return ConvertEntUserToModelUser(user), nil
+	return convertEntUserToModelUser(user), nil
 }
 
-func ConvertEntUserToModelUser(user *ent.User) *User {
+func (repo *EntRepository) GetUsers(ctx context.Context) ([]*User, error) {
+	users, err := repo.client.User.
+		Query().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var modelusers []*User
+	for _, user := range users {
+		modelusers = append(modelusers, convertEntUserToModelUser(user))
+	}
+	return modelusers, nil
+}
+
+func (repo *EntRepository) UpdateUser(ctx context.Context, userID uuid.UUID, name string, dn string, admin bool) (*User, error) {
+	user, err := repo.client.User.
+		UpdateOneID(userID).
+		SetName(name).
+		SetDisplayName(dn).
+		SetAdmin(admin).
+		SetUpdatedAt(time.Now()).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return convertEntUserToModelUser(user), nil
+}
+
+func convertEntUserToModelUser(user *ent.User) *User {
+	if user == nil {
+		return nil
+	}
 	return &User{
 		ID:          user.ID,
 		Name:        user.Name,

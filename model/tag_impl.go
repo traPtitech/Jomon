@@ -23,6 +23,17 @@ func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
 	return modeltags, nil
 }
 
+func (repo *EntRepository) GetTag(ctx context.Context, tagID uuid.UUID) (*Tag, error) {
+	tag, err := repo.client.Tag.
+		Query().
+		Where(tag.IDEQ(tagID)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ConvertEntTagToModelTag(tag), nil
+}
+
 func (repo *EntRepository) CreateTag(ctx context.Context, name string, description string) (*Tag, error) {
 	created, err := repo.client.Tag.
 		Create().
@@ -49,15 +60,8 @@ func (repo *EntRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name 
 }
 
 func (repo *EntRepository) DeleteTag(ctx context.Context, tagID uuid.UUID) error {
-	tag, err := repo.client.Tag.
-		Query().
-		Where(tag.IDEQ(tagID)).
-		Only(ctx)
-	if err != nil {
-		return err
-	}
-	err = repo.client.Tag.
-		DeleteOne(tag).
+	err := repo.client.Tag.
+		DeleteOneID(tagID).
 		Exec(ctx)
 	return err
 }

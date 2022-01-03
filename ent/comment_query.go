@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -104,7 +103,7 @@ func (cq *CommentQuery) QueryUser() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(comment.Table, comment.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, comment.UserTable, comment.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, false, comment.UserTable, comment.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -363,8 +362,8 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 //		Select(comment.FieldComment).
 //		Scan(ctx, &v)
 //
-func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
-	cq.fields = append([]string{field}, fields...)
+func (cq *CommentQuery) Select(fields ...string) *CommentSelect {
+	cq.fields = append(cq.fields, fields...)
 	return &CommentSelect{CommentQuery: cq}
 }
 
@@ -394,7 +393,7 @@ func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 			cq.withUser != nil,
 		}
 	)
-	if cq.withRequest != nil {
+	if cq.withRequest != nil || cq.withUser != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -450,30 +449,31 @@ func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 	}
 
 	if query := cq.withUser; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[uuid.UUID]*Comment)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Comment)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
+			if nodes[i].comment_user == nil {
+				continue
+			}
+			fk := *nodes[i].comment_user
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.withFKs = true
-		query.Where(predicate.User(func(s *sql.Selector) {
-			s.Where(sql.InValues(comment.UserColumn, fks...))
-		}))
+		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.comment_user
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "comment_user" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "comment_user" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "comment_user" returned %v`, n.ID)
 			}
-			node.Edges.User = n
+			for i := range nodes {
+				nodes[i].Edges.User = n
+			}
 		}
 	}
 
@@ -544,10 +544,14 @@ func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 func (cq *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cq.driver.Dialect())
 	t1 := builder.Table(comment.Table)
-	selector := builder.Select(t1.Columns(comment.Columns...)...).From(t1)
+	columns := cq.fields
+	if len(columns) == 0 {
+		columns = comment.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if cq.sql != nil {
 		selector = cq.sql
-		selector.Select(selector.Columns(comment.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range cq.predicates {
 		p(selector)
@@ -815,13 +819,24 @@ func (cgb *CommentGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (cgb *CommentGroupBy) sqlQuery() *sql.Selector {
-	selector := cgb.sql
-	columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
-	columns = append(columns, cgb.fields...)
+	selector := cgb.sql.Select()
+	aggregation := make([]string, 0, len(cgb.fns))
 	for _, fn := range cgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(cgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
+		for _, f := range cgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(cgb.fields...)...)
 }
 
 // CommentSelect is the builder for selecting fields of Comment entities.
@@ -1037,16 +1052,10 @@ func (cs *CommentSelect) BoolX(ctx context.Context) bool {
 
 func (cs *CommentSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := cs.sqlQuery().Query()
+	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (cs *CommentSelect) sqlQuery() sql.Querier {
-	selector := cs.sql
-	selector.Select(selector.Columns(cs.fields...)...)
-	return selector
 }

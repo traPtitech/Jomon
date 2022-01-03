@@ -24,9 +24,9 @@ type TagUpdate struct {
 	mutation *TagMutation
 }
 
-// Where adds a new predicate for the TagUpdate builder.
+// Where appends a list predicates to the TagUpdate builder.
 func (tu *TagUpdate) Where(ps ...predicate.Tag) *TagUpdate {
-	tu.mutation.predicates = append(tu.mutation.predicates, ps...)
+	tu.mutation.Where(ps...)
 	return tu
 }
 
@@ -90,23 +90,19 @@ func (tu *TagUpdate) ClearDeletedAt() *TagUpdate {
 	return tu
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (tu *TagUpdate) SetRequestID(id uuid.UUID) *TagUpdate {
-	tu.mutation.SetRequestID(id)
+// AddRequestIDs adds the "request" edge to the Request entity by IDs.
+func (tu *TagUpdate) AddRequestIDs(ids ...uuid.UUID) *TagUpdate {
+	tu.mutation.AddRequestIDs(ids...)
 	return tu
 }
 
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (tu *TagUpdate) SetNillableRequestID(id *uuid.UUID) *TagUpdate {
-	if id != nil {
-		tu = tu.SetRequestID(*id)
+// AddRequest adds the "request" edges to the Request entity.
+func (tu *TagUpdate) AddRequest(r ...*Request) *TagUpdate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
-	return tu
-}
-
-// SetRequest sets the "request" edge to the Request entity.
-func (tu *TagUpdate) SetRequest(r *Request) *TagUpdate {
-	return tu.SetRequestID(r.ID)
+	return tu.AddRequestIDs(ids...)
 }
 
 // SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
@@ -133,10 +129,25 @@ func (tu *TagUpdate) Mutation() *TagMutation {
 	return tu.mutation
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
+// ClearRequest clears all "request" edges to the Request entity.
 func (tu *TagUpdate) ClearRequest() *TagUpdate {
 	tu.mutation.ClearRequest()
 	return tu
+}
+
+// RemoveRequestIDs removes the "request" edge to Request entities by IDs.
+func (tu *TagUpdate) RemoveRequestIDs(ids ...uuid.UUID) *TagUpdate {
+	tu.mutation.RemoveRequestIDs(ids...)
+	return tu
+}
+
+// RemoveRequest removes "request" edges to Request entities.
+func (tu *TagUpdate) RemoveRequest(r ...*Request) *TagUpdate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return tu.RemoveRequestIDs(ids...)
 }
 
 // ClearTransaction clears the "transaction" edge to the Transaction entity.
@@ -152,6 +163,9 @@ func (tu *TagUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(tu.hooks) == 0 {
+		if err = tu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = tu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
@@ -159,12 +173,18 @@ func (tu *TagUpdate) Save(ctx context.Context) (int, error) {
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
+			if err = tu.check(); err != nil {
+				return 0, err
+			}
 			tu.mutation = mutation
 			affected, err = tu.sqlSave(ctx)
 			mutation.done = true
 			return affected, err
 		})
 		for i := len(tu.hooks) - 1; i >= 0; i-- {
+			if tu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tu.mutation); err != nil {
@@ -194,6 +214,16 @@ func (tu *TagUpdate) ExecX(ctx context.Context) {
 	if err := tu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (tu *TagUpdate) check() error {
+	if v, ok := tu.mutation.Name(); ok {
+		if err := tag.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -257,10 +287,10 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
 			Table:   tag.RequestTable,
-			Columns: []string{tag.RequestColumn},
+			Columns: tag.RequestPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -271,12 +301,31 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := tu.mutation.RemovedRequestIDs(); len(nodes) > 0 && !tu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
 			Table:   tag.RequestTable,
-			Columns: []string{tag.RequestColumn},
+			Columns: tag.RequestPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RequestIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   tag.RequestTable,
+			Columns: tag.RequestPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -328,8 +377,8 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{tag.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -404,23 +453,19 @@ func (tuo *TagUpdateOne) ClearDeletedAt() *TagUpdateOne {
 	return tuo
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (tuo *TagUpdateOne) SetRequestID(id uuid.UUID) *TagUpdateOne {
-	tuo.mutation.SetRequestID(id)
+// AddRequestIDs adds the "request" edge to the Request entity by IDs.
+func (tuo *TagUpdateOne) AddRequestIDs(ids ...uuid.UUID) *TagUpdateOne {
+	tuo.mutation.AddRequestIDs(ids...)
 	return tuo
 }
 
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (tuo *TagUpdateOne) SetNillableRequestID(id *uuid.UUID) *TagUpdateOne {
-	if id != nil {
-		tuo = tuo.SetRequestID(*id)
+// AddRequest adds the "request" edges to the Request entity.
+func (tuo *TagUpdateOne) AddRequest(r ...*Request) *TagUpdateOne {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
-	return tuo
-}
-
-// SetRequest sets the "request" edge to the Request entity.
-func (tuo *TagUpdateOne) SetRequest(r *Request) *TagUpdateOne {
-	return tuo.SetRequestID(r.ID)
+	return tuo.AddRequestIDs(ids...)
 }
 
 // SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
@@ -447,10 +492,25 @@ func (tuo *TagUpdateOne) Mutation() *TagMutation {
 	return tuo.mutation
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
+// ClearRequest clears all "request" edges to the Request entity.
 func (tuo *TagUpdateOne) ClearRequest() *TagUpdateOne {
 	tuo.mutation.ClearRequest()
 	return tuo
+}
+
+// RemoveRequestIDs removes the "request" edge to Request entities by IDs.
+func (tuo *TagUpdateOne) RemoveRequestIDs(ids ...uuid.UUID) *TagUpdateOne {
+	tuo.mutation.RemoveRequestIDs(ids...)
+	return tuo
+}
+
+// RemoveRequest removes "request" edges to Request entities.
+func (tuo *TagUpdateOne) RemoveRequest(r ...*Request) *TagUpdateOne {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return tuo.RemoveRequestIDs(ids...)
 }
 
 // ClearTransaction clears the "transaction" edge to the Transaction entity.
@@ -473,6 +533,9 @@ func (tuo *TagUpdateOne) Save(ctx context.Context) (*Tag, error) {
 		node *Tag
 	)
 	if len(tuo.hooks) == 0 {
+		if err = tuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = tuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
@@ -480,12 +543,18 @@ func (tuo *TagUpdateOne) Save(ctx context.Context) (*Tag, error) {
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
+			if err = tuo.check(); err != nil {
+				return nil, err
+			}
 			tuo.mutation = mutation
 			node, err = tuo.sqlSave(ctx)
 			mutation.done = true
 			return node, err
 		})
 		for i := len(tuo.hooks) - 1; i >= 0; i-- {
+			if tuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tuo.mutation); err != nil {
@@ -515,6 +584,16 @@ func (tuo *TagUpdateOne) ExecX(ctx context.Context) {
 	if err := tuo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (tuo *TagUpdateOne) check() error {
+	if v, ok := tuo.mutation.Name(); ok {
+		if err := tag.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
@@ -595,10 +674,10 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 	}
 	if tuo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
 			Table:   tag.RequestTable,
-			Columns: []string{tag.RequestColumn},
+			Columns: tag.RequestPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -609,12 +688,31 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := tuo.mutation.RemovedRequestIDs(); len(nodes) > 0 && !tuo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
 			Table:   tag.RequestTable,
-			Columns: []string{tag.RequestColumn},
+			Columns: tag.RequestPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RequestIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   tag.RequestTable,
+			Columns: tag.RequestPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -669,8 +767,8 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 	if err = sqlgraph.UpdateNode(ctx, tuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{tag.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
