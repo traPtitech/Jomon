@@ -125,10 +125,10 @@ func (mr *MockGroupRepositoryMockRecorder) DeleteOwner(ctx, groupID, ownerID int
 }
 
 // GetMembers mocks base method
-func (m *MockGroupRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*model.User, error) {
+func (m *MockGroupRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*model.Member, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetMembers", ctx, groupID)
-	ret0, _ := ret[0].([]*model.User)
+	ret0, _ := ret[0].([]*model.Member)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
