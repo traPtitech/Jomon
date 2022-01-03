@@ -178,7 +178,9 @@ func TestHandlers_GetMembers(t *testing.T) {
 			CreatedAt:   date,
 			UpdatedAt:   date,
 		}
-		members := []*model.User{user1, user2}
+		member1 := model.Member{ID: user1.ID}
+		member2 := model.Member{ID: user2.ID}
+		members := []*model.Member{&member1, &member2}
 		memberIDs := []uuid.UUID{user1.ID, user2.ID}
 
 		e := echo.New()
@@ -225,7 +227,7 @@ func TestHandlers_GetMembers(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
-		members := []*model.User{}
+		members := []*model.Member{}
 
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/groups/%s/members", group.ID.String()), nil)
@@ -642,7 +644,7 @@ func TestHandlers_DeleteMember(t *testing.T) {
 
 		_, resErr := uuid.Parse(c.Param("groupID"))
 
-		err = h.Handlers.PostMember(c)
+		err = h.Handlers.DeleteMember(c)
 		if assert.Error(t, err) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 		}
@@ -673,7 +675,7 @@ func TestHandlers_DeleteMember(t *testing.T) {
 
 		resErr := errors.New("invalid UUID")
 
-		err = h.Handlers.PostMember(c)
+		err = h.Handlers.DeleteMember(c)
 		if assert.Error(t, err) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 		}
