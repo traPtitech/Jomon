@@ -48,6 +48,50 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 	return ConvertEntGroupToModelGroup(created), nil
 }
 
+func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]*Owner, error) {
+	groupowners, err := repo.client.Group.
+		Query().
+		Where(group.IDEQ(groupID)).
+		QueryOwner().
+		Select(user.FieldID).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	owners := []*Owner{}
+	for _, groupowner := range groupowners {
+		owners = append(owners, &Owner{ID: groupowner.ID})
+	}
+
+	return owners, nil
+}
+
+func (repo *EntRepository) CreateOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) (*Owner, error) {
+	_, err := repo.client.Group.
+		Update().
+		Where(group.IDEQ(groupID)).
+		AddOwnerIDs(ownerID).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resowner := &Owner{
+		ID: ownerID,
+	}
+	return resowner, nil
+
+}
+
+func (repo *EntRepository) DeleteOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) error {
+	_, err := repo.client.Group.
+		Update().
+		Where(group.IDEQ(groupID)).
+		RemoveOwnerIDs(ownerID).
+		Save(ctx)
+
+	return err
+}
+
 func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*Member, error) {
 	gotGroup, err := repo.client.Group.
 		Query().

@@ -80,6 +80,50 @@ func (mr *MockGroupRepositoryMockRecorder) CreateGroup(ctx, name, description, b
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGroup", reflect.TypeOf((*MockGroupRepository)(nil).CreateGroup), ctx, name, description, budget, owners)
 }
 
+// GetOwners mocks base method
+func (m *MockGroupRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]*model.Owner, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOwners", ctx, groupID)
+	ret0, _ := ret[0].([]*model.Owner)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOwners indicates an expected call of GetOwners
+func (mr *MockGroupRepositoryMockRecorder) GetOwners(ctx, groupID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOwners", reflect.TypeOf((*MockGroupRepository)(nil).GetOwners), ctx, groupID)
+}
+
+// CreateOwner mocks base method
+func (m *MockGroupRepository) CreateOwner(ctx context.Context, groupID, ownerID uuid.UUID) (*model.Owner, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateOwner", ctx, groupID, ownerID)
+	ret0, _ := ret[0].(*model.Owner)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateOwner indicates an expected call of CreateOwner
+func (mr *MockGroupRepositoryMockRecorder) CreateOwner(ctx, groupID, ownerID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOwner", reflect.TypeOf((*MockGroupRepository)(nil).CreateOwner), ctx, groupID, ownerID)
+}
+
+// DeleteOwner mocks base method
+func (m *MockGroupRepository) DeleteOwner(ctx context.Context, groupID, ownerID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteOwner", ctx, groupID, ownerID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteOwner indicates an expected call of DeleteOwner
+func (mr *MockGroupRepositoryMockRecorder) DeleteOwner(ctx, groupID, ownerID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOwner", reflect.TypeOf((*MockGroupRepository)(nil).DeleteOwner), ctx, groupID, ownerID)
+}
+
 // GetMembers mocks base method
 func (m *MockGroupRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*model.Member, error) {
 	m.ctrl.T.Helper()

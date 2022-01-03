@@ -157,3 +157,109 @@ func TestEntRepository_DeleteMember(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
+
+func TestEntRepository_GetOwners(t *testing.T) {
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
+	repo := NewEntRepository(client, storage)
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		require.NoError(t, err)
+
+		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
+		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
+
+		_, err = repo.CreateOwner(ctx, group.ID, user1.ID)
+		require.NoError(t, err)
+		_, err = repo.CreateOwner(ctx, group.ID, user2.ID)
+		require.NoError(t, err)
+
+		got, err := repo.GetOwners(ctx, group.ID)
+		assert.NoError(t, err)
+		if assert.Len(t, got, 2) && got[0].ID == user1.ID {
+			assert.Equal(t, got[0].ID, user1.ID)
+			assert.Equal(t, got[1].ID, user2.ID)
+		} else if assert.Len(t, got, 2) {
+			assert.Equal(t, got[0].ID, user2.ID)
+			assert.Equal(t, got[1].ID, user1.ID)
+		}
+	})
+
+	t.Run("Success2", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		require.NoError(t, err)
+
+		got, err := repo.GetOwners(ctx, group.ID)
+		assert.NoError(t, err)
+		assert.Equal(t, got, []*Owner{})
+	})
+}
+
+func TestEntRepository_CreateOwner(t *testing.T) {
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
+	repo := NewEntRepository(client, storage)
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, nil)
+		require.NoError(t, err)
+
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
+
+		owner, err := repo.CreateOwner(ctx, group.ID, user.ID)
+		assert.NoError(t, err)
+		assert.Equal(t, owner.ID, user.ID)
+	})
+
+	t.Run("UnknownUser", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		require.NoError(t, err)
+
+		_, err = repo.CreateOwner(ctx, group.ID, uuid.New())
+		assert.Error(t, err)
+	})
+}
+
+func TestEntRepository_DeleteOwner(t *testing.T) {
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
+	repo := NewEntRepository(client, storage)
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, nil)
+		require.NoError(t, err)
+
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		require.NoError(t, err)
+		owner, err := repo.CreateOwner(ctx, group.ID, user.ID)
+		require.NoError(t, err)
+
+		err = repo.DeleteOwner(ctx, group.ID, owner.ID)
+		assert.NoError(t, err)
+	})
+}
