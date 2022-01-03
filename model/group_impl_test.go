@@ -38,18 +38,10 @@ func TestEntRepository_GetMembers(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) && got[0].ID == user1.ID {
 			assert.Equal(t, got[0].ID, user1.ID)
-			assert.Equal(t, got[0].Name, user1.Name)
-			assert.Equal(t, got[0].DisplayName, user1.DisplayName)
 			assert.Equal(t, got[1].ID, user2.ID)
-			assert.Equal(t, got[1].Name, user2.Name)
-			assert.Equal(t, got[1].DisplayName, user2.DisplayName)
 		} else if assert.Len(t, got, 2) {
 			assert.Equal(t, got[0].ID, user2.ID)
-			assert.Equal(t, got[0].Name, user2.Name)
-			assert.Equal(t, got[0].DisplayName, user2.DisplayName)
 			assert.Equal(t, got[1].ID, user1.ID)
-			assert.Equal(t, got[1].Name, user1.Name)
-			assert.Equal(t, got[1].DisplayName, user1.DisplayName)
 		}
 	})
 
@@ -64,7 +56,7 @@ func TestEntRepository_GetMembers(t *testing.T) {
 
 		got, err := repo.GetMembers(ctx, group.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, got, []*User{})
+		assert.Equal(t, got, []*Member{})
 	})
 
 	t.Run("UnknownGroup", func(t *testing.T) {
