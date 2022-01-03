@@ -144,7 +144,7 @@ func (h *Handlers) DeleteFile(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	_, err = h.Repository.DeleteFile(ctx, fileID)
+	err = h.Repository.DeleteFile(ctx, fileID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}

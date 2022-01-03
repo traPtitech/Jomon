@@ -2,9 +2,7 @@ package model
 
 import (
 	"context"
-	"fmt"
 	"io"
-	"mime"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
@@ -54,41 +52,35 @@ func (repo *EntRepository) GetFile(ctx context.Context, fileID uuid.UUID) (*File
 	return ConvertEntFileToModelFile(file), nil
 }
 
-func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) (*File, error) {
+func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) error {
 	file, err := repo.client.File.
 		Query().
 		Where(file.IDEQ(fileID)).
 		Only(ctx)
 	if err != nil {
-		return nil, err
-	}
-	ext, err := mime.ExtensionsByType(file.MimeType)
-	if err != nil {
-		return nil, err
-	} else if len(ext) == 0 {
-		return nil, fmt.Errorf("%s is not registered", file.MimeType)
+		return err
 	}
 
 	request, err := file.QueryRequest().First(ctx)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := repo.client.File.
 		DeleteOne(file).
 		Exec(ctx); err != nil {
-		return nil, err
+		return err
 	}
 
 	if err = request.
 		Update().
 		RemoveFileIDs(fileID).
 		Exec(ctx); err != nil {
-		return nil, err
+		return err
 	}
 
-	return ConvertEntFileToModelFile(file), nil
+	return nil
 }
 
 func ConvertEntFileToModelFile(entfile *ent.File) *File {

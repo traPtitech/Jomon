@@ -450,7 +450,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		h.Repository.MockFileRepository.
 			EXPECT().
 			DeleteFile(c.Request().Context(), file.ID).
-			Return(file, nil)
+			Return(nil)
 
 		h.Storage.
 			EXPECT().
@@ -490,7 +490,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		h.Repository.MockFileRepository.
 			EXPECT().
 			DeleteFile(c.Request().Context(), file.ID).
-			Return(nil, mocErr)
+			Return(mocErr)
 
 		err = h.Handlers.DeleteFile(c)
 		if assert.Error(t, err) {
@@ -523,7 +523,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		h.Repository.MockFileRepository.
 			EXPECT().
 			DeleteFile(c.Request().Context(), file.ID).
-			Return(file, nil)
+			Return(nil)
 
 		mocErr := errors.New("failed to delete file")
 

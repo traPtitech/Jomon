@@ -156,70 +156,15 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 		file, err := repo.CreateFile(ctx, src, name, mimetype, request.ID)
 		assert.NoError(t, err)
 
-		got, err := repo.DeleteFile(ctx, file.ID)
+		err = repo.DeleteFile(ctx, file.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, file.ID, got.ID)
-		assert.Equal(t, file.Name, got.Name)
-		assert.Equal(t, file.MimeType, got.MimeType)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 
-		_, err = repo.DeleteFile(ctx, uuid.New())
-		assert.Error(t, err)
-	})
-
-	t.Run("UnknownMimeType", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-
-		var tags []*Tag
-		var group *Group
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
-		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
-		assert.NoError(t, err)
-
-		sampleText := "sampleData"
-
-		mimetype := "po"
-
-		src := strings.NewReader(sampleText)
-
-		name := random.AlphaNumeric(t, 20)
-
-		file, err := repo.CreateFile(ctx, src, name, mimetype, request.ID)
-		assert.NoError(t, err)
-
-		_, err = repo.DeleteFile(ctx, file.ID)
-		assert.Error(t, err)
-	})
-
-	t.Run("MissingMimeType", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-
-		var tags []*Tag
-		var group *Group
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
-		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
-		assert.NoError(t, err)
-
-		sampleText := "sampleData"
-
-		mimetype := ""
-
-		src := strings.NewReader(sampleText)
-
-		name := random.AlphaNumeric(t, 20)
-
-		file, err := repo.CreateFile(ctx, src, name, mimetype, request.ID)
-		assert.NoError(t, err)
-
-		_, err = repo.DeleteFile(ctx, file.ID)
+		err = repo.DeleteFile(ctx, uuid.New())
 		assert.Error(t, err)
 	})
 }

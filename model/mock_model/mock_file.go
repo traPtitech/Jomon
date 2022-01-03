@@ -67,12 +67,11 @@ func (mr *MockFileRepositoryMockRecorder) GetFile(ctx, fileID interface{}) *gomo
 }
 
 // DeleteFile mocks base method
-func (m *MockFileRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) (*model.File, error) {
+func (m *MockFileRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteFile", ctx, fileID)
-	ret0, _ := ret[0].(*model.File)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // DeleteFile indicates an expected call of DeleteFile
