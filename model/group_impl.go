@@ -2,12 +2,10 @@ package model
 
 import (
 	"context"
-	"errors"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/group"
-	"github.com/traPtitech/Jomon/ent/user"
 )
 
 func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
@@ -49,18 +47,9 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 }
 
 func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*Member, error) {
-	gotGroup, err := repo.client.Group.
+	members, err := repo.client.Group.
 		Query().
 		Where(group.IDEQ(groupID)).
-		First(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if gotGroup == nil {
-		return nil, errors.New("unknown group id")
-	}
-
-	members, err := gotGroup.
 		QueryUser().
 		All(ctx)
 
@@ -69,8 +58,7 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	}
 	modelmembers := []*Member{}
 	for _, member := range members {
-		user := convertEntUserToModelUser(member)
-		modelmembers = append(modelmembers, &Member{user.ID})
+		modelmembers = append(modelmembers, &Member{member.ID})
 	}
 	return modelmembers, nil
 }
@@ -90,18 +78,7 @@ func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, 
 }
 
 func (repo *EntRepository) DeleteMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) error {
-	gotUser, err := repo.client.User.
-		Query().
-		Where(user.IDEQ(userID)).
-		First(ctx)
-	if err != nil {
-		return err
-	}
-	if gotUser == nil {
-		return errors.New("unknown user id")
-	}
-
-	_, err = repo.client.Group.
+	_, err := repo.client.Group.
 		UpdateOneID(groupID).
 		RemoveUserIDs(userID).
 		Save(ctx)
