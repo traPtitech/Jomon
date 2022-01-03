@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/tag"
 )
 
 func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
@@ -17,9 +18,20 @@ func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
 	}
 	modeltags := []*Tag{}
 	for _, tag := range tags {
-		modeltags = append(modeltags, convertEntTagToModelTag(tag))
+		modeltags = append(modeltags, ConvertEntTagToModelTag(tag))
 	}
 	return modeltags, nil
+}
+
+func (repo *EntRepository) GetTag(ctx context.Context, tagID uuid.UUID) (*Tag, error) {
+	tag, err := repo.client.Tag.
+		Query().
+		Where(tag.IDEQ(tagID)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ConvertEntTagToModelTag(tag), nil
 }
 
 func (repo *EntRepository) CreateTag(ctx context.Context, name string, description string) (*Tag, error) {
@@ -31,7 +43,7 @@ func (repo *EntRepository) CreateTag(ctx context.Context, name string, descripti
 	if err != nil {
 		return nil, err
 	}
-	return convertEntTagToModelTag(created), nil
+	return ConvertEntTagToModelTag(created), nil
 }
 
 func (repo *EntRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name string, description string) (*Tag, error) {
@@ -44,7 +56,7 @@ func (repo *EntRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name 
 	if err != nil {
 		return nil, err
 	}
-	return convertEntTagToModelTag(tag), nil
+	return ConvertEntTagToModelTag(tag), nil
 }
 
 func (repo *EntRepository) DeleteTag(ctx context.Context, tagID uuid.UUID) error {
@@ -54,13 +66,13 @@ func (repo *EntRepository) DeleteTag(ctx context.Context, tagID uuid.UUID) error
 	return err
 }
 
-func convertEntTagToModelTag(tag *ent.Tag) *Tag {
+func ConvertEntTagToModelTag(enttag *ent.Tag) *Tag {
 	return &Tag{
-		ID:          tag.ID,
-		Name:        tag.Name,
-		Description: tag.Description,
-		CreatedAt:   tag.CreatedAt,
-		UpdatedAt:   tag.UpdatedAt,
-		DeletedAt:   tag.DeletedAt,
+		ID:          enttag.ID,
+		Name:        enttag.Name,
+		Description: enttag.Description,
+		CreatedAt:   enttag.CreatedAt,
+		UpdatedAt:   enttag.UpdatedAt,
+		DeletedAt:   enttag.DeletedAt,
 	}
 }

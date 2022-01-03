@@ -8,25 +8,25 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockRequestTargetRepository is a mock of RequestTargetRepository interface
+// MockRequestTargetRepository is a mock of RequestTargetRepository interface.
 type MockRequestTargetRepository struct {
 	ctrl     *gomock.Controller
 	recorder *MockRequestTargetRepositoryMockRecorder
 }
 
-// MockRequestTargetRepositoryMockRecorder is the mock recorder for MockRequestTargetRepository
+// MockRequestTargetRepositoryMockRecorder is the mock recorder for MockRequestTargetRepository.
 type MockRequestTargetRepositoryMockRecorder struct {
 	mock *MockRequestTargetRepository
 }
 
-// NewMockRequestTargetRepository creates a new mock instance
+// NewMockRequestTargetRepository creates a new mock instance.
 func NewMockRequestTargetRepository(ctrl *gomock.Controller) *MockRequestTargetRepository {
 	mock := &MockRequestTargetRepository{ctrl: ctrl}
 	mock.recorder = &MockRequestTargetRepositoryMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockRequestTargetRepository) EXPECT() *MockRequestTargetRepositoryMockRecorder {
 	return m.recorder
 }

@@ -60,7 +60,7 @@ type TraQUser struct {
 	Name        string `json:"name"`
 }
 
-func FetchTraQUserInfo(token string) (TraQUser, error) {
+func FetchTraQUserInfo(token string) (TraQUser, error) {  //GetMe
 	req, err := http.NewRequest("GET", TraQBaseURL+"/users/me", nil)
 	if err != nil {
 		return TraQUser{}, err
