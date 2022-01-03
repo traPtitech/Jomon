@@ -27,3 +27,14 @@ updates:
       - cskd8
     labels:
       - "dependencies"
+
+  - package-ecosystem: docker
+      directory: "/development/"
+      schedule:
+        interval: daily
+      open-pull-requests-limit: 10
+      reviewers:
+        - FujishigeTemma
+        - cskd8
+      labels:
+        - "dependencies"
