@@ -136,61 +136,49 @@ func (uu *UserUpdate) AddGroupOwner(g ...*Group) *UserUpdate {
 	return uu.AddGroupOwnerIDs(ids...)
 }
 
-// SetCommentID sets the "comment" edge to the Comment entity by ID.
-func (uu *UserUpdate) SetCommentID(id uuid.UUID) *UserUpdate {
-	uu.mutation.SetCommentID(id)
+// AddCommentIDs adds the "comment" edge to the Comment entity by IDs.
+func (uu *UserUpdate) AddCommentIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddCommentIDs(ids...)
 	return uu
 }
 
-// SetNillableCommentID sets the "comment" edge to the Comment entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillableCommentID(id *uuid.UUID) *UserUpdate {
-	if id != nil {
-		uu = uu.SetCommentID(*id)
+// AddComment adds the "comment" edges to the Comment entity.
+func (uu *UserUpdate) AddComment(c ...*Comment) *UserUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
+	return uu.AddCommentIDs(ids...)
+}
+
+// AddRequestStatuIDs adds the "request_status" edge to the RequestStatus entity by IDs.
+func (uu *UserUpdate) AddRequestStatuIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddRequestStatuIDs(ids...)
 	return uu
 }
 
-// SetComment sets the "comment" edge to the Comment entity.
-func (uu *UserUpdate) SetComment(c *Comment) *UserUpdate {
-	return uu.SetCommentID(c.ID)
-}
-
-// SetRequestStatusID sets the "request_status" edge to the RequestStatus entity by ID.
-func (uu *UserUpdate) SetRequestStatusID(id uuid.UUID) *UserUpdate {
-	uu.mutation.SetRequestStatusID(id)
-	return uu
-}
-
-// SetNillableRequestStatusID sets the "request_status" edge to the RequestStatus entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillableRequestStatusID(id *uuid.UUID) *UserUpdate {
-	if id != nil {
-		uu = uu.SetRequestStatusID(*id)
+// AddRequestStatus adds the "request_status" edges to the RequestStatus entity.
+func (uu *UserUpdate) AddRequestStatus(r ...*RequestStatus) *UserUpdate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
+	return uu.AddRequestStatuIDs(ids...)
+}
+
+// AddRequestIDs adds the "request" edge to the Request entity by IDs.
+func (uu *UserUpdate) AddRequestIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddRequestIDs(ids...)
 	return uu
 }
 
-// SetRequestStatus sets the "request_status" edge to the RequestStatus entity.
-func (uu *UserUpdate) SetRequestStatus(r *RequestStatus) *UserUpdate {
-	return uu.SetRequestStatusID(r.ID)
-}
-
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (uu *UserUpdate) SetRequestID(id uuid.UUID) *UserUpdate {
-	uu.mutation.SetRequestID(id)
-	return uu
-}
-
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillableRequestID(id *uuid.UUID) *UserUpdate {
-	if id != nil {
-		uu = uu.SetRequestID(*id)
+// AddRequest adds the "request" edges to the Request entity.
+func (uu *UserUpdate) AddRequest(r ...*Request) *UserUpdate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
-	return uu
-}
-
-// SetRequest sets the "request" edge to the Request entity.
-func (uu *UserUpdate) SetRequest(r *Request) *UserUpdate {
-	return uu.SetRequestID(r.ID)
+	return uu.AddRequestIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -240,22 +228,67 @@ func (uu *UserUpdate) RemoveGroupOwner(g ...*Group) *UserUpdate {
 	return uu.RemoveGroupOwnerIDs(ids...)
 }
 
-// ClearComment clears the "comment" edge to the Comment entity.
+// ClearComment clears all "comment" edges to the Comment entity.
 func (uu *UserUpdate) ClearComment() *UserUpdate {
 	uu.mutation.ClearComment()
 	return uu
 }
 
-// ClearRequestStatus clears the "request_status" edge to the RequestStatus entity.
+// RemoveCommentIDs removes the "comment" edge to Comment entities by IDs.
+func (uu *UserUpdate) RemoveCommentIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveCommentIDs(ids...)
+	return uu
+}
+
+// RemoveComment removes "comment" edges to Comment entities.
+func (uu *UserUpdate) RemoveComment(c ...*Comment) *UserUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uu.RemoveCommentIDs(ids...)
+}
+
+// ClearRequestStatus clears all "request_status" edges to the RequestStatus entity.
 func (uu *UserUpdate) ClearRequestStatus() *UserUpdate {
 	uu.mutation.ClearRequestStatus()
 	return uu
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
+// RemoveRequestStatuIDs removes the "request_status" edge to RequestStatus entities by IDs.
+func (uu *UserUpdate) RemoveRequestStatuIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveRequestStatuIDs(ids...)
+	return uu
+}
+
+// RemoveRequestStatus removes "request_status" edges to RequestStatus entities.
+func (uu *UserUpdate) RemoveRequestStatus(r ...*RequestStatus) *UserUpdate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uu.RemoveRequestStatuIDs(ids...)
+}
+
+// ClearRequest clears all "request" edges to the Request entity.
 func (uu *UserUpdate) ClearRequest() *UserUpdate {
 	uu.mutation.ClearRequest()
 	return uu
+}
+
+// RemoveRequestIDs removes the "request" edge to Request entities by IDs.
+func (uu *UserUpdate) RemoveRequestIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveRequestIDs(ids...)
+	return uu
+}
+
+// RemoveRequest removes "request" edges to Request entities.
+func (uu *UserUpdate) RemoveRequest(r ...*Request) *UserUpdate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uu.RemoveRequestIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -504,7 +537,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.CommentTable,
 			Columns: []string{user.CommentColumn},
@@ -518,9 +551,28 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := uu.mutation.RemovedCommentIDs(); len(nodes) > 0 && !uu.mutation.CommentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.CommentTable,
+			Columns: []string{user.CommentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := uu.mutation.CommentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.CommentTable,
 			Columns: []string{user.CommentColumn},
@@ -539,7 +591,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.RequestStatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.RequestStatusTable,
 			Columns: []string{user.RequestStatusColumn},
@@ -553,9 +605,28 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := uu.mutation.RemovedRequestStatusIDs(); len(nodes) > 0 && !uu.mutation.RequestStatusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.RequestStatusTable,
+			Columns: []string{user.RequestStatusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: requeststatus.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := uu.mutation.RequestStatusIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.RequestStatusTable,
 			Columns: []string{user.RequestStatusColumn},
@@ -574,7 +645,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.RequestTable,
 			Columns: []string{user.RequestColumn},
@@ -588,9 +659,28 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := uu.mutation.RemovedRequestIDs(); len(nodes) > 0 && !uu.mutation.RequestCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.RequestTable,
+			Columns: []string{user.RequestColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := uu.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.RequestTable,
 			Columns: []string{user.RequestColumn},
@@ -730,61 +820,49 @@ func (uuo *UserUpdateOne) AddGroupOwner(g ...*Group) *UserUpdateOne {
 	return uuo.AddGroupOwnerIDs(ids...)
 }
 
-// SetCommentID sets the "comment" edge to the Comment entity by ID.
-func (uuo *UserUpdateOne) SetCommentID(id uuid.UUID) *UserUpdateOne {
-	uuo.mutation.SetCommentID(id)
+// AddCommentIDs adds the "comment" edge to the Comment entity by IDs.
+func (uuo *UserUpdateOne) AddCommentIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddCommentIDs(ids...)
 	return uuo
 }
 
-// SetNillableCommentID sets the "comment" edge to the Comment entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableCommentID(id *uuid.UUID) *UserUpdateOne {
-	if id != nil {
-		uuo = uuo.SetCommentID(*id)
+// AddComment adds the "comment" edges to the Comment entity.
+func (uuo *UserUpdateOne) AddComment(c ...*Comment) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
+	return uuo.AddCommentIDs(ids...)
+}
+
+// AddRequestStatuIDs adds the "request_status" edge to the RequestStatus entity by IDs.
+func (uuo *UserUpdateOne) AddRequestStatuIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddRequestStatuIDs(ids...)
 	return uuo
 }
 
-// SetComment sets the "comment" edge to the Comment entity.
-func (uuo *UserUpdateOne) SetComment(c *Comment) *UserUpdateOne {
-	return uuo.SetCommentID(c.ID)
-}
-
-// SetRequestStatusID sets the "request_status" edge to the RequestStatus entity by ID.
-func (uuo *UserUpdateOne) SetRequestStatusID(id uuid.UUID) *UserUpdateOne {
-	uuo.mutation.SetRequestStatusID(id)
-	return uuo
-}
-
-// SetNillableRequestStatusID sets the "request_status" edge to the RequestStatus entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableRequestStatusID(id *uuid.UUID) *UserUpdateOne {
-	if id != nil {
-		uuo = uuo.SetRequestStatusID(*id)
+// AddRequestStatus adds the "request_status" edges to the RequestStatus entity.
+func (uuo *UserUpdateOne) AddRequestStatus(r ...*RequestStatus) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
+	return uuo.AddRequestStatuIDs(ids...)
+}
+
+// AddRequestIDs adds the "request" edge to the Request entity by IDs.
+func (uuo *UserUpdateOne) AddRequestIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddRequestIDs(ids...)
 	return uuo
 }
 
-// SetRequestStatus sets the "request_status" edge to the RequestStatus entity.
-func (uuo *UserUpdateOne) SetRequestStatus(r *RequestStatus) *UserUpdateOne {
-	return uuo.SetRequestStatusID(r.ID)
-}
-
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (uuo *UserUpdateOne) SetRequestID(id uuid.UUID) *UserUpdateOne {
-	uuo.mutation.SetRequestID(id)
-	return uuo
-}
-
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableRequestID(id *uuid.UUID) *UserUpdateOne {
-	if id != nil {
-		uuo = uuo.SetRequestID(*id)
+// AddRequest adds the "request" edges to the Request entity.
+func (uuo *UserUpdateOne) AddRequest(r ...*Request) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
-	return uuo
-}
-
-// SetRequest sets the "request" edge to the Request entity.
-func (uuo *UserUpdateOne) SetRequest(r *Request) *UserUpdateOne {
-	return uuo.SetRequestID(r.ID)
+	return uuo.AddRequestIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -834,22 +912,67 @@ func (uuo *UserUpdateOne) RemoveGroupOwner(g ...*Group) *UserUpdateOne {
 	return uuo.RemoveGroupOwnerIDs(ids...)
 }
 
-// ClearComment clears the "comment" edge to the Comment entity.
+// ClearComment clears all "comment" edges to the Comment entity.
 func (uuo *UserUpdateOne) ClearComment() *UserUpdateOne {
 	uuo.mutation.ClearComment()
 	return uuo
 }
 
-// ClearRequestStatus clears the "request_status" edge to the RequestStatus entity.
+// RemoveCommentIDs removes the "comment" edge to Comment entities by IDs.
+func (uuo *UserUpdateOne) RemoveCommentIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveCommentIDs(ids...)
+	return uuo
+}
+
+// RemoveComment removes "comment" edges to Comment entities.
+func (uuo *UserUpdateOne) RemoveComment(c ...*Comment) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uuo.RemoveCommentIDs(ids...)
+}
+
+// ClearRequestStatus clears all "request_status" edges to the RequestStatus entity.
 func (uuo *UserUpdateOne) ClearRequestStatus() *UserUpdateOne {
 	uuo.mutation.ClearRequestStatus()
 	return uuo
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
+// RemoveRequestStatuIDs removes the "request_status" edge to RequestStatus entities by IDs.
+func (uuo *UserUpdateOne) RemoveRequestStatuIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveRequestStatuIDs(ids...)
+	return uuo
+}
+
+// RemoveRequestStatus removes "request_status" edges to RequestStatus entities.
+func (uuo *UserUpdateOne) RemoveRequestStatus(r ...*RequestStatus) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uuo.RemoveRequestStatuIDs(ids...)
+}
+
+// ClearRequest clears all "request" edges to the Request entity.
 func (uuo *UserUpdateOne) ClearRequest() *UserUpdateOne {
 	uuo.mutation.ClearRequest()
 	return uuo
+}
+
+// RemoveRequestIDs removes the "request" edge to Request entities by IDs.
+func (uuo *UserUpdateOne) RemoveRequestIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveRequestIDs(ids...)
+	return uuo
+}
+
+// RemoveRequest removes "request" edges to Request entities.
+func (uuo *UserUpdateOne) RemoveRequest(r ...*Request) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uuo.RemoveRequestIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1122,7 +1245,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.CommentTable,
 			Columns: []string{user.CommentColumn},
@@ -1136,9 +1259,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := uuo.mutation.RemovedCommentIDs(); len(nodes) > 0 && !uuo.mutation.CommentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.CommentTable,
+			Columns: []string{user.CommentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: comment.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := uuo.mutation.CommentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.CommentTable,
 			Columns: []string{user.CommentColumn},
@@ -1157,7 +1299,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.RequestStatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.RequestStatusTable,
 			Columns: []string{user.RequestStatusColumn},
@@ -1171,9 +1313,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := uuo.mutation.RemovedRequestStatusIDs(); len(nodes) > 0 && !uuo.mutation.RequestStatusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.RequestStatusTable,
+			Columns: []string{user.RequestStatusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: requeststatus.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := uuo.mutation.RequestStatusIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.RequestStatusTable,
 			Columns: []string{user.RequestStatusColumn},
@@ -1192,7 +1353,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.RequestTable,
 			Columns: []string{user.RequestColumn},
@@ -1206,9 +1367,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := uuo.mutation.RemovedRequestIDs(); len(nodes) > 0 && !uuo.mutation.RequestCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.RequestTable,
+			Columns: []string{user.RequestColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := uuo.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
 			Table:   user.RequestTable,
 			Columns: []string{user.RequestColumn},

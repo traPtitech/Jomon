@@ -599,7 +599,7 @@ func HasRequest() predicate.Tag {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RequestTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, RequestTable, RequestPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -611,7 +611,7 @@ func HasRequestWith(preds ...predicate.Request) predicate.Tag {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RequestInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, RequestTable, RequestPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

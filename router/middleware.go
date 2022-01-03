@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 
@@ -62,14 +61,14 @@ func (h Handlers) AccessLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFun
 
 func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		sess, err := session.Get(h.SessionName, c)
+		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		_, ok := sess.Values[sessionUserKey].(User)
+		_, ok := sess.Values[sessionUserKey].([]byte)
 		if !ok {
-			return c.Redirect(http.StatusUnauthorized, "/api/auth/genpkce")
+			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
 		}
 
 		return next(c)

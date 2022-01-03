@@ -35,7 +35,7 @@ const (
 	// RequestColumn is the table column denoting the request relation/edge.
 	RequestColumn = "request_comment"
 	// UserTable is the table that holds the user relation/edge.
-	UserTable = "users"
+	UserTable = "comments"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
@@ -55,6 +55,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "comments"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"comment_user",
 	"request_comment",
 }
 

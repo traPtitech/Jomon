@@ -19,9 +19,20 @@ func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
 	}
 	modelgroups := []*Group{}
 	for _, group := range groups {
-		modelgroups = append(modelgroups, convertEntGroupToModelGroup(group))
+		modelgroups = append(modelgroups, ConvertEntGroupToModelGroup(group))
 	}
 	return modelgroups, nil
+}
+
+func (repo *EntRepository) GetGroup(ctx context.Context, groupID uuid.UUID) (*Group, error) {
+	group, err := repo.client.Group.
+		Query().
+		Where(group.IDEQ(groupID)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ConvertEntGroupToModelGroup(group), nil
 }
 
 func (repo *EntRepository) CreateGroup(ctx context.Context, name string, description string, budget *int, owners *[]User) (*Group, error) {
@@ -34,7 +45,7 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 	if err != nil {
 		return nil, err
 	}
-	return convertEntGroupToModelGroup(created), nil
+	return ConvertEntGroupToModelGroup(created), nil
 }
 
 func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*User, error) {
@@ -52,6 +63,7 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	members, err := gotGroup.
 		QueryUser().
 		All(ctx)
+
 	if err != nil {
 		return nil, err
 	}
@@ -67,9 +79,11 @@ func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, 
 		UpdateOneID(groupID).
 		AddUserIDs(userID).
 		Save(ctx)
+
 	if err != nil {
 		return nil, err
 	}
+	
 	created := &Member{userID}
 	return created, nil
 }
@@ -90,20 +104,24 @@ func (repo *EntRepository) DeleteMember(ctx context.Context, groupID uuid.UUID, 
 		UpdateOneID(groupID).
 		RemoveUserIDs(userID).
 		Save(ctx)
+
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func convertEntGroupToModelGroup(group *ent.Group) *Group {
+func ConvertEntGroupToModelGroup(entgroup *ent.Group) *Group {
+	if entgroup == nil {
+		return nil
+	}
 	return &Group{
-		ID:          group.ID,
-		Name:        group.Name,
-		Description: group.Description,
-		Budget:      group.Budget,
-		CreatedAt:   group.CreatedAt,
-		UpdatedAt:   group.UpdatedAt,
-		DeletedAt:   group.DeletedAt,
+		ID:          entgroup.ID,
+		Name:        entgroup.Name,
+		Description: entgroup.Description,
+		Budget:      entgroup.Budget,
+		CreatedAt:   entgroup.CreatedAt,
+		UpdatedAt:   entgroup.UpdatedAt,
+		DeletedAt:   entgroup.DeletedAt,
 	}
 }
