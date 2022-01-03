@@ -73,7 +73,7 @@ func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) err
 		return err
 	}
 
-	if err = request.
+	if err := request.
 		Update().
 		RemoveFileIDs(fileID).
 		Exec(ctx); err != nil {
