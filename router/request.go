@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -226,6 +227,10 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	modelcomments, err := h.Repository.GetComments(ctx, requestID)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
 	var comments []*CommentDetail
 	for _, modelcomment := range modelcomments {
 		comment := &CommentDetail{
@@ -393,8 +398,8 @@ func (h *Handlers) PostComment(c echo.Context) error {
 	}
 	bodyUser, ok := sess.Values[sessionUserKey].([]byte)
 	if !ok {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusUnauthorized, err)
+		c.Logger().Error(errors.New("sessionUser not found"))
+		return echo.NewHTTPError(http.StatusUnauthorized, errors.New("sessionUser not found"))
 	}
 	user := new(User)
 	err = json.Unmarshal(bodyUser, user)
