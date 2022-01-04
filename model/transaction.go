@@ -2,18 +2,17 @@
 package model
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type TransactionRepository interface {
-	/*
-		GetTransactions(ctx context.Context, query TransactionQuery) ([]*TransactionResponse, error)
-		CreateTransaction(ctx context.Context, Amount int, Target string, tags []*uuid.UUID, group uuid.UUID) (TransactionResponse, error)
-		GetTransaction(ctx context.Context, transactionID uuid.UUID) (TransactionResponse, error)
-		UpdateTransaction(ctx context.Context, transactionID uuid.UUID, Amount int, Target string, tags []*uuid.UUID, group uuid.UUID) (TransactionResponse, error)
-	*/
+	GetTransactions(ctx context.Context, query TransactionQuery) ([]*TransactionResponse, error)
+	CreateTransaction(ctx context.Context, Amount int, Target string, tags []*uuid.UUID, group *uuid.UUID) (*TransactionResponse, error)
+	GetTransaction(ctx context.Context, transactionID uuid.UUID) (*TransactionResponse, error)
+	UpdateTransaction(ctx context.Context, transactionID uuid.UUID, Amount int, Target string, tags []*uuid.UUID, group *uuid.UUID) (*TransactionResponse, error)
 }
 
 type Transaction struct {
@@ -26,7 +25,7 @@ type TransactionResponse struct {
 	Amount    int
 	Target    string
 	Tags      []*Tag
-	Group     Group
+	Group     *Group
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

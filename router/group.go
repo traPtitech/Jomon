@@ -12,10 +12,9 @@ import (
 )
 
 type Group struct {
-	Name        string       `json:"name"`
-	Description string       `json:"description"`
-	Budget      *int         `json:"budget"`
-	Owners      []*uuid.UUID `json:"owners"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Budget      *int   `json:"budget"`
 }
 
 type Owner struct {
