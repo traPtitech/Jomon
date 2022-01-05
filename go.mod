@@ -12,6 +12,6 @@ require (
 	github.com/labstack/echo/v4 v4.6.1
 	github.com/ncw/swift v1.0.53
 	github.com/stretchr/testify v1.7.0
-	go.uber.org/zap v1.19.1
+	go.uber.org/zap v1.20.0
 	gopkg.in/check.v1 v1.0.0-20200902074654-038fdea0a05b // indirect
 )
