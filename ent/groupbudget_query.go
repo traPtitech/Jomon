@@ -482,6 +482,10 @@ func (gbq *GroupBudgetQuery) sqlAll(ctx context.Context) ([]*GroupBudget, error)
 
 func (gbq *GroupBudgetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := gbq.querySpec()
+	_spec.Node.Columns = gbq.fields
+	if len(gbq.fields) > 0 {
+		_spec.Unique = gbq.unique != nil && *gbq.unique
+	}
 	return sqlgraph.CountNodes(ctx, gbq.driver, _spec)
 }
 
@@ -552,6 +556,9 @@ func (gbq *GroupBudgetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if gbq.sql != nil {
 		selector = gbq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if gbq.unique != nil && *gbq.unique {
+		selector.Distinct()
 	}
 	for _, p := range gbq.predicates {
 		p(selector)
@@ -831,9 +838,7 @@ func (gbgb *GroupBudgetGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range gbgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(gbgb.fields...)...)

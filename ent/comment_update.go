@@ -187,10 +187,10 @@ func (cu *CommentUpdate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (cu *CommentUpdate) check() error {
 	if _, ok := cu.mutation.RequestID(); cu.mutation.RequestCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"request\"")
+		return errors.New(`ent: clearing a required unique edge "Comment.request"`)
 	}
 	if _, ok := cu.mutation.UserID(); cu.mutation.UserCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"user\"")
+		return errors.New(`ent: clearing a required unique edge "Comment.user"`)
 	}
 	return nil
 }
@@ -499,10 +499,10 @@ func (cuo *CommentUpdateOne) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (cuo *CommentUpdateOne) check() error {
 	if _, ok := cuo.mutation.RequestID(); cuo.mutation.RequestCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"request\"")
+		return errors.New(`ent: clearing a required unique edge "Comment.request"`)
 	}
 	if _, ok := cuo.mutation.UserID(); cuo.mutation.UserCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"user\"")
+		return errors.New(`ent: clearing a required unique edge "Comment.user"`)
 	}
 	return nil
 }
@@ -520,7 +520,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Comment.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Comment.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := cuo.fields; len(fields) > 0 {

@@ -98,6 +98,14 @@ func (gc *GroupCreate) SetID(u uuid.UUID) *GroupCreate {
 	return gc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (gc *GroupCreate) SetNillableID(u *uuid.UUID) *GroupCreate {
+	if u != nil {
+		gc.SetID(*u)
+	}
+	return gc
+}
+
 // AddGroupBudgetIDs adds the "group_budget" edge to the GroupBudget entity by IDs.
 func (gc *GroupCreate) AddGroupBudgetIDs(ids ...uuid.UUID) *GroupCreate {
 	gc.mutation.AddGroupBudgetIDs(ids...)
@@ -246,16 +254,16 @@ func (gc *GroupCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (gc *GroupCreate) check() error {
 	if _, ok := gc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Group.name"`)}
 	}
 	if _, ok := gc.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "description"`)}
+		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Group.description"`)}
 	}
 	if _, ok := gc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Group.created_at"`)}
 	}
 	if _, ok := gc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Group.updated_at"`)}
 	}
 	return nil
 }
@@ -269,7 +277,11 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -287,7 +299,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	)
 	if id, ok := gc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := gc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
