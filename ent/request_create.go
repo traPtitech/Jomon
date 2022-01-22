@@ -81,6 +81,14 @@ func (rc *RequestCreate) SetID(u uuid.UUID) *RequestCreate {
 	return rc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (rc *RequestCreate) SetNillableID(u *uuid.UUID) *RequestCreate {
+	if u != nil {
+		rc.SetID(*u)
+	}
+	return rc
+}
+
 // AddStatuIDs adds the "status" edge to the RequestStatus entity by IDs.
 func (rc *RequestCreate) AddStatuIDs(ids ...uuid.UUID) *RequestCreate {
 	rc.mutation.AddStatuIDs(ids...)
@@ -297,19 +305,19 @@ func (rc *RequestCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (rc *RequestCreate) check() error {
 	if _, ok := rc.mutation.Amount(); !ok {
-		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "amount"`)}
+		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "Request.amount"`)}
 	}
 	if _, ok := rc.mutation.Title(); !ok {
-		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "title"`)}
+		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Request.title"`)}
 	}
 	if _, ok := rc.mutation.Content(); !ok {
-		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "content"`)}
+		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Request.content"`)}
 	}
 	if _, ok := rc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Request.created_at"`)}
 	}
 	if _, ok := rc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Request.updated_at"`)}
 	}
 	return nil
 }
@@ -323,7 +331,11 @@ func (rc *RequestCreate) sqlSave(ctx context.Context) (*Request, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -341,7 +353,7 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 	)
 	if id, ok := rc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := rc.mutation.Amount(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

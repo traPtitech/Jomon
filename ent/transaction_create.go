@@ -45,6 +45,14 @@ func (tc *TransactionCreate) SetID(u uuid.UUID) *TransactionCreate {
 	return tc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableID(u *uuid.UUID) *TransactionCreate {
+	if u != nil {
+		tc.SetID(*u)
+	}
+	return tc
+}
+
 // SetDetailID sets the "detail" edge to the TransactionDetail entity by ID.
 func (tc *TransactionCreate) SetDetailID(id uuid.UUID) *TransactionCreate {
 	tc.mutation.SetDetailID(id)
@@ -201,7 +209,7 @@ func (tc *TransactionCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (tc *TransactionCreate) check() error {
 	if _, ok := tc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Transaction.created_at"`)}
 	}
 	return nil
 }
@@ -215,7 +223,11 @@ func (tc *TransactionCreate) sqlSave(ctx context.Context) (*Transaction, error) 
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -233,7 +245,7 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 	)
 	if id, ok := tc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := tc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
