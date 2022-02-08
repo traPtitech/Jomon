@@ -131,7 +131,7 @@ func TestEntREpository_UpdateComment(t *testing.T) {
 		assert.Equal(t, updated.Comment, comment)
 	})
 
-	t.Run("Sucess2", func(t *testing.T) {
+	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)

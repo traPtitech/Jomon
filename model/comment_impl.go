@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,15 +11,12 @@ import (
 )
 
 func (repo *EntRepository) GetComments(ctx context.Context, requestID uuid.UUID) ([]*Comment, error) {
-	gotRequest, err := repo.client.Request.
+	_, err := repo.client.Request.
 		Query().
 		Where(request.IDEQ(requestID)).
 		First(ctx)
 	if err != nil {
 		return nil, err
-	}
-	if gotRequest == nil {
-		return nil, errors.New("unknown request id")
 	}
 
 	comments, err := repo.client.Comment.
