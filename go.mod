@@ -12,7 +12,7 @@ require (
 	github.com/labstack/echo/v4 v4.6.3
 	github.com/ncw/swift v1.0.53
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
-	go.uber.org/zap v1.20.0
+	go.uber.org/zap v1.21.0
 )
 
 require (
