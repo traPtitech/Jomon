@@ -11,6 +11,14 @@ import (
 )
 
 func (repo *EntRepository) GetComments(ctx context.Context, requestID uuid.UUID) ([]*Comment, error) {
+	_, err := repo.client.Request.
+		Query().
+		Where(request.IDEQ(requestID)).
+		First(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	comments, err := repo.client.Comment.
 		Query().
 		Where(
@@ -43,12 +51,12 @@ func (repo *EntRepository) CreateComment(ctx context.Context, comment string, re
 	return ConvertEntCommentToModelComment(created, userID), nil
 }
 
-// TODO: add edge to request
 func (repo *EntRepository) UpdateComment(ctx context.Context, commentContent string, requestID uuid.UUID, commentID uuid.UUID) (*Comment, error) {
 	updated, err := repo.client.Comment.
 		UpdateOneID(commentID).
 		SetComment(commentContent).
 		SetUpdatedAt(time.Now()).
+		SetRequestID(requestID).
 		Save(ctx)
 	if err != nil {
 		return nil, err
