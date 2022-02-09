@@ -63,6 +63,14 @@ func (gbc *GroupBudgetCreate) SetID(u uuid.UUID) *GroupBudgetCreate {
 	return gbc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (gbc *GroupBudgetCreate) SetNillableID(u *uuid.UUID) *GroupBudgetCreate {
+	if u != nil {
+		gbc.SetID(*u)
+	}
+	return gbc
+}
+
 // SetGroupID sets the "group" edge to the Group entity by ID.
 func (gbc *GroupBudgetCreate) SetGroupID(id uuid.UUID) *GroupBudgetCreate {
 	gbc.mutation.SetGroupID(id)
@@ -177,13 +185,13 @@ func (gbc *GroupBudgetCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (gbc *GroupBudgetCreate) check() error {
 	if _, ok := gbc.mutation.Amount(); !ok {
-		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "amount"`)}
+		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "GroupBudget.amount"`)}
 	}
 	if _, ok := gbc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "GroupBudget.created_at"`)}
 	}
 	if _, ok := gbc.mutation.GroupID(); !ok {
-		return &ValidationError{Name: "group", err: errors.New("ent: missing required edge \"group\"")}
+		return &ValidationError{Name: "group", err: errors.New(`ent: missing required edge "GroupBudget.group"`)}
 	}
 	return nil
 }
@@ -197,7 +205,11 @@ func (gbc *GroupBudgetCreate) sqlSave(ctx context.Context) (*GroupBudget, error)
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -215,7 +227,7 @@ func (gbc *GroupBudgetCreate) createSpec() (*GroupBudget, *sqlgraph.CreateSpec) 
 	)
 	if id, ok := gbc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := gbc.mutation.Amount(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

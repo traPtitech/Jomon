@@ -155,7 +155,7 @@ func (rtu *RequestTargetUpdate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (rtu *RequestTargetUpdate) check() error {
 	if _, ok := rtu.mutation.RequestID(); rtu.mutation.RequestCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"request\"")
+		return errors.New(`ent: clearing a required unique edge "RequestTarget.request"`)
 	}
 	return nil
 }
@@ -391,7 +391,7 @@ func (rtuo *RequestTargetUpdateOne) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (rtuo *RequestTargetUpdateOne) check() error {
 	if _, ok := rtuo.mutation.RequestID(); rtuo.mutation.RequestCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"request\"")
+		return errors.New(`ent: clearing a required unique edge "RequestTarget.request"`)
 	}
 	return nil
 }
@@ -409,7 +409,7 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 	}
 	id, ok := rtuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing RequestTarget.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "RequestTarget.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := rtuo.fields; len(fields) > 0 {

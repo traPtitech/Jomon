@@ -416,6 +416,10 @@ func (rtq *RequestTargetQuery) sqlAll(ctx context.Context) ([]*RequestTarget, er
 
 func (rtq *RequestTargetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := rtq.querySpec()
+	_spec.Node.Columns = rtq.fields
+	if len(rtq.fields) > 0 {
+		_spec.Unique = rtq.unique != nil && *rtq.unique
+	}
 	return sqlgraph.CountNodes(ctx, rtq.driver, _spec)
 }
 
@@ -486,6 +490,9 @@ func (rtq *RequestTargetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if rtq.sql != nil {
 		selector = rtq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if rtq.unique != nil && *rtq.unique {
+		selector.Distinct()
 	}
 	for _, p := range rtq.predicates {
 		p(selector)
@@ -765,9 +772,7 @@ func (rtgb *RequestTargetGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range rtgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(rtgb.fields...)...)
