@@ -159,6 +159,10 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		ctx := context.Background()
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
+			if ent.IsNotFound(err) {
+				c.Logger().Error(err)
+				return echo.NewHTTPError(http.StatusNotFound, err)
+			}
 			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
@@ -169,6 +173,10 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		ctx := context.Background()
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
+			if ent.IsNotFound(err) {
+				c.Logger().Error(err)
+				return echo.NewHTTPError(http.StatusNotFound, err)
+			}
 			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
@@ -176,6 +184,10 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 	ctx := context.Background()
 	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, group, req.CreatedBy)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
