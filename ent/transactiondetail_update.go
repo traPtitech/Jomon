@@ -178,7 +178,7 @@ func (tdu *TransactionDetailUpdate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (tdu *TransactionDetailUpdate) check() error {
 	if _, ok := tdu.mutation.TransactionID(); tdu.mutation.TransactionCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"transaction\"")
+		return errors.New(`ent: clearing a required unique edge "TransactionDetail.transaction"`)
 	}
 	return nil
 }
@@ -445,7 +445,7 @@ func (tduo *TransactionDetailUpdateOne) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (tduo *TransactionDetailUpdateOne) check() error {
 	if _, ok := tduo.mutation.TransactionID(); tduo.mutation.TransactionCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"transaction\"")
+		return errors.New(`ent: clearing a required unique edge "TransactionDetail.transaction"`)
 	}
 	return nil
 }
@@ -463,7 +463,7 @@ func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *Tra
 	}
 	id, ok := tduo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing TransactionDetail.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "TransactionDetail.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := tduo.fields; len(fields) > 0 {

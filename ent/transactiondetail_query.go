@@ -416,6 +416,10 @@ func (tdq *TransactionDetailQuery) sqlAll(ctx context.Context) ([]*TransactionDe
 
 func (tdq *TransactionDetailQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := tdq.querySpec()
+	_spec.Node.Columns = tdq.fields
+	if len(tdq.fields) > 0 {
+		_spec.Unique = tdq.unique != nil && *tdq.unique
+	}
 	return sqlgraph.CountNodes(ctx, tdq.driver, _spec)
 }
 
@@ -486,6 +490,9 @@ func (tdq *TransactionDetailQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if tdq.sql != nil {
 		selector = tdq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if tdq.unique != nil && *tdq.unique {
+		selector.Distinct()
 	}
 	for _, p := range tdq.predicates {
 		p(selector)
@@ -765,9 +772,7 @@ func (tdgb *TransactionDetailGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range tdgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(tdgb.fields...)...)

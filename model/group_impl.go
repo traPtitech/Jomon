@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"errors"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
@@ -48,28 +47,64 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 	return ConvertEntGroupToModelGroup(created), nil
 }
 
-func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*User, error) {
-	gotGroup, err := repo.client.Group.
+func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]*Owner, error) {
+	groupowners, err := repo.client.Group.
 		Query().
 		Where(group.IDEQ(groupID)).
-		First(ctx)
+		QueryOwner().
+		Select(user.FieldID).
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if gotGroup == nil {
-		return nil, errors.New("unknown group id")
+	owners := []*Owner{}
+	for _, groupowner := range groupowners {
+		owners = append(owners, &Owner{ID: groupowner.ID})
 	}
 
-	members, err := gotGroup.
+	return owners, nil
+}
+
+func (repo *EntRepository) CreateOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) (*Owner, error) {
+	_, err := repo.client.Group.
+		Update().
+		Where(group.IDEQ(groupID)).
+		AddOwnerIDs(ownerID).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resowner := &Owner{
+		ID: ownerID,
+	}
+	return resowner, nil
+
+}
+
+func (repo *EntRepository) DeleteOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) error {
+	_, err := repo.client.Group.
+		Update().
+		Where(group.IDEQ(groupID)).
+		RemoveOwnerIDs(ownerID).
+		Save(ctx)
+
+	return err
+}
+
+func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([]*Member, error) {
+	members, err := repo.client.Group.
+		Query().
+		Where(group.IDEQ(groupID)).
 		QueryUser().
+		Select(user.FieldID).
 		All(ctx)
 
 	if err != nil {
 		return nil, err
 	}
-	modelmembers := []*User{}
+	modelmembers := []*Member{}
 	for _, member := range members {
-		modelmembers = append(modelmembers, convertEntUserToModelUser(member))
+		modelmembers = append(modelmembers, &Member{member.ID})
 	}
 	return modelmembers, nil
 }
@@ -83,24 +118,13 @@ func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, 
 	if err != nil {
 		return nil, err
 	}
-	
+
 	created := &Member{userID}
 	return created, nil
 }
 
 func (repo *EntRepository) DeleteMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) error {
-	gotUser, err := repo.client.User.
-		Query().
-		Where(user.IDEQ(userID)).
-		First(ctx)
-	if err != nil {
-		return err
-	}
-	if gotUser == nil {
-		return errors.New("unknown user id")
-	}
-
-	_, err = repo.client.Group.
+	_, err := repo.client.Group.
 		UpdateOneID(groupID).
 		RemoveUserIDs(userID).
 		Save(ctx)

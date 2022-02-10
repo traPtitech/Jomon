@@ -188,7 +188,7 @@ func (gbu *GroupBudgetUpdate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (gbu *GroupBudgetUpdate) check() error {
 	if _, ok := gbu.mutation.GroupID(); gbu.mutation.GroupCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"group\"")
+		return errors.New(`ent: clearing a required unique edge "GroupBudget.group"`)
 	}
 	return nil
 }
@@ -498,7 +498,7 @@ func (gbuo *GroupBudgetUpdateOne) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (gbuo *GroupBudgetUpdateOne) check() error {
 	if _, ok := gbuo.mutation.GroupID(); gbuo.mutation.GroupCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"group\"")
+		return errors.New(`ent: clearing a required unique edge "GroupBudget.group"`)
 	}
 	return nil
 }
@@ -516,7 +516,7 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 	}
 	id, ok := gbuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing GroupBudget.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "GroupBudget.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := gbuo.fields; len(fields) > 0 {

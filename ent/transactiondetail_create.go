@@ -84,6 +84,14 @@ func (tdc *TransactionDetailCreate) SetID(u uuid.UUID) *TransactionDetailCreate 
 	return tdc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (tdc *TransactionDetailCreate) SetNillableID(u *uuid.UUID) *TransactionDetailCreate {
+	if u != nil {
+		tdc.SetID(*u)
+	}
+	return tdc
+}
+
 // SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
 func (tdc *TransactionDetailCreate) SetTransactionID(id uuid.UUID) *TransactionDetailCreate {
 	tdc.mutation.SetTransactionID(id)
@@ -191,19 +199,19 @@ func (tdc *TransactionDetailCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (tdc *TransactionDetailCreate) check() error {
 	if _, ok := tdc.mutation.Amount(); !ok {
-		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "amount"`)}
+		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "TransactionDetail.amount"`)}
 	}
 	if _, ok := tdc.mutation.Target(); !ok {
-		return &ValidationError{Name: "target", err: errors.New(`ent: missing required field "target"`)}
+		return &ValidationError{Name: "target", err: errors.New(`ent: missing required field "TransactionDetail.target"`)}
 	}
 	if _, ok := tdc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "TransactionDetail.created_at"`)}
 	}
 	if _, ok := tdc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "TransactionDetail.updated_at"`)}
 	}
 	if _, ok := tdc.mutation.TransactionID(); !ok {
-		return &ValidationError{Name: "transaction", err: errors.New("ent: missing required edge \"transaction\"")}
+		return &ValidationError{Name: "transaction", err: errors.New(`ent: missing required edge "TransactionDetail.transaction"`)}
 	}
 	return nil
 }
@@ -217,7 +225,11 @@ func (tdc *TransactionDetailCreate) sqlSave(ctx context.Context) (*TransactionDe
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -235,7 +247,7 @@ func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.
 	)
 	if id, ok := tdc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := tdc.mutation.Amount(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

@@ -63,6 +63,14 @@ func (rsc *RequestStatusCreate) SetID(u uuid.UUID) *RequestStatusCreate {
 	return rsc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (rsc *RequestStatusCreate) SetNillableID(u *uuid.UUID) *RequestStatusCreate {
+	if u != nil {
+		rsc.SetID(*u)
+	}
+	return rsc
+}
+
 // SetRequestID sets the "request" edge to the Request entity by ID.
 func (rsc *RequestStatusCreate) SetRequestID(id uuid.UUID) *RequestStatusCreate {
 	rsc.mutation.SetRequestID(id)
@@ -173,24 +181,24 @@ func (rsc *RequestStatusCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (rsc *RequestStatusCreate) check() error {
 	if _, ok := rsc.mutation.Status(); !ok {
-		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "status"`)}
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "RequestStatus.status"`)}
 	}
 	if v, ok := rsc.mutation.Status(); ok {
 		if err := requeststatus.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "status": %w`, err)}
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "RequestStatus.status": %w`, err)}
 		}
 	}
 	if _, ok := rsc.mutation.Reason(); !ok {
-		return &ValidationError{Name: "reason", err: errors.New(`ent: missing required field "reason"`)}
+		return &ValidationError{Name: "reason", err: errors.New(`ent: missing required field "RequestStatus.reason"`)}
 	}
 	if _, ok := rsc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "RequestStatus.created_at"`)}
 	}
 	if _, ok := rsc.mutation.RequestID(); !ok {
-		return &ValidationError{Name: "request", err: errors.New("ent: missing required edge \"request\"")}
+		return &ValidationError{Name: "request", err: errors.New(`ent: missing required edge "RequestStatus.request"`)}
 	}
 	if _, ok := rsc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user", err: errors.New("ent: missing required edge \"user\"")}
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "RequestStatus.user"`)}
 	}
 	return nil
 }
@@ -204,7 +212,11 @@ func (rsc *RequestStatusCreate) sqlSave(ctx context.Context) (*RequestStatus, er
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -222,7 +234,7 @@ func (rsc *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSp
 	)
 	if id, ok := rsc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := rsc.mutation.Status(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

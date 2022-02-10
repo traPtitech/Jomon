@@ -27,7 +27,7 @@ func TestEntRepository_GetComments(t *testing.T) {
 		require.NoError(t, err)
 		comment2, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, user.ID)
 		require.NoError(t, err)
-		
+
 		got, err := repo.GetComments(ctx, request.ID)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) && got[0].ID == comment1.ID {
@@ -131,7 +131,7 @@ func TestEntREpository_UpdateComment(t *testing.T) {
 		assert.Equal(t, updated.Comment, comment)
 	})
 
-	t.Run("Sucess2", func(t *testing.T) {
+	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
