@@ -16,6 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
@@ -79,7 +80,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequests(c.Request().Context(), query).
@@ -208,14 +209,12 @@ func TestHandlers_GetRequests(t *testing.T) {
 	})
 }
 
-//group, file, comment考えてない
 func TestHandlers_PostRequest(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-
 		date := time.Now()
 
 		request := &model.RequestDetail{
@@ -248,8 +247,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
-
+		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			CreateRequest(c.Request().Context(), reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, group, reqRequest.CreatedBy).
@@ -277,7 +275,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 	t.Run("SuccessWithTags", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-
 		date := time.Now()
 
 		tag := &model.Tag{
@@ -320,8 +317,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
-
+		require.NoError(t, err)
 		h.Repository.MockTagRepository.
 			EXPECT().
 			GetTag(c.Request().Context(), tag.ID).
@@ -355,17 +351,92 @@ func TestHandlers_PostRequest(t *testing.T) {
 			assert.Equal(t, http.StatusOK, rec.Code)
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
-
 	})
-}
 
-func TestHandlers_PutRequest(t *testing.T) {
-	t.Parallel()
-
-	t.Run("Success", func(t *testing.T) {
+	t.Run("SuccessWithGroup", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
+		date := time.Now()
 
+		budget := random.Numeric(t, 100000)
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+		}
+
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted.String(),
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			Group:     group,
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		reqRequest := Request{
+			CreatedBy: request.CreatedBy,
+			Amount:    request.Amount,
+			Title:     request.Title,
+			Content:   request.Content,
+			Group:     &group.ID,
+		}
+		reqBody, err := json.Marshal(reqRequest)
+		require.NoError(t, err)
+		var tags []*model.Tag
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetGroup(c.Request().Context(), group.ID).
+			Return(group, nil)
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			CreateRequest(c.Request().Context(), reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, group, reqRequest.CreatedBy).
+			Return(request, nil)
+
+		res := &RequestResponse{
+			ID:        request.ID,
+			Status:    request.Status,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: request.UpdatedAt,
+			CreatedBy: request.CreatedBy,
+			Amount:    request.Amount,
+			Title:     request.Title,
+			Content:   request.Content,
+			Group: &GroupOverview{
+				ID:          group.ID,
+				Name:        group.Name,
+				Description: group.Description,
+				Budget:      group.Budget,
+				CreatedAt:   group.CreatedAt,
+				UpdatedAt:   group.UpdatedAt,
+			},
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PostRequest(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+//TODO return Not Found
+	t.Run("UnknownTagID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
 		date := time.Now()
 
 		request := &model.RequestDetail{
@@ -379,24 +450,397 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedBy: uuid.New(),
 		}
 
-		budget := random.Numeric(t, 1000000)
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
+		unknownTagID := uuid.New()
+
+		reqRequest := Request{
+			CreatedBy: request.CreatedBy,
+			Amount:    request.Amount,
+			Title:     request.Title,
+			Content:   request.Content,
+			Tags:      []*uuid.UUID{&unknownTagID},
 		}
-		reqRequest := PutRequest{
-			Amount:  random.Numeric(t, 1000000),
-			Title:   request.Title,
-			Content: random.AlphaNumeric(t, 50),
-			Group:   &group.ID,
+		reqBody, err := json.Marshal(reqRequest)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		mocErr := errors.New("unknown tag id")
+		h.Repository.MockTagRepository.
+			EXPECT().
+			GetTag(c.Request().Context(), unknownTagID).
+			Return(nil, mocErr)
+
+		err = h.Handlers.PostRequest(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		}
+	})
+//TODO return Not Found
+	t.Run("UnknownGroupID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted.String(),
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		unknownGroupID := uuid.New()
+
+		reqRequest := Request{
+			CreatedBy: request.CreatedBy,
+			Amount:    request.Amount,
+			Title:     request.Title,
+			Content:   request.Content,
+			Group:     &unknownGroupID,
+		}
+		reqBody, err := json.Marshal(reqRequest)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		mocErr := errors.New("unknown group id")
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetGroup(c.Request().Context(), unknownGroupID).
+			Return(nil, mocErr)
+
+		err = h.Handlers.PostRequest(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		}
+	})
+//TODO return Not Found
+	t.Run("UnknownUserID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted.String(),
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		reqRequest := Request{
+			CreatedBy: request.CreatedBy,
+			Amount:    request.Amount,
+			Title:     request.Title,
+			Content:   request.Content,
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
 		var tags []*model.Tag
+		var group *model.Group
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		mocErr := errors.New("unknown user id")
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			CreateRequest(c.Request().Context(), reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, group, reqRequest.CreatedBy).
+			Return(nil, mocErr)
+
+		err = h.Handlers.PostRequest(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		}
+	})
+}
+
+func TestHandlers_GetRequest(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted.String(),
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests/%s", request.ID.String()), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/requests/:requestID")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(c.Request().Context(), request.ID).
+			Return(request, nil)
+		h.Repository.MockCommentRepository.
+			EXPECT().
+			GetComments(c.Request().Context(), request.ID).
+			Return(nil, nil)
+
+		res := &RequestResponse{
+			ID:        request.ID,
+			Status:    request.Status,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: request.UpdatedAt,
+			CreatedBy: request.CreatedBy,
+			Amount:    request.Amount,
+			Title:     request.Title,
+			Content:   request.Content,
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.GetRequest(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("SuccessWithComments", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted.String(),
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		comment1 := &model.Comment{
+			ID:        uuid.New(),
+			User:      request.CreatedBy,
+			Comment:   random.AlphaNumeric(t, 100),
+			CreatedAt: date,
+			UpdatedAt: date,
+		}
+		comment2 := &model.Comment{
+			ID:        uuid.New(),
+			User:      request.CreatedBy,
+			Comment:   random.AlphaNumeric(t, 100),
+			CreatedAt: date,
+			UpdatedAt: date,
+		}
+		comments := []*model.Comment{comment1, comment2}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests/%s", request.ID.String()), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/requests/:requestID")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(c.Request().Context(), request.ID).
+			Return(request, nil)
+		h.Repository.MockCommentRepository.
+			EXPECT().
+			GetComments(c.Request().Context(), request.ID).
+			Return(comments, nil)
+
+		resComments := []*CommentDetail{
+			{
+				ID:        comment1.ID,
+				User:      comment1.User,
+				Comment:   comment1.Comment,
+				CreatedAt: comment1.CreatedAt,
+				UpdatedAt: comment1.UpdatedAt,
+			},
+			{
+				ID:        comment2.ID,
+				User:      comment2.User,
+				Comment:   comment2.Comment,
+				CreatedAt: comment2.CreatedAt,
+				UpdatedAt: comment2.UpdatedAt,
+			},
+		}
+
+		res := &RequestResponse{
+			ID:        request.ID,
+			Status:    request.Status,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: request.UpdatedAt,
+			CreatedBy: request.CreatedBy,
+			Amount:    request.Amount,
+			Title:     request.Title,
+			Content:   request.Content,
+			Comments:  resComments,
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.GetRequest(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("InvalidUUID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/requests/hoge", nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/requests/:requestID")
+		c.SetParamNames("requestID")
+		c.SetParamValues("hoge")
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+
+		_, resErr := uuid.Parse(c.Param("requestID"))
+
+		err = h.Handlers.GetRequest(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
+
+	t.Run("NilUUID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests/%s", uuid.Nil), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/requests/:requestID")
+		c.SetParamNames("requestID")
+		c.SetParamValues(uuid.Nil.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+
+		resErr := errors.New("invalid UUID")
+
+		err = h.Handlers.GetRequest(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
+
+	t.Run("UnknownID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		unknownID := uuid.New()
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests/%s", unknownID.String()), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/requests/:requestID")
+		c.SetParamNames("requestID")
+		c.SetParamValues(unknownID.String())
+
+		var resErr *ent.NotFoundError
+		errors.As(errors.New("unknown id"), &resErr)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(c.Request().Context(), unknownID).
+			Return(nil, resErr)
+
+		err = h.Handlers.GetRequest(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		}
+	})
+}
+
+func TestHandlers_PutRequest(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted.String(),
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		reqRequest := PutRequest{
+			Amount:  random.Numeric(t, 100000),
+			Title:   random.AlphaNumeric(t, 30),
+			Content: random.AlphaNumeric(t, 50),
+		}
+		reqBody, err := json.Marshal(reqRequest)
+		require.NoError(t, err)
+		var tags []*model.Tag
+		var group *model.Group
 
 		updateRequest := &model.RequestDetail{
 			ID:        request.ID,
@@ -405,9 +849,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 			UpdatedAt: time.Now(),
 			CreatedBy: request.CreatedBy,
 			Amount:    reqRequest.Amount,
-			Title:     request.Title,
+			Title:     reqRequest.Title,
 			Content:   reqRequest.Content,
-			Group:     group,
 		}
 
 		e := echo.New()
@@ -422,14 +865,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-
-		h.Repository.MockGroupRepository.
-			EXPECT().
-			GetGroup(c.Request().Context(), group.ID).
-			Return(group, nil)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			UpdateRequest(c.Request().Context(), request.ID, reqRequest.Amount, request.Title, reqRequest.Content, tags, group).
+			UpdateRequest(c.Request().Context(), request.ID, reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, group).
 			Return(updateRequest, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
@@ -445,14 +883,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Amount:    updateRequest.Amount,
 			Title:     updateRequest.Title,
 			Content:   updateRequest.Content,
-			Group: &GroupOverview{
-				ID:          group.ID,
-				Name:        group.Name,
-				Description: group.Description,
-				Budget:      group.Budget,
-				CreatedAt:   group.CreatedAt,
-				UpdatedAt:   group.UpdatedAt,
-			},
 		}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
@@ -466,7 +896,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 	t.Run("SuccessWithTag", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-
 		date := time.Now()
 
 		request := &model.RequestDetail{
@@ -480,15 +909,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedBy: uuid.New(),
 		}
 
-		budget := random.Numeric(t, 1000000)
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
 		tag1 := &model.Tag{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -506,13 +926,13 @@ func TestHandlers_PutRequest(t *testing.T) {
 		tags := []*model.Tag{tag1, tag2}
 		reqRequest := PutRequest{
 			Amount:  random.Numeric(t, 1000000),
-			Title:   request.Title,
+			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []*uuid.UUID{&tag1.ID, &tag2.ID},
-			Group:   &group.ID,
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
+		var group *model.Group
 
 		updateRequest := &model.RequestDetail{
 			ID:        request.ID,
@@ -528,7 +948,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s", request.ID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s", request.ID.String()), bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -548,13 +968,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 			EXPECT().
 			GetTag(c.Request().Context(), tag2.ID).
 			Return(tag2, nil)
-		h.Repository.MockGroupRepository.
-			EXPECT().
-			GetGroup(c.Request().Context(), group.ID).
-			Return(group, nil)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			UpdateRequest(c.Request().Context(), request.ID, reqRequest.Amount, request.Title, reqRequest.Content, tags, group).
+			UpdateRequest(c.Request().Context(), request.ID, reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, group).
 			Return(updateRequest, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
@@ -586,6 +1002,99 @@ func TestHandlers_PutRequest(t *testing.T) {
 					UpdatedAt:   tag2.UpdatedAt,
 				},
 			},
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PutRequest(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("SuccessWithGroup", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted.String(),
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		budget := random.Numeric(t, 100000)
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		reqRequest := PutRequest{
+			Amount:  random.Numeric(t, 1000000),
+			Title:   random.AlphaNumeric(t, 30),
+			Content: random.AlphaNumeric(t, 50),
+			Group:   &group.ID,
+		}
+		reqBody, err := json.Marshal(reqRequest)
+		require.NoError(t, err)
+		var tags []*model.Tag
+
+		updateRequest := &model.RequestDetail{
+			ID:        request.ID,
+			Status:    request.Status,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: time.Now(),
+			CreatedBy: request.CreatedBy,
+			Amount:    reqRequest.Amount,
+			Title:     request.Title,
+			Content:   reqRequest.Content,
+			Tags:      tags,
+			Group:     group,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetGroup(c.Request().Context(), group.ID).
+			Return(group, nil)
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			UpdateRequest(c.Request().Context(), request.ID, reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, group).
+			Return(updateRequest, nil)
+		h.Repository.MockCommentRepository.
+			EXPECT().
+			GetComments(c.Request().Context(), request.ID).
+			Return([]*model.Comment{}, nil)
+
+		res := &RequestResponse{
+			ID:        updateRequest.ID,
+			Status:    updateRequest.Status,
+			CreatedAt: updateRequest.CreatedAt,
+			UpdatedAt: updateRequest.UpdatedAt,
+			CreatedBy: updateRequest.CreatedBy,
+			Amount:    updateRequest.Amount,
+			Title:     updateRequest.Title,
+			Content:   updateRequest.Content,
 			Group: &GroupOverview{
 				ID:          group.ID,
 				Name:        group.Name,
@@ -602,6 +1111,137 @@ func TestHandlers_PutRequest(t *testing.T) {
 			assert.Equal(t, http.StatusOK, rec.Code)
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
+	})
+
+	t.Run("SuccessWithComment", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted.String(),
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		reqRequest := PutRequest{
+			Amount:  random.Numeric(t, 100000),
+			Title:   random.AlphaNumeric(t, 30),
+			Content: random.AlphaNumeric(t, 50),
+		}
+		reqBody, err := json.Marshal(reqRequest)
+		require.NoError(t, err)
+		var tags []*model.Tag
+		var group *model.Group
+
+		updateRequest := &model.RequestDetail{
+			ID:        request.ID,
+			Status:    request.Status,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: time.Now(),
+			CreatedBy: request.CreatedBy,
+			Amount:    reqRequest.Amount,
+			Title:     reqRequest.Title,
+			Content:   reqRequest.Content,
+		}
+
+		comment1 := &model.Comment{
+			ID:        uuid.New(),
+			User:      request.CreatedBy,
+			Comment:   random.AlphaNumeric(t, 100),
+			CreatedAt: date,
+			UpdatedAt: date,
+		}
+		comment2 := &model.Comment{
+			ID:        uuid.New(),
+			User:      request.CreatedBy,
+			Comment:   random.AlphaNumeric(t, 100),
+			CreatedAt: date,
+			UpdatedAt: date,
+		}
+		comments := []*model.Comment{comment1, comment2}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s", request.ID), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			UpdateRequest(c.Request().Context(), request.ID, reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, group).
+			Return(updateRequest, nil)
+		h.Repository.MockCommentRepository.
+			EXPECT().
+			GetComments(c.Request().Context(), request.ID).
+			Return(comments, nil)
+
+		resComments := []*CommentDetail{
+			{
+				ID:        comment1.ID,
+				User:      comment1.User,
+				Comment:   comment1.Comment,
+				CreatedAt: comment1.CreatedAt,
+				UpdatedAt: comment1.UpdatedAt,
+			},
+			{
+				ID:        comment2.ID,
+				User:      comment2.User,
+				Comment:   comment2.Comment,
+				CreatedAt: comment2.CreatedAt,
+				UpdatedAt: comment2.UpdatedAt,
+			},
+		}
+
+		res := &RequestResponse{
+			ID:        updateRequest.ID,
+			Status:    updateRequest.Status,
+			CreatedAt: updateRequest.CreatedAt,
+			UpdatedAt: updateRequest.UpdatedAt,
+			CreatedBy: updateRequest.CreatedBy,
+			Amount:    updateRequest.Amount,
+			Title:     updateRequest.Title,
+			Content:   updateRequest.Content,
+			Comments:  resComments,
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PutRequest(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("InvalidUUID", func(t *testing.T) {
+
+	})
+	
+	t.Run("NilUUID", func(t *testing.T) {
+
+	})
+//TODO return Not Found
+	t.Run("UnknownUUID", func(t *testing.T) {
+
+	})
+//TODO return Not Found
+	t.Run("UnknownTagID", func(t *testing.T) {
+
+	})
+//TODO return Not Found
+	t.Run("UnknownGroupID", func(t *testing.T) {
+
 	})
 }
 
