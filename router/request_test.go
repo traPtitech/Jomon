@@ -196,15 +196,15 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		mocErr := errors.New("Failed to get requests.")
+		resErr := errors.New("Failed to get requests.")
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequests(c.Request().Context(), query).
-			Return(nil, mocErr)
+			Return(nil, resErr)
 
 		err = h.Handlers.GetRequests(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 		}
 	})
 }
