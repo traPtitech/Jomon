@@ -469,17 +469,19 @@ func TestHandlers_PostRequest(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
+		var resErr *ent.NotFoundError
+		errors.As(errors.New("unknown id"), &resErr)
+
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		mocErr := errors.New("unknown tag id")
 		h.Repository.MockTagRepository.
 			EXPECT().
 			GetTag(c.Request().Context(), unknownTagID).
-			Return(nil, mocErr)
+			Return(nil, resErr)
 
 		err = h.Handlers.PostRequest(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 		}
 	})
 	//TODO return Not Found
@@ -518,20 +520,22 @@ func TestHandlers_PostRequest(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
+		var resErr *ent.NotFoundError
+		errors.As(errors.New("unknown id"), &resErr)
+
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		mocErr := errors.New("unknown group id")
 		h.Repository.MockGroupRepository.
 			EXPECT().
 			GetGroup(c.Request().Context(), unknownGroupID).
-			Return(nil, mocErr)
+			Return(nil, resErr)
 
 		err = h.Handlers.PostRequest(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 		}
 	})
-	//TODO return Not Found
+
 	t.Run("UnknownUserID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
@@ -566,17 +570,19 @@ func TestHandlers_PostRequest(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
+		var resErr *ent.NotFoundError
+		errors.As(errors.New("unknown id"), &resErr)
+
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		mocErr := errors.New("unknown user id")
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			CreateRequest(c.Request().Context(), reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, group, reqRequest.CreatedBy).
-			Return(nil, mocErr)
+			Return(nil, resErr)
 
 		err = h.Handlers.PostRequest(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 		}
 	})
 }
