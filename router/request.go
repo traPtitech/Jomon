@@ -159,6 +159,10 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		ctx := context.Background()
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
+			if ent.IsNotFound(err) {
+				c.Logger().Error(err)
+				return echo.NewHTTPError(http.StatusNotFound, err)
+			}
 			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
@@ -169,6 +173,10 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		ctx := context.Background()
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
+			if ent.IsNotFound(err) {
+				c.Logger().Error(err)
+				return echo.NewHTTPError(http.StatusNotFound, err)
+			}
 			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
@@ -176,6 +184,10 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 	ctx := context.Background()
 	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, group, req.CreatedBy)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -311,6 +323,10 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		ctx := context.Background()
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
+			if ent.IsNotFound(err) {
+				c.Logger().Error(err)
+				return echo.NewHTTPError(http.StatusNotFound, err)
+			}
 			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
@@ -321,6 +337,10 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		ctx := context.Background()
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
+			if ent.IsNotFound(err) {
+				c.Logger().Error(err)
+				return echo.NewHTTPError(http.StatusNotFound, err)
+			}
 			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
@@ -328,6 +348,10 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	ctx := context.Background()
 	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Amount, req.Title, req.Content, tags, group)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -384,7 +408,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, res)
 }
-// TODO return Not Found
+
 func (h *Handlers) PostComment(c echo.Context) error {
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
@@ -421,6 +445,10 @@ func (h *Handlers) PostComment(c echo.Context) error {
 	ctx := context.Background()
 	comment, err := h.Repository.CreateComment(ctx, req.Comment, requestID, user.ID)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -433,7 +461,7 @@ func (h *Handlers) PostComment(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, res)
 }
-//TODO return Not Found
+
 func (h *Handlers) PutComment(c echo.Context) error {
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
@@ -463,6 +491,10 @@ func (h *Handlers) PutComment(c echo.Context) error {
 	ctx := context.Background()
 	comment, err := h.Repository.UpdateComment(ctx, req.Comment, requestID, commentID)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
