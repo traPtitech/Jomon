@@ -6,6 +6,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/group"
+	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -138,9 +140,78 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, Amount int, Ta
 	return ConvertEntTransactionToModelTransactionResponse(tx), nil
 }
 
-func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID uuid.UUID, Amount int, Target string, tags []*uuid.UUID, group *uuid.UUID) (*TransactionResponse, error) {
-	// TODO: impl
-	return nil, nil
+func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID uuid.UUID, Amount int, Target string, tags []*uuid.UUID, groupID *uuid.UUID) (*TransactionResponse, error) {
+	// Get transaction detail
+	detail, err := repo.client.TransactionDetail.
+		Query().
+		Where(transactiondetail.HasTransactionWith(
+			transaction.IDEQ(transactionID),
+		)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update transaction detail
+	detail, err = repo.client.TransactionDetail.UpdateOne(detail).
+		SetAmount(Amount).
+		SetTarget(Target).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get Tags
+	var tagIDs []uuid.UUID
+	for _, tag := range tags {
+		tagIDs = append(tagIDs, *tag)
+	}
+
+	var gb *ent.GroupBudget
+	if groupID != nil {
+		_, err = repo.client.GroupBudget.
+			Update().
+			Where(groupbudget.HasGroupWith(
+				group.IDEQ(*groupID),
+			)).
+			SetAmount(Amount).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Get transaction
+	tx, err := repo.client.Transaction.
+		Query().
+		Where(transaction.ID(transactionID)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update transaction
+	_, err = repo.client.Transaction.
+		UpdateOne(tx).
+		SetDetailID(detail.ID).
+		SetGroupBudgetID(gb.ID).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update Tag to set transaction
+	_, err = repo.client.Tag.
+		Update().
+		Where(tag.IDIn(tagIDs...)).
+		SetTransactionID(tx.ID).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Converting
+	return ConvertEntTransactionToModelTransactionResponse(tx), nil
 }
 
 func ConvertEntTransactionToModelTransaction(transaction *ent.Transaction) *Transaction {
