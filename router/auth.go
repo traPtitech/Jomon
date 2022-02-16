@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/gob"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -11,7 +12,6 @@ import (
 	"time"
 
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/service"
 )
@@ -37,6 +37,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 	if err != nil {
+		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -48,22 +49,26 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
 	if !ok {
+		c.Logger().Error(err)
 		return echo.ErrInternalServerError
 	}
 
 	res, err := service.RequestAccessToken(code, codeVerifier)
 	if err != nil {
+		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	u, err := service.FetchTraQUserInfo(res.AccessToken)
 	if err != nil {
+		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	ctx := context.Background()
 	modelUser, err := h.Repository.GetUserByName(ctx, u.Name)
 	if err != nil {
+		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -74,9 +79,11 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		Admin:       modelUser.Admin,
 	}
 
+	gob.Register(&User{})
 	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {
+		c.Logger().Error(err)
 		return echo.ErrInternalServerError
 	}
 
@@ -84,8 +91,9 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 }
 
 func (h Handlers) GeneratePKCE(c echo.Context) error {
-	sess, err := session.Get(sessionKey, c)
+	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 	if err != nil {
+		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -96,7 +104,7 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 	}
 
 	codeVerifier := randAlphabetAndNumberString(43)
-	sess.Values["codeVerifier"] = codeVerifier
+	sess.Values[sessionCodeVerifierKey] = codeVerifier
 
 	codeVerifierHash := sha256.Sum256([]byte(codeVerifier))
 	encoder := base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_").WithPadding(base64.NoPadding)
@@ -105,6 +113,7 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 
 	err = sess.Save(c.Request(), c.Response())
 	if err != nil {
+		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
