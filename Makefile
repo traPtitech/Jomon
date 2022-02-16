@@ -4,7 +4,7 @@ up:
 
 .PHONY: dev-up
 dev-up:
-	@docker-compose up
+	@docker-compose up --build
 
 .PHONY: down
 down:
