@@ -292,7 +292,7 @@ paths:
           $ref: "#/components/responses/404"
   "/requests/{requestID}/status":
     put:
-      description: 指定した依頼のstatusを変更のみ(新規はpost /requests)する。reasonは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「fix_requiredからsubmitted」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからfully_repaid」の操作はここでは行えない。管理者権限または作成者権限が必要。
+      description: 指定した依頼のstatusを変更のみ(新規はpost /requests)する。reasonは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「fix_requiredからsubmitted」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからcompleted」の操作はここでは行えない。管理者権限または作成者権限が必要。
       tags:
         - Requests
       parameters:
