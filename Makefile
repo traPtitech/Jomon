@@ -2,6 +2,10 @@
 up:
 	@docker-compose up -d --build
 
+.PHONY: dev-up
+dev-up:
+	@docker-compose up --build
+
 .PHONY: down
 down:
 	@docker-compose down -v
