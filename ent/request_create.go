@@ -41,12 +41,6 @@ func (rc *RequestCreate) SetTitle(s string) *RequestCreate {
 	return rc
 }
 
-// SetContent sets the "content" field.
-func (rc *RequestCreate) SetContent(s string) *RequestCreate {
-	rc.mutation.SetContent(s)
-	return rc
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (rc *RequestCreate) SetCreatedAt(t time.Time) *RequestCreate {
 	rc.mutation.SetCreatedAt(t)
@@ -310,9 +304,6 @@ func (rc *RequestCreate) check() error {
 	if _, ok := rc.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Request.title"`)}
 	}
-	if _, ok := rc.mutation.Content(); !ok {
-		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Request.content"`)}
-	}
 	if _, ok := rc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Request.created_at"`)}
 	}
@@ -370,14 +361,6 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 			Column: request.FieldTitle,
 		})
 		_node.Title = value
-	}
-	if value, ok := rc.mutation.Content(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: request.FieldContent,
-		})
-		_node.Content = value
 	}
 	if value, ok := rc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

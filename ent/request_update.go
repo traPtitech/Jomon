@@ -56,12 +56,6 @@ func (ru *RequestUpdate) SetTitle(s string) *RequestUpdate {
 	return ru
 }
 
-// SetContent sets the "content" field.
-func (ru *RequestUpdate) SetContent(s string) *RequestUpdate {
-	ru.mutation.SetContent(s)
-	return ru
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (ru *RequestUpdate) SetCreatedAt(t time.Time) *RequestUpdate {
 	ru.mutation.SetCreatedAt(t)
@@ -452,13 +446,6 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: request.FieldTitle,
-		})
-	}
-	if value, ok := ru.mutation.Content(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: request.FieldContent,
 		})
 	}
 	if value, ok := ru.mutation.CreatedAt(); ok {
@@ -907,12 +894,6 @@ func (ruo *RequestUpdateOne) SetTitle(s string) *RequestUpdateOne {
 	return ruo
 }
 
-// SetContent sets the "content" field.
-func (ruo *RequestUpdateOne) SetContent(s string) *RequestUpdateOne {
-	ruo.mutation.SetContent(s)
-	return ruo
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (ruo *RequestUpdateOne) SetCreatedAt(t time.Time) *RequestUpdateOne {
 	ruo.mutation.SetCreatedAt(t)
@@ -1327,13 +1308,6 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 			Type:   field.TypeString,
 			Value:  value,
 			Column: request.FieldTitle,
-		})
-	}
-	if value, ok := ruo.mutation.Content(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: request.FieldContent,
 		})
 	}
 	if value, ok := ruo.mutation.CreatedAt(); ok {
