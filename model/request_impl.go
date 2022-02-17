@@ -115,7 +115,7 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 	return reqres, nil
 }
 
-func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, group *Group, userID uuid.UUID) (*RequestDetail, error) {
+func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, tags []*Tag, group *Group, userID uuid.UUID) (*RequestDetail, error) {
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
 		tagIDs = append(tagIDs, tag.ID)
@@ -124,7 +124,6 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 		Create().
 		SetTitle(title).
 		SetAmount(amount).
-		SetContent(content).
 		SetCreatedAt(time.Now()).
 		SetUpdatedAt(time.Now()).
 		SetUserID(userID).
@@ -149,7 +148,6 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 	status, err := repo.client.RequestStatus.
 		Create().
 		SetStatus(requeststatus.StatusSubmitted).
-		SetReason("").
 		SetCreatedAt(time.Now()).
 		SetRequest(created).
 		SetUser(user).
@@ -162,7 +160,6 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 		Status:    string(status.Status),
 		Amount:    created.Amount,
 		Title:     created.Title,
-		Content:   created.Content,
 		Tags:      tags,
 		Group:     group,
 		CreatedAt: created.CreatedAt,
@@ -196,7 +193,6 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 		Status:    string(request.Edges.Status[0].Status),
 		Amount:    request.Amount,
 		Title:     request.Title,
-		Content:   request.Content,
 		Tags:      tags,
 		Group:     group,
 		CreatedAt: request.CreatedAt,
@@ -206,7 +202,7 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 	return reqdetail, nil
 }
 
-func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, content string, tags []*Tag, group *Group) (*RequestDetail, error) {
+func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, tags []*Tag, group *Group) (*RequestDetail, error) {
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
 		tagIDs = append(tagIDs, tag.ID)
@@ -215,7 +211,6 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		UpdateOneID(requestID).
 		SetAmount(amount).
 		SetTitle(title).
-		SetContent(content).
 		ClearTag().
 		AddTagIDs(tagIDs...).
 		SetUpdatedAt(time.Now()).
@@ -250,9 +245,12 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	for _, tag := range enttags {
 		modeltags = append(modeltags, ConvertEntTagToModelTag(tag))
 	}
-	entgroup, err := updated.QueryGroup().Only(ctx)
-	if err != nil {
-		return nil, err
+	var entgroup *ent.Group
+	if group != nil {
+		entgroup, err = updated.QueryGroup().Only(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 	modelgroup := ConvertEntGroupToModelGroup(entgroup)
 	reqdetail := &RequestDetail{
@@ -260,7 +258,6 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		Status:    string(status.Status),
 		Amount:    updated.Amount,
 		Title:     updated.Title,
-		Content:   updated.Content,
 		Tags:      modeltags,
 		Group:     modelgroup,
 		CreatedAt: updated.CreatedAt,
@@ -298,7 +295,6 @@ func ConvertEntRequestResponseToModelRequestResponse(request *ent.Request, tags 
 		CreatedBy: user.ID,
 		Amount:    request.Amount,
 		Title:     request.Title,
-		Content:   request.Content,
 		Tags:      modeltags,
 		Group:     ConvertEntGroupToModelGroup(group),
 	}

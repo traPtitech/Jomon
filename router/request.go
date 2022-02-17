@@ -19,7 +19,6 @@ type Request struct {
 	CreatedBy uuid.UUID    `json:"created_by"`
 	Amount    int          `json:"amount"`
 	Title     string       `json:"title"`
-	Content   string       `json:"content"`
 	Tags      []*uuid.UUID `json:"tags"`
 	Group     *uuid.UUID   `json:"group"`
 }
@@ -27,7 +26,6 @@ type Request struct {
 type PutRequest struct {
 	Amount  int          `json:"amount"`
 	Title   string       `json:"title"`
-	Content string       `json:"content"`
 	Tags    []*uuid.UUID `json:"tags"`
 	Group   *uuid.UUID   `json:"group"`
 }
@@ -40,7 +38,6 @@ type RequestResponse struct {
 	CreatedBy uuid.UUID        `json:"created_by"`
 	Amount    int              `json:"amount"`
 	Title     string           `json:"title"`
-	Content   string           `json:"content"`
 	Tags      []*TagOverview   `json:"tags"`
 	Group     *GroupOverview   `json:"group"`
 	Comments  []*CommentDetail `json:"comments"`
@@ -137,7 +134,6 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 			CreatedBy: request.CreatedBy,
 			Amount:    request.Amount,
 			Title:     request.Title,
-			Content:   request.Content,
 			Tags:      tags,
 			Group:     resgroup,
 		}
@@ -182,7 +178,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		}
 	}
 	ctx := context.Background()
-	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, group, req.CreatedBy)
+	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, tags, group, req.CreatedBy)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.Logger().Error(err)
@@ -220,7 +216,6 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		CreatedBy: request.CreatedBy,
 		Amount:    request.Amount,
 		Title:     request.Title,
-		Content:   request.Content,
 		Tags:      restags,
 		Group:     resgroup,
 	}
@@ -293,7 +288,6 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 		CreatedBy: request.CreatedBy,
 		Amount:    request.Amount,
 		Title:     request.Title,
-		Content:   request.Content,
 		Tags:      restags,
 		Group:     resgroup,
 		Comments:  comments,
@@ -346,7 +340,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		}
 	}
 	ctx := context.Background()
-	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Amount, req.Title, req.Content, tags, group)
+	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Amount, req.Title, tags, group)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.Logger().Error(err)
@@ -401,7 +395,6 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		CreatedBy: request.CreatedBy,
 		Amount:    request.Amount,
 		Title:     request.Title,
-		Content:   request.Content,
 		Tags:      restags,
 		Group:     resgroup,
 		Comments:  comments,
