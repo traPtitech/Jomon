@@ -150,18 +150,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-
-	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	user, ok := sess.Values[sessionUserKey].(*User)
-	if !ok {
-		c.Logger().Error(errors.New("sessionUser not found"))
-		return echo.NewHTTPError(http.StatusUnauthorized, errors.New("sessionUser not found"))
-	}
-
+	
 	var tags []*model.Tag
 	for _, tagID := range req.Tags {
 		ctx := context.Background()
@@ -200,7 +189,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	comment, err := h.Repository.CreateComment(ctx, req.Comment, request.ID, user.ID)
+	comment, err := h.Repository.CreateComment(ctx, req.Comment, request.ID, req.CreatedBy)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.Logger().Error(err)
