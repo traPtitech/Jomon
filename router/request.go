@@ -54,6 +54,17 @@ type CommentDetail struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type PutStatus struct {
+	Status  string `json:"status"`
+	Comment string `json:"comment"`
+}
+type Status struct {
+	CreatedBy uuid.UUID `json:"created_by"`
+	Status    string    `json:"status"`
+	Comment   string    `json:"comment"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 func (h *Handlers) GetRequests(c echo.Context) error {
 	ctx := context.Background()
 	sort := c.QueryParam("sort")
@@ -150,7 +161,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	
+
 	var tags []*model.Tag
 	for _, tagID := range req.Tags {
 		ctx := context.Background()
@@ -328,7 +339,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
-	if err := c.Bind(&req); err != nil {
+	if err = c.Bind(&req); err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
@@ -523,6 +534,70 @@ func (h *Handlers) DeleteComment(c echo.Context) error {
 }
 
 func (h *Handlers) PutStatus(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	var req PutStatus
+	var err error
+	requestID, err := uuid.Parse(c.Param("requestID"))
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if requestID == uuid.Nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	user, ok := sess.Values[sessionUserKey].(*User)
+	if !ok {
+		c.Logger().Error(errors.New("sessionUser not found"))
+		return echo.NewHTTPError(http.StatusUnauthorized, errors.New("sessionUser not found"))
+	}
+
+	if err = c.Bind(&req); err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	status, err := model.ConvertStrStatusToStatus(req.Status)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	ctx := context.Background()
+	request, err := h.Repository.GetRequest(ctx, requestID)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	latestStatus, err := model.ConvertStrStatusToStatus(request.Status)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	//TODO 現状の状態とreqstatusを返してあげるとわかりやすそう
+	// judging privilege
+	if status == latestStatus {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	created, err := h.Repository.CreateStatus(ctx, requestID, user.ID, status)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	comment, err := h.Repository.CreateComment(ctx, req.Comment, request.ID, user.ID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	res := &Status{
+		CreatedBy: user.ID,
+		Status:    created.Status,
+		Comment:   comment.Comment,
+		CreatedAt: comment.CreatedAt,
+	}
+
+	return echo.NewHTTPError(http.StatusOK, res)
 }
