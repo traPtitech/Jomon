@@ -1087,10 +1087,11 @@ func TestHandlers_PutRequest(t *testing.T) {
 		date := time.Now()
 
 		request := &model.RequestDetail{
-			ID:     uuid.New(),
-			Status: model.Submitted.String(),
-			Amount: random.Numeric(t, 1000000),
-			Title:  random.AlphaNumeric(t, 20), CreatedAt: date,
+			ID:        uuid.New(),
+			Status:    model.Submitted.String(),
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
