@@ -567,6 +567,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
+	//TODO return Not Found
 	ctx := context.Background()
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
@@ -599,7 +600,6 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest)
 		}
 	}
-	
 
 	u, err := h.Repository.GetUserByID(ctx, user.ID)
 	if err != nil {
