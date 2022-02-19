@@ -110,7 +110,7 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 
 	reqres := []*RequestResponse{}
 	for _, request := range requests {
-		reqres = append(reqres, ConvertEntRequestResponseToModelRequestResponse(request, request.Edges.Tag, request.Edges.Group, request.Edges.Status[0], request.Edges.User))
+		reqres = append(reqres, convertEntRequestResponseToModelRequestResponse(request, request.Edges.Tag, request.Edges.Group, request.Edges.Status[0], request.Edges.User))
 	}
 	return reqres, nil
 }
@@ -280,9 +280,26 @@ func (repo *EntRepository) CreateStatus(ctx context.Context, requestID uuid.UUID
 	if err != nil {
 		return nil, err
 	}
-	return ConvertEntRequestStatusToModelRequestStatus(created), nil
+	return convertEntRequestStatusToModelRequestStatus(created), nil
 }
-func ConvertEntRequestToModelRequest(request *ent.Request) *Request {
+
+func (repo *EntRepository) GetRequestTargets(ctx context.Context, requestID uuid.UUID) ([]*RequestTarget, error) {
+	targets, err := repo.client.RequestTarget.
+		Query().
+		Where(requesttarget.IDEQ(requestID)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var reqTargets []*RequestTarget
+	for _, target := range targets {
+		reqTargets = append(reqTargets, convertEntRequestTargetToModelRequestTarget(target))
+	}
+	return reqTargets, nil
+}
+
+func convertEntRequestToModelRequest(request *ent.Request) *Request {
 	if request == nil {
 		return nil
 	}
@@ -293,7 +310,7 @@ func ConvertEntRequestToModelRequest(request *ent.Request) *Request {
 	}
 }
 
-func ConvertEntRequestResponseToModelRequestResponse(request *ent.Request, tags []*ent.Tag, group *ent.Group, status *ent.RequestStatus, user *ent.User) *RequestResponse {
+func convertEntRequestResponseToModelRequestResponse(request *ent.Request, tags []*ent.Tag, group *ent.Group, status *ent.RequestStatus, user *ent.User) *RequestResponse {
 	if request == nil {
 		return nil
 	}
@@ -314,13 +331,25 @@ func ConvertEntRequestResponseToModelRequestResponse(request *ent.Request, tags 
 	}
 }
 
-func ConvertEntRequestStatusToModelRequestStatus(requestStatus *ent.RequestStatus) *RequestStatus {
+func convertEntRequestStatusToModelRequestStatus(requestStatus *ent.RequestStatus) *RequestStatus {
 	if requestStatus == nil {
 		return nil
 	}
 	return &RequestStatus{
-		ID: requestStatus.ID,
-		Status: requestStatus.Status.String(),
+		ID:        requestStatus.ID,
+		Status:    requestStatus.Status.String(),
 		CreatedAt: requestStatus.CreatedAt,
+	}
+}
+
+func convertEntRequestTargetToModelRequestTarget(requestTarget *ent.RequestTarget) *RequestTarget {
+	if requestTarget == nil {
+		return nil
+	}
+	return &RequestTarget{
+		ID:        requestTarget.ID,
+		Target:    requestTarget.Target,
+		PaidAt:    requestTarget.PaidAt,
+		CreatedAt: requestTarget.CreatedAt,
 	}
 }
