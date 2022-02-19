@@ -2,6 +2,7 @@
 package model
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -36,7 +37,7 @@ func (s Status) String() string {
 		return ""
 	}
 }
-
+//multipart/form-dataじゃないから使わなそう
 func (s Status) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.String())
 }
@@ -66,12 +67,30 @@ func (s *Status) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func ConvertStrStatusToStatus(str string) (Status, error) {
+	var status Status
+	switch str {
+	case "submitted":
+		status = Submitted
+	case "fix_required":
+		status = FixRequired
+	case "accepted":
+		status = Accepted
+	case "completed":
+		status = Completed
+	case "rejected":
+		status = Rejected
+	default:
+		return Status(0), fmt.Errorf("invalid Status %s", str)
+	}
+	return status, nil
+}
 type RequestStatusRepository interface {
+	CreateStatus(ctx context.Context, requestID uuid.UUID, userID uuid.UUID, status Status)
 }
 
 type RequestStatus struct {
 	ID        uuid.UUID
 	Status    string
-	Reason    string
 	CreatedAt time.Time
 }
