@@ -574,30 +574,99 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	latestStatus, err := model.ConvertStrStatusToStatus(request.Status)
 	if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	//TODO 現状の状態とreqstatusを返してあげるとわかりやすそう
+	//TODO 現状の状態とreqstatusをlogに表示したい
 	// judging privilege
 	if status == latestStatus {
-		return c.NoContent(http.StatusBadRequest)
+		return echo.NewHTTPError(http.StatusBadRequest)
 	}
+	if req.Comment == "" {
+		if !IsAbleNoCommentChangeStatus(status, latestStatus) {
+			return echo.NewHTTPError(http.StatusBadRequest)
+		}
+	}
+	if user.ID == request.CreatedBy {
+		if !IsAbleCreatorChangeStatus(status, latestStatus) {
+			return echo.NewHTTPError(http.StatusBadRequest)
+		}
+	}
+
+	admin, err := h.Repository.IsAdmin(ctx, user.ID) 
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+		if !admin {
+			if !IsAbleAdminChangeState(status, latestStatus) {
+				return echo.NewHTTPError(http.StatusBadRequest)
+			}
+
+			if status == model.Submitted && latestStatus == model.Accepted {
+				//TODO paid_atを確認
+			}
+		}
+
+	if user.ID != request.CreatedBy && !admin {
+		return echo.NewHTTPError(http.StatusUnauthorized)
+	}
+	
 
 	created, err := h.Repository.CreateStatus(ctx, requestID, user.ID, status)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	comment, err := h.Repository.CreateComment(ctx, req.Comment, request.ID, user.ID)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	var resComment string
+	if req.Comment != "" {
+		comment, err := h.Repository.CreateComment(ctx, req.Comment, request.ID, user.ID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+		resComment = comment.Comment
 	}
 
 	res := &Status{
 		CreatedBy: user.ID,
 		Status:    created.Status,
-		Comment:   comment.Comment,
-		CreatedAt: comment.CreatedAt,
+		Comment:   resComment,
+		CreatedAt: created.CreatedAt,
 	}
 
 	return echo.NewHTTPError(http.StatusOK, res)
+}
+
+func IsAbleNoCommentChangeStatus(status, latestStatus model.Status) bool {
+	if status == model.FixRequired && latestStatus == model.Submitted {
+		return false
+	}
+	if status == model.Rejected && latestStatus == model.Submitted {
+		return false
+	}
+	if status == model.Submitted && latestStatus == model.Accepted {
+		return false
+	}
+	return true
+}
+
+func IsAbleCreatorChangeStatus(status, latestStatus model.Status) bool {
+	if status == model.Submitted && latestStatus == model.FixRequired {
+		return true
+	}
+	return false
+}
+
+func IsAbleAdminChangeState(status, latestStatus model.Status) bool {
+	if status == model.Rejected && latestStatus == model.Submitted {
+		return true
+	}
+	if status == model.Submitted && latestStatus == model.FixRequired {
+		return true
+	}
+	if status == model.Accepted && latestStatus == model.Submitted {
+		return true
+	}
+	if status == model.Submitted && latestStatus == model.Accepted {
+		return true
+	}
+	return false
 }
