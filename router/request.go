@@ -3,6 +3,8 @@ package router
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -565,6 +567,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
+	//TODO return Not Found
 	ctx := context.Background()
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
@@ -576,8 +579,10 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+	log.Print(status, latestStatus)
+	log.Print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
-	//TODO 現状の状態とreqstatusをlogに表示したい
+	//TODO 現状の状態とreqstatusをlogに表示するかjsonでかえすかしたい
 	// judging privilege
 	if status == latestStatus {
 		return echo.NewHTTPError(http.StatusBadRequest)
@@ -593,33 +598,49 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		}
 	}
 
-	admin, err := h.Repository.IsAdmin(ctx, user.ID) 
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+	//TODO return Not found??
+	u, err := h.Repository.GetUserByID(ctx, user.ID)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if u.Admin {
+		if !IsAbleAdminChangeState(status, latestStatus) {
+			return echo.NewHTTPError(http.StatusBadRequest)
 		}
-		if !admin {
-			if !IsAbleAdminChangeState(status, latestStatus) {
-				return echo.NewHTTPError(http.StatusBadRequest)
+		if status == model.Submitted && latestStatus == model.Accepted {
+			targets, err := h.Repository.GetRequestTargets(ctx, requestID)
+			if err != nil {
+				c.Logger().Error(err)
+				return echo.NewHTTPError(http.StatusInternalServerError)
 			}
-
-			if status == model.Submitted && latestStatus == model.Accepted {
-				//TODO paid_atを確認
+			var paid bool
+			for _, target := range targets {
+				if target.PaidAt != nil {
+					paid = true
+					break
+				}
+			}
+			if paid {
+				return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("someone already paid"))
 			}
 		}
+	}
 
-	if user.ID != request.CreatedBy && !admin {
+	if user.ID != request.CreatedBy && !u.Admin {
 		return echo.NewHTTPError(http.StatusUnauthorized)
 	}
-	
 
 	created, err := h.Repository.CreateStatus(ctx, requestID, user.ID, status)
 	if err != nil {
+		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	var resComment string
 	if req.Comment != "" {
 		comment, err := h.Repository.CreateComment(ctx, req.Comment, request.ID, user.ID)
 		if err != nil {
+			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 		resComment = comment.Comment
