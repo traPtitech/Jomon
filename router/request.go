@@ -599,6 +599,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest)
 		}
 	}
+	
 
 	u, err := h.Repository.GetUserByID(ctx, user.ID)
 	if err != nil {
