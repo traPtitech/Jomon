@@ -65,7 +65,7 @@ func TestPutState(t *testing.T) {
 		panic(err)
 	}
 
-	userRepMock := NewUserRepositoryMock("UserId", "AdminUserId")
+	userRepMock := NewUserRepositoryMock("AdminUserId", "AdminUserId")
 
 	service := Service{
 		Administrators: adminRepMock,
@@ -458,7 +458,7 @@ func TestPutState(t *testing.T) {
 		asr.NoError(err)
 		asr.Equal(http.StatusBadRequest, rec.Code)
 	})
-	userRepMock = NewUserRepositoryMock("AnotherId", "AdminUserId")
+	userRepMock = NewUserRepositoryMock("AdminUserId", "AdminUserId")
 
 	service = Service{
 		Administrators: adminRepMock,
@@ -537,6 +537,46 @@ func TestPutState(t *testing.T) {
 		err = service.PutStates(c)
 		asr.NoError(err)
 		asr.Equal(http.StatusBadRequest, rec.Code)
+	})
+	userRepMock = NewUserRepositoryMock("AnotherId", "AdminUserId")
+
+	t.Run("shouldSuccess", func(t *testing.T) {
+		asr := assert.New(t)
+		e := echo.New()
+		ctx := context.TODO()
+		body := fmt.Sprintf(`
+		{
+			"to_state": %s,
+			"reason": "%s"
+		}
+		`, string(toStateAccepted), stateReason)
+		req := httptest.NewRequest(http.MethodPut, "/api/applications/"+id.String()+"/states", strings.NewReader(body))
+		req.Header.Set(echo.HeaderContentType, "application/json")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/applications/:applicationId/states")
+		c.SetParamNames("applicationId")
+		c.SetParamValues(id.String())
+		userRepMock.SetNormalUser(c)
+
+		route, pathParam, err := router.FindRoute(req.Method, req.URL)
+		if err != nil {
+			panic(err)
+		}
+
+		requestValidationInput := &openapi3filter.RequestValidationInput{
+			Request:    req,
+			PathParams: pathParam,
+			Route:      route,
+		}
+
+		if err := openapi3filter.ValidateRequest(ctx, requestValidationInput); err != nil {
+			panic(err)
+		}
+
+		err = service.PutStates(c)
+		asr.NoError(err)
+		asr.Equal(http.StatusUnauthorized, rec.Code)
 	})
 }
 
