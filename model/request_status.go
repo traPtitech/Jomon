@@ -86,7 +86,7 @@ func ConvertStrStatusToStatus(str string) (Status, error) {
 	return status, nil
 }
 type RequestStatusRepository interface {
-	CreateStatus(ctx context.Context, requestID uuid.UUID, userID uuid.UUID, status Status)
+	CreateStatus(ctx context.Context, requestID uuid.UUID, userID uuid.UUID, status Status) (*RequestStatus, error)
 }
 
 type RequestStatus struct {
