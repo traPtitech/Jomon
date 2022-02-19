@@ -23,10 +23,11 @@ type Transaction struct {
 }
 
 type TransactionOverview struct {
-	Amount int          `json:"amount"`
-	Target string       `json:"target"`
-	Tags   []*uuid.UUID `json:"tags"`
-	Group  *uuid.UUID   `json:"group"`
+	Amount  int          `json:"amount"`
+	Target  string       `json:"target"`
+	Tags    []*uuid.UUID `json:"tags"`
+	Group   *uuid.UUID   `json:"group"`
+	Request *uuid.UUID   `json:"request"`
 }
 
 func (h *Handlers) GetTransactions(c echo.Context) error {

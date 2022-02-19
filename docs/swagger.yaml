@@ -1037,6 +1037,9 @@ components:
         group:
           type: string
           format: uuid
+        request:
+          type: string
+          format: uuid
     Comment:
       type: object
       properties:
