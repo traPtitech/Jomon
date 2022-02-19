@@ -113,6 +113,10 @@ func (s *Service) PutStates(c echo.Context) error {
 		}
 	}
 
+	if user != application.CreateUserTrapID && !admin {
+		return c.JSON(http.StatusUnauthorized, errsta)
+	}
+
 	state, err := s.Applications.UpdateStatesLog(applicationId, user.TrapId, sta.Reason, sta.ToState)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
