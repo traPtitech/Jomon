@@ -16,8 +16,6 @@ const (
 	FieldID = "id"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-	// FieldReason holds the string denoting the reason field in the database.
-	FieldReason = "reason"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// EdgeRequest holds the string denoting the request edge name in mutations.
@@ -46,7 +44,6 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldStatus,
-	FieldReason,
 	FieldCreatedAt,
 }
 
