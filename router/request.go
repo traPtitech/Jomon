@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -564,13 +563,17 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	}
 	status, err := model.ConvertStrStatusToStatus(req.Status)
 	if err != nil {
+		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	//TODO return Not Found
 	ctx := context.Background()
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -579,33 +582,36 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	log.Print(status, latestStatus)
-	log.Print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
-	//TODO 現状の状態とreqstatusをlogに表示するかjsonでかえすかしたい
 	// judging privilege
 	if status == latestStatus {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 	if req.Comment == "" {
 		if !IsAbleNoCommentChangeStatus(status, latestStatus) {
+			c.Logger().Errorf("unable to change %v to %v without comment", request.Status, req.Status)
 			return echo.NewHTTPError(http.StatusBadRequest)
 		}
 	}
 	if user.ID == request.CreatedBy {
 		if !IsAbleCreatorChangeStatus(status, latestStatus) {
+			c.Logger().Errorf("creator unable to change %v to %v", request.Status, req.Status)
 			return echo.NewHTTPError(http.StatusBadRequest)
 		}
 	}
 
-	//TODO return Not found??
 	u, err := h.Repository.GetUserByID(ctx, user.ID)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	if u.Admin {
 		if !IsAbleAdminChangeState(status, latestStatus) {
+			c.Logger().Errorf("admin unable to change %v to %v", request.Status, req.Status)
 			return echo.NewHTTPError(http.StatusBadRequest)
 		}
 		if status == model.Submitted && latestStatus == model.Accepted {
@@ -631,6 +637,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized)
 	}
 
+	// create status and comment
 	created, err := h.Repository.CreateStatus(ctx, requestID, user.ID, status)
 	if err != nil {
 		c.Logger().Error(err)
