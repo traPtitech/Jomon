@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -568,7 +567,6 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	//TODO return Not Found
 	ctx := context.Background()
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
@@ -584,8 +582,6 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	log.Print(status, latestStatus)
-	log.Print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
 	// judging privilege
 	if status == latestStatus {
