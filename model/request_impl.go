@@ -274,36 +274,6 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	return reqdetail, nil
 }
 
-func (repo *EntRepository) CreateStatus(ctx context.Context, requestID uuid.UUID, userID uuid.UUID, status Status) (*RequestStatus, error) {
-	created, err := repo.client.RequestStatus.
-		Create().
-		SetStatus(requeststatus.Status(status.String())).
-		SetCreatedAt(time.Now()).
-		SetRequestID(requestID).
-		SetUserID(userID).
-		Save(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return convertEntRequestStatusToModelRequestStatus(created), nil
-}
-
-func (repo *EntRepository) GetRequestTargets(ctx context.Context, requestID uuid.UUID) ([]*RequestTarget, error) {
-	targets, err := repo.client.RequestTarget.
-		Query().
-		Where(requesttarget.IDEQ(requestID)).
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var reqTargets []*RequestTarget
-	for _, target := range targets {
-		reqTargets = append(reqTargets, convertEntRequestTargetToModelRequestTarget(target))
-	}
-	return reqTargets, nil
-}
-
 func convertEntRequestToModelRequest(request *ent.Request) *Request {
 	if request == nil {
 		return nil
@@ -333,28 +303,5 @@ func convertEntRequestResponseToModelRequestResponse(request *ent.Request, tags 
 		Title:     request.Title,
 		Tags:      modeltags,
 		Group:     ConvertEntGroupToModelGroup(group),
-	}
-}
-
-func convertEntRequestStatusToModelRequestStatus(requestStatus *ent.RequestStatus) *RequestStatus {
-	if requestStatus == nil {
-		return nil
-	}
-	return &RequestStatus{
-		ID:        requestStatus.ID,
-		Status:    requestStatus.Status.String(),
-		CreatedAt: requestStatus.CreatedAt,
-	}
-}
-
-func convertEntRequestTargetToModelRequestTarget(requestTarget *ent.RequestTarget) *RequestTarget {
-	if requestTarget == nil {
-		return nil
-	}
-	return &RequestTarget{
-		ID:        requestTarget.ID,
-		Target:    requestTarget.Target,
-		PaidAt:    requestTarget.PaidAt,
-		CreatedAt: requestTarget.CreatedAt,
 	}
 }
