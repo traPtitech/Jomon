@@ -220,15 +220,21 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	}
 
 	if group != nil {
-		_, err = repo.client.Group.
-			UpdateOneID(group.ID).
-			ClearRequest().
-			AddRequest(updated).
+		_, err = repo.client.Request.
+			UpdateOneID(requestID).
+			ClearGroup().
+			SetGroupID(group.ID).
 			Save(ctx)
-		if err != nil {
-			return nil, err
-		}
+	} else {
+		_, err = repo.client.Request.
+			UpdateOneID(requestID).
+			ClearGroup().
+			Save(ctx)
 	}
+	if err != nil {
+		return nil, err
+	}
+
 	status, err := updated.QueryStatus().Select(requeststatus.FieldStatus).First(ctx)
 	if err != nil {
 		return nil, err
@@ -252,6 +258,7 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 			return nil, err
 		}
 	}
+
 	modelgroup := ConvertEntGroupToModelGroup(entgroup)
 	reqdetail := &RequestDetail{
 		ID:        updated.ID,
@@ -266,8 +273,6 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	}
 	return reqdetail, nil
 }
-
-// このままだとnil *Group はGroupをなしにするのでなくそのままってかんじ
 
 func (repo *EntRepository) CreateStatus(ctx context.Context, requestID uuid.UUID, userID uuid.UUID, status Status) (*RequestStatus, error) {
 	created, err := repo.client.RequestStatus.
