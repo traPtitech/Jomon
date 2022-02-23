@@ -387,25 +387,3 @@ func TestEntREpository_UpdateRequest(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
-
-func TestEntRepository_CreateStatus(t *testing.T) {
-	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
-	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-
-	t.Run("Success", func(t *testing.T) {
-		t.Parallel()
-		amount := random.Numeric(t, 100000)
-		title := random.AlphaNumeric(t, 40)
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
-		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, amount, title, nil, nil, user.ID)
-		require.NoError(t, err)
-
-		status := Status(random.Numeric(t, 5) + 1)
-		created, err := repo.CreateStatus(ctx, request.ID, user.ID, status)
-		assert.NoError(t, err)
-		assert.Equal(t, created.Status, status.String())
-	})
-}
