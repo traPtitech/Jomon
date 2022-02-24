@@ -589,12 +589,6 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest)
 		}
 	}
-	if user.ID == request.CreatedBy {
-		if !IsAbleCreatorChangeStatus(req.Status, latestStatus) {
-			c.Logger().Errorf("creator unable to change %v to %v", request.Status, req.Status)
-			return echo.NewHTTPError(http.StatusBadRequest)
-		}
-	}
 
 	u, err := h.Repository.GetUserByID(ctx, user.ID)
 	if err != nil {
@@ -626,6 +620,13 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 			if paid {
 				return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("someone already paid"))
 			}
+		}
+	}
+
+	if !u.Admin && user.ID == request.CreatedBy {
+		if !IsAbleCreatorChangeStatus(req.Status, latestStatus) {
+			c.Logger().Errorf("creator unable to change %v to %v", request.Status, req.Status)
+			return echo.NewHTTPError(http.StatusBadRequest)
 		}
 	}
 
