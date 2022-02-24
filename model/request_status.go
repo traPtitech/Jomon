@@ -40,7 +40,7 @@ func (s Status) String() string {
 	}
 }
 
-//multipart/form-dataじゃないから使わなそう
+//dbにstringいれる今の実装だとMarshalJson入らなそう。
 func (s Status) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.String())
 }
