@@ -70,32 +70,13 @@ func (s *Status) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func ConvertStrStatusToStatus(str string) (Status, error) {
-	var status Status
-	switch str {
-	case "submitted":
-		status = Submitted
-	case "fix_required":
-		status = FixRequired
-	case "accepted":
-		status = Accepted
-	case "completed":
-		status = Completed
-	case "rejected":
-		status = Rejected
-	default:
-		return Status(0), fmt.Errorf("invalid Status %s", str)
-	}
-	return status, nil
-}
-
 type RequestStatusRepository interface {
 	CreateStatus(ctx context.Context, requestID uuid.UUID, userID uuid.UUID, status Status) (*RequestStatus, error)
 }
 
 type RequestStatus struct {
 	ID        uuid.UUID
-	Status    string
+	Status    Status
 	CreatedAt time.Time
 }
 
@@ -119,7 +100,24 @@ func convertEntRequestStatusToModelRequestStatus(requestStatus *ent.RequestStatu
 	}
 	return &RequestStatus{
 		ID:        requestStatus.ID,
-		Status:    requestStatus.Status.String(),
+		Status:    convertEntRequestStatusToModelStatus(&requestStatus.Status),
 		CreatedAt: requestStatus.CreatedAt,
 	}
+}
+
+func convertEntRequestStatusToModelStatus(entStatus *requeststatus.Status) Status {
+	var status Status
+	switch entStatus.String() {
+	case "submitted":
+		status = Submitted
+	case "fix_required":
+		status = FixRequired
+	case "accepted":
+		status = Accepted
+	case "completed":
+		status = Completed
+	case "rejected":
+		status = Rejected
+	}
+	return status
 }

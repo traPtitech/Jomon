@@ -33,7 +33,7 @@ type PutRequest struct {
 
 type RequestResponse struct {
 	ID        uuid.UUID        `json:"id"`
-	Status    string           `json:"status"`
+	Status    model.Status     `json:"status"`
 	CreatedAt time.Time        `json:"created_at"`
 	UpdatedAt time.Time        `json:"updated_at"`
 	CreatedBy uuid.UUID        `json:"created_by"`
@@ -60,10 +60,10 @@ type PutStatus struct {
 	Comment string       `json:"comment"`
 }
 type Status struct {
-	CreatedBy uuid.UUID `json:"created_by"`
-	Status    string    `json:"status"`
-	Comment   string    `json:"comment"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedBy uuid.UUID    `json:"created_by"`
+	Status    model.Status `json:"status"`
+	Comment   string       `json:"comment"`
+	CreatedAt time.Time    `json:"created_at"`
 }
 
 func (h *Handlers) GetRequests(c echo.Context) error {
@@ -572,19 +572,14 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	latestStatus, err := model.ConvertStrStatusToStatus(request.Status)
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
 
 	// judging privilege
-	if req.Status == latestStatus {
+	if req.Status == request.Status {
 		c.Logger().Errorf("invalid request: same status")
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 	if req.Comment == "" {
-		if !IsAbleNoCommentChangeStatus(req.Status, latestStatus) {
+		if !IsAbleNoCommentChangeStatus(req.Status, request.Status) {
 			c.Logger().Errorf("unable to change %v to %v without comment", request.Status, req.Status)
 			return echo.NewHTTPError(http.StatusBadRequest)
 		}
@@ -600,11 +595,11 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	if u.Admin {
-		if !IsAbleAdminChangeState(req.Status, latestStatus) {
+		if !IsAbleAdminChangeState(req.Status, request.Status) {
 			c.Logger().Errorf("admin unable to change %v to %v", request.Status, req.Status)
 			return echo.NewHTTPError(http.StatusBadRequest)
 		}
-		if req.Status == model.Submitted && latestStatus == model.Accepted {
+		if req.Status == model.Submitted && request.Status == model.Accepted {
 			targets, err := h.Repository.GetRequestTargets(ctx, requestID)
 			if err != nil {
 				c.Logger().Error(err)
@@ -624,7 +619,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	}
 
 	if !u.Admin && user.ID == request.CreatedBy {
-		if !IsAbleCreatorChangeStatus(req.Status, latestStatus) {
+		if !IsAbleCreatorChangeStatus(req.Status, request.Status) {
 			c.Logger().Errorf("creator unable to change %v to %v", request.Status, req.Status)
 			return echo.NewHTTPError(http.StatusBadRequest)
 		}

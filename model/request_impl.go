@@ -157,7 +157,7 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 	}
 	reqdetail := &RequestDetail{
 		ID:        created.ID,
-		Status:    string(status.Status),
+		Status:    convertEntRequestStatusToModelStatus(&status.Status),
 		Amount:    created.Amount,
 		Title:     created.Title,
 		Tags:      tags,
@@ -190,7 +190,7 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 	group := ConvertEntGroupToModelGroup(request.Edges.Group)
 	reqdetail := &RequestDetail{
 		ID:        request.ID,
-		Status:    string(request.Edges.Status[0].Status),
+		Status:    convertEntRequestStatusToModelStatus(&request.Edges.Status[0].Status),
 		Amount:    request.Amount,
 		Title:     request.Title,
 		Tags:      tags,
@@ -262,7 +262,7 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	modelgroup := ConvertEntGroupToModelGroup(entgroup)
 	reqdetail := &RequestDetail{
 		ID:        updated.ID,
-		Status:    string(status.Status),
+		Status:    convertEntRequestStatusToModelStatus(&status.Status),
 		Amount:    updated.Amount,
 		Title:     updated.Title,
 		Tags:      modeltags,
@@ -295,7 +295,7 @@ func convertEntRequestResponseToModelRequestResponse(request *ent.Request, tags 
 	}
 	return &RequestResponse{
 		ID:        request.ID,
-		Status:    string(status.Status),
+		Status:    convertEntRequestStatusToModelStatus(&status.Status),
 		CreatedAt: request.CreatedAt,
 		UpdatedAt: request.UpdatedAt,
 		CreatedBy: user.ID,
