@@ -28,7 +28,7 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 		status := Status(random.Numeric(t, 5) + 1)
 		created, err := repo.CreateStatus(ctx, request.ID, user.ID, status)
 		assert.NoError(t, err)
-		assert.Equal(t, created.Status, status.String())
+		assert.Equal(t, created.Status, status)
 	})
 
 	t.Run("InvalidStatus", func(t *testing.T) {
