@@ -652,7 +652,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		CreatedAt: created.CreatedAt,
 	}
 
-	return echo.NewHTTPError(http.StatusOK, res)
+	return c.JSON(http.StatusOK, res)
 }
 
 func IsAbleNoCommentChangeStatus(status, latestStatus model.Status) bool {
