@@ -599,7 +599,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 			c.Logger().Errorf("admin unable to change %v to %v", request.Status, req.Status)
 			return echo.NewHTTPError(http.StatusBadRequest)
 		}
-		if req.Status == model.Submitted && request.Status == model.Accepted {
+		if req.Status == model.Accepted && request.Status == model.Submitted {
 			targets, err := h.Repository.GetRequestTargets(ctx, requestID)
 			if err != nil {
 				c.Logger().Error(err)
@@ -686,6 +686,9 @@ func IsAbleAdminChangeState(status, latestStatus model.Status) bool {
 		return true
 	}
 	if status == model.Submitted && latestStatus == model.Accepted {
+		return true
+	}
+	if status == model.FixRequired && latestStatus == model.Submitted {
 		return true
 	}
 	return false
