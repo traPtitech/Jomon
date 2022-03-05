@@ -1,6 +1,7 @@
 package router
 
 import (
+	"encoding/gob"
 	"net/http"
 	"strconv"
 	"time"
@@ -61,8 +62,10 @@ func (h Handlers) AccessLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFun
 
 func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		gob.Register(&User{})
 		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 		if err != nil {
+			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 

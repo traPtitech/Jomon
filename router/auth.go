@@ -91,6 +91,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 }
 
 func (h Handlers) GeneratePKCE(c echo.Context) error {
+	gob.Register(&User{})
 	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 	if err != nil {
 		c.Logger().Error(err)
