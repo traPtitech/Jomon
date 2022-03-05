@@ -633,7 +633,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized)
 	}
 
-	// create status and comment
+	// create status and comment: keep the two in this order
 	created, err := h.Repository.CreateStatus(ctx, requestID, user.ID, req.Status)
 	if err != nil {
 		c.Logger().Error(err)
@@ -660,13 +660,9 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 }
 
 func IsAbleNoCommentChangeStatus(status, latestStatus model.Status) bool {
-	if status == model.FixRequired && latestStatus == model.Submitted {
-		return false
-	}
-	if status == model.Rejected && latestStatus == model.Submitted {
-		return false
-	}
-	if status == model.Submitted && latestStatus == model.Accepted {
+	if status == model.FixRequired && latestStatus == model.Submitted ||
+		status == model.Rejected && latestStatus == model.Submitted ||
+		status == model.Submitted && latestStatus == model.Accepted {
 		return false
 	}
 	return true
@@ -680,19 +676,11 @@ func IsAbleCreatorChangeStatus(status, latestStatus model.Status) bool {
 }
 
 func IsAbleAdminChangeState(status, latestStatus model.Status) bool {
-	if status == model.Rejected && latestStatus == model.Submitted {
-		return true
-	}
-	if status == model.Submitted && latestStatus == model.FixRequired {
-		return true
-	}
-	if status == model.Accepted && latestStatus == model.Submitted {
-		return true
-	}
-	if status == model.Submitted && latestStatus == model.Accepted {
-		return true
-	}
-	if status == model.FixRequired && latestStatus == model.Submitted {
+	if status == model.Rejected && latestStatus == model.Submitted ||
+		status == model.Submitted && latestStatus == model.FixRequired ||
+		status == model.Accepted && latestStatus == model.Submitted ||
+		status == model.Submitted && latestStatus == model.Accepted ||
+		status == model.FixRequired && latestStatus == model.Submitted {
 		return true
 	}
 	return false
