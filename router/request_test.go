@@ -35,7 +35,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		request1 := &model.RequestResponse{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
@@ -44,7 +44,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		}
 		request2 := &model.RequestResponse{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
@@ -224,7 +224,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Comments:  []*model.Comment{comment},
@@ -311,7 +311,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		tags := []*model.Tag{tag}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Comments:  []*model.Comment{comment},
@@ -409,7 +409,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Comments:  []*model.Comment{comment},
@@ -501,7 +501,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Comments:  []*model.Comment{comment},
@@ -560,7 +560,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Comments:  []*model.Comment{comment},
@@ -619,7 +619,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Comments:  []*model.Comment{comment},
@@ -673,9 +673,13 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
+			Comments:  []*model.Comment{},
+			Files:     []*uuid.UUID{},
+			Statuses:  []*model.RequestStatus{},
+			Tags:      []*model.Tag{},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -727,9 +731,13 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
+			Comments:  []*model.Comment{},
+			Files:     []*uuid.UUID{},
+			Statuses:  []*model.RequestStatus{},
+			Tags:      []*model.Tag{},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -901,7 +909,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -974,7 +982,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1089,7 +1097,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1186,7 +1194,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1383,7 +1391,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1440,7 +1448,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1511,7 +1519,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(2),
+			Status:    model.FixRequired,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1520,7 +1528,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(1),
+			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -1608,7 +1616,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1617,7 +1625,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(2),
+			Status:  model.FixRequired,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -1705,7 +1713,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1714,7 +1722,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(3),
+			Status:  model.Accepted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -1802,7 +1810,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1811,7 +1819,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(2),
+			Status:  model.FixRequired,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -1899,7 +1907,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(2),
+			Status:    model.FixRequired,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1908,7 +1916,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(1),
+			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -1996,7 +2004,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(3),
+			Status:    model.Accepted,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -2012,7 +2020,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		targets := []*model.RequestTarget{target}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(1),
+			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2104,7 +2112,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(2),
+			Status:    model.FixRequired,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -2166,7 +2174,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(1),
+			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2216,7 +2224,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(1),
+			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2266,7 +2274,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(2),
+			Status:    model.FixRequired,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -2275,7 +2283,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(1),
+			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2382,7 +2390,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -2391,7 +2399,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status: model.Status(2),
+			Status: model.FixRequired,
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
@@ -2446,7 +2454,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -2455,7 +2463,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status: model.Status(5),
+			Status: model.Rejected,
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
@@ -2510,7 +2518,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(3),
+			Status:    model.Accepted,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -2519,7 +2527,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status: model.Status(1),
+			Status: model.Submitted,
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
@@ -2574,7 +2582,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(2),
+			Status:    model.FixRequired,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -2583,7 +2591,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(1),
+			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2644,7 +2652,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(2),
+			Status:    model.FixRequired,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -2653,7 +2661,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(3),
+			Status:  model.Accepted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2713,7 +2721,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(3),
+			Status:    model.Accepted,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -2729,7 +2737,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		targets := []*model.RequestTarget{target}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(1),
+			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2793,7 +2801,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(1),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -2802,7 +2810,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(3),
+			Status:  model.Accepted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2862,7 +2870,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(2),
+			Status:    model.FixRequired,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -2871,7 +2879,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		reqStatus := PutStatus{
-			Status:  model.Status(1),
+			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
