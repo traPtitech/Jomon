@@ -1,9 +1,10 @@
 package router
 
 import (
-	"github.com/traPtitech/Jomon/storage/mock_storage"
 	"testing"
 	"time"
+
+	"github.com/traPtitech/Jomon/storage/mock_storage"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -20,6 +21,7 @@ type MockRepository struct {
 	*mock_model.MockGroupBudgetRepository
 	*mock_model.MockGroupRepository
 	*mock_model.MockRequestRepository
+	*mock_model.MockRequestStatusRepository
 	*mock_model.MockRequestFileRepository
 	*mock_model.MockRequestTagRepository
 	*mock_model.MockRequestTargetRepository
@@ -37,6 +39,7 @@ func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 		MockGroupBudgetRepository:       mock_model.NewMockGroupBudgetRepository(ctrl),
 		MockGroupRepository:             mock_model.NewMockGroupRepository(ctrl),
 		MockRequestRepository:           mock_model.NewMockRequestRepository(ctrl),
+		MockRequestStatusRepository:     mock_model.NewMockRequestStatusRepository(ctrl),
 		MockRequestFileRepository:       mock_model.NewMockRequestFileRepository(ctrl),
 		MockRequestTagRepository:        mock_model.NewMockRequestTagRepository(ctrl),
 		MockRequestTargetRepository:     mock_model.NewMockRequestTargetRepository(ctrl),

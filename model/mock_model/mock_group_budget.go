@@ -8,25 +8,25 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockGroupBudgetRepository is a mock of GroupBudgetRepository interface
+// MockGroupBudgetRepository is a mock of GroupBudgetRepository interface.
 type MockGroupBudgetRepository struct {
 	ctrl     *gomock.Controller
 	recorder *MockGroupBudgetRepositoryMockRecorder
 }
 
-// MockGroupBudgetRepositoryMockRecorder is the mock recorder for MockGroupBudgetRepository
+// MockGroupBudgetRepositoryMockRecorder is the mock recorder for MockGroupBudgetRepository.
 type MockGroupBudgetRepositoryMockRecorder struct {
 	mock *MockGroupBudgetRepository
 }
 
-// NewMockGroupBudgetRepository creates a new mock instance
+// NewMockGroupBudgetRepository creates a new mock instance.
 func NewMockGroupBudgetRepository(ctrl *gomock.Controller) *MockGroupBudgetRepository {
 	mock := &MockGroupBudgetRepository{ctrl: ctrl}
 	mock.recorder = &MockGroupBudgetRepositoryMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockGroupBudgetRepository) EXPECT() *MockGroupBudgetRepositoryMockRecorder {
 	return m.recorder
 }

@@ -110,7 +110,7 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 
 	reqres := []*RequestResponse{}
 	for _, request := range requests {
-		reqres = append(reqres, ConvertEntRequestResponseToModelRequestResponse(request, request.Edges.Tag, request.Edges.Group, request.Edges.Status[0], request.Edges.User))
+		reqres = append(reqres, convertEntRequestResponseToModelRequestResponse(request, request.Edges.Tag, request.Edges.Group, request.Edges.Status[0], request.Edges.User))
 	}
 	return reqres, nil
 }
@@ -157,7 +157,7 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 	}
 	reqdetail := &RequestDetail{
 		ID:        created.ID,
-		Status:    string(status.Status),
+		Status:    convertEntRequestStatusToModelStatus(&status.Status),
 		Amount:    created.Amount,
 		Title:     created.Title,
 		Tags:      tags,
@@ -190,7 +190,7 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 	group := ConvertEntGroupToModelGroup(request.Edges.Group)
 	reqdetail := &RequestDetail{
 		ID:        request.ID,
-		Status:    string(request.Edges.Status[0].Status),
+		Status:    convertEntRequestStatusToModelStatus(&request.Edges.Status[0].Status),
 		Amount:    request.Amount,
 		Title:     request.Title,
 		Tags:      tags,
@@ -220,15 +220,21 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	}
 
 	if group != nil {
-		_, err = repo.client.Group.
-			UpdateOneID(group.ID).
-			ClearRequest().
-			AddRequest(updated).
+		_, err = repo.client.Request.
+			UpdateOneID(requestID).
+			ClearGroup().
+			SetGroupID(group.ID).
 			Save(ctx)
-		if err != nil {
-			return nil, err
-		}
+	} else {
+		_, err = repo.client.Request.
+			UpdateOneID(requestID).
+			ClearGroup().
+			Save(ctx)
 	}
+	if err != nil {
+		return nil, err
+	}
+
 	status, err := updated.QueryStatus().Select(requeststatus.FieldStatus).First(ctx)
 	if err != nil {
 		return nil, err
@@ -252,10 +258,11 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 			return nil, err
 		}
 	}
+
 	modelgroup := ConvertEntGroupToModelGroup(entgroup)
 	reqdetail := &RequestDetail{
 		ID:        updated.ID,
-		Status:    string(status.Status),
+		Status:    convertEntRequestStatusToModelStatus(&status.Status),
 		Amount:    updated.Amount,
 		Title:     updated.Title,
 		Tags:      modeltags,
@@ -266,9 +273,8 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	}
 	return reqdetail, nil
 }
-// このままだとnil *Group はGroupをなしにするのでなくそのままってかんじ
 
-func ConvertEntRequestToModelRequest(request *ent.Request) *Request {
+func convertEntRequestToModelRequest(request *ent.Request) *Request {
 	if request == nil {
 		return nil
 	}
@@ -279,7 +285,7 @@ func ConvertEntRequestToModelRequest(request *ent.Request) *Request {
 	}
 }
 
-func ConvertEntRequestResponseToModelRequestResponse(request *ent.Request, tags []*ent.Tag, group *ent.Group, status *ent.RequestStatus, user *ent.User) *RequestResponse {
+func convertEntRequestResponseToModelRequestResponse(request *ent.Request, tags []*ent.Tag, group *ent.Group, status *ent.RequestStatus, user *ent.User) *RequestResponse {
 	if request == nil {
 		return nil
 	}
@@ -289,7 +295,7 @@ func ConvertEntRequestResponseToModelRequestResponse(request *ent.Request, tags 
 	}
 	return &RequestResponse{
 		ID:        request.ID,
-		Status:    string(status.Status),
+		Status:    convertEntRequestStatusToModelStatus(&status.Status),
 		CreatedAt: request.CreatedAt,
 		UpdatedAt: request.UpdatedAt,
 		CreatedBy: user.ID,

@@ -2,6 +2,7 @@ package router
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -34,7 +35,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		request1 := &model.RequestResponse{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
@@ -43,7 +44,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		}
 		request2 := &model.RequestResponse{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
@@ -223,7 +224,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Comments:  []*model.Comment{comment},
@@ -310,7 +311,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		tags := []*model.Tag{tag}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Comments:  []*model.Comment{comment},
@@ -408,7 +409,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Comments:  []*model.Comment{comment},
@@ -500,7 +501,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Comments:  []*model.Comment{comment},
@@ -559,7 +560,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Comments:  []*model.Comment{comment},
@@ -618,7 +619,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Comments:  []*model.Comment{comment},
@@ -672,9 +673,13 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
+			Comments:  []*model.Comment{},
+			Files:     []*uuid.UUID{},
+			Statuses:  []*model.RequestStatus{},
+			Tags:      []*model.Tag{},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -726,9 +731,13 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
+			Comments:  []*model.Comment{},
+			Files:     []*uuid.UUID{},
+			Statuses:  []*model.RequestStatus{},
+			Tags:      []*model.Tag{},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -900,7 +909,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -973,7 +982,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1088,7 +1097,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1185,7 +1194,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 100000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1382,7 +1391,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1439,7 +1448,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted.String(),
+			Status:    model.Submitted,
 			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1488,6 +1497,1428 @@ func TestHandlers_PutRequest(t *testing.T) {
 		err = h.Handlers.PutRequest(c)
 		if assert.Error(t, err) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		}
+	})
+}
+
+func TestHandlers_PutStatus(t *testing.T) {
+	t.Parallel()
+
+	t.Run("SuccessByCreator", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.FixRequired,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: user.ID,
+		}
+
+		reqStatus := PutStatus{
+			Status:  model.Submitted,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		comment := &model.Comment{
+			ID:        uuid.New(),
+			User:      user.ID,
+			Comment:   reqStatus.Comment,
+			CreatedAt: date,
+			UpdatedAt: date,
+		}
+		status := &model.RequestStatus{
+			ID:        uuid.New(),
+			Status:    reqStatus.Status,
+			CreatedAt: date,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+		h.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByID(ctx, user.ID).
+			Return(user, nil)
+		h.Repository.MockRequestStatusRepository.
+			EXPECT().
+			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
+			Return(status, nil)
+		h.Repository.MockCommentRepository.
+			EXPECT().
+			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
+			Return(comment, nil)
+
+		res := &Status{
+			CreatedBy: user.ID,
+			Status:    status.Status,
+			Comment:   comment.Comment,
+			CreatedAt: status.CreatedAt,
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PutStatus(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("SuccessByAdminFromSubmittedToFixRequired", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       true,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		reqStatus := PutStatus{
+			Status:  model.FixRequired,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		comment := &model.Comment{
+			ID:        uuid.New(),
+			User:      user.ID,
+			Comment:   reqStatus.Comment,
+			CreatedAt: date,
+			UpdatedAt: date,
+		}
+		status := &model.RequestStatus{
+			ID:        uuid.New(),
+			Status:    reqStatus.Status,
+			CreatedAt: date,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+		h.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByID(ctx, user.ID).
+			Return(user, nil)
+		h.Repository.MockRequestStatusRepository.
+			EXPECT().
+			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
+			Return(status, nil)
+		h.Repository.MockCommentRepository.
+			EXPECT().
+			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
+			Return(comment, nil)
+
+		res := &Status{
+			CreatedBy: user.ID,
+			Status:    status.Status,
+			Comment:   comment.Comment,
+			CreatedAt: status.CreatedAt,
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PutStatus(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("SuccessByAdminFromSubmittedToAccepted", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       true,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		reqStatus := PutStatus{
+			Status:  model.Accepted,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		comment := &model.Comment{
+			ID:        uuid.New(),
+			User:      user.ID,
+			Comment:   reqStatus.Comment,
+			CreatedAt: date,
+			UpdatedAt: date,
+		}
+		status := &model.RequestStatus{
+			ID:        uuid.New(),
+			Status:    reqStatus.Status,
+			CreatedAt: date,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+		h.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByID(ctx, user.ID).
+			Return(user, nil)
+		h.Repository.MockRequestStatusRepository.
+			EXPECT().
+			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
+			Return(status, nil)
+		h.Repository.MockCommentRepository.
+			EXPECT().
+			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
+			Return(comment, nil)
+
+		res := &Status{
+			CreatedBy: user.ID,
+			Status:    status.Status,
+			Comment:   comment.Comment,
+			CreatedAt: status.CreatedAt,
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PutStatus(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("SuccessByAdminFromSubmittedToFixRequired", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       true,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		reqStatus := PutStatus{
+			Status:  model.FixRequired,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		comment := &model.Comment{
+			ID:        uuid.New(),
+			User:      user.ID,
+			Comment:   reqStatus.Comment,
+			CreatedAt: date,
+			UpdatedAt: date,
+		}
+		status := &model.RequestStatus{
+			ID:        uuid.New(),
+			Status:    reqStatus.Status,
+			CreatedAt: date,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+		h.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByID(ctx, user.ID).
+			Return(user, nil)
+		h.Repository.MockRequestStatusRepository.
+			EXPECT().
+			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
+			Return(status, nil)
+		h.Repository.MockCommentRepository.
+			EXPECT().
+			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
+			Return(comment, nil)
+
+		res := &Status{
+			CreatedBy: user.ID,
+			Status:    status.Status,
+			Comment:   comment.Comment,
+			CreatedAt: status.CreatedAt,
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PutStatus(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("SuccessByAdminFromFixRequiredToSubmitted", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       true,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.FixRequired,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		reqStatus := PutStatus{
+			Status:  model.Submitted,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		comment := &model.Comment{
+			ID:        uuid.New(),
+			User:      user.ID,
+			Comment:   reqStatus.Comment,
+			CreatedAt: date,
+			UpdatedAt: date,
+		}
+		status := &model.RequestStatus{
+			ID:        uuid.New(),
+			Status:    reqStatus.Status,
+			CreatedAt: date,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+		h.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByID(ctx, user.ID).
+			Return(user, nil)
+		h.Repository.MockRequestStatusRepository.
+			EXPECT().
+			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
+			Return(status, nil)
+		h.Repository.MockCommentRepository.
+			EXPECT().
+			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
+			Return(comment, nil)
+
+		res := &Status{
+			CreatedBy: user.ID,
+			Status:    status.Status,
+			Comment:   comment.Comment,
+			CreatedAt: status.CreatedAt,
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PutStatus(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("SuccessByAdminFromAcceptedToSubmitted", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       true,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Accepted,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+		target := &model.RequestTarget{
+			ID:        uuid.New(),
+			Target:    random.AlphaNumeric(t, 20),
+			PaidAt:    nil,
+			CreatedAt: date,
+		}
+		targets := []*model.RequestTarget{target}
+
+		reqStatus := PutStatus{
+			Status:  model.Submitted,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		comment := &model.Comment{
+			ID:        uuid.New(),
+			User:      user.ID,
+			Comment:   reqStatus.Comment,
+			CreatedAt: date,
+			UpdatedAt: date,
+		}
+		status := &model.RequestStatus{
+			ID:        uuid.New(),
+			Status:    reqStatus.Status,
+			CreatedAt: date,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+		h.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByID(ctx, user.ID).
+			Return(user, nil)
+		h.Repository.MockRequestTargetRepository.
+			EXPECT().
+			GetRequestTargets(ctx, request.ID).
+			Return(targets, nil)
+		h.Repository.MockRequestStatusRepository.
+			EXPECT().
+			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
+			Return(status, nil)
+		h.Repository.MockCommentRepository.
+			EXPECT().
+			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
+			Return(comment, nil)
+
+		res := &Status{
+			CreatedBy: user.ID,
+			Status:    status.Status,
+			Comment:   comment.Comment,
+			CreatedAt: status.CreatedAt,
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PutStatus(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("InvalidStatus", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.FixRequired,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: user.ID,
+		}
+
+		invalidStatus := random.AlphaNumeric(t, 20)
+		reqStatus := fmt.Sprintf(`
+		{
+			"status": "%s",
+			"comment": "%s"
+		}`, invalidStatus, random.AlphaNumeric(t, 20))
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), strings.NewReader(reqStatus))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		resErr := echo.NewHTTPError(http.StatusBadRequest)
+		resErrMessage := echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid Status %s", invalidStatus))
+		resErrMessage.Internal = errors.New(fmt.Sprintf("invalid Status %s", invalidStatus))
+		resErr.Message = resErrMessage
+
+		err = h.Handlers.PutStatus(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, resErr, err)
+		}
+	})
+
+	t.Run("InvalidUUID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		reqStatus := PutStatus{
+			Status:  model.Submitted,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", "hoge"), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues("hoge")
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		_, resErr := uuid.Parse(c.Param("requestID"))
+
+		err = h.Handlers.PutStatus(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
+
+	t.Run("NillUUID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		reqStatus := PutStatus{
+			Status:  model.Submitted,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", uuid.Nil), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(uuid.Nil.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		_, resErr := uuid.Parse(c.Param("requestID"))
+
+		err = h.Handlers.PutStatus(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
+
+	t.Run("SissionNotFound", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.FixRequired,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: user.ID,
+		}
+
+		reqStatus := PutStatus{
+			Status:  model.Submitted,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		resErr := errors.New("sessionUser not found")
+
+		err = h.Handlers.PutStatus(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusUnauthorized, resErr), err)
+		}
+	})
+
+	t.Run("SameStatusError", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Status(random.Numeric(t, 5) + 1),
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: user.ID,
+		}
+
+		reqStatus := PutStatus{
+			Status:  request.Status,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+
+		resErr := errors.New("invalid request: same status")
+
+		err = h.Handlers.PutStatus(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
+
+	t.Run("CommentRequiredErrorFromSubmittedToFixRequired", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: user.ID,
+		}
+
+		reqStatus := PutStatus{
+			Status: model.FixRequired,
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+
+		resErr := fmt.Errorf("unable to change %v to %v without comment", request.Status.String(), reqStatus.Status.String())
+
+		err = h.Handlers.PutStatus(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
+
+	t.Run("CommentRequiredErrorFromSubmittedToRejected", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: user.ID,
+		}
+
+		reqStatus := PutStatus{
+			Status: model.Rejected,
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+
+		resErr := fmt.Errorf("unable to change %v to %v without comment", request.Status.String(), reqStatus.Status.String())
+
+		err = h.Handlers.PutStatus(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
+
+	t.Run("CommentRequiredErrorFromAcceptedToSubmitted", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Accepted,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: user.ID,
+		}
+
+		reqStatus := PutStatus{
+			Status: model.Submitted,
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+
+		resErr := fmt.Errorf("unable to change %v to %v without comment", request.Status.String(), reqStatus.Status.String())
+
+		err = h.Handlers.PutStatus(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
+
+	t.Run("UnknownUser", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.FixRequired,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: user.ID,
+		}
+
+		reqStatus := PutStatus{
+			Status:  model.Submitted,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		var resErr *ent.NotFoundError
+		errors.As(errors.New("unknown id"), &resErr)
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+		h.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByID(ctx, user.ID).
+			Return(nil, resErr)
+
+		err = h.Handlers.PutStatus(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		}
+	})
+
+	t.Run("AdminNoPrivilege", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       true,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.FixRequired,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		reqStatus := PutStatus{
+			Status:  model.Accepted,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+		h.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByID(ctx, user.ID).
+			Return(user, nil)
+
+		resErr := fmt.Errorf("admin unable to change %v to %v", request.Status.String(), reqStatus.Status.String())
+
+		err = h.Handlers.PutStatus(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
+
+	t.Run("AlreadyPaid", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       true,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Accepted,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+		target := &model.RequestTarget{
+			ID:        uuid.New(),
+			Target:    random.AlphaNumeric(t, 20),
+			PaidAt:    &date,
+			CreatedAt: date,
+		}
+		targets := []*model.RequestTarget{target}
+
+		reqStatus := PutStatus{
+			Status:  model.Submitted,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+		h.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByID(ctx, user.ID).
+			Return(user, nil)
+		h.Repository.MockRequestTargetRepository.
+			EXPECT().
+			GetRequestTargets(ctx, request.ID).
+			Return(targets, nil)
+
+		resErr := errors.New("someone already paid")
+
+		err = h.Handlers.PutStatus(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
+
+	t.Run("CreatorNoPrivilege", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: user.ID,
+		}
+
+		reqStatus := PutStatus{
+			Status:  model.Accepted,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+		h.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByID(ctx, user.ID).
+			Return(user, nil)
+
+		resErr := fmt.Errorf("creator unable to change %v to %v", request.Status.String(), reqStatus.Status.String())
+
+		err = h.Handlers.PutStatus(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
+
+	t.Run("NoPrivilege", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 20),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.FixRequired,
+			Amount:    random.Numeric(t, 100000),
+			Title:     random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		reqStatus := PutStatus{
+			Status:  model.Submitted,
+			Comment: random.AlphaNumeric(t, 20),
+		}
+		reqBody, err := json.Marshal(reqStatus)
+		require.NoError(t, err)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/requests/:requestID/status")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		assert.NoError(t, err)
+		sess.Values[sessionUserKey] = &User{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.Name,
+			Admin:       user.Admin,
+		}
+
+		ctx := context.Background()
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(ctx, request.ID).
+			Return(request, nil)
+		h.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByID(ctx, user.ID).
+			Return(user, nil)
+
+		err = h.Handlers.PutStatus(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusUnauthorized), err)
 		}
 	})
 }
