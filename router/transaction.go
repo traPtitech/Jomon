@@ -134,7 +134,7 @@ func (h *Handlers) PostTransaction(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	created, err := h.Repository.CreateTransaction(ctx, tx.Amount, tx.Target, tx.Tags, tx.Group)
+	created, err := h.Repository.CreateTransaction(ctx, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -225,7 +225,7 @@ func (h *Handlers) PutTransaction(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	updated, err := h.Repository.UpdateTransaction(ctx, txID, tx.Amount, tx.Target, tx.Tags, tx.Group)
+	updated, err := h.Repository.UpdateTransaction(ctx, txID, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}

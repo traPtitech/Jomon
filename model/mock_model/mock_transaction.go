@@ -51,18 +51,18 @@ func (mr *MockTransactionRepositoryMockRecorder) GetTransactions(ctx, query inte
 }
 
 // CreateTransaction mocks base method
-func (m *MockTransactionRepository) CreateTransaction(ctx context.Context, Amount int, Target string, tags []*uuid.UUID, group *uuid.UUID) (*model.TransactionResponse, error) {
+func (m *MockTransactionRepository) CreateTransaction(ctx context.Context, Amount int, Target string, tags []*uuid.UUID, group, requestID *uuid.UUID) (*model.TransactionResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateTransaction", ctx, Amount, Target, tags, group)
+	ret := m.ctrl.Call(m, "CreateTransaction", ctx, Amount, Target, tags, group, requestID)
 	ret0, _ := ret[0].(*model.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateTransaction indicates an expected call of CreateTransaction
-func (mr *MockTransactionRepositoryMockRecorder) CreateTransaction(ctx, Amount, Target, tags, group interface{}) *gomock.Call {
+func (mr *MockTransactionRepositoryMockRecorder) CreateTransaction(ctx, Amount, Target, tags, group, requestID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransaction", reflect.TypeOf((*MockTransactionRepository)(nil).CreateTransaction), ctx, Amount, Target, tags, group)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransaction", reflect.TypeOf((*MockTransactionRepository)(nil).CreateTransaction), ctx, Amount, Target, tags, group, requestID)
 }
 
 // GetTransaction mocks base method
@@ -81,16 +81,16 @@ func (mr *MockTransactionRepositoryMockRecorder) GetTransaction(ctx, transaction
 }
 
 // UpdateTransaction mocks base method
-func (m *MockTransactionRepository) UpdateTransaction(ctx context.Context, transactionID uuid.UUID, Amount int, Target string, tags []*uuid.UUID, group *uuid.UUID) (*model.TransactionResponse, error) {
+func (m *MockTransactionRepository) UpdateTransaction(ctx context.Context, transactionID uuid.UUID, Amount int, Target string, tags []*uuid.UUID, group, requestID *uuid.UUID) (*model.TransactionResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateTransaction", ctx, transactionID, Amount, Target, tags, group)
+	ret := m.ctrl.Call(m, "UpdateTransaction", ctx, transactionID, Amount, Target, tags, group, requestID)
 	ret0, _ := ret[0].(*model.TransactionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateTransaction indicates an expected call of UpdateTransaction
-func (mr *MockTransactionRepositoryMockRecorder) UpdateTransaction(ctx, transactionID, Amount, Target, tags, group interface{}) *gomock.Call {
+func (mr *MockTransactionRepositoryMockRecorder) UpdateTransaction(ctx, transactionID, Amount, Target, tags, group, requestID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTransaction", reflect.TypeOf((*MockTransactionRepository)(nil).UpdateTransaction), ctx, transactionID, Amount, Target, tags, group)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTransaction", reflect.TypeOf((*MockTransactionRepository)(nil).UpdateTransaction), ctx, transactionID, Amount, Target, tags, group, requestID)
 }

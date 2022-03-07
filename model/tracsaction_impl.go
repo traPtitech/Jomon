@@ -82,7 +82,7 @@ func (repo *EntRepository) GetTransaction(ctx context.Context, transactionID uui
 	return ConvertEntTransactionToModelTransactionResponse(tx), nil
 }
 
-func (repo *EntRepository) CreateTransaction(ctx context.Context, Amount int, Target string, tags []*uuid.UUID, groupID *uuid.UUID) (*TransactionResponse, error) {
+func (repo *EntRepository) CreateTransaction(ctx context.Context, Amount int, Target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
 	// Creating transaction detail
 	detail, err := repo.client.TransactionDetail.Create().
 		SetAmount(Amount).
@@ -120,6 +120,12 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, Amount int, Ta
 			SetGroupBudgetID(gb.ID)
 	}
 
+	// Set Request to the Transaction
+	if requestID != nil {
+		query.
+			SetRequestID(*requestID)
+	}
+
 	// Create transaction
 	tx, err := query.Save(ctx)
 	if err != nil {
@@ -140,7 +146,7 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, Amount int, Ta
 	return ConvertEntTransactionToModelTransactionResponse(tx), nil
 }
 
-func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID uuid.UUID, Amount int, Target string, tags []*uuid.UUID, groupID *uuid.UUID) (*TransactionResponse, error) {
+func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID uuid.UUID, Amount int, Target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
 	// Get transaction detail
 	detail, err := repo.client.TransactionDetail.
 		Query().
@@ -188,6 +194,17 @@ func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID 
 		Only(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	// Set Request to the transaction
+	if requestID != nil {
+		tx, err = repo.client.Transaction.
+			UpdateOne(tx).
+			SetRequestID(*requestID).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Update transaction
