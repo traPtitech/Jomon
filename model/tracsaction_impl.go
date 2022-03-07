@@ -82,12 +82,9 @@ func (repo *EntRepository) GetTransaction(ctx context.Context, transactionID uui
 	return ConvertEntTransactionToModelTransactionResponse(tx), nil
 }
 
-func (repo *EntRepository) CreateTransaction(ctx context.Context, Amount int, Target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
+func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
 	// Creating transaction detail
-	detail, err := repo.client.TransactionDetail.Create().
-		SetAmount(Amount).
-		SetTarget(Target).
-		Save(ctx)
+	detail, err := repo.CreateTransactionDetail(ctx, amount, target)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +100,7 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, Amount int, Ta
 		gb, err = repo.client.GroupBudget.
 			Create().
 			SetGroupID(*groupID).
-			SetAmount(Amount).
+			SetAmount(amount).
 			Save(ctx)
 		if err != nil {
 			return nil, err
