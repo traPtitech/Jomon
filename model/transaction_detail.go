@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/ent"
 )
 
 type TransactionDetailRepository interface {
-	CreateTransactionDetail(ctx context.Context, amount int, target string) (*ent.TransactionDetail, error)
+	CreateTransactionDetail(ctx context.Context, amount int, target string) (*TransactionDetail, error)
+	UpdateTransactionDetail(ctx context.Context, transactionID uuid.UUID, amount int, target string) (*TransactionDetail, error)
 }
 
 type TransactionDetail struct {

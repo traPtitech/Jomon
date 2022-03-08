@@ -143,23 +143,9 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 	return ConvertEntTransactionToModelTransactionResponse(tx), nil
 }
 
-func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID uuid.UUID, Amount int, Target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
-	// Get transaction detail
-	detail, err := repo.client.TransactionDetail.
-		Query().
-		Where(transactiondetail.HasTransactionWith(
-			transaction.IDEQ(transactionID),
-		)).
-		Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// Update transaction detail
-	detail, err = repo.client.TransactionDetail.UpdateOne(detail).
-		SetAmount(Amount).
-		SetTarget(Target).
-		Save(ctx)
+func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID uuid.UUID, amount int, target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
+	// Update transaction Detail
+	detail, err := repo.UpdateTransactionDetail(ctx, transactionID, amount, target)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +163,7 @@ func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID 
 			Where(groupbudget.HasGroupWith(
 				group.IDEQ(*groupID),
 			)).
-			SetAmount(Amount).
+			SetAmount(amount).
 			Save(ctx)
 		if err != nil {
 			return nil, err
