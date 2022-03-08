@@ -22,21 +22,12 @@ func TestEntRepository_GetUsers(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 
+		user1, err := repo.CreateUser(ctx, "user1", "user1", true)
+		assert.NoError(t, err)
+		user2, err := repo.CreateUser(ctx, "user2", "user2", true)
+		assert.NoError(t, err)
+
 		got, err := repo.GetUsers(ctx)
-		assert.NoError(t, err)
-		assert.Len(t, got, 0)
-	})
-
-	t.Run("Success2", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-
-		user1, err := repo2.CreateUser(ctx, "user1", "user1", true)
-		assert.NoError(t, err)
-		user2, err := repo2.CreateUser(ctx, "user2", "user2", true)
-		assert.NoError(t, err)
-
-		got, err := repo2.GetUsers(ctx)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) && got[0].ID == user1.ID {
 			assert.Equal(t, got[0].ID, user1.ID)
@@ -57,6 +48,15 @@ func TestEntRepository_GetUsers(t *testing.T) {
 			assert.Equal(t, got[1].DisplayName, user1.DisplayName)
 			assert.Equal(t, got[1].Admin, user1.Admin)
 		}
+	})
+
+	t.Run("Success2", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+
+		got, err := repo2.GetUsers(ctx)
+		assert.NoError(t, err)
+		assert.Len(t, got, 0)
 	})
 }
 
