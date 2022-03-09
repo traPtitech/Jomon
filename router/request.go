@@ -2,7 +2,6 @@ package router
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -440,18 +439,13 @@ func (h *Handlers) PostComment(c echo.Context) error {
 
 	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 	if err != nil {
+		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	bodyUser, ok := sess.Values[sessionUserKey].([]byte)
+	user, ok := sess.Values[sessionUserKey].(*User)
 	if !ok {
 		c.Logger().Error(errors.New("sessionUser not found"))
 		return echo.NewHTTPError(http.StatusUnauthorized, errors.New("sessionUser not found"))
-	}
-	user := new(User)
-	err = json.Unmarshal(bodyUser, user)
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	ctx := context.Background()
