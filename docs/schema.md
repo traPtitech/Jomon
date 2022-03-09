@@ -81,6 +81,7 @@ jomon の admin (会計の人：申請書更新等の権限)（admin のログ�
 | id         | int(11)     | NO   | PRI | NULL              | auto_increment |                                     |
 | request_id | char(36)    | NO   | MUL | NULL              |                | 依頼への参照**Parents:requests.id** |
 | target     | varchar(64) | NO   |     | NULL              |                | 入金元 or 出金先                    |
+| amount     | int(11)     | NO   |     | NULL              |                | 払う/払われた金額　　                | 
 | paid_at    | date        | YES  |     | NULL              |                | 払う/払われた日                     |
 | created_at | datetime    | NO   |     | CURRENT_TIMESTAMP |                | request_target が作成された日時     |
 

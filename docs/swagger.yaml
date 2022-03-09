@@ -904,8 +904,22 @@ components:
           type: string
           example: "hoge.png"
     Target:
-      type: string
-      example: "hoge株式会社"
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        target:
+          type: string
+          example: "hoge株式会社"
+        amount:
+          type: integer
+        paid_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
     Request:
       type: object
       properties:
@@ -970,6 +984,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Tag"
+        targets:
+          type: array
+          items:
+            $ref: "#/components/schemas/Target"
         group:
           $ref: "#/components/schemas/Group"
         created_at:
