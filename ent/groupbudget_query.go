@@ -158,7 +158,7 @@ func (gbq *GroupBudgetQuery) FirstIDX(ctx context.Context) uuid.UUID {
 }
 
 // Only returns a single GroupBudget entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one GroupBudget entity is not found.
+// Returns a *NotSingularError when more than one GroupBudget entity is found.
 // Returns a *NotFoundError when no GroupBudget entities are found.
 func (gbq *GroupBudgetQuery) Only(ctx context.Context) (*GroupBudget, error) {
 	nodes, err := gbq.Limit(2).All(ctx)
@@ -185,7 +185,7 @@ func (gbq *GroupBudgetQuery) OnlyX(ctx context.Context) *GroupBudget {
 }
 
 // OnlyID is like Only, but returns the only GroupBudget ID in the query.
-// Returns a *NotSingularError when exactly one GroupBudget ID is not found.
+// Returns a *NotSingularError when more than one GroupBudget ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (gbq *GroupBudgetQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
@@ -296,8 +296,9 @@ func (gbq *GroupBudgetQuery) Clone() *GroupBudgetQuery {
 		withGroup:       gbq.withGroup.Clone(),
 		withTransaction: gbq.withTransaction.Clone(),
 		// clone intermediate query.
-		sql:  gbq.sql.Clone(),
-		path: gbq.path,
+		sql:    gbq.sql.Clone(),
+		path:   gbq.path,
+		unique: gbq.unique,
 	}
 }
 
