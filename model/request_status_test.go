@@ -22,7 +22,7 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 		title := random.AlphaNumeric(t, 40)
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, amount, title, nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, title, nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		status := Status(random.Numeric(t, 5) + 1)
@@ -37,7 +37,7 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 		title := random.AlphaNumeric(t, 40)
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, amount, title, nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, title, nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		invalidStatus := Status(6)
@@ -61,7 +61,7 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 		title := random.AlphaNumeric(t, 40)
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, amount, title, nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, title, nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		status := Status(random.Numeric(t, 5) + 1)
