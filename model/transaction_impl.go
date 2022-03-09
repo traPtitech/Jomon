@@ -43,6 +43,16 @@ func (repo *EntRepository) GetTransactions(ctx context.Context, query Transactio
 		))
 	}
 
+	if query.Since != nil {
+		transactionsq = transactionsq.
+			Where(transaction.CreatedAtGTE(*query.Since))
+	}
+
+	if query.Until != nil {
+		transactionsq = transactionsq.
+			Where(transaction.CreatedAtLT(*query.Until))
+	}
+
 	if query.Year != nil && *query.Year != 0 {
 		transactionsq = transactionsq.
 			Where(transaction.CreatedAtGTE(time.Date(*query.Year, 4, 1, 0, 0, 0, 0, time.Local))).
