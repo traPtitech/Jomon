@@ -21,14 +21,16 @@ type Request struct {
 	Title     string       `json:"title"`
 	Comment   string       `json:"comment"`
 	Tags      []*uuid.UUID `json:"tags"`
+	Targets   []*Target    `json:"targets"`
 	Group     *uuid.UUID   `json:"group"`
 }
 
 type PutRequest struct {
-	Amount int          `json:"amount"`
-	Title  string       `json:"title"`
-	Tags   []*uuid.UUID `json:"tags"`
-	Group  *uuid.UUID   `json:"group"`
+	Amount  int          `json:"amount"`
+	Title   string       `json:"title"`
+	Tags    []*uuid.UUID `json:"tags"`
+	Targets []*Target    `json:"targets"`
+	Group   *uuid.UUID   `json:"group"`
 }
 
 type RequestResponse struct {
@@ -40,6 +42,7 @@ type RequestResponse struct {
 	Amount    int              `json:"amount"`
 	Title     string           `json:"title"`
 	Tags      []*TagOverview   `json:"tags"`
+	Targets   []*TargetDetail  `json:"targets"`
 	Group     *GroupOverview   `json:"group"`
 	Comments  []*CommentDetail `json:"comments"`
 }
@@ -64,6 +67,18 @@ type Status struct {
 	Status    model.Status `json:"status"`
 	Comment   string       `json:"comment"`
 	CreatedAt time.Time    `json:"created_at"`
+}
+
+type Target struct {
+	Target string `json:"target"`
+	Amount int    `json:"amount"`
+}
+type TargetDetail struct {
+	ID        uuid.UUID  `json:"id"`
+	Target    string     `json:"target"`
+	Amount    int        `json:"amount"`
+	PaidAt    *time.Time `json:"paid_at"`
+	CreatedAt time.Time  `json:"created_at"`
 }
 
 func (h *Handlers) GetRequests(c echo.Context) error {
