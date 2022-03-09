@@ -920,6 +920,13 @@ components:
         created_at:
           type: string
           format: date-time
+    PostTarget:
+      type: object
+      properties:
+        target:
+          type: string
+        amount:
+          type: integer
     Request:
       type: object
       properties:
@@ -1014,6 +1021,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/PostTag"
+        targets:
+          type: array
+          items:
+            $ref: "#/components/schemas/PostTarget"
         group:
           $ref: "#/components/schemas/PostGroup"
     Transaction:
