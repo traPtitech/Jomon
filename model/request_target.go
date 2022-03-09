@@ -49,6 +49,7 @@ func convertEntRequestTargetToModelRequestTarget(requestTarget *ent.RequestTarge
 	return &TargetDetail{
 		ID:        requestTarget.ID,
 		Target:    requestTarget.Target,
+		Amount:    requestTarget.Amount,
 		PaidAt:    requestTarget.PaidAt,
 		CreatedAt: requestTarget.CreatedAt,
 	}
