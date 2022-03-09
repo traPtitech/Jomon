@@ -17,7 +17,6 @@ func TestEntRepository_GetComments(t *testing.T) {
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
-		t.Parallel()
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 40), []*Tag{}, nil, user.ID)
@@ -37,7 +36,7 @@ func TestEntRepository_GetComments(t *testing.T) {
 			assert.Equal(t, got[1].ID, comment2.ID)
 			assert.Equal(t, got[1].User, comment2.User)
 			assert.Equal(t, got[1].Comment, comment2.Comment)
-		}else if assert.Len(t, got, 2) {
+		} else if assert.Len(t, got, 2) {
 			assert.Equal(t, got[0].ID, comment2.ID)
 			assert.Equal(t, got[0].User, comment2.User)
 			assert.Equal(t, got[0].Comment, comment2.Comment)
@@ -48,7 +47,8 @@ func TestEntRepository_GetComments(t *testing.T) {
 	})
 
 	t.Run("Success2", func(t *testing.T) {
-		t.Parallel()
+		err := dropAll(t, ctx, client)
+		require.NoError(t, err)
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 40), []*Tag{}, nil, user.ID)
@@ -66,7 +66,7 @@ func TestEntRepository_GetComments(t *testing.T) {
 	})
 }
 
-func TestEntRepository_CreateComments(t *testing.T) {
+func TestEntRepository_CreateComment(t *testing.T) {
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx)
 	require.NoError(t, err)
@@ -123,7 +123,7 @@ func TestEntREpository_UpdateComment(t *testing.T) {
 		created, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, user.ID)
 		require.NoError(t, err)
 
-    comment := random.AlphaNumeric(t, 30)
+		comment := random.AlphaNumeric(t, 30)
 		updated, err := repo.UpdateComment(ctx, comment, request.ID, created.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, updated.ID, created.ID)

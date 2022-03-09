@@ -6,26 +6,23 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
 func TestEntRepository_GetUsers(t *testing.T) {
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx)
-	assert.NoError(t, err)
-	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
-		t.Parallel()
 		ctx := context.Background()
 
 		user1, err := repo.CreateUser(ctx, "user1", "user1", true)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		user2, err := repo.CreateUser(ctx, "user2", "user2", true)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		got, err := repo.GetUsers(ctx)
 		assert.NoError(t, err)
@@ -51,10 +48,11 @@ func TestEntRepository_GetUsers(t *testing.T) {
 	})
 
 	t.Run("Success2", func(t *testing.T) {
-		t.Parallel()
+		err := dropAll(t, ctx, client)
+		require.NoError(t, err)
 		ctx := context.Background()
 
-		got, err := repo2.GetUsers(ctx)
+		got, err := repo.GetUsers(ctx)
 		assert.NoError(t, err)
 		assert.Len(t, got, 0)
 	})

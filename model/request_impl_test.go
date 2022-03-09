@@ -18,7 +18,6 @@ func TestEntRepository_GetRequests(t *testing.T) {
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
-		t.Parallel()
 		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
@@ -72,7 +71,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 	})
 
 	t.Run("SuccessWithReverseOrder", func(t *testing.T) {
-		t.Parallel()
+		err := dropAll(t, ctx, client)
+		require.NoError(t, err)
 		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
