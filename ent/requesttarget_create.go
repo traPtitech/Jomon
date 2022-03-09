@@ -82,6 +82,14 @@ func (rtc *RequestTargetCreate) SetRequestID(id uuid.UUID) *RequestTargetCreate 
 	return rtc
 }
 
+// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
+func (rtc *RequestTargetCreate) SetNillableRequestID(id *uuid.UUID) *RequestTargetCreate {
+	if id != nil {
+		rtc = rtc.SetRequestID(*id)
+	}
+	return rtc
+}
+
 // SetRequest sets the "request" edge to the Request entity.
 func (rtc *RequestTargetCreate) SetRequest(r *Request) *RequestTargetCreate {
 	return rtc.SetRequestID(r.ID)
@@ -178,9 +186,6 @@ func (rtc *RequestTargetCreate) check() error {
 	}
 	if _, ok := rtc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "RequestTarget.created_at"`)}
-	}
-	if _, ok := rtc.mutation.RequestID(); !ok {
-		return &ValidationError{Name: "request", err: errors.New(`ent: missing required edge "RequestTarget.request"`)}
 	}
 	return nil
 }

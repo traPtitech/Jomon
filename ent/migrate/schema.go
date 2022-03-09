@@ -147,7 +147,7 @@ var (
 				Symbol:     "request_status_requests_status",
 				Columns:    []*schema.Column{RequestStatusColumns[3]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "request_status_users_user",
@@ -164,7 +164,7 @@ var (
 		{Name: "amount", Type: field.TypeInt},
 		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "request_target", Type: field.TypeUUID},
+		{Name: "request_target", Type: field.TypeUUID, Nullable: true},
 	}
 	// RequestTargetsTable holds the schema information for the "request_targets" table.
 	RequestTargetsTable = &schema.Table{
@@ -176,7 +176,7 @@ var (
 				Symbol:     "request_targets_requests_target",
 				Columns:    []*schema.Column{RequestTargetsColumns[5]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}

@@ -37,18 +37,18 @@ func (m *MockRequestRepository) EXPECT() *MockRequestRepositoryMockRecorder {
 }
 
 // CreateRequest mocks base method.
-func (m *MockRequestRepository) CreateRequest(ctx context.Context, amount int, title string, tags []*model.Tag, group *model.Group, userID uuid.UUID) (*model.RequestDetail, error) {
+func (m *MockRequestRepository) CreateRequest(ctx context.Context, amount int, title string, tags []*model.Tag, targets []*model.Target, group *model.Group, userID uuid.UUID) (*model.RequestDetail, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateRequest", ctx, amount, title, tags, group, userID)
+	ret := m.ctrl.Call(m, "CreateRequest", ctx, amount, title, tags, targets, group, userID)
 	ret0, _ := ret[0].(*model.RequestDetail)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateRequest indicates an expected call of CreateRequest.
-func (mr *MockRequestRepositoryMockRecorder) CreateRequest(ctx, amount, title, tags, group, userID interface{}) *gomock.Call {
+func (mr *MockRequestRepositoryMockRecorder) CreateRequest(ctx, amount, title, tags, targets, group, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRequest", reflect.TypeOf((*MockRequestRepository)(nil).CreateRequest), ctx, amount, title, tags, group, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRequest", reflect.TypeOf((*MockRequestRepository)(nil).CreateRequest), ctx, amount, title, tags, targets, group, userID)
 }
 
 // GetRequest mocks base method.
@@ -82,16 +82,16 @@ func (mr *MockRequestRepositoryMockRecorder) GetRequests(ctx, query interface{})
 }
 
 // UpdateRequest mocks base method.
-func (m *MockRequestRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, tags []*model.Tag, group *model.Group) (*model.RequestDetail, error) {
+func (m *MockRequestRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, tags []*model.Tag, targets []*model.Target, group *model.Group) (*model.RequestDetail, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateRequest", ctx, requestID, amount, title, tags, group)
+	ret := m.ctrl.Call(m, "UpdateRequest", ctx, requestID, amount, title, tags, targets, group)
 	ret0, _ := ret[0].(*model.RequestDetail)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateRequest indicates an expected call of UpdateRequest.
-func (mr *MockRequestRepositoryMockRecorder) UpdateRequest(ctx, requestID, amount, title, tags, group interface{}) *gomock.Call {
+func (mr *MockRequestRepositoryMockRecorder) UpdateRequest(ctx, requestID, amount, title, tags, targets, group interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRequest", reflect.TypeOf((*MockRequestRepository)(nil).UpdateRequest), ctx, requestID, amount, title, tags, group)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRequest", reflect.TypeOf((*MockRequestRepository)(nil).UpdateRequest), ctx, requestID, amount, title, tags, targets, group)
 }

@@ -34,7 +34,6 @@ func (RequestTarget) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("request", Request.Type).
 			Ref("target").
-			Unique().
-			Required(),
+			Unique(),
 	}
 }

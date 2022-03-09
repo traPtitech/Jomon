@@ -89,6 +89,14 @@ func (rtu *RequestTargetUpdate) SetRequestID(id uuid.UUID) *RequestTargetUpdate 
 	return rtu
 }
 
+// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
+func (rtu *RequestTargetUpdate) SetNillableRequestID(id *uuid.UUID) *RequestTargetUpdate {
+	if id != nil {
+		rtu = rtu.SetRequestID(*id)
+	}
+	return rtu
+}
+
 // SetRequest sets the "request" edge to the Request entity.
 func (rtu *RequestTargetUpdate) SetRequest(r *Request) *RequestTargetUpdate {
 	return rtu.SetRequestID(r.ID)
@@ -112,18 +120,12 @@ func (rtu *RequestTargetUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(rtu.hooks) == 0 {
-		if err = rtu.check(); err != nil {
-			return 0, err
-		}
 		affected, err = rtu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*RequestTargetMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = rtu.check(); err != nil {
-				return 0, err
 			}
 			rtu.mutation = mutation
 			affected, err = rtu.sqlSave(ctx)
@@ -163,14 +165,6 @@ func (rtu *RequestTargetUpdate) ExecX(ctx context.Context) {
 	if err := rtu.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (rtu *RequestTargetUpdate) check() error {
-	if _, ok := rtu.mutation.RequestID(); rtu.mutation.RequestCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "RequestTarget.request"`)
-	}
-	return nil
 }
 
 func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -345,6 +339,14 @@ func (rtuo *RequestTargetUpdateOne) SetRequestID(id uuid.UUID) *RequestTargetUpd
 	return rtuo
 }
 
+// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
+func (rtuo *RequestTargetUpdateOne) SetNillableRequestID(id *uuid.UUID) *RequestTargetUpdateOne {
+	if id != nil {
+		rtuo = rtuo.SetRequestID(*id)
+	}
+	return rtuo
+}
+
 // SetRequest sets the "request" edge to the Request entity.
 func (rtuo *RequestTargetUpdateOne) SetRequest(r *Request) *RequestTargetUpdateOne {
 	return rtuo.SetRequestID(r.ID)
@@ -375,18 +377,12 @@ func (rtuo *RequestTargetUpdateOne) Save(ctx context.Context) (*RequestTarget, e
 		node *RequestTarget
 	)
 	if len(rtuo.hooks) == 0 {
-		if err = rtuo.check(); err != nil {
-			return nil, err
-		}
 		node, err = rtuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*RequestTargetMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = rtuo.check(); err != nil {
-				return nil, err
 			}
 			rtuo.mutation = mutation
 			node, err = rtuo.sqlSave(ctx)
@@ -426,14 +422,6 @@ func (rtuo *RequestTargetUpdateOne) ExecX(ctx context.Context) {
 	if err := rtuo.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (rtuo *RequestTargetUpdateOne) check() error {
-	if _, ok := rtuo.mutation.RequestID(); rtuo.mutation.RequestCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "RequestTarget.request"`)
-	}
-	return nil
 }
 
 func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *RequestTarget, err error) {
