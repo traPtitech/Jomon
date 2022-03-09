@@ -37,10 +37,10 @@ func (m *MockRequestTargetRepository) EXPECT() *MockRequestTargetRepositoryMockR
 }
 
 // GetRequestTargets mocks base method.
-func (m *MockRequestTargetRepository) GetRequestTargets(ctx context.Context, requestID uuid.UUID) ([]*model.RequestTarget, error) {
+func (m *MockRequestTargetRepository) GetRequestTargets(ctx context.Context, requestID uuid.UUID) ([]*model.TargetDetail, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRequestTargets", ctx, requestID)
-	ret0, _ := ret[0].([]*model.RequestTarget)
+	ret0, _ := ret[0].([]*model.TargetDetail)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

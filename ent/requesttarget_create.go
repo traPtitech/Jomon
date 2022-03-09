@@ -28,6 +28,12 @@ func (rtc *RequestTargetCreate) SetTarget(s string) *RequestTargetCreate {
 	return rtc
 }
 
+// SetAmount sets the "amount" field.
+func (rtc *RequestTargetCreate) SetAmount(i int) *RequestTargetCreate {
+	rtc.mutation.SetAmount(i)
+	return rtc
+}
+
 // SetPaidAt sets the "paid_at" field.
 func (rtc *RequestTargetCreate) SetPaidAt(t time.Time) *RequestTargetCreate {
 	rtc.mutation.SetPaidAt(t)
@@ -167,6 +173,9 @@ func (rtc *RequestTargetCreate) check() error {
 	if _, ok := rtc.mutation.Target(); !ok {
 		return &ValidationError{Name: "target", err: errors.New(`ent: missing required field "RequestTarget.target"`)}
 	}
+	if _, ok := rtc.mutation.Amount(); !ok {
+		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "RequestTarget.amount"`)}
+	}
 	if _, ok := rtc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "RequestTarget.created_at"`)}
 	}
@@ -216,6 +225,14 @@ func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSp
 			Column: requesttarget.FieldTarget,
 		})
 		_node.Target = value
+	}
+	if value, ok := rtc.mutation.Amount(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: requesttarget.FieldAmount,
+		})
+		_node.Amount = value
 	}
 	if value, ok := rtc.mutation.PaidAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

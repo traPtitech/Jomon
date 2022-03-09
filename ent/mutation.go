@@ -4512,6 +4512,8 @@ type RequestTargetMutation struct {
 	typ            string
 	id             *uuid.UUID
 	target         *string
+	amount         *int
+	addamount      *int
 	paid_at        *time.Time
 	created_at     *time.Time
 	clearedFields  map[string]struct{}
@@ -4662,6 +4664,62 @@ func (m *RequestTargetMutation) ResetTarget() {
 	m.target = nil
 }
 
+// SetAmount sets the "amount" field.
+func (m *RequestTargetMutation) SetAmount(i int) {
+	m.amount = &i
+	m.addamount = nil
+}
+
+// Amount returns the value of the "amount" field in the mutation.
+func (m *RequestTargetMutation) Amount() (r int, exists bool) {
+	v := m.amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmount returns the old "amount" field's value of the RequestTarget entity.
+// If the RequestTarget object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RequestTargetMutation) OldAmount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmount: %w", err)
+	}
+	return oldValue.Amount, nil
+}
+
+// AddAmount adds i to the "amount" field.
+func (m *RequestTargetMutation) AddAmount(i int) {
+	if m.addamount != nil {
+		*m.addamount += i
+	} else {
+		m.addamount = &i
+	}
+}
+
+// AddedAmount returns the value that was added to the "amount" field in this mutation.
+func (m *RequestTargetMutation) AddedAmount() (r int, exists bool) {
+	v := m.addamount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAmount resets all changes to the "amount" field.
+func (m *RequestTargetMutation) ResetAmount() {
+	m.amount = nil
+	m.addamount = nil
+}
+
 // SetPaidAt sets the "paid_at" field.
 func (m *RequestTargetMutation) SetPaidAt(t time.Time) {
 	m.paid_at = &t
@@ -4805,9 +4863,12 @@ func (m *RequestTargetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RequestTargetMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.target != nil {
 		fields = append(fields, requesttarget.FieldTarget)
+	}
+	if m.amount != nil {
+		fields = append(fields, requesttarget.FieldAmount)
 	}
 	if m.paid_at != nil {
 		fields = append(fields, requesttarget.FieldPaidAt)
@@ -4825,6 +4886,8 @@ func (m *RequestTargetMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case requesttarget.FieldTarget:
 		return m.Target()
+	case requesttarget.FieldAmount:
+		return m.Amount()
 	case requesttarget.FieldPaidAt:
 		return m.PaidAt()
 	case requesttarget.FieldCreatedAt:
@@ -4840,6 +4903,8 @@ func (m *RequestTargetMutation) OldField(ctx context.Context, name string) (ent.
 	switch name {
 	case requesttarget.FieldTarget:
 		return m.OldTarget(ctx)
+	case requesttarget.FieldAmount:
+		return m.OldAmount(ctx)
 	case requesttarget.FieldPaidAt:
 		return m.OldPaidAt(ctx)
 	case requesttarget.FieldCreatedAt:
@@ -4859,6 +4924,13 @@ func (m *RequestTargetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTarget(v)
+		return nil
+	case requesttarget.FieldAmount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmount(v)
 		return nil
 	case requesttarget.FieldPaidAt:
 		v, ok := value.(time.Time)
@@ -4881,13 +4953,21 @@ func (m *RequestTargetMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *RequestTargetMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addamount != nil {
+		fields = append(fields, requesttarget.FieldAmount)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *RequestTargetMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case requesttarget.FieldAmount:
+		return m.AddedAmount()
+	}
 	return nil, false
 }
 
@@ -4896,6 +4976,13 @@ func (m *RequestTargetMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *RequestTargetMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case requesttarget.FieldAmount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmount(v)
+		return nil
 	}
 	return fmt.Errorf("unknown RequestTarget numeric field %s", name)
 }
@@ -4934,6 +5021,9 @@ func (m *RequestTargetMutation) ResetField(name string) error {
 	switch name {
 	case requesttarget.FieldTarget:
 		m.ResetTarget()
+		return nil
+	case requesttarget.FieldAmount:
+		m.ResetAmount()
 		return nil
 	case requesttarget.FieldPaidAt:
 		m.ResetPaidAt()

@@ -101,6 +101,13 @@ func Target(v string) predicate.RequestTarget {
 	})
 }
 
+// Amount applies equality check predicate on the "amount" field. It's identical to AmountEQ.
+func Amount(v int) predicate.RequestTarget {
+	return predicate.RequestTarget(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAmount), v))
+	})
+}
+
 // PaidAt applies equality check predicate on the "paid_at" field. It's identical to PaidAtEQ.
 func PaidAt(v time.Time) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
@@ -223,6 +230,82 @@ func TargetEqualFold(v string) predicate.RequestTarget {
 func TargetContainsFold(v string) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldTarget), v))
+	})
+}
+
+// AmountEQ applies the EQ predicate on the "amount" field.
+func AmountEQ(v int) predicate.RequestTarget {
+	return predicate.RequestTarget(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAmount), v))
+	})
+}
+
+// AmountNEQ applies the NEQ predicate on the "amount" field.
+func AmountNEQ(v int) predicate.RequestTarget {
+	return predicate.RequestTarget(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAmount), v))
+	})
+}
+
+// AmountIn applies the In predicate on the "amount" field.
+func AmountIn(vs ...int) predicate.RequestTarget {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.RequestTarget(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldAmount), v...))
+	})
+}
+
+// AmountNotIn applies the NotIn predicate on the "amount" field.
+func AmountNotIn(vs ...int) predicate.RequestTarget {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.RequestTarget(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldAmount), v...))
+	})
+}
+
+// AmountGT applies the GT predicate on the "amount" field.
+func AmountGT(v int) predicate.RequestTarget {
+	return predicate.RequestTarget(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldAmount), v))
+	})
+}
+
+// AmountGTE applies the GTE predicate on the "amount" field.
+func AmountGTE(v int) predicate.RequestTarget {
+	return predicate.RequestTarget(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldAmount), v))
+	})
+}
+
+// AmountLT applies the LT predicate on the "amount" field.
+func AmountLT(v int) predicate.RequestTarget {
+	return predicate.RequestTarget(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldAmount), v))
+	})
+}
+
+// AmountLTE applies the LTE predicate on the "amount" field.
+func AmountLTE(v int) predicate.RequestTarget {
+	return predicate.RequestTarget(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldAmount), v))
 	})
 }
 

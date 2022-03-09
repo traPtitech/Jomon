@@ -157,7 +157,7 @@ func (rsq *RequestStatusQuery) FirstIDX(ctx context.Context) uuid.UUID {
 }
 
 // Only returns a single RequestStatus entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one RequestStatus entity is not found.
+// Returns a *NotSingularError when more than one RequestStatus entity is found.
 // Returns a *NotFoundError when no RequestStatus entities are found.
 func (rsq *RequestStatusQuery) Only(ctx context.Context) (*RequestStatus, error) {
 	nodes, err := rsq.Limit(2).All(ctx)
@@ -184,7 +184,7 @@ func (rsq *RequestStatusQuery) OnlyX(ctx context.Context) *RequestStatus {
 }
 
 // OnlyID is like Only, but returns the only RequestStatus ID in the query.
-// Returns a *NotSingularError when exactly one RequestStatus ID is not found.
+// Returns a *NotSingularError when more than one RequestStatus ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (rsq *RequestStatusQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
@@ -295,8 +295,9 @@ func (rsq *RequestStatusQuery) Clone() *RequestStatusQuery {
 		withRequest: rsq.withRequest.Clone(),
 		withUser:    rsq.withUser.Clone(),
 		// clone intermediate query.
-		sql:  rsq.sql.Clone(),
-		path: rsq.path,
+		sql:    rsq.sql.Clone(),
+		path:   rsq.path,
+		unique: rsq.unique,
 	}
 }
 
