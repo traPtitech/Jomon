@@ -149,7 +149,6 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 	status, err := repo.client.RequestStatus.
 		Create().
 		SetStatus(requeststatus.StatusSubmitted).
-		SetReason("").
 		SetCreatedAt(time.Now()).
 		SetRequest(created).
 		SetUser(user).
