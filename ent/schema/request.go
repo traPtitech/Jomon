@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -32,7 +33,10 @@ func (Request) Fields() []ent.Field {
 func (Request) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("status", RequestStatus.Type),
-		edge.To("target", RequestTarget.Type),
+		edge.To("target", RequestTarget.Type).
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
 		edge.To("file", File.Type),
 		edge.To("tag", Tag.Type),
 		edge.To("transaction", Transaction.Type),
