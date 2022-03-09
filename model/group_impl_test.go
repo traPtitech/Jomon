@@ -174,6 +174,7 @@ func TestEntRepository_GetOwners(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		err := dropAll(t, ctx, client)
+		require.NoError(t, err)
 		ctx := context.Background()
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
