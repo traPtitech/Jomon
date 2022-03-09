@@ -115,7 +115,7 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 	return reqres, nil
 }
 
-func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, tags []*Tag, group *Group, userID uuid.UUID) (*RequestDetail, error) {
+func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, tags []*Tag, targets []*Target, group *Group, userID uuid.UUID) (*RequestDetail, error) {
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
 		tagIDs = append(tagIDs, tag.ID)
@@ -155,12 +155,28 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 	if err != nil {
 		return nil, err
 	}
+
+	var entTargets []*ent.RequestTarget
+	bulk := make([]*ent.RequestTargetCreate, len(targets))
+	for i, target := range targets {
+		bulk[i] = repo.client.RequestTarget.Create().SetTarget(target.Target).SetAmount(target.Amount).SetRequestID(created.ID)
+	}
+	entTargets, err = repo.client.RequestTarget.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var modelTargets []*TargetDetail
+	for _, entTarget := range entTargets {
+		modelTargets = append(modelTargets, convertEntRequestTargetToModelRequestTarget(entTarget))
+	}
+
 	reqdetail := &RequestDetail{
 		ID:        created.ID,
 		Status:    convertEntRequestStatusToModelStatus(&status.Status),
 		Amount:    created.Amount,
 		Title:     created.Title,
 		Tags:      tags,
+		Targets:   modelTargets,
 		Group:     group,
 		CreatedAt: created.CreatedAt,
 		UpdatedAt: created.UpdatedAt,
@@ -178,6 +194,7 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 		WithStatus(func(q *ent.RequestStatusQuery) {
 			q.Order(ent.Desc(requeststatus.FieldCreatedAt)).Limit(1)
 		}).
+		WithTarget().
 		WithUser().
 		Only(ctx)
 	if err != nil {
@@ -187,6 +204,10 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 	for _, tag := range request.Edges.Tag {
 		tags = append(tags, ConvertEntTagToModelTag(tag))
 	}
+	var targets []*TargetDetail
+	for _, target := range request.Edges.Target {
+		targets = append(targets, convertEntRequestTargetToModelRequestTarget(target))
+	}
 	group := ConvertEntGroupToModelGroup(request.Edges.Group)
 	reqdetail := &RequestDetail{
 		ID:        request.ID,
@@ -194,6 +215,7 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 		Amount:    request.Amount,
 		Title:     request.Title,
 		Tags:      tags,
+		Targets:   targets,
 		Group:     group,
 		CreatedAt: request.CreatedAt,
 		UpdatedAt: request.UpdatedAt,
@@ -202,17 +224,19 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 	return reqdetail, nil
 }
 
-func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, tags []*Tag, group *Group) (*RequestDetail, error) {
+func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, tags []*Tag, targets []*Target, group *Group) (*RequestDetail, error) {
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
 		tagIDs = append(tagIDs, tag.ID)
 	}
+	// 前のtarget達をdeleteしたほうがいいのかどうか
 	updated, err := repo.client.Request.
 		UpdateOneID(requestID).
 		SetAmount(amount).
 		SetTitle(title).
 		ClearTag().
 		AddTagIDs(tagIDs...).
+		ClearTarget().
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
@@ -259,6 +283,20 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		}
 	}
 
+	var entTargets []*ent.RequestTarget
+	bulk := make([]*ent.RequestTargetCreate, len(targets))
+	for i, target := range targets {
+		bulk[i] = repo.client.RequestTarget.Create().SetTarget(target.Target).SetAmount(target.Amount).SetRequestID(updated.ID)
+	}
+	entTargets, err = repo.client.RequestTarget.CreateBulk(bulk...).Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var modelTargets []*TargetDetail
+	for _, entTarget := range entTargets {
+		modelTargets = append(modelTargets, convertEntRequestTargetToModelRequestTarget(entTarget))
+	}
+
 	modelgroup := ConvertEntGroupToModelGroup(entgroup)
 	reqdetail := &RequestDetail{
 		ID:        updated.ID,
@@ -266,6 +304,7 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		Amount:    updated.Amount,
 		Title:     updated.Title,
 		Tags:      modeltags,
+		Targets:   modelTargets,
 		Group:     modelgroup,
 		CreatedAt: updated.CreatedAt,
 		UpdatedAt: updated.UpdatedAt,

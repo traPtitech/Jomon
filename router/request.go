@@ -192,6 +192,13 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
+	var targets []*model.Target
+	for _, target := range req.Targets {
+		targets = append(targets, &model.Target{
+			Target: target.Target,
+			Amount: target.Amount,
+		})
+	}
 	var group *model.Group
 	if req.Group != nil {
 		ctx := context.Background()
@@ -207,7 +214,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, tags, group, req.CreatedBy)
+	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, tags, targets, group, req.CreatedBy)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.Logger().Error(err)
@@ -247,6 +254,16 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 			UpdatedAt:   tag.UpdatedAt,
 		})
 	}
+	var resTargets []*TargetDetail
+	for _, target := range request.Targets {
+		resTargets = append(resTargets, &TargetDetail{
+			ID:        target.ID,
+			Target:    target.Target,
+			Amount:    target.Amount,
+			PaidAt:    target.PaidAt,
+			CreatedAt: target.CreatedAt,
+		})
+	}
 	resComment := &CommentDetail{
 		ID:        comment.ID,
 		User:      comment.User,
@@ -263,6 +280,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		Amount:    request.Amount,
 		Title:     request.Title,
 		Tags:      restags,
+		Targets:   resTargets,
 		Group:     resgroup,
 		Comments:  []*CommentDetail{resComment},
 	}
@@ -327,6 +345,16 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 			UpdatedAt:   tag.UpdatedAt,
 		})
 	}
+	var resTargets []*TargetDetail
+	for _, target := range request.Targets {
+		resTargets = append(resTargets, &TargetDetail{
+			ID:        target.ID,
+			Target:    target.Target,
+			Amount:    target.Amount,
+			PaidAt:    target.PaidAt,
+			CreatedAt: target.CreatedAt,
+		})
+	}
 	res := &RequestResponse{
 		ID:        request.ID,
 		Status:    request.Status,
@@ -336,6 +364,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 		Amount:    request.Amount,
 		Title:     request.Title,
 		Tags:      restags,
+		Targets:   resTargets,
 		Group:     resgroup,
 		Comments:  comments,
 	}
@@ -373,6 +402,13 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
+	var targets []*model.Target
+	for _, target := range req.Targets {
+		targets = append(targets, &model.Target{
+			Target: target.Target,
+			Amount: target.Amount,
+		})
+	}
 	var group *model.Group
 	if req.Group != nil {
 		ctx := context.Background()
@@ -388,7 +424,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Amount, req.Title, tags, group)
+	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Amount, req.Title, tags, targets, group)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.Logger().Error(err)
@@ -435,6 +471,16 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 			UpdatedAt:   tag.UpdatedAt,
 		})
 	}
+	var resTargets []*TargetDetail
+	for _, target := range request.Targets {
+		resTargets = append(resTargets, &TargetDetail{
+			ID:        target.ID,
+			Target:    target.Target,
+			Amount:    target.Amount,
+			PaidAt:    target.PaidAt,
+			CreatedAt: target.CreatedAt,
+		})
+	}
 	res := &RequestResponse{
 		ID:        request.ID,
 		Status:    request.Status,
@@ -444,6 +490,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		Amount:    request.Amount,
 		Title:     request.Title,
 		Tags:      restags,
+		Targets:   resTargets,
 		Group:     resgroup,
 		Comments:  comments,
 	}
