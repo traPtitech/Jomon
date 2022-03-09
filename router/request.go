@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -19,16 +20,17 @@ type Request struct {
 	CreatedBy uuid.UUID    `json:"created_by"`
 	Amount    int          `json:"amount"`
 	Title     string       `json:"title"`
-	Comment   string       `json:"comment"`
+	Content   string       `json:"content"`
 	Tags      []*uuid.UUID `json:"tags"`
 	Group     *uuid.UUID   `json:"group"`
 }
 
 type PutRequest struct {
-	Amount int          `json:"amount"`
-	Title  string       `json:"title"`
-	Tags   []*uuid.UUID `json:"tags"`
-	Group  *uuid.UUID   `json:"group"`
+	Amount  int          `json:"amount"`
+	Title   string       `json:"title"`
+	Content string       `json:"content"`
+	Tags    []*uuid.UUID `json:"tags"`
+	Group   *uuid.UUID   `json:"group"`
 }
 
 type RequestResponse struct {
@@ -39,6 +41,7 @@ type RequestResponse struct {
 	CreatedBy uuid.UUID        `json:"created_by"`
 	Amount    int              `json:"amount"`
 	Title     string           `json:"title"`
+	Content   string           `json:"content"`
 	Tags      []*TagOverview   `json:"tags"`
 	Group     *GroupOverview   `json:"group"`
 	Comments  []*CommentDetail `json:"comments"`
@@ -146,6 +149,7 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 			CreatedBy: request.CreatedBy,
 			Amount:    request.Amount,
 			Title:     request.Title,
+			Content:   request.Content,
 			Tags:      tags,
 			Group:     resgroup,
 		}
@@ -162,7 +166,6 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-
 	var tags []*model.Tag
 	for _, tagID := range req.Tags {
 		ctx := context.Background()
@@ -190,9 +193,8 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
-
 	ctx := context.Background()
-	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, tags, group, req.CreatedBy)
+	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, group, req.CreatedBy)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.Logger().Error(err)
@@ -201,16 +203,6 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	comment, err := h.Repository.CreateComment(ctx, req.Comment, request.ID, req.CreatedBy)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-
 	var resgroup *GroupOverview
 	if group != nil {
 		resgroup = &GroupOverview{
@@ -232,13 +224,6 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 			UpdatedAt:   tag.UpdatedAt,
 		})
 	}
-	resComment := &CommentDetail{
-		ID:        comment.ID,
-		User:      comment.User,
-		Comment:   comment.Comment,
-		CreatedAt: comment.CreatedAt,
-		UpdatedAt: comment.UpdatedAt,
-	}
 	res := &RequestResponse{
 		ID:        request.ID,
 		Status:    request.Status,
@@ -247,9 +232,9 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		CreatedBy: request.CreatedBy,
 		Amount:    request.Amount,
 		Title:     request.Title,
+		Content:   request.Content,
 		Tags:      restags,
 		Group:     resgroup,
-		Comments:  []*CommentDetail{resComment},
 	}
 	return c.JSON(http.StatusOK, res)
 }
@@ -320,6 +305,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 		CreatedBy: request.CreatedBy,
 		Amount:    request.Amount,
 		Title:     request.Title,
+		Content:   request.Content,
 		Tags:      restags,
 		Group:     resgroup,
 		Comments:  comments,
@@ -371,9 +357,8 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
-
 	ctx := context.Background()
-	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Amount, req.Title, tags, group)
+	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Amount, req.Title, req.Content, tags, group)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.Logger().Error(err)
@@ -428,6 +413,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		CreatedBy: request.CreatedBy,
 		Amount:    request.Amount,
 		Title:     request.Title,
+		Content:   request.Content,
 		Tags:      restags,
 		Group:     resgroup,
 		Comments:  comments,
@@ -454,13 +440,18 @@ func (h *Handlers) PostComment(c echo.Context) error {
 
 	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	user, ok := sess.Values[sessionUserKey].(*User)
+	bodyUser, ok := sess.Values[sessionUserKey].([]byte)
 	if !ok {
 		c.Logger().Error(errors.New("sessionUser not found"))
 		return echo.NewHTTPError(http.StatusUnauthorized, errors.New("sessionUser not found"))
+	}
+	user := new(User)
+	err = json.Unmarshal(bodyUser, user)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	ctx := context.Background()

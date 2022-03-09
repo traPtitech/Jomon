@@ -45,6 +45,12 @@ func (rsu *RequestStatusUpdate) SetNillableStatus(r *requeststatus.Status) *Requ
 	return rsu
 }
 
+// SetReason sets the "reason" field.
+func (rsu *RequestStatusUpdate) SetReason(s string) *RequestStatusUpdate {
+	rsu.mutation.SetReason(s)
+	return rsu
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (rsu *RequestStatusUpdate) SetCreatedAt(t time.Time) *RequestStatusUpdate {
 	rsu.mutation.SetCreatedAt(t)
@@ -199,6 +205,13 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Column: requeststatus.FieldStatus,
 		})
 	}
+	if value, ok := rsu.mutation.Reason(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: requeststatus.FieldReason,
+		})
+	}
 	if value, ok := rsu.mutation.CreatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -306,6 +319,12 @@ func (rsuo *RequestStatusUpdateOne) SetNillableStatus(r *requeststatus.Status) *
 	if r != nil {
 		rsuo.SetStatus(*r)
 	}
+	return rsuo
+}
+
+// SetReason sets the "reason" field.
+func (rsuo *RequestStatusUpdateOne) SetReason(s string) *RequestStatusUpdateOne {
+	rsuo.mutation.SetReason(s)
 	return rsuo
 }
 
@@ -485,6 +504,13 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: requeststatus.FieldStatus,
+		})
+	}
+	if value, ok := rsuo.mutation.Reason(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: requeststatus.FieldReason,
 		})
 	}
 	if value, ok := rsuo.mutation.CreatedAt(); ok {

@@ -104,6 +104,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "amount", Type: field.TypeInt},
 		{Name: "title", Type: field.TypeString},
+		{Name: "content", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "group_request", Type: field.TypeUUID, Nullable: true},
@@ -117,13 +118,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "requests_groups_request",
-				Columns:    []*schema.Column{RequestsColumns[5]},
+				Columns:    []*schema.Column{RequestsColumns[6]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "requests_users_user",
-				Columns:    []*schema.Column{RequestsColumns[6]},
+				Columns:    []*schema.Column{RequestsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -133,6 +134,7 @@ var (
 	RequestStatusColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"submitted", "fix_required", "accepted", "completed", "rejected"}, Default: "submitted"},
+		{Name: "reason", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "request_status", Type: field.TypeUUID, Nullable: true},
 		{Name: "request_status_user", Type: field.TypeUUID, Nullable: true},
@@ -145,13 +147,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "request_status_requests_status",
-				Columns:    []*schema.Column{RequestStatusColumns[3]},
+				Columns:    []*schema.Column{RequestStatusColumns[4]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "request_status_users_user",
-				Columns:    []*schema.Column{RequestStatusColumns[4]},
+				Columns:    []*schema.Column{RequestStatusColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

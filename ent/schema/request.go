@@ -21,6 +21,7 @@ func (Request) Fields() []ent.Field {
 			Default(uuid.New),
 		field.Int("amount"),
 		field.String("title"),
+		field.String("content"),
 		field.Time("created_at").
 			Default(time.Now),
 		field.Time("updated_at").
