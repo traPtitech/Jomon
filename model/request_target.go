@@ -11,17 +11,22 @@ import (
 )
 
 type RequestTargetRepository interface {
-	GetRequestTargets(ctx context.Context, requestID uuid.UUID) ([]*RequestTarget, error)
+	GetRequestTargets(ctx context.Context, requestID uuid.UUID) ([]*TargetDetail, error)
 }
 
-type RequestTarget struct {
+type Target struct {
+	Target string
+	Amount int
+}
+type TargetDetail struct {
 	ID        uuid.UUID
 	Target    string
+	Amount    int
 	PaidAt    *time.Time
 	CreatedAt time.Time
 }
 
-func (repo *EntRepository) GetRequestTargets(ctx context.Context, requestID uuid.UUID) ([]*RequestTarget, error) {
+func (repo *EntRepository) GetRequestTargets(ctx context.Context, requestID uuid.UUID) ([]*TargetDetail, error) {
 	targets, err := repo.client.RequestTarget.
 		Query().
 		Where(requesttarget.IDEQ(requestID)).
@@ -30,18 +35,18 @@ func (repo *EntRepository) GetRequestTargets(ctx context.Context, requestID uuid
 		return nil, err
 	}
 
-	var reqTargets []*RequestTarget
+	var reqTargets []*TargetDetail
 	for _, target := range targets {
 		reqTargets = append(reqTargets, convertEntRequestTargetToModelRequestTarget(target))
 	}
 	return reqTargets, nil
 }
 
-func convertEntRequestTargetToModelRequestTarget(requestTarget *ent.RequestTarget) *RequestTarget {
+func convertEntRequestTargetToModelRequestTarget(requestTarget *ent.RequestTarget) *TargetDetail {
 	if requestTarget == nil {
 		return nil
 	}
-	return &RequestTarget{
+	return &TargetDetail{
 		ID:        requestTarget.ID,
 		Target:    requestTarget.Target,
 		PaidAt:    requestTarget.PaidAt,

@@ -2011,13 +2011,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-		target := &model.RequestTarget{
+		target := &model.TargetDetail{
 			ID:        uuid.New(),
 			Target:    random.AlphaNumeric(t, 20),
+			Amount:    random.Numeric(t, 100000),
 			PaidAt:    nil,
 			CreatedAt: date,
 		}
-		targets := []*model.RequestTarget{target}
+		targets := []*model.TargetDetail{target}
 
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
@@ -2728,13 +2729,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-		target := &model.RequestTarget{
+		target := &model.TargetDetail{
 			ID:        uuid.New(),
 			Target:    random.AlphaNumeric(t, 20),
+			Amount:    random.Numeric(t, 100000),
 			PaidAt:    &date,
 			CreatedAt: date,
 		}
-		targets := []*model.RequestTarget{target}
+		targets := []*model.TargetDetail{target}
 
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
