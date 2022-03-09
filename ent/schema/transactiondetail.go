@@ -35,7 +35,6 @@ func (TransactionDetail) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("transaction", Transaction.Type).
 			Ref("detail").
-			Unique().
-			Required(),
+			Unique(),
 	}
 }

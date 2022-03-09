@@ -98,6 +98,14 @@ func (tdc *TransactionDetailCreate) SetTransactionID(id uuid.UUID) *TransactionD
 	return tdc
 }
 
+// SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
+func (tdc *TransactionDetailCreate) SetNillableTransactionID(id *uuid.UUID) *TransactionDetailCreate {
+	if id != nil {
+		tdc = tdc.SetTransactionID(*id)
+	}
+	return tdc
+}
+
 // SetTransaction sets the "transaction" edge to the Transaction entity.
 func (tdc *TransactionDetailCreate) SetTransaction(t *Transaction) *TransactionDetailCreate {
 	return tdc.SetTransactionID(t.ID)
@@ -209,9 +217,6 @@ func (tdc *TransactionDetailCreate) check() error {
 	}
 	if _, ok := tdc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "TransactionDetail.updated_at"`)}
-	}
-	if _, ok := tdc.mutation.TransactionID(); !ok {
-		return &ValidationError{Name: "transaction", err: errors.New(`ent: missing required edge "TransactionDetail.transaction"`)}
 	}
 	return nil
 }

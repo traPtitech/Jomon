@@ -99,6 +99,14 @@ func (tdu *TransactionDetailUpdate) SetTransactionID(id uuid.UUID) *TransactionD
 	return tdu
 }
 
+// SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
+func (tdu *TransactionDetailUpdate) SetNillableTransactionID(id *uuid.UUID) *TransactionDetailUpdate {
+	if id != nil {
+		tdu = tdu.SetTransactionID(*id)
+	}
+	return tdu
+}
+
 // SetTransaction sets the "transaction" edge to the Transaction entity.
 func (tdu *TransactionDetailUpdate) SetTransaction(t *Transaction) *TransactionDetailUpdate {
 	return tdu.SetTransactionID(t.ID)
@@ -122,18 +130,12 @@ func (tdu *TransactionDetailUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(tdu.hooks) == 0 {
-		if err = tdu.check(); err != nil {
-			return 0, err
-		}
 		affected, err = tdu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*TransactionDetailMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = tdu.check(); err != nil {
-				return 0, err
 			}
 			tdu.mutation = mutation
 			affected, err = tdu.sqlSave(ctx)
@@ -173,14 +175,6 @@ func (tdu *TransactionDetailUpdate) ExecX(ctx context.Context) {
 	if err := tdu.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (tdu *TransactionDetailUpdate) check() error {
-	if _, ok := tdu.mutation.TransactionID(); tdu.mutation.TransactionCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "TransactionDetail.transaction"`)
-	}
-	return nil
 }
 
 func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -359,6 +353,14 @@ func (tduo *TransactionDetailUpdateOne) SetTransactionID(id uuid.UUID) *Transact
 	return tduo
 }
 
+// SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
+func (tduo *TransactionDetailUpdateOne) SetNillableTransactionID(id *uuid.UUID) *TransactionDetailUpdateOne {
+	if id != nil {
+		tduo = tduo.SetTransactionID(*id)
+	}
+	return tduo
+}
+
 // SetTransaction sets the "transaction" edge to the Transaction entity.
 func (tduo *TransactionDetailUpdateOne) SetTransaction(t *Transaction) *TransactionDetailUpdateOne {
 	return tduo.SetTransactionID(t.ID)
@@ -389,18 +391,12 @@ func (tduo *TransactionDetailUpdateOne) Save(ctx context.Context) (*TransactionD
 		node *TransactionDetail
 	)
 	if len(tduo.hooks) == 0 {
-		if err = tduo.check(); err != nil {
-			return nil, err
-		}
 		node, err = tduo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*TransactionDetailMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = tduo.check(); err != nil {
-				return nil, err
 			}
 			tduo.mutation = mutation
 			node, err = tduo.sqlSave(ctx)
@@ -440,14 +436,6 @@ func (tduo *TransactionDetailUpdateOne) ExecX(ctx context.Context) {
 	if err := tduo.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (tduo *TransactionDetailUpdateOne) check() error {
-	if _, ok := tduo.mutation.TransactionID(); tduo.mutation.TransactionCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "TransactionDetail.transaction"`)
-	}
-	return nil
 }
 
 func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *TransactionDetail, err error) {

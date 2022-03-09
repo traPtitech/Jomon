@@ -53,14 +53,6 @@ func (tu *TransactionUpdate) SetDetailID(id uuid.UUID) *TransactionUpdate {
 	return tu
 }
 
-// SetNillableDetailID sets the "detail" edge to the TransactionDetail entity by ID if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableDetailID(id *uuid.UUID) *TransactionUpdate {
-	if id != nil {
-		tu = tu.SetDetailID(*id)
-	}
-	return tu
-}
-
 // SetDetail sets the "detail" edge to the TransactionDetail entity.
 func (tu *TransactionUpdate) SetDetail(t *TransactionDetail) *TransactionUpdate {
 	return tu.SetDetailID(t.ID)
@@ -170,12 +162,18 @@ func (tu *TransactionUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(tu.hooks) == 0 {
+		if err = tu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = tu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*TransactionMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = tu.check(); err != nil {
+				return 0, err
 			}
 			tu.mutation = mutation
 			affected, err = tu.sqlSave(ctx)
@@ -215,6 +213,14 @@ func (tu *TransactionUpdate) ExecX(ctx context.Context) {
 	if err := tu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (tu *TransactionUpdate) check() error {
+	if _, ok := tu.mutation.DetailID(); tu.mutation.DetailCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Transaction.detail"`)
+	}
+	return nil
 }
 
 func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -440,14 +446,6 @@ func (tuo *TransactionUpdateOne) SetDetailID(id uuid.UUID) *TransactionUpdateOne
 	return tuo
 }
 
-// SetNillableDetailID sets the "detail" edge to the TransactionDetail entity by ID if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableDetailID(id *uuid.UUID) *TransactionUpdateOne {
-	if id != nil {
-		tuo = tuo.SetDetailID(*id)
-	}
-	return tuo
-}
-
 // SetDetail sets the "detail" edge to the TransactionDetail entity.
 func (tuo *TransactionUpdateOne) SetDetail(t *TransactionDetail) *TransactionUpdateOne {
 	return tuo.SetDetailID(t.ID)
@@ -564,12 +562,18 @@ func (tuo *TransactionUpdateOne) Save(ctx context.Context) (*Transaction, error)
 		node *Transaction
 	)
 	if len(tuo.hooks) == 0 {
+		if err = tuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = tuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*TransactionMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = tuo.check(); err != nil {
+				return nil, err
 			}
 			tuo.mutation = mutation
 			node, err = tuo.sqlSave(ctx)
@@ -609,6 +613,14 @@ func (tuo *TransactionUpdateOne) ExecX(ctx context.Context) {
 	if err := tuo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (tuo *TransactionUpdateOne) check() error {
+	if _, ok := tuo.mutation.DetailID(); tuo.mutation.DetailCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Transaction.detail"`)
+	}
+	return nil
 }
 
 func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transaction, err error) {

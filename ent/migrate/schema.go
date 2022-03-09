@@ -238,7 +238,7 @@ var (
 		{Name: "target", Type: field.TypeString, Default: ""},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "transaction_detail", Type: field.TypeUUID, Unique: true},
+		{Name: "transaction_detail", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// TransactionDetailsTable holds the schema information for the "transaction_details" table.
 	TransactionDetailsTable = &schema.Table{
@@ -250,7 +250,7 @@ var (
 				Symbol:     "transaction_details_transactions_detail",
 				Columns:    []*schema.Column{TransactionDetailsColumns[5]},
 				RefColumns: []*schema.Column{TransactionsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.SetNull,
 			},
 		},
 	}

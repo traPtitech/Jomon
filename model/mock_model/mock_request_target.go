@@ -6,37 +6,36 @@ package mock_model
 
 import (
 	context "context"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
 	model "github.com/traPtitech/Jomon/model"
+	reflect "reflect"
 )
 
-// MockRequestTargetRepository is a mock of RequestTargetRepository interface.
+// MockRequestTargetRepository is a mock of RequestTargetRepository interface
 type MockRequestTargetRepository struct {
 	ctrl     *gomock.Controller
 	recorder *MockRequestTargetRepositoryMockRecorder
 }
 
-// MockRequestTargetRepositoryMockRecorder is the mock recorder for MockRequestTargetRepository.
+// MockRequestTargetRepositoryMockRecorder is the mock recorder for MockRequestTargetRepository
 type MockRequestTargetRepositoryMockRecorder struct {
 	mock *MockRequestTargetRepository
 }
 
-// NewMockRequestTargetRepository creates a new mock instance.
+// NewMockRequestTargetRepository creates a new mock instance
 func NewMockRequestTargetRepository(ctrl *gomock.Controller) *MockRequestTargetRepository {
 	mock := &MockRequestTargetRepository{ctrl: ctrl}
 	mock.recorder = &MockRequestTargetRepositoryMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
+// EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockRequestTargetRepository) EXPECT() *MockRequestTargetRepositoryMockRecorder {
 	return m.recorder
 }
 
-// GetRequestTargets mocks base method.
+// GetRequestTargets mocks base method
 func (m *MockRequestTargetRepository) GetRequestTargets(ctx context.Context, requestID uuid.UUID) ([]*model.RequestTarget, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRequestTargets", ctx, requestID)
@@ -45,7 +44,7 @@ func (m *MockRequestTargetRepository) GetRequestTargets(ctx context.Context, req
 	return ret0, ret1
 }
 
-// GetRequestTargets indicates an expected call of GetRequestTargets.
+// GetRequestTargets indicates an expected call of GetRequestTargets
 func (mr *MockRequestTargetRepositoryMockRecorder) GetRequestTargets(ctx, requestID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRequestTargets", reflect.TypeOf((*MockRequestTargetRepository)(nil).GetRequestTargets), ctx, requestID)

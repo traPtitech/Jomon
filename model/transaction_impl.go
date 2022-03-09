@@ -83,18 +83,19 @@ func (repo *EntRepository) GetTransaction(ctx context.Context, transactionID uui
 }
 
 func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
-	// Creating transaction detail
-	detail, err := repo.CreateTransactionDetail(ctx, amount, target)
-	if err != nil {
-		return nil, err
-	}
-
 	// Get Tags
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
 		tagIDs = append(tagIDs, *tag)
 	}
 
+	// Create Transaction Detail
+	detail, err := repo.CreateTransactionDetail(ctx, amount, target)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create GroupBudget
 	var gb *ent.GroupBudget
 	if groupID != nil {
 		gb, err = repo.client.GroupBudget.
@@ -106,7 +107,7 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 			return nil, err
 		}
 	}
-	// Creating transaction query
+	// Create transaction query
 	query := repo.client.Transaction.
 		Create().
 		SetDetailID(detail.ID)
@@ -129,14 +130,29 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 		return nil, err
 	}
 
-	// Update Tag to set transaction
-	_, err = repo.client.Tag.
-		Update().
-		Where(tag.IDIn(tagIDs...)).
-		SetTransactionID(tx.ID).
-		Save(ctx)
+	tx, err = repo.client.Transaction.
+		Query().
+		Where(transaction.ID(tx.ID)).
+		WithTag().
+		WithDetail().
+		WithGroupBudget(func(q *ent.GroupBudgetQuery) {
+			q.WithGroup()
+		}).
+		Only(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	// Update Tag to set transaction
+	if tags != nil {
+		_, err = repo.client.Tag.
+			Update().
+			Where(tag.IDIn(tagIDs...)).
+			SetTransactionID(tx.ID).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Converting
@@ -226,12 +242,18 @@ func ConvertEntTransactionToModelTransactionResponse(transaction *ent.Transactio
 	for _, tag := range transaction.Edges.Tag {
 		tags = append(tags, ConvertEntTagToModelTag(tag))
 	}
+	var group *Group
+	if transaction.Edges.GroupBudget == nil {
+		group = nil
+	} else {
+		group = ConvertEntGroupToModelGroup(transaction.Edges.GroupBudget.Edges.Group)
+	}
 	return &TransactionResponse{
 		ID:        transaction.ID,
 		Amount:    transaction.Edges.Detail.Amount,
 		Target:    transaction.Edges.Detail.Target,
 		Tags:      tags,
-		Group:     ConvertEntGroupToModelGroup(transaction.Edges.GroupBudget.Edges.Group),
+		Group:     group,
 		CreatedAt: transaction.CreatedAt,
 	}
 }
