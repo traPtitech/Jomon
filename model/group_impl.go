@@ -34,7 +34,7 @@ func (repo *EntRepository) GetGroup(ctx context.Context, groupID uuid.UUID) (*Gr
 	return ConvertEntGroupToModelGroup(group), nil
 }
 
-func (repo *EntRepository) CreateGroup(ctx context.Context, name string, description string, budget *int, owners *[]User) (*Group, error) {
+func (repo *EntRepository) CreateGroup(ctx context.Context, name string, description string, budget *int, owners []*User) (*Group, error) {
 	created, err := repo.client.Group.
 		Create().
 		SetName(name).

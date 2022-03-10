@@ -16,7 +16,6 @@ import (
 func (repo *EntRepository) GetTransactions(ctx context.Context, query TransactionQuery) ([]*TransactionResponse, error) {
 	// Querying
 	var transactionsq *ent.TransactionQuery
-	var err error
 	if query.Sort == nil || *query.Sort == "" || *query.Sort == "created_at" {
 		transactionsq = repo.client.Transaction.
 			Query().
@@ -140,6 +139,18 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 		return nil, err
 	}
 
+	// Update Tag to set transaction
+	if tags != nil {
+		_, err = repo.client.Tag.
+			Update().
+			Where(tag.IDIn(tagIDs...)).
+			SetTransactionID(tx.ID).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	tx, err = repo.client.Transaction.
 		Query().
 		Where(transaction.ID(tx.ID)).
@@ -151,18 +162,6 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 		Only(ctx)
 	if err != nil {
 		return nil, err
-	}
-
-	// Update Tag to set transaction
-	if tags != nil {
-		_, err = repo.client.Tag.
-			Update().
-			Where(tag.IDIn(tagIDs...)).
-			SetTransactionID(tx.ID).
-			Save(ctx)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	// Converting

@@ -66,7 +66,7 @@ func (mr *MockGroupRepositoryMockRecorder) GetGroup(ctx, groupID interface{}) *g
 }
 
 // CreateGroup mocks base method
-func (m *MockGroupRepository) CreateGroup(ctx context.Context, name, description string, budget *int, owners *[]model.User) (*model.Group, error) {
+func (m *MockGroupRepository) CreateGroup(ctx context.Context, name, description string, budget *int, owners []*model.User) (*model.Group, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateGroup", ctx, name, description, budget, owners)
 	ret0, _ := ret[0].(*model.Group)
