@@ -365,15 +365,21 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		}
 	})
 
-	t.Run("FailedWithNegativeAmount", func(t *testing.T) {
+	t.Run("SuccessWithNegativeAmount", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 
 		// Create Transactions
 		target := random.AlphaNumeric(t, 20)
-		amount := -1
+		amount := -1 * random.Numeric(t, 100000)
 
-		_, err := repo.CreateTransaction(ctx, amount, target, nil, nil, nil)
-		assert.Error(t, err)
+		tx, err := repo.CreateTransaction(ctx, amount, target, nil, nil, nil)
+		assert.NoError(t, err)
+		if assert.NotNil(t, tx) {
+			assert.Equal(t, amount, tx.Amount)
+			assert.Equal(t, target, tx.Target)
+			assert.Len(t, tx.Tags, 0)
+			assert.Nil(t, tx.Group)
+		}
 	})
 }
