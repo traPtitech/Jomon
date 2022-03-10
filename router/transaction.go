@@ -3,7 +3,6 @@ package router
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -42,15 +41,6 @@ func (h *Handlers) GetTransactions(c echo.Context) error {
 		t := c.Param("target")
 		target = &t
 	}
-	var year *int = nil
-	if c.Param("year") != "" {
-		var err error
-		y, err := strconv.Atoi(c.Param("year"))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err)
-		}
-		year = &y
-	}
 	var since *time.Time = nil
 	if c.Param("since") != "" {
 		var err error
@@ -82,7 +72,6 @@ func (h *Handlers) GetTransactions(c echo.Context) error {
 	query := model.TransactionQuery{
 		Sort:   sort,
 		Target: target,
-		Year:   year,
 		Since:  since,
 		Until:  until,
 		Tag:    tag,

@@ -33,7 +33,6 @@ type TransactionResponse struct {
 type TransactionQuery struct {
 	Sort   *string
 	Target *string
-	Year   *int
 	Since  *time.Time
 	Until  *time.Time
 	Tag    *string

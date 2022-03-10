@@ -364,4 +364,16 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 			assert.Nil(t, tx.Group)
 		}
 	})
+
+	t.Run("FailedWithNegativeAmount", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+
+		// Create Transactions
+		target := random.AlphaNumeric(t, 20)
+		amount := -1
+
+		_, err := repo.CreateTransaction(ctx, amount, target, nil, nil, nil)
+		assert.Error(t, err)
+	})
 }

@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
@@ -50,12 +49,6 @@ func (repo *EntRepository) GetTransactions(ctx context.Context, query Transactio
 	if query.Until != nil {
 		transactionsq = transactionsq.
 			Where(transaction.CreatedAtLT(*query.Until))
-	}
-
-	if query.Year != nil && *query.Year != 0 {
-		transactionsq = transactionsq.
-			Where(transaction.CreatedAtGTE(time.Date(*query.Year, 4, 1, 0, 0, 0, 0, time.Local))).
-			Where(transaction.CreatedAtLT(time.Date(*query.Year+1, 4, 1, 0, 0, 0, 0, time.Local)))
 	}
 
 	txs, err := transactionsq.All(ctx)

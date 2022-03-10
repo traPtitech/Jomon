@@ -37,7 +37,6 @@ paths:
       parameters:
         - $ref: "#/components/parameters/sortQuery"
         - $ref: "#/components/parameters/targetQuery"
-        - $ref: "#/components/parameters/yearQuery"
         - $ref: "#/components/parameters/sinceQuery"
         - $ref: "#/components/parameters/untilQuery"
         - $ref: "#/components/parameters/tagQuery"
@@ -126,7 +125,6 @@ paths:
       parameters:
         - $ref: "#/components/parameters/sortQuery"
         - $ref: "#/components/parameters/targetQuery"
-        - $ref: "#/components/parameters/yearQuery"
         - $ref: "#/components/parameters/sinceQuery"
         - $ref: "#/components/parameters/untilQuery"
         - $ref: "#/components/parameters/tagQuery"
@@ -1125,13 +1123,6 @@ components:
       in: query
       schema:
         type: string
-    yearQuery:
-      name: year
-      description: 何年度の依頼か
-      required: false
-      in: query
-      schema:
-        type: integer
     sinceQuery:
       name: since
       description: いつからの依頼か

@@ -89,7 +89,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			GetTransactions(c.Request().Context(), model.TransactionQuery{
 				Sort:   nil,
 				Target: nil,
-				Year:   nil,
 				Since:  nil,
 				Until:  nil,
 				Tag:    nil,
