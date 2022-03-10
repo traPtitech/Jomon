@@ -239,6 +239,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
 		ctx := context.Background()
 
 		amount := random.Numeric(t, 100000)
@@ -276,6 +277,91 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 				assert.Equal(t, group.Description, tx.Group.Description)
 				assert.Equal(t, group.Budget, tx.Group.Budget)
 			}
+		}
+	})
+
+	t.Run("SuccessWithoutTags", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+
+		amount := random.Numeric(t, 100000)
+
+		// Create user
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
+		require.NoError(t, err)
+
+		// Create group
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &amount, []*User{user})
+		require.NoError(t, err)
+
+		// Create Transactions
+		target := random.AlphaNumeric(t, 20)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), nil, nil, user.ID)
+		require.NoError(t, err)
+
+		tx, err := repo.CreateTransaction(ctx, amount, target, nil, &group.ID, &request.ID)
+		assert.NoError(t, err)
+		if assert.NotNil(t, tx) {
+			assert.Equal(t, amount, tx.Amount)
+			assert.Equal(t, target, tx.Target)
+			assert.Len(t, tx.Tags, 0)
+			if assert.NotNil(t, tx.Group) {
+				assert.Equal(t, group.ID, tx.Group.ID)
+				assert.Equal(t, group.Name, tx.Group.Name)
+				assert.Equal(t, group.Description, tx.Group.Description)
+				assert.Equal(t, group.Budget, tx.Group.Budget)
+			}
+		}
+	})
+
+	t.Run("SuccessWithoutGroup", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+
+		amount := random.Numeric(t, 100000)
+
+		// Create user
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
+		require.NoError(t, err)
+
+		// Create tag
+		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
+		require.NoError(t, err)
+
+		// Create Transactions
+		target := random.AlphaNumeric(t, 20)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), nil, nil, user.ID)
+		require.NoError(t, err)
+
+		tx, err := repo.CreateTransaction(ctx, amount, target, []*uuid.UUID{&tag.ID}, nil, &request.ID)
+		assert.NoError(t, err)
+		if assert.NotNil(t, tx) {
+			assert.Equal(t, amount, tx.Amount)
+			assert.Equal(t, target, tx.Target)
+			if assert.Len(t, tx.Tags, 1) {
+				assert.Equal(t, tag.ID, tx.Tags[0].ID)
+				assert.Equal(t, tag.Name, tx.Tags[0].Name)
+				assert.Equal(t, tag.Description, tx.Tags[0].Description)
+			}
+			assert.Nil(t, tx.Group)
+		}
+	})
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+
+		// Create Transactions
+		target := random.AlphaNumeric(t, 20)
+		amount := random.Numeric(t, 100000)
+
+		tx, err := repo.CreateTransaction(ctx, amount, target, nil, nil, nil)
+		assert.NoError(t, err)
+		if assert.NotNil(t, tx) {
+			assert.Equal(t, amount, tx.Amount)
+			assert.Equal(t, target, tx.Target)
+			assert.Len(t, tx.Tags, 0)
+			assert.Nil(t, tx.Group)
 		}
 	})
 }
