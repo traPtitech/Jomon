@@ -217,4 +217,16 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			assert.Equal(t, tx.UpdatedAt, got[0].UpdatedAt)
 		}
 	})
+
+	t.Run("Success", func(t *testing.T) {
+		err := dropAll(t, ctx, client)
+		require.NoError(t, err)
+		ctx := context.Background()
+
+		// Get Transactions
+		query := TransactionQuery{}
+		got, err := repo.GetTransactions(ctx, query)
+		assert.NoError(t, err)
+		assert.Len(t, got, 0)
+	})
 }
