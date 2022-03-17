@@ -133,7 +133,7 @@ func (tdq *TransactionDetailQuery) FirstIDX(ctx context.Context) uuid.UUID {
 }
 
 // Only returns a single TransactionDetail entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one TransactionDetail entity is not found.
+// Returns a *NotSingularError when more than one TransactionDetail entity is found.
 // Returns a *NotFoundError when no TransactionDetail entities are found.
 func (tdq *TransactionDetailQuery) Only(ctx context.Context) (*TransactionDetail, error) {
 	nodes, err := tdq.Limit(2).All(ctx)
@@ -160,7 +160,7 @@ func (tdq *TransactionDetailQuery) OnlyX(ctx context.Context) *TransactionDetail
 }
 
 // OnlyID is like Only, but returns the only TransactionDetail ID in the query.
-// Returns a *NotSingularError when exactly one TransactionDetail ID is not found.
+// Returns a *NotSingularError when more than one TransactionDetail ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (tdq *TransactionDetailQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
@@ -270,8 +270,9 @@ func (tdq *TransactionDetailQuery) Clone() *TransactionDetailQuery {
 		predicates:      append([]predicate.TransactionDetail{}, tdq.predicates...),
 		withTransaction: tdq.withTransaction.Clone(),
 		// clone intermediate query.
-		sql:  tdq.sql.Clone(),
-		path: tdq.path,
+		sql:    tdq.sql.Clone(),
+		path:   tdq.path,
+		unique: tdq.unique,
 	}
 }
 

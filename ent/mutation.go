@@ -2874,6 +2874,7 @@ type RequestMutation struct {
 	amount             *int
 	addamount          *int
 	title              *string
+	content            *string
 	created_at         *time.Time
 	updated_at         *time.Time
 	clearedFields      map[string]struct{}
@@ -3098,6 +3099,42 @@ func (m *RequestMutation) OldTitle(ctx context.Context) (v string, err error) {
 // ResetTitle resets all changes to the "title" field.
 func (m *RequestMutation) ResetTitle() {
 	m.title = nil
+}
+
+// SetContent sets the "content" field.
+func (m *RequestMutation) SetContent(s string) {
+	m.content = &s
+}
+
+// Content returns the value of the "content" field in the mutation.
+func (m *RequestMutation) Content() (r string, exists bool) {
+	v := m.content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old "content" field's value of the Request entity.
+// If the Request object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RequestMutation) OldContent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ResetContent resets all changes to the "content" field.
+func (m *RequestMutation) ResetContent() {
+	m.content = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -3593,12 +3630,15 @@ func (m *RequestMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RequestMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.amount != nil {
 		fields = append(fields, request.FieldAmount)
 	}
 	if m.title != nil {
 		fields = append(fields, request.FieldTitle)
+	}
+	if m.content != nil {
+		fields = append(fields, request.FieldContent)
 	}
 	if m.created_at != nil {
 		fields = append(fields, request.FieldCreatedAt)
@@ -3618,6 +3658,8 @@ func (m *RequestMutation) Field(name string) (ent.Value, bool) {
 		return m.Amount()
 	case request.FieldTitle:
 		return m.Title()
+	case request.FieldContent:
+		return m.Content()
 	case request.FieldCreatedAt:
 		return m.CreatedAt()
 	case request.FieldUpdatedAt:
@@ -3635,6 +3677,8 @@ func (m *RequestMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldAmount(ctx)
 	case request.FieldTitle:
 		return m.OldTitle(ctx)
+	case request.FieldContent:
+		return m.OldContent(ctx)
 	case request.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case request.FieldUpdatedAt:
@@ -3661,6 +3705,13 @@ func (m *RequestMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTitle(v)
+		return nil
+	case request.FieldContent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
 		return nil
 	case request.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -3745,6 +3796,9 @@ func (m *RequestMutation) ResetField(name string) error {
 		return nil
 	case request.FieldTitle:
 		m.ResetTitle()
+		return nil
+	case request.FieldContent:
+		m.ResetContent()
 		return nil
 	case request.FieldCreatedAt:
 		m.ResetCreatedAt()

@@ -10,9 +10,9 @@ import (
 
 type RequestRepository interface {
 	GetRequests(ctx context.Context, query RequestQuery) ([]*RequestResponse, error)
-	CreateRequest(ctx context.Context, amount int, title string, tags []*Tag, group *Group, userID uuid.UUID) (*RequestDetail, error)
+	CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, group *Group, userID uuid.UUID) (*RequestDetail, error)
 	GetRequest(ctx context.Context, requestID uuid.UUID) (*RequestDetail, error)
-	UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, tags []*Tag, group *Group) (*RequestDetail, error)
+	UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, content string, tags []*Tag, group *Group) (*RequestDetail, error)
 }
 
 type Request struct {
@@ -30,6 +30,7 @@ type RequestResponse struct {
 	CreatedBy uuid.UUID
 	Amount    int
 	Title     string
+	Content   string
 	Tags      []*Tag
 	Group     *Group
 }
@@ -39,6 +40,7 @@ type RequestDetail struct {
 	Status    Status
 	Amount    int
 	Title     string
+	Content   string
 	Comments  []*Comment
 	Files     []*uuid.UUID
 	Statuses  []*RequestStatus

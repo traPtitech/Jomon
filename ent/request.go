@@ -23,6 +23,8 @@ type Request struct {
 	Amount int `json:"amount,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
+	// Content holds the value of the "content" field.
+	Content string `json:"content,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -146,7 +148,7 @@ func (*Request) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case request.FieldAmount:
 			values[i] = new(sql.NullInt64)
-		case request.FieldTitle:
+		case request.FieldTitle, request.FieldContent:
 			values[i] = new(sql.NullString)
 		case request.FieldCreatedAt, request.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -188,6 +190,12 @@ func (r *Request) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
 			} else if value.Valid {
 				r.Title = value.String
+			}
+		case request.FieldContent:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field content", values[i])
+			} else if value.Valid {
+				r.Content = value.String
 			}
 		case request.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -287,6 +295,8 @@ func (r *Request) String() string {
 	builder.WriteString(fmt.Sprintf("%v", r.Amount))
 	builder.WriteString(", title=")
 	builder.WriteString(r.Title)
+	builder.WriteString(", content=")
+	builder.WriteString(r.Content)
 	builder.WriteString(", created_at=")
 	builder.WriteString(r.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")

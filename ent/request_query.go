@@ -302,7 +302,7 @@ func (rq *RequestQuery) FirstIDX(ctx context.Context) uuid.UUID {
 }
 
 // Only returns a single Request entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Request entity is not found.
+// Returns a *NotSingularError when more than one Request entity is found.
 // Returns a *NotFoundError when no Request entities are found.
 func (rq *RequestQuery) Only(ctx context.Context) (*Request, error) {
 	nodes, err := rq.Limit(2).All(ctx)
@@ -329,7 +329,7 @@ func (rq *RequestQuery) OnlyX(ctx context.Context) *Request {
 }
 
 // OnlyID is like Only, but returns the only Request ID in the query.
-// Returns a *NotSingularError when exactly one Request ID is not found.
+// Returns a *NotSingularError when more than one Request ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (rq *RequestQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
@@ -446,8 +446,9 @@ func (rq *RequestQuery) Clone() *RequestQuery {
 		withUser:        rq.withUser.Clone(),
 		withGroup:       rq.withGroup.Clone(),
 		// clone intermediate query.
-		sql:  rq.sql.Clone(),
-		path: rq.path,
+		sql:    rq.sql.Clone(),
+		path:   rq.path,
+		unique: rq.unique,
 	}
 }
 

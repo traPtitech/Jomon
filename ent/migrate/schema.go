@@ -15,8 +15,8 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "comment_user", Type: field.TypeUUID, Nullable: true},
-		{Name: "request_comment", Type: field.TypeUUID, Nullable: true},
+		{Name: "comment_user", Type: field.TypeUUID},
+		{Name: "request_comment", Type: field.TypeUUID},
 	}
 	// CommentsTable holds the schema information for the "comments" table.
 	CommentsTable = &schema.Table{
@@ -28,13 +28,13 @@ var (
 				Symbol:     "comments_users_user",
 				Columns:    []*schema.Column{CommentsColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "comments_requests_comment",
 				Columns:    []*schema.Column{CommentsColumns[6]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -83,7 +83,7 @@ var (
 		{Name: "amount", Type: field.TypeInt},
 		{Name: "comment", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "group_group_budget", Type: field.TypeUUID, Nullable: true},
+		{Name: "group_group_budget", Type: field.TypeUUID},
 	}
 	// GroupBudgetsTable holds the schema information for the "group_budgets" table.
 	GroupBudgetsTable = &schema.Table{
@@ -95,7 +95,7 @@ var (
 				Symbol:     "group_budgets_groups_group_budget",
 				Columns:    []*schema.Column{GroupBudgetsColumns[4]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -104,6 +104,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "amount", Type: field.TypeInt},
 		{Name: "title", Type: field.TypeString},
+		{Name: "content", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "group_request", Type: field.TypeUUID, Nullable: true},
@@ -117,13 +118,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "requests_groups_request",
-				Columns:    []*schema.Column{RequestsColumns[5]},
+				Columns:    []*schema.Column{RequestsColumns[6]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "requests_users_user",
-				Columns:    []*schema.Column{RequestsColumns[6]},
+				Columns:    []*schema.Column{RequestsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -134,8 +135,8 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"submitted", "fix_required", "accepted", "completed", "rejected"}, Default: "submitted"},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "request_status", Type: field.TypeUUID, Nullable: true},
-		{Name: "request_status_user", Type: field.TypeUUID, Nullable: true},
+		{Name: "request_status", Type: field.TypeUUID},
+		{Name: "request_status_user", Type: field.TypeUUID},
 	}
 	// RequestStatusTable holds the schema information for the "request_status" table.
 	RequestStatusTable = &schema.Table{
@@ -147,13 +148,13 @@ var (
 				Symbol:     "request_status_requests_status",
 				Columns:    []*schema.Column{RequestStatusColumns[3]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "request_status_users_user",
 				Columns:    []*schema.Column{RequestStatusColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -163,7 +164,7 @@ var (
 		{Name: "target", Type: field.TypeString},
 		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "request_target", Type: field.TypeUUID, Nullable: true},
+		{Name: "request_target", Type: field.TypeUUID},
 	}
 	// RequestTargetsTable holds the schema information for the "request_targets" table.
 	RequestTargetsTable = &schema.Table{
@@ -175,7 +176,7 @@ var (
 				Symbol:     "request_targets_requests_target",
 				Columns:    []*schema.Column{RequestTargetsColumns[4]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -237,7 +238,7 @@ var (
 		{Name: "target", Type: field.TypeString, Default: ""},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "transaction_detail", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "transaction_detail", Type: field.TypeUUID, Unique: true},
 	}
 	// TransactionDetailsTable holds the schema information for the "transaction_details" table.
 	TransactionDetailsTable = &schema.Table{
@@ -249,7 +250,7 @@ var (
 				Symbol:     "transaction_details_transactions_detail",
 				Columns:    []*schema.Column{TransactionDetailsColumns[5]},
 				RefColumns: []*schema.Column{TransactionsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
