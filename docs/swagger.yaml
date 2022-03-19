@@ -41,7 +41,7 @@ paths:
         - $ref: "#/components/parameters/untilQuery"
         - $ref: "#/components/parameters/tagQuery"
         - $ref: "#/components/parameters/groupQuery"
-        - $ref: "#/components/parameters/transactionQuery"
+        - $ref: "#/components/parameters/requestQuery"
       responses:
         "200":
           description: 該当するものがない場合は空配列を返却。
