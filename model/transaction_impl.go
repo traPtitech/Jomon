@@ -52,6 +52,22 @@ func (repo *EntRepository) GetTransactions(ctx context.Context, query Transactio
 			Where(transaction.CreatedAtLT(*query.Until))
 	}
 
+	if query.Tag != nil {
+		transactionsq = transactionsq.
+			Where(transaction.HasTagWith(
+				tag.NameEQ(*query.Tag),
+			))
+	}
+
+	if query.Group != nil {
+		transactionsq = transactionsq.
+			Where(transaction.HasGroupBudgetWith(
+				groupbudget.HasGroupWith(
+					group.NameEQ(*query.Group),
+				),
+			))
+	}
+
 	if query.Request != nil {
 		transactionsq = transactionsq.
 			Where(transaction.HasRequestWith(
