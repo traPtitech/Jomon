@@ -167,6 +167,7 @@ func TestEntREpository_UpdateComment(t *testing.T) {
 	})
 
 	t.Run("UnknownRequest", func(t *testing.T) {
+		t.Parallel()
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, nil, user.ID)
