@@ -1154,9 +1154,9 @@ components:
       in: query
       schema:
         type: string
-    transactionQuery:
-      name: transaction
-      description: トランザクション
+    requestQuery:
+      name: request
+      description: 依頼
       required: False
       in: query
       schema:
