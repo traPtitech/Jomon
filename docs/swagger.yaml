@@ -37,11 +37,11 @@ paths:
       parameters:
         - $ref: "#/components/parameters/sortQuery"
         - $ref: "#/components/parameters/targetQuery"
-        - $ref: "#/components/parameters/yearQuery"
         - $ref: "#/components/parameters/sinceQuery"
         - $ref: "#/components/parameters/untilQuery"
         - $ref: "#/components/parameters/tagQuery"
         - $ref: "#/components/parameters/groupQuery"
+        - $ref: "#/components/parameters/transactionQuery"
       responses:
         "200":
           description: 該当するものがない場合は空配列を返却。
@@ -126,7 +126,6 @@ paths:
       parameters:
         - $ref: "#/components/parameters/sortQuery"
         - $ref: "#/components/parameters/targetQuery"
-        - $ref: "#/components/parameters/yearQuery"
         - $ref: "#/components/parameters/sinceQuery"
         - $ref: "#/components/parameters/untilQuery"
         - $ref: "#/components/parameters/tagQuery"
@@ -1037,6 +1036,9 @@ components:
         group:
           type: string
           format: uuid
+        request:
+          type: string
+          format: uuid
     Comment:
       type: object
       properties:
@@ -1122,13 +1124,6 @@ components:
       in: query
       schema:
         type: string
-    yearQuery:
-      name: year
-      description: 何年度の依頼か
-      required: false
-      in: query
-      schema:
-        type: integer
     sinceQuery:
       name: since
       description: いつからの依頼か
@@ -1159,3 +1154,11 @@ components:
       in: query
       schema:
         type: string
+    transactionQuery:
+      name: transaction
+      description: トランザクション
+      required: False
+      in: query
+      schema:
+        type: string
+        format: uuid
