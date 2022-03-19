@@ -11,7 +11,7 @@ import (
 
 func TestEntRepository_GetTags(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_tags")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -47,7 +47,7 @@ func TestEntRepository_GetTags(t *testing.T) {
 
 func TestEntRepository_CreateTag(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "create_tag")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -74,7 +74,7 @@ func TestEntRepository_CreateTag(t *testing.T) {
 
 func TestEntRepository_UpdateTag(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "update_tag")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -122,7 +122,7 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 
 func TestEntRepository_DeleteTag(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "delete_tag")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 

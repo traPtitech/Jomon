@@ -12,7 +12,7 @@ import (
 
 func TestEntRepository_GetMembers(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_members")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -62,7 +62,7 @@ func TestEntRepository_GetMembers(t *testing.T) {
 
 func TestEntRepository_CreateMember(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "create_member")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -106,7 +106,7 @@ func TestEntRepository_CreateMember(t *testing.T) {
 
 func TestEntRepository_DeleteMember(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "delete_member")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -140,7 +140,7 @@ func TestEntRepository_DeleteMember(t *testing.T) {
 
 func TestEntRepository_GetOwners(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_owners")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -190,7 +190,7 @@ func TestEntRepository_GetOwners(t *testing.T) {
 
 func TestEntRepository_CreateOwner(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "create_owner")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -224,7 +224,7 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 
 func TestEntRepository_DeleteOwner(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "delete_owner")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 

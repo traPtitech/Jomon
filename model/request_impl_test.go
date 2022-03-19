@@ -13,7 +13,7 @@ import (
 
 func TestEntRepository_GetRequests(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_requests")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -132,7 +132,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 func TestEntRepository_CreateRequest(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "create_request")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -236,7 +236,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 
 func TestEntRepository_GetRequest(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_request")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -279,7 +279,7 @@ func TestEntRepository_GetRequest(t *testing.T) {
 
 func TestEntREpository_UpdateRequest(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "update_request")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
