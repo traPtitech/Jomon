@@ -41,6 +41,7 @@ paths:
         - $ref: "#/components/parameters/untilQuery"
         - $ref: "#/components/parameters/tagQuery"
         - $ref: "#/components/parameters/groupQuery"
+        - $ref: "#/components/parameters/transactionQuery"
       responses:
         "200":
           description: 該当するものがない場合は空配列を返却。
@@ -1153,3 +1154,11 @@ components:
       in: query
       schema:
         type: string
+    transactionQuery:
+      name: transaction
+      description: トランザクション
+      required: False
+      in: query
+      schema:
+        type: string
+        format: uuid
