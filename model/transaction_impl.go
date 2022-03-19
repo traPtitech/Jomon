@@ -7,6 +7,7 @@ import (
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
+	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -49,6 +50,13 @@ func (repo *EntRepository) GetTransactions(ctx context.Context, query Transactio
 	if query.Until != nil {
 		transactionsq = transactionsq.
 			Where(transaction.CreatedAtLT(*query.Until))
+	}
+
+	if query.Request != nil {
+		transactionsq = transactionsq.
+			Where(transaction.HasRequestWith(
+				request.IDEQ(*query.Request),
+			))
 	}
 
 	txs, err := transactionsq.All(ctx)

@@ -219,6 +219,44 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 	})
 
+	t.Run("SuccessWithRequest", func(t *testing.T) {
+		err := dropAll(t, ctx, client)
+		require.NoError(t, err)
+		ctx := context.Background()
+
+		// Create user
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
+		require.NoError(t, err)
+
+		// Create Transactions
+		amount := random.Numeric(t, 100000)
+		target := random.AlphaNumeric(t, 20)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), nil, nil, user.ID)
+		require.NoError(t, err)
+
+		_, err = repo.CreateTransaction(ctx, amount, target, nil, nil, nil)
+		require.NoError(t, err)
+
+		// Get Transactions
+		query := TransactionQuery{
+			Request: &request.ID,
+		}
+
+		time.Sleep(1 * time.Second)
+		tx, err := repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		require.NoError(t, err)
+
+		got, err := repo.GetTransactions(ctx, query)
+		assert.NoError(t, err)
+		if assert.Len(t, got, 1) {
+			assert.Equal(t, tx.ID, got[0].ID)
+			assert.Equal(t, tx.Amount, got[0].Amount)
+			assert.Equal(t, tx.Target, got[0].Target)
+			assert.Equal(t, tx.CreatedAt, got[0].CreatedAt)
+			assert.Equal(t, tx.UpdatedAt, got[0].UpdatedAt)
+		}
+	})
+
 	t.Run("Success", func(t *testing.T) {
 		err := dropAll(t, ctx, client)
 		require.NoError(t, err)

@@ -31,10 +31,11 @@ type TransactionResponse struct {
 }
 
 type TransactionQuery struct {
-	Sort   *string
-	Target *string
-	Since  *time.Time
-	Until  *time.Time
-	Tag    *string
-	Group  *string
+	Sort    *string
+	Target  *string
+	Since   *time.Time
+	Until   *time.Time
+	Tag     *string
+	Group   *string
+	Request *uuid.UUID
 }
