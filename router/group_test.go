@@ -1365,7 +1365,7 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 
 		unknownUserID := uuid.New()
 		var resErr *ent.NotFoundError
-		errors.As(errors.New("unknown member id"), &resErr)
+		errors.As(errors.New("unknown owner id"), &resErr)
 
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners/%s", group.ID.String(), unknownUserID.String()), nil)
