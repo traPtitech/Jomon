@@ -95,7 +95,7 @@ var (
 				Symbol:     "group_budgets_groups_group_budget",
 				Columns:    []*schema.Column{GroupBudgetsColumns[4]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
