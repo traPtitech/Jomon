@@ -164,7 +164,7 @@ var (
 		{Name: "amount", Type: field.TypeInt},
 		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "request_target", Type: field.TypeUUID, Nullable: true},
+		{Name: "request_target", Type: field.TypeUUID},
 	}
 	// RequestTargetsTable holds the schema information for the "request_targets" table.
 	RequestTargetsTable = &schema.Table{
