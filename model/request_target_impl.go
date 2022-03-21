@@ -42,23 +42,6 @@ func createRequestTargets(client *ent.Client, ctx context.Context, requestID uui
 	return targetDetails, nil
 }
 
-func updateRequestTargets(client *ent.Client, ctx context.Context, requestID uuid.UUID, targets []Target) ([]*TargetDetail, error) {
-	var entTargets []*ent.RequestTarget
-	bulk := make([]*ent.RequestTargetCreate, len(targets))
-	for i, target := range targets {
-		bulk[i] = client.RequestTarget.Create().SetTarget(target.Target).SetAmount(target.Amount).SetRequestID(requestID)
-	}
-	entTargets, err := client.RequestTarget.CreateBulk(bulk...).Save(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var targetDetails []*TargetDetail
-	for _, entTarget := range entTargets {
-		targetDetails = append(targetDetails, convertEntRequestTargetToModelRequestTarget(entTarget))
-	}
-	return targetDetails, nil
-}
-
 func deleteRequestTargets(client *ent.Client, ctx context.Context, requestID uuid.UUID) error {
 	_, err := client.RequestTarget.
 		Delete().
