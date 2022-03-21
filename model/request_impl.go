@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -116,11 +117,16 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 }
 
 func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, tags []*Tag, targets []*Target, group *Group, userID uuid.UUID) (*RequestDetail, error) {
+	tx, txClient, err := setupTx(repo.client, ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
 		tagIDs = append(tagIDs, tag.ID)
 	}
-	created, err := repo.client.Request.
+	created, err := txClient.Request.
 		Create().
 		SetTitle(title).
 		SetAmount(amount).
@@ -130,22 +136,25 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 		AddTagIDs(tagIDs...).
 		Save(ctx)
 	if err != nil {
+		err = rollBackWithErr(tx, ctx, err)
 		return nil, err
 	}
 	user, err := created.QueryUser().Select(user.FieldID).First(ctx)
 	if err != nil {
+		err = rollBackWithErr(tx, ctx, err)
 		return nil, err
 	}
 	if group != nil {
-		_, err = repo.client.Group.
+		_, err = txClient.Group.
 			UpdateOneID(group.ID).
 			AddRequest(created).
 			Save(ctx)
 		if err != nil {
+			err = rollBackWithErr(tx, ctx, err)
 			return nil, err
 		}
 	}
-	status, err := repo.client.RequestStatus.
+	status, err := txClient.RequestStatus.
 		Create().
 		SetStatus(requeststatus.StatusSubmitted).
 		SetCreatedAt(time.Now()).
@@ -153,23 +162,19 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 		SetUser(user).
 		Save(ctx)
 	if err != nil {
+		err = rollBackWithErr(tx, ctx, err)
 		return nil, err
 	}
-
-	var entTargets []*ent.RequestTarget
-	bulk := make([]*ent.RequestTargetCreate, len(targets))
-	for i, target := range targets {
-		bulk[i] = repo.client.RequestTarget.Create().SetTarget(target.Target).SetAmount(target.Amount).SetRequestID(created.ID)
-	}
-	entTargets, err = repo.client.RequestTarget.CreateBulk(bulk...).Save(ctx)
+	modelTargets, err := createRequestTargets(txClient, ctx, created.ID, targets)
 	if err != nil {
+		err = rollBackWithErr(tx, ctx, err)
 		return nil, err
 	}
-	var modelTargets []*TargetDetail
-	for _, entTarget := range entTargets {
-		modelTargets = append(modelTargets, convertEntRequestTargetToModelRequestTarget(entTarget))
-	}
 
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("committing transaction: %v", err)
+	}
 	reqdetail := &RequestDetail{
 		ID:        created.ID,
 		Status:    convertEntRequestStatusToModelStatus(&status.Status),
@@ -225,50 +230,58 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 }
 
 func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, tags []*Tag, targets []*Target, group *Group) (*RequestDetail, error) {
+	tx, txClient, err := setupTx(repo.client, ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
 		tagIDs = append(tagIDs, tag.ID)
 	}
-	// 前のtarget達をdeleteしたほうがいいのかどうか
-	updated, err := repo.client.Request.
+	updated, err := txClient.Request.
 		UpdateOneID(requestID).
 		SetAmount(amount).
 		SetTitle(title).
 		ClearTag().
 		AddTagIDs(tagIDs...).
-		ClearTarget().
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
+		err = rollBackWithErr(tx, ctx, err)
 		return nil, err
 	}
 
 	if group != nil {
-		_, err = repo.client.Request.
+		_, err = txClient.Request.
 			UpdateOneID(requestID).
 			ClearGroup().
 			SetGroupID(group.ID).
 			Save(ctx)
 	} else {
-		_, err = repo.client.Request.
+		_, err = txClient.Request.
 			UpdateOneID(requestID).
 			ClearGroup().
 			Save(ctx)
 	}
 	if err != nil {
+		err = rollBackWithErr(tx, ctx, err)
 		return nil, err
 	}
 
 	status, err := updated.QueryStatus().Select(requeststatus.FieldStatus).First(ctx)
 	if err != nil {
+		err = rollBackWithErr(tx, ctx, err)
 		return nil, err
 	}
 	user, err := updated.QueryUser().Select(user.FieldID).First(ctx)
 	if err != nil {
+		err = rollBackWithErr(tx, ctx, err)
 		return nil, err
 	}
 	enttags, err := updated.QueryTag().All(ctx)
 	if err != nil {
+		err = rollBackWithErr(tx, ctx, err)
 		return nil, err
 	}
 	var modeltags []*Tag
@@ -279,25 +292,25 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	if group != nil {
 		entgroup, err = updated.QueryGroup().Only(ctx)
 		if err != nil {
+			err = rollBackWithErr(tx, ctx, err)
 			return nil, err
 		}
 	}
-
-	var entTargets []*ent.RequestTarget
-	bulk := make([]*ent.RequestTargetCreate, len(targets))
-	for i, target := range targets {
-		bulk[i] = repo.client.RequestTarget.Create().SetTarget(target.Target).SetAmount(target.Amount).SetRequestID(updated.ID)
-	}
-	entTargets, err = repo.client.RequestTarget.CreateBulk(bulk...).Save(ctx)
+	err = deleteRequestTargets(txClient, ctx, requestID)
 	if err != nil {
+		err = rollBackWithErr(tx, ctx, err)
 		return nil, err
 	}
-	var modelTargets []*TargetDetail
-	for _, entTarget := range entTargets {
-		modelTargets = append(modelTargets, convertEntRequestTargetToModelRequestTarget(entTarget))
+	modelTargets, err := createRequestTargets(txClient, ctx, updated.ID, targets)
+	if err != nil {
+		err = rollBackWithErr(tx, ctx, err)
+		return nil, err
 	}
 
-	modelgroup := ConvertEntGroupToModelGroup(entgroup)
+	err = tx.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("committing transaction: %v", err)
+	}
 	reqdetail := &RequestDetail{
 		ID:        updated.ID,
 		Status:    convertEntRequestStatusToModelStatus(&status.Status),
@@ -305,7 +318,7 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		Title:     updated.Title,
 		Tags:      modeltags,
 		Targets:   modelTargets,
-		Group:     modelgroup,
+		Group:     ConvertEntGroupToModelGroup(entgroup),
 		CreatedAt: updated.CreatedAt,
 		UpdatedAt: updated.UpdatedAt,
 		CreatedBy: user.ID,
