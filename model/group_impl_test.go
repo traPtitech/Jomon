@@ -10,6 +10,59 @@ import (
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
+func TestEntRepository_CreateGroup(t *testing.T) {
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
+	repo := NewEntRepository(client, storage)
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		budget := random.Numeric(t, 100000)
+		name := random.AlphaNumeric(t, 20)
+		description := random.AlphaNumeric(t, 15)
+		group, err := repo.CreateGroup(ctx, name, description, &budget)
+		require.NoError(t, err)
+		assert.Equal(t, name, group.Name)
+		assert.Equal(t, description, group.Description)
+		assert.Equal(t, *group.Budget, budget)
+	})
+}
+
+func TestEntRepository_UpdateGroup(t *testing.T) {
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
+	repo := NewEntRepository(client, storage)
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		require.NoError(t, err)
+
+		updatedBudget := random.Numeric(t, 10000)
+		ug := Group{
+			ID:          group.ID,
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 15),
+			Budget:      &updatedBudget,
+		}
+		updated, err := repo.UpdateGroup(ctx, group.ID, ug.Name, ug.Description, ug.Budget)
+		assert.NoError(t, err)
+		assert.Equal(t, ug.Name, updated.Name)
+		assert.Equal(t, ug.Description, updated.Description)
+		assert.Equal(t, ug.Budget, updated.Budget)
+	})
+
+	t.Run("UnknownGroup", func(t *testing.T) {
+		t.Parallel()
+		budget := random.Numeric(t, 100000)
+		_, err := repo.UpdateGroup(ctx, uuid.New(), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		assert.Error(t, err)
+	})
+}
+
 func TestEntRepository_DeleteGroup(t *testing.T) {
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx)
