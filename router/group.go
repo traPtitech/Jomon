@@ -89,15 +89,35 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
+	owners, err := h.Repository.GetOwners(ctx, created.ID)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	resOwners := []*uuid.UUID{}
+	for _, owner := range owners {
+		resOwners = append(resOwners, &owner.ID)
+	}
+
+	users, err := h.Repository.GetMembers(ctx, created.ID)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	resUsers := []*uuid.UUID{}
+	for _, user := range users {
+		resUsers = append(resUsers, &user.ID)
+	}
+
 	res := GroupDetail{
 		ID:          created.ID,
 		Name:        created.Name,
 		Description: created.Description,
 		Budget:      created.Budget,
-		//Owners:      created.Owners,
-		//Users:       created.Users,
-		CreatedAt: created.CreatedAt,
-		UpdatedAt: created.UpdatedAt,
+		Owners:      resOwners,
+		Users:       resUsers,
+		CreatedAt:   created.CreatedAt,
+		UpdatedAt:   created.UpdatedAt,
 	}
 
 	return c.JSON(http.StatusOK, res)

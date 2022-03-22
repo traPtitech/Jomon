@@ -143,6 +143,68 @@ func TestHandlers_GetGroups(t *testing.T) {
 	})
 }
 
+func TestHandlers_PostGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		budget := random.Numeric(t, 1000000)
+
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPost, "/api/groups", strings.NewReader(fmt.Sprintf(`{"name":"%s","description":"%s","budget":%d}`, group.Name, group.Description, *group.Budget)))
+		require.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			CreateGroup(c.Request().Context(), group.Name, group.Description, group.Budget, nil).
+			Return(group, nil)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), group.ID).
+			Return([]*model.Owner{}, nil)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetMembers(c.Request().Context(), group.ID).
+			Return([]*model.Member{}, nil)
+
+		res := &GroupDetail{
+			ID:          group.ID,
+			Name:        group.Name,
+			Description: group.Description,
+			Budget:      group.Budget,
+			Owners:      []*uuid.UUID{},
+			Users:       []*uuid.UUID{},
+			CreatedAt:   group.CreatedAt,
+			UpdatedAt:   group.UpdatedAt,
+		}
+
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PostGroup(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+}
+
 func TestHandlers_GetMembers(t *testing.T) {
 	t.Parallel()
 
