@@ -10,6 +10,59 @@ import (
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
+func TestEntRepository_GetGroups(t *testing.T) {
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
+	repo := NewEntRepository(client, storage)
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		require.NoError(t, err)
+
+		groups, err := repo.GetGroups(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, 1, len(groups))
+		assert.Equal(t, group.ID, groups[0].ID)
+	})
+
+	t.Run("Success2", func(t *testing.T) {
+		t.Parallel()
+		groups, err := repo.GetGroups(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, 0, len(groups))
+	})
+}
+
+func TestEntRepository_GetGroup(t *testing.T) {
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
+	repo := NewEntRepository(client, storage)
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		require.NoError(t, err)
+
+		g, err := repo.GetGroup(ctx, group.ID)
+		assert.NoError(t, err)
+		assert.Equal(t, group.ID, g.ID)
+		assert.Equal(t, group.Name, g.Name)
+		assert.Equal(t, group.Description, g.Description)
+		assert.Equal(t, group.Budget, g.Budget)
+	})
+
+	t.Run("UnknownGroup", func(t *testing.T) {
+		t.Parallel()
+		_, err := repo.GetGroup(ctx, uuid.New())
+		assert.Error(t, err)
+	})
+}
+
 func TestEntRepository_CreateGroup(t *testing.T) {
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx)

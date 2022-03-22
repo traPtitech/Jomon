@@ -21,7 +21,6 @@ import (
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
-// TODO: 直す
 func TestHandlers_GetGroups(t *testing.T) {
 	t.Parallel()
 
