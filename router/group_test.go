@@ -193,6 +193,33 @@ func TestHandlers_PostGroup(t *testing.T) {
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
 	})
+
+	t.Run("FailedWithCreateGroup", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		budget := random.Numeric(t, 1000000)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPost, "/api/groups", strings.NewReader(fmt.Sprintf(`{"name":"test","description":"test","budget":%d}`, budget)))
+		require.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		resErr := errors.New("failed to create group")
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			CreateGroup(c.Request().Context(), "test", "test", &budget).
+			Return(nil, resErr)
+
+		err = h.Handlers.PostGroup(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		}
+	})
 }
 
 func TestHandlers_PutGroup(t *testing.T) {
