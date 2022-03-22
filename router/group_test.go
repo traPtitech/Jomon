@@ -337,6 +337,31 @@ func TestHandlers_PutGroup(t *testing.T) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 		}
 	})
+
+	t.Run("FailedWithUUID", func(t *testing.T) {
+		t.Parallel()
+
+		invalidUUID := "invalid-uuid"
+		_, resErr := uuid.Parse(invalidUUID)
+
+		ctrl := gomock.NewController(t)
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, "/api/groups/invalid-uuid", strings.NewReader(`{"name":"test","description":"test","budget":1000000}`))
+		require.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues("invalid-uuid")
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		err = h.Handlers.PutGroup(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
 }
 
 func TestHandlers_DeleteGroup(t *testing.T) {
@@ -415,6 +440,30 @@ func TestHandlers_DeleteGroup(t *testing.T) {
 		err = h.Handlers.DeleteGroup(c)
 		if assert.Error(t, err) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		}
+	})
+
+	t.Run("FailedWithUUID", func(t *testing.T) {
+		t.Parallel()
+
+		invalidUUID := "invalid-uuid"
+		_, resErr := uuid.Parse(invalidUUID)
+
+		ctrl := gomock.NewController(t)
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodDelete, "/api/groups/invalid-uuid", nil)
+		require.NoError(t, err)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues("invalid-uuid")
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		err = h.Handlers.DeleteGroup(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 		}
 	})
 }
