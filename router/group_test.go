@@ -259,6 +259,57 @@ func TestHandlers_PutGroup(t *testing.T) {
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
 	})
+
+	t.Run("FailedWithUpdateGroup", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+		date2 := time.Now().Add(time.Hour)
+
+		budget := random.Numeric(t, 1000000)
+		budget2 := random.Numeric(t, 1000000)
+
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		updated := &model.Group{
+			ID:          group.ID,
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget2,
+			CreatedAt:   date2,
+			UpdatedAt:   date2,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/groups/%s", group.ID.String()), strings.NewReader(fmt.Sprintf(`{"name":"%s","description":"%s","budget":%d}`, updated.Name, updated.Description, *updated.Budget)))
+		require.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues(group.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		resErr := errors.New("Failed to get requests.")
+		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			UpdateGroup(c.Request().Context(), group.ID, updated.Name, updated.Description, updated.Budget).
+			Return(nil, resErr)
+
+		err = h.Handlers.PutGroup(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		}
+	})
 }
 
 func TestHandlers_GetMembers(t *testing.T) {
