@@ -137,8 +137,24 @@ func (h *Handlers) PutGroup(c echo.Context) error {
 }
 
 func (h *Handlers) DeleteGroup(c echo.Context) error {
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if groupID == uuid.Nil {
+		c.Logger().Error(errors.New("invalid UUID"))
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+	}
+
+	ctx := context.Background()
+	err = h.Repository.DeleteGroup(ctx, groupID)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
 	return c.NoContent(http.StatusOK)
-	// TODO: Implement
 }
 
 func (h *Handlers) GetMembers(c echo.Context) error {

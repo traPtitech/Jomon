@@ -95,6 +95,20 @@ func (mr *MockGroupRepositoryMockRecorder) UpdateGroup(ctx, groupID, name, descr
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateGroup", reflect.TypeOf((*MockGroupRepository)(nil).UpdateGroup), ctx, groupID, name, description, budget)
 }
 
+// DeleteGroup mocks base method
+func (m *MockGroupRepository) DeleteGroup(ctx context.Context, groupID uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteGroup", ctx, groupID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteGroup indicates an expected call of DeleteGroup
+func (mr *MockGroupRepositoryMockRecorder) DeleteGroup(ctx, groupID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteGroup", reflect.TypeOf((*MockGroupRepository)(nil).DeleteGroup), ctx, groupID)
+}
+
 // GetOwners mocks base method
 func (m *MockGroupRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]*model.Owner, error) {
 	m.ctrl.T.Helper()

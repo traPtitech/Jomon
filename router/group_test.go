@@ -339,6 +339,86 @@ func TestHandlers_PutGroup(t *testing.T) {
 	})
 }
 
+func TestHandlers_DeleteGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		budget := random.Numeric(t, 1000000)
+
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s", group.ID.String()), nil)
+		require.NoError(t, err)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues(group.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			DeleteGroup(c.Request().Context(), group.ID).
+			Return(nil)
+
+		if assert.NoError(t, h.Handlers.DeleteGroup(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+		}
+	})
+
+	t.Run("FailedWithDeleteGroup", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		budget := random.Numeric(t, 1000000)
+
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s", group.ID.String()), nil)
+		require.NoError(t, err)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues(group.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		resErr := errors.New("Failed to get requests.")
+		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			DeleteGroup(c.Request().Context(), group.ID).
+			Return(resErr)
+
+		err = h.Handlers.DeleteGroup(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		}
+	})
+}
+
 func TestHandlers_GetMembers(t *testing.T) {
 	t.Parallel()
 

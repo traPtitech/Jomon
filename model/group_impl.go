@@ -62,6 +62,14 @@ func (repo *EntRepository) UpdateGroup(ctx context.Context, groupID uuid.UUID, n
 	return ConvertEntGroupToModelGroup(updated), nil
 }
 
+func (repo *EntRepository) DeleteGroup(ctx context.Context, groupID uuid.UUID) error {
+	err := repo.client.Group.
+		DeleteOneID(groupID).
+		Exec(ctx)
+
+	return err
+}
+
 func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]*Owner, error) {
 	groupowners, err := repo.client.Group.
 		Query().

@@ -10,6 +10,29 @@ import (
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
+func TestEntRepository_DeleteGroup(t *testing.T) {
+	ctx := context.Background()
+	client, storage, err := setup(t, ctx)
+	require.NoError(t, err)
+	repo := NewEntRepository(client, storage)
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		require.NoError(t, err)
+
+		err = repo.DeleteGroup(ctx, group.ID)
+		assert.NoError(t, err)
+	})
+
+	t.Run("UnknownGroup", func(t *testing.T) {
+		t.Parallel()
+		err := repo.DeleteGroup(ctx, uuid.New())
+		assert.Error(t, err)
+	})
+}
+
 func TestEntRepository_GetMembers(t *testing.T) {
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx, "get_members")
