@@ -15,6 +15,9 @@ func TestEntRepository_GetComments(t *testing.T) {
 	client, storage, err := setup(t, ctx, "get_comments")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
+	client2, storage2, err := setup(t, ctx, "get_comments2")
+	assert.NoError(t, err)
+	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -49,12 +52,12 @@ func TestEntRepository_GetComments(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, nil, user.ID)
+		request, err := repo2.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, nil, user.ID)
 		require.NoError(t, err)
 
-		got, err := repo.GetComments(ctx, request.ID)
+		got, err := repo2.GetComments(ctx, request.ID)
 		assert.NoError(t, err)
 		assert.Len(t, got, 0)
 	})

@@ -14,15 +14,11 @@ func TestEntRepository_GetTags(t *testing.T) {
 	client, storage, err := setup(t, ctx, "get_tags")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
+	client2, storage2, err := setup(t, ctx, "get_tags2")
+	assert.NoError(t, err)
+	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
-		t.Parallel()
-		got, err := repo.GetTags(ctx)
-		assert.NoError(t, err)
-		assert.Len(t, got, 0)
-	})
-
-	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		tag1, _ := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		tag2, _ := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
@@ -44,6 +40,13 @@ func TestEntRepository_GetTags(t *testing.T) {
 			assert.Equal(t, got[1].Name, tag1.Name)
 			assert.Equal(t, got[1].Description, tag1.Description)
 		}
+	})
+
+	t.Run("Success2", func(t *testing.T) {
+		t.Parallel()
+		got, err := repo2.GetTags(ctx)
+		assert.NoError(t, err)
+		assert.Len(t, got, 0)
 	})
 }
 
