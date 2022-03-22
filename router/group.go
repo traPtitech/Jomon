@@ -76,33 +76,31 @@ func (h *Handlers) GetGroups(c echo.Context) error {
 }
 
 func (h *Handlers) PostGroup(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
-	/*
-		var group Group
-		if err := c.Bind(&group); err != nil {
-			return badRequest(err)
-		}
+	var group Group
+	if err := c.Bind(&group); err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
 
-		ctx := context.Background()
-		created, err := h.MockRepository.CreateGroup(ctx, group.Name, group.Description, group.Budget, owners)
-		if err != nil {
-			return internalServerError(err)
-		}
+	ctx := context.Background()
+	created, err := h.Repository.CreateGroup(ctx, group.Name, group.Description, group.Budget, group.Owners)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
 
-		res := GroupDetail{
-			ID:          created.ID,
-			Name:        created.Name,
-			Description: created.Description,
-			Budget:      created.Budget,
-			//Owners:      created.Owners,
-			//Users:       created.Users,
-			CreatedAt: created.CreatedAt,
-			UpdatedAt: created.UpdatedAt,
-		}
+	res := GroupDetail{
+		ID:          created.ID,
+		Name:        created.Name,
+		Description: created.Description,
+		Budget:      created.Budget,
+		//Owners:      created.Owners,
+		//Users:       created.Users,
+		CreatedAt: created.CreatedAt,
+		UpdatedAt: created.UpdatedAt,
+	}
 
-		return c.JSON(http.StatusOK, res)
-	*/
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handlers) PostGroupUser(c echo.Context) error {

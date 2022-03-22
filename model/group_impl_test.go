@@ -24,7 +24,7 @@ func TestEntRepository_GetMembers(t *testing.T) {
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, []*uuid.UUID{&owner.ID})
 		require.NoError(t, err)
 
 		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
@@ -54,7 +54,7 @@ func TestEntRepository_GetMembers(t *testing.T) {
 		owner, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 		budget := random.Numeric(t, 100000)
-		group, err := repo2.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, []*uuid.UUID{&owner.ID})
 		require.NoError(t, err)
 
 		got, err := repo2.GetMembers(ctx, group.ID)
@@ -74,7 +74,7 @@ func TestEntRepository_CreateMember(t *testing.T) {
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, []*uuid.UUID{&owner.ID})
 		require.NoError(t, err)
 
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
@@ -99,7 +99,7 @@ func TestEntRepository_CreateMember(t *testing.T) {
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, []*uuid.UUID{&owner.ID})
 		require.NoError(t, err)
 
 		_, err = repo.CreateMember(ctx, group.ID, uuid.New())
@@ -118,7 +118,7 @@ func TestEntRepository_DeleteMember(t *testing.T) {
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, []*uuid.UUID{&owner.ID})
 		require.NoError(t, err)
 
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
@@ -152,27 +152,23 @@ func TestEntRepository_GetOwners(t *testing.T) {
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, []*uuid.UUID{&owner.ID})
 		require.NoError(t, err)
 
-		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		require.NoError(t, err)
-		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 
-		_, err = repo.CreateOwner(ctx, group.ID, user1.ID)
-		require.NoError(t, err)
-		_, err = repo.CreateOwner(ctx, group.ID, user2.ID)
+		_, err = repo.CreateOwner(ctx, group.ID, user.ID)
 		require.NoError(t, err)
 
 		got, err := repo.GetOwners(ctx, group.ID)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && got[0].ID == user1.ID {
-			assert.Equal(t, got[0].ID, user1.ID)
-			assert.Equal(t, got[1].ID, user2.ID)
+		if assert.Len(t, got, 2) && got[0].ID == user.ID {
+			assert.Equal(t, got[0].ID, user.ID)
+			assert.Equal(t, got[1].ID, owner.ID)
 		} else if assert.Len(t, got, 2) {
-			assert.Equal(t, got[0].ID, user2.ID)
-			assert.Equal(t, got[1].ID, user1.ID)
+			assert.Equal(t, got[0].ID, owner.ID)
+			assert.Equal(t, got[1].ID, user.ID)
 		}
 	})
 
@@ -182,12 +178,15 @@ func TestEntRepository_GetOwners(t *testing.T) {
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, []*uuid.UUID{&owner.ID})
 		require.NoError(t, err)
 
 		got, err := repo.GetOwners(ctx, group.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, got, []*Owner{})
+		owr := &Owner{
+			ID: owner.ID,
+		}
+		assert.Equal(t, got, []*Owner{owr})
 	})
 }
 
@@ -217,7 +216,7 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, []*uuid.UUID{&owner.ID})
 		require.NoError(t, err)
 
 		_, err = repo.CreateOwner(ctx, group.ID, uuid.New())
