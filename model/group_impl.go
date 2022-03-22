@@ -34,24 +34,32 @@ func (repo *EntRepository) GetGroup(ctx context.Context, groupID uuid.UUID) (*Gr
 	return ConvertEntGroupToModelGroup(group), nil
 }
 
-func (repo *EntRepository) CreateGroup(ctx context.Context, name string, description string, budget *int, owners []*uuid.UUID) (*Group, error) {
-	ownerIDs := []uuid.UUID{}
-	for _, owner := range owners {
-		ownerIDs = append(ownerIDs, *owner)
-	}
-
+func (repo *EntRepository) CreateGroup(ctx context.Context, name string, description string, budget *int) (*Group, error) {
 	created, err := repo.client.Group.
 		Create().
 		SetName(name).
 		SetDescription(description).
 		SetBudget(*budget).
-		AddOwnerIDs(ownerIDs...).
 		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return ConvertEntGroupToModelGroup(created), nil
+}
+
+func (repo *EntRepository) UpdateGroup(ctx context.Context, groupID uuid.UUID, name string, description string, budget *int) (*Group, error) {
+	updated, err := repo.client.Group.
+		UpdateOneID(groupID).
+		SetName(name).
+		SetDescription(description).
+		SetBudget(*budget).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return ConvertEntGroupToModelGroup(updated), nil
 }
 
 func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]*Owner, error) {

@@ -12,10 +12,9 @@ import (
 )
 
 type Group struct {
-	Name        string       `json:"name"`
-	Description string       `json:"description"`
-	Budget      *int         `json:"budget"`
-	Owners      []*uuid.UUID `json:"owners"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Budget      *int   `json:"budget"`
 }
 
 type Owner struct {
@@ -83,39 +82,17 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	created, err := h.Repository.CreateGroup(ctx, group.Name, group.Description, group.Budget, group.Owners)
+	created, err := h.Repository.CreateGroup(ctx, group.Name, group.Description, group.Budget)
 	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	owners, err := h.Repository.GetOwners(ctx, created.ID)
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	resOwners := []*uuid.UUID{}
-	for _, owner := range owners {
-		resOwners = append(resOwners, &owner.ID)
-	}
-
-	users, err := h.Repository.GetMembers(ctx, created.ID)
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	resUsers := []*uuid.UUID{}
-	for _, user := range users {
-		resUsers = append(resUsers, &user.ID)
-	}
-
-	res := GroupDetail{
+	res := GroupOverview{
 		ID:          created.ID,
 		Name:        created.Name,
 		Description: created.Description,
 		Budget:      created.Budget,
-		Owners:      resOwners,
-		Users:       resUsers,
 		CreatedAt:   created.CreatedAt,
 		UpdatedAt:   created.UpdatedAt,
 	}
@@ -123,14 +100,40 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PostGroupUser(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
-}
-
 func (h *Handlers) PutGroup(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	var group Group
+	if err := c.Bind(&group); err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if groupID == uuid.Nil {
+		c.Logger().Error(errors.New("invalid UUID"))
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+	}
+
+	ctx := context.Background()
+	updated, err := h.Repository.UpdateGroup(ctx, groupID, group.Name, group.Description, group.Budget)
+	if err != nil {
+		c.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	res := GroupOverview{
+		ID:          updated.ID,
+		Name:        updated.Name,
+		Description: updated.Description,
+		Budget:      updated.Budget,
+		CreatedAt:   updated.CreatedAt,
+		UpdatedAt:   updated.UpdatedAt,
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handlers) DeleteGroup(c echo.Context) error {

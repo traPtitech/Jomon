@@ -66,18 +66,33 @@ func (mr *MockGroupRepositoryMockRecorder) GetGroup(ctx, groupID interface{}) *g
 }
 
 // CreateGroup mocks base method
-func (m *MockGroupRepository) CreateGroup(ctx context.Context, name, description string, budget *int, owners []*uuid.UUID) (*model.Group, error) {
+func (m *MockGroupRepository) CreateGroup(ctx context.Context, name, description string, budget *int) (*model.Group, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateGroup", ctx, name, description, budget, owners)
+	ret := m.ctrl.Call(m, "CreateGroup", ctx, name, description, budget)
 	ret0, _ := ret[0].(*model.Group)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateGroup indicates an expected call of CreateGroup
-func (mr *MockGroupRepositoryMockRecorder) CreateGroup(ctx, name, description, budget, owners interface{}) *gomock.Call {
+func (mr *MockGroupRepositoryMockRecorder) CreateGroup(ctx, name, description, budget interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGroup", reflect.TypeOf((*MockGroupRepository)(nil).CreateGroup), ctx, name, description, budget, owners)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGroup", reflect.TypeOf((*MockGroupRepository)(nil).CreateGroup), ctx, name, description, budget)
+}
+
+// UpdateGroup mocks base method
+func (m *MockGroupRepository) UpdateGroup(ctx context.Context, groupID uuid.UUID, name, description string, budget *int) (*model.Group, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateGroup", ctx, groupID, name, description, budget)
+	ret0, _ := ret[0].(*model.Group)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateGroup indicates an expected call of UpdateGroup
+func (mr *MockGroupRepositoryMockRecorder) UpdateGroup(ctx, groupID, name, description, budget interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateGroup", reflect.TypeOf((*MockGroupRepository)(nil).UpdateGroup), ctx, groupID, name, description, budget)
 }
 
 // GetOwners mocks base method

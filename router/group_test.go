@@ -173,24 +173,14 @@ func TestHandlers_PostGroup(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			CreateGroup(c.Request().Context(), group.Name, group.Description, group.Budget, nil).
+			CreateGroup(c.Request().Context(), group.Name, group.Description, group.Budget).
 			Return(group, nil)
-		h.Repository.MockGroupRepository.
-			EXPECT().
-			GetOwners(c.Request().Context(), group.ID).
-			Return([]*model.Owner{}, nil)
-		h.Repository.MockGroupRepository.
-			EXPECT().
-			GetMembers(c.Request().Context(), group.ID).
-			Return([]*model.Member{}, nil)
 
-		res := &GroupDetail{
+		res := &GroupOverview{
 			ID:          group.ID,
 			Name:        group.Name,
 			Description: group.Description,
 			Budget:      group.Budget,
-			Owners:      []*uuid.UUID{},
-			Users:       []*uuid.UUID{},
 			CreatedAt:   group.CreatedAt,
 			UpdatedAt:   group.UpdatedAt,
 		}
@@ -199,6 +189,72 @@ func TestHandlers_PostGroup(t *testing.T) {
 		require.NoError(t, err)
 
 		if assert.NoError(t, h.Handlers.PostGroup(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+}
+
+func TestHandlers_PutGroup(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+		date2 := time.Now().Add(time.Hour)
+
+		budget := random.Numeric(t, 1000000)
+		budget2 := random.Numeric(t, 1000000)
+
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		updated := &model.Group{
+			ID:          group.ID,
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget2,
+			CreatedAt:   date2,
+			UpdatedAt:   date2,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/groups/%s", group.ID.String()), strings.NewReader(fmt.Sprintf(`{"name":"%s","description":"%s","budget":%d}`, updated.Name, updated.Description, *updated.Budget)))
+		require.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues(group.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			UpdateGroup(c.Request().Context(), group.ID, updated.Name, updated.Description, updated.Budget).
+			Return(updated, nil)
+
+		res := &GroupOverview{
+			ID:          updated.ID,
+			Name:        updated.Name,
+			Description: updated.Description,
+			Budget:      updated.Budget,
+			CreatedAt:   updated.CreatedAt,
+			UpdatedAt:   updated.UpdatedAt,
+		}
+
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PutGroup(c)) {
 			assert.Equal(t, http.StatusOK, rec.Code)
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
