@@ -170,7 +170,7 @@ func (fu *FileUpdate) ExecX(ctx context.Context) {
 func (fu *FileUpdate) check() error {
 	if v, ok := fu.mutation.Name(); ok {
 		if err := file.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "File.name": %w`, err)}
 		}
 	}
 	return nil
@@ -429,7 +429,7 @@ func (fuo *FileUpdateOne) ExecX(ctx context.Context) {
 func (fuo *FileUpdateOne) check() error {
 	if v, ok := fuo.mutation.Name(); ok {
 		if err := file.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "File.name": %w`, err)}
 		}
 	}
 	return nil

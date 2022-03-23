@@ -21,7 +21,6 @@ type MockRepository struct {
 	*mock_model.MockGroupBudgetRepository
 	*mock_model.MockGroupRepository
 	*mock_model.MockRequestRepository
-	*mock_model.MockRequestStatusRepository
 	*mock_model.MockRequestFileRepository
 	*mock_model.MockRequestTagRepository
 	*mock_model.MockRequestTargetRepository
@@ -32,6 +31,10 @@ type MockRepository struct {
 	*mock_model.MockUserRepository
 }
 
+type MockStorage struct {
+	*mock_storage.MockStorage
+}
+
 func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 	return &MockRepository{
 		MockCommentRepository:           mock_model.NewMockCommentRepository(ctrl),
@@ -39,7 +42,6 @@ func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 		MockGroupBudgetRepository:       mock_model.NewMockGroupBudgetRepository(ctrl),
 		MockGroupRepository:             mock_model.NewMockGroupRepository(ctrl),
 		MockRequestRepository:           mock_model.NewMockRequestRepository(ctrl),
-		MockRequestStatusRepository:     mock_model.NewMockRequestStatusRepository(ctrl),
 		MockRequestFileRepository:       mock_model.NewMockRequestFileRepository(ctrl),
 		MockRequestTagRepository:        mock_model.NewMockRequestTagRepository(ctrl),
 		MockRequestTargetRepository:     mock_model.NewMockRequestTargetRepository(ctrl),
@@ -51,9 +53,16 @@ func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 	}
 }
 
+func NewMockStorage(ctrl *gomock.Controller) *MockStorage {
+	return &MockStorage{
+		MockStorage: mock_storage.NewMockStorage(ctrl),
+	}
+}
+
 type TestHandlers struct {
 	Handlers   *Handlers
 	Repository *MockRepository
+	Storage    *MockStorage
 }
 
 func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, error) {
@@ -62,16 +71,21 @@ func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, erro
 		return nil, err
 	}
 	repository := NewMockRepository(ctrl)
+	storage := NewMockStorage(ctrl)
 	sessionStore := sessions.NewCookieStore([]byte("session"))
 	sessionName := "session"
 
-	return &TestHandlers{&Handlers{
-		Repository:   repository,
-		Storage:      mock_storage.NewMockStorage(ctrl),
-		Logger:       logger,
-		SessionName:  sessionName,
-		SessionStore: sessionStore,
-	}, repository}, nil
+	return &TestHandlers{
+		&Handlers{
+			Repository:   repository,
+			Storage:      storage,
+			Logger:       logger,
+			SessionName:  sessionName,
+			SessionStore: sessionStore,
+		},
+		repository,
+		storage,
+	}, nil
 }
 
 func makeUser(t *testing.T, admin bool) *model.User {

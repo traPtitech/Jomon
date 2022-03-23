@@ -183,7 +183,7 @@ func (fc *FileCreate) check() error {
 	}
 	if v, ok := fc.mutation.Name(); ok {
 		if err := file.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "name": %w`, err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "File.name": %w`, err)}
 		}
 	}
 	if _, ok := fc.mutation.MimeType(); !ok {
