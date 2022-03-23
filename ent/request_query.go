@@ -302,7 +302,7 @@ func (rq *RequestQuery) FirstIDX(ctx context.Context) uuid.UUID {
 }
 
 // Only returns a single Request entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Request entity is not found.
+// Returns a *NotSingularError when more than one Request entity is found.
 // Returns a *NotFoundError when no Request entities are found.
 func (rq *RequestQuery) Only(ctx context.Context) (*Request, error) {
 	nodes, err := rq.Limit(2).All(ctx)
@@ -329,7 +329,7 @@ func (rq *RequestQuery) OnlyX(ctx context.Context) *Request {
 }
 
 // OnlyID is like Only, but returns the only Request ID in the query.
-// Returns a *NotSingularError when exactly one Request ID is not found.
+// Returns a *NotSingularError when more than one Request ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (rq *RequestQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
@@ -446,8 +446,9 @@ func (rq *RequestQuery) Clone() *RequestQuery {
 		withUser:        rq.withUser.Clone(),
 		withGroup:       rq.withGroup.Clone(),
 		// clone intermediate query.
-		sql:  rq.sql.Clone(),
-		path: rq.path,
+		sql:    rq.sql.Clone(),
+		path:   rq.path,
+		unique: rq.unique,
 	}
 }
 
@@ -915,6 +916,10 @@ func (rq *RequestQuery) sqlAll(ctx context.Context) ([]*Request, error) {
 
 func (rq *RequestQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := rq.querySpec()
+	_spec.Node.Columns = rq.fields
+	if len(rq.fields) > 0 {
+		_spec.Unique = rq.unique != nil && *rq.unique
+	}
 	return sqlgraph.CountNodes(ctx, rq.driver, _spec)
 }
 
@@ -985,6 +990,9 @@ func (rq *RequestQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if rq.sql != nil {
 		selector = rq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if rq.unique != nil && *rq.unique {
+		selector.Distinct()
 	}
 	for _, p := range rq.predicates {
 		p(selector)
@@ -1264,9 +1272,7 @@ func (rgb *RequestGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range rgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(rgb.fields...)...)

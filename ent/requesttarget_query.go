@@ -133,7 +133,7 @@ func (rtq *RequestTargetQuery) FirstIDX(ctx context.Context) uuid.UUID {
 }
 
 // Only returns a single RequestTarget entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one RequestTarget entity is not found.
+// Returns a *NotSingularError when more than one RequestTarget entity is found.
 // Returns a *NotFoundError when no RequestTarget entities are found.
 func (rtq *RequestTargetQuery) Only(ctx context.Context) (*RequestTarget, error) {
 	nodes, err := rtq.Limit(2).All(ctx)
@@ -160,7 +160,7 @@ func (rtq *RequestTargetQuery) OnlyX(ctx context.Context) *RequestTarget {
 }
 
 // OnlyID is like Only, but returns the only RequestTarget ID in the query.
-// Returns a *NotSingularError when exactly one RequestTarget ID is not found.
+// Returns a *NotSingularError when more than one RequestTarget ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (rtq *RequestTargetQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
@@ -270,8 +270,9 @@ func (rtq *RequestTargetQuery) Clone() *RequestTargetQuery {
 		predicates:  append([]predicate.RequestTarget{}, rtq.predicates...),
 		withRequest: rtq.withRequest.Clone(),
 		// clone intermediate query.
-		sql:  rtq.sql.Clone(),
-		path: rtq.path,
+		sql:    rtq.sql.Clone(),
+		path:   rtq.path,
+		unique: rtq.unique,
 	}
 }
 
@@ -416,6 +417,10 @@ func (rtq *RequestTargetQuery) sqlAll(ctx context.Context) ([]*RequestTarget, er
 
 func (rtq *RequestTargetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := rtq.querySpec()
+	_spec.Node.Columns = rtq.fields
+	if len(rtq.fields) > 0 {
+		_spec.Unique = rtq.unique != nil && *rtq.unique
+	}
 	return sqlgraph.CountNodes(ctx, rtq.driver, _spec)
 }
 
@@ -486,6 +491,9 @@ func (rtq *RequestTargetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if rtq.sql != nil {
 		selector = rtq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if rtq.unique != nil && *rtq.unique {
+		selector.Distinct()
 	}
 	for _, p := range rtq.predicates {
 		p(selector)
@@ -765,9 +773,7 @@ func (rtgb *RequestTargetGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range rtgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(rtgb.fields...)...)

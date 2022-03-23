@@ -158,7 +158,7 @@ func (gbq *GroupBudgetQuery) FirstIDX(ctx context.Context) uuid.UUID {
 }
 
 // Only returns a single GroupBudget entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one GroupBudget entity is not found.
+// Returns a *NotSingularError when more than one GroupBudget entity is found.
 // Returns a *NotFoundError when no GroupBudget entities are found.
 func (gbq *GroupBudgetQuery) Only(ctx context.Context) (*GroupBudget, error) {
 	nodes, err := gbq.Limit(2).All(ctx)
@@ -185,7 +185,7 @@ func (gbq *GroupBudgetQuery) OnlyX(ctx context.Context) *GroupBudget {
 }
 
 // OnlyID is like Only, but returns the only GroupBudget ID in the query.
-// Returns a *NotSingularError when exactly one GroupBudget ID is not found.
+// Returns a *NotSingularError when more than one GroupBudget ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (gbq *GroupBudgetQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
@@ -296,8 +296,9 @@ func (gbq *GroupBudgetQuery) Clone() *GroupBudgetQuery {
 		withGroup:       gbq.withGroup.Clone(),
 		withTransaction: gbq.withTransaction.Clone(),
 		// clone intermediate query.
-		sql:  gbq.sql.Clone(),
-		path: gbq.path,
+		sql:    gbq.sql.Clone(),
+		path:   gbq.path,
+		unique: gbq.unique,
 	}
 }
 
@@ -482,6 +483,10 @@ func (gbq *GroupBudgetQuery) sqlAll(ctx context.Context) ([]*GroupBudget, error)
 
 func (gbq *GroupBudgetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := gbq.querySpec()
+	_spec.Node.Columns = gbq.fields
+	if len(gbq.fields) > 0 {
+		_spec.Unique = gbq.unique != nil && *gbq.unique
+	}
 	return sqlgraph.CountNodes(ctx, gbq.driver, _spec)
 }
 
@@ -552,6 +557,9 @@ func (gbq *GroupBudgetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if gbq.sql != nil {
 		selector = gbq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if gbq.unique != nil && *gbq.unique {
+		selector.Distinct()
 	}
 	for _, p := range gbq.predicates {
 		p(selector)
@@ -831,9 +839,7 @@ func (gbgb *GroupBudgetGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range gbgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(gbgb.fields...)...)

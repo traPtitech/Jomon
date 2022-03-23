@@ -1,4 +1,4 @@
-FROM golang:1.16.0-alpine as build
+FROM golang:1.18.0-alpine as build
 ENV DOCKERIZE_VERSION v0.6.1
 ENV CGO_ENABLED 0
 ENV TZ Asia/Tokyo
@@ -18,7 +18,7 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
     && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
-RUN go get -u github.com/cosmtrek/air
+RUN go install github.com/cosmtrek/air@latest
 
 WORKDIR /src
 

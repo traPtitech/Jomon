@@ -62,6 +62,14 @@ func (rtc *RequestTargetCreate) SetID(u uuid.UUID) *RequestTargetCreate {
 	return rtc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (rtc *RequestTargetCreate) SetNillableID(u *uuid.UUID) *RequestTargetCreate {
+	if u != nil {
+		rtc.SetID(*u)
+	}
+	return rtc
+}
+
 // SetRequestID sets the "request" edge to the Request entity by ID.
 func (rtc *RequestTargetCreate) SetRequestID(id uuid.UUID) *RequestTargetCreate {
 	rtc.mutation.SetRequestID(id)
@@ -157,13 +165,13 @@ func (rtc *RequestTargetCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (rtc *RequestTargetCreate) check() error {
 	if _, ok := rtc.mutation.Target(); !ok {
-		return &ValidationError{Name: "target", err: errors.New(`ent: missing required field "target"`)}
+		return &ValidationError{Name: "target", err: errors.New(`ent: missing required field "RequestTarget.target"`)}
 	}
 	if _, ok := rtc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "RequestTarget.created_at"`)}
 	}
 	if _, ok := rtc.mutation.RequestID(); !ok {
-		return &ValidationError{Name: "request", err: errors.New("ent: missing required edge \"request\"")}
+		return &ValidationError{Name: "request", err: errors.New(`ent: missing required edge "RequestTarget.request"`)}
 	}
 	return nil
 }
@@ -177,7 +185,11 @@ func (rtc *RequestTargetCreate) sqlSave(ctx context.Context) (*RequestTarget, er
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -195,7 +207,7 @@ func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSp
 	)
 	if id, ok := rtc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := rtc.mutation.Target(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

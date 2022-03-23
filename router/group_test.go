@@ -130,15 +130,15 @@ func TestHandlers_GetGroups(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		mocErr := errors.New("failed to get groups")
+		resErr := errors.New("failed to get groups")
 		h.Repository.MockGroupRepository.
 			EXPECT().
 			GetGroups(c.Request().Context()).
-			Return(nil, mocErr)
+			Return(nil, resErr)
 
 		err = h.Handlers.GetGroups(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 		}
 	})
 }

@@ -155,7 +155,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 		request, err := repo.CreateRequest(ctx, amount, title, content, []*Tag{tag}, group, user.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, request.CreatedBy, user.ID)
-		assert.Equal(t, request.Status, "submitted")
+		assert.Equal(t, request.Status, Status(1))
 		assert.Equal(t, request.Amount, amount)
 		assert.Equal(t, request.Title, title)
 		assert.Equal(t, request.Content, content)
@@ -166,7 +166,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 	t.Run("UnknownUser", func(t *testing.T) {
 		t.Parallel()
 		amount := random.Numeric(t, 100000)
-		title := ""
+		title := random.AlphaNumeric(t, 40)
 		content := random.AlphaNumeric(t, 100)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
@@ -191,11 +191,11 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 
 		date := time.Now()
 		tag := &Tag{
-			ID: uuid.New(),
-			Name: random.AlphaNumeric(t, 20),
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
 			Description: random.AlphaNumeric(t, 30),
-			CreatedAt: date,
-			UpdatedAt: date,
+			CreatedAt:   date,
+			UpdatedAt:   date,
 		}
 
 		owner, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
@@ -257,7 +257,7 @@ func TestEntRepository_GetRequest(t *testing.T) {
 		got, err := repo.GetRequest(ctx, request.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, got.CreatedBy, user.ID)
-		assert.Equal(t, got.Status, "submitted")
+		assert.Equal(t, got.Status, Status(1))
 		assert.Equal(t, got.Amount, request.Amount)
 		assert.Equal(t, got.Title, request.Title)
 		assert.Equal(t, got.Content, request.Content)
@@ -392,12 +392,12 @@ func TestEntREpository_UpdateRequest(t *testing.T) {
 
 		date := time.Now()
 		unknownTag := &Tag{
-			ID: uuid.New(),
-			Name: random.AlphaNumeric(t, 20),
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
 			Description: random.AlphaNumeric(t, 30),
-			CreatedAt: date,
-			UpdatedAt: date,
-		} 
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
 		_, err = repo.UpdateRequest(ctx, request.ID, request.Amount, request.Title, request.Content, []*Tag{unknownTag}, group)
 		assert.Error(t, err)
 	})
@@ -419,13 +419,13 @@ func TestEntREpository_UpdateRequest(t *testing.T) {
 		date := time.Now()
 		unknownBudget := random.Numeric(t, 100000)
 		unknownGroup := &Group{
-			ID: uuid.New(),
-			Name: random.AlphaNumeric(t, 20),
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
 			Description: random.AlphaNumeric(t, 30),
-			Budget: &unknownBudget,
-			CreatedAt: date,
-			UpdatedAt: date,
-		} 
+			Budget:      &unknownBudget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
 		_, err = repo.UpdateRequest(ctx, request.ID, request.Amount, request.Title, request.Content, []*Tag{tag}, unknownGroup)
 		assert.Error(t, err)
 	})

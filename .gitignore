@@ -101,3 +101,4 @@ tmp
 Jomon
 uploads/*
 .task
+.vscode

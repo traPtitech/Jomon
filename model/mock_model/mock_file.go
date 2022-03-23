@@ -6,37 +6,38 @@ package mock_model
 
 import (
 	context "context"
+	io "io"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
 	model "github.com/traPtitech/Jomon/model"
-	io "io"
-	reflect "reflect"
 )
 
-// MockFileRepository is a mock of FileRepository interface
+// MockFileRepository is a mock of FileRepository interface.
 type MockFileRepository struct {
 	ctrl     *gomock.Controller
 	recorder *MockFileRepositoryMockRecorder
 }
 
-// MockFileRepositoryMockRecorder is the mock recorder for MockFileRepository
+// MockFileRepositoryMockRecorder is the mock recorder for MockFileRepository.
 type MockFileRepositoryMockRecorder struct {
 	mock *MockFileRepository
 }
 
-// NewMockFileRepository creates a new mock instance
+// NewMockFileRepository creates a new mock instance.
 func NewMockFileRepository(ctrl *gomock.Controller) *MockFileRepository {
 	mock := &MockFileRepository{ctrl: ctrl}
 	mock.recorder = &MockFileRepositoryMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockFileRepository) EXPECT() *MockFileRepositoryMockRecorder {
 	return m.recorder
 }
 
-// CreateFile mocks base method
+// CreateFile mocks base method.
 func (m *MockFileRepository) CreateFile(ctx context.Context, src io.Reader, name, mimetype string, requestID uuid.UUID) (*model.File, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateFile", ctx, src, name, mimetype, requestID)
@@ -45,7 +46,7 @@ func (m *MockFileRepository) CreateFile(ctx context.Context, src io.Reader, name
 	return ret0, ret1
 }
 
-// CreateFile indicates an expected call of CreateFile
+// CreateFile indicates an expected call of CreateFile.
 func (mr *MockFileRepositoryMockRecorder) CreateFile(ctx, src, name, mimetype, requestID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateFile", reflect.TypeOf((*MockFileRepository)(nil).CreateFile), ctx, src, name, mimetype, requestID)

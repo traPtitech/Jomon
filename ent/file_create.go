@@ -68,6 +68,14 @@ func (fc *FileCreate) SetID(u uuid.UUID) *FileCreate {
 	return fc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (fc *FileCreate) SetNillableID(u *uuid.UUID) *FileCreate {
+	if u != nil {
+		fc.SetID(*u)
+	}
+	return fc
+}
+
 // SetRequestID sets the "request" edge to the Request entity by ID.
 func (fc *FileCreate) SetRequestID(id uuid.UUID) *FileCreate {
 	fc.mutation.SetRequestID(id)
@@ -171,7 +179,7 @@ func (fc *FileCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (fc *FileCreate) check() error {
 	if _, ok := fc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "File.name"`)}
 	}
 	if v, ok := fc.mutation.Name(); ok {
 		if err := file.NameValidator(v); err != nil {
@@ -179,10 +187,10 @@ func (fc *FileCreate) check() error {
 		}
 	}
 	if _, ok := fc.mutation.MimeType(); !ok {
-		return &ValidationError{Name: "mime_type", err: errors.New(`ent: missing required field "mime_type"`)}
+		return &ValidationError{Name: "mime_type", err: errors.New(`ent: missing required field "File.mime_type"`)}
 	}
 	if _, ok := fc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "File.created_at"`)}
 	}
 	return nil
 }
@@ -196,7 +204,11 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -214,7 +226,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 	)
 	if id, ok := fc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := fc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

@@ -93,7 +93,7 @@ func init() {
 	requeststatusFields := schema.RequestStatus{}.Fields()
 	_ = requeststatusFields
 	// requeststatusDescCreatedAt is the schema descriptor for created_at field.
-	requeststatusDescCreatedAt := requeststatusFields[3].Descriptor()
+	requeststatusDescCreatedAt := requeststatusFields[2].Descriptor()
 	// requeststatus.DefaultCreatedAt holds the default value on creation for the created_at field.
 	requeststatus.DefaultCreatedAt = requeststatusDescCreatedAt.Default.(func() time.Time)
 	// requeststatusDescID is the schema descriptor for id field.

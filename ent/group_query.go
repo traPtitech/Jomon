@@ -204,7 +204,7 @@ func (gq *GroupQuery) FirstIDX(ctx context.Context) uuid.UUID {
 }
 
 // Only returns a single Group entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Group entity is not found.
+// Returns a *NotSingularError when more than one Group entity is found.
 // Returns a *NotFoundError when no Group entities are found.
 func (gq *GroupQuery) Only(ctx context.Context) (*Group, error) {
 	nodes, err := gq.Limit(2).All(ctx)
@@ -231,7 +231,7 @@ func (gq *GroupQuery) OnlyX(ctx context.Context) *Group {
 }
 
 // OnlyID is like Only, but returns the only Group ID in the query.
-// Returns a *NotSingularError when exactly one Group ID is not found.
+// Returns a *NotSingularError when more than one Group ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (gq *GroupQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
@@ -344,8 +344,9 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		withOwner:       gq.withOwner.Clone(),
 		withRequest:     gq.withRequest.Clone(),
 		// clone intermediate query.
-		sql:  gq.sql.Clone(),
-		path: gq.path,
+		sql:    gq.sql.Clone(),
+		path:   gq.path,
+		unique: gq.unique,
 	}
 }
 
@@ -678,6 +679,10 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 
 func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := gq.querySpec()
+	_spec.Node.Columns = gq.fields
+	if len(gq.fields) > 0 {
+		_spec.Unique = gq.unique != nil && *gq.unique
+	}
 	return sqlgraph.CountNodes(ctx, gq.driver, _spec)
 }
 
@@ -748,6 +753,9 @@ func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if gq.sql != nil {
 		selector = gq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if gq.unique != nil && *gq.unique {
+		selector.Distinct()
 	}
 	for _, p := range gq.predicates {
 		p(selector)
@@ -1027,9 +1035,7 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range ggb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(ggb.fields...)...)

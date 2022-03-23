@@ -133,7 +133,7 @@ func (tdq *TransactionDetailQuery) FirstIDX(ctx context.Context) uuid.UUID {
 }
 
 // Only returns a single TransactionDetail entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one TransactionDetail entity is not found.
+// Returns a *NotSingularError when more than one TransactionDetail entity is found.
 // Returns a *NotFoundError when no TransactionDetail entities are found.
 func (tdq *TransactionDetailQuery) Only(ctx context.Context) (*TransactionDetail, error) {
 	nodes, err := tdq.Limit(2).All(ctx)
@@ -160,7 +160,7 @@ func (tdq *TransactionDetailQuery) OnlyX(ctx context.Context) *TransactionDetail
 }
 
 // OnlyID is like Only, but returns the only TransactionDetail ID in the query.
-// Returns a *NotSingularError when exactly one TransactionDetail ID is not found.
+// Returns a *NotSingularError when more than one TransactionDetail ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (tdq *TransactionDetailQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
@@ -270,8 +270,9 @@ func (tdq *TransactionDetailQuery) Clone() *TransactionDetailQuery {
 		predicates:      append([]predicate.TransactionDetail{}, tdq.predicates...),
 		withTransaction: tdq.withTransaction.Clone(),
 		// clone intermediate query.
-		sql:  tdq.sql.Clone(),
-		path: tdq.path,
+		sql:    tdq.sql.Clone(),
+		path:   tdq.path,
+		unique: tdq.unique,
 	}
 }
 
@@ -416,6 +417,10 @@ func (tdq *TransactionDetailQuery) sqlAll(ctx context.Context) ([]*TransactionDe
 
 func (tdq *TransactionDetailQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := tdq.querySpec()
+	_spec.Node.Columns = tdq.fields
+	if len(tdq.fields) > 0 {
+		_spec.Unique = tdq.unique != nil && *tdq.unique
+	}
 	return sqlgraph.CountNodes(ctx, tdq.driver, _spec)
 }
 
@@ -486,6 +491,9 @@ func (tdq *TransactionDetailQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if tdq.sql != nil {
 		selector = tdq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if tdq.unique != nil && *tdq.unique {
+		selector.Distinct()
 	}
 	for _, p := range tdq.predicates {
 		p(selector)
@@ -765,9 +773,7 @@ func (tdgb *TransactionDetailGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range tdgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(tdgb.fields...)...)

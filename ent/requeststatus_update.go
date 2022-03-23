@@ -45,12 +45,6 @@ func (rsu *RequestStatusUpdate) SetNillableStatus(r *requeststatus.Status) *Requ
 	return rsu
 }
 
-// SetReason sets the "reason" field.
-func (rsu *RequestStatusUpdate) SetReason(s string) *RequestStatusUpdate {
-	rsu.mutation.SetReason(s)
-	return rsu
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (rsu *RequestStatusUpdate) SetCreatedAt(t time.Time) *RequestStatusUpdate {
 	rsu.mutation.SetCreatedAt(t)
@@ -168,14 +162,14 @@ func (rsu *RequestStatusUpdate) ExecX(ctx context.Context) {
 func (rsu *RequestStatusUpdate) check() error {
 	if v, ok := rsu.mutation.Status(); ok {
 		if err := requeststatus.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "RequestStatus.status": %w`, err)}
 		}
 	}
 	if _, ok := rsu.mutation.RequestID(); rsu.mutation.RequestCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"request\"")
+		return errors.New(`ent: clearing a required unique edge "RequestStatus.request"`)
 	}
 	if _, ok := rsu.mutation.UserID(); rsu.mutation.UserCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"user\"")
+		return errors.New(`ent: clearing a required unique edge "RequestStatus.user"`)
 	}
 	return nil
 }
@@ -203,13 +197,6 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: requeststatus.FieldStatus,
-		})
-	}
-	if value, ok := rsu.mutation.Reason(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: requeststatus.FieldReason,
 		})
 	}
 	if value, ok := rsu.mutation.CreatedAt(); ok {
@@ -319,12 +306,6 @@ func (rsuo *RequestStatusUpdateOne) SetNillableStatus(r *requeststatus.Status) *
 	if r != nil {
 		rsuo.SetStatus(*r)
 	}
-	return rsuo
-}
-
-// SetReason sets the "reason" field.
-func (rsuo *RequestStatusUpdateOne) SetReason(s string) *RequestStatusUpdateOne {
-	rsuo.mutation.SetReason(s)
 	return rsuo
 }
 
@@ -452,14 +433,14 @@ func (rsuo *RequestStatusUpdateOne) ExecX(ctx context.Context) {
 func (rsuo *RequestStatusUpdateOne) check() error {
 	if v, ok := rsuo.mutation.Status(); ok {
 		if err := requeststatus.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "RequestStatus.status": %w`, err)}
 		}
 	}
 	if _, ok := rsuo.mutation.RequestID(); rsuo.mutation.RequestCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"request\"")
+		return errors.New(`ent: clearing a required unique edge "RequestStatus.request"`)
 	}
 	if _, ok := rsuo.mutation.UserID(); rsuo.mutation.UserCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"user\"")
+		return errors.New(`ent: clearing a required unique edge "RequestStatus.user"`)
 	}
 	return nil
 }
@@ -477,7 +458,7 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 	}
 	id, ok := rsuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing RequestStatus.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "RequestStatus.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := rsuo.fields; len(fields) > 0 {
@@ -504,13 +485,6 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: requeststatus.FieldStatus,
-		})
-	}
-	if value, ok := rsuo.mutation.Reason(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: requeststatus.FieldReason,
 		})
 	}
 	if value, ok := rsuo.mutation.CreatedAt(); ok {

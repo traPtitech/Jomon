@@ -77,6 +77,14 @@ func (cc *CommentCreate) SetID(u uuid.UUID) *CommentCreate {
 	return cc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (cc *CommentCreate) SetNillableID(u *uuid.UUID) *CommentCreate {
+	if u != nil {
+		cc.SetID(*u)
+	}
+	return cc
+}
+
 // SetRequestID sets the "request" edge to the Request entity by ID.
 func (cc *CommentCreate) SetRequestID(id uuid.UUID) *CommentCreate {
 	cc.mutation.SetRequestID(id)
@@ -187,19 +195,19 @@ func (cc *CommentCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (cc *CommentCreate) check() error {
 	if _, ok := cc.mutation.Comment(); !ok {
-		return &ValidationError{Name: "comment", err: errors.New(`ent: missing required field "comment"`)}
+		return &ValidationError{Name: "comment", err: errors.New(`ent: missing required field "Comment.comment"`)}
 	}
 	if _, ok := cc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Comment.created_at"`)}
 	}
 	if _, ok := cc.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Comment.updated_at"`)}
 	}
 	if _, ok := cc.mutation.RequestID(); !ok {
-		return &ValidationError{Name: "request", err: errors.New("ent: missing required edge \"request\"")}
+		return &ValidationError{Name: "request", err: errors.New(`ent: missing required edge "Comment.request"`)}
 	}
 	if _, ok := cc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user", err: errors.New("ent: missing required edge \"user\"")}
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Comment.user"`)}
 	}
 	return nil
 }
@@ -213,7 +221,11 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -231,7 +243,7 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 	)
 	if id, ok := cc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := cc.mutation.Comment(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

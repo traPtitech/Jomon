@@ -24,7 +24,7 @@ type Request struct {
 
 type RequestResponse struct {
 	ID        uuid.UUID
-	Status    string
+	Status    Status
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	CreatedBy uuid.UUID
@@ -37,7 +37,7 @@ type RequestResponse struct {
 
 type RequestDetail struct {
 	ID        uuid.UUID
-	Status    string
+	Status    Status
 	Amount    int
 	Title     string
 	Content   string
