@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/enttest"
 	"github.com/traPtitech/Jomon/ent/migrate"
@@ -25,10 +24,14 @@ func SetupTestEntClient(t *testing.T, dbName string) (*ent.Client, error) {
 
 	dbDsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort)
 	conn, err := sql.Open("mysql", dbDsn)
-	require.NoError(t, err)
+	if err != nil {
+		return nil, err
+	}
 	defer conn.Close()
 	_, err = conn.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS `%s`", dbName))
-	require.NoError(t, err)
+	if err != nil {
+		return nil, err
+	}
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
 
