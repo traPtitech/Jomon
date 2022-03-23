@@ -2,7 +2,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -38,7 +37,6 @@ func (s Status) String() string {
 	}
 }
 
-//dbにstringいれる今の実装だとMarshalJson入らなそう。
 func (s Status) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.String())
 }
@@ -69,11 +67,11 @@ func (s *Status) UnmarshalJSON(data []byte) error {
 }
 
 type RequestStatusRepository interface {
-	CreateStatus(ctx context.Context, requestID uuid.UUID, userID uuid.UUID, status Status) (*RequestStatus, error)
 }
 
 type RequestStatus struct {
 	ID        uuid.UUID
-	Status    Status
+	Status    string
+	Reason    string
 	CreatedAt time.Time
 }
