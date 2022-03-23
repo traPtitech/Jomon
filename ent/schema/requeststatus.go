@@ -22,7 +22,6 @@ func (RequestStatus) Fields() []ent.Field {
 		field.Enum("status").
 			Values("submitted", "fix_required", "accepted", "completed", "rejected").
 			Default("submitted"),
-		field.String("reason"),
 		field.Time("created_at").
 			Default(time.Now),
 	}

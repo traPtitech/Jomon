@@ -37,12 +37,6 @@ func (rsc *RequestStatusCreate) SetNillableStatus(r *requeststatus.Status) *Requ
 	return rsc
 }
 
-// SetReason sets the "reason" field.
-func (rsc *RequestStatusCreate) SetReason(s string) *RequestStatusCreate {
-	rsc.mutation.SetReason(s)
-	return rsc
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (rsc *RequestStatusCreate) SetCreatedAt(t time.Time) *RequestStatusCreate {
 	rsc.mutation.SetCreatedAt(t)
@@ -188,9 +182,6 @@ func (rsc *RequestStatusCreate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "RequestStatus.status": %w`, err)}
 		}
 	}
-	if _, ok := rsc.mutation.Reason(); !ok {
-		return &ValidationError{Name: "reason", err: errors.New(`ent: missing required field "RequestStatus.reason"`)}
-	}
 	if _, ok := rsc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "RequestStatus.created_at"`)}
 	}
@@ -243,14 +234,6 @@ func (rsc *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSp
 			Column: requeststatus.FieldStatus,
 		})
 		_node.Status = value
-	}
-	if value, ok := rsc.mutation.Reason(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: requeststatus.FieldReason,
-		})
-		_node.Reason = value
 	}
 	if value, ok := rsc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

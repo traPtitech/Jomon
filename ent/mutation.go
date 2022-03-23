@@ -4067,7 +4067,6 @@ type RequestStatusMutation struct {
 	typ            string
 	id             *uuid.UUID
 	status         *requeststatus.Status
-	reason         *string
 	created_at     *time.Time
 	clearedFields  map[string]struct{}
 	request        *uuid.UUID
@@ -4219,42 +4218,6 @@ func (m *RequestStatusMutation) ResetStatus() {
 	m.status = nil
 }
 
-// SetReason sets the "reason" field.
-func (m *RequestStatusMutation) SetReason(s string) {
-	m.reason = &s
-}
-
-// Reason returns the value of the "reason" field in the mutation.
-func (m *RequestStatusMutation) Reason() (r string, exists bool) {
-	v := m.reason
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldReason returns the old "reason" field's value of the RequestStatus entity.
-// If the RequestStatus object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestStatusMutation) OldReason(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldReason is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldReason requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldReason: %w", err)
-	}
-	return oldValue.Reason, nil
-}
-
-// ResetReason resets all changes to the "reason" field.
-func (m *RequestStatusMutation) ResetReason() {
-	m.reason = nil
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (m *RequestStatusMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -4388,12 +4351,9 @@ func (m *RequestStatusMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RequestStatusMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 2)
 	if m.status != nil {
 		fields = append(fields, requeststatus.FieldStatus)
-	}
-	if m.reason != nil {
-		fields = append(fields, requeststatus.FieldReason)
 	}
 	if m.created_at != nil {
 		fields = append(fields, requeststatus.FieldCreatedAt)
@@ -4408,8 +4368,6 @@ func (m *RequestStatusMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case requeststatus.FieldStatus:
 		return m.Status()
-	case requeststatus.FieldReason:
-		return m.Reason()
 	case requeststatus.FieldCreatedAt:
 		return m.CreatedAt()
 	}
@@ -4423,8 +4381,6 @@ func (m *RequestStatusMutation) OldField(ctx context.Context, name string) (ent.
 	switch name {
 	case requeststatus.FieldStatus:
 		return m.OldStatus(ctx)
-	case requeststatus.FieldReason:
-		return m.OldReason(ctx)
 	case requeststatus.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	}
@@ -4442,13 +4398,6 @@ func (m *RequestStatusMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStatus(v)
-		return nil
-	case requeststatus.FieldReason:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetReason(v)
 		return nil
 	case requeststatus.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -4508,9 +4457,6 @@ func (m *RequestStatusMutation) ResetField(name string) error {
 	switch name {
 	case requeststatus.FieldStatus:
 		m.ResetStatus()
-		return nil
-	case requeststatus.FieldReason:
-		m.ResetReason()
 		return nil
 	case requeststatus.FieldCreatedAt:
 		m.ResetCreatedAt()

@@ -21,8 +21,6 @@ type RequestStatus struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// Status holds the value of the "status" field.
 	Status requeststatus.Status `json:"status,omitempty"`
-	// Reason holds the value of the "reason" field.
-	Reason string `json:"reason,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -76,7 +74,7 @@ func (*RequestStatus) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case requeststatus.FieldStatus, requeststatus.FieldReason:
+		case requeststatus.FieldStatus:
 			values[i] = new(sql.NullString)
 		case requeststatus.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -112,12 +110,6 @@ func (rs *RequestStatus) assignValues(columns []string, values []interface{}) er
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				rs.Status = requeststatus.Status(value.String)
-			}
-		case requeststatus.FieldReason:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field reason", values[i])
-			} else if value.Valid {
-				rs.Reason = value.String
 			}
 		case requeststatus.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -179,8 +171,6 @@ func (rs *RequestStatus) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", rs.ID))
 	builder.WriteString(", status=")
 	builder.WriteString(fmt.Sprintf("%v", rs.Status))
-	builder.WriteString(", reason=")
-	builder.WriteString(rs.Reason)
 	builder.WriteString(", created_at=")
 	builder.WriteString(rs.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')

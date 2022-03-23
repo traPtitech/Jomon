@@ -5,7 +5,11 @@
 package mock_model
 
 import (
+	context "context"
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
+	model "github.com/traPtitech/Jomon/model"
+	reflect "reflect"
 )
 
 // MockRequestStatusRepository is a mock of RequestStatusRepository interface
@@ -29,4 +33,19 @@ func NewMockRequestStatusRepository(ctrl *gomock.Controller) *MockRequestStatusR
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockRequestStatusRepository) EXPECT() *MockRequestStatusRepositoryMockRecorder {
 	return m.recorder
+}
+
+// CreateStatus mocks base method
+func (m *MockRequestStatusRepository) CreateStatus(ctx context.Context, requestID, userID uuid.UUID, status model.Status) (*model.RequestStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateStatus", ctx, requestID, userID, status)
+	ret0, _ := ret[0].(*model.RequestStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateStatus indicates an expected call of CreateStatus
+func (mr *MockRequestStatusRepositoryMockRecorder) CreateStatus(ctx, requestID, userID, status interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateStatus", reflect.TypeOf((*MockRequestStatusRepository)(nil).CreateStatus), ctx, requestID, userID, status)
 }
