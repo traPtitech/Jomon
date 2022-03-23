@@ -1,6 +1,7 @@
 package router
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -588,6 +589,312 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		if assert.NoError(t, h.Handlers.GetTransactions(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+}
+
+func TestHandlers_PostTransaction(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		date := time.Now()
+
+		budget := random.Numeric(t, 1000000)
+
+		tag := &model.Tag{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		target1 := random.AlphaNumeric(t, 20)
+
+		tx1 := &model.TransactionResponse{
+			ID:     uuid.New(),
+			Amount: random.Numeric(t, 1000000),
+			Target: target1,
+			Tags: []*model.Tag{
+				tag,
+			},
+			Group: &model.Group{
+				ID:          uuid.New(),
+				Name:        random.AlphaNumeric(t, 20),
+				Description: random.AlphaNumeric(t, 50),
+				Budget:      &budget,
+				CreatedAt:   date,
+				UpdatedAt:   date,
+			},
+			CreatedAt: date,
+			UpdatedAt: date,
+		}
+
+		txs := []*model.TransactionResponse{tx1}
+
+		tags := []*uuid.UUID{&tag.ID}
+		group := tx1.Group.ID
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPost, "/api/transactions", bytes.NewBuffer([]byte(fmt.Sprintf(`{"amount": %d, "target": "%s", "tags": ["%s"], "group": "%s"}`, tx1.Amount, tx1.Target, tag.ID, group))))
+		require.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+
+		h.Repository.MockTransactionRepository.
+			EXPECT().
+			CreateTransaction(c.Request().Context(), tx1.Amount, tx1.Target, tags, &group, nil).
+			Return(tx1, nil)
+
+		var resOverview Transaction
+		for _, tx := range txs {
+			tag := []*TagOverview{}
+			for _, modelTag := range tx.Tags {
+				tag = append(tag, &TagOverview{
+					ID:          modelTag.ID,
+					Name:        modelTag.Name,
+					Description: modelTag.Description,
+					CreatedAt:   modelTag.CreatedAt,
+					UpdatedAt:   modelTag.UpdatedAt,
+				})
+			}
+			group := &GroupOverview{
+				ID:          tx.Group.ID,
+				Name:        tx.Group.Name,
+				Description: tx.Group.Description,
+				Budget:      tx.Group.Budget,
+				CreatedAt:   tx.Group.CreatedAt,
+				UpdatedAt:   tx.Group.UpdatedAt,
+			}
+			resOverview = Transaction{
+				ID:        tx.ID,
+				Amount:    tx.Amount,
+				Target:    tx.Target,
+				Tags:      tag,
+				Group:     group,
+				CreatedAt: tx.CreatedAt,
+				UpdatedAt: tx.UpdatedAt,
+			}
+		}
+		res := resOverview
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PostTransaction(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("SuccessWithRequest", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		date := time.Now()
+
+		budget := random.Numeric(t, 1000000)
+
+		tag := &model.Tag{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		target1 := random.AlphaNumeric(t, 20)
+
+		tx := &model.TransactionResponse{
+			ID:     uuid.New(),
+			Amount: random.Numeric(t, 1000000),
+			Target: target1,
+			Tags: []*model.Tag{
+				tag,
+			},
+			Group: &model.Group{
+				ID:          uuid.New(),
+				Name:        random.AlphaNumeric(t, 20),
+				Description: random.AlphaNumeric(t, 50),
+				Budget:      &budget,
+				CreatedAt:   date,
+				UpdatedAt:   date,
+			},
+			CreatedAt: date,
+			UpdatedAt: date,
+		}
+
+		tags := []*uuid.UUID{&tag.ID}
+		group := tx.Group.ID
+
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Status(model.Accepted),
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			Comments:  []*model.Comment{},
+			Files:     []*uuid.UUID{},
+			Statuses:  []*model.RequestStatus{},
+			Tags:      []*model.Tag{},
+			Group:     nil,
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPost, "/api/transactions", bytes.NewBuffer([]byte(fmt.Sprintf(`{"amount": %d, "target": "%s", "tags": ["%s"], "group": "%s", "request": "%s"}`, tx.Amount, tx.Target, tag.ID, group, request.ID))))
+		require.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+
+		h.Repository.MockTransactionRepository.
+			EXPECT().
+			CreateTransaction(c.Request().Context(), tx.Amount, tx.Target, tags, &group, &request.ID).
+			Return(tx, nil)
+
+		var resOverview Transaction
+		to := []*TagOverview{}
+		for _, modelTag := range tx.Tags {
+			to = append(to, &TagOverview{
+				ID:          modelTag.ID,
+				Name:        modelTag.Name,
+				Description: modelTag.Description,
+				CreatedAt:   modelTag.CreatedAt,
+				UpdatedAt:   modelTag.UpdatedAt,
+			})
+		}
+		grov := &GroupOverview{
+			ID:          tx.Group.ID,
+			Name:        tx.Group.Name,
+			Description: tx.Group.Description,
+			Budget:      tx.Group.Budget,
+			CreatedAt:   tx.Group.CreatedAt,
+			UpdatedAt:   tx.Group.UpdatedAt,
+		}
+		resOverview = Transaction{
+			ID:        tx.ID,
+			Amount:    tx.Amount,
+			Target:    tx.Target,
+			Tags:      to,
+			Group:     grov,
+			CreatedAt: tx.CreatedAt,
+			UpdatedAt: tx.UpdatedAt,
+		}
+		res := resOverview
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.PostTransaction(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+}
+
+func TestHandlers_GetTransaction(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		budget := random.Numeric(t, 1000000)
+
+		tag := &model.Tag{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+		}
+
+		tx := &model.TransactionResponse{
+			ID:     uuid.New(),
+			Amount: random.Numeric(t, 1000000),
+			Target: random.AlphaNumeric(t, 20),
+			Tags: []*model.Tag{
+				tag,
+			},
+			Group: &model.Group{
+				ID:          uuid.New(),
+				Name:        random.AlphaNumeric(t, 20),
+				Description: random.AlphaNumeric(t, 50),
+				Budget:      &budget,
+				CreatedAt:   time.Now(),
+				UpdatedAt:   time.Now(),
+			},
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+
+		tags := []*uuid.UUID{}
+		for _, modelTag := range tx.Tags {
+			tags = append(tags, &modelTag.ID)
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/transactions/%s", tx.ID), nil)
+		require.NoError(t, err)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetParamNames("transactionID")
+		c.SetParamValues(tx.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+
+		h.Repository.MockTransactionRepository.
+			EXPECT().
+			GetTransaction(c.Request().Context(), tx.ID).
+			Return(tx, nil)
+
+		var resOverview Transaction
+		to := []*TagOverview{}
+		for _, modelTag := range tx.Tags {
+			to = append(to, &TagOverview{
+				ID:          modelTag.ID,
+				Name:        modelTag.Name,
+				Description: modelTag.Description,
+				CreatedAt:   modelTag.CreatedAt,
+				UpdatedAt:   modelTag.UpdatedAt,
+			})
+		}
+		grov := &GroupOverview{
+			ID:          tx.Group.ID,
+			Name:        tx.Group.Name,
+			Description: tx.Group.Description,
+			Budget:      tx.Group.Budget,
+			CreatedAt:   tx.Group.CreatedAt,
+			UpdatedAt:   tx.Group.UpdatedAt,
+		}
+		resOverview = Transaction{
+			ID:        tx.ID,
+			Amount:    tx.Amount,
+			Target:    tx.Target,
+			Tags:      to,
+			Group:     grov,
+			CreatedAt: tx.CreatedAt,
+			UpdatedAt: tx.UpdatedAt,
+		}
+		res := resOverview
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.GetTransaction(c)) {
 			assert.Equal(t, http.StatusOK, rec.Code)
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
