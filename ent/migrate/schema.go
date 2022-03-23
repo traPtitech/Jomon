@@ -34,7 +34,7 @@ var (
 				Symbol:     "comments_requests_comment",
 				Columns:    []*schema.Column{CommentsColumns[6]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -57,7 +57,7 @@ var (
 				Symbol:     "files_requests_file",
 				Columns:    []*schema.Column{FilesColumns[5]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -149,7 +149,7 @@ var (
 				Symbol:     "request_status_requests_status",
 				Columns:    []*schema.Column{RequestStatusColumns[4]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "request_status_users_user",
@@ -177,7 +177,7 @@ var (
 				Symbol:     "request_targets_requests_target",
 				Columns:    []*schema.Column{RequestTargetsColumns[4]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -251,7 +251,7 @@ var (
 				Symbol:     "transaction_details_transactions_detail",
 				Columns:    []*schema.Column{TransactionDetailsColumns[5]},
 				RefColumns: []*schema.Column{TransactionsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}

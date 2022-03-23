@@ -13,6 +13,7 @@ import (
 )
 
 func SetupTestEntClient(t *testing.T) (*ent.Client, error) {
+	t.Helper()
 	entOptions := []enttest.Option{
 		enttest.WithOptions(ent.Log(t.Log)),
 	}
