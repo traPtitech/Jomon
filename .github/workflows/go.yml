@@ -81,5 +81,5 @@ jobs:
         MARIADB_HOSTNAME: "localhost"
         MARIADB_PORT: 50000
 
-    - name: Upload coverage to Codecov
-      run: bash <(curl -s https://codecov.io/bash)
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v2
