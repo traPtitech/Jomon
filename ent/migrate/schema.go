@@ -250,7 +250,7 @@ var (
 				Symbol:     "transaction_details_transactions_detail",
 				Columns:    []*schema.Column{TransactionDetailsColumns[5]},
 				RefColumns: []*schema.Column{TransactionsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
