@@ -96,7 +96,7 @@ paths:
         "404":
           $ref: "#/components/responses/404"
     put:
-      description: 指定したTransactionを修正する。管理者権限が必要。
+      description: 指定したTransactionを修正する。管理者権限が必要。requestに紐づいている場合は変更不可。
       tags:
         - Transactions
       requestBody:
@@ -251,44 +251,6 @@ paths:
         required: true
         schema:
           type: integer
-    put:
-      description: コメントを変更する。
-      tags:
-        - Requests
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                comment:
-                  type: string
-                  example: "ここを修正してください。"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Comment"
-        "400":
-          $ref: "#/components/responses/400"
-        "403":
-          $ref: "#/components/responses/403"
-        "404":
-          $ref: "#/components/responses/404"
-    delete:
-      description: 指定したコメントを削除する。
-      tags:
-        - Requests
-      responses:
-        "204":
-          description: 正常に取り消すことができました。
-        "403":
-          $ref: "#/components/responses/403"
-        "404":
-          $ref: "#/components/responses/404"
   "/requests/{requestID}/status":
     put:
       description: 指定した依頼のstatusを変更のみ(新規はpost /requests)する。reasonは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「fix_requiredからsubmitted」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからfully_repaid」の操作はここでは行えない。管理者権限または作成者権限が必要。
@@ -915,6 +877,22 @@ components:
     Target:
       type: string
       example: "hoge株式会社"
+    TargetDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+        target:
+          type: string
+        paid_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
     Request:
       type: object
       properties:
@@ -962,6 +940,9 @@ components:
         content:
           type: string
           example: "サーバー代 1200円"
+        created_by:
+          type: string
+          format: uuid  
         comments:
           type: array
           items:
@@ -981,6 +962,10 @@ components:
             $ref: "#/components/schemas/Tag"
         group:
           $ref: "#/components/schemas/Group"
+        targets:
+          type: array
+          items:
+            $ref: "#/components/schemas/TargetDetail"
         created_at:
           type: string
           format: date-time
@@ -1006,7 +991,8 @@ components:
           items:
             $ref: "#/components/schemas/PostTag"
         group:
-          $ref: "#/components/schemas/PostGroup"
+          type: string
+          format: uuid
     Transaction:
       type: object
       properties:
@@ -1018,6 +1004,9 @@ components:
           example: 1200
         target:
           $ref: "#/components/schemas/Target"
+        request:
+          type: string
+          format: uuid
         tags:
           type: array
           items:
@@ -1036,8 +1025,10 @@ components:
         amount:
           type: integer
           example: 1200
-        target:
-          $ref: "#/components/schemas/Target"
+        targets:
+          type: array
+          items:
+            $ref: "#/components/schemas/Target"
         tags:
           type: array
           items:
