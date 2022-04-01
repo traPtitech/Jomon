@@ -161,7 +161,7 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 		_, err = repo.client.Tag.
 			Update().
 			Where(tag.IDIn(tagIDs...)).
-			SetTransactionID(tx.ID).
+			AddTransactionIDs(tx.ID).
 			Save(ctx)
 		if err != nil {
 			return nil, err
@@ -204,7 +204,7 @@ func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID 
 		Where(tag.HasTransactionWith(
 			transaction.IDEQ(transactionID),
 		)).
-		ClearTransaction().
+		RemoveTransactionIDs(transactionID).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -237,7 +237,7 @@ func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID 
 	_, err = repo.client.Tag.
 		Update().
 		Where(tag.IDIn(tagIDs...)).
-		SetTransactionID(transactionID).
+		AddTransactionIDs(transactionID).
 		Save(ctx)
 	if err != nil {
 		return nil, err

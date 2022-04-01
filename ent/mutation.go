@@ -5090,7 +5090,8 @@ type TagMutation struct {
 	request            map[uuid.UUID]struct{}
 	removedrequest     map[uuid.UUID]struct{}
 	clearedrequest     bool
-	transaction        *uuid.UUID
+	transaction        map[uuid.UUID]struct{}
+	removedtransaction map[uuid.UUID]struct{}
 	clearedtransaction bool
 	done               bool
 	oldValue           func(context.Context) (*Tag, error)
@@ -5448,9 +5449,14 @@ func (m *TagMutation) ResetRequest() {
 	m.removedrequest = nil
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by id.
-func (m *TagMutation) SetTransactionID(id uuid.UUID) {
-	m.transaction = &id
+// AddTransactionIDs adds the "transaction" edge to the Transaction entity by ids.
+func (m *TagMutation) AddTransactionIDs(ids ...uuid.UUID) {
+	if m.transaction == nil {
+		m.transaction = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.transaction[ids[i]] = struct{}{}
+	}
 }
 
 // ClearTransaction clears the "transaction" edge to the Transaction entity.
@@ -5463,20 +5469,29 @@ func (m *TagMutation) TransactionCleared() bool {
 	return m.clearedtransaction
 }
 
-// TransactionID returns the "transaction" edge ID in the mutation.
-func (m *TagMutation) TransactionID() (id uuid.UUID, exists bool) {
-	if m.transaction != nil {
-		return *m.transaction, true
+// RemoveTransactionIDs removes the "transaction" edge to the Transaction entity by IDs.
+func (m *TagMutation) RemoveTransactionIDs(ids ...uuid.UUID) {
+	if m.removedtransaction == nil {
+		m.removedtransaction = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.transaction, ids[i])
+		m.removedtransaction[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTransaction returns the removed IDs of the "transaction" edge to the Transaction entity.
+func (m *TagMutation) RemovedTransactionIDs() (ids []uuid.UUID) {
+	for id := range m.removedtransaction {
+		ids = append(ids, id)
 	}
 	return
 }
 
 // TransactionIDs returns the "transaction" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TransactionID instead. It exists only for internal usage by the builders.
 func (m *TagMutation) TransactionIDs() (ids []uuid.UUID) {
-	if id := m.transaction; id != nil {
-		ids = append(ids, *id)
+	for id := range m.transaction {
+		ids = append(ids, id)
 	}
 	return
 }
@@ -5485,6 +5500,7 @@ func (m *TagMutation) TransactionIDs() (ids []uuid.UUID) {
 func (m *TagMutation) ResetTransaction() {
 	m.transaction = nil
 	m.clearedtransaction = false
+	m.removedtransaction = nil
 }
 
 // Where appends a list predicates to the TagMutation builder.
@@ -5703,9 +5719,11 @@ func (m *TagMutation) AddedIDs(name string) []ent.Value {
 		}
 		return ids
 	case tag.EdgeTransaction:
-		if id := m.transaction; id != nil {
-			return []ent.Value{*id}
+		ids := make([]ent.Value, 0, len(m.transaction))
+		for id := range m.transaction {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -5715,6 +5733,9 @@ func (m *TagMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
 	if m.removedrequest != nil {
 		edges = append(edges, tag.EdgeRequest)
+	}
+	if m.removedtransaction != nil {
+		edges = append(edges, tag.EdgeTransaction)
 	}
 	return edges
 }
@@ -5726,6 +5747,12 @@ func (m *TagMutation) RemovedIDs(name string) []ent.Value {
 	case tag.EdgeRequest:
 		ids := make([]ent.Value, 0, len(m.removedrequest))
 		for id := range m.removedrequest {
+			ids = append(ids, id)
+		}
+		return ids
+	case tag.EdgeTransaction:
+		ids := make([]ent.Value, 0, len(m.removedtransaction))
+		for id := range m.removedtransaction {
 			ids = append(ids, id)
 		}
 		return ids
@@ -5761,9 +5788,6 @@ func (m *TagMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *TagMutation) ClearEdge(name string) error {
 	switch name {
-	case tag.EdgeTransaction:
-		m.ClearTransaction()
-		return nil
 	}
 	return fmt.Errorf("unknown Tag unique edge %s", name)
 }

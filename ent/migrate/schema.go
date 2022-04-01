@@ -188,21 +188,12 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "transaction_tag", Type: field.TypeUUID, Nullable: true},
 	}
 	// TagsTable holds the schema information for the "tags" table.
 	TagsTable = &schema.Table{
 		Name:       "tags",
 		Columns:    TagsColumns,
 		PrimaryKey: []*schema.Column{TagsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "tags_transactions_tag",
-				Columns:    []*schema.Column{TagsColumns[6]},
-				RefColumns: []*schema.Column{TransactionsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 	}
 	// TransactionsColumns holds the columns for the "transactions" table.
 	TransactionsColumns = []*schema.Column{
@@ -345,6 +336,31 @@ var (
 			},
 		},
 	}
+	// TransactionTagColumns holds the columns for the "transaction_tag" table.
+	TransactionTagColumns = []*schema.Column{
+		{Name: "transaction_id", Type: field.TypeUUID},
+		{Name: "tag_id", Type: field.TypeUUID},
+	}
+	// TransactionTagTable holds the schema information for the "transaction_tag" table.
+	TransactionTagTable = &schema.Table{
+		Name:       "transaction_tag",
+		Columns:    TransactionTagColumns,
+		PrimaryKey: []*schema.Column{TransactionTagColumns[0], TransactionTagColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "transaction_tag_transaction_id",
+				Columns:    []*schema.Column{TransactionTagColumns[0]},
+				RefColumns: []*schema.Column{TransactionsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "transaction_tag_tag_id",
+				Columns:    []*schema.Column{TransactionTagColumns[1]},
+				RefColumns: []*schema.Column{TagsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CommentsTable,
@@ -361,6 +377,7 @@ var (
 		GroupUserTable,
 		GroupOwnerTable,
 		RequestTagTable,
+		TransactionTagTable,
 	}
 )
 
@@ -374,7 +391,6 @@ func init() {
 	RequestStatusTable.ForeignKeys[0].RefTable = RequestsTable
 	RequestStatusTable.ForeignKeys[1].RefTable = UsersTable
 	RequestTargetsTable.ForeignKeys[0].RefTable = RequestsTable
-	TagsTable.ForeignKeys[0].RefTable = TransactionsTable
 	TransactionsTable.ForeignKeys[0].RefTable = GroupBudgetsTable
 	TransactionsTable.ForeignKeys[1].RefTable = RequestsTable
 	TransactionDetailsTable.ForeignKeys[0].RefTable = TransactionsTable
@@ -384,4 +400,6 @@ func init() {
 	GroupOwnerTable.ForeignKeys[1].RefTable = UsersTable
 	RequestTagTable.ForeignKeys[0].RefTable = RequestsTable
 	RequestTagTable.ForeignKeys[1].RefTable = TagsTable
+	TransactionTagTable.ForeignKeys[0].RefTable = TransactionsTable
+	TransactionTagTable.ForeignKeys[1].RefTable = TagsTable
 }

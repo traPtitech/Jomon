@@ -34,13 +34,11 @@ const (
 	// RequestInverseTable is the table name for the Request entity.
 	// It exists in this package in order to avoid circular dependency with the "request" package.
 	RequestInverseTable = "requests"
-	// TransactionTable is the table that holds the transaction relation/edge.
-	TransactionTable = "tags"
+	// TransactionTable is the table that holds the transaction relation/edge. The primary key declared below.
+	TransactionTable = "transaction_tag"
 	// TransactionInverseTable is the table name for the Transaction entity.
 	// It exists in this package in order to avoid circular dependency with the "transaction" package.
 	TransactionInverseTable = "transactions"
-	// TransactionColumn is the table column denoting the transaction relation/edge.
-	TransactionColumn = "transaction_tag"
 )
 
 // Columns holds all SQL columns for tag fields.
@@ -53,27 +51,19 @@ var Columns = []string{
 	FieldDeletedAt,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "tags"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"transaction_tag",
-}
-
 var (
 	// RequestPrimaryKey and RequestColumn2 are the table columns denoting the
 	// primary key for the request relation (M2M).
 	RequestPrimaryKey = []string{"request_id", "tag_id"}
+	// TransactionPrimaryKey and TransactionColumn2 are the table columns denoting the
+	// primary key for the transaction relation (M2M).
+	TransactionPrimaryKey = []string{"transaction_id", "tag_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

@@ -106,23 +106,19 @@ func (tc *TagCreate) AddRequest(r ...*Request) *TagCreate {
 	return tc.AddRequestIDs(ids...)
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (tc *TagCreate) SetTransactionID(id uuid.UUID) *TagCreate {
-	tc.mutation.SetTransactionID(id)
+// AddTransactionIDs adds the "transaction" edge to the Transaction entity by IDs.
+func (tc *TagCreate) AddTransactionIDs(ids ...uuid.UUID) *TagCreate {
+	tc.mutation.AddTransactionIDs(ids...)
 	return tc
 }
 
-// SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
-func (tc *TagCreate) SetNillableTransactionID(id *uuid.UUID) *TagCreate {
-	if id != nil {
-		tc = tc.SetTransactionID(*id)
+// AddTransaction adds the "transaction" edges to the Transaction entity.
+func (tc *TagCreate) AddTransaction(t ...*Transaction) *TagCreate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return tc
-}
-
-// SetTransaction sets the "transaction" edge to the Transaction entity.
-func (tc *TagCreate) SetTransaction(t *Transaction) *TagCreate {
-	return tc.SetTransactionID(t.ID)
+	return tc.AddTransactionIDs(ids...)
 }
 
 // Mutation returns the TagMutation object of the builder.
@@ -326,10 +322,10 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 	}
 	if nodes := tc.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
 			Table:   tag.TransactionTable,
-			Columns: []string{tag.TransactionColumn},
+			Columns: tag.TransactionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -341,7 +337,6 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.transaction_tag = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

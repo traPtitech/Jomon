@@ -627,7 +627,7 @@ func HasTransaction() predicate.Tag {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TransactionTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, TransactionTable, TransactionColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, TransactionTable, TransactionPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -639,7 +639,7 @@ func HasTransactionWith(preds ...predicate.Transaction) predicate.Tag {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TransactionInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, TransactionTable, TransactionColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, TransactionTable, TransactionPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
