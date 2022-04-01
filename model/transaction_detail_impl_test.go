@@ -44,14 +44,14 @@ func TestEntRepository_UpdateTransactionDetail(t *testing.T) {
 		amount := 100
 		target := "hoge"
 
-		// Create TransactionDetail
-		td, err := repo.CreateTransactionDetail(ctx, amount, target)
+		// Create Transaction
+		tx, err := repo.CreateTransaction(ctx, amount, target, nil, nil, nil)
 		require.NoError(t, err)
 
 		// Update TransactionDetail
 		updatedAmount := 1000
 		updatedTarget := "fuga"
-		td, err = repo.UpdateTransactionDetail(ctx, td.ID, updatedAmount, updatedTarget)
+		td, err := repo.UpdateTransactionDetail(ctx, tx.ID, updatedAmount, updatedTarget)
 		assert.NoError(t, err)
 		assert.NotNil(t, td)
 		assert.Equal(t, td.Amount, updatedAmount)

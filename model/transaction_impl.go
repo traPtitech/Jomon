@@ -187,7 +187,7 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 
 func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID uuid.UUID, amount int, target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
 	// Update transaction Detail
-	detail, err := repo.UpdateTransactionDetail(ctx, transactionID, amount, target)
+	_, err := repo.UpdateTransactionDetail(ctx, transactionID, amount, target)
 	if err != nil {
 		return nil, err
 	}
@@ -198,56 +198,61 @@ func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID 
 		tagIDs = append(tagIDs, *tag)
 	}
 
-	var gb *ent.GroupBudget
-	if groupID != nil {
-		_, err = repo.client.GroupBudget.
-			Update().
-			Where(groupbudget.HasGroupWith(
-				group.IDEQ(*groupID),
-			)).
-			SetAmount(amount).
-			Save(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Get transaction
-	tx, err := repo.client.Transaction.
-		Query().
-		Where(transaction.ID(transactionID)).
-		Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// Set Request to the transaction
-	if requestID != nil {
-		tx, err = repo.client.Transaction.
-			UpdateOne(tx).
-			SetRequestID(*requestID).
-			Save(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Update transaction
-	_, err = repo.client.Transaction.
-		UpdateOne(tx).
-		SetDetailID(detail.ID).
-		SetGroupBudgetID(gb.ID).
+	// Delete Tag Transaction Edge
+	_, err = repo.client.Tag.
+		Update().
+		Where(tag.HasTransactionWith(
+			transaction.IDEQ(transactionID),
+		)).
+		ClearTransaction().
 		Save(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	if groupID != nil {
+		// Delete GroupBudget
+		_, err = repo.client.GroupBudget.
+			Delete().
+			Where(groupbudget.HasTransactionWith(
+				transaction.IDEQ(transactionID),
+			)).
+			Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+		// Create GroupBudget
+		_, err = repo.client.GroupBudget.
+			Create().
+			SetGroupID(*groupID).
+			SetAmount(amount).
+			SetTransactionID(transactionID).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Update Tag to set transaction
 	_, err = repo.client.Tag.
 		Update().
 		Where(tag.IDIn(tagIDs...)).
-		SetTransactionID(tx.ID).
+		SetTransactionID(transactionID).
 		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get transaction
+	tx, err := repo.client.Transaction.
+		Query().
+		Where(transaction.ID(transactionID)).
+		WithTag().
+		WithDetail().
+		WithGroupBudget(func(q *ent.GroupBudgetQuery) {
+			q.WithGroup()
+		}).
+		Only(ctx)
 	if err != nil {
 		return nil, err
 	}
