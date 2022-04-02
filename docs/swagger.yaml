@@ -272,9 +272,6 @@ paths:
               properties:
                 status:
                   $ref: "#/components/schemas/StatusEnum"
-                reason:
-                  type: string
-                  example: "良いですね。"
       responses:
         "200":
           description: OK
@@ -405,38 +402,6 @@ paths:
       responses:
         "200":
           description: 取得に成功した。
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/Tag"
-                  - type: object
-                    properties:
-                      transactions:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
-                      requests:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
-        "404":
-          $ref: "#/components/responses/404"
-    put:
-      description: タグの情報を変更する。
-      tags:
-        - Tags
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PostTag"
-      responses:
-        "200":
-          description: 変更に成功した。
           content:
             application/json:
               schema:
@@ -759,10 +724,10 @@ paths:
   /users:
     get:
       tags:
-      - "Users"
+        - "Users"
       description: "ユーザー一覧を取得する。"
       responses:
-        '200':
+        "200":
           description: "OK"
           content:
             application/json:
@@ -772,7 +737,7 @@ paths:
                   $ref: "#/components/schemas/User"
     put:
       tags:
-      - "Users"
+        - "Users"
       description: "ユーザーの情報を変更する。主に権限の変更用。管理者権限またはグループオーナー権限が必要。"
       requestBody:
         required: true
@@ -781,13 +746,13 @@ paths:
             schema:
               $ref: "#/components/schemas/PostUser"
       responses:
-        '200':
+        "200":
           description: "取得に成功した。返す"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-        '400':
+        "400":
           $ref: "#/components/responses/400"
         "403":
           $ref: "#/components/responses/403"
@@ -795,10 +760,10 @@ paths:
   /users/me:
     get:
       tags:
-      - "Users"
+        - "Users"
       description: "自分の情報を取得する。存在しない場合はユーザーを作成する。"
       responses:
-        '200':
+        "200":
           description: "取得に成功した。返す"
           content:
             application/json:
@@ -822,9 +787,6 @@ components:
         name:
           type: string
           example: "2020講習会"
-        description:
-          type: string
-          example: "2020年度講習会"
         created_at:
           type: string
           format: date-time
@@ -837,9 +799,6 @@ components:
         name:
           type: string
           example: "2020講習会"
-        description:
-          type: string
-          example: "2020年度講習会"
     Group:
       type: object
       properties:
@@ -975,7 +934,7 @@ components:
           example: "サーバー代 1200円"
         created_by:
           type: string
-          format: uuid  
+          format: uuid
         comments:
           type: array
           items:
@@ -1022,7 +981,8 @@ components:
         tags:
           type: array
           items:
-            $ref: "#/components/schemas/PostTag"
+            type: string
+            format: uuid
         group:
           type: string
           format: uuid
@@ -1097,10 +1057,6 @@ components:
           $ref: "#/components/schemas/TrapID"
         status:
           $ref: "#/components/schemas/StatusEnum"
-        reason:
-          type: string
-          default: null
-          example: "これは雑すぎますね。"
         created_at:
           type: string
           format: date-time
