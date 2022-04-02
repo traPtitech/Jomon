@@ -67,7 +67,6 @@ func NewServer(h Handlers) *echo.Echo {
 		{
 			apiTags.GET("", h.GetTags)
 			apiTags.POST("", h.PostTag)
-			apiTags.PUT("/:tagID", h.PutTag)
 			apiTags.DELETE("/:tagID", h.DeleteTag)
 		}
 

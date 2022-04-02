@@ -67,35 +67,6 @@ func (h *Handlers) PostTag(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PutTag(c echo.Context) error {
-	tagID, err := uuid.Parse(c.Param("tagID"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-	if tagID == uuid.Nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID"))
-	}
-	var req Tag
-	if err := c.Bind(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	ctx := context.Background()
-	tag, err := h.Repository.UpdateTag(ctx, tagID, req.Name)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-
-	res := &TagOverview{
-		ID:        tag.ID,
-		Name:      tag.Name,
-		CreatedAt: tag.CreatedAt,
-		UpdatedAt: tag.UpdatedAt,
-	}
-
-	return c.JSON(http.StatusOK, res)
-}
-
 func (h *Handlers) DeleteTag(c echo.Context) error {
 	tagID, err := uuid.Parse(c.Param("tagID"))
 	if err != nil {
