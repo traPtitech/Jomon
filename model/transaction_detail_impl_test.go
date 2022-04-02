@@ -9,11 +9,13 @@ import (
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
-func TestEntRepository_CreateTransactionDetail(t *testing.T) {
+func TestEntRepository_createTransactionDetail(t *testing.T) {
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx)
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
+
+	r := repo.(*EntRepository)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -23,7 +25,7 @@ func TestEntRepository_CreateTransactionDetail(t *testing.T) {
 		target := random.AlphaNumeric(t, 10)
 
 		// Create TransactionDetail
-		td, err := repo.CreateTransactionDetail(ctx, amount, target)
+		td, err := r.createTransactionDetail(ctx, amount, target)
 		assert.NoError(t, err)
 		assert.NotNil(t, td)
 		assert.Equal(t, td.Amount, amount)
@@ -31,11 +33,13 @@ func TestEntRepository_CreateTransactionDetail(t *testing.T) {
 	})
 }
 
-func TestEntRepository_UpdateTransactionDetail(t *testing.T) {
+func TestEntRepository_updateTransactionDetail(t *testing.T) {
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx)
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
+
+	r := repo.(*EntRepository)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -51,7 +55,7 @@ func TestEntRepository_UpdateTransactionDetail(t *testing.T) {
 		// Update TransactionDetail
 		updatedAmount := 1000
 		updatedTarget := "fuga"
-		td, err := repo.UpdateTransactionDetail(ctx, tx.ID, updatedAmount, updatedTarget)
+		td, err := r.updateTransactionDetail(ctx, tx.ID, updatedAmount, updatedTarget)
 		assert.NoError(t, err)
 		assert.NotNil(t, td)
 		assert.Equal(t, td.Amount, updatedAmount)

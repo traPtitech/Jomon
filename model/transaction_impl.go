@@ -116,7 +116,7 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 	}
 
 	// Create Transaction Detail
-	detail, err := repo.CreateTransactionDetail(ctx, amount, target)
+	detail, err := repo.createTransactionDetail(ctx, amount, target)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +187,7 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 
 func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID uuid.UUID, amount int, target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
 	// Update transaction Detail
-	_, err := repo.UpdateTransactionDetail(ctx, transactionID, amount, target)
+	_, err := repo.updateTransactionDetail(ctx, transactionID, amount, target)
 	if err != nil {
 		return nil, err
 	}

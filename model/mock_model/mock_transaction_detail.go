@@ -5,11 +5,7 @@
 package mock_model
 
 import (
-	context "context"
 	gomock "github.com/golang/mock/gomock"
-	uuid "github.com/google/uuid"
-	model "github.com/traPtitech/Jomon/model"
-	reflect "reflect"
 )
 
 // MockTransactionDetailRepository is a mock of TransactionDetailRepository interface
@@ -33,34 +29,4 @@ func NewMockTransactionDetailRepository(ctrl *gomock.Controller) *MockTransactio
 // EXPECT returns an object that allows the caller to indicate expected use
 func (m *MockTransactionDetailRepository) EXPECT() *MockTransactionDetailRepositoryMockRecorder {
 	return m.recorder
-}
-
-// CreateTransactionDetail mocks base method
-func (m *MockTransactionDetailRepository) CreateTransactionDetail(ctx context.Context, amount int, target string) (*model.TransactionDetail, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateTransactionDetail", ctx, amount, target)
-	ret0, _ := ret[0].(*model.TransactionDetail)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateTransactionDetail indicates an expected call of CreateTransactionDetail
-func (mr *MockTransactionDetailRepositoryMockRecorder) CreateTransactionDetail(ctx, amount, target interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransactionDetail", reflect.TypeOf((*MockTransactionDetailRepository)(nil).CreateTransactionDetail), ctx, amount, target)
-}
-
-// UpdateTransactionDetail mocks base method
-func (m *MockTransactionDetailRepository) UpdateTransactionDetail(ctx context.Context, transactionID uuid.UUID, amount int, target string) (*model.TransactionDetail, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateTransactionDetail", ctx, transactionID, amount, target)
-	ret0, _ := ret[0].(*model.TransactionDetail)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateTransactionDetail indicates an expected call of UpdateTransactionDetail
-func (mr *MockTransactionDetailRepositoryMockRecorder) UpdateTransactionDetail(ctx, transactionID, amount, target interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTransactionDetail", reflect.TypeOf((*MockTransactionDetailRepository)(nil).UpdateTransactionDetail), ctx, transactionID, amount, target)
 }
