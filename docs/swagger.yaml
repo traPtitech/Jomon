@@ -35,7 +35,7 @@ paths:
       tags:
         - Transactions
       parameters:
-        - $ref: "#/components/parameters/sortQuery"
+        - $ref: "#/components/parameters/sortTransactionQuery"
         - $ref: "#/components/parameters/targetQuery"
         - $ref: "#/components/parameters/yearQuery"
         - $ref: "#/components/parameters/sinceQuery"
@@ -124,7 +124,7 @@ paths:
       tags:
         - Requests
       parameters:
-        - $ref: "#/components/parameters/sortQuery"
+        - $ref: "#/components/parameters/sortRequestQuery"
         - $ref: "#/components/parameters/targetQuery"
         - $ref: "#/components/parameters/yearQuery"
         - $ref: "#/components/parameters/sinceQuery"
@@ -1057,9 +1057,16 @@ components:
       description: 指定したリソースは存在しない。
 
   parameters:
-    sortQuery:
+    sortRequestQuery:
       name: sort
       description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", タイトルの昇順 "title", タイトルの降順 "-title")
+      required: false
+      in: query
+      schema:
+        type: string
+    sortTransactionQuery:
+      name: sort
+      description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at")
       required: false
       in: query
       schema:
