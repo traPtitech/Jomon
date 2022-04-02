@@ -468,57 +468,6 @@ func (h *Handlers) PostComment(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PutComment(c echo.Context) error {
-	requestID, err := uuid.Parse(c.Param("requestID"))
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-	if requestID == uuid.Nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-	commentID, err := uuid.Parse(c.Param("commentID"))
-	if err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-	if commentID == uuid.Nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	var req Comment
-	if err := c.Bind(&req); err != nil {
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	ctx := context.Background()
-	comment, err := h.Repository.UpdateComment(ctx, req.Comment, requestID, commentID)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
-		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	res := &CommentDetail{
-		ID:        comment.ID,
-		User:      comment.User,
-		Comment:   comment.Comment,
-		CreatedAt: comment.CreatedAt,
-		UpdatedAt: comment.UpdatedAt,
-	}
-	return c.JSON(http.StatusOK, res)
-}
-
-func (h *Handlers) DeleteComment(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
-}
-
 func (h *Handlers) PutStatus(c echo.Context) error {
 	var req PutStatus
 	var err error
