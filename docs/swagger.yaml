@@ -1060,6 +1060,10 @@ components:
           $ref: "#/components/schemas/TrapID"
         status:
           $ref: "#/components/schemas/StatusEnum"
+        comment:
+          type: string
+          default: null
+          example: "これは雑すぎますね。"
         created_at:
           type: string
           format: date-time
