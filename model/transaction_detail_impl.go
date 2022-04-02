@@ -25,19 +25,19 @@ func (repo *EntRepository) updateTransactionDetail(ctx context.Context, transact
 		Where(transactiondetail.HasTransactionWith(
 			transaction.IDEQ(transactionID),
 		)).
-		SetAmount(amount).
-		SetTarget(target).
+		ClearTransaction().
 		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
-	// Get Transaction Detail
-	enttd, err := repo.client.TransactionDetail.
-		Query().
-		Where(transactiondetail.HasTransactionWith(
-			transaction.IDEQ(transactionID),
-		)).
-		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	enttd, err := repo.client.TransactionDetail.Create().
+		SetAmount(amount).
+		SetTarget(target).
+		SetTransactionID(transactionID).
+		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
