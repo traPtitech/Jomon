@@ -11,9 +11,12 @@ import (
 
 func TestEntRepository_GetTags(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_tags")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
+	client2, storage2, err := setup(t, ctx, "get_tags2")
+	assert.NoError(t, err)
+	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
 		got, err := repo.GetTags(ctx)
@@ -39,11 +42,18 @@ func TestEntRepository_GetTags(t *testing.T) {
 			assert.Equal(t, got[1].Name, tag1.Name)
 		}
 	})
+
+	t.Run("Success2", func(t *testing.T) {
+		t.Parallel()
+		got, err := repo2.GetTags(ctx)
+		assert.NoError(t, err)
+		assert.Len(t, got, 0)
+	})
 }
 
 func TestEntRepository_CreateTag(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "create_tag")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -67,7 +77,7 @@ func TestEntRepository_CreateTag(t *testing.T) {
 
 func TestEntRepository_UpdateTag(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "update_tag")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -111,7 +121,7 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 
 func TestEntRepository_DeleteTag(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "delete_tag")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
