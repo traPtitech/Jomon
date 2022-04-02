@@ -279,11 +279,10 @@ func TestHandlers_PostRequest(t *testing.T) {
 		date := time.Now()
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 		tags := []*model.Tag{tag}
 
@@ -338,11 +337,10 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Title:     request.Title,
 			Content:   request.Content,
 			Tags: []*TagOverview{{
-				ID:          tag.ID,
-				Name:        tag.Name,
-				Description: tag.Description,
-				CreatedAt:   tag.CreatedAt,
-				UpdatedAt:   tag.UpdatedAt,
+				ID:        tag.ID,
+				Name:      tag.Name,
+				CreatedAt: tag.CreatedAt,
+				UpdatedAt: tag.UpdatedAt,
 			}},
 		}
 		resBody, err := json.Marshal(res)
@@ -925,18 +923,16 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 
 		tag1 := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 30),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 		tag2 := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 30),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 		tags := []*model.Tag{tag1, tag2}
 		reqRequest := PutRequest{
@@ -1003,18 +999,16 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Content:   updateRequest.Content,
 			Tags: []*TagOverview{
 				{
-					ID:          tag1.ID,
-					Name:        tag1.Name,
-					Description: tag1.Description,
-					CreatedAt:   tag1.CreatedAt,
-					UpdatedAt:   tag1.UpdatedAt,
+					ID:        tag1.ID,
+					Name:      tag1.Name,
+					CreatedAt: tag1.CreatedAt,
+					UpdatedAt: tag1.UpdatedAt,
 				},
 				{
-					ID:          tag2.ID,
-					Name:        tag2.Name,
-					Description: tag2.Description,
-					CreatedAt:   tag2.CreatedAt,
-					UpdatedAt:   tag2.UpdatedAt,
+					ID:        tag2.ID,
+					Name:      tag2.Name,
+					CreatedAt: tag2.CreatedAt,
+					UpdatedAt: tag2.UpdatedAt,
 				},
 			},
 		}
@@ -1347,11 +1341,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 30),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		reqRequest := PutRequest{

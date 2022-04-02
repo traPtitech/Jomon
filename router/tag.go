@@ -11,16 +11,14 @@ import (
 )
 
 type Tag struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name string `json:"name"`
 }
 
 type TagOverview struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type TagResponse struct {
@@ -37,11 +35,10 @@ func (h *Handlers) GetTags(c echo.Context) error {
 	res := []*TagOverview{}
 	for _, tag := range tags {
 		res = append(res, &TagOverview{
-			ID:          tag.ID,
-			Name:        tag.Name,
-			Description: tag.Description,
-			CreatedAt:   tag.CreatedAt,
-			UpdatedAt:   tag.UpdatedAt,
+			ID:        tag.ID,
+			Name:      tag.Name,
+			CreatedAt: tag.CreatedAt,
+			UpdatedAt: tag.UpdatedAt,
 		})
 	}
 
@@ -55,17 +52,16 @@ func (h *Handlers) PostTag(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	created, err := h.Repository.CreateTag(ctx, tag.Name, tag.Description)
+	created, err := h.Repository.CreateTag(ctx, tag.Name)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	res := TagOverview{
-		ID:          created.ID,
-		Name:        created.Name,
-		Description: created.Description,
-		CreatedAt:   created.CreatedAt,
-		UpdatedAt:   created.UpdatedAt,
+		ID:        created.ID,
+		Name:      created.Name,
+		CreatedAt: created.CreatedAt,
+		UpdatedAt: created.UpdatedAt,
 	}
 
 	return c.JSON(http.StatusOK, res)
@@ -85,17 +81,16 @@ func (h *Handlers) PutTag(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	tag, err := h.Repository.UpdateTag(ctx, tagID, req.Name, req.Description)
+	tag, err := h.Repository.UpdateTag(ctx, tagID, req.Name)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	res := &TagOverview{
-		ID:          tag.ID,
-		Name:        tag.Name,
-		Description: tag.Description,
-		CreatedAt:   tag.CreatedAt,
-		UpdatedAt:   tag.UpdatedAt,
+		ID:        tag.ID,
+		Name:      tag.Name,
+		CreatedAt: tag.CreatedAt,
+		UpdatedAt: tag.UpdatedAt,
 	}
 
 	return c.JSON(http.StatusOK, res)

@@ -30,18 +30,16 @@ func TestHandlers_GetTags(t *testing.T) {
 		date := time.Now()
 
 		tag1 := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 		tag2 := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 		tags := []*model.Tag{tag1, tag2}
 
@@ -62,11 +60,10 @@ func TestHandlers_GetTags(t *testing.T) {
 		resOverview := []*TagOverview{}
 		for _, tag := range tags {
 			resOverview = append(resOverview, &TagOverview{
-				ID:          tag.ID,
-				Name:        tag.Name,
-				Description: tag.Description,
-				CreatedAt:   tag.CreatedAt,
-				UpdatedAt:   tag.UpdatedAt,
+				ID:        tag.ID,
+				Name:      tag.Name,
+				CreatedAt: tag.CreatedAt,
+				UpdatedAt: tag.UpdatedAt,
 			})
 		}
 		res := TagResponse{resOverview}
@@ -145,16 +142,14 @@ func TestHandlers_PostTag(t *testing.T) {
 		date := time.Now()
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		reqTag := Tag{
-			Name:        tag.Name,
-			Description: tag.Description,
+			Name: tag.Name,
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
@@ -171,15 +166,14 @@ func TestHandlers_PostTag(t *testing.T) {
 
 		h.Repository.MockTagRepository.
 			EXPECT().
-			CreateTag(c.Request().Context(), tag.Name, tag.Description).
+			CreateTag(c.Request().Context(), tag.Name).
 			Return(tag, nil)
 
 		res := TagOverview{
-			ID:          tag.ID,
-			Name:        tag.Name,
-			Description: tag.Description,
-			CreatedAt:   tag.CreatedAt,
-			UpdatedAt:   tag.UpdatedAt,
+			ID:        tag.ID,
+			Name:      tag.Name,
+			CreatedAt: tag.CreatedAt,
+			UpdatedAt: tag.UpdatedAt,
 		}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
@@ -196,16 +190,14 @@ func TestHandlers_PostTag(t *testing.T) {
 		date := time.Now()
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        "",
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      "",
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		reqTag := Tag{
-			Name:        "",
-			Description: tag.Description,
+			Name: "",
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
@@ -223,7 +215,7 @@ func TestHandlers_PostTag(t *testing.T) {
 		mocErr := errors.New("Tag name can't be empty.")
 		h.Repository.MockTagRepository.
 			EXPECT().
-			CreateTag(c.Request().Context(), tag.Name, tag.Description).
+			CreateTag(c.Request().Context(), tag.Name).
 			Return(nil, mocErr)
 
 		err = h.Handlers.PostTag(c)
@@ -242,26 +234,23 @@ func TestHandlers_PutTag(t *testing.T) {
 		date := time.Now()
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		reqTag := Tag{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
+			Name: tag.Name,
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
 
 		updateTag := &model.Tag{
-			ID:          tag.ID,
-			Name:        reqTag.Name,
-			Description: reqTag.Description,
-			CreatedAt:   date,
-			UpdatedAt:   time.Now(),
+			ID:        tag.ID,
+			Name:      reqTag.Name,
+			CreatedAt: date,
+			UpdatedAt: time.Now(),
 		}
 
 		e := echo.New()
@@ -279,15 +268,14 @@ func TestHandlers_PutTag(t *testing.T) {
 
 		h.Repository.MockTagRepository.
 			EXPECT().
-			UpdateTag(c.Request().Context(), tag.ID, reqTag.Name, reqTag.Description).
+			UpdateTag(c.Request().Context(), tag.ID, reqTag.Name).
 			Return(updateTag, nil)
 
 		res := TagOverview{
-			ID:          updateTag.ID,
-			Name:        updateTag.Name,
-			Description: updateTag.Description,
-			CreatedAt:   updateTag.CreatedAt,
-			UpdatedAt:   updateTag.UpdatedAt,
+			ID:        updateTag.ID,
+			Name:      updateTag.Name,
+			CreatedAt: updateTag.CreatedAt,
+			UpdatedAt: updateTag.UpdatedAt,
 		}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
@@ -304,16 +292,14 @@ func TestHandlers_PutTag(t *testing.T) {
 		date := time.Now()
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		reqTag := Tag{
-			Name:        "",
-			Description: tag.Description,
+			Name: "",
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
@@ -334,7 +320,7 @@ func TestHandlers_PutTag(t *testing.T) {
 		mocErr := errors.New("Tag name can't be empty.")
 		h.Repository.MockTagRepository.
 			EXPECT().
-			UpdateTag(c.Request().Context(), tag.ID, reqTag.Name, reqTag.Description).
+			UpdateTag(c.Request().Context(), tag.ID, reqTag.Name).
 			Return(nil, mocErr)
 
 		err = h.Handlers.PutTag(c)
@@ -349,16 +335,14 @@ func TestHandlers_PutTag(t *testing.T) {
 		date := time.Now()
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		reqTag := Tag{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
+			Name: tag.Name,
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
@@ -390,16 +374,14 @@ func TestHandlers_PutTag(t *testing.T) {
 		date := time.Now()
 
 		tag := &model.Tag{
-			ID:          uuid.Nil,
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.Nil,
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		reqTag := Tag{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
+			Name: tag.Name,
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
@@ -433,16 +415,14 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		date := time.Now()
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		reqTag := Tag{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
+			Name: tag.Name,
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
@@ -476,16 +456,14 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		date := time.Now()
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		reqTag := Tag{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
+			Name: tag.Name,
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
@@ -521,16 +499,14 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		date := time.Now()
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		reqTag := Tag{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
+			Name: tag.Name,
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
@@ -562,16 +538,14 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		date := time.Now()
 
 		tag := &model.Tag{
-			ID:          uuid.Nil,
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.Nil,
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		reqTag := Tag{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
+			Name: tag.Name,
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)

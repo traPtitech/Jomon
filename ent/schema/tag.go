@@ -21,7 +21,6 @@ func (Tag) Fields() []ent.Field {
 			Default(uuid.New),
 		field.String("name").
 			NotEmpty(),
-		field.String("description"),
 		field.Time("created_at").
 			Default(time.Now),
 		field.Time("updated_at").

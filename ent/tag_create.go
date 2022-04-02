@@ -29,12 +29,6 @@ func (tc *TagCreate) SetName(s string) *TagCreate {
 	return tc
 }
 
-// SetDescription sets the "description" field.
-func (tc *TagCreate) SetDescription(s string) *TagCreate {
-	tc.mutation.SetDescription(s)
-	return tc
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (tc *TagCreate) SetCreatedAt(t time.Time) *TagCreate {
 	tc.mutation.SetCreatedAt(t)
@@ -220,9 +214,6 @@ func (tc *TagCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Tag.name": %w`, err)}
 		}
 	}
-	if _, ok := tc.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Tag.description"`)}
-	}
 	if _, ok := tc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Tag.created_at"`)}
 	}
@@ -272,14 +263,6 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 			Column: tag.FieldName,
 		})
 		_node.Name = value
-	}
-	if value, ok := tc.mutation.Description(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: tag.FieldDescription,
-		})
-		_node.Description = value
 	}
 	if value, ok := tc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
