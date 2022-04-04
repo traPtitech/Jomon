@@ -107,7 +107,7 @@ func (h Handlers) CheckAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func (h Handlers) CheckRequestCreaterMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func (h Handlers) CheckRequestCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		gob.Register(&User{})
 		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
@@ -122,16 +122,16 @@ func (h Handlers) CheckRequestCreaterMiddleware(next echo.HandlerFunc) echo.Hand
 			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
 		}
 
-		creater := sess.Values[sessionCreaterKey].(uuid.UUID)
-		if creater != user.ID {
-			return echo.NewHTTPError(http.StatusForbidden, "you are not creater")
+		creator := sess.Values[sessionCreatorKey].(uuid.UUID)
+		if creator != user.ID {
+			return echo.NewHTTPError(http.StatusForbidden, "you are not creator")
 		}
 
 		return next(c)
 	}
 }
 
-func (h Handlers) CheckAdminOrRequestCreaterMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func (h Handlers) CheckAdminOrRequestCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		gob.Register(&User{})
 		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
@@ -146,9 +146,9 @@ func (h Handlers) CheckAdminOrRequestCreaterMiddleware(next echo.HandlerFunc) ec
 			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
 		}
 
-		creater := sess.Values[sessionCreaterKey].(uuid.UUID)
-		if creater != user.ID && !user.Admin {
-			return echo.NewHTTPError(http.StatusForbidden, "you are not admin or creater")
+		creator := sess.Values[sessionCreatorKey].(uuid.UUID)
+		if creator != user.ID && !user.Admin {
+			return echo.NewHTTPError(http.StatusForbidden, "you are not admin or creator")
 		}
 
 		return next(c)
@@ -223,7 +223,7 @@ func (h Handlers) RetrieveGroupOwner(repo model.Repository) echo.MiddlewareFunc 
 	}
 }
 
-func (h Handlers) RetrieveRequestCreater(repo model.Repository) echo.MiddlewareFunc {
+func (h Handlers) RetrieveRequestCreator(repo model.Repository) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
@@ -246,7 +246,7 @@ func (h Handlers) RetrieveRequestCreater(repo model.Repository) echo.MiddlewareF
 
 			gob.Register(&uuid.UUID{})
 
-			sess.Values[sessionCreaterKey] = request.CreatedBy
+			sess.Values[sessionCreatorKey] = request.CreatedBy
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
 				c.Logger().Error(err)
