@@ -13,7 +13,7 @@ import (
 
 func TestEntRepository_CreateFile(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "create_file")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -87,7 +87,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 func TestEntRepository_GetFile(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_file")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -130,7 +130,7 @@ func TestEntRepository_GetFile(t *testing.T) {
 
 func TestEntRepository_DeleteFile(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "delete_file")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
