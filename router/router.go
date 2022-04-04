@@ -92,6 +92,13 @@ func NewServer(h Handlers) *echo.Echo {
 			apiUsers.PUT("", h.UpdateUserInfo)
 			apiUsers.GET("/me", h.GetMe)
 		}
+
+		apiAdmins := api.Group("/admins", h.CheckLoginMiddleware)
+		{
+			apiAdmins.GET("", h.GetAdmins)
+			apiAdmins.POST("", h.PostAdmin)
+			apiAdmins.DELETE("/:userID", h.DeleteAdmin)
+		}
 	}
 
 	return e
