@@ -31,7 +31,7 @@ func NewServer(h Handlers) *echo.Echo {
 	e.Use(session.Middleware(h.SessionStore))
 
 	retrieveGroupOwner := h.RetrieveGroupOwner(h.Repository)
-	retrieveRequestCreater := h.RetrieveRequestCreater(h.Repository)
+	retrieveRequestCreator := h.RetrieveRequestCreator(h.Repository)
 
 	api := e.Group("/api")
 	{
@@ -45,12 +45,12 @@ func NewServer(h Handlers) *echo.Echo {
 		{
 			apiRequests.GET("", h.GetRequests)
 			apiRequests.POST("", h.PostRequest, middleware.BodyDump(service.WebhookEventHandler))
-			apiRequestIDs := api.Group("/:requestID", retrieveRequestCreater)
+			apiRequestIDs := api.Group("/:requestID", retrieveRequestCreator)
 			{
 				apiRequestIDs.GET("", h.GetRequest)
-				apiRequestIDs.PUT("", h.PutRequest, middleware.BodyDump(service.WebhookEventHandler), h.CheckRequestCreaterMiddleware)
+				apiRequestIDs.PUT("", h.PutRequest, middleware.BodyDump(service.WebhookEventHandler), h.CheckRequestCreatorMiddleware)
 				apiRequestIDs.POST("/comments", h.PostComment, middleware.BodyDump(service.WebhookEventHandler))
-				apiRequestIDs.PUT("/status", h.PutStatus, h.CheckAdminOrRequestCreaterMiddleware)
+				apiRequestIDs.PUT("/status", h.PutStatus, h.CheckAdminOrRequestCreatorMiddleware)
 			}
 		}
 

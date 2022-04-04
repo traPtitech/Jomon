@@ -22,7 +22,7 @@ const (
 	sessionCodeVerifierKey = "code_verifier"
 	sessionUserKey         = "user"
 	sessionOwnerKey        = "group_owner"
-	sessionCreaterKey      = "request_creater"
+	sessionCreatorKey      = "request_creator"
 )
 
 type AuthResponse struct {
