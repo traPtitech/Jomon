@@ -613,42 +613,7 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		}
 	})
 
-	t.Run("InvalidUUID", func(t *testing.T) {
-		t.Parallel()
-		ctrl := gomock.NewController(t)
-		date := time.Now()
-
-		user := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-
-		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/hoge/members/%s", user.ID.String()), nil)
-		assert.NoError(t, err)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/members/:memberID")
-		c.SetParamNames("groupID", "memberID")
-		c.SetParamValues("hoge", user.ID.String())
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-
-		_, resErr := uuid.Parse(c.Param("groupID"))
-
-		err = h.Handlers.DeleteMember(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
-	})
-
-	t.Run("NilUUID", func(t *testing.T) {
+	t.Run("NilGroupUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		date := time.Now()
@@ -1351,42 +1316,7 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		}
 	})
 
-	t.Run("InvalidUUID", func(t *testing.T) {
-		t.Parallel()
-		ctrl := gomock.NewController(t)
-		date := time.Now()
-
-		user := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-
-		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/hoge/owners/%s", user.ID.String()), nil)
-		assert.NoError(t, err)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/owners/:ownerID")
-		c.SetParamNames("groupID", "ownerID")
-		c.SetParamValues("hoge", user.ID.String())
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-
-		_, resErr := uuid.Parse(c.Param("groupID"))
-
-		err = h.Handlers.DeleteOwner(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
-	})
-
-	t.Run("NilUUID", func(t *testing.T) {
+	t.Run("NilGroupUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		date := time.Now()
@@ -1582,7 +1512,7 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		}
 	})
 
-	t.Run("NilOwnerUUID", func(t *testing.T) {
+	t.Run("NilGroupUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		date := time.Now()
