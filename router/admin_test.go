@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
 )
 
@@ -175,6 +176,35 @@ func TestHandler_PostAdmin(t *testing.T) {
 		err = h.Handlers.PostAdmin(c)
 		if assert.Error(t, err) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		}
+	})
+
+	t.Run("FailedWithEntConstraintError", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		adminID := uuid.New()
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodPost, "/api/admins", strings.NewReader(`{"id": "`+adminID.String()+`"}`))
+		require.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		var resErr *ent.ConstraintError
+		errors.As(errors.New("failed to create admin"), &resErr)
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockAdminRepository.
+			EXPECT().
+			CreateAdmin(c.Request().Context(), adminID).
+			Return(nil, resErr)
+
+		err = h.Handlers.PostAdmin(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 		}
 	})
 }
