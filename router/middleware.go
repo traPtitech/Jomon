@@ -1,13 +1,16 @@
 package router
 
 import (
+	"context"
 	"encoding/gob"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/logging"
+	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
 )
 
@@ -101,5 +104,156 @@ func (h Handlers) CheckAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		return next(c)
+	}
+}
+
+func (h Handlers) CheckRequestCreaterMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		gob.Register(&User{})
+		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+		if err != nil {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+
+		user, ok := sess.Values[sessionUserKey].(*User)
+		if !ok {
+			c.Logger().Error(err)
+			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
+		}
+
+		creater := sess.Values[sessionCreaterKey].(uuid.UUID)
+		if creater != user.ID {
+			return echo.NewHTTPError(http.StatusForbidden, "you are not creater")
+		}
+
+		return next(c)
+	}
+}
+
+func (h Handlers) CheckAdminOrRequestCreaterMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		gob.Register(&User{})
+		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+		if err != nil {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+
+		user, ok := sess.Values[sessionUserKey].(*User)
+		if !ok {
+			c.Logger().Error(err)
+			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
+		}
+
+		creater := sess.Values[sessionCreaterKey].(uuid.UUID)
+		if creater != user.ID && !user.Admin {
+			return echo.NewHTTPError(http.StatusForbidden, "you are not admin or creater")
+		}
+
+		return next(c)
+	}
+}
+
+func (h Handlers) CheckAdminOrGroupOwnerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		gob.Register(&User{})
+		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+		if err != nil {
+			c.Logger().Error(err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+
+		user, ok := sess.Values[sessionUserKey].(*User)
+		if !ok {
+			c.Logger().Error(err)
+			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
+		}
+
+		owners, ok := sess.Values[sessionOwnerKey].([]*model.Owner)
+		if !ok {
+			c.Logger().Error(err)
+			return echo.ErrInternalServerError
+		}
+
+		for _, owner := range owners {
+			if owner.ID == user.ID {
+				if user.Admin {
+					return next(c)
+				}
+			}
+		}
+
+		return echo.ErrForbidden
+	}
+}
+
+func (h Handlers) RetrieveGroupOwner(repo model.Repository) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+			if err != nil {
+				c.Logger().Error(err)
+				return echo.NewHTTPError(http.StatusInternalServerError, err)
+			}
+			id, err := uuid.Parse(c.Param("groupID"))
+			if err != nil {
+				c.Logger().Error(err)
+				return echo.NewHTTPError(http.StatusBadRequest, err)
+			}
+
+			ctx := context.Background()
+			owners, err := repo.GetOwners(ctx, id)
+			if err != nil {
+				c.Logger().Error(err)
+				return echo.NewHTTPError(http.StatusInternalServerError, err)
+			}
+
+			gob.Register([]*model.Owner{})
+
+			sess.Values[sessionOwnerKey] = owners
+
+			if err = sess.Save(c.Request(), c.Response()); err != nil {
+				c.Logger().Error(err)
+				return echo.ErrInternalServerError
+			}
+
+			return next(c)
+		}
+	}
+}
+
+func (h Handlers) RetrieveRequestCreater(repo model.Repository) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+			if err != nil {
+				c.Logger().Error(err)
+				return echo.NewHTTPError(http.StatusInternalServerError, err)
+			}
+			id, err := uuid.Parse(c.Param("requestID"))
+			if err != nil {
+				c.Logger().Error(err)
+				return echo.NewHTTPError(http.StatusBadRequest, err)
+			}
+
+			ctx := context.Background()
+			request, err := repo.GetRequest(ctx, id)
+			if err != nil {
+				c.Logger().Error(err)
+				return echo.NewHTTPError(http.StatusInternalServerError, err)
+			}
+
+			gob.Register(&uuid.UUID{})
+
+			sess.Values[sessionCreaterKey] = request.CreatedBy
+
+			if err = sess.Save(c.Request(), c.Response()); err != nil {
+				c.Logger().Error(err)
+				return echo.ErrInternalServerError
+			}
+
+			return next(c)
+		}
 	}
 }

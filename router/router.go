@@ -30,6 +30,9 @@ func NewServer(h Handlers) *echo.Echo {
 	e.Use(middleware.Secure())
 	e.Use(session.Middleware(h.SessionStore))
 
+	retrieveGroupOwner := h.RetrieveGroupOwner(h.Repository)
+	retrieveRequestCreater := h.RetrieveRequestCreater(h.Repository)
+
 	api := e.Group("/api")
 	{
 		apiAuth := api.Group("/auth")
@@ -42,16 +45,19 @@ func NewServer(h Handlers) *echo.Echo {
 		{
 			apiRequests.GET("", h.GetRequests)
 			apiRequests.POST("", h.PostRequest, middleware.BodyDump(service.WebhookEventHandler))
-			apiRequests.GET("/:requestID", h.GetRequest)
-			apiRequests.PUT("/:requestID", h.PutRequest, middleware.BodyDump(service.WebhookEventHandler))
-			apiRequests.POST("/:requestID/comments", h.PostComment, middleware.BodyDump(service.WebhookEventHandler))
-			apiRequests.PUT("/:requestID/status", h.PutStatus)
+			apiRequestIDs := api.Group("/:requestID", retrieveRequestCreater)
+			{
+				apiRequestIDs.GET("", h.GetRequest)
+				apiRequestIDs.PUT("", h.PutRequest, middleware.BodyDump(service.WebhookEventHandler), h.CheckRequestCreaterMiddleware)
+				apiRequestIDs.POST("/comments", h.PostComment, middleware.BodyDump(service.WebhookEventHandler))
+				apiRequestIDs.PUT("/status", h.PutStatus, h.CheckAdminOrRequestCreaterMiddleware)
+			}
 		}
 
 		apiComments := api.Group("/transactions", h.CheckLoginMiddleware)
 		{
 			apiComments.GET("", h.GetTransactions)
-			apiComments.POST("", h.PostTransaction)
+			apiComments.POST("", h.PostTransaction, h.CheckAdminMiddleware)
 			apiComments.GET("/:transactionID", h.GetTransaction)
 			apiComments.PUT("/:transactionID", h.PutTransaction, h.CheckAdminMiddleware)
 		}
@@ -76,20 +82,23 @@ func NewServer(h Handlers) *echo.Echo {
 		{
 			apiGroups.GET("", h.GetGroups)
 			apiGroups.POST("", h.PostGroup, h.CheckAdminMiddleware)
-			apiGroups.PUT("/:groupID", h.PutGroup)
-			apiGroups.DELETE("/:groupID", h.DeleteGroup)
-			apiGroups.GET("/:groupID/members", h.GetMembers)
-			apiGroups.POST("/:groupID/members", h.PostMember)
-			apiGroups.DELETE("/:groupID/members", h.DeleteMember)
-			apiGroups.GET("/:groupID/owners", h.GetOwners)
-			apiGroups.POST("/:groupID/owners", h.PostOwner)
-			apiGroups.DELETE("/:groupID/owners", h.DeleteOwner)
+			apiGroupIDs := api.Group("/:groupID", retrieveGroupOwner)
+			{
+				apiGroupIDs.PUT("", h.PutGroup, h.CheckAdminOrGroupOwnerMiddleware)
+				apiGroupIDs.DELETE("", h.DeleteGroup, h.CheckAdminOrGroupOwnerMiddleware)
+				apiGroupIDs.GET("/members", h.GetMembers)
+				apiGroupIDs.POST("/members", h.PostMember, h.CheckAdminOrGroupOwnerMiddleware)
+				apiGroupIDs.DELETE("/members", h.DeleteMember, h.CheckAdminOrGroupOwnerMiddleware)
+				apiGroupIDs.GET("/owners", h.GetOwners)
+				apiGroupIDs.POST("/owners", h.PostOwner, h.CheckAdminOrGroupOwnerMiddleware)
+				apiGroupIDs.DELETE("/owners", h.DeleteOwner, h.CheckAdminOrGroupOwnerMiddleware)
+			}
 		}
 
 		apiUsers := api.Group("/users", h.CheckLoginMiddleware)
 		{
 			apiUsers.GET("", h.GetUsers)
-			apiUsers.PUT("", h.UpdateUserInfo)
+			apiUsers.PUT("", h.UpdateUserInfo, h.CheckAdminMiddleware)
 			apiUsers.GET("/me", h.GetMe)
 		}
 
