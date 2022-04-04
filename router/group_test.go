@@ -1512,7 +1512,7 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		}
 	})
 
-	t.Run("NilGroupUUID", func(t *testing.T) {
+	t.Run("NilOwnerUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		date := time.Now()
