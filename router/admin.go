@@ -20,7 +20,12 @@ func (h *Handlers) GetAdmins(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	return c.JSON(http.StatusOK, admins)
+	res := []*uuid.UUID{}
+	for _, admin := range admins {
+		res = append(res, &admin.ID)
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handlers) PostAdmin(c echo.Context) error {
@@ -30,7 +35,7 @@ func (h *Handlers) PostAdmin(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	created, err := h.Repository.CreateAdmin(ctx, admin)
+	created, err := h.Repository.CreateAdmin(ctx, admin.ID)
 	if err != nil {
 		if ent.IsConstraintError(err) {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -42,7 +47,7 @@ func (h *Handlers) PostAdmin(c echo.Context) error {
 		ID: created.ID,
 	}
 
-	return c.JSON(http.StatusOK, created)
+	return c.JSON(http.StatusOK, res)
 }
 
 func (h *Handlers) DeleteAdmin(c echo.Context) error {

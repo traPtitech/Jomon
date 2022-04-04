@@ -16,6 +16,7 @@ import (
 )
 
 type MockRepository struct {
+	*mock_model.MockAdminRepository
 	*mock_model.MockCommentRepository
 	*mock_model.MockFileRepository
 	*mock_model.MockGroupBudgetRepository
@@ -38,6 +39,7 @@ type MockStorage struct {
 
 func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 	return &MockRepository{
+		MockAdminRepository:             mock_model.NewMockAdminRepository(ctrl),
 		MockCommentRepository:           mock_model.NewMockCommentRepository(ctrl),
 		MockFileRepository:              mock_model.NewMockFileRepository(ctrl),
 		MockGroupBudgetRepository:       mock_model.NewMockGroupBudgetRepository(ctrl),
