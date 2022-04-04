@@ -14,6 +14,13 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	sessionUserKey    = "user"
+	sessionOwnerKey   = "group_owner"
+	sessionCreatorKey = "request_creator"
+)
+
+// AccessLoggingMiddleware ですべてのエラーを出力する
 func (h Handlers) AccessLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {

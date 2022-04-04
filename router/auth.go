@@ -20,9 +20,6 @@ const (
 	sessionDuration        = 24 * 60 * 60 * 7
 	sessionKey             = "sessions"
 	sessionCodeVerifierKey = "code_verifier"
-	sessionUserKey         = "user"
-	sessionOwnerKey        = "group_owner"
-	sessionCreatorKey      = "request_creator"
 )
 
 type AuthResponse struct {
