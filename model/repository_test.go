@@ -9,9 +9,13 @@ import (
 	"github.com/traPtitech/Jomon/testutil"
 )
 
-func setup(t *testing.T, ctx context.Context) (*ent.Client, storage.Storage, error) {
+const (
+	dbPrefix = "jomon_test_repo_"
+)
+
+func setup(t *testing.T, ctx context.Context, dbName string) (*ent.Client, storage.Storage, error) {
 	t.Helper()
-	client, err := SetupTestEntClient(t)
+	client, err := SetupTestEntClient(t, dbPrefix+dbName)
 	if err != nil {
 		return nil, nil, err
 	}
