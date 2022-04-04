@@ -53,7 +53,7 @@ func NewServer(h Handlers) *echo.Echo {
 			apiComments.GET("", h.GetTransactions)
 			apiComments.POST("", h.PostTransaction)
 			apiComments.GET("/:transactionID", h.GetTransaction)
-			apiComments.PUT("/:transactionID", h.PutTransaction)
+			apiComments.PUT("/:transactionID", h.PutTransaction, h.CheckAdminMiddleware)
 		}
 
 		apiFiles := api.Group("/files", h.CheckLoginMiddleware)
@@ -75,7 +75,7 @@ func NewServer(h Handlers) *echo.Echo {
 		apiGroups := api.Group("/groups", h.CheckLoginMiddleware)
 		{
 			apiGroups.GET("", h.GetGroups)
-			apiGroups.POST("", h.PostGroup)
+			apiGroups.POST("", h.PostGroup, h.CheckAdminMiddleware)
 			apiGroups.PUT("/:groupID", h.PutGroup)
 			apiGroups.DELETE("/:groupID", h.DeleteGroup)
 			apiGroups.GET("/:groupID/members", h.GetMembers)
