@@ -54,7 +54,7 @@ func TestEntRepository_GetMembers(t *testing.T) {
 		owner, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 		budget := random.Numeric(t, 100000)
-		group, err := repo2.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, &[]User{*owner})
+		group, err := repo2.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget, []*User{owner})
 		require.NoError(t, err)
 
 		got, err := repo2.GetMembers(ctx, group.ID)
