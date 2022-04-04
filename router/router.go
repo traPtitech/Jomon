@@ -45,8 +45,6 @@ func NewServer(h Handlers) *echo.Echo {
 			apiRequests.GET("/:requestID", h.GetRequest)
 			apiRequests.PUT("/:requestID", h.PutRequest, middleware.BodyDump(service.WebhookEventHandler))
 			apiRequests.POST("/:requestID/comments", h.PostComment, middleware.BodyDump(service.WebhookEventHandler))
-			apiRequests.PUT("/:requestID/comments/:commentID", h.PutComment)
-			apiRequests.DELETE("/:requestID/comments/:commentID", h.DeleteComment)
 			apiRequests.PUT("/:requestID/status", h.PutStatus)
 		}
 

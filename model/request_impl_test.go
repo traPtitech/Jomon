@@ -13,12 +13,11 @@ import (
 
 func TestEntRepository_GetRequests(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_requests")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
-		t.Parallel()
 		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
@@ -39,18 +38,9 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		require.NoError(t, err)
 
 		sort := "created_at"
-		year := 2021
-		since := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.Local)
-		until := time.Now()
 
 		got, err := repo.GetRequests(ctx, RequestQuery{
 			Sort: &sort,
-			// Target: &target,
-			Year:  &year,
-			Since: &since,
-			Until: &until,
-			Tag:   &tag.Name,
-			Group: &group.Name,
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) && assert.Equal(t, got[1].ID, request1.ID) {
@@ -74,7 +64,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 	})
 
 	t.Run("SuccessWithReverseOrder", func(t *testing.T) {
-		t.Parallel()
+		err := dropAll(t, ctx, client)
+		require.NoError(t, err)
 		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
@@ -95,18 +86,9 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		require.NoError(t, err)
 
 		sort := "-created_at"
-		year := 2021
-		since := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.Local)
-		until := time.Now()
 
 		got, err := repo.GetRequests(ctx, RequestQuery{
 			Sort: &sort,
-			// Target: &target,
-			Year:  &year,
-			Since: &since,
-			Until: &until,
-			Tag:   &tag.Name,
-			Group: &group.Name,
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) && assert.Equal(t, got[0].ID, request1.ID) {
@@ -132,7 +114,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 func TestEntRepository_CreateRequest(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "create_request")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -236,7 +218,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 
 func TestEntRepository_GetRequest(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_request")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -279,7 +261,7 @@ func TestEntRepository_GetRequest(t *testing.T) {
 
 func TestEntREpository_UpdateRequest(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "update_request")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 

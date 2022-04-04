@@ -11,10 +11,10 @@ import (
 
 func TestEntRepository_GetUsers(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_user")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx)
+	client2, storage2, err := setup(t, ctx, "get_user2")
 	assert.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
@@ -62,7 +62,7 @@ func TestEntRepository_GetUsers(t *testing.T) {
 
 func TestEntRepository_CreateUser(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "create_user")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -96,10 +96,10 @@ func TestEntRepository_CreateUser(t *testing.T) {
 
 func TestEntRepository_GetUserByName(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_user_by_name")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx)
+	client2, storage2, err := setup(t, ctx, "get_user_by_name2")
 	assert.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
@@ -131,10 +131,10 @@ func TestEntRepository_GetUserByName(t *testing.T) {
 
 func TestEntRepository_GetUserByID(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_user_by_id")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx)
+	client2, storage2, err := setup(t, ctx, "get_user_by_id2")
 	assert.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
@@ -166,7 +166,7 @@ func TestEntRepository_GetUserByID(t *testing.T) {
 
 func TestEntRepository_UpdateUser(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "update_user")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
