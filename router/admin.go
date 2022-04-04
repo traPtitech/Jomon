@@ -38,5 +38,24 @@ func (h *Handlers) PostAdmin(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
+	res := Admin{
+		ID: created.ID,
+	}
+
 	return c.JSON(http.StatusOK, created)
+}
+
+func (h *Handlers) DeleteAdmin(c echo.Context) error {
+	id, err := uuid.Parse(c.Param("userID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	ctx := context.Background()
+	err = h.Repository.DeleteAdmin(ctx, id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }
