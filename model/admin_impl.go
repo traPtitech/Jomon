@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/user"
@@ -36,7 +37,7 @@ func (repo *EntRepository) CreateAdmin(ctx context.Context, userID uuid.UUID) (*
 	}
 
 	if user.Admin {
-		return nil, nil
+		return nil, errors.New("user already has admin")
 	}
 
 	_, err = repo.client.User.
@@ -62,7 +63,7 @@ func (repo *EntRepository) DeleteAdmin(ctx context.Context, userID uuid.UUID) er
 	}
 
 	if !user.Admin {
-		return nil
+		return errors.New("user already does't have admin")
 	}
 
 	_, err = repo.client.User.
