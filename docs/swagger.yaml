@@ -574,19 +574,24 @@ paths:
                     type: array
                     items:
                     $ref: "#/components/schemas/TrapID"
+  "/groups/{groupID}/owners/{memberID}":
+    parameters:
+      - name: groupID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: memberID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
     delete:
       description: ユーザーをグループから削除する。管理者権限またはグループオーナー権限が必要。
       tags:
         - Groups
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  $ref: "#/components/schemas/TrapID"
       responses:
         "200":
           description: 削除に成功した。
@@ -639,19 +644,24 @@ paths:
                 properties:
                   id:
                     $ref: "#/components/schemas/TrapID"
+  "/groups/{groupID}/owners/{ownerID}":
+    parameters:
+      - name: groupID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: ownerID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
     delete:
       description: グループオーナーをグループから削除する。管理者権限またはグループオーナー権限が必要。
       tags:
         - Groups
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  $ref: "#/components/schemas/TrapID"
       responses:
         "200":
           description: 削除に成功した。
