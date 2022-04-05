@@ -12,9 +12,12 @@ import (
 
 func TestEntRepository_GetGroups(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_groups")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
+	client2, storage2, err := setup(t, ctx, "get_groups2")
+	require.NoError(t, err)
+	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -30,7 +33,7 @@ func TestEntRepository_GetGroups(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
-		groups, err := repo.GetGroups(ctx)
+		groups, err := repo2.GetGroups(ctx)
 		require.NoError(t, err)
 		assert.Equal(t, 0, len(groups))
 	})
@@ -38,7 +41,7 @@ func TestEntRepository_GetGroups(t *testing.T) {
 
 func TestEntRepository_GetGroup(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "get_group")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -65,7 +68,7 @@ func TestEntRepository_GetGroup(t *testing.T) {
 
 func TestEntRepository_CreateGroup(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "create_group")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -102,7 +105,7 @@ func TestEntRepository_CreateGroup(t *testing.T) {
 
 func TestEntRepository_UpdateGroup(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "update_group")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -136,7 +139,7 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 
 func TestEntRepository_DeleteGroup(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx)
+	client, storage, err := setup(t, ctx, "delete_group")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
