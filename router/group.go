@@ -52,6 +52,7 @@ type Member struct {
 	ID uuid.UUID `json:"id"`
 }
 
+// GetGroups GET /groups
 func (h *Handlers) GetGroups(c echo.Context) error {
 	ctx := context.Background()
 	groups, err := h.Repository.GetGroups(ctx)
@@ -74,6 +75,7 @@ func (h *Handlers) GetGroups(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+// PostGroup POST /groups
 func (h *Handlers) PostGroup(c echo.Context) error {
 	var group Group
 	if err := c.Bind(&group); err != nil {
@@ -100,6 +102,7 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+// PutGroup PUT /groups/:groupID
 func (h *Handlers) PutGroup(c echo.Context) error {
 	var group Group
 	if err := c.Bind(&group); err != nil {
@@ -136,6 +139,7 @@ func (h *Handlers) PutGroup(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+// DeleteGroup DELETE /groups/:groupID
 func (h *Handlers) DeleteGroup(c echo.Context) error {
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
@@ -157,6 +161,7 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
+// GetMembers GET /groups/:groupID/members
 func (h *Handlers) GetMembers(c echo.Context) error {
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
@@ -187,6 +192,7 @@ func (h *Handlers) GetMembers(c echo.Context) error {
 	return c.JSON(http.StatusOK, &MemberResponse{res})
 }
 
+// PostMember POST /groups/:groupID/members
 func (h *Handlers) PostMember(c echo.Context) error {
 	var member Member
 	if err := c.Bind(&member); err != nil {
@@ -220,6 +226,7 @@ func (h *Handlers) PostMember(c echo.Context) error {
 	return c.JSON(http.StatusOK, &Member{res})
 }
 
+// DeleteMember DELETE /groups/:groupID/members
 func (h *Handlers) DeleteMember(c echo.Context) error {
 	var member Member
 	if err := c.Bind(&member); err != nil {
@@ -251,6 +258,7 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
+// GetOwners GET /groups/:groupID/owners
 func (h *Handlers) GetOwners(c echo.Context) error {
 	ctx := context.Background()
 	groupID, err := uuid.Parse(c.Param("groupID"))
@@ -277,6 +285,7 @@ func (h *Handlers) GetOwners(c echo.Context) error {
 	return c.JSON(http.StatusOK, &OwnerResponse{res})
 }
 
+// PostOwner POST /groups/:groupID/owners
 func (h *Handlers) PostOwner(c echo.Context) error {
 	ctx := context.Background()
 	var owner Owner
@@ -306,6 +315,7 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+// DeleteOwner DELETE /groups/:groupID/owners
 func (h *Handlers) DeleteOwner(c echo.Context) error {
 	ctx := context.Background()
 	groupID, err := uuid.Parse(c.Param("groupID"))
