@@ -39,7 +39,7 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 		Create().
 		SetName(name).
 		SetDescription(description).
-		SetBudget(*budget).
+		SetNillableBudget(budget).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func (repo *EntRepository) UpdateGroup(ctx context.Context, groupID uuid.UUID, n
 		UpdateOneID(groupID).
 		SetName(name).
 		SetDescription(description).
-		SetBudget(*budget).
+		SetNillableBudget(budget).
 		Save(ctx)
 	if err != nil {
 		return nil, err

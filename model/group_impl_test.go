@@ -80,6 +80,24 @@ func TestEntRepository_CreateGroup(t *testing.T) {
 		assert.Equal(t, description, group.Description)
 		assert.Equal(t, *group.Budget, budget)
 	})
+
+	t.Run("SuccessWithNilBudget", func(t *testing.T) {
+		t.Parallel()
+		name := random.AlphaNumeric(t, 20)
+		description := random.AlphaNumeric(t, 15)
+		group, err := repo.CreateGroup(ctx, name, description, nil)
+		assert.NoError(t, err)
+		assert.Equal(t, name, group.Name)
+		assert.Equal(t, description, group.Description)
+		assert.Nil(t, group.Budget)
+	})
+
+	t.Run("FailedWithEmptyName", func(t *testing.T) {
+		t.Parallel()
+		budget := random.Numeric(t, 100000)
+		_, err := repo.CreateGroup(ctx, "", random.AlphaNumeric(t, 15), &budget)
+		assert.Error(t, err)
+	})
 }
 
 func TestEntRepository_UpdateGroup(t *testing.T) {
