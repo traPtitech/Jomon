@@ -79,14 +79,12 @@ func (h *Handlers) GetGroups(c echo.Context) error {
 func (h *Handlers) PostGroup(c echo.Context) error {
 	var group Group
 	if err := c.Bind(&group); err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
 	created, err := h.Repository.CreateGroup(ctx, group.Name, group.Description, group.Budget)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -106,13 +104,11 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 func (h *Handlers) PutGroup(c echo.Context) error {
 	var group Group
 	if err := c.Bind(&group); err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
@@ -123,7 +119,6 @@ func (h *Handlers) PutGroup(c echo.Context) error {
 	ctx := context.Background()
 	updated, err := h.Repository.UpdateGroup(ctx, groupID, group.Name, group.Description, group.Budget)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -143,7 +138,6 @@ func (h *Handlers) PutGroup(c echo.Context) error {
 func (h *Handlers) DeleteGroup(c echo.Context) error {
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
@@ -154,7 +148,6 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 	ctx := context.Background()
 	err = h.Repository.DeleteGroup(ctx, groupID)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -165,7 +158,6 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 func (h *Handlers) GetMembers(c echo.Context) error {
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
@@ -177,10 +169,8 @@ func (h *Handlers) GetMembers(c echo.Context) error {
 	members, err := h.Repository.GetMembers(ctx, groupID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -196,13 +186,11 @@ func (h *Handlers) GetMembers(c echo.Context) error {
 func (h *Handlers) PostMember(c echo.Context) error {
 	var member Member
 	if err := c.Bind(&member); err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
@@ -214,10 +202,8 @@ func (h *Handlers) PostMember(c echo.Context) error {
 	created, err := h.Repository.CreateMember(ctx, groupID, member.ID)
 	if err != nil {
 		if ent.IsConstraintError(err) {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -230,13 +216,11 @@ func (h *Handlers) PostMember(c echo.Context) error {
 func (h *Handlers) DeleteMember(c echo.Context) error {
 	var member Member
 	if err := c.Bind(&member); err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
@@ -248,10 +232,8 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 	err = h.Repository.DeleteMember(ctx, groupID, member.ID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -320,7 +302,6 @@ func (h *Handlers) DeleteOwner(c echo.Context) error {
 	ctx := context.Background()
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
@@ -329,7 +310,6 @@ func (h *Handlers) DeleteOwner(c echo.Context) error {
 	}
 	var owner Owner
 	if err := c.Bind(&owner); err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
