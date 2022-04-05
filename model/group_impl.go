@@ -88,7 +88,7 @@ func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]
 	return owners, nil
 }
 
-func (repo *EntRepository) CreateOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) (*Owner, error) {
+func (repo *EntRepository) AddOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) (*Owner, error) {
 	_, err := repo.client.Group.
 		Update().
 		Where(group.IDEQ(groupID)).
@@ -132,7 +132,7 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	return modelmembers, nil
 }
 
-func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*Member, error) {
+func (repo *EntRepository) AddMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*Member, error) {
 	_, err := repo.client.Group.
 		UpdateOneID(groupID).
 		AddUserIDs(userID).

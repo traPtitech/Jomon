@@ -199,7 +199,7 @@ func (h *Handlers) PostMember(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	created, err := h.Repository.CreateMember(ctx, groupID, member.ID)
+	added, err := h.Repository.AddMember(ctx, groupID, member.ID)
 	if err != nil {
 		if ent.IsConstraintError(err) {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -207,7 +207,7 @@ func (h *Handlers) PostMember(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := created.ID
+	res := added.ID
 
 	return c.JSON(http.StatusOK, &Member{res})
 }
@@ -286,7 +286,7 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 	if err := c.Bind(&owner); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	createdOwner, err := h.Repository.CreateOwner(ctx, groupID, owner.ID)
+	added, err := h.Repository.AddOwner(ctx, groupID, owner.ID)
 	if err != nil {
 		if ent.IsConstraintError(err) {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -295,7 +295,7 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 	}
 
 	res := &Owner{
-		ID: createdOwner.ID,
+		ID: added.ID,
 	}
 
 	return c.JSON(http.StatusOK, res)

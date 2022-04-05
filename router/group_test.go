@@ -712,7 +712,7 @@ func TestHandlers_PostMember(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			CreateMember(c.Request().Context(), group.ID, user.ID).
+			AddMember(c.Request().Context(), group.ID, user.ID).
 			Return(&model.Member{
 				ID: user.ID,
 			}, nil)
@@ -830,7 +830,7 @@ func TestHandlers_PostMember(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			CreateMember(c.Request().Context(), unknownGroupID, user.ID).
+			AddMember(c.Request().Context(), unknownGroupID, user.ID).
 			Return(nil, resErr)
 
 		err = h.Handlers.PostMember(c)
@@ -878,7 +878,7 @@ func TestHandlers_PostMember(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			CreateMember(c.Request().Context(), group.ID, unknownUserID).
+			AddMember(c.Request().Context(), group.ID, unknownUserID).
 			Return(nil, resErr)
 
 		err = h.Handlers.PostMember(c)
@@ -1415,7 +1415,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			CreateOwner(c.Request().Context(), group.ID, user.ID).
+			AddOwner(c.Request().Context(), group.ID, user.ID).
 			Return(&model.Owner{
 				ID: user.ID,
 			}, nil)
@@ -1533,7 +1533,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			CreateOwner(c.Request().Context(), unknownGroupID, user.ID).
+			AddOwner(c.Request().Context(), unknownGroupID, user.ID).
 			Return(nil, resErr)
 
 		err = h.Handlers.PostOwner(c)
@@ -1581,7 +1581,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			CreateOwner(c.Request().Context(), group.ID, unknownUserID).
+			AddOwner(c.Request().Context(), group.ID, unknownUserID).
 			Return(nil, resErr)
 
 		err = h.Handlers.PostOwner(c)
