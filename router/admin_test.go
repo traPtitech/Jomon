@@ -136,7 +136,7 @@ func TestHandler_PostAdmin(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			CreateAdmin(c.Request().Context(), admin.ID).
+			AddAdmin(c.Request().Context(), admin.ID).
 			Return(admin, nil)
 
 		res := Admin{
@@ -170,7 +170,7 @@ func TestHandler_PostAdmin(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			CreateAdmin(c.Request().Context(), adminID).
+			AddAdmin(c.Request().Context(), adminID).
 			Return(nil, resErr)
 
 		err = h.Handlers.PostAdmin(c)
@@ -199,7 +199,7 @@ func TestHandler_PostAdmin(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			CreateAdmin(c.Request().Context(), adminID).
+			AddAdmin(c.Request().Context(), adminID).
 			Return(nil, resErr)
 
 		err = h.Handlers.PostAdmin(c)

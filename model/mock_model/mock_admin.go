@@ -50,19 +50,19 @@ func (mr *MockAdminRepositoryMockRecorder) GetAdmins(ctx interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAdmins", reflect.TypeOf((*MockAdminRepository)(nil).GetAdmins), ctx)
 }
 
-// CreateAdmin mocks base method
-func (m *MockAdminRepository) CreateAdmin(ctx context.Context, userID uuid.UUID) (*model.Admin, error) {
+// AddAdmin mocks base method
+func (m *MockAdminRepository) AddAdmin(ctx context.Context, userID uuid.UUID) (*model.Admin, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateAdmin", ctx, userID)
+	ret := m.ctrl.Call(m, "AddAdmin", ctx, userID)
 	ret0, _ := ret[0].(*model.Admin)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateAdmin indicates an expected call of CreateAdmin
-func (mr *MockAdminRepositoryMockRecorder) CreateAdmin(ctx, userID interface{}) *gomock.Call {
+// AddAdmin indicates an expected call of AddAdmin
+func (mr *MockAdminRepositoryMockRecorder) AddAdmin(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAdmin", reflect.TypeOf((*MockAdminRepository)(nil).CreateAdmin), ctx, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAdmin", reflect.TypeOf((*MockAdminRepository)(nil).AddAdmin), ctx, userID)
 }
 
 // DeleteAdmin mocks base method

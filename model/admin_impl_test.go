@@ -57,7 +57,7 @@ func TestEntRepository_CreateAdmin(t *testing.T) {
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), false)
 		require.NoError(t, err)
 
-		got, err := repo.CreateAdmin(ctx, user.ID)
+		got, err := repo.AddAdmin(ctx, user.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, user.ID, got.ID)
 
@@ -71,16 +71,16 @@ func TestEntRepository_CreateAdmin(t *testing.T) {
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), false)
 		require.NoError(t, err)
 
-		_, err = repo.CreateAdmin(ctx, user.ID)
+		_, err = repo.AddAdmin(ctx, user.ID)
 		assert.NoError(t, err)
 
-		_, err = repo.CreateAdmin(ctx, user.ID)
+		_, err = repo.AddAdmin(ctx, user.ID)
 		assert.Error(t, err)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
 		t.Parallel()
-		_, err := repo.CreateAdmin(ctx, uuid.New())
+		_, err := repo.AddAdmin(ctx, uuid.New())
 		assert.Error(t, err)
 	})
 }

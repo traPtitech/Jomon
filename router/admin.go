@@ -35,7 +35,7 @@ func (h *Handlers) PostAdmin(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	created, err := h.Repository.CreateAdmin(ctx, admin.ID)
+	created, err := h.Repository.AddAdmin(ctx, admin.ID)
 	if err != nil {
 		if ent.IsConstraintError(err) {
 			return echo.NewHTTPError(http.StatusBadRequest, err)

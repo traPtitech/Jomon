@@ -27,7 +27,7 @@ func (repo *EntRepository) GetAdmins(ctx context.Context) ([]*Admin, error) {
 	return admins, nil
 }
 
-func (repo *EntRepository) CreateAdmin(ctx context.Context, userID uuid.UUID) (*Admin, error) {
+func (repo *EntRepository) AddAdmin(ctx context.Context, userID uuid.UUID) (*Admin, error) {
 	user, err := repo.client.User.
 		Query().
 		Where(user.ID(userID)).
