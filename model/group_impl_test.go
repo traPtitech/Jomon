@@ -135,6 +135,35 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 		_, err := repo.UpdateGroup(ctx, uuid.New(), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
 		assert.Error(t, err)
 	})
+
+	t.Run("SuccessWithNilBudget", func(t *testing.T) {
+		t.Parallel()
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		require.NoError(t, err)
+
+		ug := Group{
+			ID:          group.ID,
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 15),
+			Budget:      nil,
+		}
+		updated, err := repo.UpdateGroup(ctx, group.ID, ug.Name, ug.Description, ug.Budget)
+		assert.NoError(t, err)
+		assert.Equal(t, ug.Name, updated.Name)
+		assert.Equal(t, ug.Description, updated.Description)
+		assert.Nil(t, updated.Budget)
+	})
+
+	t.Run("FailedWithEmptyName", func(t *testing.T) {
+		t.Parallel()
+		budget := random.Numeric(t, 100000)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		require.NoError(t, err)
+
+		_, err = repo.UpdateGroup(ctx, group.ID, "", random.AlphaNumeric(t, 15), &budget)
+		assert.Error(t, err)
+	})
 }
 
 func TestEntRepository_DeleteGroup(t *testing.T) {

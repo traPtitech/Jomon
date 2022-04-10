@@ -53,6 +53,7 @@ func (repo *EntRepository) UpdateGroup(ctx context.Context, groupID uuid.UUID, n
 		UpdateOneID(groupID).
 		SetName(name).
 		SetDescription(description).
+		ClearBudget().
 		SetNillableBudget(budget).
 		Save(ctx)
 	if err != nil {
