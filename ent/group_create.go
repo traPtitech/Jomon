@@ -256,6 +256,11 @@ func (gc *GroupCreate) check() error {
 	if _, ok := gc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Group.name"`)}
 	}
+	if v, ok := gc.mutation.Name(); ok {
+		if err := group.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
+		}
+	}
 	if _, ok := gc.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Group.description"`)}
 	}

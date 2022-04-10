@@ -50,6 +50,10 @@ func init() {
 	file.DefaultID = fileDescID.Default.(func() uuid.UUID)
 	groupFields := schema.Group{}.Fields()
 	_ = groupFields
+	// groupDescName is the schema descriptor for name field.
+	groupDescName := groupFields[1].Descriptor()
+	// group.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	group.NameValidator = groupDescName.Validators[0].(func(string) error)
 	// groupDescCreatedAt is the schema descriptor for created_at field.
 	groupDescCreatedAt := groupFields[4].Descriptor()
 	// group.DefaultCreatedAt holds the default value on creation for the created_at field.
