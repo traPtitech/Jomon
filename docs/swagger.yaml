@@ -15,7 +15,7 @@ tags:
     description: "トランザクションに関するAPI"
   - name: "Requests"
     description: "リクエストに関するAPI"
-  - name: "File"
+  - name: "Files"
     description: "ファイルに関するAPI"
   - name: "Tags"
     description: "タグに関するAPI"
@@ -569,7 +569,7 @@ paths:
       operationId: deleteGroupMembers
       description: ユーザーをグループのメンバーから外す。管理者権限またはグループオーナー権限が必要。
       tags:
-        - Group
+        - Groups
       requestBody:
         required: true
         content:
