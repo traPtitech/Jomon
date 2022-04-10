@@ -9,22 +9,22 @@ info:
     JomonのAPIです。
 
 tags:
-- name: "Auth"
-  description: "認証用API"
-- name: "Transactions"
-  description: "トランザクションに関するAPI"
-- name: "Requests"
-  description: "リクエストに関するAPI"
-- name: "File"
-  description: "ファイルに関するAPI"
-- name: "Tags"
-  description: "タグに関するAPI"
-- name: "Users"
-  description: "ユーザーに関するAPI"
-- name: "Groups"
-  description: "グループに関するAPI"
-- name: "Admins"
-  description: "管理者用API"
+  - name: "Auth"
+    description: "認証用API"
+  - name: "Transactions"
+    description: "トランザクションに関するAPI"
+  - name: "Requests"
+    description: "リクエストに関するAPI"
+  - name: "File"
+    description: "ファイルに関するAPI"
+  - name: "Tags"
+    description: "タグに関するAPI"
+  - name: "Users"
+    description: "ユーザーに関するAPI"
+  - name: "Groups"
+    description: "グループに関するAPI"
+  - name: "Admins"
+    description: "管理者用API"
 
 ##### Paths #####
 
@@ -511,6 +511,14 @@ paths:
       description: グループを削除する。管理者権限またはグループオーナー権限が必要。
       tags:
         - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/TrapID"
       responses:
         "200":
           description: 削除に成功した場合
@@ -596,12 +604,22 @@ paths:
         schema:
           type: string
           format: uuid
-      - name: memberID
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
+    get:
+      operationId: getGroupOwners
+      description: 指定したグループに所属しているオーナーを返す。
+      tags:
+        - Groups
+      responses:
+        "200":
+          description: 取得に成功した場合。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrapID"
+        "404":
+          $ref: "#/components/responses/404"
     post:
       operationId: postGroupOwners
       description: グループオーナーをグループに追加する。管理者権限またはグループオーナー権限が必要。
@@ -629,6 +647,14 @@ paths:
       description: ユーザーをグループから削除する。管理者権限またはグループオーナー権限が必要。
       tags:
         - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/TrapID"
       responses:
         "200":
           description: 削除に成功した場合。
@@ -792,7 +818,7 @@ paths:
 
 components:
   schemas:
-    AuthInfo: 
+    AuthInfo:
       type: object
       properties:
         code_challenge:
@@ -1031,6 +1057,11 @@ components:
         group:
           type: string
           format: uuid
+        targets:
+          type: array
+          items:
+            type: string
+            format: uuid
     Transaction:
       type: object
       properties:
