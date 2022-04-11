@@ -1240,7 +1240,6 @@ components:
         - created_by
         - status
         - created_at
-        - comment
     PutStatus:
       type: object
       properties:
