@@ -842,12 +842,19 @@ components:
         updated_at:
           type: string
           format: date-time
+      required:
+        - id
+        - name
+        - created_at
+        - updated_at
     PostTag:
       type: object
       properties:
         name:
           type: string
           example: "2020講習会"
+      required:
+        - name
     Group:
       type: object
       properties:
@@ -917,6 +924,9 @@ components:
         name:
           type: string
           example: "hoge.png"
+      required:
+        - file
+        - name
     PostFile:
       type: object
       properties:
@@ -929,6 +939,10 @@ components:
         request_id:
           type: string
           format: uuid
+      required:
+        - file
+        - name
+        - request_id
     FileMeta:
       type: object
       properties:
@@ -942,6 +956,11 @@ components:
         created_at:
           type: string
           format: date-time
+      required:
+        - id
+        - name
+        - mime_type
+        - created_at
     Target:
       type: string
       example: "hoge株式会社"
@@ -961,6 +980,12 @@ components:
         created_at:
           type: string
           format: date-time
+      required:
+        - id
+        - amount
+        - target
+        - paid_at
+        - created_at
     Request:
       type: object
       properties:
@@ -1195,6 +1220,8 @@ components:
         comment:
           type: string
           example: "ここを修正してください。"
+      required:
+        - comment
     Status:
       type: object
       properties:
@@ -1209,6 +1236,11 @@ components:
         created_at:
           type: string
           format: date-time
+      required:
+        - created_by
+        - status
+        - created_at
+        - comment
     PutStatus:
       type: object
       properties:
@@ -1217,6 +1249,9 @@ components:
         comment:
           type: string
           example: "良いですね。"
+      required:
+        - status
+        - comment
     User:
       type: "object"
       properties:
@@ -1237,6 +1272,13 @@ components:
         deleted_at:
           type: "string"
           format: "date-time"
+      required:
+        - name
+        - display_name
+        - admin
+        - created_at
+        - updated_at
+        - deleted_at
     PutUser:
       type: "object"
       properties:
@@ -1248,6 +1290,10 @@ components:
           example: "ながてち"
         admin:
           type: "boolean"
+      required:
+        - name
+        - display_name
+        - admin
   responses:
     400:
       description: 不正なリクエスト。
