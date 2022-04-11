@@ -75,10 +75,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		tag, err := repo2.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
 
-		owner, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
-		require.NoError(t, err)
 		budget := random.Numeric(t, 10000)
-		group, err := repo2.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget, &[]User{*owner})
+		group, err := repo2.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
 
 		request1, err := repo2.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user1.ID)
