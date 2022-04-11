@@ -869,6 +869,13 @@ components:
         updated_at:
           type: string
           format: date-time
+      required:
+        - id
+        - name
+        - description
+        - budget
+        - created_at
+        - updated_at
     PostGroup:
       type: object
       properties:
@@ -881,6 +888,10 @@ components:
         budget:
           type: integer
           example: 250000
+      required:
+        - name
+        - description
+        - budget
     PutGroup:
       type: object
       properties:
@@ -893,6 +904,10 @@ components:
         budget:
           type: integer
           example: 250000
+      required:
+        - name
+        - description
+        - budget
     File:
       type: object
       properties:
@@ -978,6 +993,17 @@ components:
             $ref: "#/components/schemas/Tag"
         group:
           $ref: "#/components/schemas/Group"
+      required:
+        - id
+        - status
+        - created_at
+        - updated_at
+        - created_by
+        - amount
+        - title
+        - content
+        - tags
+        - group
     RequestDetail:
       type: object
       properties:
@@ -1027,6 +1053,21 @@ components:
         updated_at:
           type: string
           format: date-time
+      required:
+        - id
+        - status
+        - amount
+        - title
+        - content
+        - created_by
+        - comments
+        - files
+        - statuses
+        - tags
+        - group
+        - targets
+        - created_at
+        - updated_at
     PostRequest:
       type: object
       properties:
@@ -1054,6 +1095,15 @@ components:
           items:
             type: string
             format: uuid
+      required:
+        - amount
+        - title
+        - content
+        - created_by
+        - comments
+        - tags
+        - group
+        - targets
     Transaction:
       type: object
       properties:
@@ -1080,6 +1130,15 @@ components:
         updated_at:
           type: string
           format: date-time
+      required:
+        - id
+        - amount
+        - target
+        - request
+        - tags
+        - group
+        - created_at
+        - updated_at
     PostTransaction:
       type: object
       properties:
@@ -1101,6 +1160,12 @@ components:
         request:
           type: string
           format: uuid
+      required:
+        - amount
+        - targets
+        - request
+        - tags
+        - group
     Comment:
       type: object
       properties:
@@ -1118,6 +1183,12 @@ components:
         updated_at:
           type: string
           format: date-time
+      required:
+        - id
+        - user
+        - comment
+        - created_at
+        - updated_at
     PostComment:
       type: object
       properties:
