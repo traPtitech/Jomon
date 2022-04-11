@@ -105,8 +105,8 @@ func NewServer(h Handlers) *echo.Echo {
 		apiAdmins := api.Group("/admins", h.CheckLoginMiddleware, h.CheckAdminMiddleware)
 		{
 			apiAdmins.GET("", h.GetAdmins)
-			apiAdmins.POST("", h.PostAdmin)
-			apiAdmins.DELETE("/:userID", h.DeleteAdmin)
+			apiAdmins.POST("", h.PostAdmins)
+			apiAdmins.DELETE("/:userID", h.DeleteAdmins)
 		}
 	}
 

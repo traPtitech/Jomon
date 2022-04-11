@@ -28,14 +28,14 @@ func (h *Handlers) GetAdmins(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PostAdmin(c echo.Context) error {
-	var admin Admin
+func (h *Handlers) PostAdmins(c echo.Context) error {
+	var admin []uuid.UUID
 	if err := c.Bind(&admin); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
-	created, err := h.Repository.AddAdmin(ctx, admin.ID)
+	err := h.Repository.AddAdmins(ctx, admin)
 	if err != nil {
 		if ent.IsConstraintError(err) {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -43,24 +43,20 @@ func (h *Handlers) PostAdmin(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := Admin{
-		ID: created.ID,
-	}
-
-	return c.JSON(http.StatusOK, res)
+	return c.NoContent(http.StatusOK)
 }
 
-func (h *Handlers) DeleteAdmin(c echo.Context) error {
-	id, err := uuid.Parse(c.Param("userID"))
-	if err != nil {
+func (h *Handlers) DeleteAdmins(c echo.Context) error {
+	var admin []uuid.UUID
+	if err := c.Bind(&admin); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := context.Background()
-	err = h.Repository.DeleteAdmin(ctx, id)
+	err := h.Repository.DeleteAdmins(ctx, admin)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	return c.NoContent(http.StatusNoContent)
+	return c.NoContent(http.StatusOK)
 }

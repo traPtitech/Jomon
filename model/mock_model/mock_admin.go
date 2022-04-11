@@ -50,31 +50,30 @@ func (mr *MockAdminRepositoryMockRecorder) GetAdmins(ctx interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAdmins", reflect.TypeOf((*MockAdminRepository)(nil).GetAdmins), ctx)
 }
 
-// AddAdmin mocks base method
-func (m *MockAdminRepository) AddAdmin(ctx context.Context, userID uuid.UUID) (*model.Admin, error) {
+// AddAdmins mocks base method
+func (m *MockAdminRepository) AddAdmins(ctx context.Context, userIDs []uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddAdmin", ctx, userID)
-	ret0, _ := ret[0].(*model.Admin)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AddAdmin indicates an expected call of AddAdmin
-func (mr *MockAdminRepositoryMockRecorder) AddAdmin(ctx, userID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAdmin", reflect.TypeOf((*MockAdminRepository)(nil).AddAdmin), ctx, userID)
-}
-
-// DeleteAdmin mocks base method
-func (m *MockAdminRepository) DeleteAdmin(ctx context.Context, userID uuid.UUID) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteAdmin", ctx, userID)
+	ret := m.ctrl.Call(m, "AddAdmins", ctx, userIDs)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteAdmin indicates an expected call of DeleteAdmin
-func (mr *MockAdminRepositoryMockRecorder) DeleteAdmin(ctx, userID interface{}) *gomock.Call {
+// AddAdmins indicates an expected call of AddAdmins
+func (mr *MockAdminRepositoryMockRecorder) AddAdmins(ctx, userIDs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAdmin", reflect.TypeOf((*MockAdminRepository)(nil).DeleteAdmin), ctx, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAdmins", reflect.TypeOf((*MockAdminRepository)(nil).AddAdmins), ctx, userIDs)
+}
+
+// DeleteAdmins mocks base method
+func (m *MockAdminRepository) DeleteAdmins(ctx context.Context, userIDs []uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAdmins", ctx, userIDs)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteAdmins indicates an expected call of DeleteAdmins
+func (mr *MockAdminRepositoryMockRecorder) DeleteAdmins(ctx, userIDs interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAdmins", reflect.TypeOf((*MockAdminRepository)(nil).DeleteAdmins), ctx, userIDs)
 }

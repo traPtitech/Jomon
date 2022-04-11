@@ -13,6 +13,6 @@ type Admin struct {
 
 type AdminRepository interface {
 	GetAdmins(ctx context.Context) ([]*Admin, error)
-	AddAdmin(ctx context.Context, userID uuid.UUID) (*Admin, error)
-	DeleteAdmin(ctx context.Context, userID uuid.UUID) error
+	AddAdmins(ctx context.Context, userIDs []uuid.UUID) error
+	DeleteAdmins(ctx context.Context, userIDs []uuid.UUID) error
 }

@@ -46,9 +46,9 @@ func TestEntRepository_GetAdmins(t *testing.T) {
 	})
 }
 
-func TestEntRepository_CreateAdmin(t *testing.T) {
+func TestEntRepository_AddAdmins(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx, "create_admin")
+	client, storage, err := setup(t, ctx, "add_admins")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -57,37 +57,18 @@ func TestEntRepository_CreateAdmin(t *testing.T) {
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), false)
 		require.NoError(t, err)
 
-		got, err := repo.AddAdmin(ctx, user.ID)
+		err = repo.AddAdmins(ctx, []uuid.UUID{user.ID})
 		assert.NoError(t, err)
-		assert.Equal(t, user.ID, got.ID)
 
 		u, err := repo.GetUserByID(ctx, user.ID)
 		assert.NoError(t, err)
 		assert.True(t, u.Admin)
 	})
-
-	t.Run("AlreadyAdmin", func(t *testing.T) {
-		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), false)
-		require.NoError(t, err)
-
-		_, err = repo.AddAdmin(ctx, user.ID)
-		assert.NoError(t, err)
-
-		_, err = repo.AddAdmin(ctx, user.ID)
-		assert.Error(t, err)
-	})
-
-	t.Run("NotFound", func(t *testing.T) {
-		t.Parallel()
-		_, err := repo.AddAdmin(ctx, uuid.New())
-		assert.Error(t, err)
-	})
 }
 
-func TestEntRepository_DeleteAdmin(t *testing.T) {
+func TestEntRepository_DeleteAdmins(t *testing.T) {
 	ctx := context.Background()
-	client, storage, err := setup(t, ctx, "delete_admin")
+	client, storage, err := setup(t, ctx, "delete_admins")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
@@ -96,26 +77,11 @@ func TestEntRepository_DeleteAdmin(t *testing.T) {
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 
-		err = repo.DeleteAdmin(ctx, user.ID)
+		err = repo.DeleteAdmins(ctx, []uuid.UUID{user.ID})
 		assert.NoError(t, err)
 
 		u, err := repo.GetUserByID(ctx, user.ID)
 		assert.NoError(t, err)
 		assert.False(t, u.Admin)
-	})
-
-	t.Run("NotAdmin", func(t *testing.T) {
-		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), false)
-		require.NoError(t, err)
-
-		err = repo.DeleteAdmin(ctx, user.ID)
-		assert.Error(t, err)
-	})
-
-	t.Run("NotFound", func(t *testing.T) {
-		t.Parallel()
-		err := repo.DeleteAdmin(ctx, uuid.New())
-		assert.Error(t, err)
 	})
 }

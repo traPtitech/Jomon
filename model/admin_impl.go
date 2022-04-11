@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"errors"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/user"
@@ -27,52 +26,22 @@ func (repo *EntRepository) GetAdmins(ctx context.Context) ([]*Admin, error) {
 	return admins, nil
 }
 
-func (repo *EntRepository) AddAdmin(ctx context.Context, userID uuid.UUID) (*Admin, error) {
-	user, err := repo.client.User.
-		Query().
-		Where(user.ID(userID)).
-		Only(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if user.Admin {
-		return nil, errors.New("user already has admin")
-	}
-
-	_, err = repo.client.User.
-		UpdateOne(user).
+func (repo *EntRepository) AddAdmins(ctx context.Context, userIDs []uuid.UUID) error {
+	_, err := repo.client.User.
+		Update().
+		Where(user.IDIn(userIDs...)).
 		SetAdmin(true).
 		Save(ctx)
-	if err != nil {
-		return nil, err
-	}
 
-	return &Admin{
-		ID: user.ID,
-	}, nil
+	return err
 }
 
-func (repo *EntRepository) DeleteAdmin(ctx context.Context, userID uuid.UUID) error {
-	user, err := repo.client.User.
-		Query().
-		Where(user.ID(userID)).
-		Only(ctx)
-	if err != nil {
-		return err
-	}
-
-	if !user.Admin {
-		return errors.New("user already does't have admin")
-	}
-
-	_, err = repo.client.User.
-		UpdateOne(user).
+func (repo *EntRepository) DeleteAdmins(ctx context.Context, userIDs []uuid.UUID) error {
+	_, err := repo.client.User.
+		Update().
+		Where(user.IDIn(userIDs...)).
 		SetAdmin(false).
 		Save(ctx)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }

@@ -121,12 +121,10 @@ func TestHandler_PostAdmin(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		admin := &model.Admin{
-			ID: uuid.New(),
-		}
+		admin := []uuid.UUID{uuid.New()}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/admins", strings.NewReader(`{"id": "`+admin.ID.String()+`"}`))
+		req, err := http.NewRequest(http.MethodPost, "/api/admins", strings.NewReader(`["`+admin[0].String()+`"]`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -136,18 +134,11 @@ func TestHandler_PostAdmin(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			AddAdmin(c.Request().Context(), admin.ID).
-			Return(admin, nil)
+			AddAdmins(c.Request().Context(), admin).
+			Return(nil)
 
-		res := Admin{
-			ID: admin.ID,
-		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PostAdmin(c)) {
+		if assert.NoError(t, h.Handlers.PostAdmins(c)) {
 			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
 	})
 
@@ -158,7 +149,7 @@ func TestHandler_PostAdmin(t *testing.T) {
 		adminID := uuid.New()
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/admins", strings.NewReader(`{"id": "`+adminID.String()+`"}`))
+		req, err := http.NewRequest(http.MethodPost, "/api/admins", strings.NewReader(`["`+adminID.String()+`"]`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -170,10 +161,10 @@ func TestHandler_PostAdmin(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			AddAdmin(c.Request().Context(), adminID).
-			Return(nil, resErr)
+			AddAdmins(c.Request().Context(), []uuid.UUID{adminID}).
+			Return(resErr)
 
-		err = h.Handlers.PostAdmin(c)
+		err = h.Handlers.PostAdmins(c)
 		if assert.Error(t, err) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 		}
@@ -186,7 +177,7 @@ func TestHandler_PostAdmin(t *testing.T) {
 		adminID := uuid.New()
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/admins", strings.NewReader(`{"id": "`+adminID.String()+`"}`))
+		req, err := http.NewRequest(http.MethodPost, "/api/admins", strings.NewReader(`["`+adminID.String()+`"]`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -199,10 +190,10 @@ func TestHandler_PostAdmin(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			AddAdmin(c.Request().Context(), adminID).
-			Return(nil, resErr)
+			AddAdmins(c.Request().Context(), []uuid.UUID{adminID}).
+			Return(resErr)
 
-		err = h.Handlers.PostAdmin(c)
+		err = h.Handlers.PostAdmins(c)
 		if assert.Error(t, err) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 		}
@@ -216,29 +207,24 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		admin := &model.Admin{
-			ID: uuid.New(),
-		}
+		admin := []uuid.UUID{uuid.New()}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, "/api/admins/"+admin.ID.String(), nil)
+		req, err := http.NewRequest(http.MethodDelete, "/api/admins", strings.NewReader(`["`+admin[0].String()+`"]`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/admins/:userID")
-		c.SetParamNames("userID")
-		c.SetParamValues(admin.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			DeleteAdmin(c.Request().Context(), admin.ID).
+			DeleteAdmins(c.Request().Context(), admin).
 			Return(nil)
 
-		if assert.NoError(t, h.Handlers.DeleteAdmin(c)) {
-			assert.Equal(t, http.StatusNoContent, rec.Code)
+		if assert.NoError(t, h.Handlers.DeleteAdmins(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
 		}
 	})
 
@@ -249,14 +235,11 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		adminID := uuid.New()
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, "/api/admins/"+adminID.String(), nil)
+		req, err := http.NewRequest(http.MethodDelete, "/api/admins", strings.NewReader(`["`+adminID.String()+`"]`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/admins/:userID")
-		c.SetParamNames("userID")
-		c.SetParamValues(adminID.String())
 
 		resErr := errors.New("failed to delete admin")
 
@@ -264,10 +247,10 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			DeleteAdmin(c.Request().Context(), adminID).
+			DeleteAdmins(c.Request().Context(), []uuid.UUID{adminID}).
 			Return(resErr)
 
-		err = h.Handlers.DeleteAdmin(c)
+		err = h.Handlers.DeleteAdmins(c)
 		if assert.Error(t, err) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 		}
@@ -278,23 +261,45 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, "/api/admins/invalid", nil)
+		req, err := http.NewRequest(http.MethodDelete, "/api/admins", strings.NewReader(`["invalid"]`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/admins/:userID")
-		c.SetParamNames("userID")
-		c.SetParamValues("invalid")
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 
-		_, resErr := uuid.Parse("invalid")
+		err = h.Handlers.DeleteAdmins(c)
+		assert.Error(t, err)
+	})
 
-		err = h.Handlers.DeleteAdmin(c)
+	t.Run("FailedWithEntConstraintError", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		adminID := uuid.New()
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodDelete, "/api/admins", strings.NewReader(`["`+adminID.String()+`"]`))
+		require.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		var resErr *ent.ConstraintError
+		errors.As(errors.New("failed to delete admin"), &resErr)
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockAdminRepository.
+			EXPECT().
+			DeleteAdmins(c.Request().Context(), []uuid.UUID{adminID}).
+			Return(resErr)
+
+		err = h.Handlers.DeleteAdmins(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 		}
 	})
 }
