@@ -2,14 +2,13 @@ package model
 
 import (
 	"context"
-	"io"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/file"
 )
 
-func (repo *EntRepository) CreateFile(ctx context.Context, src io.Reader, name string, mimetype string, requestID uuid.UUID) (*File, error) {
+func (repo *EntRepository) CreateFile(ctx context.Context, name string, mimetype string, requestID uuid.UUID) (*File, error) {
 	id := uuid.New()
 
 	created, err := repo.client.File.

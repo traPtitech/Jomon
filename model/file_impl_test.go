@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/google/uuid"
@@ -28,15 +27,11 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
 		assert.NoError(t, err)
 
-		sampleText := "sampleData"
-
 		mimetype := "image/png"
-
-		src := strings.NewReader(sampleText)
 
 		name := random.AlphaNumeric(t, 20)
 
-		file, err := repo.CreateFile(ctx, src, name, mimetype, request.ID)
+		file, err := repo.CreateFile(ctx, name, mimetype, request.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, name, file.Name)
 		assert.Equal(t, mimetype, file.MimeType)
@@ -51,15 +46,11 @@ func TestEntRepository_CreateFile(t *testing.T) {
 			ID: uuid.New(),
 		}
 
-		sampleText := "sampleData"
-
 		mimetype := "image/png"
-
-		src := strings.NewReader(sampleText)
 
 		name := random.AlphaNumeric(t, 20)
 
-		_, err = repo.CreateFile(ctx, src, name, mimetype, request.ID)
+		_, err = repo.CreateFile(ctx, name, mimetype, request.ID)
 		assert.Error(t, err)
 	})
 
@@ -74,13 +65,9 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
 		assert.NoError(t, err)
 
-		sampleText := "sampleData"
-
 		mimetype := "image/png"
 
-		src := strings.NewReader(sampleText)
-
-		_, err = repo.CreateFile(ctx, src, "", mimetype, request.ID)
+		_, err = repo.CreateFile(ctx, "", mimetype, request.ID)
 		assert.Error(t, err)
 	})
 }
@@ -102,15 +89,11 @@ func TestEntRepository_GetFile(t *testing.T) {
 		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
 		assert.NoError(t, err)
 
-		sampleText := "sampleData"
-
 		mimetype := "image/png"
-
-		src := strings.NewReader(sampleText)
 
 		name := random.AlphaNumeric(t, 20)
 
-		file, err := repo.CreateFile(ctx, src, name, mimetype, request.ID)
+		file, err := repo.CreateFile(ctx, name, mimetype, request.ID)
 		assert.NoError(t, err)
 		got, err := repo.GetFile(ctx, file.ID)
 		assert.NoError(t, err)
@@ -145,15 +128,11 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, group, user.ID)
 		assert.NoError(t, err)
 
-		sampleText := "sampleData"
-
 		mimetype := "image/png"
-
-		src := strings.NewReader(sampleText)
 
 		name := random.AlphaNumeric(t, 20)
 
-		file, err := repo.CreateFile(ctx, src, name, mimetype, request.ID)
+		file, err := repo.CreateFile(ctx, name, mimetype, request.ID)
 		assert.NoError(t, err)
 
 		err = repo.DeleteFile(ctx, file.ID)

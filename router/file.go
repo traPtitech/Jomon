@@ -67,7 +67,7 @@ func (h *Handlers) PostFile(c echo.Context) error {
 	defer src.Close()
 
 	ctx := context.Background()
-	file, err := h.Repository.CreateFile(ctx, src, name, mimetype, requestID)
+	file, err := h.Repository.CreateFile(ctx, name, mimetype, requestID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}

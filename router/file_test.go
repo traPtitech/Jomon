@@ -64,7 +64,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
-			CreateFile(c.Request().Context(), gomock.Any(), "test", "image/jpeg", request).
+			CreateFile(c.Request().Context(), "test", "image/jpeg", request).
 			Return(file, nil)
 
 		h.Storage.
@@ -112,7 +112,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
-			CreateFile(c.Request().Context(), gomock.Any(), "test", "image/jpeg", request).
+			CreateFile(c.Request().Context(), "test", "image/jpeg", request).
 			Return(nil, mocErr)
 
 		err = h.Handlers.PostFile(c)
@@ -158,7 +158,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
-			CreateFile(c.Request().Context(), gomock.Any(), "test", "image/jpeg", request).
+			CreateFile(c.Request().Context(), "test", "image/jpeg", request).
 			Return(file, nil)
 
 		mocErr := errors.New("failed to save file")
