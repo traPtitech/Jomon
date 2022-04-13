@@ -137,6 +137,10 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 
 		err = repo.DeleteFile(ctx, file.ID)
 		assert.NoError(t, err)
+
+		r, err := repo.GetRequest(ctx, request.ID)
+		require.NoError(t, err)
+		assert.Len(t, r.Files, 0)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {

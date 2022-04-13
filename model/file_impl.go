@@ -52,34 +52,9 @@ func (repo *EntRepository) GetFile(ctx context.Context, fileID uuid.UUID) (*File
 }
 
 func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) error {
-	file, err := repo.client.File.
-		Query().
-		Where(file.IDEQ(fileID)).
-		Only(ctx)
-	if err != nil {
-		return err
-	}
-
-	request, err := file.QueryRequest().First(ctx)
-
-	if err != nil {
-		return err
-	}
-
-	if err := repo.client.File.
-		DeleteOne(file).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	if err := request.
-		Update().
-		RemoveFileIDs(fileID).
-		Exec(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return repo.client.File.
+		DeleteOneID(fileID).
+		Exec(ctx)
 }
 
 func ConvertEntFileToModelFile(entfile *ent.File) *File {
