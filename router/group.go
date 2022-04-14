@@ -12,10 +12,9 @@ import (
 )
 
 type Group struct {
-	Name        string       `json:"name"`
-	Description string       `json:"description"`
-	Budget      *int         `json:"budget"`
-	Owners      []*uuid.UUID `json:"owners"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Budget      *int   `json:"budget"`
 }
 
 type Owner struct {
@@ -53,6 +52,7 @@ type Member struct {
 	ID uuid.UUID `json:"id"`
 }
 
+// GetGroups GET /groups
 func (h *Handlers) GetGroups(c echo.Context) error {
 	ctx := context.Background()
 	groups, err := h.Repository.GetGroups(ctx)
@@ -75,55 +75,89 @@ func (h *Handlers) GetGroups(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+// PostGroup POST /groups
 func (h *Handlers) PostGroup(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
-	/*
-		var group Group
-		if err := c.Bind(&group); err != nil {
-			return badRequest(err)
-		}
+	var group Group
+	if err := c.Bind(&group); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
 
-		ctx := context.Background()
-		created, err := h.MockRepository.CreateGroup(ctx, group.Name, group.Description, group.Budget, owners)
-		if err != nil {
-			return internalServerError(err)
-		}
+	ctx := context.Background()
+	created, err := h.Repository.CreateGroup(ctx, group.Name, group.Description, group.Budget)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
 
-		res := GroupDetail{
-			ID:          created.ID,
-			Name:        created.Name,
-			Description: created.Description,
-			Budget:      created.Budget,
-			//Owners:      created.Owners,
-			//Users:       created.Users,
-			CreatedAt: created.CreatedAt,
-			UpdatedAt: created.UpdatedAt,
-		}
+	res := GroupOverview{
+		ID:          created.ID,
+		Name:        created.Name,
+		Description: created.Description,
+		Budget:      created.Budget,
+		CreatedAt:   created.CreatedAt,
+		UpdatedAt:   created.UpdatedAt,
+	}
 
-		return c.JSON(http.StatusOK, res)
-	*/
+	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PostGroupUser(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
-}
-
+// PutGroup PUT /groups/:groupID
 func (h *Handlers) PutGroup(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	var group Group
+	if err := c.Bind(&group); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if groupID == uuid.Nil {
+		c.Logger().Error(errors.New("invalid UUID"))
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+	}
+
+	ctx := context.Background()
+	updated, err := h.Repository.UpdateGroup(ctx, groupID, group.Name, group.Description, group.Budget)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	res := GroupOverview{
+		ID:          updated.ID,
+		Name:        updated.Name,
+		Description: updated.Description,
+		Budget:      updated.Budget,
+		CreatedAt:   updated.CreatedAt,
+		UpdatedAt:   updated.UpdatedAt,
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
+// DeleteGroup DELETE /groups/:groupID
 func (h *Handlers) DeleteGroup(c echo.Context) error {
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if groupID == uuid.Nil {
+		c.Logger().Error(errors.New("invalid UUID"))
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+	}
+
+	ctx := context.Background()
+	err = h.Repository.DeleteGroup(ctx, groupID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
 	return c.NoContent(http.StatusOK)
-	// TODO: Implement
 }
 
+// GetMembers GET /groups/:groupID/members
 func (h *Handlers) GetMembers(c echo.Context) error {
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
@@ -135,10 +169,8 @@ func (h *Handlers) GetMembers(c echo.Context) error {
 	members, err := h.Repository.GetMembers(ctx, groupID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -150,16 +182,15 @@ func (h *Handlers) GetMembers(c echo.Context) error {
 	return c.JSON(http.StatusOK, &MemberResponse{res})
 }
 
+// PostMember POST /groups/:groupID/members
 func (h *Handlers) PostMember(c echo.Context) error {
 	var member Member
 	if err := c.Bind(&member); err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
@@ -168,25 +199,23 @@ func (h *Handlers) PostMember(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	created, err := h.Repository.CreateMember(ctx, groupID, member.ID)
+	added, err := h.Repository.AddMember(ctx, groupID, member.ID)
 	if err != nil {
 		if ent.IsConstraintError(err) {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := created.ID
+	res := added.ID
 
 	return c.JSON(http.StatusOK, &Member{res})
 }
 
+// DeleteMember DELETE /groups/:groupID/members
 func (h *Handlers) DeleteMember(c echo.Context) error {
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
@@ -196,7 +225,6 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 
 	memberID, err := uuid.Parse(c.Param("memberID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if memberID == uuid.Nil {
@@ -208,16 +236,15 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 	err = h.Repository.DeleteMember(ctx, groupID, memberID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.NoContent(http.StatusOK)
 }
 
+// GetOwners GET /groups/:groupID/owners
 func (h *Handlers) GetOwners(c echo.Context) error {
 	ctx := context.Background()
 	groupID, err := uuid.Parse(c.Param("groupID"))
@@ -244,6 +271,7 @@ func (h *Handlers) GetOwners(c echo.Context) error {
 	return c.JSON(http.StatusOK, &OwnerResponse{res})
 }
 
+// PostOwner POST /groups/:groupID/owners
 func (h *Handlers) PostOwner(c echo.Context) error {
 	ctx := context.Background()
 	var owner Owner
@@ -258,7 +286,7 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 	if err := c.Bind(&owner); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	createdOwner, err := h.Repository.CreateOwner(ctx, groupID, owner.ID)
+	added, err := h.Repository.AddOwner(ctx, groupID, owner.ID)
 	if err != nil {
 		if ent.IsConstraintError(err) {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -267,17 +295,17 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 	}
 
 	res := &Owner{
-		ID: createdOwner.ID,
+		ID: added.ID,
 	}
 
 	return c.JSON(http.StatusOK, res)
 }
 
+// DeleteOwner DELETE /groups/:groupID/owners
 func (h *Handlers) DeleteOwner(c echo.Context) error {
 	ctx := context.Background()
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
@@ -286,7 +314,6 @@ func (h *Handlers) DeleteOwner(c echo.Context) error {
 	}
 	ownerID, err := uuid.Parse(c.Param("ownerID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if ownerID == uuid.Nil {
