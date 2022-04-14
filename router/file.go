@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -66,7 +65,7 @@ func (h *Handlers) PostFile(c echo.Context) error {
 	}
 	defer src.Close()
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	file, err := h.Repository.CreateFile(ctx, name, mimetype, requestID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -86,7 +85,7 @@ func (h *Handlers) GetFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	file, err := h.Repository.GetFile(ctx, fileID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -101,7 +100,7 @@ func (h *Handlers) GetFile(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		if modifiedAt.Before(imt) || modifiedAt.Equal(imt) {
-			return echo.NewHTTPError(http.StatusNotModified, fmt.Errorf("not modified"))
+			return c.NoContent(http.StatusNotModified)
 		}
 	}
 
@@ -123,7 +122,7 @@ func (h *Handlers) GetFileMeta(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	file, err := h.Repository.GetFile(ctx, fileID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -143,7 +142,7 @@ func (h *Handlers) DeleteFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	err = h.Repository.DeleteFile(ctx, fileID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
