@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -299,7 +300,7 @@ func TestHandlers_GetMe(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		gob.Register(User{})
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		require.NoError(t, err)
 		sess.Values[sessionUserKey] = user
 		require.NoError(t, sess.Save(c.Request(), c.Response()))

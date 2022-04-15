@@ -15,11 +15,10 @@ import (
 )
 
 type Handlers struct {
-	Repository   model.Repository
-	Storage      storage.Storage
-	Logger       *zap.Logger
-	SessionName  string
-	SessionStore sessions.Store
+	Repository  model.Repository
+	Storage     storage.Storage
+	Logger      *zap.Logger
+	SessionName string
 }
 
 func NewServer(h Handlers) *echo.Echo {
@@ -28,7 +27,7 @@ func NewServer(h Handlers) *echo.Echo {
 	e.Use(h.AccessLoggingMiddleware(h.Logger))
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
-	e.Use(session.Middleware(h.SessionStore))
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte(h.SessionName))))
 
 	retrieveGroupOwner := h.RetrieveGroupOwner(h.Repository)
 	retrieveRequestCreator := h.RetrieveRequestCreator(h.Repository)

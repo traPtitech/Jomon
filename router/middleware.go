@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
@@ -74,8 +75,7 @@ func (h Handlers) AccessLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFun
 
 func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		gob.Register(&User{})
-		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
@@ -91,8 +91,7 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 func (h Handlers) CheckAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		gob.Register(&User{})
-		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
@@ -112,8 +111,7 @@ func (h Handlers) CheckAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 func (h Handlers) CheckRequestCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		gob.Register(&User{})
-		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
@@ -134,8 +132,7 @@ func (h Handlers) CheckRequestCreatorMiddleware(next echo.HandlerFunc) echo.Hand
 
 func (h Handlers) CheckAdminOrRequestCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		gob.Register(&User{})
-		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
@@ -156,8 +153,7 @@ func (h Handlers) CheckAdminOrRequestCreatorMiddleware(next echo.HandlerFunc) ec
 
 func (h Handlers) CheckAdminOrGroupOwnerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		gob.Register(&User{})
-		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
@@ -187,7 +183,7 @@ func (h Handlers) CheckAdminOrGroupOwnerMiddleware(next echo.HandlerFunc) echo.H
 func (h Handlers) RetrieveGroupOwner(repo model.Repository) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+			sess, err := session.Get(h.SessionName, c)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
@@ -218,7 +214,7 @@ func (h Handlers) RetrieveGroupOwner(repo model.Repository) echo.MiddlewareFunc 
 func (h Handlers) RetrieveRequestCreator(repo model.Repository) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+			sess, err := session.Get(h.SessionName, c)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}

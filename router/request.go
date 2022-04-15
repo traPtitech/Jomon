@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
@@ -408,7 +409,7 @@ func (h *Handlers) PostComment(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -445,7 +446,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	if requestID == uuid.Nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}

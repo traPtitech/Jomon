@@ -14,6 +14,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -1509,7 +1510,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -1606,7 +1607,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -1703,7 +1704,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -1800,7 +1801,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -1897,7 +1898,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2001,7 +2002,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2089,7 +2090,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2142,7 +2143,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2192,7 +2193,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2302,7 +2303,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2366,7 +2367,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2430,7 +2431,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2494,7 +2495,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2559,7 +2560,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2629,7 +2630,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2705,7 +2706,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2778,7 +2779,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2847,7 +2848,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,

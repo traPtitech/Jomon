@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/service"
 )
@@ -34,7 +35,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "code is required")
 	}
 
-	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -85,7 +86,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 func (h Handlers) GeneratePKCE(c echo.Context) error {
 	gob.Register(&User{})
-	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}

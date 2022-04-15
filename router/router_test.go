@@ -8,7 +8,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
-	"github.com/gorilla/sessions"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/model/mock_model"
 	"github.com/traPtitech/Jomon/testutil/random"
@@ -76,16 +75,14 @@ func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, erro
 	}
 	repository := NewMockRepository(ctrl)
 	storage := NewMockStorage(ctrl)
-	sessionStore := sessions.NewCookieStore([]byte("session"))
 	sessionName := "session"
 
 	return &TestHandlers{
 		&Handlers{
-			Repository:   repository,
-			Storage:      storage,
-			Logger:       logger,
-			SessionName:  sessionName,
-			SessionStore: sessionStore,
+			Repository:  repository,
+			Storage:     storage,
+			Logger:      logger,
+			SessionName: sessionName,
 		},
 		repository,
 		storage,
