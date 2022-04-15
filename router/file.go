@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/ent"
 )
 
 type FileResponse struct {
@@ -88,6 +89,9 @@ func (h *Handlers) GetFile(c echo.Context) error {
 	ctx := c.Request().Context()
 	file, err := h.Repository.GetFile(ctx, fileID)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -125,6 +129,9 @@ func (h *Handlers) GetFileMeta(c echo.Context) error {
 	ctx := c.Request().Context()
 	file, err := h.Repository.GetFile(ctx, fileID)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -145,6 +152,9 @@ func (h *Handlers) DeleteFile(c echo.Context) error {
 	ctx := c.Request().Context()
 	err = h.Repository.DeleteFile(ctx, fileID)
 	if err != nil {
+		if ent.IsConstraintError(err) {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
