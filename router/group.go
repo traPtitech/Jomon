@@ -112,7 +112,6 @@ func (h *Handlers) PutGroup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		c.Logger().Error(errors.New("invalid UUID"))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
@@ -141,7 +140,6 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		c.Logger().Error(errors.New("invalid UUID"))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
@@ -161,7 +159,6 @@ func (h *Handlers) GetMembers(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		c.Logger().Error(errors.New("invalid UUID"))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
@@ -194,7 +191,6 @@ func (h *Handlers) PostMember(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		c.Logger().Error(errors.New("invalid UUID"))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
@@ -219,7 +215,6 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		c.Logger().Error(errors.New("invalid UUID"))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
@@ -228,7 +223,6 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if memberID == uuid.Nil {
-		c.Logger().Error(errors.New("invalid UUID"))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
@@ -252,7 +246,6 @@ func (h *Handlers) GetOwners(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		c.Logger().Error(errors.New("invalid UUID"))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 	owners, err := h.Repository.GetOwners(ctx, groupID)
@@ -280,7 +273,6 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		c.Logger().Error(errors.New("invalid UUID"))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 	if err := c.Bind(&owner); err != nil {
@@ -309,7 +301,6 @@ func (h *Handlers) DeleteOwner(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		c.Logger().Error(errors.New("invalid UUID"))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 	ownerID, err := uuid.Parse(c.Param("ownerID"))
@@ -317,7 +308,6 @@ func (h *Handlers) DeleteOwner(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if ownerID == uuid.Nil {
-		c.Logger().Error(errors.New("invalid UUID"))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 

@@ -77,13 +77,11 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		gob.Register(&User{})
 		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 		if err != nil {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		_, ok := sess.Values[sessionUserKey].(*User)
 		if !ok {
-			c.Logger().Error(err)
 			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
 		}
 
@@ -96,13 +94,11 @@ func (h Handlers) CheckAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		gob.Register(&User{})
 		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 		if err != nil {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, ok := sess.Values[sessionUserKey].(*User)
 		if !ok {
-			c.Logger().Error(err)
 			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
 		}
 
@@ -119,13 +115,11 @@ func (h Handlers) CheckRequestCreatorMiddleware(next echo.HandlerFunc) echo.Hand
 		gob.Register(&User{})
 		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 		if err != nil {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, ok := sess.Values[sessionUserKey].(*User)
 		if !ok {
-			c.Logger().Error(err)
 			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
 		}
 
@@ -143,13 +137,11 @@ func (h Handlers) CheckAdminOrRequestCreatorMiddleware(next echo.HandlerFunc) ec
 		gob.Register(&User{})
 		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 		if err != nil {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, ok := sess.Values[sessionUserKey].(*User)
 		if !ok {
-			c.Logger().Error(err)
 			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
 		}
 
@@ -167,19 +159,16 @@ func (h Handlers) CheckAdminOrGroupOwnerMiddleware(next echo.HandlerFunc) echo.H
 		gob.Register(&User{})
 		sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 		if err != nil {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, ok := sess.Values[sessionUserKey].(*User)
 		if !ok {
-			c.Logger().Error(err)
 			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
 		}
 
 		owners, ok := sess.Values[sessionOwnerKey].([]*model.Owner)
 		if !ok {
-			c.Logger().Error(err)
 			return echo.ErrInternalServerError
 		}
 
@@ -200,19 +189,16 @@ func (h Handlers) RetrieveGroupOwner(repo model.Repository) echo.MiddlewareFunc 
 		return func(c echo.Context) error {
 			sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 			if err != nil {
-				c.Logger().Error(err)
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 			id, err := uuid.Parse(c.Param("groupID"))
 			if err != nil {
-				c.Logger().Error(err)
 				return echo.NewHTTPError(http.StatusBadRequest, err)
 			}
 
 			ctx := context.Background()
 			owners, err := repo.GetOwners(ctx, id)
 			if err != nil {
-				c.Logger().Error(err)
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
@@ -221,7 +207,6 @@ func (h Handlers) RetrieveGroupOwner(repo model.Repository) echo.MiddlewareFunc 
 			sess.Values[sessionOwnerKey] = owners
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				c.Logger().Error(err)
 				return echo.ErrInternalServerError
 			}
 
@@ -235,19 +220,16 @@ func (h Handlers) RetrieveRequestCreator(repo model.Repository) echo.MiddlewareF
 		return func(c echo.Context) error {
 			sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 			if err != nil {
-				c.Logger().Error(err)
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 			id, err := uuid.Parse(c.Param("requestID"))
 			if err != nil {
-				c.Logger().Error(err)
 				return echo.NewHTTPError(http.StatusBadRequest, err)
 			}
 
 			ctx := context.Background()
 			request, err := repo.GetRequest(ctx, id)
 			if err != nil {
-				c.Logger().Error(err)
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
@@ -256,7 +238,6 @@ func (h Handlers) RetrieveRequestCreator(repo model.Repository) echo.MiddlewareF
 			sess.Values[sessionCreatorKey] = request.CreatedBy
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				c.Logger().Error(err)
 				return echo.ErrInternalServerError
 			}
 
