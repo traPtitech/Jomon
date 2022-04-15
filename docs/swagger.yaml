@@ -690,6 +690,8 @@ paths:
                     format: uuid
         "400":
           $ref: "#/components/responses/400"
+        "500":
+          $ref: "#/components/responses/500"
   "/files/{fileID}":
     parameters:
       - name: fileID
@@ -706,11 +708,18 @@ paths:
         "200":
           description: 該当するファイルが存在した 返す
           content:
-            multipart/form-data:
+            application/octet-stream:
               schema:
-                $ref: "#/components/schemas/File"
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/400"
         "404":
           $ref: "#/components/responses/404"
+        "304":
+          $ref: "#/components/responses/304"
+        "500":
+          $ref: "#/components/responses/500"
     delete:
       description: 指定したidのファイルを削除する。管理者権限または作成者権限が必要。
       tags:
@@ -718,10 +727,14 @@ paths:
       responses:
         "204":
           description: 正常に取り消すことができた。
+        "400":
+          $ref: "#/components/responses/400"
         "403":
           $ref: "#/components/responses/403"
         "404":
           $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
   "/files/{fileID}/meta":
     parameters:
       - name: fileID
@@ -741,8 +754,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FileMeta"
+        "400":
+          $ref: "#/components/responses/400"
         "404":
           $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
 
 
   /users:
@@ -1093,12 +1110,16 @@ components:
         admin:
           type: "boolean"
   responses:
+    304:
+      description: Not Modified
     400:
       description: 不正なリクエスト。
     403:
       description: 編集権限がない人による操作。
     404:
       description: 指定したリソースは存在しない。
+    500:
+      description: サーバーエラー。
 
   parameters:
     sortRequestQuery:
