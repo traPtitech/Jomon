@@ -40,6 +40,10 @@ func init() {
 	comment.DefaultID = commentDescID.Default.(func() uuid.UUID)
 	fileFields := schema.File{}.Fields()
 	_ = fileFields
+	// fileDescName is the schema descriptor for name field.
+	fileDescName := fileFields[1].Descriptor()
+	// file.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	file.NameValidator = fileDescName.Validators[0].(func(string) error)
 	// fileDescCreatedAt is the schema descriptor for created_at field.
 	fileDescCreatedAt := fileFields[3].Descriptor()
 	// file.DefaultCreatedAt holds the default value on creation for the created_at field.

@@ -61,6 +61,7 @@ func NewServer(h Handlers) *echo.Echo {
 			apiFiles.POST("", h.PostFile)
 			apiFiles.GET("/:fileID", h.GetFile)
 			apiFiles.DELETE("/:fileID", h.DeleteFile)
+			apiFiles.GET("/:fileID/meta", h.GetFileMeta)
 		}
 
 		apiTags := api.Group("/tags", h.CheckLoginMiddleware)
