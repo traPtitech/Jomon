@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -9,12 +8,8 @@ import (
 	"github.com/traPtitech/Jomon/ent"
 )
 
-type Admin struct {
-	ID uuid.UUID `json:"id"`
-}
-
 func (h *Handlers) GetAdmins(c echo.Context) error {
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	admins, err := h.Repository.GetAdmins(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -34,7 +29,7 @@ func (h *Handlers) PostAdmins(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	err := h.Repository.AddAdmins(ctx, admin)
 	if err != nil {
 		if ent.IsConstraintError(err) {
@@ -52,7 +47,7 @@ func (h *Handlers) DeleteAdmins(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	err := h.Repository.DeleteAdmins(ctx, admin)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
