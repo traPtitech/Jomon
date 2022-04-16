@@ -30,9 +30,6 @@ func (repo *EntRepository) updateTransactionDetail(ctx context.Context, transact
 	if err != nil {
 		return nil, err
 	}
-	if err != nil {
-		return nil, err
-	}
 	enttd, err := repo.client.TransactionDetail.Create().
 		SetAmount(amount).
 		SetTarget(target).
