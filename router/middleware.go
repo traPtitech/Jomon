@@ -3,11 +3,13 @@ package router
 import (
 	"context"
 	"encoding/gob"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/logging"
@@ -96,9 +98,9 @@ func (h Handlers) CheckAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		user, ok := sess.Values[sessionUserKey].(*User)
-		if !ok {
-			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
+		user, err := getUserInfo(sess)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		if !user.Admin {
@@ -116,9 +118,9 @@ func (h Handlers) CheckRequestCreatorMiddleware(next echo.HandlerFunc) echo.Hand
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		user, ok := sess.Values[sessionUserKey].(*User)
-		if !ok {
-			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
+		user, err := getUserInfo(sess)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		creator := sess.Values[sessionCreatorKey].(uuid.UUID)
@@ -137,9 +139,9 @@ func (h Handlers) CheckAdminOrRequestCreatorMiddleware(next echo.HandlerFunc) ec
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		user, ok := sess.Values[sessionUserKey].(*User)
-		if !ok {
-			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
+		user, err := getUserInfo(sess)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		creator := sess.Values[sessionCreatorKey].(uuid.UUID)
@@ -158,9 +160,9 @@ func (h Handlers) CheckAdminOrGroupOwnerMiddleware(next echo.HandlerFunc) echo.H
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		user, ok := sess.Values[sessionUserKey].(*User)
-		if !ok {
-			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
+		user, err := getUserInfo(sess)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		owners, ok := sess.Values[sessionOwnerKey].([]*model.Owner)
@@ -240,4 +242,13 @@ func (h Handlers) RetrieveRequestCreator(repo model.Repository) echo.MiddlewareF
 			return next(c)
 		}
 	}
+}
+
+func getUserInfo(sess *sessions.Session) (*User, error) {
+	user, ok := sess.Values[sessionUserKey].(*User)
+	if !ok {
+		return nil, errors.New("user not found")
+	}
+
+	return user, nil
 }
