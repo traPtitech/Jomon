@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"errors"
+	"github.com/gorilla/sessions"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -296,6 +297,12 @@ func TestHandlers_GetMe(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -316,11 +323,18 @@ func TestHandlers_GetMe(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		e := echo.New()
+		e.Use(session.Middleware(sessions.NewCookieStore([]byte("session"))))
 		req, err := http.NewRequest(http.MethodPut, "/api/users/me", nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)

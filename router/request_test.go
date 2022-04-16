@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/gorilla/sessions"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -1507,6 +1508,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -1604,6 +1611,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -1701,6 +1714,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -1798,6 +1817,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -1895,6 +1920,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
+
+
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -1999,6 +2032,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2087,6 +2126,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2140,6 +2185,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues("hoge")
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2190,6 +2241,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(uuid.Nil.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2249,6 +2306,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2300,6 +2363,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2364,6 +2433,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2428,6 +2503,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2492,6 +2573,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2557,6 +2644,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2627,6 +2720,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2703,6 +2802,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2776,6 +2881,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2845,6 +2956,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
