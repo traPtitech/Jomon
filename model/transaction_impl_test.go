@@ -272,7 +272,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget, nil)
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
 		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
 		require.NoError(t, err)
@@ -407,7 +407,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create group
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &amount, []*User{user})
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &amount)
 		require.NoError(t, err)
 
 		// Create Transactions
@@ -445,7 +445,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create group
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &amount, []*User{user})
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &amount)
 		require.NoError(t, err)
 
 		// Create Transactions
@@ -559,7 +559,7 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create group
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &amount, []*User{user})
+		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &amount)
 		require.NoError(t, err)
 
 		// Create Transactions
@@ -578,7 +578,7 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create group
-		group, err = repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &amount, []*User{user})
+		group, err = repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &amount)
 		require.NoError(t, err)
 
 		// Create Transactions
