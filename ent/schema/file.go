@@ -19,7 +19,8 @@ func (File) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
-		field.String("name"),
+		field.String("name").
+			NotEmpty(),
 		field.String("mime_type"),
 		field.Time("created_at").
 			Default(time.Now),
