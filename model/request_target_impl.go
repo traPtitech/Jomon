@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
@@ -16,6 +17,10 @@ func (repo *EntRepository) GetRequestTargets(ctx context.Context, requestID uuid
 		All(ctx)
 	if err != nil {
 		return nil, err
+	}
+	// TODO: test
+	if len(targets) == 0 {
+		return nil, fmt.Errorf("request having no targets")
 	}
 
 	var reqTargets []*TargetDetail

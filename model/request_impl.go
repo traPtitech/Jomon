@@ -296,6 +296,7 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 			return nil, err
 		}
 	}
+	// targets tableに関わることはまとめないとdead lockの原因になる
 	err = deleteRequestTargets(txClient, ctx, requestID)
 	if err != nil {
 		err = rollBackWithErr(tx, ctx, err)

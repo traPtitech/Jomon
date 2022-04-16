@@ -177,6 +177,10 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
+	if len(req.Targets) == 0 {
+		c.Logger().Error("request targets required")
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("request targets required"))
+	}
 
 	var tags []*model.Tag
 	for _, tagID := range req.Tags {
@@ -383,11 +387,15 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		c.Logger().Error(errors.New("invalid UUID"))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
-
 	if err = c.Bind(&req); err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
+	if len(req.Targets) == 0 {
+		c.Logger().Error("request targets required")
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("request targets required"))
+	}
+	
 	var tags []*model.Tag
 	for _, tagID := range req.Tags {
 		ctx := context.Background()
