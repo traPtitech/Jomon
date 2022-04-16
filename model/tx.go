@@ -17,7 +17,7 @@ func setupTx(client *ent.Client, ctx context.Context) (*ent.Tx, *ent.Client, err
 
 func rollBackWithErr(tx *ent.Tx, ctx context.Context, err error) error {
 	if rerr := tx.Rollback(); rerr != nil {
-		err = fmt.Errorf("%v, rolling back transaction: %v", err, rerr)
+		err = fmt.Errorf("%w, rolling back transaction: %w", err, rerr)
 	}
 	return err
 }

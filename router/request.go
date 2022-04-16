@@ -177,6 +177,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
+	// TODO: test
 	if len(req.Targets) == 0 {
 		c.Logger().Error("request targets required")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("request targets required"))

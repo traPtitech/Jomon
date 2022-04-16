@@ -40,7 +40,6 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 		request1, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), []*Tag{tag}, []*Target{reqTarget}, group, user1.ID)
 		require.NoError(t, err)
-		time.Sleep(1 * time.Second)
 		request2, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), []*Tag{tag}, []*Target{reqTarget}, group, user2.ID)
 		require.NoError(t, err)
 
