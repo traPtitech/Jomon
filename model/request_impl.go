@@ -115,12 +115,16 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 	return reqres, nil
 }
 
-func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, group *Group, userID uuid.UUID) (*RequestDetail, error) {
+func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, targets []*RequestTarget, group *Group, userID uuid.UUID) (*RequestDetail, error) {
+	tx, err := Tx(ctx, repo.client)
+	if err != nil {
+		return nil, err
+	}
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
 		tagIDs = append(tagIDs, tag.ID)
 	}
-	created, err := repo.client.Request.
+	created, err := tx.Client().Request.
 		Create().
 		SetTitle(title).
 		SetAmount(amount).
@@ -131,28 +135,41 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 		AddTagIDs(tagIDs...).
 		Save(ctx)
 	if err != nil {
+		err = RollbackWithError(ctx, tx, err)
 		return nil, err
 	}
 	user, err := created.QueryUser().Select(user.FieldID).First(ctx)
 	if err != nil {
+		err = RollbackWithError(ctx, tx, err)
 		return nil, err
 	}
 	if group != nil {
-		_, err = repo.client.Group.
+		_, err = tx.Client().Group.
 			UpdateOneID(group.ID).
 			AddRequest(created).
 			Save(ctx)
 		if err != nil {
+			err = RollbackWithError(ctx, tx, err)
 			return nil, err
 		}
 	}
-	status, err := repo.client.RequestStatus.
+	status, err := tx.Client().RequestStatus.
 		Create().
 		SetStatus(requeststatus.StatusSubmitted).
 		SetCreatedAt(time.Now()).
 		SetRequest(created).
 		SetUser(user).
 		Save(ctx)
+	if err != nil {
+		err = RollbackWithError(ctx, tx, err)
+		return nil, err
+	}
+	targets, err := repo.createRequestTargets(ctx, tx, created.ID, targets)
+	if err != nil {
+		err = RollbackWithError(ctx, tx, err)
+		return nil, err
+	}
+	err = tx.Commit()
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +222,7 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 	return reqdetail, nil
 }
 
-func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, content string, tags []*Tag, group *Group) (*RequestDetail, error) {
+func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, content string, tags []*Tag, targets []*RequestTarget, group *Group) (*RequestDetail, error) {
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
 		tagIDs = append(tagIDs, tag.ID)
