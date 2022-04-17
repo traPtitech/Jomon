@@ -20,6 +20,7 @@ func (RequestTarget) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
 		field.String("target"),
+		field.Int("amount"),
 		field.Time("paid_at").
 			Optional().
 			Nillable(),

@@ -36,6 +36,19 @@ func (rtu *RequestTargetUpdate) SetTarget(s string) *RequestTargetUpdate {
 	return rtu
 }
 
+// SetAmount sets the "amount" field.
+func (rtu *RequestTargetUpdate) SetAmount(i int) *RequestTargetUpdate {
+	rtu.mutation.ResetAmount()
+	rtu.mutation.SetAmount(i)
+	return rtu
+}
+
+// AddAmount adds i to the "amount" field.
+func (rtu *RequestTargetUpdate) AddAmount(i int) *RequestTargetUpdate {
+	rtu.mutation.AddAmount(i)
+	return rtu
+}
+
 // SetPaidAt sets the "paid_at" field.
 func (rtu *RequestTargetUpdate) SetPaidAt(t time.Time) *RequestTargetUpdate {
 	rtu.mutation.SetPaidAt(t)
@@ -185,6 +198,20 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Column: requesttarget.FieldTarget,
 		})
 	}
+	if value, ok := rtu.mutation.Amount(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: requesttarget.FieldAmount,
+		})
+	}
+	if value, ok := rtu.mutation.AddedAmount(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: requesttarget.FieldAmount,
+		})
+	}
 	if value, ok := rtu.mutation.PaidAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -262,6 +289,19 @@ type RequestTargetUpdateOne struct {
 // SetTarget sets the "target" field.
 func (rtuo *RequestTargetUpdateOne) SetTarget(s string) *RequestTargetUpdateOne {
 	rtuo.mutation.SetTarget(s)
+	return rtuo
+}
+
+// SetAmount sets the "amount" field.
+func (rtuo *RequestTargetUpdateOne) SetAmount(i int) *RequestTargetUpdateOne {
+	rtuo.mutation.ResetAmount()
+	rtuo.mutation.SetAmount(i)
+	return rtuo
+}
+
+// AddAmount adds i to the "amount" field.
+func (rtuo *RequestTargetUpdateOne) AddAmount(i int) *RequestTargetUpdateOne {
+	rtuo.mutation.AddAmount(i)
 	return rtuo
 }
 
@@ -436,6 +476,20 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			Type:   field.TypeString,
 			Value:  value,
 			Column: requesttarget.FieldTarget,
+		})
+	}
+	if value, ok := rtuo.mutation.Amount(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: requesttarget.FieldAmount,
+		})
+	}
+	if value, ok := rtuo.mutation.AddedAmount(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: requesttarget.FieldAmount,
 		})
 	}
 	if value, ok := rtuo.mutation.PaidAt(); ok {
