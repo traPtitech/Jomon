@@ -238,6 +238,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
 		var tags []*model.Tag
+		var targets []*model.RequestTarget
 		var group *model.Group
 
 		e := echo.New()
@@ -251,7 +252,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			CreateRequest(c.Request().Context(), reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, group, reqRequest.CreatedBy).
+			CreateRequest(c.Request().Context(), reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, targets, group, reqRequest.CreatedBy).
 			Return(request, nil)
 
 		res := &RequestResponse{
@@ -308,6 +309,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
+		var targets []*model.RequestTarget
 		var group *model.Group
 
 		e := echo.New()
@@ -325,7 +327,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Return(tag, nil)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			CreateRequest(c.Request().Context(), reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, group, reqRequest.CreatedBy).
+			CreateRequest(c.Request().Context(), reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, targets, group, reqRequest.CreatedBy).
 			Return(request, nil)
 
 		res := &RequestResponse{
