@@ -967,6 +967,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Tag"
+        targets:
+          type: array
+          items:
+            $ref: "#/components/schemas/Target"
         group:
           $ref: "#/components/schemas/Group"
     RequestDetail:

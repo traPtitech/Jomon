@@ -21,6 +21,7 @@ type Request struct {
 	Title     string       `json:"title"`
 	Content   string       `json:"content"`
 	Tags      []*uuid.UUID `json:"tags"`
+	Targets   []*Target    `json:"targets"`
 	Group     *uuid.UUID   `json:"group"`
 }
 
@@ -29,21 +30,23 @@ type PutRequest struct {
 	Title   string       `json:"title"`
 	Content string       `json:"content"`
 	Tags    []*uuid.UUID `json:"tags"`
+	Targets []*Target    `json:"targets"`
 	Group   *uuid.UUID   `json:"group"`
 }
 
 type RequestResponse struct {
-	ID        uuid.UUID        `json:"id"`
-	Status    model.Status     `json:"status"`
-	CreatedAt time.Time        `json:"created_at"`
-	UpdatedAt time.Time        `json:"updated_at"`
-	CreatedBy uuid.UUID        `json:"created_by"`
-	Amount    int              `json:"amount"`
-	Title     string           `json:"title"`
-	Content   string           `json:"content"`
-	Tags      []*TagOverview   `json:"tags"`
-	Group     *GroupOverview   `json:"group"`
-	Comments  []*CommentDetail `json:"comments"`
+	ID        uuid.UUID         `json:"id"`
+	Status    model.Status      `json:"status"`
+	CreatedAt time.Time         `json:"created_at"`
+	UpdatedAt time.Time         `json:"updated_at"`
+	CreatedBy uuid.UUID         `json:"created_by"`
+	Amount    int               `json:"amount"`
+	Title     string            `json:"title"`
+	Content   string            `json:"content"`
+	Tags      []*TagOverview    `json:"tags"`
+	Targets   []*TargetOverview `json:"targets"`
+	Group     *GroupOverview    `json:"group"`
+	Comments  []*CommentDetail  `json:"comments"`
 }
 
 type Comment struct {
@@ -66,6 +69,19 @@ type Status struct {
 	Status    model.Status `json:"status"`
 	Comment   string       `json:"comment"`
 	CreatedAt time.Time    `json:"created_at"`
+}
+
+type Target struct {
+	Target string `json:"target"`
+	Amount int    `json:"amount"`
+}
+
+type TargetOverview struct {
+	ID        uuid.UUID  `json:"id"`
+	Target    string     `json:"target"`
+	Amount    int        `json:"amount"`
+	PaidAt    *time.Time `json:"paid_at"`
+	CreatedAt time.Time  `json:"created_at"`
 }
 
 func (h *Handlers) GetRequests(c echo.Context) error {
@@ -165,9 +181,9 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
+	ctx := context.Background()
 	var tags []*model.Tag
 	for _, tagID := range req.Tags {
-		ctx := context.Background()
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
 			if ent.IsNotFound(err) {
@@ -179,9 +195,15 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
+	var targets []*model.RequestTarget
+	for _, target := range req.Targets {
+		targets = append(targets, &model.RequestTarget{
+			Target: target.Target,
+			Amount: target.Amount,
+		})
+	}
 	var group *model.Group
 	if req.Group != nil {
-		ctx := context.Background()
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
 			if ent.IsNotFound(err) {
@@ -192,8 +214,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
-	ctx := context.Background()
-	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, group, req.CreatedBy)
+	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, targets, group, req.CreatedBy)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			c.Logger().Error(err)
@@ -212,6 +233,16 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 			CreatedAt:   request.Group.CreatedAt,
 			UpdatedAt:   request.Group.UpdatedAt,
 		}
+	}
+	var reqtargets []*TargetOverview
+	for _, target := range request.Targets {
+		reqtargets = append(reqtargets, &TargetOverview{
+			ID:        target.ID,
+			Target:    target.Target,
+			Amount:    target.Amount,
+			PaidAt:    target.PaidAt,
+			CreatedAt: target.CreatedAt,
+		})
 	}
 	var restags []*TagOverview
 	for _, tag := range request.Tags {
@@ -233,6 +264,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      restags,
+		Targets:   reqtargets,
 		Group:     resgroup,
 	}
 	return c.JSON(http.StatusOK, res)

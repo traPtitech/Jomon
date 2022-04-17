@@ -164,7 +164,7 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 		err = RollbackWithError(ctx, tx, err)
 		return nil, err
 	}
-	targets, err := repo.createRequestTargets(ctx, tx, created.ID, targets)
+	ts, err := repo.createRequestTargets(ctx, tx, created.ID, targets)
 	if err != nil {
 		err = RollbackWithError(ctx, tx, err)
 		return nil, err
@@ -180,6 +180,7 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 		Title:     created.Title,
 		Content:   created.Content,
 		Tags:      tags,
+		Targets:   ts,
 		Group:     group,
 		CreatedAt: created.CreatedAt,
 		UpdatedAt: created.UpdatedAt,
@@ -193,6 +194,7 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 		Query().
 		Where(request.IDEQ(requestID)).
 		WithTag().
+		WithTarget().
 		WithGroup().
 		WithStatus(func(q *ent.RequestStatusQuery) {
 			q.Order(ent.Desc(requeststatus.FieldCreatedAt)).Limit(1)
@@ -206,6 +208,10 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 	for _, tag := range request.Edges.Tag {
 		tags = append(tags, ConvertEntTagToModelTag(tag))
 	}
+	var targets []*RequestTargetDetail
+	for _, target := range request.Edges.Target {
+		targets = append(targets, ConvertEntRequestTargetToModelRequestTargetDetail(target))
+	}
 	group := ConvertEntGroupToModelGroup(request.Edges.Group)
 	reqdetail := &RequestDetail{
 		ID:        request.ID,
@@ -214,6 +220,7 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      tags,
+		Targets:   targets,
 		Group:     group,
 		CreatedAt: request.CreatedAt,
 		UpdatedAt: request.UpdatedAt,
@@ -223,11 +230,15 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 }
 
 func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, content string, tags []*Tag, targets []*RequestTarget, group *Group) (*RequestDetail, error) {
+	tx, err := Tx(ctx, repo.client)
+	if err != nil {
+		return nil, err
+	}
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
 		tagIDs = append(tagIDs, tag.ID)
 	}
-	updated, err := repo.client.Request.
+	updated, err := tx.Client().Request.
 		UpdateOneID(requestID).
 		SetAmount(amount).
 		SetTitle(title).
@@ -237,35 +248,40 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
+		err = RollbackWithError(ctx, tx, err)
 		return nil, err
 	}
 
 	if group != nil {
-		_, err = repo.client.Request.
+		_, err = tx.Client().Request.
 			UpdateOneID(requestID).
 			ClearGroup().
 			SetGroupID(group.ID).
 			Save(ctx)
 	} else {
-		_, err = repo.client.Request.
+		_, err = tx.Client().Request.
 			UpdateOneID(requestID).
 			ClearGroup().
 			Save(ctx)
 	}
 	if err != nil {
+		err = RollbackWithError(ctx, tx, err)
 		return nil, err
 	}
 
 	status, err := updated.QueryStatus().Select(requeststatus.FieldStatus).First(ctx)
 	if err != nil {
+		err = RollbackWithError(ctx, tx, err)
 		return nil, err
 	}
 	user, err := updated.QueryUser().Select(user.FieldID).First(ctx)
 	if err != nil {
+		err = RollbackWithError(ctx, tx, err)
 		return nil, err
 	}
 	enttags, err := updated.QueryTag().All(ctx)
 	if err != nil {
+		err = RollbackWithError(ctx, tx, err)
 		return nil, err
 	}
 	var modeltags []*Tag
@@ -273,6 +289,22 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		modeltags = append(modeltags, ConvertEntTagToModelTag(tag))
 	}
 	entgroup, err := updated.QueryGroup().Only(ctx)
+	if err != nil {
+		err = RollbackWithError(ctx, tx, err)
+		return nil, err
+	}
+
+	err = repo.deleteRequestTargets(ctx, tx, requestID)
+	if err != nil {
+		err = RollbackWithError(ctx, tx, err)
+		return nil, err
+	}
+	modeltargets, err := repo.createRequestTargets(ctx, tx, requestID, targets)
+	if err != nil {
+		err = RollbackWithError(ctx, tx, err)
+		return nil, err
+	}
+	err = tx.Commit()
 	if err != nil {
 		return nil, err
 	}
@@ -285,6 +317,7 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		Title:     updated.Title,
 		Content:   updated.Content,
 		Tags:      modeltags,
+		Targets:   modeltargets,
 		Group:     modelgroup,
 		CreatedAt: updated.CreatedAt,
 		UpdatedAt: updated.UpdatedAt,
