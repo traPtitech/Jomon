@@ -467,17 +467,17 @@ func TestHandlers_PostRequest(t *testing.T) {
 			CreatedBy: uuid.New(),
 		}
 
+		tg := &Target{
+			Target: target.Target,
+			Amount: target.Amount,
+		}
+
 		reqRequest := Request{
 			CreatedBy: request.CreatedBy,
 			Amount:    request.Amount,
 			Title:     request.Title,
 			Content:   request.Content,
-			Targets: []*Target{
-				&Target{
-					Target: target.Target,
-					Amount: target.Amount,
-				},
-			},
+			Targets:   []*Target{tg},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
