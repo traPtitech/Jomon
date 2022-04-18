@@ -448,20 +448,20 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Amount: random.Numeric(t, 1000000),
 		}
 
+		tgd := &model.RequestTargetDetail{
+			ID:        uuid.New(),
+			Target:    target.Target,
+			Amount:    target.Amount,
+			CreatedAt: date,
+		}
+
 		request := &model.RequestDetail{
-			ID:      uuid.New(),
-			Status:  model.Submitted,
-			Amount:  random.Numeric(t, 1000000),
-			Title:   random.AlphaNumeric(t, 20),
-			Content: random.AlphaNumeric(t, 50),
-			Targets: []*model.RequestTargetDetail{
-				&model.RequestTargetDetail{
-					ID:        uuid.New(),
-					Target:    target.Target,
-					Amount:    target.Amount,
-					CreatedAt: date,
-				},
-			},
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			Targets:   []*model.RequestTargetDetail{tgd},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -498,6 +498,13 @@ func TestHandlers_PostRequest(t *testing.T) {
 			CreateRequest(c.Request().Context(), reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, []*model.RequestTarget{target}, group, reqRequest.CreatedBy).
 			Return(request, nil)
 
+		tgov := &TargetOverview{
+			ID:        request.Targets[0].ID,
+			Target:    request.Targets[0].Target,
+			Amount:    request.Targets[0].Amount,
+			CreatedAt: request.Targets[0].CreatedAt,
+		}
+
 		res := &RequestResponse{
 			ID:        request.ID,
 			Status:    request.Status,
@@ -507,14 +514,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Amount:    request.Amount,
 			Title:     request.Title,
 			Content:   request.Content,
-			Targets: []*TargetOverview{
-				&TargetOverview{
-					ID:        request.Targets[0].ID,
-					Target:    request.Targets[0].Target,
-					Amount:    request.Targets[0].Amount,
-					CreatedAt: request.Targets[0].CreatedAt,
-				},
-			},
+			Targets:   []*TargetOverview{tgov},
 		}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
@@ -1246,6 +1246,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
 		var tags []*model.Tag
+		var targets []*model.RequestTarget
 		var group *model.Group
 
 		updateRequest := &model.RequestDetail{
@@ -1289,7 +1290,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			UpdateRequest(c.Request().Context(), request.ID, reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, group).
+			UpdateRequest(c.Request().Context(), request.ID, reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, targets, group).
 			Return(updateRequest, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
@@ -1396,6 +1397,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
 		var tags []*model.Tag
+		var targets []*model.RequestTarget
 		var group *model.Group
 
 		e := echo.New()
@@ -1415,7 +1417,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			UpdateRequest(c.Request().Context(), unknownID, reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, group).
+			UpdateRequest(c.Request().Context(), unknownID, reqRequest.Amount, reqRequest.Title, reqRequest.Content, tags, targets, group).
 			Return(nil, resErr)
 
 		err = h.Handlers.PutRequest(c)
@@ -2055,13 +2057,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-		target := &model.RequestTarget{
+		target := &model.RequestTargetDetail{
 			ID:        uuid.New(),
 			Target:    random.AlphaNumeric(t, 20),
 			PaidAt:    nil,
 			CreatedAt: date,
 		}
-		targets := []*model.RequestTarget{target}
+		targets := []*model.RequestTargetDetail{target}
 
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
@@ -2772,13 +2774,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-		target := &model.RequestTarget{
+		target := &model.RequestTargetDetail{
 			ID:        uuid.New(),
 			Target:    random.AlphaNumeric(t, 20),
 			PaidAt:    &date,
 			CreatedAt: date,
 		}
-		targets := []*model.RequestTarget{target}
+		targets := []*model.RequestTargetDetail{target}
 
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
