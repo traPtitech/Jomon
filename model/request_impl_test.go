@@ -265,7 +265,7 @@ func TestEntRepository_GetRequest(t *testing.T) {
 	})
 }
 
-func TestEntREpository_UpdateRequest(t *testing.T) {
+func TestEntRepository_UpdateRequest(t *testing.T) {
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx, "update_request")
 	require.NoError(t, err)
