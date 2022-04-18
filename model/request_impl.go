@@ -288,10 +288,13 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	for _, tag := range enttags {
 		modeltags = append(modeltags, ConvertEntTagToModelTag(tag))
 	}
-	entgroup, err := updated.QueryGroup().Only(ctx)
-	if err != nil {
-		err = RollbackWithError(ctx, tx, err)
-		return nil, err
+	var entgroup *ent.Group
+	if group != nil {
+		entgroup, err = updated.QueryGroup().Only(ctx)
+		if err != nil {
+			err = RollbackWithError(ctx, tx, err)
+			return nil, err
+		}
 	}
 
 	err = repo.deleteRequestTargets(ctx, tx, requestID)

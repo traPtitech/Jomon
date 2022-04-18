@@ -87,7 +87,6 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 	client, storage, err := setup(t, ctx, "delete_request_targets")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
-	r := repo.(*EntRepository)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -100,15 +99,13 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 			Amount: random.Numeric(t, 100000),
 		}
 
-		user, err := r.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
-		request, err := r.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil, user.ID)
 		require.NoError(t, err)
-		tx, err := Tx(ctx, r.client)
-		require.NoError(t, err)
-		assert.NoError(t, r.deleteRequestTargets(ctx, tx, request.ID))
-		assert.NoError(t, tx.Commit())
-		got, err := r.GetRequestTargets(ctx, request.ID)
+		_, err = repo.UpdateRequest(ctx, request.ID, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{}, nil)
+		assert.NoError(t, err)
+		got, err := repo.GetRequestTargets(ctx, request.ID)
 		assert.NoError(t, err)
 		assert.Len(t, got, 0)
 	})
