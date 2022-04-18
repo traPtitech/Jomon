@@ -24,15 +24,19 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
 
 		budget := random.Numeric(t, 10000)
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
 
-		request1, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user1.ID)
+		request1, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user1.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		request2, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user2.ID)
+		request2, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user2.ID)
 		require.NoError(t, err)
 
 		sort := "created_at"
@@ -70,15 +74,19 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
 
 		budget := random.Numeric(t, 10000)
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
 
-		request1, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user1.ID)
+		request1, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user1.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		request2, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user2.ID)
+		request2, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user2.ID)
 		require.NoError(t, err)
 
 		sort := "-created_at"
@@ -123,12 +131,16 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
 
 		budget := random.Numeric(t, 10000)
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
 
-		request, err := repo.CreateRequest(ctx, amount, title, content, []*Tag{tag}, group, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, title, content, []*Tag{tag}, []*RequestTarget{target}, group, user.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, request.CreatedBy, user.ID)
 		assert.Equal(t, request.Status, Status(1))
@@ -151,7 +163,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
 
-		_, err = repo.CreateRequest(ctx, amount, title, content, []*Tag{tag}, group, uuid.New())
+		_, err = repo.CreateRequest(ctx, amount, title, content, []*Tag{tag}, []*RequestTarget{}, group, uuid.New())
 		assert.Error(t, err)
 	})
 
@@ -176,7 +188,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
 
-		_, err = repo.CreateRequest(ctx, amount, title, content, []*Tag{tag}, group, user.ID)
+		_, err = repo.CreateRequest(ctx, amount, title, content, []*Tag{tag}, []*RequestTarget{}, group, user.ID)
 		assert.Error(t, err)
 	})
 
@@ -201,7 +213,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
-		_, err = repo.CreateRequest(ctx, amount, title, content, []*Tag{tag}, group, user.ID)
+		_, err = repo.CreateRequest(ctx, amount, title, content, []*Tag{tag}, []*RequestTarget{}, group, user.ID)
 		assert.Error(t, err)
 	})
 }
@@ -218,10 +230,14 @@ func TestEntRepository_GetRequest(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
 		budget := random.Numeric(t, 10000)
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user.ID)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user.ID)
 		require.NoError(t, err)
 
 		got, err := repo.GetRequest(ctx, request.ID)
@@ -234,6 +250,8 @@ func TestEntRepository_GetRequest(t *testing.T) {
 		assert.Equal(t, got.Tags[0].ID, request.Tags[0].ID)
 		assert.Equal(t, got.Tags[0].Name, request.Tags[0].Name)
 		assert.Equal(t, got.Tags[0].Description, request.Tags[0].Description)
+		assert.Equal(t, got.Targets[0].Target, request.Targets[0].Target)
+		assert.Equal(t, got.Targets[0].Amount, request.Targets[0].Amount)
 		assert.Equal(t, got.Group.ID, request.Group.ID)
 		assert.Equal(t, got.Group.Name, request.Group.Name)
 		assert.Equal(t, got.Group.Description, request.Group.Description)
@@ -259,14 +277,18 @@ func TestEntREpository_UpdateRequest(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
 		budget := random.Numeric(t, 10000)
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user.ID)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user.ID)
 		require.NoError(t, err)
 
 		amount := random.Numeric(t, 100000)
-		updatedRequest, err := repo.UpdateRequest(ctx, request.ID, amount, request.Title, request.Content, []*Tag{tag}, group)
+		updatedRequest, err := repo.UpdateRequest(ctx, request.ID, amount, request.Title, request.Content, []*Tag{tag}, []*RequestTarget{target}, group)
 		assert.NoError(t, err)
 		assert.Equal(t, updatedRequest.ID, request.ID)
 		assert.Equal(t, updatedRequest.Status, request.Status)
@@ -288,14 +310,18 @@ func TestEntREpository_UpdateRequest(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
 		budget := random.Numeric(t, 10000)
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user.ID)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user.ID)
 		require.NoError(t, err)
 
 		title := random.AlphaNumeric(t, 40)
-		updatedRequest, err := repo.UpdateRequest(ctx, request.ID, request.Amount, title, request.Content, []*Tag{tag}, group)
+		updatedRequest, err := repo.UpdateRequest(ctx, request.ID, request.Amount, title, request.Content, []*Tag{tag}, []*RequestTarget{target}, group)
 		assert.NoError(t, err)
 		assert.Equal(t, updatedRequest.ID, request.ID)
 		assert.Equal(t, updatedRequest.Status, request.Status)
@@ -317,14 +343,18 @@ func TestEntREpository_UpdateRequest(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
 		budget := random.Numeric(t, 10000)
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user.ID)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user.ID)
 		require.NoError(t, err)
 
 		content := random.AlphaNumeric(t, 100)
-		updatedRequest, err := repo.UpdateRequest(ctx, request.ID, request.Amount, request.Title, content, []*Tag{tag}, group)
+		updatedRequest, err := repo.UpdateRequest(ctx, request.ID, request.Amount, request.Title, content, []*Tag{tag}, []*RequestTarget{target}, group)
 		assert.NoError(t, err)
 		assert.Equal(t, updatedRequest.ID, request.ID)
 		assert.Equal(t, updatedRequest.Status, request.Status)
@@ -346,10 +376,14 @@ func TestEntREpository_UpdateRequest(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
 		budget := random.Numeric(t, 10000)
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user.ID)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user.ID)
 		require.NoError(t, err)
 
 		date := time.Now()
@@ -360,7 +394,7 @@ func TestEntREpository_UpdateRequest(t *testing.T) {
 			CreatedAt:   date,
 			UpdatedAt:   date,
 		}
-		_, err = repo.UpdateRequest(ctx, request.ID, request.Amount, request.Title, request.Content, []*Tag{unknownTag}, group)
+		_, err = repo.UpdateRequest(ctx, request.ID, request.Amount, request.Title, request.Content, []*Tag{unknownTag}, []*RequestTarget{target}, group)
 		assert.Error(t, err)
 	})
 
@@ -370,10 +404,14 @@ func TestEntREpository_UpdateRequest(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
 		budget := random.Numeric(t, 10000)
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user.ID)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user.ID)
 		require.NoError(t, err)
 
 		date := time.Now()
@@ -386,7 +424,7 @@ func TestEntREpository_UpdateRequest(t *testing.T) {
 			CreatedAt:   date,
 			UpdatedAt:   date,
 		}
-		_, err = repo.UpdateRequest(ctx, request.ID, request.Amount, request.Title, request.Content, []*Tag{tag}, unknownGroup)
+		_, err = repo.UpdateRequest(ctx, request.ID, request.Amount, request.Title, request.Content, []*Tag{tag}, []*RequestTarget{target}, unknownGroup)
 		assert.Error(t, err)
 	})
 }
