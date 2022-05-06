@@ -116,7 +116,7 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 }
 
 func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, targets []*RequestTarget, group *Group, userID uuid.UUID) (*RequestDetail, error) {
-	tx, err := Tx(ctx, repo.client)
+	tx, err := repo.client.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -135,12 +135,12 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 		AddTagIDs(tagIDs...).
 		Save(ctx)
 	if err != nil {
-		err = RollbackWithError(ctx, tx, err)
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 	user, err := created.QueryUser().Select(user.FieldID).First(ctx)
 	if err != nil {
-		err = RollbackWithError(ctx, tx, err)
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 	if group != nil {
@@ -149,7 +149,7 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 			AddRequest(created).
 			Save(ctx)
 		if err != nil {
-			err = RollbackWithError(ctx, tx, err)
+			err = RollbackWithError(tx, err)
 			return nil, err
 		}
 	}
@@ -161,12 +161,12 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 		SetUser(user).
 		Save(ctx)
 	if err != nil {
-		err = RollbackWithError(ctx, tx, err)
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 	ts, err := repo.createRequestTargets(ctx, tx, created.ID, targets)
 	if err != nil {
-		err = RollbackWithError(ctx, tx, err)
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 	err = tx.Commit()
@@ -230,7 +230,7 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 }
 
 func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, content string, tags []*Tag, targets []*RequestTarget, group *Group) (*RequestDetail, error) {
-	tx, err := Tx(ctx, repo.client)
+	tx, err := repo.client.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -248,7 +248,7 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
-		err = RollbackWithError(ctx, tx, err)
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 
@@ -265,23 +265,23 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 			Save(ctx)
 	}
 	if err != nil {
-		err = RollbackWithError(ctx, tx, err)
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 
 	status, err := updated.QueryStatus().Select(requeststatus.FieldStatus).First(ctx)
 	if err != nil {
-		err = RollbackWithError(ctx, tx, err)
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 	user, err := updated.QueryUser().Select(user.FieldID).First(ctx)
 	if err != nil {
-		err = RollbackWithError(ctx, tx, err)
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 	enttags, err := updated.QueryTag().All(ctx)
 	if err != nil {
-		err = RollbackWithError(ctx, tx, err)
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 	var modeltags []*Tag
@@ -292,19 +292,19 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	if group != nil {
 		entgroup, err = updated.QueryGroup().Only(ctx)
 		if err != nil {
-			err = RollbackWithError(ctx, tx, err)
+			err = RollbackWithError(tx, err)
 			return nil, err
 		}
 	}
 
 	err = repo.deleteRequestTargets(ctx, tx, requestID)
 	if err != nil {
-		err = RollbackWithError(ctx, tx, err)
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 	modeltargets, err := repo.createRequestTargets(ctx, tx, requestID, targets)
 	if err != nil {
-		err = RollbackWithError(ctx, tx, err)
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 	err = tx.Commit()

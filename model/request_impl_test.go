@@ -229,6 +229,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := context.Background()
 		amount := random.Numeric(t, 100000)
 		title := random.AlphaNumeric(t, 40)
 		content := random.AlphaNumeric(t, 100)
@@ -258,6 +259,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 
 	t.Run("UnknownUser", func(t *testing.T) {
 		t.Parallel()
+		ctx := context.Background()
 		amount := random.Numeric(t, 100000)
 		title := random.AlphaNumeric(t, 40)
 		content := random.AlphaNumeric(t, 100)
@@ -274,6 +276,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 
 	t.Run("UnknownTag", func(t *testing.T) {
 		t.Parallel()
+		ctx := context.Background()
 		amount := random.Numeric(t, 100000)
 		title := random.AlphaNumeric(t, 40)
 		content := random.AlphaNumeric(t, 100)
@@ -299,6 +302,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 
 	t.Run("UnknownGroup", func(t *testing.T) {
 		t.Parallel()
+		ctx := context.Background()
 		amount := random.Numeric(t, 100000)
 		title := random.AlphaNumeric(t, 40)
 		content := random.AlphaNumeric(t, 100)
@@ -378,6 +382,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := context.Background()
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
@@ -411,6 +416,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
+		ctx := context.Background()
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
@@ -444,6 +450,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 
 	t.Run("Success3", func(t *testing.T) {
 		t.Parallel()
+		ctx := context.Background()
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
@@ -477,6 +484,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 
 	t.Run("UnknownTag", func(t *testing.T) {
 		t.Parallel()
+		ctx := context.Background()
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
@@ -505,6 +513,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 
 	t.Run("UnknownGroup", func(t *testing.T) {
 		t.Parallel()
+		ctx := context.Background()
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
