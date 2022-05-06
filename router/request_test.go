@@ -438,7 +438,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 	})
 
-	t.Run("SuccessWithTargets", func(t *testing.T) {
+	t.Run("SuccessWithTarget", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		date := time.Now()

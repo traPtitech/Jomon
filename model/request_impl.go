@@ -47,7 +47,7 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 				q.Order(ent.Desc(requeststatus.FieldCreatedAt))
 			}).
 			WithUser().
-			Order(ent.Desc(request.FieldTitle))
+			Order(ent.Asc(request.FieldTitle))
 	} else if *query.Sort == "-title" {
 		requestsq = repo.client.Request.
 			Query().
@@ -57,7 +57,7 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 				q.Order(ent.Desc(requeststatus.FieldCreatedAt))
 			}).
 			WithUser().
-			Order(ent.Asc(request.FieldTitle))
+			Order(ent.Desc(request.FieldTitle))
 	}
 
 	if query.Target != nil && *query.Target != "" {
