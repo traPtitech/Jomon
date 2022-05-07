@@ -144,6 +144,17 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 			})
 		}
 
+		var reqtargets []*TargetOverview
+		for _, target := range request.Targets {
+			reqtargets = append(reqtargets, &TargetOverview{
+				ID:        target.ID,
+				Target:    target.Target,
+				Amount:    target.Amount,
+				PaidAt:    target.PaidAt,
+				CreatedAt: target.CreatedAt,
+			})
+		}
+
 		var resgroup *GroupOverview
 		if request.Group != nil {
 			resgroup = &GroupOverview{
@@ -165,6 +176,7 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 			Amount:    request.Amount,
 			Title:     request.Title,
 			Content:   request.Content,
+			Targets:   reqtargets,
 			Tags:      tags,
 			Group:     resgroup,
 		}
@@ -318,6 +330,16 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 			UpdatedAt:   request.Group.UpdatedAt,
 		}
 	}
+	var reqtargets []*TargetOverview
+	for _, target := range request.Targets {
+		reqtargets = append(reqtargets, &TargetOverview{
+			ID:        target.ID,
+			Target:    target.Target,
+			Amount:    target.Amount,
+			PaidAt:    target.PaidAt,
+			CreatedAt: target.CreatedAt,
+		})
+	}
 	var restags []*TagOverview
 	for _, tag := range request.Tags {
 		restags = append(restags, &TagOverview{
@@ -338,6 +360,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      restags,
+		Targets:   reqtargets,
 		Group:     resgroup,
 		Comments:  comments,
 	}
