@@ -34,6 +34,8 @@ func init() {
 	commentDescUpdatedAt := commentFields[3].Descriptor()
 	// comment.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	comment.DefaultUpdatedAt = commentDescUpdatedAt.Default.(func() time.Time)
+	// comment.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	comment.UpdateDefaultUpdatedAt = commentDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// commentDescID is the schema descriptor for id field.
 	commentDescID := commentFields[0].Descriptor()
 	// comment.DefaultID holds the default value on creation for the id field.
@@ -66,6 +68,8 @@ func init() {
 	groupDescUpdatedAt := groupFields[5].Descriptor()
 	// group.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	group.DefaultUpdatedAt = groupDescUpdatedAt.Default.(func() time.Time)
+	// group.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	group.UpdateDefaultUpdatedAt = groupDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// groupDescID is the schema descriptor for id field.
 	groupDescID := groupFields[0].Descriptor()
 	// group.DefaultID holds the default value on creation for the id field.
@@ -90,6 +94,8 @@ func init() {
 	requestDescUpdatedAt := requestFields[5].Descriptor()
 	// request.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	request.DefaultUpdatedAt = requestDescUpdatedAt.Default.(func() time.Time)
+	// request.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	request.UpdateDefaultUpdatedAt = requestDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// requestDescID is the schema descriptor for id field.
 	requestDescID := requestFields[0].Descriptor()
 	// request.DefaultID holds the default value on creation for the id field.
@@ -128,6 +134,8 @@ func init() {
 	tagDescUpdatedAt := tagFields[4].Descriptor()
 	// tag.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	tag.DefaultUpdatedAt = tagDescUpdatedAt.Default.(func() time.Time)
+	// tag.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	tag.UpdateDefaultUpdatedAt = tagDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// tagDescID is the schema descriptor for id field.
 	tagDescID := tagFields[0].Descriptor()
 	// tag.DefaultID holds the default value on creation for the id field.
@@ -160,6 +168,8 @@ func init() {
 	transactiondetailDescUpdatedAt := transactiondetailFields[4].Descriptor()
 	// transactiondetail.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	transactiondetail.DefaultUpdatedAt = transactiondetailDescUpdatedAt.Default.(func() time.Time)
+	// transactiondetail.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	transactiondetail.UpdateDefaultUpdatedAt = transactiondetailDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// transactiondetailDescID is the schema descriptor for id field.
 	transactiondetailDescID := transactiondetailFields[0].Descriptor()
 	// transactiondetail.DefaultID holds the default value on creation for the id field.
@@ -182,6 +192,8 @@ func init() {
 	userDescUpdatedAt := userFields[5].Descriptor()
 	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
+	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
 	// user.DefaultID holds the default value on creation for the id field.

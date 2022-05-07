@@ -26,7 +26,8 @@ func (Request) Fields() []ent.Field {
 		field.Time("created_at").
 			Default(time.Now),
 		field.Time("updated_at").
-			Default(time.Now),
+			Default(time.Now).
+			UpdateDefault(time.Now),
 	}
 }
 

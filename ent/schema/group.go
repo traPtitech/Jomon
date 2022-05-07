@@ -28,7 +28,8 @@ func (Group) Fields() []ent.Field {
 		field.Time("created_at").
 			Default(time.Now),
 		field.Time("updated_at").
-			Default(time.Now),
+			Default(time.Now).
+			UpdateDefault(time.Now),
 		field.Time("deleted_at").
 			Optional().
 			Nillable(),
