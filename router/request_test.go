@@ -836,6 +836,85 @@ func TestHandlers_GetRequest(t *testing.T) {
 		}
 	})
 
+	t.Run("SuccessWithTarget", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		target := &TargetOverview{
+			ID:        uuid.New(),
+			Target:    random.AlphaNumeric(t, 20),
+			Amount:    random.Numeric(t, 1000000),
+			PaidAt:    nil,
+			CreatedAt: date,
+		}
+
+		modeltarget := &model.RequestTargetDetail{
+			ID:        target.ID,
+			Target:    target.Target,
+			Amount:    target.Amount,
+			PaidAt:    target.PaidAt,
+			CreatedAt: target.CreatedAt,
+		}
+
+		request := &model.RequestDetail{
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Comments:  []*model.Comment{},
+			Files:     []*uuid.UUID{},
+			Statuses:  []*model.RequestStatus{},
+			Tags:      []*model.Tag{},
+			Content:   random.AlphaNumeric(t, 50),
+			Targets:   []*model.RequestTargetDetail{modeltarget},
+			CreatedAt: date,
+			UpdatedAt: date,
+			CreatedBy: uuid.New(),
+		}
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests/%s", request.ID.String()), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/requests/:requestID")
+		c.SetParamNames("requestID")
+		c.SetParamValues(request.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequest(c.Request().Context(), request.ID).
+			Return(request, nil)
+		h.Repository.MockCommentRepository.
+			EXPECT().
+			GetComments(c.Request().Context(), request.ID).
+			Return(nil, nil)
+
+		res := &RequestResponse{
+			ID:        request.ID,
+			Status:    request.Status,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: request.UpdatedAt,
+			CreatedBy: request.CreatedBy,
+			Amount:    request.Amount,
+			Title:     request.Title,
+			Content:   request.Content,
+			Targets:   []*TargetOverview{target},
+		}
+
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.GetRequest(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
