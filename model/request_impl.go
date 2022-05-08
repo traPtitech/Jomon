@@ -120,6 +120,12 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		if v := recover(); v != nil {
+			tx.Rollback()
+			panic(v)
+		}
+	}()
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
 		tagIDs = append(tagIDs, tag.ID)
@@ -234,6 +240,12 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		if v := recover(); v != nil {
+			tx.Rollback()
+			panic(v)
+		}
+	}()
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
 		tagIDs = append(tagIDs, tag.ID)
@@ -245,7 +257,6 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		SetContent(content).
 		ClearTag().
 		AddTagIDs(tagIDs...).
-		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
