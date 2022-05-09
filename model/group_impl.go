@@ -34,17 +34,41 @@ func (repo *EntRepository) GetGroup(ctx context.Context, groupID uuid.UUID) (*Gr
 	return ConvertEntGroupToModelGroup(group), nil
 }
 
-func (repo *EntRepository) CreateGroup(ctx context.Context, name string, description string, budget *int, owners *[]User) (*Group, error) {
+func (repo *EntRepository) CreateGroup(ctx context.Context, name string, description string, budget *int) (*Group, error) {
 	created, err := repo.client.Group.
 		Create().
 		SetName(name).
 		SetDescription(description).
-		SetBudget(*budget).
+		SetNillableBudget(budget).
 		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
+
 	return ConvertEntGroupToModelGroup(created), nil
+}
+
+func (repo *EntRepository) UpdateGroup(ctx context.Context, groupID uuid.UUID, name string, description string, budget *int) (*Group, error) {
+	updated, err := repo.client.Group.
+		UpdateOneID(groupID).
+		SetName(name).
+		SetDescription(description).
+		ClearBudget().
+		SetNillableBudget(budget).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return ConvertEntGroupToModelGroup(updated), nil
+}
+
+func (repo *EntRepository) DeleteGroup(ctx context.Context, groupID uuid.UUID) error {
+	err := repo.client.Group.
+		DeleteOneID(groupID).
+		Exec(ctx)
+
+	return err
 }
 
 func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]*Owner, error) {
@@ -65,7 +89,7 @@ func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]
 	return owners, nil
 }
 
-func (repo *EntRepository) CreateOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) (*Owner, error) {
+func (repo *EntRepository) AddOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) (*Owner, error) {
 	_, err := repo.client.Group.
 		Update().
 		Where(group.IDEQ(groupID)).
@@ -109,7 +133,7 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	return modelmembers, nil
 }
 
-func (repo *EntRepository) CreateMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*Member, error) {
+func (repo *EntRepository) AddMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*Member, error) {
 	_, err := repo.client.Group.
 		UpdateOneID(groupID).
 		AddUserIDs(userID).

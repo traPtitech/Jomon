@@ -37,7 +37,6 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -49,26 +48,22 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
 	if !ok {
-		c.Logger().Error(err)
 		return echo.ErrInternalServerError
 	}
 
 	res, err := service.RequestAccessToken(code, codeVerifier)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	u, err := service.FetchTraQUserInfo(res.AccessToken)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	ctx := context.Background()
 	modelUser, err := h.Repository.GetUserByName(ctx, u.Name)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -83,7 +78,6 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {
-		c.Logger().Error(err)
 		return echo.ErrInternalServerError
 	}
 
@@ -94,7 +88,6 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 	gob.Register(&User{})
 	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -114,7 +107,6 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 
 	err = sess.Save(c.Request(), c.Response())
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 

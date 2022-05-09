@@ -11,7 +11,7 @@ type Swift struct {
 	conn      *swift.Connection
 }
 
-func NewSwiftStorage(container string, userName string, apiKey string, tenant string, tenantID string, authURL string) (Storage, error) {
+func NewSwiftStorage(container string, userName string, apiKey string, tenant string, tenantID string, authURL string) (*Swift, error) {
 	conn := &swift.Connection{
 		AuthUrl:  authURL,
 		UserName: userName,

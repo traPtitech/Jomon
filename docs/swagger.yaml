@@ -35,7 +35,7 @@ paths:
       tags:
         - Transactions
       parameters:
-        - $ref: "#/components/parameters/sortQuery"
+        - $ref: "#/components/parameters/sortTransactionQuery"
         - $ref: "#/components/parameters/targetQuery"
         - $ref: "#/components/parameters/yearQuery"
         - $ref: "#/components/parameters/sinceQuery"
@@ -124,7 +124,7 @@ paths:
       tags:
         - Requests
       parameters:
-        - $ref: "#/components/parameters/sortQuery"
+        - $ref: "#/components/parameters/sortRequestQuery"
         - $ref: "#/components/parameters/targetQuery"
         - $ref: "#/components/parameters/yearQuery"
         - $ref: "#/components/parameters/sinceQuery"
@@ -574,19 +574,24 @@ paths:
                     type: array
                     items:
                     $ref: "#/components/schemas/TrapID"
+  "/groups/{groupID}/owners/{memberID}":
+    parameters:
+      - name: groupID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: memberID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
     delete:
       description: ユーザーをグループから削除する。管理者権限またはグループオーナー権限が必要。
       tags:
         - Groups
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  $ref: "#/components/schemas/TrapID"
       responses:
         "200":
           description: 削除に成功した。
@@ -639,19 +644,24 @@ paths:
                 properties:
                   id:
                     $ref: "#/components/schemas/TrapID"
+  "/groups/{groupID}/owners/{ownerID}":
+    parameters:
+      - name: groupID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: ownerID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
     delete:
       description: グループオーナーをグループから削除する。管理者権限またはグループオーナー権限が必要。
       tags:
         - Groups
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  $ref: "#/components/schemas/TrapID"
       responses:
         "200":
           description: 削除に成功した。
@@ -675,11 +685,13 @@ paths:
               schema:
                 type: object
                 properties:
-                  file_id:
+                  id:
                     type: string
                     format: uuid
         "400":
           $ref: "#/components/responses/400"
+        "500":
+          $ref: "#/components/responses/500"
   "/files/{fileID}":
     parameters:
       - name: fileID
@@ -696,11 +708,18 @@ paths:
         "200":
           description: 該当するファイルが存在した 返す
           content:
-            multipart/form-data:
+            application/octet-stream:
               schema:
-                $ref: "#/components/schemas/File"
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/400"
         "404":
           $ref: "#/components/responses/404"
+        "304":
+          $ref: "#/components/responses/304"
+        "500":
+          $ref: "#/components/responses/500"
     delete:
       description: 指定したidのファイルを削除する。管理者権限または作成者権限が必要。
       tags:
@@ -708,10 +727,39 @@ paths:
       responses:
         "204":
           description: 正常に取り消すことができた。
+        "400":
+          $ref: "#/components/responses/400"
         "403":
           $ref: "#/components/responses/403"
         "404":
           $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+  "/files/{fileID}/meta":
+    parameters:
+      - name: fileID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - Files
+      description: 指定されたファイルのメタデータを返す
+      responses:
+        "200":
+          description: 該当するファイルのメタデータが存在した 返す
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileMeta"
+        "400":
+          $ref: "#/components/responses/400"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
 
 
   /users:
@@ -852,6 +900,19 @@ components:
         name:
           type: string
           example: "hoge.png"
+    FileMeta:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        mime_type:
+          type: string
+        created_at:
+          type: string
+          format: date-time
     Target:
       type: string
       example: "hoge株式会社"
@@ -1049,17 +1110,28 @@ components:
         admin:
           type: "boolean"
   responses:
+    304:
+      description: Not Modified
     400:
       description: 不正なリクエスト。
     403:
       description: 編集権限がない人による操作。
     404:
       description: 指定したリソースは存在しない。
+    500:
+      description: サーバーエラー。
 
   parameters:
-    sortQuery:
+    sortRequestQuery:
       name: sort
       description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", タイトルの昇順 "title", タイトルの降順 "-title")
+      required: false
+      in: query
+      schema:
+        type: string
+    sortTransactionQuery:
+      name: sort
+      description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at")
       required: false
       in: query
       schema:

@@ -11,12 +11,14 @@ import (
 type GroupRepository interface {
 	GetGroups(ctx context.Context) ([]*Group, error)
 	GetGroup(ctx context.Context, groupID uuid.UUID) (*Group, error)
-	CreateGroup(ctx context.Context, name string, description string, budget *int, owners *[]User) (*Group, error)
+	CreateGroup(ctx context.Context, name string, description string, budget *int) (*Group, error)
+	UpdateGroup(ctx context.Context, groupID uuid.UUID, name string, description string, budget *int) (*Group, error)
+	DeleteGroup(ctx context.Context, groupID uuid.UUID) error
 	GetOwners(ctx context.Context, groupID uuid.UUID) ([]*Owner, error)
-	CreateOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) (*Owner, error)
+	AddOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) (*Owner, error)
 	DeleteOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) error
 	GetMembers(ctx context.Context, groupID uuid.UUID) ([]*Member, error)
-	CreateMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*Member, error)
+	AddMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*Member, error)
 	DeleteMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) error
 }
 

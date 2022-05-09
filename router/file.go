@@ -1,21 +1,34 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/ent"
 )
 
 type FileResponse struct {
-	FileIDs []*uuid.UUID `json:"file_ids"`
+	ID uuid.UUID `json:"id"`
+}
+
+type FileMetaResponse struct {
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	MimeType  string    `json:"mime_type"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 var acceptedMimeTypes = map[string]bool{
-	"image/jpeg": true,
-	"image/png":  true,
-	"image/gif":  true,
-	"image/bmp":  true,
+	"image/jpeg":         true,
+	"image/png":          true,
+	"image/gif":          true,
+	"image/bmp":          true,
+	"application/pdf":    true,
+	"application/msword": true,
+	"application/zip":    true,
 }
 
 func (h *Handlers) PostFile(c echo.Context) error {
@@ -23,47 +36,132 @@ func (h *Handlers) PostFile(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-
-	var fileIDs []*uuid.UUID
-	file := form.File["file"][0]
-	name := form.Value["name"][0]
-	requestID, err := uuid.Parse(form.Value["request_id"][0])
+	files, ok := form.File["file"]
+	if !ok || len(files) != 1 {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid file"))
+	}
+	reqfile := files[0]
+	names, ok := form.Value["name"]
+	if !ok || len(names) != 1 {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid file name"))
+	}
+	name := names[0]
+	requestIDs, ok := form.Value["request_id"]
+	if !ok || len(requestIDs) != 1 {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid file request id"))
+	}
+	requestID, err := uuid.Parse(requestIDs[0])
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	mimetype := file.Header.Get(echo.HeaderContentType)
+	mimetype := reqfile.Header.Get(echo.HeaderContentType)
 	if !acceptedMimeTypes[mimetype] {
-		return c.NoContent(http.StatusUnsupportedMediaType)
+		return echo.NewHTTPError(http.StatusUnsupportedMediaType, fmt.Errorf("unsupported media type"))
 	}
 
-	src, err := file.Open()
+	src, err := reqfile.Open()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	defer src.Close()
 
-	err = h.Storage.Save(name, src)
+	ctx := c.Request().Context()
+	file, err := h.Repository.CreateFile(ctx, name, mimetype, requestID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	// TODO: src とかを引数に取らなくて良いようにする
-	created, err := h.Repository.CreateFile(c.Request().Context(), src, name, mimetype, requestID)
+	err = h.Storage.Save(file.ID.String(), src)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	fileIDs = append(fileIDs, &created.ID)
-	return c.JSON(http.StatusOK, &FileResponse{fileIDs})
+	return c.JSON(http.StatusOK, &FileResponse{file.ID})
 }
 
 func (h *Handlers) GetFile(c echo.Context) error {
-	return c.NoContent(http.StatusOK)
-	// TODO: Implement
+	fileID, err := uuid.Parse(c.Param("fileID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	ctx := c.Request().Context()
+	file, err := h.Repository.GetFile(ctx, fileID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	modifiedAt := file.CreatedAt.Truncate(time.Second)
+
+	im := c.Request().Header.Get(echo.HeaderIfModifiedSince)
+	if im != "" {
+		imt, err := http.ParseTime(im)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		if modifiedAt.Before(imt) || modifiedAt.Equal(imt) {
+			return c.NoContent(http.StatusNotModified)
+		}
+	}
+
+	f, err := h.Storage.Open(fileID.String())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	defer f.Close()
+
+	c.Response().Header().Set("Cache-Control", "private, no-cache, max-age=0")
+	c.Response().Header().Set(echo.HeaderLastModified, modifiedAt.UTC().Format(http.TimeFormat))
+
+	return c.Stream(http.StatusOK, file.MimeType, f)
+}
+
+func (h *Handlers) GetFileMeta(c echo.Context) error {
+	fileID, err := uuid.Parse(c.Param("fileID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	ctx := c.Request().Context()
+	file, err := h.Repository.GetFile(ctx, fileID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return c.JSON(http.StatusOK, &FileMetaResponse{
+		ID:        file.ID,
+		Name:      file.Name,
+		MimeType:  file.MimeType,
+		CreatedAt: file.CreatedAt,
+	})
 }
 
 func (h *Handlers) DeleteFile(c echo.Context) error {
+	fileID, err := uuid.Parse(c.Param("fileID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	ctx := c.Request().Context()
+	err = h.Repository.DeleteFile(ctx, fileID)
+	if err != nil {
+		if ent.IsConstraintError(err) {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	err = h.Storage.Delete(fileID.String())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
 	return c.NoContent(http.StatusOK)
-	// TODO: Implement
 }

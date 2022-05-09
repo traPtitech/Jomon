@@ -7,83 +7,82 @@
 		<div class="mermaid" id="er-diagram">
 erDiagram
     Comment {
-        id uuidDOTUUID
-        comment string
-        created_at timeDOTTime
-        updated_at timeDOTTime
-        deleted_at timeDOTTime
+        uuidDOTUUID id
+        string comment
+        timeDOTTime created_at
+        timeDOTTime updated_at
+        timeDOTTime deleted_at
     }
     File {
-        id uuidDOTUUID
-        name string
-        mime_type string
-        created_at timeDOTTime
-        deleted_at timeDOTTime
+        uuidDOTUUID id
+        string name
+        string mime_type
+        timeDOTTime created_at
+        timeDOTTime deleted_at
     }
     Group {
-        id uuidDOTUUID
-        name string
-        description string
-        budget int
-        created_at timeDOTTime
-        updated_at timeDOTTime
-        deleted_at timeDOTTime
+        uuidDOTUUID id
+        string name
+        string description
+        int budget
+        timeDOTTime created_at
+        timeDOTTime updated_at
+        timeDOTTime deleted_at
     }
     GroupBudget {
-        id uuidDOTUUID
-        amount int
-        comment string
-        created_at timeDOTTime
+        uuidDOTUUID id
+        int amount
+        string comment
+        timeDOTTime created_at
     }
     Request {
-        id uuidDOTUUID
-        amount int
-        title string
-        content string
-        created_at timeDOTTime
-        updated_at timeDOTTime
+        uuidDOTUUID id
+        int amount
+        string title
+        string content
+        timeDOTTime created_at
+        timeDOTTime updated_at
     }
     RequestStatus {
-        id uuidDOTUUID
-        status requeststatusDOTStatus
-        reason string
-        created_at timeDOTTime
+        uuidDOTUUID id
+        requeststatusDOTStatus status
+        timeDOTTime created_at
     }
     RequestTarget {
-        id uuidDOTUUID
-        target string
-        paid_at timeDOTTime
-        created_at timeDOTTime
+        uuidDOTUUID id
+        string target
+        timeDOTTime paid_at
+        timeDOTTime created_at
     }
     Tag {
-        id uuidDOTUUID
-        name string
-        description string
-        created_at timeDOTTime
-        updated_at timeDOTTime
-        deleted_at timeDOTTime
+        uuidDOTUUID id
+        string name
+        string description
+        timeDOTTime created_at
+        timeDOTTime updated_at
+        timeDOTTime deleted_at
     }
     Transaction {
-        id uuidDOTUUID
-        created_at timeDOTTime
+        uuidDOTUUID id
+        timeDOTTime created_at
     }
     TransactionDetail {
-        id uuidDOTUUID
-        amount int
-        target string
-        created_at timeDOTTime
-        updated_at timeDOTTime
+        uuidDOTUUID id
+        int amount
+        string target
+        timeDOTTime created_at
+        timeDOTTime updated_at
     }
     User {
-        id uuidDOTUUID
-        name string
-        display_name string
-        admin bool
-        created_at timeDOTTime
-        updated_at timeDOTTime
-        deleted_at timeDOTTime
+        uuidDOTUUID id
+        string name
+        string display_name
+        bool admin
+        timeDOTTime created_at
+        timeDOTTime updated_at
+        timeDOTTime deleted_at
     }
-    	Comment |o--o| User : "user/comment"
+    	Comment }o--o| User : "user/comment"
     	Group |o--o{ GroupBudget : "group_budget/group"
     	Group }o--o{ User : "user/group_user"
     	Group }o--o{ User : "owner/group_owner"
@@ -92,11 +91,11 @@ erDiagram
     	Request |o--o{ RequestStatus : "status/request"
     	Request |o--o{ RequestTarget : "target/request"
     	Request |o--o{ File : "file/request"
-    	Request |o--o{ Tag : "tag/request"
+    	Request }o--o{ Tag : "tag/request"
     	Request |o--o{ Transaction : "transaction/request"
     	Request |o--o{ Comment : "comment/request"
-    	Request |o--o| User : "user/request"
-    	RequestStatus |o--o| User : "user/request_status"
+    	Request }o--o| User : "user/request"
+    	RequestStatus }o--o| User : "user/request_status"
     	Transaction |o--o| TransactionDetail : "detail/transaction"
     	Transaction |o--o{ Tag : "tag/transaction"
 		</div>
