@@ -3,6 +3,7 @@ package router
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/gob"
 	"errors"
 	"fmt"
 	"io"
@@ -15,6 +16,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -32,6 +35,12 @@ func TestHandlers_PostFile(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		request := uuid.New()
+		user := &User{
+			ID:          uuid.New(),
+			Name:        "test",
+			DisplayName: "test",
+			Admin:       true,
+		}
 
 		pr, pw := io.Pipe()
 		writer := multipart.NewWriter(pw)
@@ -55,16 +64,29 @@ func TestHandlers_PostFile(t *testing.T) {
 		}
 
 		e := echo.New()
-		req := httptest.NewRequest(echo.POST, "/api/files", pr)
+		req, err := http.NewRequest(http.MethodPost, "/api/files", pr)
+		require.NoError(t, err)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
+		gob.Register(User{})
+		sess, err := session.Get(h.Handlers.SessionName, c)
+		require.NoError(t, err)
+		sess.Values[sessionUserKey] = user
+		require.NoError(t, sess.Save(c.Request(), c.Response()))
+
 		h.Repository.MockFileRepository.
 			EXPECT().
-			CreateFile(c.Request().Context(), "test", "image/jpeg", request).
+			CreateFile(c.Request().Context(), "test", "image/jpeg", request, user.ID).
 			Return(file, nil)
 
 		h.Storage.
@@ -82,6 +104,12 @@ func TestHandlers_PostFile(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		request := uuid.New()
+		user := &User{
+			ID:          uuid.New(),
+			Name:        "test",
+			DisplayName: "test",
+			Admin:       true,
+		}
 
 		pr, pw := io.Pipe()
 		writer := multipart.NewWriter(pw)
@@ -101,18 +129,32 @@ func TestHandlers_PostFile(t *testing.T) {
 		}()
 
 		e := echo.New()
-		req := httptest.NewRequest(echo.POST, "/api/files", pr)
+		req, err := http.NewRequest(http.MethodPost, "/api/files", pr)
+		require.NoError(t, err)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		gob.Register(User{})
+		sess, err := session.Get(h.Handlers.SessionName, c)
+		require.NoError(t, err)
+		sess.Values[sessionUserKey] = user
+		require.NoError(t, sess.Save(c.Request(), c.Response()))
 
 		mocErr := errors.New("failed to create file")
 
-		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
-			CreateFile(c.Request().Context(), "test", "image/jpeg", request).
+			CreateFile(c.Request().Context(), "test", "image/jpeg", request, user.ID).
 			Return(nil, mocErr)
 
 		err = h.Handlers.PostFile(c)
@@ -126,6 +168,12 @@ func TestHandlers_PostFile(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		request := uuid.New()
+		user := &User{
+			ID:          uuid.New(),
+			Name:        "test",
+			DisplayName: "test",
+			Admin:       true,
+		}
 
 		pr, pw := io.Pipe()
 		writer := multipart.NewWriter(pw)
@@ -149,16 +197,29 @@ func TestHandlers_PostFile(t *testing.T) {
 		}
 
 		e := echo.New()
-		req := httptest.NewRequest(echo.POST, "/api/files", pr)
+		req, err := http.NewRequest(http.MethodPost, "/api/files", pr)
+		require.NoError(t, err)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
+		gob.Register(User{})
+		sess, err := session.Get(h.Handlers.SessionName, c)
+		require.NoError(t, err)
+		sess.Values[sessionUserKey] = user
+		require.NoError(t, sess.Save(c.Request(), c.Response()))
+
 		h.Repository.MockFileRepository.
 			EXPECT().
-			CreateFile(c.Request().Context(), "test", "image/jpeg", request).
+			CreateFile(c.Request().Context(), "test", "image/jpeg", request, user.ID).
 			Return(file, nil)
 
 		mocErr := errors.New("failed to save file")
@@ -334,6 +395,7 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
+			CreatedBy: uuid.New(),
 			CreatedAt: time.Now(),
 		}
 
@@ -367,6 +429,7 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
+			CreatedBy: uuid.New(),
 			CreatedAt: time.Now(),
 		}
 

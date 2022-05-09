@@ -23,6 +23,8 @@ const (
 	FieldDeletedAt = "deleted_at"
 	// EdgeRequest holds the string denoting the request edge name in mutations.
 	EdgeRequest = "request"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 	// Table holds the table name of the file in the database.
 	Table = "files"
 	// RequestTable is the table that holds the request relation/edge.
@@ -32,6 +34,13 @@ const (
 	RequestInverseTable = "requests"
 	// RequestColumn is the table column denoting the request relation/edge.
 	RequestColumn = "request_file"
+	// UserTable is the table that holds the user relation/edge.
+	UserTable = "files"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "file_user"
 )
 
 // Columns holds all SQL columns for file fields.
@@ -46,6 +55,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "files"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"file_user",
 	"request_file",
 }
 

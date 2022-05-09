@@ -194,6 +194,27 @@ func (h Handlers) CheckFileCreatorMiddleware(next echo.HandlerFunc) echo.Handler
 	}
 }
 
+func (h Handlers) CheckAdminOrFileCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		sess, err := session.Get(h.SessionName, c)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+
+		user, err := getUserInfo(sess)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+
+		creator := sess.Values[sessionFileCreatorKey].(uuid.UUID)
+		if creator != user.ID && !user.Admin {
+			return echo.NewHTTPError(http.StatusForbidden, "you are not admin or creator")
+		}
+
+		return next(c)
+	}
+}
+
 func (h Handlers) RetrieveGroupOwner(repo model.Repository) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {

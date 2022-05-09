@@ -1508,7 +1508,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -1611,7 +1611,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -1714,7 +1714,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -1817,7 +1817,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -1920,7 +1920,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2030,7 +2030,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2124,7 +2124,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2183,7 +2183,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues("hoge")
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2239,7 +2239,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(uuid.Nil.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2304,7 +2304,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2361,7 +2361,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2431,7 +2431,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2501,7 +2501,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2571,7 +2571,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2642,7 +2642,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2718,7 +2718,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2800,7 +2800,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2879,7 +2879,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -2954,7 +2954,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))

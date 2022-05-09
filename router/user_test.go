@@ -5,12 +5,13 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"errors"
-	"github.com/gorilla/sessions"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gorilla/sessions"
 
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo-contrib/session"
@@ -297,7 +298,7 @@ func TestHandlers_GetMe(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
@@ -323,13 +324,13 @@ func TestHandlers_GetMe(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		e := echo.New()
-		e.Use(session.Middleware(sessions.NewCookieStore([]byte("session"))))
+		e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 		req, err := http.NewRequest(http.MethodPut, "/api/users/me", nil)
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		mw := session.Middleware(sessions.NewCookieStore([]byte("session")))
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))

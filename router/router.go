@@ -31,6 +31,7 @@ func NewServer(h Handlers) *echo.Echo {
 
 	retrieveGroupOwner := h.RetrieveGroupOwner(h.Repository)
 	retrieveRequestCreator := h.RetrieveRequestCreator(h.Repository)
+	retrieveFileCreator := h.RetrieveFileCreator(h.Repository)
 
 	api := e.Group("/api")
 	{
@@ -44,7 +45,7 @@ func NewServer(h Handlers) *echo.Echo {
 		{
 			apiRequests.GET("", h.GetRequests)
 			apiRequests.POST("", h.PostRequest, middleware.BodyDump(service.WebhookEventHandler))
-			apiRequestIDs := api.Group("/:requestID", retrieveRequestCreator)
+			apiRequestIDs := apiRequests.Group("/:requestID", retrieveRequestCreator)
 			{
 				apiRequestIDs.GET("", h.GetRequest)
 				apiRequestIDs.PUT("", h.PutRequest, middleware.BodyDump(service.WebhookEventHandler), h.CheckRequestCreatorMiddleware)
@@ -64,9 +65,12 @@ func NewServer(h Handlers) *echo.Echo {
 		apiFiles := api.Group("/files", h.CheckLoginMiddleware)
 		{
 			apiFiles.POST("", h.PostFile)
-			apiFiles.GET("/:fileID", h.GetFile)
-			apiFiles.DELETE("/:fileID", h.DeleteFile)
-			apiFiles.GET("/:fileID/meta", h.GetFileMeta)
+			apiFileIDs := apiFiles.Group("/:fileID", retrieveFileCreator)
+			{
+				apiFileIDs.GET("", h.GetFile)
+				apiFileIDs.DELETE("", h.DeleteFile, h.CheckAdminOrFileCreatorMiddleware)
+				apiFileIDs.GET("/meta", h.GetFileMeta)
+			}
 		}
 
 		apiTags := api.Group("/tags", h.CheckLoginMiddleware)
@@ -81,7 +85,7 @@ func NewServer(h Handlers) *echo.Echo {
 		{
 			apiGroups.GET("", h.GetGroups)
 			apiGroups.POST("", h.PostGroup, h.CheckAdminMiddleware)
-			apiGroupIDs := api.Group("/:groupID", retrieveGroupOwner)
+			apiGroupIDs := apiGroups.Group("/:groupID", retrieveGroupOwner)
 			{
 				apiGroupIDs.PUT("", h.PutGroup, h.CheckAdminOrGroupOwnerMiddleware)
 				apiGroupIDs.DELETE("", h.DeleteGroup, h.CheckAdminOrGroupOwnerMiddleware)

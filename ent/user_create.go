@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
+	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
@@ -180,6 +181,21 @@ func (uc *UserCreate) AddRequest(r ...*Request) *UserCreate {
 		ids[i] = r[i].ID
 	}
 	return uc.AddRequestIDs(ids...)
+}
+
+// AddFileIDs adds the "file" edge to the File entity by IDs.
+func (uc *UserCreate) AddFileIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddFileIDs(ids...)
+	return uc
+}
+
+// AddFile adds the "file" edges to the File entity.
+func (uc *UserCreate) AddFile(f ...*File) *UserCreate {
+	ids := make([]uuid.UUID, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return uc.AddFileIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -464,6 +480,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.FileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.FileTable,
+			Columns: []string{user.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: file.FieldID,
 				},
 			},
 		}

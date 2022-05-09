@@ -15,6 +15,7 @@ import (
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // FileUpdate is the builder for updating File entities.
@@ -95,6 +96,17 @@ func (fu *FileUpdate) SetRequest(r *Request) *FileUpdate {
 	return fu.SetRequestID(r.ID)
 }
 
+// SetUserID sets the "user" edge to the User entity by ID.
+func (fu *FileUpdate) SetUserID(id uuid.UUID) *FileUpdate {
+	fu.mutation.SetUserID(id)
+	return fu
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (fu *FileUpdate) SetUser(u *User) *FileUpdate {
+	return fu.SetUserID(u.ID)
+}
+
 // Mutation returns the FileMutation object of the builder.
 func (fu *FileUpdate) Mutation() *FileMutation {
 	return fu.mutation
@@ -103,6 +115,12 @@ func (fu *FileUpdate) Mutation() *FileMutation {
 // ClearRequest clears the "request" edge to the Request entity.
 func (fu *FileUpdate) ClearRequest() *FileUpdate {
 	fu.mutation.ClearRequest()
+	return fu
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (fu *FileUpdate) ClearUser() *FileUpdate {
+	fu.mutation.ClearUser()
 	return fu
 }
 
@@ -172,6 +190,9 @@ func (fu *FileUpdate) check() error {
 		if err := file.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "File.name": %w`, err)}
 		}
+	}
+	if _, ok := fu.mutation.UserID(); fu.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "File.user"`)
 	}
 	return nil
 }
@@ -255,6 +276,41 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if fu.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   file.UserTable,
+			Columns: []string{file.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fu.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   file.UserTable,
+			Columns: []string{file.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -347,6 +403,17 @@ func (fuo *FileUpdateOne) SetRequest(r *Request) *FileUpdateOne {
 	return fuo.SetRequestID(r.ID)
 }
 
+// SetUserID sets the "user" edge to the User entity by ID.
+func (fuo *FileUpdateOne) SetUserID(id uuid.UUID) *FileUpdateOne {
+	fuo.mutation.SetUserID(id)
+	return fuo
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (fuo *FileUpdateOne) SetUser(u *User) *FileUpdateOne {
+	return fuo.SetUserID(u.ID)
+}
+
 // Mutation returns the FileMutation object of the builder.
 func (fuo *FileUpdateOne) Mutation() *FileMutation {
 	return fuo.mutation
@@ -355,6 +422,12 @@ func (fuo *FileUpdateOne) Mutation() *FileMutation {
 // ClearRequest clears the "request" edge to the Request entity.
 func (fuo *FileUpdateOne) ClearRequest() *FileUpdateOne {
 	fuo.mutation.ClearRequest()
+	return fuo
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (fuo *FileUpdateOne) ClearUser() *FileUpdateOne {
+	fuo.mutation.ClearUser()
 	return fuo
 }
 
@@ -431,6 +504,9 @@ func (fuo *FileUpdateOne) check() error {
 		if err := file.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "File.name": %w`, err)}
 		}
+	}
+	if _, ok := fuo.mutation.UserID(); fuo.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "File.user"`)
 	}
 	return nil
 }
@@ -531,6 +607,41 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if fuo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   file.UserTable,
+			Columns: []string{file.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fuo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   file.UserTable,
+			Columns: []string{file.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
