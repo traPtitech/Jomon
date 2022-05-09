@@ -473,8 +473,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	}
 	if req.Comment == "" {
 		if !IsAbleNoCommentChangeStatus(req.Status, request.Status) {
-			message := fmt.Sprintf("unable to change %v to %v without comment", request.Status.String(), req.Status.String())
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New(message))
+			return echo.NewHTTPError(http.StatusBadRequest, errors.New(fmt.Sprintf("unable to change %v to %v without comment", request.Status.String(), req.Status.String())))
 		}
 	}
 
@@ -487,8 +486,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	}
 	if u.Admin {
 		if !IsAbleAdminChangeState(req.Status, request.Status) {
-			message := fmt.Sprintf("admin unable to change %v to %v", request.Status.String(), req.Status.String())
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New(message))
+			return echo.NewHTTPError(http.StatusBadRequest, errors.New(fmt.Sprintf("admin unable to change %v to %v", request.Status.String(), req.Status.String())))
 		}
 		if req.Status == model.Submitted && request.Status == model.Accepted {
 			targets, err := h.Repository.GetRequestTargets(ctx, requestID)
@@ -510,8 +508,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 
 	if !u.Admin && user.ID == request.CreatedBy {
 		if !IsAbleCreatorChangeStatus(req.Status, request.Status) {
-			message := fmt.Sprintf("creator unable to change %v to %v", request.Status.String(), req.Status.String())
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New(message))
+			return echo.NewHTTPError(http.StatusBadRequest, errors.New(fmt.Sprintf("creator unable to change %v to %v", request.Status.String(), req.Status.String())))
 		}
 	}
 

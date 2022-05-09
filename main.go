@@ -47,6 +47,7 @@ func main() {
 	} else {
 		logger, err = zap.NewProduction()
 	}
+	defer logger.Sync()
 	if err != nil {
 		panic(err)
 	}
