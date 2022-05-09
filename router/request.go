@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -70,7 +69,7 @@ type Status struct {
 }
 
 func (h *Handlers) GetRequests(c echo.Context) error {
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	sort := c.QueryParam("sort")
 	target := c.QueryParam("target")
 	var year int
@@ -163,7 +162,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 	}
 	var tags []*model.Tag
 	for _, tagID := range req.Tags {
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
 			if ent.IsNotFound(err) {
@@ -175,7 +174,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 	}
 	var group *model.Group
 	if req.Group != nil {
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
 			if ent.IsNotFound(err) {
@@ -184,7 +183,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, group, req.CreatedBy)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -237,7 +236,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -313,7 +312,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	}
 	var tags []*model.Tag
 	for _, tagID := range req.Tags {
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
 			if ent.IsNotFound(err) {
@@ -325,7 +324,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	}
 	var group *model.Group
 	if req.Group != nil {
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
 			if ent.IsNotFound(err) {
@@ -334,7 +333,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Amount, req.Title, req.Content, tags, group)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -418,7 +417,7 @@ func (h *Handlers) PostComment(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, errors.New("sessionUser not found"))
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	comment, err := h.Repository.CreateComment(ctx, req.Comment, requestID, user.ID)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -459,7 +458,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
 		if ent.IsNotFound(err) {

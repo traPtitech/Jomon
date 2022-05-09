@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/gob"
@@ -61,7 +60,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	modelUser, err := h.Repository.GetUserByName(ctx, u.Name)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)

@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"encoding/gob"
 	"errors"
 	"net/http"
@@ -194,7 +193,7 @@ func (h Handlers) RetrieveGroupOwner(repo model.Repository) echo.MiddlewareFunc 
 				return echo.NewHTTPError(http.StatusBadRequest, err)
 			}
 
-			ctx := context.Background()
+			ctx := c.Request().Context()
 			owners, err := repo.GetOwners(ctx, id)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -225,7 +224,7 @@ func (h Handlers) RetrieveRequestCreator(repo model.Repository) echo.MiddlewareF
 				return echo.NewHTTPError(http.StatusBadRequest, err)
 			}
 
-			ctx := context.Background()
+			ctx := c.Request().Context()
 			request, err := repo.GetRequest(ctx, id)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err)

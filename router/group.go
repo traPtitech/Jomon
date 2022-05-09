@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"time"
@@ -54,7 +53,7 @@ type Member struct {
 
 // GetGroups GET /groups
 func (h *Handlers) GetGroups(c echo.Context) error {
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	groups, err := h.Repository.GetGroups(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -82,7 +81,7 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	created, err := h.Repository.CreateGroup(ctx, group.Name, group.Description, group.Budget)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -115,7 +114,7 @@ func (h *Handlers) PutGroup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	updated, err := h.Repository.UpdateGroup(ctx, groupID, group.Name, group.Description, group.Budget)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -143,7 +142,7 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	err = h.Repository.DeleteGroup(ctx, groupID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -162,7 +161,7 @@ func (h *Handlers) GetMembers(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	members, err := h.Repository.GetMembers(ctx, groupID)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -194,7 +193,7 @@ func (h *Handlers) PostMember(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	added, err := h.Repository.AddMember(ctx, groupID, member.ID)
 	if err != nil {
 		if ent.IsConstraintError(err) {
@@ -226,7 +225,7 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	err = h.Repository.DeleteMember(ctx, groupID, memberID)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -240,7 +239,7 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 
 // GetOwners GET /groups/:groupID/owners
 func (h *Handlers) GetOwners(c echo.Context) error {
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -266,7 +265,7 @@ func (h *Handlers) GetOwners(c echo.Context) error {
 
 // PostOwner POST /groups/:groupID/owners
 func (h *Handlers) PostOwner(c echo.Context) error {
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	var owner Owner
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
@@ -295,7 +294,7 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 
 // DeleteOwner DELETE /groups/:groupID/owners
 func (h *Handlers) DeleteOwner(c echo.Context) error {
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)

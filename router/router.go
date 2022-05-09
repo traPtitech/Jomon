@@ -27,7 +27,7 @@ func NewServer(h Handlers) *echo.Echo {
 	e.Use(h.AccessLoggingMiddleware(h.Logger))
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
-	e.Use(session.Middleware(sessions.NewCookieStore([]byte(h.SessionName))))
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))))
 
 	retrieveGroupOwner := h.RetrieveGroupOwner(h.Repository)
 	retrieveRequestCreator := h.RetrieveRequestCreator(h.Repository)

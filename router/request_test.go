@@ -2,16 +2,16 @@ package router
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gorilla/sessions"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gorilla/sessions"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -1526,7 +1526,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -1629,7 +1629,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -1732,7 +1732,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -1835,7 +1835,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -1927,8 +1927,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 		err = hn(c)
 		require.NoError(t, err)
 
-
-
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
@@ -1940,7 +1938,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2050,7 +2048,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2381,7 +2379,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2451,7 +2449,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2521,7 +2519,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2591,7 +2589,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2665,7 +2663,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		var resErr *ent.NotFoundError
 		errors.As(errors.New("unknown id"), &resErr)
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2738,7 +2736,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2820,7 +2818,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2899,7 +2897,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2974,7 +2972,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
