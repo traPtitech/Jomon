@@ -17,9 +17,10 @@ import (
 )
 
 const (
-	sessionUserKey    = "user"
-	sessionOwnerKey   = "group_owner"
-	sessionCreatorKey = "request_creator"
+	sessionUserKey           = "user"
+	sessionOwnerKey          = "group_owner"
+	sessionRequestCreatorKey = "request_creator"
+	sessionFileCreatorKey    = "request_creator"
 )
 
 // AccessLoggingMiddleware ですべてのエラーを出力する
@@ -113,7 +114,7 @@ func (h Handlers) CheckRequestCreatorMiddleware(next echo.HandlerFunc) echo.Hand
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		creator := sess.Values[sessionCreatorKey].(uuid.UUID)
+		creator := sess.Values[sessionRequestCreatorKey].(uuid.UUID)
 		if creator != user.ID {
 			return echo.NewHTTPError(http.StatusForbidden, "you are not creator")
 		}
@@ -134,7 +135,7 @@ func (h Handlers) CheckAdminOrRequestCreatorMiddleware(next echo.HandlerFunc) ec
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		creator := sess.Values[sessionCreatorKey].(uuid.UUID)
+		creator := sess.Values[sessionRequestCreatorKey].(uuid.UUID)
 		if creator != user.ID && !user.Admin {
 			return echo.NewHTTPError(http.StatusForbidden, "you are not admin or creator")
 		}
@@ -169,6 +170,27 @@ func (h Handlers) CheckAdminOrGroupOwnerMiddleware(next echo.HandlerFunc) echo.H
 		}
 
 		return echo.ErrForbidden
+	}
+}
+
+func (h Handlers) CheckFileCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		sess, err := session.Get(h.SessionName, c)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+
+		user, err := getUserInfo(sess)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+
+		creator := sess.Values[sessionFileCreatorKey].(uuid.UUID)
+		if creator != user.ID {
+			return echo.NewHTTPError(http.StatusForbidden, "you are not creator")
+		}
+
+		return next(c)
 	}
 }
 
@@ -223,7 +245,38 @@ func (h Handlers) RetrieveRequestCreator(repo model.Repository) echo.MiddlewareF
 
 			gob.Register(&uuid.UUID{})
 
-			sess.Values[sessionCreatorKey] = request.CreatedBy
+			sess.Values[sessionRequestCreatorKey] = request.CreatedBy
+
+			if err = sess.Save(c.Request(), c.Response()); err != nil {
+				return echo.ErrInternalServerError
+			}
+
+			return next(c)
+		}
+	}
+}
+
+func (h Handlers) RetrieveFileCreator(repo model.Repository) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			sess, err := session.Get(h.SessionName, c)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err)
+			}
+			id, err := uuid.Parse(c.Param("fileID"))
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, err)
+			}
+
+			ctx := c.Request().Context()
+			file, err := repo.GetFile(ctx, id)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err)
+			}
+
+			gob.Register(&uuid.UUID{})
+
+			sess.Values[sessionFileCreatorKey] = file.CreatedBy
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
 				return echo.ErrInternalServerError
