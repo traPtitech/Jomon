@@ -58,7 +58,7 @@ var (
 				Symbol:     "files_users_user",
 				Columns:    []*schema.Column{FilesColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
+				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "files_requests_file",
