@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -64,7 +65,7 @@ func (h *Handlers) UpdateUserInfo(c echo.Context) error {
 }
 
 func (h *Handlers) GetMe(c echo.Context) error {
-	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}

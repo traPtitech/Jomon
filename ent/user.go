@@ -46,9 +46,11 @@ type UserEdges struct {
 	RequestStatus []*RequestStatus `json:"request_status,omitempty"`
 	// Request holds the value of the request edge.
 	Request []*Request `json:"request,omitempty"`
+	// File holds the value of the file edge.
+	File []*File `json:"file,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [6]bool
 }
 
 // GroupUserOrErr returns the GroupUser value or an error if the edge
@@ -94,6 +96,15 @@ func (e UserEdges) RequestOrErr() ([]*Request, error) {
 		return e.Request, nil
 	}
 	return nil, &NotLoadedError{edge: "request"}
+}
+
+// FileOrErr returns the File value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FileOrErr() ([]*File, error) {
+	if e.loadedTypes[5] {
+		return e.File, nil
+	}
+	return nil, &NotLoadedError{edge: "file"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -195,6 +206,11 @@ func (u *User) QueryRequestStatus() *RequestStatusQuery {
 // QueryRequest queries the "request" edge of the User entity.
 func (u *User) QueryRequest() *RequestQuery {
 	return (&UserClient{config: u.config}).QueryRequest(u)
+}
+
+// QueryFile queries the "file" edge of the User entity.
+func (u *User) QueryFile() *FileQuery {
+	return (&UserClient{config: u.config}).QueryFile(u)
 }
 
 // Update returns a builder for updating this User.

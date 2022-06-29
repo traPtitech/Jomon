@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 
-	"github.com/gorilla/sessions"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/router"
 	"github.com/traPtitech/Jomon/storage"
@@ -53,11 +52,10 @@ func main() {
 		panic(err)
 	}
 	handlers := router.Handlers{
-		Repository:   repo,
-		Storage:      strg,
-		Logger:       logger,
-		SessionName:  "session",
-		SessionStore: sessions.NewCookieStore([]byte("session")),
+		Repository:  repo,
+		Storage:     strg,
+		Logger:      logger,
+		SessionName: "session",
 	}
 
 	server := router.NewServer(handlers)

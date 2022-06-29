@@ -16,8 +16,12 @@ func TestEntRepository_GetRequests(t *testing.T) {
 	client, storage, err := setup(t, ctx, "get_requests")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
+	client2, storage2, err := setup(t, ctx, "get_requests2")
+	require.NoError(t, err)
+	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
 		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
@@ -62,28 +66,28 @@ func TestEntRepository_GetRequests(t *testing.T) {
 	})
 
 	t.Run("SuccessWithReverseOrder", func(t *testing.T) {
-		err := dropAll(t, ctx, client)
+		t.Parallel()
 		require.NoError(t, err)
-		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user1, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
-		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user2, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
-		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
+		tag, err := repo2.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
 
 		budget := random.Numeric(t, 10000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
+		group, err := repo2.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
 
-		request1, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user1.ID)
+		request1, err := repo2.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user1.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		request2, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user2.ID)
+		request2, err := repo2.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user2.ID)
 		require.NoError(t, err)
 
 		sort := "-created_at"
 
-		got, err := repo.GetRequests(ctx, RequestQuery{
+		got, err := repo2.GetRequests(ctx, RequestQuery{
 			Sort: &sort,
 		})
 		assert.NoError(t, err)
