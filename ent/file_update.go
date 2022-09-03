@@ -15,6 +15,7 @@ import (
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // FileUpdate is the builder for updating File entities.
@@ -95,6 +96,17 @@ func (fu *FileUpdate) SetRequest(r *Request) *FileUpdate {
 	return fu.SetRequestID(r.ID)
 }
 
+// SetUserID sets the "user" edge to the User entity by ID.
+func (fu *FileUpdate) SetUserID(id uuid.UUID) *FileUpdate {
+	fu.mutation.SetUserID(id)
+	return fu
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (fu *FileUpdate) SetUser(u *User) *FileUpdate {
+	return fu.SetUserID(u.ID)
+}
+
 // Mutation returns the FileMutation object of the builder.
 func (fu *FileUpdate) Mutation() *FileMutation {
 	return fu.mutation
@@ -106,6 +118,12 @@ func (fu *FileUpdate) ClearRequest() *FileUpdate {
 	return fu
 }
 
+// ClearUser clears the "user" edge to the User entity.
+func (fu *FileUpdate) ClearUser() *FileUpdate {
+	fu.mutation.ClearUser()
+	return fu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 	var (
@@ -113,12 +131,18 @@ func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(fu.hooks) == 0 {
+		if err = fu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = fu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*FileMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = fu.check(); err != nil {
+				return 0, err
 			}
 			fu.mutation = mutation
 			affected, err = fu.sqlSave(ctx)
@@ -158,6 +182,19 @@ func (fu *FileUpdate) ExecX(ctx context.Context) {
 	if err := fu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (fu *FileUpdate) check() error {
+	if v, ok := fu.mutation.Name(); ok {
+		if err := file.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "File.name": %w`, err)}
+		}
+	}
+	if _, ok := fu.mutation.UserID(); fu.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "File.user"`)
+	}
+	return nil
 }
 
 func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -239,6 +276,41 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if fu.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   file.UserTable,
+			Columns: []string{file.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fu.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   file.UserTable,
+			Columns: []string{file.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -331,6 +403,17 @@ func (fuo *FileUpdateOne) SetRequest(r *Request) *FileUpdateOne {
 	return fuo.SetRequestID(r.ID)
 }
 
+// SetUserID sets the "user" edge to the User entity by ID.
+func (fuo *FileUpdateOne) SetUserID(id uuid.UUID) *FileUpdateOne {
+	fuo.mutation.SetUserID(id)
+	return fuo
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (fuo *FileUpdateOne) SetUser(u *User) *FileUpdateOne {
+	return fuo.SetUserID(u.ID)
+}
+
 // Mutation returns the FileMutation object of the builder.
 func (fuo *FileUpdateOne) Mutation() *FileMutation {
 	return fuo.mutation
@@ -339,6 +422,12 @@ func (fuo *FileUpdateOne) Mutation() *FileMutation {
 // ClearRequest clears the "request" edge to the Request entity.
 func (fuo *FileUpdateOne) ClearRequest() *FileUpdateOne {
 	fuo.mutation.ClearRequest()
+	return fuo
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (fuo *FileUpdateOne) ClearUser() *FileUpdateOne {
+	fuo.mutation.ClearUser()
 	return fuo
 }
 
@@ -356,12 +445,18 @@ func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 		node *File
 	)
 	if len(fuo.hooks) == 0 {
+		if err = fuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = fuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*FileMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = fuo.check(); err != nil {
+				return nil, err
 			}
 			fuo.mutation = mutation
 			node, err = fuo.sqlSave(ctx)
@@ -401,6 +496,19 @@ func (fuo *FileUpdateOne) ExecX(ctx context.Context) {
 	if err := fuo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (fuo *FileUpdateOne) check() error {
+	if v, ok := fuo.mutation.Name(); ok {
+		if err := file.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "File.name": %w`, err)}
+		}
+	}
+	if _, ok := fuo.mutation.UserID(); fuo.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "File.user"`)
+	}
+	return nil
 }
 
 func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) {
@@ -499,6 +607,41 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if fuo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   file.UserTable,
+			Columns: []string{file.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fuo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   file.UserTable,
+			Columns: []string{file.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}

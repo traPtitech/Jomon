@@ -50,7 +50,7 @@ paths:
       tags:
         - Transactions
       parameters:
-        - $ref: "#/components/parameters/sortQuery"
+        - $ref: "#/components/parameters/sortTransactionQuery"
         - $ref: "#/components/parameters/targetQuery"
         - $ref: "#/components/parameters/sinceQuery"
         - $ref: "#/components/parameters/untilQuery"
@@ -261,7 +261,6 @@ paths:
           $ref: "#/components/responses/400"
         "404":
           $ref: "#/components/responses/404"
-
   /requests/{requestID}/status:
     put:
       operationId: putStatus
@@ -677,12 +676,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  file_id:
+                  id:
                     type: string
                     format: uuid
         "400":
           $ref: "#/components/responses/400"
-
   /files/{fileID}:
     parameters:
       - name: fileID
@@ -700,11 +698,18 @@ paths:
         "200":
           description: 該当するファイルが存在した 返す
           content:
-            multipart/form-data:
+            application/octet-stream:
               schema:
-                $ref: "#/components/schemas/File"
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/400"
         "404":
           $ref: "#/components/responses/404"
+        "304":
+          $ref: "#/components/responses/304"
+        "500":
+          $ref: "#/components/responses/500"
     delete:
       operationId: deleteFile
       description: 指定したidのファイルを削除する。管理者権限または作成者権限が必要。
@@ -719,8 +724,9 @@ paths:
           $ref: "#/components/responses/403"
         "404":
           $ref: "#/components/responses/404"
-
-  /files/{fileID}/meta:
+        "500":
+          $ref: "#/components/responses/500"
+  "/files/{fileID}/meta":
     parameters:
       - name: fileID
         in: path
@@ -729,10 +735,10 @@ paths:
           type: string
           format: uuid
     get:
-      operationId: getFileMeta
-      description: 指定されたファイルのメタデータを返す
       tags:
         - Files
+      operationId: getFileMeta
+      description: 指定されたファイルのメタデータを返す
       responses:
         "200":
           description: 該当するファイルのメタデータが存在した 返す
@@ -740,8 +746,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FileMeta"
+        "400":
+          $ref: "#/components/responses/400"
         "404":
           $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
 
   /users:
     get:
@@ -1294,15 +1304,19 @@ components:
         - display_name
         - admin
   responses:
+    304:
+      description: Not Modified
     400:
       description: 不正なリクエスト。
     403:
       description: 編集権限がない人による操作。
     404:
       description: 指定したリソースは存在しない。
+    500:
+      description: サーバーエラー。
 
   parameters:
-    sortQuery:
+    sortRequestQuery:
       name: sort
       description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", タイトルの昇順 "title", タイトルの降順 "-title")
       required: false

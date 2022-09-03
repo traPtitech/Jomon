@@ -8,7 +8,6 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
-	"github.com/gorilla/sessions"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/model/mock_model"
 	"github.com/traPtitech/Jomon/testutil/random"
@@ -16,6 +15,7 @@ import (
 )
 
 type MockRepository struct {
+	*mock_model.MockAdminRepository
 	*mock_model.MockCommentRepository
 	*mock_model.MockFileRepository
 	*mock_model.MockGroupBudgetRepository
@@ -32,8 +32,13 @@ type MockRepository struct {
 	*mock_model.MockUserRepository
 }
 
+type MockStorage struct {
+	*mock_storage.MockStorage
+}
+
 func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 	return &MockRepository{
+		MockAdminRepository:             mock_model.NewMockAdminRepository(ctrl),
 		MockCommentRepository:           mock_model.NewMockCommentRepository(ctrl),
 		MockFileRepository:              mock_model.NewMockFileRepository(ctrl),
 		MockGroupBudgetRepository:       mock_model.NewMockGroupBudgetRepository(ctrl),
@@ -51,9 +56,16 @@ func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 	}
 }
 
+func NewMockStorage(ctrl *gomock.Controller) *MockStorage {
+	return &MockStorage{
+		MockStorage: mock_storage.NewMockStorage(ctrl),
+	}
+}
+
 type TestHandlers struct {
 	Handlers   *Handlers
 	Repository *MockRepository
+	Storage    *MockStorage
 }
 
 func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, error) {
@@ -62,16 +74,19 @@ func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, erro
 		return nil, err
 	}
 	repository := NewMockRepository(ctrl)
-	sessionStore := sessions.NewCookieStore([]byte("session"))
+	storage := NewMockStorage(ctrl)
 	sessionName := "session"
 
-	return &TestHandlers{&Handlers{
-		Repository:   repository,
-		Storage:      mock_storage.NewMockStorage(ctrl),
-		Logger:       logger,
-		SessionName:  sessionName,
-		SessionStore: sessionStore,
-	}, repository}, nil
+	return &TestHandlers{
+		&Handlers{
+			Repository:  repository,
+			Storage:     storage,
+			Logger:      logger,
+			SessionName: sessionName,
+		},
+		repository,
+		storage,
+	}, nil
 }
 
 func makeUser(t *testing.T, admin bool) *model.User {

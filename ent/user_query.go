@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
+	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
@@ -36,6 +37,7 @@ type UserQuery struct {
 	withComment       *CommentQuery
 	withRequestStatus *RequestStatusQuery
 	withRequest       *RequestQuery
+	withFile          *FileQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -175,6 +177,28 @@ func (uq *UserQuery) QueryRequest() *RequestQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.RequestTable, user.RequestColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFile chains the current query on the "file" edge.
+func (uq *UserQuery) QueryFile() *FileQuery {
+	query := &FileQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.FileTable, user.FileColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -368,6 +392,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withComment:       uq.withComment.Clone(),
 		withRequestStatus: uq.withRequestStatus.Clone(),
 		withRequest:       uq.withRequest.Clone(),
+		withFile:          uq.withFile.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -427,6 +452,17 @@ func (uq *UserQuery) WithRequest(opts ...func(*RequestQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withRequest = query
+	return uq
+}
+
+// WithFile tells the query-builder to eager-load the nodes that are connected to
+// the "file" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithFile(opts ...func(*FileQuery)) *UserQuery {
+	query := &FileQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withFile = query
 	return uq
 }
 
@@ -495,12 +531,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [6]bool{
 			uq.withGroupUser != nil,
 			uq.withGroupOwner != nil,
 			uq.withComment != nil,
 			uq.withRequestStatus != nil,
 			uq.withRequest != nil,
+			uq.withFile != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -737,6 +774,35 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "request_user" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Request = append(node.Edges.Request, n)
+		}
+	}
+
+	if query := uq.withFile; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.File = []*File{}
+		}
+		query.withFKs = true
+		query.Where(predicate.File(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.FileColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.file_user
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "file_user" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "file_user" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.File = append(node.Edges.File, n)
 		}
 	}
 

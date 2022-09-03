@@ -11,7 +11,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gorilla/sessions"
+
 	"github.com/golang/mock/gomock"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -295,11 +298,17 @@ func TestHandlers_GetMe(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		gob.Register(User{})
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		require.NoError(t, err)
 		sess.Values[sessionUserKey] = user
 		require.NoError(t, sess.Save(c.Request(), c.Response()))
@@ -315,11 +324,18 @@ func TestHandlers_GetMe(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		e := echo.New()
+		e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 		req, err := http.NewRequest(http.MethodPut, "/api/users/me", nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)

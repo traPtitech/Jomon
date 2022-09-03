@@ -15,6 +15,7 @@ import (
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // FileQuery is the builder for querying File entities.
@@ -28,6 +29,7 @@ type FileQuery struct {
 	predicates []predicate.File
 	// eager-loading edges.
 	withRequest *RequestQuery
+	withUser    *UserQuery
 	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -80,6 +82,28 @@ func (fq *FileQuery) QueryRequest() *RequestQuery {
 			sqlgraph.From(file.Table, file.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, file.RequestTable, file.RequestColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUser chains the current query on the "user" edge.
+func (fq *FileQuery) QueryUser() *UserQuery {
+	query := &UserQuery{config: fq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := fq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, file.UserTable, file.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,6 +293,7 @@ func (fq *FileQuery) Clone() *FileQuery {
 		order:       append([]OrderFunc{}, fq.order...),
 		predicates:  append([]predicate.File{}, fq.predicates...),
 		withRequest: fq.withRequest.Clone(),
+		withUser:    fq.withUser.Clone(),
 		// clone intermediate query.
 		sql:    fq.sql.Clone(),
 		path:   fq.path,
@@ -284,6 +309,17 @@ func (fq *FileQuery) WithRequest(opts ...func(*RequestQuery)) *FileQuery {
 		opt(query)
 	}
 	fq.withRequest = query
+	return fq
+}
+
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (fq *FileQuery) WithUser(opts ...func(*UserQuery)) *FileQuery {
+	query := &UserQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withUser = query
 	return fq
 }
 
@@ -353,11 +389,12 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		nodes       = []*File{}
 		withFKs     = fq.withFKs
 		_spec       = fq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			fq.withRequest != nil,
+			fq.withUser != nil,
 		}
 	)
-	if fq.withRequest != nil {
+	if fq.withRequest != nil || fq.withUser != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -408,6 +445,35 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 			}
 			for i := range nodes {
 				nodes[i].Edges.Request = n
+			}
+		}
+	}
+
+	if query := fq.withUser; query != nil {
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*File)
+		for i := range nodes {
+			if nodes[i].file_user == nil {
+				continue
+			}
+			fk := *nodes[i].file_user
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(user.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "file_user" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.User = n
 			}
 		}
 	}

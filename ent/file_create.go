@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/request"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // FileCreate is the builder for creating a File entity.
@@ -93,6 +94,17 @@ func (fc *FileCreate) SetNillableRequestID(id *uuid.UUID) *FileCreate {
 // SetRequest sets the "request" edge to the Request entity.
 func (fc *FileCreate) SetRequest(r *Request) *FileCreate {
 	return fc.SetRequestID(r.ID)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (fc *FileCreate) SetUserID(id uuid.UUID) *FileCreate {
+	fc.mutation.SetUserID(id)
+	return fc
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (fc *FileCreate) SetUser(u *User) *FileCreate {
+	return fc.SetUserID(u.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
@@ -181,11 +193,19 @@ func (fc *FileCreate) check() error {
 	if _, ok := fc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "File.name"`)}
 	}
+	if v, ok := fc.mutation.Name(); ok {
+		if err := file.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "File.name": %w`, err)}
+		}
+	}
 	if _, ok := fc.mutation.MimeType(); !ok {
 		return &ValidationError{Name: "mime_type", err: errors.New(`ent: missing required field "File.mime_type"`)}
 	}
 	if _, ok := fc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "File.created_at"`)}
+	}
+	if _, ok := fc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "File.user"`)}
 	}
 	return nil
 }
@@ -273,6 +293,26 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.request_file = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := fc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   file.UserTable,
+			Columns: []string{file.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.file_user = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

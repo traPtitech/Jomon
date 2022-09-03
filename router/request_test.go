@@ -2,7 +2,6 @@ package router
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,8 +11,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gorilla/sessions"
+
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -1506,10 +1508,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -1518,7 +1526,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -1603,10 +1611,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -1615,7 +1629,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -1700,10 +1714,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -1712,7 +1732,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -1797,10 +1817,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -1809,7 +1835,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -1894,10 +1920,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -1906,7 +1938,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -1998,10 +2030,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2010,7 +2048,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2086,10 +2124,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2139,10 +2183,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues("hoge")
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2189,10 +2239,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(uuid.Nil.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2248,6 +2304,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
@@ -2299,10 +2361,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2311,7 +2379,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2363,10 +2431,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2375,7 +2449,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2427,10 +2501,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2439,7 +2519,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2491,10 +2571,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2503,7 +2589,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2556,10 +2642,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2571,7 +2663,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		var resErr *ent.NotFoundError
 		errors.As(errors.New("unknown id"), &resErr)
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2626,10 +2718,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2638,7 +2736,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2702,10 +2800,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2714,7 +2818,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2775,10 +2879,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2787,7 +2897,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2844,10 +2954,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
 		c.SetParamValues(request.ID.String())
+		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
+		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
+			return c.NoContent(http.StatusOK)
+		}))
+		err = hn(c)
+		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-		sess, err := h.Handlers.SessionStore.Get(c.Request(), h.Handlers.SessionName)
+		sess, err := session.Get(h.Handlers.SessionName, c)
 		assert.NoError(t, err)
 		sess.Values[sessionUserKey] = &User{
 			ID:          user.ID,
@@ -2856,7 +2972,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).

@@ -20,6 +20,7 @@ services:
       MARIADB_PASSWORD: password
       MARIADB_HOSTNAME: db
       MARIADB_DATABASE: jomon
+      SESSION_KEY: secret
       IS_DEBUG_MODE: "true"
       UPLOAD_DIR: ./uploads
     env_file: .env
