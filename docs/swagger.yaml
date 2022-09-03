@@ -146,7 +146,7 @@ paths:
         - Requests
       parameters:
         - $ref: "#/components/parameters/sortQuery"
-        - $ref: "#/components/parameters/currentStatusQuery"
+        - $ref: "#/components/parameters/statusQuery"
         - $ref: "#/components/parameters/targetQuery"
         - $ref: "#/components/parameters/sinceQuery"
         - $ref: "#/components/parameters/untilQuery"
@@ -1309,13 +1309,13 @@ components:
       in: query
       schema:
         type: string
-    currentStatusQuery:
-      name: current_status
+    statusQuery:
+      name: status
       description: 現在の状態
       required: false
       in: query
       schema:
-        type: string
+        $ref: "#/components/schemas/StatusEnum"
     targetQuery:
       name: target
       description: 誰との取引か
