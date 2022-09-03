@@ -145,7 +145,7 @@ paths:
       tags:
         - Requests
       parameters:
-        - $ref: "#/components/parameters/sortQuery"
+        - $ref: "#/components/parameters/sortRequestQuery"
         - $ref: "#/components/parameters/statusQuery"
         - $ref: "#/components/parameters/targetQuery"
         - $ref: "#/components/parameters/sinceQuery"
@@ -1330,6 +1330,13 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/StatusEnum"
+    sortTransactionQuery:
+      name: sort
+      description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at")
+      required: false
+      in: query
+      schema:
+        type: string
     targetQuery:
       name: target
       description: 誰との取引か
