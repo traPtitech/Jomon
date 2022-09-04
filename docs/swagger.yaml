@@ -769,39 +769,6 @@ paths:
                 items:
                   $ref: "#/components/schemas/User"
 
-  /users/{userID}:
-    parameters:
-      - name: userID
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-    put:
-      operationId: putUserDetail
-      description: "ユーザーの情報を変更する。主に権限の変更用。管理者権限またはグループオーナー権限が必要。"
-      tags:
-        - "Users"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PutUser"
-      responses:
-        "200":
-          description: "取得に成功した場合。"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
-        "400":
-          $ref: "#/components/responses/400"
-        "403":
-          $ref: "#/components/responses/403"
-        "404":
-          $ref: "#/components/responses/404"
-
   /users/me:
     get:
       operationId: getMe
