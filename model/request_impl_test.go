@@ -19,6 +19,9 @@ func TestEntRepository_GetRequests(t *testing.T) {
 	client2, storage2, err := setup(t, ctx, "get_requests2")
 	require.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
+	client3, storage3, err := setup(t, ctx, "get_requests3")
+	require.NoError(t, err)
+	repo3 := NewEntRepository(client3, storage3)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -108,6 +111,45 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			assert.Equal(t, got[1].Tags[0].ID, request1.Tags[0].ID)
 			assert.Equal(t, got[1].Tags[0].Name, request1.Tags[0].Name)
 			assert.Equal(t, got[1].Tags[0].Description, request1.Tags[0].Description)
+		}
+	})
+
+	t.Run("SuccessWithStatus", func(t *testing.T) {
+		t.Parallel()
+		user1, err := repo3.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		user2, err := repo3.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		tag, err := repo3.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
+		require.NoError(t, err)
+
+		budget := random.Numeric(t, 10000)
+		group, err := repo3.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
+		require.NoError(t, err)
+
+		request1, err := repo3.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user1.ID)
+		require.NoError(t, err)
+		time.Sleep(1 * time.Second)
+		request2, err := repo3.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, group, user2.ID)
+		require.NoError(t, err)
+
+		status := "accepted"
+		_, err = repo3.CreateStatus(ctx, request2.ID, user2.ID, Accepted)
+		require.NoError(t, err)
+
+		got, err := repo3.GetRequests(ctx, RequestQuery{
+			Status: &status,
+		})
+		assert.NoError(t, err)
+		if assert.Len(t, got, 1) {
+			assert.Equal(t, got[0].ID, request2.ID)
+			assert.Equal(t, got[0].Status, Accepted)
+			assert.Equal(t, got[0].Amount, request2.Amount)
+			assert.Equal(t, got[0].Title, request2.Title)
+			assert.Equal(t, got[0].Content, request2.Content)
+			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
+			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+			assert.Equal(t, got[0].Tags[0].Description, request1.Tags[0].Description)
 		}
 	})
 }

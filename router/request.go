@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -71,15 +70,12 @@ type Status struct {
 func (h *Handlers) GetRequests(c echo.Context) error {
 	ctx := c.Request().Context()
 	sort := c.QueryParam("sort")
-	target := c.QueryParam("target")
-	var year int
-	var err error
-	if c.QueryParam("year") != "" {
-		year, err = strconv.Atoi(c.QueryParam("year"))
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err)
-		}
+	status := c.QueryParam("status")
+	if status != "submitted" && status != "fix_required" && status != "accepted" && status != "completed" && status != "rejected" && status != "" {
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid status"))
 	}
+	target := c.QueryParam("target")
+	var err error
 	var since time.Time
 	if c.QueryParam("since") != "" {
 		since, err = service.StrToDate(c.QueryParam("since"))
@@ -99,7 +95,7 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 	query := model.RequestQuery{
 		Sort:   &sort,
 		Target: &target,
-		Year:   &year,
+		Status: &status,
 		Since:  &since,
 		Until:  &until,
 		Tag:    &tag,
