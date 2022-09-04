@@ -59,7 +59,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		var sort string
 		var target string
-		var year int
+		var status string
 		var since time.Time
 		var until time.Time
 		var tag string
@@ -68,7 +68,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		query := model.RequestQuery{
 			Sort:   &sort,
 			Target: &target,
-			Year:   &year,
+			Status: &status,
 			Since:  &since,
 			Until:  &until,
 			Tag:    &tag,
@@ -128,7 +128,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		var title string
 		var target string
-		var year int
+		var status string
 		var since time.Time
 		var until time.Time
 		var tag string
@@ -137,7 +137,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		query := model.RequestQuery{
 			Sort:   &title,
 			Target: &target,
-			Year:   &year,
+			Status: &status,
 			Since:  &since,
 			Until:  &until,
 			Tag:    &tag,
@@ -174,7 +174,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		var title string
 		var target string
-		var year int
+		var status string
 		var since time.Time
 		var until time.Time
 		var tag string
@@ -183,7 +183,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		query := model.RequestQuery{
 			Sort:   &title,
 			Target: &target,
-			Year:   &year,
+			Status: &status,
 			Since:  &since,
 			Until:  &until,
 			Tag:    &tag,
@@ -1544,7 +1544,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		res := &Status{
+		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment:   comment.Comment,
@@ -1647,7 +1647,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		res := &Status{
+		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment:   comment.Comment,
@@ -1750,7 +1750,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		res := &Status{
+		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment:   comment.Comment,
@@ -1853,7 +1853,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		res := &Status{
+		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment:   comment.Comment,
@@ -1956,7 +1956,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		res := &Status{
+		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment:   comment.Comment,
@@ -2070,7 +2070,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		res := &Status{
+		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment:   comment.Comment,

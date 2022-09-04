@@ -69,10 +69,13 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 			)
 	}
 
-	if query.Year != nil && *query.Year != 0 {
+	if query.Status != nil && *query.Status != "" {
 		requestsq = requestsq.
-			Where(request.CreatedAtGTE(time.Date(*query.Year, 4, 1, 0, 0, 0, 0, time.Local))).
-			Where(request.CreatedAtLT(time.Date(*query.Year+1, 4, 1, 0, 0, 0, 0, time.Local)))
+			Where(
+				request.HasStatusWith(
+					requeststatus.StatusEQ(requeststatus.Status(*query.Status)),
+				),
+			)
 	}
 
 	if query.Since != nil && !(*query.Since).IsZero() {

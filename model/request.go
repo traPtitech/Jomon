@@ -54,7 +54,7 @@ type RequestDetail struct {
 type RequestQuery struct {
 	Sort   *string
 	Target *string
-	Year   *int
+	Status *string
 	Since  *time.Time
 	Until  *time.Time
 	Tag    *string
