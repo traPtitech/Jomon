@@ -1544,7 +1544,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		res := &Status{
+		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment:   comment.Comment,
@@ -1647,7 +1647,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		res := &Status{
+		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment:   comment.Comment,
@@ -1750,7 +1750,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		res := &Status{
+		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment:   comment.Comment,
@@ -1853,7 +1853,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		res := &Status{
+		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment:   comment.Comment,
@@ -1956,7 +1956,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		res := &Status{
+		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment:   comment.Comment,
@@ -2070,7 +2070,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		res := &Status{
+		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment:   comment.Comment,

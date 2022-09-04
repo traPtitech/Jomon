@@ -14,6 +14,30 @@ import (
 	"github.com/traPtitech/Jomon/service"
 )
 
+type Status string
+
+const (
+	Submitted   Status = "submitted"
+	FixRequired Status = "fix_required"
+	Accepted    Status = "accepted"
+	Completed   Status = "completed"
+	Rejected    Status = "rejected"
+)
+
+func (s Status) Valid() bool {
+	switch s {
+	case Submitted, FixRequired, Accepted, Completed, Rejected, "":
+		return true
+	default:
+		return false
+	}
+}
+
+func (s Status) String() *string {
+	str := string(s)
+	return &str
+}
+
 type Request struct {
 	CreatedBy uuid.UUID    `json:"created_by"`
 	Amount    int          `json:"amount"`
@@ -60,7 +84,7 @@ type PutStatus struct {
 	Status  model.Status `json:"status"`
 	Comment string       `json:"comment"`
 }
-type Status struct {
+type StatusResponse struct {
 	CreatedBy uuid.UUID    `json:"created_by"`
 	Status    model.Status `json:"status"`
 	Comment   string       `json:"comment"`
@@ -70,8 +94,9 @@ type Status struct {
 func (h *Handlers) GetRequests(c echo.Context) error {
 	ctx := c.Request().Context()
 	sort := c.QueryParam("sort")
-	status := c.QueryParam("status")
-	if status != "submitted" && status != "fix_required" && status != "accepted" && status != "completed" && status != "rejected" && status != "" {
+	var status Status
+	status = Status(c.QueryParam("status"))
+	if !status.Valid() {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid status"))
 	}
 	target := c.QueryParam("target")
@@ -95,7 +120,7 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 	query := model.RequestQuery{
 		Sort:   &sort,
 		Target: &target,
-		Status: &status,
+		Status: status.String(),
 		Since:  &since,
 		Until:  &until,
 		Tag:    &tag,
@@ -526,7 +551,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 		resComment = comment.Comment
 	}
 
-	res := &Status{
+	res := &StatusResponse{
 		CreatedBy: user.ID,
 		Status:    created.Status,
 		Comment:   resComment,
