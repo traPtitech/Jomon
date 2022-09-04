@@ -41,7 +41,7 @@ func NewServer(h Handlers) *echo.Echo {
 			apiAuth.GET("/genpkce", h.GeneratePKCE)
 		}
 
-		apiRequests := api.Group("/requests", h.CheckLoginMiddleware)
+		apiRequests := api.Group("/requests")
 		{
 			apiRequests.GET("", h.GetRequests)
 			apiRequests.POST("", h.PostRequest, middleware.BodyDump(service.WebhookEventHandler))
