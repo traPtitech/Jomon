@@ -45,6 +45,7 @@ var (
 		{Name: "mime_type", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "file_user", Type: field.TypeUUID},
 		{Name: "request_file", Type: field.TypeUUID, Nullable: true},
 	}
 	// FilesTable holds the schema information for the "files" table.
@@ -54,8 +55,14 @@ var (
 		PrimaryKey: []*schema.Column{FilesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "files_requests_file",
+				Symbol:     "files_users_user",
 				Columns:    []*schema.Column{FilesColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "files_requests_file",
+				Columns:    []*schema.Column{FilesColumns[6]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -368,7 +375,8 @@ var (
 func init() {
 	CommentsTable.ForeignKeys[0].RefTable = UsersTable
 	CommentsTable.ForeignKeys[1].RefTable = RequestsTable
-	FilesTable.ForeignKeys[0].RefTable = RequestsTable
+	FilesTable.ForeignKeys[0].RefTable = UsersTable
+	FilesTable.ForeignKeys[1].RefTable = RequestsTable
 	GroupBudgetsTable.ForeignKeys[0].RefTable = GroupsTable
 	RequestsTable.ForeignKeys[0].RefTable = GroupsTable
 	RequestsTable.ForeignKeys[1].RefTable = UsersTable

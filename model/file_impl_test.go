@@ -32,7 +32,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 		name := random.AlphaNumeric(t, 20)
 
-		file, err := repo.CreateFile(ctx, name, mimetype, request.ID)
+		file, err := repo.CreateFile(ctx, name, mimetype, request.ID, user.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, name, file.Name)
 		assert.Equal(t, mimetype, file.MimeType)
@@ -42,7 +42,8 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 
-		assert.NoError(t, err)
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
 		request := Request{
 			ID: uuid.New(),
 		}
@@ -51,7 +52,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 		name := random.AlphaNumeric(t, 20)
 
-		_, err = repo.CreateFile(ctx, name, mimetype, request.ID)
+		_, err = repo.CreateFile(ctx, name, mimetype, request.ID, user.ID)
 		assert.Error(t, err)
 	})
 
@@ -69,7 +70,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 		mimetype := "image/png"
 
-		_, err = repo.CreateFile(ctx, "", mimetype, request.ID)
+		_, err = repo.CreateFile(ctx, "", mimetype, request.ID, user.ID)
 		assert.Error(t, err)
 	})
 }
@@ -96,7 +97,7 @@ func TestEntRepository_GetFile(t *testing.T) {
 
 		name := random.AlphaNumeric(t, 20)
 
-		file, err := repo.CreateFile(ctx, name, mimetype, request.ID)
+		file, err := repo.CreateFile(ctx, name, mimetype, request.ID, user.ID)
 		assert.NoError(t, err)
 		got, err := repo.GetFile(ctx, file.ID)
 		assert.NoError(t, err)
@@ -136,7 +137,7 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 
 		name := random.AlphaNumeric(t, 20)
 
-		file, err := repo.CreateFile(ctx, name, mimetype, request.ID)
+		file, err := repo.CreateFile(ctx, name, mimetype, request.ID, user.ID)
 		assert.NoError(t, err)
 
 		err = repo.DeleteFile(ctx, file.ID)

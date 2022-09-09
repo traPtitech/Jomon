@@ -35,6 +35,8 @@ const (
 	EdgeRequestStatus = "request_status"
 	// EdgeRequest holds the string denoting the request edge name in mutations.
 	EdgeRequest = "request"
+	// EdgeFile holds the string denoting the file edge name in mutations.
+	EdgeFile = "file"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// GroupUserTable is the table that holds the group_user relation/edge. The primary key declared below.
@@ -68,6 +70,13 @@ const (
 	RequestInverseTable = "requests"
 	// RequestColumn is the table column denoting the request relation/edge.
 	RequestColumn = "request_user"
+	// FileTable is the table that holds the file relation/edge.
+	FileTable = "files"
+	// FileInverseTable is the table name for the File entity.
+	// It exists in this package in order to avoid circular dependency with the "file" package.
+	FileInverseTable = "files"
+	// FileColumn is the table column denoting the file relation/edge.
+	FileColumn = "file_user"
 )
 
 // Columns holds all SQL columns for user fields.

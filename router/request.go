@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
@@ -18,6 +18,30 @@ import (
 
 // TransactionのDeadLock防止
 var mu sync.Mutex
+
+type Status string
+
+const (
+	Submitted   Status = "submitted"
+	FixRequired Status = "fix_required"
+	Accepted    Status = "accepted"
+	Completed   Status = "completed"
+	Rejected    Status = "rejected"
+)
+
+func (s Status) Valid() bool {
+	switch s {
+	case Submitted, FixRequired, Accepted, Completed, Rejected, "":
+		return true
+	default:
+		return false
+	}
+}
+
+func (s Status) String() *string {
+	str := string(s)
+	return &str
+}
 
 type Request struct {
 	CreatedBy uuid.UUID    `json:"created_by"`
@@ -68,7 +92,7 @@ type PutStatus struct {
 	Status  model.Status `json:"status"`
 	Comment string       `json:"comment"`
 }
-type Status struct {
+type StatusResponse struct {
 	CreatedBy uuid.UUID    `json:"created_by"`
 	Status    model.Status `json:"status"`
 	Comment   string       `json:"comment"`
@@ -89,23 +113,19 @@ type TargetOverview struct {
 }
 
 func (h *Handlers) GetRequests(c echo.Context) error {
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	sort := c.QueryParam("sort")
-	target := c.QueryParam("target")
-	var year int
-	var err error
-	if c.QueryParam("year") != "" {
-		year, err = strconv.Atoi(c.QueryParam("year"))
-		if err != nil {
-			c.Logger().Error(err)
-			return echo.NewHTTPError(http.StatusBadRequest, err)
-		}
+	var status Status
+	status = Status(c.QueryParam("status"))
+	if !status.Valid() {
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid status"))
 	}
+	target := c.QueryParam("target")
+	var err error
 	var since time.Time
 	if c.QueryParam("since") != "" {
 		since, err = service.StrToDate(c.QueryParam("since"))
 		if err != nil {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 	}
@@ -113,7 +133,6 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 	if c.QueryParam("until") != "" {
 		until, err = service.StrToDate(c.QueryParam("until"))
 		if err != nil {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 	}
@@ -122,7 +141,7 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 	query := model.RequestQuery{
 		Sort:   &sort,
 		Target: &target,
-		Year:   &year,
+		Status: status.String(),
 		Since:  &since,
 		Until:  &until,
 		Tag:    &tag,
@@ -131,7 +150,6 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 
 	modelrequests, err := h.Repository.GetRequests(ctx, query)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -194,7 +212,6 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 	var req Request
 	var err error
 	if err = c.Bind(&req); err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	ctx := context.Background()
@@ -203,10 +220,8 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
 			if ent.IsNotFound(err) {
-				c.Logger().Error(err)
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 		tags = append(tags, tag)
@@ -223,20 +238,16 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
 			if ent.IsNotFound(err) {
-				c.Logger().Error(err)
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
 	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, targets, group, req.CreatedBy)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	var resgroup *GroupOverview
@@ -289,27 +300,22 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 func (h *Handlers) GetRequest(c echo.Context) error {
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if requestID == uuid.Nil {
-		c.Logger().Error(errors.New("invalid UUID"))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	modelcomments, err := h.Repository.GetComments(ctx, requestID)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	var comments []*CommentDetail
@@ -380,28 +386,23 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	var err error
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if requestID == uuid.Nil {
-		c.Logger().Error(errors.New("invalid UUID"))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
 	if err = c.Bind(&req); err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	var tags []*model.Tag
 	for _, tagID := range req.Tags {
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
 			if ent.IsNotFound(err) {
-				c.Logger().Error(err)
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 		tags = append(tags, tag)
@@ -415,14 +416,12 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	}
 	var group *model.Group
 	if req.Group != nil {
-		ctx := context.Background()
+		ctx := c.Request().Context()
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
 			if ent.IsNotFound(err) {
-				c.Logger().Error(err)
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
@@ -430,15 +429,12 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Amount, req.Title, req.Content, tags, targets, group)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	modelcomments, err := h.Repository.GetComments(ctx, requestID)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	var comments []*CommentDetail
@@ -504,39 +500,32 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 func (h *Handlers) PostComment(c echo.Context) error {
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if requestID == uuid.Nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	var req Comment
 	if err := c.Bind(&req); err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	user, ok := sess.Values[sessionUserKey].(*User)
 	if !ok {
-		c.Logger().Error(errors.New("sessionUser not found"))
 		return echo.NewHTTPError(http.StatusUnauthorized, errors.New("sessionUser not found"))
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	comment, err := h.Repository.CreateComment(ctx, req.Comment, requestID, user.ID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	res := &CommentDetail{
@@ -554,72 +543,57 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	var err error
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if requestID == uuid.Nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	user, ok := sess.Values[sessionUserKey].(*User)
 	if !ok {
-		c.Logger().Error("sessionUser not found")
 		return echo.NewHTTPError(http.StatusUnauthorized, errors.New("sessionUser not found"))
 	}
 
 	if err = c.Bind(&req); err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	// judging privilege
 	if req.Status == request.Status {
-		c.Logger().Error("invalid request: same status")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid request: same status"))
 	}
 	if req.Comment == "" {
 		if !IsAbleNoCommentChangeStatus(req.Status, request.Status) {
-			message := fmt.Sprintf("unable to change %v to %v without comment", request.Status.String(), req.Status.String())
-			c.Logger().Error(message)
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New(message))
+			return echo.NewHTTPError(http.StatusBadRequest, errors.New(fmt.Sprintf("unable to change %v to %v without comment", request.Status.String(), req.Status.String())))
 		}
 	}
 
 	u, err := h.Repository.GetUserByID(ctx, user.ID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	if u.Admin {
 		if !IsAbleAdminChangeState(req.Status, request.Status) {
-			message := fmt.Sprintf("admin unable to change %v to %v", request.Status.String(), req.Status.String())
-			c.Logger().Error(message)
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New(message))
+			return echo.NewHTTPError(http.StatusBadRequest, errors.New(fmt.Sprintf("admin unable to change %v to %v", request.Status.String(), req.Status.String())))
 		}
 		if req.Status == model.Submitted && request.Status == model.Accepted {
 			targets, err := h.Repository.GetRequestTargets(ctx, requestID)
 			if err != nil {
-				c.Logger().Error(err)
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 			var paid bool
@@ -630,7 +604,6 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 				}
 			}
 			if paid {
-				c.Logger().Error("someone already paid")
 				return echo.NewHTTPError(http.StatusBadRequest, errors.New("someone already paid"))
 			}
 		}
@@ -638,9 +611,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 
 	if !u.Admin && user.ID == request.CreatedBy {
 		if !IsAbleCreatorChangeStatus(req.Status, request.Status) {
-			message := fmt.Sprintf("creator unable to change %v to %v", request.Status.String(), req.Status.String())
-			c.Logger().Error(message)
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New(message))
+			return echo.NewHTTPError(http.StatusBadRequest, errors.New(fmt.Sprintf("creator unable to change %v to %v", request.Status.String(), req.Status.String())))
 		}
 	}
 
@@ -651,20 +622,18 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	// create status and comment: keep the two in this order
 	created, err := h.Repository.CreateStatus(ctx, requestID, user.ID, req.Status)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	var resComment string
 	if req.Comment != "" {
 		comment, err := h.Repository.CreateComment(ctx, req.Comment, request.ID, user.ID)
 		if err != nil {
-			c.Logger().Error(err)
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 		resComment = comment.Comment
 	}
 
-	res := &Status{
+	res := &StatusResponse{
 		CreatedBy: user.ID,
 		Status:    created.Status,
 		Comment:   resComment,

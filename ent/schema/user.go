@@ -49,5 +49,7 @@ func (User) Edges() []ent.Edge {
 			Ref("user"),
 		edge.From("request", Request.Type).
 			Ref("user"),
+		edge.From("file", File.Type).
+			Ref("user"),
 	}
 }

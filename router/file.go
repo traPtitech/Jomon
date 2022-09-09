@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/ent"
 )
@@ -18,6 +19,7 @@ type FileMetaResponse struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	MimeType  string    `json:"mime_type"`
+	CreatedBy uuid.UUID `json:"created_by"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -66,8 +68,19 @@ func (h *Handlers) PostFile(c echo.Context) error {
 	}
 	defer src.Close()
 
+	// get create user
+	sess, err := session.Get(h.SessionName, c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	user, ok := sess.Values[sessionUserKey].(*User)
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("invalid user"))
+	}
+
 	ctx := c.Request().Context()
-	file, err := h.Repository.CreateFile(ctx, name, mimetype, requestID)
+	file, err := h.Repository.CreateFile(ctx, name, mimetype, requestID, user.ID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
@@ -139,6 +152,7 @@ func (h *Handlers) GetFileMeta(c echo.Context) error {
 		ID:        file.ID,
 		Name:      file.Name,
 		MimeType:  file.MimeType,
+		CreatedBy: file.CreatedBy,
 		CreatedAt: file.CreatedAt,
 	})
 }

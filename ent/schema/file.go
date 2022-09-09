@@ -36,5 +36,8 @@ func (File) Edges() []ent.Edge {
 		edge.From("request", Request.Type).
 			Ref("file").
 			Unique(),
+		edge.To("user", User.Type).
+			Unique().
+			Required(),
 	}
 }
