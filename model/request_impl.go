@@ -349,17 +349,6 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	return reqdetail, nil
 }
 
-func convertEntRequestToModelRequest(request *ent.Request) *Request {
-	if request == nil {
-		return nil
-	}
-	return &Request{
-		ID:        request.ID,
-		Amount:    request.Amount,
-		CreatedAt: request.CreatedAt,
-	}
-}
-
 func convertEntRequestResponseToModelRequestResponse(request *ent.Request, tags []*ent.Tag, group *ent.Group, status *ent.RequestStatus, user *ent.User) *RequestResponse {
 	if request == nil {
 		return nil
