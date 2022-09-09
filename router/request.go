@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,9 +14,6 @@ import (
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
 )
-
-// TransactionのDeadLock防止
-var mu sync.Mutex
 
 type Status string
 
@@ -377,11 +373,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-// TransactionでDeadLockになるので、Mutexを使う
-// DeadLockになる理由: https://github.com/traPtitech/Jomon/pull/570#issuecomment-1120426979
 func (h *Handlers) PutRequest(c echo.Context) error {
-	mu.Lock()
-	defer mu.Unlock()
 	var req PutRequest
 	var err error
 	requestID, err := uuid.Parse(c.Param("requestID"))

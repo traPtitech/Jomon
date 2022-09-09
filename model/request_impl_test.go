@@ -37,9 +37,6 @@ func TestEntRepository_GetRequests(t *testing.T) {
 	client8, storage8, err := setup(t, ctx, "get_requests8")
 	require.NoError(t, err)
 	repo8 := NewEntRepository(client8, storage8)
-	client9, storage9, err := setup(t, ctx, "get_requests9")
-	require.NoError(t, err)
-	repo9 := NewEntRepository(client9, storage9)
 
 	t.Run("SuccessWithSortCreatedAt", func(t *testing.T) {
 		t.Parallel()
@@ -94,9 +91,9 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		t.Parallel()
 		user1, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
-		user2, err := repo22.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user2, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
-		tag, err := repo22.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
+		tag, err := repo2.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
 		target := &RequestTarget{
 			Target: random.AlphaNumeric(t, 20),
@@ -104,7 +101,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		}
 
 		budget := random.Numeric(t, 10000)
-		group, err := repo22.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
+		group, err := repo2.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
 
 		request1, err := repo2.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user1.ID)
@@ -115,7 +112,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 		sort := "-created_at"
 
-		got, err := repo22.GetRequests(ctx, RequestQuery{
+		got, err := repo2.GetRequests(ctx, RequestQuery{
 			Sort: &sort,
 		})
 		assert.NoError(t, err)
@@ -136,6 +133,270 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			assert.Equal(t, got[1].Tags[0].ID, request1.Tags[0].ID)
 			assert.Equal(t, got[1].Tags[0].Name, request1.Tags[0].Name)
 			assert.Equal(t, got[1].Tags[0].Description, request1.Tags[0].Description)
+		}
+	})
+
+	t.Run("SuccessWithSortTitle", func(t *testing.T) {
+		t.Parallel()
+		user1, err := repo3.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		user2, err := repo3.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		tag, err := repo3.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
+		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
+
+		budget := random.Numeric(t, 10000)
+		group, err := repo3.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
+		require.NoError(t, err)
+
+		request1, err := repo3.CreateRequest(ctx, random.Numeric(t, 1000000), "b", random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user1.ID)
+		require.NoError(t, err)
+		request2, err := repo3.CreateRequest(ctx, random.Numeric(t, 1000000), "a", random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user2.ID)
+		require.NoError(t, err)
+
+		sort := "title"
+
+		got, err := repo3.GetRequests(ctx, RequestQuery{
+			Sort: &sort,
+		})
+		assert.NoError(t, err)
+		if assert.Len(t, got, 2) && assert.Equal(t, got[0].ID, request2.ID) {
+			assert.Equal(t, got[0].ID, request2.ID)
+			assert.Equal(t, got[0].Status, request2.Status)
+			assert.Equal(t, got[0].Amount, request2.Amount)
+			assert.Equal(t, got[0].Title, request2.Title)
+			assert.Equal(t, got[0].Content, request2.Content)
+			assert.Equal(t, got[0].Tags[0].ID, request2.Tags[0].ID)
+			assert.Equal(t, got[0].Tags[0].Name, request2.Tags[0].Name)
+			assert.Equal(t, got[0].Tags[0].Description, request2.Tags[0].Description)
+			assert.Equal(t, got[1].ID, request1.ID)
+			assert.Equal(t, got[1].Status, request1.Status)
+			assert.Equal(t, got[1].Amount, request1.Amount)
+			assert.Equal(t, got[1].Title, request1.Title)
+			assert.Equal(t, got[1].Content, request1.Content)
+			assert.Equal(t, got[1].Tags[0].ID, request1.Tags[0].ID)
+			assert.Equal(t, got[1].Tags[0].Name, request1.Tags[0].Name)
+			assert.Equal(t, got[1].Tags[0].Description, request1.Tags[0].Description)
+		}
+	})
+
+	t.Run("SuccessWithReverseSortTitle", func(t *testing.T) {
+		t.Parallel()
+		user1, err := repo4.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		user2, err := repo4.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		tag, err := repo4.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
+		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
+
+		budget := random.Numeric(t, 10000)
+		group, err := repo4.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
+		require.NoError(t, err)
+
+		request1, err := repo4.CreateRequest(ctx, random.Numeric(t, 1000000), "b", random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user1.ID)
+		require.NoError(t, err)
+		request2, err := repo4.CreateRequest(ctx, random.Numeric(t, 1000000), "a", random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user2.ID)
+		require.NoError(t, err)
+
+		sort := "-title"
+
+		got, err := repo4.GetRequests(ctx, RequestQuery{
+			Sort: &sort,
+		})
+		assert.NoError(t, err)
+		if assert.Len(t, got, 2) && assert.Equal(t, got[0].ID, request1.ID) {
+			assert.Equal(t, got[0].ID, request1.ID)
+			assert.Equal(t, got[0].Status, request1.Status)
+			assert.Equal(t, got[0].Amount, request1.Amount)
+			assert.Equal(t, got[0].Title, request1.Title)
+			assert.Equal(t, got[0].Content, request1.Content)
+			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
+			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+			assert.Equal(t, got[0].Tags[0].Description, request1.Tags[0].Description)
+			assert.Equal(t, got[1].ID, request2.ID)
+			assert.Equal(t, got[1].Status, request2.Status)
+			assert.Equal(t, got[1].Amount, request2.Amount)
+			assert.Equal(t, got[1].Title, request2.Title)
+			assert.Equal(t, got[1].Content, request2.Content)
+			assert.Equal(t, got[1].Tags[0].ID, request2.Tags[0].ID)
+			assert.Equal(t, got[1].Tags[0].Name, request2.Tags[0].Name)
+			assert.Equal(t, got[1].Tags[0].Description, request2.Tags[0].Description)
+		}
+	})
+
+	t.Run("SuccessWithQueryTarget", func(t *testing.T) {
+		t.Parallel()
+		user1, err := repo5.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		user2, err := repo5.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		tag, err := repo5.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
+		require.NoError(t, err)
+		target1 := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
+		target2 := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
+
+		budget := random.Numeric(t, 10000)
+		group, err := repo5.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
+		require.NoError(t, err)
+
+		request1, err := repo5.CreateRequest(ctx, random.Numeric(t, 1000000), "b", random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target1}, group, user1.ID)
+		require.NoError(t, err)
+		_, err = repo5.CreateRequest(ctx, random.Numeric(t, 1000000), "a", random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target2}, group, user2.ID)
+		require.NoError(t, err)
+
+		target := target1.Target
+		got, err := repo5.GetRequests(ctx, RequestQuery{
+			Target: &target,
+		})
+		assert.NoError(t, err)
+		if assert.Len(t, got, 1) {
+			assert.Equal(t, got[0].ID, request1.ID)
+			assert.Equal(t, got[0].Status, request1.Status)
+			assert.Equal(t, got[0].Amount, request1.Amount)
+			assert.Equal(t, got[0].Title, request1.Title)
+			assert.Equal(t, got[0].Content, request1.Content)
+			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
+			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+			assert.Equal(t, got[0].Tags[0].Description, request1.Tags[0].Description)
+		}
+	})
+
+	t.Run("SuccessWithQuerySince", func(t *testing.T) {
+		t.Parallel()
+		user1, err := repo6.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		user2, err := repo6.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		tag, err := repo6.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
+		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
+
+		budget := random.Numeric(t, 10000)
+		group, err := repo6.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
+		require.NoError(t, err)
+
+		request1, err := repo6.CreateRequest(ctx, random.Numeric(t, 1000000), "b", random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user1.ID)
+		require.NoError(t, err)
+		time.Sleep(1 * time.Second)
+		request2, err := repo6.CreateRequest(ctx, random.Numeric(t, 1000000), "a", random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user2.ID)
+		require.NoError(t, err)
+
+		since := request1.CreatedAt.Add(10 * time.Millisecond)
+		got, err := repo6.GetRequests(ctx, RequestQuery{
+			Since: &since,
+		})
+		assert.NoError(t, err)
+		if assert.Len(t, got, 1) {
+			assert.Equal(t, got[0].ID, request2.ID)
+			assert.Equal(t, got[0].Status, request2.Status)
+			assert.Equal(t, got[0].Amount, request2.Amount)
+			assert.Equal(t, got[0].Title, request2.Title)
+			assert.Equal(t, got[0].Content, request2.Content)
+			assert.Equal(t, got[0].Tags[0].ID, request2.Tags[0].ID)
+			assert.Equal(t, got[0].Tags[0].Name, request2.Tags[0].Name)
+			assert.Equal(t, got[0].Tags[0].Description, request2.Tags[0].Description)
+		}
+	})
+
+	t.Run("SuccessWithQueryUntil", func(t *testing.T) {
+		t.Parallel()
+		user1, err := repo7.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		user2, err := repo7.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		tag, err := repo7.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
+		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
+
+		budget := random.Numeric(t, 10000)
+		group, err := repo7.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
+		require.NoError(t, err)
+
+		request1, err := repo7.CreateRequest(ctx, random.Numeric(t, 1000000), "b", random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user1.ID)
+		require.NoError(t, err)
+		time.Sleep(2 * time.Second)
+		request2, err := repo7.CreateRequest(ctx, random.Numeric(t, 1000000), "a", random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user2.ID)
+		require.NoError(t, err)
+
+		until := request2.CreatedAt.Add(-1 * time.Second)
+		got, err := repo7.GetRequests(ctx, RequestQuery{
+			Until: &until,
+		})
+		assert.NoError(t, err)
+		if assert.Len(t, got, 1) {
+			assert.Equal(t, got[0].ID, request1.ID)
+			assert.Equal(t, got[0].Status, request1.Status)
+			assert.Equal(t, got[0].Amount, request1.Amount)
+			assert.Equal(t, got[0].Title, request1.Title)
+			assert.Equal(t, got[0].Content, request1.Content)
+			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
+			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+			assert.Equal(t, got[0].Tags[0].Description, request1.Tags[0].Description)
+		}
+	})
+
+	t.Run("SuccessWithQueryStatus", func(t *testing.T) {
+		t.Parallel()
+		user1, err := repo8.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		user2, err := repo8.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		tag, err := repo8.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
+		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 10000),
+		}
+
+		budget := random.Numeric(t, 10000)
+		group, err := repo8.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
+		require.NoError(t, err)
+
+		request1, err := repo8.CreateRequest(ctx, random.Numeric(t, 1000000), "b", random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user1.ID)
+		require.NoError(t, err)
+		time.Sleep(2 * time.Second)
+		_, err = repo8.CreateRequest(ctx, random.Numeric(t, 1000000), "a", random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user2.ID)
+		require.NoError(t, err)
+
+		time.Sleep(1 * time.Second)
+
+		status := "accepted"
+		_, err = repo8.CreateStatus(ctx, request1.ID, user1.ID, Accepted)
+		require.NoError(t, err)
+
+		got, err := repo8.GetRequests(ctx, RequestQuery{
+			Status: &status,
+		})
+		assert.NoError(t, err)
+		if assert.Len(t, got, 1) {
+			assert.Equal(t, got[0].ID, request1.ID)
+			assert.Equal(t, got[0].Status, Accepted)
+			assert.Equal(t, got[0].Amount, request1.Amount)
+			assert.Equal(t, got[0].Title, request1.Title)
+			assert.Equal(t, got[0].Content, request1.Content)
+			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
+			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+			assert.Equal(t, got[0].Tags[0].Description, request1.Tags[0].Description)
 		}
 	})
 }
@@ -383,7 +644,6 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 		require.NoError(t, err)
 		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{tag}, []*RequestTarget{target}, group, user.ID)
 		require.NoError(t, err)
-
 		content := random.AlphaNumeric(t, 100)
 		updatedRequest, err := repo.UpdateRequest(ctx, request.ID, request.Amount, request.Title, content, []*Tag{tag}, []*RequestTarget{target}, group)
 		assert.NoError(t, err)

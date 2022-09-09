@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,6 +14,9 @@ import (
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/user"
 )
+
+// TransactionのDeadLock防止
+var mu sync.Mutex
 
 func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) ([]*RequestResponse, error) {
 	// Querying
@@ -239,6 +243,8 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 }
 
 func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, content string, tags []*Tag, targets []*RequestTarget, group *Group) (*RequestDetail, error) {
+	mu.Lock()
+	defer mu.Unlock()
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
 		return nil, err
