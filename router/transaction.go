@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"net/http"
 	"time"
 
@@ -194,7 +193,7 @@ func (h *Handlers) GetTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	tx, err := h.Repository.GetTransaction(ctx, txID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
