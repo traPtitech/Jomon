@@ -9,8 +9,8 @@ import (
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
 )
 
-func (repo *EntRepository) createTransactionDetail(ctx context.Context, amount int, target string) (*TransactionDetail, error) {
-	enttd, err := repo.client.TransactionDetail.Create().
+func (repo *EntRepository) createTransactionDetail(ctx context.Context, tx *ent.Tx, amount int, target string) (*TransactionDetail, error) {
+	enttd, err := tx.Client().TransactionDetail.Create().
 		SetAmount(amount).
 		SetTarget(target).
 		Save(ctx)
@@ -20,8 +20,8 @@ func (repo *EntRepository) createTransactionDetail(ctx context.Context, amount i
 	return convertEntTransactionDetailToModelTransactionDetail(enttd), nil
 }
 
-func (repo *EntRepository) updateTransactionDetail(ctx context.Context, transactionID uuid.UUID, amount int, target string) (*TransactionDetail, error) {
-	_, err := repo.client.TransactionDetail.Update().
+func (repo *EntRepository) updateTransactionDetail(ctx context.Context, tx *ent.Tx, transactionID uuid.UUID, amount int, target string) (*TransactionDetail, error) {
+	_, err := tx.Client().TransactionDetail.Update().
 		Where(transactiondetail.HasTransactionWith(
 			transaction.IDEQ(transactionID),
 		)).
@@ -30,7 +30,7 @@ func (repo *EntRepository) updateTransactionDetail(ctx context.Context, transact
 	if err != nil {
 		return nil, err
 	}
-	enttd, err := repo.client.TransactionDetail.Create().
+	enttd, err := tx.Client().TransactionDetail.Create().
 		SetAmount(amount).
 		SetTarget(target).
 		SetTransactionID(transactionID).

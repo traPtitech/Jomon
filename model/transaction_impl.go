@@ -109,6 +109,17 @@ func (repo *EntRepository) GetTransaction(ctx context.Context, transactionID uui
 }
 
 func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
+	tx, err := repo.client.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if v := recover(); v != nil {
+			tx.Rollback()
+			panic(v)
+		}
+	}()
+
 	// Get Tags
 	var tagIDs []uuid.UUID
 	for _, tag := range tags {
@@ -116,25 +127,27 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 	}
 
 	// Create Transaction Detail
-	detail, err := repo.createTransactionDetail(ctx, amount, target)
+	detail, err := repo.createTransactionDetail(ctx, tx, amount, target)
 	if err != nil {
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 
 	// Create GroupBudget
 	var gb *ent.GroupBudget
 	if groupID != nil {
-		gb, err = repo.client.GroupBudget.
+		gb, err = tx.Client().GroupBudget.
 			Create().
 			SetGroupID(*groupID).
 			SetAmount(amount).
 			Save(ctx)
 		if err != nil {
+			err = RollbackWithError(tx, err)
 			return nil, err
 		}
 	}
 	// Create transaction query
-	query := repo.client.Transaction.
+	query := tx.Client().Transaction.
 		Create().
 		SetDetailID(detail.ID)
 
@@ -151,26 +164,28 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 	}
 
 	// Create transaction
-	tx, err := query.Save(ctx)
+	trns, err := query.Save(ctx)
 	if err != nil {
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 
 	// Update Tag to set transaction
 	if tags != nil {
-		_, err = repo.client.Tag.
+		_, err = tx.Client().Tag.
 			Update().
 			Where(tag.IDIn(tagIDs...)).
-			AddTransactionIDs(tx.ID).
+			AddTransactionIDs(trns.ID).
 			Save(ctx)
 		if err != nil {
+			err = RollbackWithError(tx, err)
 			return nil, err
 		}
 	}
 
-	tx, err = repo.client.Transaction.
+	trns, err = tx.Client().Transaction.
 		Query().
-		Where(transaction.ID(tx.ID)).
+		Where(transaction.ID(trns.ID)).
 		WithTag().
 		WithDetail().
 		WithGroupBudget(func(q *ent.GroupBudgetQuery) {
@@ -178,17 +193,35 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 		}).
 		Only(ctx)
 	if err != nil {
+		err = RollbackWithError(tx, err)
+		return nil, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
 		return nil, err
 	}
 
 	// Converting
-	return ConvertEntTransactionToModelTransactionResponse(tx), nil
+	return ConvertEntTransactionToModelTransactionResponse(trns), nil
 }
 
 func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID uuid.UUID, amount int, target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
-	// Update transaction Detail
-	_, err := repo.updateTransactionDetail(ctx, transactionID, amount, target)
+	tx, err := repo.client.Tx(ctx)
 	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if v := recover(); v != nil {
+			tx.Rollback()
+			panic(v)
+		}
+	}()
+
+	// Update transaction Detail
+	_, err = repo.updateTransactionDetail(ctx, tx, transactionID, amount, target)
+	if err != nil {
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 
@@ -199,7 +232,7 @@ func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID 
 	}
 
 	// Delete Tag Transaction Edge
-	_, err = repo.client.Tag.
+	_, err = tx.Client().Tag.
 		Update().
 		Where(tag.HasTransactionWith(
 			transaction.IDEQ(transactionID),
@@ -207,44 +240,48 @@ func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID 
 		RemoveTransactionIDs(transactionID).
 		Save(ctx)
 	if err != nil {
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 
 	if groupID != nil {
 		// Delete GroupBudget
-		_, err = repo.client.GroupBudget.
+		_, err = tx.Client().GroupBudget.
 			Delete().
 			Where(groupbudget.HasTransactionWith(
 				transaction.IDEQ(transactionID),
 			)).
 			Exec(ctx)
 		if err != nil {
+			err = RollbackWithError(tx, err)
 			return nil, err
 		}
 		// Create GroupBudget
-		_, err = repo.client.GroupBudget.
+		_, err = tx.Client().GroupBudget.
 			Create().
 			SetGroupID(*groupID).
 			SetAmount(amount).
 			SetTransactionID(transactionID).
 			Save(ctx)
 		if err != nil {
+			err = RollbackWithError(tx, err)
 			return nil, err
 		}
 	}
 
 	// Update Tag to set transaction
-	_, err = repo.client.Tag.
+	_, err = tx.Client().Tag.
 		Update().
 		Where(tag.IDIn(tagIDs...)).
 		AddTransactionIDs(transactionID).
 		Save(ctx)
 	if err != nil {
+		err = RollbackWithError(tx, err)
 		return nil, err
 	}
 
 	// Get transaction
-	tx, err := repo.client.Transaction.
+	trns, err := tx.Client().Transaction.
 		Query().
 		Where(transaction.ID(transactionID)).
 		WithTag().
@@ -254,11 +291,17 @@ func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID 
 		}).
 		Only(ctx)
 	if err != nil {
+		err = RollbackWithError(tx, err)
+		return nil, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
 		return nil, err
 	}
 
 	// Converting
-	return ConvertEntTransactionToModelTransactionResponse(tx), nil
+	return ConvertEntTransactionToModelTransactionResponse(trns), nil
 }
 
 func ConvertEntTransactionToModelTransaction(transaction *ent.Transaction) *Transaction {
