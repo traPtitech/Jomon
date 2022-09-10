@@ -84,7 +84,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Transaction"
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
         "400":
           $ref: "#/components/responses/400"
         "403":
@@ -122,7 +124,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostTransaction"
+              $ref: "#/components/schemas/PostTransactionWithOneTarget"
       responses:
         "200":
           description: OK 修正後のトランザクションを返却する。
@@ -1150,6 +1152,31 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Target"
+        tags:
+          type: array
+          items:
+            type: string
+            format: uuid
+        group:
+          type: string
+          format: uuid
+        request:
+          type: string
+          format: uuid
+      required:
+        - amount
+        - targets
+        - request
+        - tags
+        - group
+    PostTransactionWithOneTarget:
+      type: object
+      properties:
+        amount:
+          type: integer
+          example: 1200
+        target:
+          $ref: "#/components/schemas/Target"
         tags:
           type: array
           items:

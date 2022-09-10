@@ -30,6 +30,14 @@ type TransactionOverview struct {
 	Request *uuid.UUID   `json:"request"`
 }
 
+type TransactionOverviewWithOneTarget struct {
+	Amount  int          `json:"amount"`
+	Target  string       `json:"target"`
+	Tags    []*uuid.UUID `json:"tags"`
+	Group   *uuid.UUID   `json:"group"`
+	Request *uuid.UUID   `json:"request"`
+}
+
 func (h *Handlers) GetTransactions(c echo.Context) error {
 	ctx := c.Request().Context()
 	var sort *string
@@ -134,44 +142,49 @@ func (h *Handlers) PostTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
+	transactions := []*Transaction{}
 	ctx := c.Request().Context()
 	for _, target := range tx.Targets {
-		created, err := h.Repository.CreateTransaction(ctx, tx.Amount, target, tx.Tags, tx.Group, tx.Request)
+		if target == nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "target is nil")
+		}
+		created, err := h.Repository.CreateTransaction(ctx, tx.Amount, *target, tx.Tags, tx.Group, tx.Request)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
+
+		tags := []*TagOverview{}
+		for _, tag := range created.Tags {
+			tags = append(tags, &TagOverview{
+				ID:          tag.ID,
+				Name:        tag.Name,
+				Description: tag.Description,
+				CreatedAt:   tag.CreatedAt,
+				UpdatedAt:   tag.UpdatedAt,
+			})
+		}
+		group := &GroupOverview{
+			ID:          created.Group.ID,
+			Name:        created.Group.Name,
+			Description: created.Group.Description,
+			Budget:      created.Group.Budget,
+			CreatedAt:   created.Group.CreatedAt,
+			UpdatedAt:   created.Group.UpdatedAt,
+		}
+		res := Transaction{
+			ID:        created.ID,
+			Amount:    created.Amount,
+			Target:    created.Target,
+			Request:   created.Request,
+			Tags:      tags,
+			Group:     group,
+			CreatedAt: created.CreatedAt,
+			UpdatedAt: created.UpdatedAt,
+		}
+		transactions = append(transactions, &res)
 	}
 
-	tags := []*TagOverview{}
-	for _, tag := range created.Tags {
-		tags = append(tags, &TagOverview{
-			ID:          tag.ID,
-			Name:        tag.Name,
-			Description: tag.Description,
-			CreatedAt:   tag.CreatedAt,
-			UpdatedAt:   tag.UpdatedAt,
-		})
-	}
-	group := &GroupOverview{
-		ID:          created.Group.ID,
-		Name:        created.Group.Name,
-		Description: created.Group.Description,
-		Budget:      created.Group.Budget,
-		CreatedAt:   created.Group.CreatedAt,
-		UpdatedAt:   created.Group.UpdatedAt,
-	}
-	res := Transaction{
-		ID:        created.ID,
-		Amount:    created.Amount,
-		Target:    created.Target,
-		Request:   created.Request,
-		Tags:      tags,
-		Group:     group,
-		CreatedAt: created.CreatedAt,
-		UpdatedAt: created.UpdatedAt,
-	}
-
-	return c.JSON(http.StatusOK, &res)
+	return c.JSON(http.StatusOK, transactions)
 }
 
 func (h *Handlers) GetTransaction(c echo.Context) error {
@@ -223,12 +236,12 @@ func (h *Handlers) PutTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	var tx *TransactionOverview
+	var tx *TransactionOverviewWithOneTarget
 	if err := c.Bind(&tx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	updated, err := h.Repository.UpdateTransaction(ctx, txID, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
