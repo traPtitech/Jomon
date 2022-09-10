@@ -2448,7 +2448,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		resErr := echo.NewHTTPError(http.StatusBadRequest)
 		resErrMessage := echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid Status %s", invalidStatus))
-		resErrMessage.Internal = errors.New(fmt.Sprintf("invalid Status %s", invalidStatus))
+		resErrMessage.Internal = fmt.Errorf("invalid Status %s", invalidStatus)
 		resErr.Message = resErrMessage
 
 		err = h.Handlers.PutStatus(c)

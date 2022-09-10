@@ -30,6 +30,7 @@ func (Transaction) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("detail", TransactionDetail.Type).
 			Unique().
+			Required().
 			Annotations(entsql.Annotation{
 				OnDelete: entsql.Cascade,
 			}),

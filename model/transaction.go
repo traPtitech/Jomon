@@ -2,18 +2,17 @@
 package model
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type TransactionRepository interface {
-	/*
-		GetTransactions(ctx context.Context, query TransactionQuery) ([]*TransactionResponse, error)
-		CreateTransaction(ctx context.Context, Amount int, Target string, tags []*uuid.UUID, group uuid.UUID) (TransactionResponse, error)
-		GetTransaction(ctx context.Context, transactionID uuid.UUID) (TransactionResponse, error)
-		UpdateTransaction(ctx context.Context, transactionID uuid.UUID, Amount int, Target string, tags []*uuid.UUID, group uuid.UUID) (TransactionResponse, error)
-	*/
+	GetTransactions(ctx context.Context, query TransactionQuery) ([]*TransactionResponse, error)
+	CreateTransaction(ctx context.Context, Amount int, Target string, tags []*uuid.UUID, group *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error)
+	GetTransaction(ctx context.Context, transactionID uuid.UUID) (*TransactionResponse, error)
+	UpdateTransaction(ctx context.Context, transactionID uuid.UUID, Amount int, Target string, tags []*uuid.UUID, group *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error)
 }
 
 type Transaction struct {
@@ -25,18 +24,19 @@ type TransactionResponse struct {
 	ID        uuid.UUID
 	Amount    int
 	Target    string
+	Request   *uuid.UUID
 	Tags      []*Tag
-	Group     Group
+	Group     *Group
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
 type TransactionQuery struct {
-	Sort   *string
-	Target *string
-	Year   *int
-	Since  *time.Time
-	Until  *time.Time
-	Tag    *string
-	Group  *string
+	Sort    *string
+	Target  *string
+	Since   *time.Time
+	Until   *time.Time
+	Tag     *string
+	Group   *string
+	Request *uuid.UUID
 }
