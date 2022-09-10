@@ -85,14 +85,6 @@ func (tdu *TransactionDetailUpdate) SetUpdatedAt(t time.Time) *TransactionDetail
 	return tdu
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (tdu *TransactionDetailUpdate) SetNillableUpdatedAt(t *time.Time) *TransactionDetailUpdate {
-	if t != nil {
-		tdu.SetUpdatedAt(*t)
-	}
-	return tdu
-}
-
 // SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
 func (tdu *TransactionDetailUpdate) SetTransactionID(id uuid.UUID) *TransactionDetailUpdate {
 	tdu.mutation.SetTransactionID(id)
@@ -129,6 +121,7 @@ func (tdu *TransactionDetailUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	tdu.defaults()
 	if len(tdu.hooks) == 0 {
 		affected, err = tdu.sqlSave(ctx)
 	} else {
@@ -175,6 +168,14 @@ func (tdu *TransactionDetailUpdate) ExecX(ctx context.Context) {
 	if err := tdu.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (tdu *TransactionDetailUpdate) check() error {
+	if _, ok := tdu.mutation.TransactionID(); tdu.mutation.TransactionCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "TransactionDetail.transaction"`)
+	}
+	return nil
 }
 
 func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -339,14 +340,6 @@ func (tduo *TransactionDetailUpdateOne) SetUpdatedAt(t time.Time) *TransactionDe
 	return tduo
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (tduo *TransactionDetailUpdateOne) SetNillableUpdatedAt(t *time.Time) *TransactionDetailUpdateOne {
-	if t != nil {
-		tduo.SetUpdatedAt(*t)
-	}
-	return tduo
-}
-
 // SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
 func (tduo *TransactionDetailUpdateOne) SetTransactionID(id uuid.UUID) *TransactionDetailUpdateOne {
 	tduo.mutation.SetTransactionID(id)
@@ -390,6 +383,7 @@ func (tduo *TransactionDetailUpdateOne) Save(ctx context.Context) (*TransactionD
 		err  error
 		node *TransactionDetail
 	)
+	tduo.defaults()
 	if len(tduo.hooks) == 0 {
 		node, err = tduo.sqlSave(ctx)
 	} else {
@@ -436,6 +430,14 @@ func (tduo *TransactionDetailUpdateOne) ExecX(ctx context.Context) {
 	if err := tduo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (tduo *TransactionDetailUpdateOne) check() error {
+	if _, ok := tduo.mutation.TransactionID(); tduo.mutation.TransactionCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "TransactionDetail.transaction"`)
+	}
+	return nil
 }
 
 func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *TransactionDetail, err error) {

@@ -82,14 +82,6 @@ func (ru *RequestUpdate) SetUpdatedAt(t time.Time) *RequestUpdate {
 	return ru
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ru *RequestUpdate) SetNillableUpdatedAt(t *time.Time) *RequestUpdate {
-	if t != nil {
-		ru.SetUpdatedAt(*t)
-	}
-	return ru
-}
-
 // AddStatuIDs adds the "status" edge to the RequestStatus entity by IDs.
 func (ru *RequestUpdate) AddStatuIDs(ids ...uuid.UUID) *RequestUpdate {
 	ru.mutation.AddStatuIDs(ids...)
@@ -367,6 +359,7 @@ func (ru *RequestUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	ru.defaults()
 	if len(ru.hooks) == 0 {
 		affected, err = ru.sqlSave(ctx)
 	} else {
@@ -412,6 +405,14 @@ func (ru *RequestUpdate) Exec(ctx context.Context) error {
 func (ru *RequestUpdate) ExecX(ctx context.Context) {
 	if err := ru.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ru *RequestUpdate) defaults() {
+	if _, ok := ru.mutation.UpdatedAt(); !ok {
+		v := request.UpdateDefaultUpdatedAt()
+		ru.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -933,14 +934,6 @@ func (ruo *RequestUpdateOne) SetUpdatedAt(t time.Time) *RequestUpdateOne {
 	return ruo
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ruo *RequestUpdateOne) SetNillableUpdatedAt(t *time.Time) *RequestUpdateOne {
-	if t != nil {
-		ruo.SetUpdatedAt(*t)
-	}
-	return ruo
-}
-
 // AddStatuIDs adds the "status" edge to the RequestStatus entity by IDs.
 func (ruo *RequestUpdateOne) AddStatuIDs(ids ...uuid.UUID) *RequestUpdateOne {
 	ruo.mutation.AddStatuIDs(ids...)
@@ -1225,6 +1218,7 @@ func (ruo *RequestUpdateOne) Save(ctx context.Context) (*Request, error) {
 		err  error
 		node *Request
 	)
+	ruo.defaults()
 	if len(ruo.hooks) == 0 {
 		node, err = ruo.sqlSave(ctx)
 	} else {
@@ -1270,6 +1264,14 @@ func (ruo *RequestUpdateOne) Exec(ctx context.Context) error {
 func (ruo *RequestUpdateOne) ExecX(ctx context.Context) {
 	if err := ruo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ruo *RequestUpdateOne) defaults() {
+	if _, ok := ruo.mutation.UpdatedAt(); !ok {
+		v := request.UpdateDefaultUpdatedAt()
+		ruo.mutation.SetUpdatedAt(v)
 	}
 }
 

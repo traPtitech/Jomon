@@ -34,7 +34,8 @@ func SetupEntClient() (*ent.Client, error) {
 	ctx := context.Background()
 
 	if os.Getenv("IS_DEBUG_MODE") != "" {
-		if err := client.Debug().Schema.Create(ctx); err != nil {
+		client = client.Debug()
+		if err := client.Schema.Create(ctx); err != nil {
 			return nil, err
 		}
 	} else {

@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/gob"
@@ -12,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/service"
 )
@@ -20,7 +20,6 @@ const (
 	sessionDuration        = 24 * 60 * 60 * 7
 	sessionKey             = "sessions"
 	sessionCodeVerifierKey = "code_verifier"
-	sessionUserKey         = "user"
 )
 
 type AuthResponse struct {
@@ -35,9 +34,8 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "code is required")
 	}
 
-	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -49,26 +47,22 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
 	if !ok {
-		c.Logger().Error(err)
 		return echo.ErrInternalServerError
 	}
 
 	res, err := service.RequestAccessToken(code, codeVerifier)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	u, err := service.FetchTraQUserInfo(res.AccessToken)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	modelUser, err := h.Repository.GetUserByName(ctx, u.Name)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -83,7 +77,6 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {
-		c.Logger().Error(err)
 		return echo.ErrInternalServerError
 	}
 
@@ -92,9 +85,8 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 func (h Handlers) GeneratePKCE(c echo.Context) error {
 	gob.Register(&User{})
-	sess, err := h.SessionStore.Get(c.Request(), h.SessionName)
+	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -114,7 +106,6 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 
 	err = sess.Save(c.Request(), c.Response())
 	if err != nil {
-		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 

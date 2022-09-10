@@ -63,14 +63,6 @@ func (tu *TagUpdate) SetUpdatedAt(t time.Time) *TagUpdate {
 	return tu
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (tu *TagUpdate) SetNillableUpdatedAt(t *time.Time) *TagUpdate {
-	if t != nil {
-		tu.SetUpdatedAt(*t)
-	}
-	return tu
-}
-
 // SetDeletedAt sets the "deleted_at" field.
 func (tu *TagUpdate) SetDeletedAt(t time.Time) *TagUpdate {
 	tu.mutation.SetDeletedAt(t)
@@ -174,6 +166,7 @@ func (tu *TagUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	tu.defaults()
 	if len(tu.hooks) == 0 {
 		if err = tu.check(); err != nil {
 			return 0, err
@@ -225,6 +218,14 @@ func (tu *TagUpdate) Exec(ctx context.Context) error {
 func (tu *TagUpdate) ExecX(ctx context.Context) {
 	if err := tu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (tu *TagUpdate) defaults() {
+	if _, ok := tu.mutation.UpdatedAt(); !ok {
+		v := tag.UpdateDefaultUpdatedAt()
+		tu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -456,14 +457,6 @@ func (tuo *TagUpdateOne) SetUpdatedAt(t time.Time) *TagUpdateOne {
 	return tuo
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (tuo *TagUpdateOne) SetNillableUpdatedAt(t *time.Time) *TagUpdateOne {
-	if t != nil {
-		tuo.SetUpdatedAt(*t)
-	}
-	return tuo
-}
-
 // SetDeletedAt sets the "deleted_at" field.
 func (tuo *TagUpdateOne) SetDeletedAt(t time.Time) *TagUpdateOne {
 	tuo.mutation.SetDeletedAt(t)
@@ -574,6 +567,7 @@ func (tuo *TagUpdateOne) Save(ctx context.Context) (*Tag, error) {
 		err  error
 		node *Tag
 	)
+	tuo.defaults()
 	if len(tuo.hooks) == 0 {
 		if err = tuo.check(); err != nil {
 			return nil, err
@@ -625,6 +619,14 @@ func (tuo *TagUpdateOne) Exec(ctx context.Context) error {
 func (tuo *TagUpdateOne) ExecX(ctx context.Context) {
 	if err := tuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (tuo *TagUpdateOne) defaults() {
+	if _, ok := tuo.mutation.UpdatedAt(); !ok {
+		v := tag.UpdateDefaultUpdatedAt()
+		tuo.mutation.SetUpdatedAt(v)
 	}
 }
 

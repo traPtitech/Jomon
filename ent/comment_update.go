@@ -57,14 +57,6 @@ func (cu *CommentUpdate) SetUpdatedAt(t time.Time) *CommentUpdate {
 	return cu
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (cu *CommentUpdate) SetNillableUpdatedAt(t *time.Time) *CommentUpdate {
-	if t != nil {
-		cu.SetUpdatedAt(*t)
-	}
-	return cu
-}
-
 // SetDeletedAt sets the "deleted_at" field.
 func (cu *CommentUpdate) SetDeletedAt(t time.Time) *CommentUpdate {
 	cu.mutation.SetDeletedAt(t)
@@ -130,6 +122,7 @@ func (cu *CommentUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	cu.defaults()
 	if len(cu.hooks) == 0 {
 		if err = cu.check(); err != nil {
 			return 0, err
@@ -181,6 +174,14 @@ func (cu *CommentUpdate) Exec(ctx context.Context) error {
 func (cu *CommentUpdate) ExecX(ctx context.Context) {
 	if err := cu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (cu *CommentUpdate) defaults() {
+	if _, ok := cu.mutation.UpdatedAt(); !ok {
+		v := comment.UpdateDefaultUpdatedAt()
+		cu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -362,14 +363,6 @@ func (cuo *CommentUpdateOne) SetUpdatedAt(t time.Time) *CommentUpdateOne {
 	return cuo
 }
 
-// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (cuo *CommentUpdateOne) SetNillableUpdatedAt(t *time.Time) *CommentUpdateOne {
-	if t != nil {
-		cuo.SetUpdatedAt(*t)
-	}
-	return cuo
-}
-
 // SetDeletedAt sets the "deleted_at" field.
 func (cuo *CommentUpdateOne) SetDeletedAt(t time.Time) *CommentUpdateOne {
 	cuo.mutation.SetDeletedAt(t)
@@ -442,6 +435,7 @@ func (cuo *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
 		err  error
 		node *Comment
 	)
+	cuo.defaults()
 	if len(cuo.hooks) == 0 {
 		if err = cuo.check(); err != nil {
 			return nil, err
@@ -493,6 +487,14 @@ func (cuo *CommentUpdateOne) Exec(ctx context.Context) error {
 func (cuo *CommentUpdateOne) ExecX(ctx context.Context) {
 	if err := cuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (cuo *CommentUpdateOne) defaults() {
+	if _, ok := cuo.mutation.UpdatedAt(); !ok {
+		v := comment.UpdateDefaultUpdatedAt()
+		cuo.mutation.SetUpdatedAt(v)
 	}
 }
 

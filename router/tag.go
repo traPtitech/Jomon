@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"time"
@@ -28,7 +27,7 @@ type TagResponse struct {
 }
 
 func (h *Handlers) GetTags(c echo.Context) error {
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	tags, err := h.Repository.GetTags(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -54,7 +53,7 @@ func (h *Handlers) PostTag(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	created, err := h.Repository.CreateTag(ctx, tag.Name, tag.Description)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -84,7 +83,7 @@ func (h *Handlers) PutTag(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	tag, err := h.Repository.UpdateTag(ctx, tagID, req.Name, req.Description)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -110,7 +109,7 @@ func (h *Handlers) DeleteTag(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID"))
 	}
 
-	ctx := context.Background()
+	ctx := c.Request().Context()
 	err = h.Repository.DeleteTag(ctx, tagID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)

@@ -9,7 +9,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/enttest"
-	"github.com/traPtitech/Jomon/ent/migrate"
 	"github.com/traPtitech/Jomon/testutil"
 )
 
@@ -35,15 +34,11 @@ func SetupTestEntClient(t *testing.T, dbName string) (*ent.Client, error) {
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
 
-	client := enttest.Open(t, "mysql", dsn, entOptions...)
+	client := enttest.Open(t, "mysql", dsn, entOptions...).Debug()
 
 	ctx := context.Background()
 
-	if err := client.Schema.Create(
-		ctx,
-		migrate.WithDropIndex(true),
-		migrate.WithDropColumn(true),
-	); err != nil {
+	if err := client.Schema.Create(ctx); err != nil {
 		return nil, err
 	}
 

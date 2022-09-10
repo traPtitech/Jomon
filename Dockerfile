@@ -1,5 +1,5 @@
 ## build backend
-FROM golang:1.18.1-alpine as server-build
+FROM golang:1.19.0-alpine as server-build
 
 WORKDIR /github.com/traPtitech/Jomon
 COPY go.mod go.sum ./
@@ -11,7 +11,7 @@ RUN go build -o /Jomon -ldflags "-s -w"
 
 ## run
 
-FROM alpine:3.15.4
+FROM alpine:3.16.2
 ENV TZ Asia/Tokyo
 
 RUN apk --update --no-cache add tzdata \

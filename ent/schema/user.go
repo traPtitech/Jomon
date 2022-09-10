@@ -28,7 +28,8 @@ func (User) Fields() []ent.Field {
 		field.Time("created_at").
 			Default(time.Now),
 		field.Time("updated_at").
-			Default(time.Now),
+			Default(time.Now).
+			UpdateDefault(time.Now),
 		field.Time("deleted_at").
 			Optional().
 			Nillable(),
@@ -47,6 +48,8 @@ func (User) Edges() []ent.Edge {
 		edge.From("request_status", RequestStatus.Type).
 			Ref("user"),
 		edge.From("request", Request.Type).
+			Ref("user"),
+		edge.From("file", File.Type).
 			Ref("user"),
 	}
 }
