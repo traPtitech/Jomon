@@ -44,6 +44,18 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 			assert.Equal(t, got[1].Amount, target1.Amount)
 		}
 	})
+
+	t.Run("Success2", func(t *testing.T) {
+		t.Parallel()
+
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user.ID)
+		require.NoError(t, err)
+		got, err := repo.GetRequestTargets(ctx, request.ID)
+		assert.NoError(t, err)
+		assert.Len(t, got, 0)
+	})
 }
 
 func TestEntRepository_createRequestTargets(t *testing.T) {
@@ -66,7 +78,6 @@ func TestEntRepository_createRequestTargets(t *testing.T) {
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		got, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil, user.ID)
-		assert.NoError(t, err)
 		assert.NoError(t, err)
 		if got.Targets[0].Target == target1.Target {
 			assert.Equal(t, got.Targets[0].Target, target1.Target)
@@ -108,5 +119,27 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 		got, err := repo.GetRequestTargets(ctx, request.ID)
 		assert.NoError(t, err)
 		assert.Len(t, got, 0)
+	})
+
+	t.Run("Success2", func(t *testing.T) {
+		t.Parallel()
+		target1 := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 100000),
+		}
+		target2 := &RequestTarget{
+			Target: random.AlphaNumeric(t, 20),
+			Amount: random.Numeric(t, 100000),
+		}
+
+		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		require.NoError(t, err)
+		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user.ID)
+		require.NoError(t, err)
+		_, err = repo.UpdateRequest(ctx, request.ID, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil)
+		assert.NoError(t, err)
+		got, err := repo.GetRequestTargets(ctx, request.ID)
+		assert.NoError(t, err)
+		assert.Len(t, got, 2)
 	})
 }

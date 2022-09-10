@@ -26,7 +26,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		request, err := repo.CreateRequest(ctx, random.Numeric(t, 100000), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, targets, group, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		mimetype := "image/png"
 
