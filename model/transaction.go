@@ -24,6 +24,7 @@ type TransactionResponse struct {
 	ID        uuid.UUID
 	Amount    int
 	Target    string
+	Request   *uuid.UUID
 	Tags      []*Tag
 	Group     *Group
 	CreatedAt time.Time

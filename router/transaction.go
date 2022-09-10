@@ -15,6 +15,7 @@ type Transaction struct {
 	ID        uuid.UUID      `json:"id"`
 	Amount    int            `json:"amount"`
 	Target    string         `json:"target"`
+	Request   *uuid.UUID     `json:"request"`
 	Tags      []*TagOverview `json:"tags"`
 	Group     *GroupOverview `json:"group"`
 	CreatedAt time.Time      `json:"created_at"`
@@ -23,25 +24,25 @@ type Transaction struct {
 
 type TransactionOverview struct {
 	Amount  int          `json:"amount"`
-	Target  string       `json:"target"`
+	Targets []*string    `json:"targets"`
 	Tags    []*uuid.UUID `json:"tags"`
 	Group   *uuid.UUID   `json:"group"`
 	Request *uuid.UUID   `json:"request"`
 }
 
 func (h *Handlers) GetTransactions(c echo.Context) error {
-	ctx := context.Background()
-	var sort *string = nil
+	ctx := c.Request().Context()
+	var sort *string
 	if c.Param("sort") != "" {
 		s := c.Param("sort")
 		sort = &s
 	}
-	var target *string = nil
+	var target *string
 	if c.Param("target") != "" {
 		t := c.Param("target")
 		target = &t
 	}
-	var since *time.Time = nil
+	var since *time.Time
 	if c.Param("since") != "" {
 		var err error
 		s, err := service.StrToDate(c.Param("since"))
@@ -50,7 +51,7 @@ func (h *Handlers) GetTransactions(c echo.Context) error {
 		}
 		since = &s
 	}
-	var until *time.Time = nil
+	var until *time.Time
 	if c.Param("until") != "" {
 		var err error
 		u, err := service.StrToDate(c.Param("until"))
@@ -59,23 +60,33 @@ func (h *Handlers) GetTransactions(c echo.Context) error {
 		}
 		until = &u
 	}
-	var tag *string = nil
+	var tag *string
 	if c.Param("tag") != "" {
 		t := c.Param("tag")
 		tag = &t
 	}
-	var group *string = nil
+	var group *string
 	if c.Param("group") != "" {
 		g := c.Param("group")
 		group = &g
 	}
+	var request *uuid.UUID
+	if c.Param("request") != "" {
+		var r uuid.UUID
+		r, err := uuid.Parse(c.Param("request"))
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		request = &r
+	}
 	query := model.TransactionQuery{
-		Sort:   sort,
-		Target: target,
-		Since:  since,
-		Until:  until,
-		Tag:    tag,
-		Group:  group,
+		Sort:    sort,
+		Target:  target,
+		Since:   since,
+		Until:   until,
+		Tag:     tag,
+		Group:   group,
+		Request: request,
 	}
 	txs, err := h.Repository.GetTransactions(ctx, query)
 	if err != nil {
@@ -106,6 +117,7 @@ func (h *Handlers) GetTransactions(c echo.Context) error {
 			ID:        tx.ID,
 			Amount:    tx.Amount,
 			Target:    tx.Target,
+			Request:   tx.Request,
 			Tags:      tags,
 			Group:     group,
 			CreatedAt: tx.CreatedAt,
@@ -122,10 +134,12 @@ func (h *Handlers) PostTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Background()
-	created, err := h.Repository.CreateTransaction(ctx, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	ctx := c.Request().Context()
+	for _, target := range tx.Targets {
+		created, err := h.Repository.CreateTransaction(ctx, tx.Amount, target, tx.Tags, tx.Group, tx.Request)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
 	}
 
 	tags := []*TagOverview{}
@@ -150,6 +164,7 @@ func (h *Handlers) PostTransaction(c echo.Context) error {
 		ID:        created.ID,
 		Amount:    created.Amount,
 		Target:    created.Target,
+		Request:   created.Request,
 		Tags:      tags,
 		Group:     group,
 		CreatedAt: created.CreatedAt,

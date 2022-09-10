@@ -279,10 +279,17 @@ func ConvertEntTransactionToModelTransactionResponse(transaction *ent.Transactio
 	} else {
 		group = ConvertEntGroupToModelGroup(transaction.Edges.GroupBudget.Edges.Group)
 	}
+	var request *uuid.UUID
+	if transaction.Edges.Request == nil {
+		request = nil
+	} else {
+		request = &transaction.Edges.Request.ID
+	}
 	return &TransactionResponse{
 		ID:        transaction.ID,
 		Amount:    transaction.Edges.Detail.Amount,
 		Target:    transaction.Edges.Detail.Target,
+		Request:   request,
 		Tags:      tags,
 		Group:     group,
 		CreatedAt: transaction.CreatedAt,
