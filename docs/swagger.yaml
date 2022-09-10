@@ -7,7 +7,6 @@ info:
   title: Jomon API
   description: >-
     JomonのAPIです。
-
 tags:
   - name: "Auth"
     description: "認証用API"

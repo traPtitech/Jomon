@@ -169,6 +169,7 @@ var (
 	RequestTargetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "target", Type: field.TypeString},
+		{Name: "amount", Type: field.TypeInt},
 		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "request_target", Type: field.TypeUUID},
@@ -181,7 +182,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "request_targets_requests_target",
-				Columns:    []*schema.Column{RequestTargetsColumns[4]},
+				Columns:    []*schema.Column{RequestTargetsColumns[5]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

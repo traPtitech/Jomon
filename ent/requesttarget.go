@@ -20,6 +20,8 @@ type RequestTarget struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// Target holds the value of the "target" field.
 	Target string `json:"target,omitempty"`
+	// Amount holds the value of the "amount" field.
+	Amount int `json:"amount,omitempty"`
 	// PaidAt holds the value of the "paid_at" field.
 	PaidAt *time.Time `json:"paid_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -58,6 +60,8 @@ func (*RequestTarget) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case requesttarget.FieldAmount:
+			values[i] = new(sql.NullInt64)
 		case requesttarget.FieldTarget:
 			values[i] = new(sql.NullString)
 		case requesttarget.FieldPaidAt, requesttarget.FieldCreatedAt:
@@ -92,6 +96,12 @@ func (rt *RequestTarget) assignValues(columns []string, values []interface{}) er
 				return fmt.Errorf("unexpected type %T for field target", values[i])
 			} else if value.Valid {
 				rt.Target = value.String
+			}
+		case requesttarget.FieldAmount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field amount", values[i])
+			} else if value.Valid {
+				rt.Amount = int(value.Int64)
 			}
 		case requesttarget.FieldPaidAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -148,6 +158,8 @@ func (rt *RequestTarget) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", rt.ID))
 	builder.WriteString(", target=")
 	builder.WriteString(rt.Target)
+	builder.WriteString(", amount=")
+	builder.WriteString(fmt.Sprintf("%v", rt.Amount))
 	if v := rt.PaidAt; v != nil {
 		builder.WriteString(", paid_at=")
 		builder.WriteString(v.Format(time.ANSIC))

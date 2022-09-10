@@ -15,6 +15,8 @@ const (
 	FieldID = "id"
 	// FieldTarget holds the string denoting the target field in the database.
 	FieldTarget = "target"
+	// FieldAmount holds the string denoting the amount field in the database.
+	FieldAmount = "amount"
 	// FieldPaidAt holds the string denoting the paid_at field in the database.
 	FieldPaidAt = "paid_at"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -36,6 +38,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldTarget,
+	FieldAmount,
 	FieldPaidAt,
 	FieldCreatedAt,
 }

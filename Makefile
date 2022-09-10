@@ -17,4 +17,4 @@ test:
 
 .PHONY: docs
 docs:
-	@enter ./ent/schema ./docs/er.html
+	@enter ./ent/schema
