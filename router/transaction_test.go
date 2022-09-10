@@ -641,7 +641,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		group := tx1.Group.ID
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/transactions", bytes.NewBuffer([]byte(fmt.Sprintf(`{"amount": %d, "target": "%s", "tags": ["%s"], "group": "%s"}`, tx1.Amount, tx1.Target, tag.ID, group))))
+		req, err := http.NewRequest(http.MethodPost, "/api/transactions", bytes.NewBuffer([]byte(fmt.Sprintf(`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s"}`, tx1.Amount, tx1.Target, tag.ID, group))))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -656,6 +656,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Return(tx1, nil)
 
 		var resOverview Transaction
+		reses := []*Transaction{}
 		for _, tx := range txs {
 			tag := []*TagOverview{}
 			for _, modelTag := range tx.Tags {
@@ -684,8 +685,9 @@ func TestHandlers_PostTransaction(t *testing.T) {
 				CreatedAt: tx.CreatedAt,
 				UpdatedAt: tx.UpdatedAt,
 			}
+			reses = append(reses, &resOverview)
 		}
-		res := resOverview
+		res := reses
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
@@ -752,7 +754,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/transactions", bytes.NewBuffer([]byte(fmt.Sprintf(`{"amount": %d, "target": "%s", "tags": ["%s"], "group": "%s", "request": "%s"}`, tx.Amount, tx.Target, tag.ID, group, request.ID))))
+		req, err := http.NewRequest(http.MethodPost, "/api/transactions", bytes.NewBuffer([]byte(fmt.Sprintf(`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s", "request": "%s"}`, tx.Amount, tx.Target, tag.ID, group, request.ID))))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -767,6 +769,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Return(tx, nil)
 
 		var resOverview Transaction
+		reses := []*Transaction{}
 		to := []*TagOverview{}
 		for _, modelTag := range tx.Tags {
 			to = append(to, &TagOverview{
@@ -794,7 +797,8 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			CreatedAt: tx.CreatedAt,
 			UpdatedAt: tx.UpdatedAt,
 		}
-		res := resOverview
+		reses = append(reses, &resOverview)
+		res := reses
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 

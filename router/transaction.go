@@ -121,7 +121,7 @@ func (h *Handlers) GetTransactions(c echo.Context) error {
 			CreatedAt:   tx.Group.CreatedAt,
 			UpdatedAt:   tx.Group.UpdatedAt,
 		}
-		res = append(res, &Transaction{
+		tx := &Transaction{
 			ID:        tx.ID,
 			Amount:    tx.Amount,
 			Target:    tx.Target,
@@ -130,7 +130,8 @@ func (h *Handlers) GetTransactions(c echo.Context) error {
 			Group:     group,
 			CreatedAt: tx.CreatedAt,
 			UpdatedAt: tx.UpdatedAt,
-		})
+		}
+		res = append(res, tx)
 	}
 
 	return c.JSON(http.StatusOK, res)
