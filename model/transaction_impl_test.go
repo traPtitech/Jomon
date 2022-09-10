@@ -27,7 +27,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		// Create Transactions
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		tx1, err := repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
@@ -69,7 +69,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		// Create Transactions
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		tx1, err := repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
@@ -111,7 +111,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		// Create Transactions
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		tx1, err := repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
@@ -154,7 +154,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		amount := random.Numeric(t, 100000)
 		target1 := random.AlphaNumeric(t, 20)
 		target2 := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		tx, err := repo.CreateTransaction(ctx, amount, target1, nil, nil, &request.ID)
@@ -190,7 +190,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		// Create Transactions
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		_, err = repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
@@ -233,7 +233,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		target := random.AlphaNumeric(t, 20)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30))
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		_, err = repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
@@ -274,7 +274,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		budget := random.Numeric(t, 100000)
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		_, err = repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
@@ -312,7 +312,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		// Create Transactions
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		_, err = repo.CreateTransaction(ctx, amount, target, nil, nil, nil)
@@ -367,7 +367,7 @@ func TestEntRepository_GetTransaction(t *testing.T) {
 		// Create Transactions
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
-		_, err = repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
+		_, err = repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		tx, err := repo.CreateTransaction(ctx, amount, target, nil, nil, nil)
@@ -412,7 +412,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 
 		// Create Transactions
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		tx, err := repo.CreateTransaction(ctx, amount, target, []*uuid.UUID{&tag.ID}, &group.ID, &request.ID)
@@ -450,7 +450,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 
 		// Create Transactions
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		tx, err := repo.CreateTransaction(ctx, amount, target, nil, &group.ID, &request.ID)
@@ -484,7 +484,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 
 		// Create Transactions
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		tx, err := repo.CreateTransaction(ctx, amount, target, []*uuid.UUID{&tag.ID}, nil, &request.ID)
@@ -564,7 +564,7 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 
 		// Create Transactions
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		tx, err := repo.CreateTransaction(ctx, amount, target, []*uuid.UUID{&tag.ID}, &group.ID, &request.ID)
@@ -583,7 +583,7 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 
 		// Create Transactions
 		target = random.AlphaNumeric(t, 20)
-		request, err = repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, user.ID)
+		request, err = repo.CreateRequest(ctx, amount, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
 		tx, err = repo.UpdateTransaction(ctx, tx.ID, amount, target, []*uuid.UUID{&tag.ID}, &group.ID, &request.ID)
