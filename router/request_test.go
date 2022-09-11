@@ -189,6 +189,26 @@ func TestHandlers_GetRequests(t *testing.T) {
 		}
 	})
 
+	t.Run("InvaildStatus", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/requests?status=po", nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+
+		err = h.Handlers.GetRequests(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, "invalid status"), err)
+		}
+	})
+
 	t.Run("FailedToGetRequests", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
