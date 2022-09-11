@@ -2326,7 +2326,8 @@ type GroupBudgetMutation struct {
 	clearedFields      map[string]struct{}
 	group              *uuid.UUID
 	clearedgroup       bool
-	transaction        *uuid.UUID
+	transaction        map[uuid.UUID]struct{}
+	removedtransaction map[uuid.UUID]struct{}
 	clearedtransaction bool
 	done               bool
 	oldValue           func(context.Context) (*GroupBudget, error)
@@ -2617,9 +2618,14 @@ func (m *GroupBudgetMutation) ResetGroup() {
 	m.clearedgroup = false
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by id.
-func (m *GroupBudgetMutation) SetTransactionID(id uuid.UUID) {
-	m.transaction = &id
+// AddTransactionIDs adds the "transaction" edge to the Transaction entity by ids.
+func (m *GroupBudgetMutation) AddTransactionIDs(ids ...uuid.UUID) {
+	if m.transaction == nil {
+		m.transaction = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.transaction[ids[i]] = struct{}{}
+	}
 }
 
 // ClearTransaction clears the "transaction" edge to the Transaction entity.
@@ -2632,20 +2638,29 @@ func (m *GroupBudgetMutation) TransactionCleared() bool {
 	return m.clearedtransaction
 }
 
-// TransactionID returns the "transaction" edge ID in the mutation.
-func (m *GroupBudgetMutation) TransactionID() (id uuid.UUID, exists bool) {
-	if m.transaction != nil {
-		return *m.transaction, true
+// RemoveTransactionIDs removes the "transaction" edge to the Transaction entity by IDs.
+func (m *GroupBudgetMutation) RemoveTransactionIDs(ids ...uuid.UUID) {
+	if m.removedtransaction == nil {
+		m.removedtransaction = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.transaction, ids[i])
+		m.removedtransaction[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTransaction returns the removed IDs of the "transaction" edge to the Transaction entity.
+func (m *GroupBudgetMutation) RemovedTransactionIDs() (ids []uuid.UUID) {
+	for id := range m.removedtransaction {
+		ids = append(ids, id)
 	}
 	return
 }
 
 // TransactionIDs returns the "transaction" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TransactionID instead. It exists only for internal usage by the builders.
 func (m *GroupBudgetMutation) TransactionIDs() (ids []uuid.UUID) {
-	if id := m.transaction; id != nil {
-		ids = append(ids, *id)
+	for id := range m.transaction {
+		ids = append(ids, id)
 	}
 	return
 }
@@ -2654,6 +2669,7 @@ func (m *GroupBudgetMutation) TransactionIDs() (ids []uuid.UUID) {
 func (m *GroupBudgetMutation) ResetTransaction() {
 	m.transaction = nil
 	m.clearedtransaction = false
+	m.removedtransaction = nil
 }
 
 // Where appends a list predicates to the GroupBudgetMutation builder.
@@ -2851,9 +2867,11 @@ func (m *GroupBudgetMutation) AddedIDs(name string) []ent.Value {
 			return []ent.Value{*id}
 		}
 	case groupbudget.EdgeTransaction:
-		if id := m.transaction; id != nil {
-			return []ent.Value{*id}
+		ids := make([]ent.Value, 0, len(m.transaction))
+		for id := range m.transaction {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -2861,6 +2879,9 @@ func (m *GroupBudgetMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *GroupBudgetMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
+	if m.removedtransaction != nil {
+		edges = append(edges, groupbudget.EdgeTransaction)
+	}
 	return edges
 }
 
@@ -2868,6 +2889,12 @@ func (m *GroupBudgetMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *GroupBudgetMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case groupbudget.EdgeTransaction:
+		ids := make([]ent.Value, 0, len(m.removedtransaction))
+		for id := range m.removedtransaction {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
@@ -2902,9 +2929,6 @@ func (m *GroupBudgetMutation) ClearEdge(name string) error {
 	switch name {
 	case groupbudget.EdgeGroup:
 		m.ClearGroup()
-		return nil
-	case groupbudget.EdgeTransaction:
-		m.ClearTransaction()
 		return nil
 	}
 	return fmt.Errorf("unknown GroupBudget unique edge %s", name)

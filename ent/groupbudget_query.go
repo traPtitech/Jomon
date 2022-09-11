@@ -102,7 +102,7 @@ func (gbq *GroupBudgetQuery) QueryTransaction() *TransactionQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groupbudget.Table, groupbudget.FieldID, selector),
 			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, groupbudget.TransactionTable, groupbudget.TransactionColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, groupbudget.TransactionTable, groupbudget.TransactionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gbq.driver.Dialect(), step)
 		return fromU, nil
@@ -427,8 +427,9 @@ func (gbq *GroupBudgetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		}
 	}
 	if query := gbq.withTransaction; query != nil {
-		if err := gbq.loadTransaction(ctx, query, nodes, nil,
-			func(n *GroupBudget, e *Transaction) { n.Edges.Transaction = e }); err != nil {
+		if err := gbq.loadTransaction(ctx, query, nodes,
+			func(n *GroupBudget) { n.Edges.Transaction = []*Transaction{} },
+			func(n *GroupBudget, e *Transaction) { n.Edges.Transaction = append(n.Edges.Transaction, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -470,6 +471,9 @@ func (gbq *GroupBudgetQuery) loadTransaction(ctx context.Context, query *Transac
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	query.withFKs = true
 	query.Where(predicate.Transaction(func(s *sql.Selector) {

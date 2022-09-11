@@ -128,7 +128,7 @@ func (tq *TransactionQuery) QueryGroupBudget() *GroupBudgetQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
 			sqlgraph.To(groupbudget.Table, groupbudget.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, transaction.GroupBudgetTable, transaction.GroupBudgetColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, transaction.GroupBudgetTable, transaction.GroupBudgetColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil

@@ -82,23 +82,19 @@ func (gbc *GroupBudgetCreate) SetGroup(g *Group) *GroupBudgetCreate {
 	return gbc.SetGroupID(g.ID)
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (gbc *GroupBudgetCreate) SetTransactionID(id uuid.UUID) *GroupBudgetCreate {
-	gbc.mutation.SetTransactionID(id)
+// AddTransactionIDs adds the "transaction" edge to the Transaction entity by IDs.
+func (gbc *GroupBudgetCreate) AddTransactionIDs(ids ...uuid.UUID) *GroupBudgetCreate {
+	gbc.mutation.AddTransactionIDs(ids...)
 	return gbc
 }
 
-// SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
-func (gbc *GroupBudgetCreate) SetNillableTransactionID(id *uuid.UUID) *GroupBudgetCreate {
-	if id != nil {
-		gbc = gbc.SetTransactionID(*id)
+// AddTransaction adds the "transaction" edges to the Transaction entity.
+func (gbc *GroupBudgetCreate) AddTransaction(t ...*Transaction) *GroupBudgetCreate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return gbc
-}
-
-// SetTransaction sets the "transaction" edge to the Transaction entity.
-func (gbc *GroupBudgetCreate) SetTransaction(t *Transaction) *GroupBudgetCreate {
-	return gbc.SetTransactionID(t.ID)
+	return gbc.AddTransactionIDs(ids...)
 }
 
 // Mutation returns the GroupBudgetMutation object of the builder.
@@ -281,7 +277,7 @@ func (gbc *GroupBudgetCreate) createSpec() (*GroupBudget, *sqlgraph.CreateSpec) 
 	}
 	if nodes := gbc.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   groupbudget.TransactionTable,
 			Columns: []string{groupbudget.TransactionColumn},

@@ -40,47 +40,47 @@ type TransactionOverviewWithOneTarget struct {
 func (h *Handlers) GetTransactions(c echo.Context) error {
 	ctx := c.Request().Context()
 	var sort *string
-	if c.Param("sort") != "" {
-		s := c.Param("sort")
+	if c.QueryParam("sort") != "" {
+		s := c.QueryParam("sort")
 		sort = &s
 	}
 	var target *string
-	if c.Param("target") != "" {
-		t := c.Param("target")
+	if c.QueryParam("target") != "" {
+		t := c.QueryParam("target")
 		target = &t
 	}
 	var since *time.Time
-	if c.Param("since") != "" {
+	if c.QueryParam("since") != "" {
 		var err error
-		s, err := service.StrToDate(c.Param("since"))
+		s, err := service.StrToDate(c.QueryParam("since"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		since = &s
 	}
 	var until *time.Time
-	if c.Param("until") != "" {
+	if c.QueryParam("until") != "" {
 		var err error
-		u, err := service.StrToDate(c.Param("until"))
+		u, err := service.StrToDate(c.QueryParam("until"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		until = &u
 	}
 	var tag *string
-	if c.Param("tag") != "" {
-		t := c.Param("tag")
+	if c.QueryParam("tag") != "" {
+		t := c.QueryParam("tag")
 		tag = &t
 	}
 	var group *string
-	if c.Param("group") != "" {
-		g := c.Param("group")
+	if c.QueryParam("group") != "" {
+		g := c.QueryParam("group")
 		group = &g
 	}
 	var request *uuid.UUID
-	if c.Param("request") != "" {
+	if c.QueryParam("request") != "" {
 		var r uuid.UUID
-		r, err := uuid.Parse(c.Param("request"))
+		r, err := uuid.Parse(c.QueryParam("request"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}

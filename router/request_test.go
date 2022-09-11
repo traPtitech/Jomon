@@ -57,24 +57,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 		}
 		requests := []*model.RequestResponse{request2, request1}
 
-		var sort string
-		var target string
-		var status string
-		var since time.Time
-		var until time.Time
-		var tag string
-		var group string
-
-		query := model.RequestQuery{
-			Sort:   &sort,
-			Target: &target,
-			Status: &status,
-			Since:  &since,
-			Until:  &until,
-			Tag:    &tag,
-			Group:  &group,
-		}
-
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, "/api/requests", nil)
 		assert.NoError(t, err)
@@ -86,7 +68,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), query).
+			GetRequests(c.Request().Context(), model.RequestQuery{}).
 			Return(requests, nil)
 
 		res := []*RequestResponse{
@@ -126,24 +108,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		requests := []*model.RequestResponse{}
 
-		var title string
-		var target string
-		var status string
-		var since time.Time
-		var until time.Time
-		var tag string
-		var group string
-
-		query := model.RequestQuery{
-			Sort:   &title,
-			Target: &target,
-			Status: &status,
-			Since:  &since,
-			Until:  &until,
-			Tag:    &tag,
-			Group:  &group,
-		}
-
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, "/api/requests", nil)
 		assert.NoError(t, err)
@@ -155,7 +119,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), query).
+			GetRequests(c.Request().Context(), model.RequestQuery{}).
 			Return(requests, nil)
 
 		var res []*RequestResponse
@@ -172,24 +136,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		var title string
-		var target string
-		var status string
-		var since time.Time
-		var until time.Time
-		var tag string
-		var group string
-
-		query := model.RequestQuery{
-			Sort:   &title,
-			Target: &target,
-			Status: &status,
-			Since:  &since,
-			Until:  &until,
-			Tag:    &tag,
-			Group:  &group,
-		}
-
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, "/api/requests", nil)
 		assert.NoError(t, err)
@@ -202,7 +148,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		resErr := errors.New("Failed to get requests.")
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), query).
+			GetRequests(c.Request().Context(), model.RequestQuery{}).
 			Return(nil, resErr)
 
 		err = h.Handlers.GetRequests(c)

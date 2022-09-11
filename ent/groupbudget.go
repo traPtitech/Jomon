@@ -11,7 +11,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
-	"github.com/traPtitech/Jomon/ent/transaction"
 )
 
 // GroupBudget is the model entity for the GroupBudget schema.
@@ -36,7 +35,7 @@ type GroupBudgetEdges struct {
 	// Group holds the value of the group edge.
 	Group *Group `json:"group,omitempty"`
 	// Transaction holds the value of the transaction edge.
-	Transaction *Transaction `json:"transaction,omitempty"`
+	Transaction []*Transaction `json:"transaction,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -56,13 +55,9 @@ func (e GroupBudgetEdges) GroupOrErr() (*Group, error) {
 }
 
 // TransactionOrErr returns the Transaction value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e GroupBudgetEdges) TransactionOrErr() (*Transaction, error) {
+// was not loaded in eager-loading.
+func (e GroupBudgetEdges) TransactionOrErr() ([]*Transaction, error) {
 	if e.loadedTypes[1] {
-		if e.Transaction == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: transaction.Label}
-		}
 		return e.Transaction, nil
 	}
 	return nil, &NotLoadedError{edge: "transaction"}
