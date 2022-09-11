@@ -34,12 +34,8 @@ func (s Status) Valid() bool {
 	}
 }
 
-func (s Status) String() *string {
-	if s == "" {
-		return nil
-	}
-	str := string(s)
-	return &str
+func (s Status) String() string {
+	return string(s)
 }
 
 type Request struct {
@@ -125,8 +121,8 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, "invalid status")
 		}
 	}
-	if status.String() != nil {
-		ss = status.String()
+	if s := status.String(); s != "" {
+		ss = &s
 	}
 	var target *string
 	if t := c.QueryParam("target"); t != "" {

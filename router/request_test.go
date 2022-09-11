@@ -132,6 +132,63 @@ func TestHandlers_GetRequests(t *testing.T) {
 		}
 	})
 
+	t.Run("Success3", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		date1 := time.Now()
+
+		request1 := &model.RequestResponse{
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			CreatedBy: uuid.New(),
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			CreatedAt: date1,
+			UpdatedAt: date1,
+		}
+		requests := []*model.RequestResponse{request1}
+
+		status := "submitted"
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/requests?status=submitted", nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequests(c.Request().Context(), model.RequestQuery{
+				Status: &status,
+			}).
+			Return(requests, nil)
+
+		res := []*RequestResponse{
+			{
+				ID:        request1.ID,
+				Status:    request1.Status,
+				CreatedAt: request1.CreatedAt,
+				UpdatedAt: request1.UpdatedAt,
+				CreatedBy: request1.CreatedBy,
+				Amount:    request1.Amount,
+				Title:     request1.Title,
+				Content:   request1.Content,
+			},
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.GetRequests(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
 	t.Run("FailedToGetRequests", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
