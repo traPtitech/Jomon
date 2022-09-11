@@ -35,7 +35,6 @@ func (GroupBudget) Edges() []ent.Edge {
 			Ref("group_budget").
 			Unique().
 			Required(),
-		edge.To("transaction", Transaction.Type).
-			Unique(),
+		edge.To("transaction", Transaction.Type),
 	}
 }

@@ -207,7 +207,7 @@ var (
 	TransactionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "group_budget_transaction", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "group_budget_transaction", Type: field.TypeUUID, Nullable: true},
 		{Name: "request_transaction", Type: field.TypeUUID, Nullable: true},
 	}
 	// TransactionsTable holds the schema information for the "transactions" table.

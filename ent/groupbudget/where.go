@@ -378,7 +378,7 @@ func HasTransaction() predicate.GroupBudget {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TransactionTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, TransactionTable, TransactionColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, TransactionTable, TransactionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -390,7 +390,7 @@ func HasTransactionWith(preds ...predicate.Transaction) predicate.GroupBudget {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TransactionInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, TransactionTable, TransactionColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, TransactionTable, TransactionColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

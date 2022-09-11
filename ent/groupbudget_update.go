@@ -89,23 +89,19 @@ func (gbu *GroupBudgetUpdate) SetGroup(g *Group) *GroupBudgetUpdate {
 	return gbu.SetGroupID(g.ID)
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (gbu *GroupBudgetUpdate) SetTransactionID(id uuid.UUID) *GroupBudgetUpdate {
-	gbu.mutation.SetTransactionID(id)
+// AddTransactionIDs adds the "transaction" edge to the Transaction entity by IDs.
+func (gbu *GroupBudgetUpdate) AddTransactionIDs(ids ...uuid.UUID) *GroupBudgetUpdate {
+	gbu.mutation.AddTransactionIDs(ids...)
 	return gbu
 }
 
-// SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
-func (gbu *GroupBudgetUpdate) SetNillableTransactionID(id *uuid.UUID) *GroupBudgetUpdate {
-	if id != nil {
-		gbu = gbu.SetTransactionID(*id)
+// AddTransaction adds the "transaction" edges to the Transaction entity.
+func (gbu *GroupBudgetUpdate) AddTransaction(t ...*Transaction) *GroupBudgetUpdate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return gbu
-}
-
-// SetTransaction sets the "transaction" edge to the Transaction entity.
-func (gbu *GroupBudgetUpdate) SetTransaction(t *Transaction) *GroupBudgetUpdate {
-	return gbu.SetTransactionID(t.ID)
+	return gbu.AddTransactionIDs(ids...)
 }
 
 // Mutation returns the GroupBudgetMutation object of the builder.
@@ -119,10 +115,25 @@ func (gbu *GroupBudgetUpdate) ClearGroup() *GroupBudgetUpdate {
 	return gbu
 }
 
-// ClearTransaction clears the "transaction" edge to the Transaction entity.
+// ClearTransaction clears all "transaction" edges to the Transaction entity.
 func (gbu *GroupBudgetUpdate) ClearTransaction() *GroupBudgetUpdate {
 	gbu.mutation.ClearTransaction()
 	return gbu
+}
+
+// RemoveTransactionIDs removes the "transaction" edge to Transaction entities by IDs.
+func (gbu *GroupBudgetUpdate) RemoveTransactionIDs(ids ...uuid.UUID) *GroupBudgetUpdate {
+	gbu.mutation.RemoveTransactionIDs(ids...)
+	return gbu
+}
+
+// RemoveTransaction removes "transaction" edges to Transaction entities.
+func (gbu *GroupBudgetUpdate) RemoveTransaction(t ...*Transaction) *GroupBudgetUpdate {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return gbu.RemoveTransactionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -282,7 +293,7 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if gbu.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   groupbudget.TransactionTable,
 			Columns: []string{groupbudget.TransactionColumn},
@@ -296,9 +307,28 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := gbu.mutation.RemovedTransactionIDs(); len(nodes) > 0 && !gbu.mutation.TransactionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   groupbudget.TransactionTable,
+			Columns: []string{groupbudget.TransactionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transaction.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := gbu.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   groupbudget.TransactionTable,
 			Columns: []string{groupbudget.TransactionColumn},
@@ -392,23 +422,19 @@ func (gbuo *GroupBudgetUpdateOne) SetGroup(g *Group) *GroupBudgetUpdateOne {
 	return gbuo.SetGroupID(g.ID)
 }
 
-// SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (gbuo *GroupBudgetUpdateOne) SetTransactionID(id uuid.UUID) *GroupBudgetUpdateOne {
-	gbuo.mutation.SetTransactionID(id)
+// AddTransactionIDs adds the "transaction" edge to the Transaction entity by IDs.
+func (gbuo *GroupBudgetUpdateOne) AddTransactionIDs(ids ...uuid.UUID) *GroupBudgetUpdateOne {
+	gbuo.mutation.AddTransactionIDs(ids...)
 	return gbuo
 }
 
-// SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
-func (gbuo *GroupBudgetUpdateOne) SetNillableTransactionID(id *uuid.UUID) *GroupBudgetUpdateOne {
-	if id != nil {
-		gbuo = gbuo.SetTransactionID(*id)
+// AddTransaction adds the "transaction" edges to the Transaction entity.
+func (gbuo *GroupBudgetUpdateOne) AddTransaction(t ...*Transaction) *GroupBudgetUpdateOne {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return gbuo
-}
-
-// SetTransaction sets the "transaction" edge to the Transaction entity.
-func (gbuo *GroupBudgetUpdateOne) SetTransaction(t *Transaction) *GroupBudgetUpdateOne {
-	return gbuo.SetTransactionID(t.ID)
+	return gbuo.AddTransactionIDs(ids...)
 }
 
 // Mutation returns the GroupBudgetMutation object of the builder.
@@ -422,10 +448,25 @@ func (gbuo *GroupBudgetUpdateOne) ClearGroup() *GroupBudgetUpdateOne {
 	return gbuo
 }
 
-// ClearTransaction clears the "transaction" edge to the Transaction entity.
+// ClearTransaction clears all "transaction" edges to the Transaction entity.
 func (gbuo *GroupBudgetUpdateOne) ClearTransaction() *GroupBudgetUpdateOne {
 	gbuo.mutation.ClearTransaction()
 	return gbuo
+}
+
+// RemoveTransactionIDs removes the "transaction" edge to Transaction entities by IDs.
+func (gbuo *GroupBudgetUpdateOne) RemoveTransactionIDs(ids ...uuid.UUID) *GroupBudgetUpdateOne {
+	gbuo.mutation.RemoveTransactionIDs(ids...)
+	return gbuo
+}
+
+// RemoveTransaction removes "transaction" edges to Transaction entities.
+func (gbuo *GroupBudgetUpdateOne) RemoveTransaction(t ...*Transaction) *GroupBudgetUpdateOne {
+	ids := make([]uuid.UUID, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return gbuo.RemoveTransactionIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -615,7 +656,7 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 	}
 	if gbuo.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   groupbudget.TransactionTable,
 			Columns: []string{groupbudget.TransactionColumn},
@@ -629,9 +670,28 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := gbuo.mutation.RemovedTransactionIDs(); len(nodes) > 0 && !gbuo.mutation.TransactionCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   groupbudget.TransactionTable,
+			Columns: []string{groupbudget.TransactionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: transaction.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := gbuo.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   groupbudget.TransactionTable,
 			Columns: []string{groupbudget.TransactionColumn},

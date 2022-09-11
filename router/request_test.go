@@ -21,6 +21,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
@@ -57,24 +58,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 		}
 		requests := []*model.RequestResponse{request2, request1}
 
-		var sort string
-		var target string
-		var status string
-		var since time.Time
-		var until time.Time
-		var tag string
-		var group string
-
-		query := model.RequestQuery{
-			Sort:   &sort,
-			Target: &target,
-			Status: &status,
-			Since:  &since,
-			Until:  &until,
-			Tag:    &tag,
-			Group:  &group,
-		}
-
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, "/api/requests", nil)
 		assert.NoError(t, err)
@@ -86,7 +69,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), query).
+			GetRequests(c.Request().Context(), model.RequestQuery{}).
 			Return(requests, nil)
 
 		res := []*RequestResponse{
@@ -126,24 +109,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		requests := []*model.RequestResponse{}
 
-		var title string
-		var target string
-		var status string
-		var since time.Time
-		var until time.Time
-		var tag string
-		var group string
-
-		query := model.RequestQuery{
-			Sort:   &title,
-			Target: &target,
-			Status: &status,
-			Since:  &since,
-			Until:  &until,
-			Tag:    &tag,
-			Group:  &group,
-		}
-
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, "/api/requests", nil)
 		assert.NoError(t, err)
@@ -155,7 +120,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), query).
+			GetRequests(c.Request().Context(), model.RequestQuery{}).
 			Return(requests, nil)
 
 		var res []*RequestResponse
@@ -168,27 +133,275 @@ func TestHandlers_GetRequests(t *testing.T) {
 		}
 	})
 
-	t.Run("FailedToGetRequests", func(t *testing.T) {
+	t.Run("Success3", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		var title string
-		var target string
-		var status string
-		var since time.Time
-		var until time.Time
-		var tag string
-		var group string
+		date1 := time.Now()
 
-		query := model.RequestQuery{
-			Sort:   &title,
-			Target: &target,
-			Status: &status,
-			Since:  &since,
-			Until:  &until,
-			Tag:    &tag,
-			Group:  &group,
+		request1 := &model.RequestResponse{
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			CreatedBy: uuid.New(),
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			CreatedAt: date1,
+			UpdatedAt: date1,
 		}
+		requests := []*model.RequestResponse{request1}
+
+		status := "submitted"
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/requests?status=submitted", nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequests(c.Request().Context(), model.RequestQuery{
+				Status: &status,
+			}).
+			Return(requests, nil)
+
+		res := []*RequestResponse{
+			{
+				ID:        request1.ID,
+				Status:    request1.Status,
+				CreatedAt: request1.CreatedAt,
+				UpdatedAt: request1.UpdatedAt,
+				CreatedBy: request1.CreatedBy,
+				Amount:    request1.Amount,
+				Title:     request1.Title,
+				Content:   request1.Content,
+			},
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.GetRequests(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("Success4", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		date1 := time.Now()
+		date2str := date1.Add(time.Hour).Format("2006-01-02")
+		date2, err := service.StrToDate(date2str)
+		require.NoError(t, err)
+
+		request1 := &model.RequestResponse{
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			CreatedBy: uuid.New(),
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			CreatedAt: date1,
+			UpdatedAt: date1,
+		}
+		requests := []*model.RequestResponse{request1}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests?until=%s", date2str), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequests(c.Request().Context(), model.RequestQuery{
+				Until: &date2,
+			}).
+			Return(requests, nil)
+
+		res := []*RequestResponse{
+			{
+				ID:        request1.ID,
+				Status:    request1.Status,
+				CreatedAt: request1.CreatedAt,
+				UpdatedAt: request1.UpdatedAt,
+				CreatedBy: request1.CreatedBy,
+				Amount:    request1.Amount,
+				Title:     request1.Title,
+				Content:   request1.Content,
+			},
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.GetRequests(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("Success5", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		date1 := time.Now()
+		date2str := date1.Add(-time.Hour).Format("2006-01-02")
+		date2, err := service.StrToDate(date2str)
+		require.NoError(t, err)
+
+		request1 := &model.RequestResponse{
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			CreatedBy: uuid.New(),
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			CreatedAt: date1,
+			UpdatedAt: date1,
+		}
+		requests := []*model.RequestResponse{request1}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests?since=%s", date2str), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequests(c.Request().Context(), model.RequestQuery{
+				Since: &date2,
+			}).
+			Return(requests, nil)
+
+		res := []*RequestResponse{
+			{
+				ID:        request1.ID,
+				Status:    request1.Status,
+				CreatedAt: request1.CreatedAt,
+				UpdatedAt: request1.UpdatedAt,
+				CreatedBy: request1.CreatedBy,
+				Amount:    request1.Amount,
+				Title:     request1.Title,
+				Content:   request1.Content,
+			},
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.GetRequests(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("Success6", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		date1 := time.Now()
+
+		tag1 := model.Tag{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 10),
+			Description: random.AlphaNumeric(t, 20),
+			CreatedAt:   date1,
+			UpdatedAt:   date1,
+		}
+
+		tag1ov := TagOverview{
+			ID:          tag1.ID,
+			Name:        tag1.Name,
+			Description: tag1.Description,
+			CreatedAt:   tag1.CreatedAt,
+			UpdatedAt:   tag1.UpdatedAt,
+		}
+
+		request1 := &model.RequestResponse{
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			CreatedBy: uuid.New(),
+			Amount:    random.Numeric(t, 1000000),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			Tags:      []*model.Tag{&tag1},
+			CreatedAt: date1,
+			UpdatedAt: date1,
+		}
+		requests := []*model.RequestResponse{request1}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests?tag=%s", tag1.Name), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequests(c.Request().Context(), model.RequestQuery{
+				Tag: &tag1.Name,
+			}).
+			Return(requests, nil)
+
+		res := []*RequestResponse{
+			{
+				ID:        request1.ID,
+				Status:    request1.Status,
+				CreatedAt: request1.CreatedAt,
+				UpdatedAt: request1.UpdatedAt,
+				CreatedBy: request1.CreatedBy,
+				Amount:    request1.Amount,
+				Title:     request1.Title,
+				Tags:      []*TagOverview{&tag1ov},
+				Content:   request1.Content,
+			},
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		if assert.NoError(t, h.Handlers.GetRequests(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
+	t.Run("InvaildStatus", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/requests?status=po", nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+
+		err = h.Handlers.GetRequests(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, "invalid status"), err)
+		}
+	})
+
+	t.Run("FailedToGetRequests", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
 
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, "/api/requests", nil)
@@ -202,7 +415,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		resErr := errors.New("Failed to get requests.")
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), query).
+			GetRequests(c.Request().Context(), model.RequestQuery{}).
 			Return(nil, resErr)
 
 		err = h.Handlers.GetRequests(c)

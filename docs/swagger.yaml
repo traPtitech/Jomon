@@ -35,12 +35,8 @@ paths:
       tags:
         - Auth
       responses:
-        "200":
-          description: 取得できた場合｡
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AuthInfo"
+        "302":
+          description: 取得できた場合｡traQのoauthページにリダイレクトされる。
 
   /transactions:
     get:
@@ -990,6 +986,10 @@ components:
         content:
           type: string
           example: "サーバー代 1200円"
+        targets:
+          type: array
+          items:
+            $ref: "#/components/schemas/TargetDetail"
         tags:
           type: array
           items:

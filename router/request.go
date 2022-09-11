@@ -27,16 +27,15 @@ const (
 
 func (s Status) Valid() bool {
 	switch s {
-	case Submitted, FixRequired, Accepted, Completed, Rejected, "":
+	case Submitted, FixRequired, Accepted, Completed, Rejected:
 		return true
 	default:
 		return false
 	}
 }
 
-func (s Status) String() *string {
-	str := string(s)
-	return &str
+func (s Status) String() string {
+	return string(s)
 }
 
 type Request struct {
@@ -110,38 +109,59 @@ type TargetOverview struct {
 
 func (h *Handlers) GetRequests(c echo.Context) error {
 	ctx := c.Request().Context()
-	sort := c.QueryParam("sort")
+	var sort *string
+	if s := c.QueryParam("sort"); s != "" {
+		sort = &s
+	}
 	var status Status
-	status = Status(c.QueryParam("status"))
-	if !status.Valid() {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid status"))
+	var ss *string
+	if s := c.QueryParam("status"); s != "" {
+		status = Status(s)
+		if !status.Valid() {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid status")
+		}
 	}
-	target := c.QueryParam("target")
-	var err error
-	var since time.Time
+	if s := status.String(); s != "" {
+		ss = &s
+	}
+	var target *string
+	if t := c.QueryParam("target"); t != "" {
+		target = &t
+	}
+	var since *time.Time
 	if c.QueryParam("since") != "" {
-		since, err = service.StrToDate(c.QueryParam("since"))
+		s, err := service.StrToDate(c.QueryParam("since"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
+		since = &s
 	}
-	var until time.Time
+	var until *time.Time
 	if c.QueryParam("until") != "" {
-		until, err = service.StrToDate(c.QueryParam("until"))
+		u, err := service.StrToDate(c.QueryParam("until"))
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
+		until = &u
 	}
-	tag := c.QueryParam("tag")
-	group := c.QueryParam("group")
+	var tag *string
+	if c.QueryParam("tag") != "" {
+		t := c.QueryParam("tag")
+		tag = &t
+	}
+	var group *string
+	if c.QueryParam("group") != "" {
+		g := c.QueryParam("group")
+		group = &g
+	}
 	query := model.RequestQuery{
-		Sort:   &sort,
-		Target: &target,
-		Status: status.String(),
-		Since:  &since,
-		Until:  &until,
-		Tag:    &tag,
-		Group:  &group,
+		Sort:   sort,
+		Target: target,
+		Status: ss,
+		Since:  since,
+		Until:  until,
+		Tag:    tag,
+		Group:  group,
 	}
 
 	modelrequests, err := h.Repository.GetRequests(ctx, query)

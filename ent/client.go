@@ -701,7 +701,7 @@ func (c *GroupBudgetClient) QueryTransaction(gb *GroupBudget) *TransactionQuery 
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groupbudget.Table, groupbudget.FieldID, id),
 			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, groupbudget.TransactionTable, groupbudget.TransactionColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, groupbudget.TransactionTable, groupbudget.TransactionColumn),
 		)
 		fromV = sqlgraph.Neighbors(gb.driver.Dialect(), step)
 		return fromV, nil
@@ -1407,7 +1407,7 @@ func (c *TransactionClient) QueryGroupBudget(t *Transaction) *GroupBudgetQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, id),
 			sqlgraph.To(groupbudget.Table, groupbudget.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, transaction.GroupBudgetTable, transaction.GroupBudgetColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, transaction.GroupBudgetTable, transaction.GroupBudgetColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil

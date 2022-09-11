@@ -201,8 +201,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetParamNames("sort")
-		c.SetParamValues("created_at")
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -318,8 +316,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetParamNames("sort")
-		c.SetParamValues("-created_at")
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -437,8 +433,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetParamNames("target")
-		c.SetParamValues(target1)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -540,8 +534,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetParamNames("since", "until")
-		c.SetParamValues("2020-01-01", "2020-01-02")
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)

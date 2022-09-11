@@ -261,7 +261,7 @@ func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID 
 			Create().
 			SetGroupID(*groupID).
 			SetAmount(amount).
-			SetTransactionID(transactionID).
+			AddTransactionIDs(transactionID).
 			Save(ctx)
 		if err != nil {
 			err = RollbackWithError(tx, err)

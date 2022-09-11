@@ -89,7 +89,7 @@ erDiagram
     	Group }o--o{ User : "user/group_user"
     	Group }o--o{ User : "owner/group_owner"
     	Group |o--o{ Request : "request/group"
-    	GroupBudget |o--o| Transaction : "transaction/group_budget"
+    	GroupBudget |o--o{ Transaction : "transaction/group_budget"
     	Request |o--o{ RequestStatus : "status/request"
     	Request |o--o{ RequestTarget : "target/request"
     	Request |o--o{ File : "file/request"
@@ -99,7 +99,7 @@ erDiagram
     	Request }o--o| User : "user/request"
     	RequestStatus }o--o| User : "user/request_status"
     	Transaction |o--o| TransactionDetail : "detail/transaction"
-    	Transaction |o--o{ Tag : "tag/transaction"
+    	Transaction }o--o{ Tag : "tag/transaction"
 		</div>
 	<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 	<script>
