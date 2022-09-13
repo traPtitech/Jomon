@@ -71,7 +71,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			}
 			splitedPath := strings.Split(c.Request().URL.Path, "/")
 
-			message += fmt.Sprintf("## :comment:[リクエスト](%s/requests/%s)", "https://jomon.trap.jp", splitedPath[3])
+			message += fmt.Sprintf("## :comment:[依頼](%s/requests/%s)", "https://jomon.trap.jp", splitedPath[3])
 			message += "に対する"
 			message += fmt.Sprintf("[コメント](%s/requests/%s/comments/%s)", "https://jomon.trap.jp", splitedPath[3], resApp.ID)
 			message += "が作成されました" + "\n"
@@ -91,9 +91,9 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				return
 			}
 			if c.Request().Method == http.MethodPost {
-				message += "## :receipt:申請書が作成されました" + "\n"
+				message += "## :receipt:依頼が作成されました" + "\n"
 			} else if c.Request().Method == http.MethodPut {
-				message += "## :receipt:申請書が更新されました" + "\n"
+				message += "## :receipt:依頼が更新されました" + "\n"
 			}
 
 			message += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
