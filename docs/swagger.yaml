@@ -478,6 +478,20 @@ paths:
         schema:
           type: string
           format: uuid
+    get:
+      operationId: getGroupDetail
+      description: グループの情報を返す。
+      tags:
+        - Groups
+      responses:
+        "200":
+          description: 取得に成功した場合。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupDetail"
+        "404":
+          $ref: "#/components/responses/404"
     put:
       operationId: putGroupDetail
       description: グループの情報を変更する。管理者権限またはグループオーナー権限が必要。
@@ -523,22 +537,6 @@ paths:
         schema:
           type: string
           format: uuid
-    get:
-      operationId: getGroupMembers
-      description: 指定したグループに所属しているユーザーを返す。
-      tags:
-        - Groups
-      responses:
-        "200":
-          description: 取得に成功した場合。
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/TrapID"
-        "404":
-          $ref: "#/components/responses/404"
     post:
       operationId: postGroupMembers
       description: ユーザーをグループに追加する。管理者権限またはグループオーナー権限が必要。
@@ -592,22 +590,6 @@ paths:
         schema:
           type: string
           format: uuid
-    get:
-      operationId: getGroupOwners
-      description: 指定したグループに所属しているオーナーを返す。
-      tags:
-        - Groups
-      responses:
-        "200":
-          description: 取得に成功した場合。
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/TrapID"
-        "404":
-          $ref: "#/components/responses/404"
     post:
       operationId: postGroupOwners
       description: グループオーナーをグループに追加する。管理者権限またはグループオーナー権限が必要。
@@ -855,6 +837,44 @@ components:
         - name
         - description
         - budget
+        - created_at
+        - updated_at
+    GroupDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "SysAd"
+        description:
+          type: string
+          example: "SysAd班"
+        budget:
+          type: integer
+          example: 250000
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrapID"
+        owners:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrapID"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - description
+        - budget
+        - members
+        - owners
         - created_at
         - updated_at
     PostGroup:
