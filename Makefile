@@ -1,10 +1,10 @@
 .PHONY: up
 up:
-	@docker-compose up -d --build
+	-@docker-compose up -d --build
 
 .PHONY: dev-up
 dev-up:
-	@docker-compose up --build
+	-@docker-compose up --build
 
 .PHONY: down
 down:
@@ -18,3 +18,5 @@ test:
 .PHONY: docs
 docs:
 	@enter ./ent/schema
+	@cp er.html ./docs/
+	@rm er.html
