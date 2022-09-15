@@ -197,33 +197,6 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-// GetMembers GET /groups/:groupID/members
-func (h *Handlers) GetMembers(c echo.Context) error {
-	groupID, err := uuid.Parse(c.Param("groupID"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-	if groupID == uuid.Nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
-	}
-
-	ctx := c.Request().Context()
-	members, err := h.Repository.GetMembers(ctx, groupID)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-
-	var res []uuid.UUID
-	for _, member := range members {
-		res = append(res, member.ID)
-	}
-
-	return c.JSON(http.StatusOK, &MemberResponse{res})
-}
-
 // PostMember POST /groups/:groupID/members
 func (h *Handlers) PostMember(c echo.Context) error {
 	var member Member
@@ -281,32 +254,6 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
-}
-
-// GetOwners GET /groups/:groupID/owners
-func (h *Handlers) GetOwners(c echo.Context) error {
-	ctx := c.Request().Context()
-	groupID, err := uuid.Parse(c.Param("groupID"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-	if groupID == uuid.Nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
-	}
-	owners, err := h.Repository.GetOwners(ctx, groupID)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-
-	var res []uuid.UUID
-	for _, owner := range owners {
-		res = append(res, owner.ID)
-	}
-
-	return c.JSON(http.StatusOK, &OwnerResponse{res})
 }
 
 // PostOwner POST /groups/:groupID/owners
