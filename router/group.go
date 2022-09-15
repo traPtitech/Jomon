@@ -100,7 +100,50 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 }
 
 // GetGroupDetail GET /groups/:groupID
+func (h *Handlers) GetGroupDetail(c echo.Context) error {
+	groupID, err := uuid.Parse(c.Param("groupID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if groupID == uuid.Nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+	}
 
+	ctx := c.Request().Context()
+	group, err := h.Repository.GetGroup(ctx, groupID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	res := GroupDetail{
+		ID:          group.ID,
+		Name:        group.Name,
+		Description: group.Description,
+		Owners:      []*uuid.UUID{},
+		Members:     []*uuid.UUID{},
+		Budget:      group.Budget,
+		CreatedAt:   group.CreatedAt,
+		UpdatedAt:   group.UpdatedAt,
+	}
+	owners, err := h.Repository.GetOwners(ctx, groupID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	for _, owner := range owners {
+		res.Owners = append(res.Owners, &owner.ID)
+	}
+	members, err := h.Repository.GetMembers(ctx, groupID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	for _, member := range members {
+		res.Members = append(res.Members, &member.ID)
+	}
+
+	return c.JSON(http.StatusOK, res)
+}
 
 // PutGroup PUT /groups/:groupID
 func (h *Handlers) PutGroup(c echo.Context) error {
