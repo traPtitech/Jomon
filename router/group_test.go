@@ -465,6 +465,155 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 		}
 	})
+
+	t.Run("FailedToGetGroup", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		var resErr error
+		errors.As(errors.New("failed to get group"), &resErr)
+
+		date := time.Now()
+
+		budget := random.Numeric(t, 1000000)
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/groups/%s", group.ID), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues(group.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetGroup(c.Request().Context(), group.ID).
+			Return(nil, resErr)
+
+		err = h.Handlers.GetGroupDetail(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		}
+	})
+
+	t.Run("FailedToGetOwners", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		var resErr error
+		errors.As(errors.New("failed to get owners"), &resErr)
+
+		date := time.Now()
+
+		budget := random.Numeric(t, 1000000)
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/groups/%s", group.ID), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues(group.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetGroup(c.Request().Context(), group.ID).
+			Return(group, nil)
+
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), group.ID).
+			Return(nil, resErr)
+
+		err = h.Handlers.GetGroupDetail(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		}
+	})
+
+	t.Run("FailedToGetMembers", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		var resErr error
+		errors.As(errors.New("failed to get members"), &resErr)
+
+		date := time.Now()
+
+		budget := random.Numeric(t, 1000000)
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		user := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 50),
+			Admin:       true,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		owner := model.Owner{ID: user.ID}
+		owners := []*model.Owner{&owner}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/groups/%s", group.ID), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues(group.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetGroup(c.Request().Context(), group.ID).
+			Return(group, nil)
+
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), group.ID).
+			Return(owners, nil)
+
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetMembers(c.Request().Context(), group.ID).
+			Return(nil, resErr)
+
+		err = h.Handlers.GetGroupDetail(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		}
+	})
 }
 
 func TestHandlers_PutGroup(t *testing.T) {
