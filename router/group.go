@@ -129,6 +129,9 @@ func (h *Handlers) GetGroupDetail(c echo.Context) error {
 	}
 	owners, err := h.Repository.GetOwners(ctx, groupID)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	for _, owner := range owners {
@@ -136,6 +139,9 @@ func (h *Handlers) GetGroupDetail(c echo.Context) error {
 	}
 	members, err := h.Repository.GetMembers(ctx, groupID)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	for _, member := range members {
