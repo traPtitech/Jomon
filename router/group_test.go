@@ -351,6 +351,36 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 		}
 	})
+
+	t.Run("UnknownGroupID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		unknownGroupID := uuid.New()
+		var resErr *ent.NotFoundError
+		errors.As(errors.New("unknown group id"), &resErr)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/groups/%s", unknownGroupID), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues(unknownGroupID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetGroup(c.Request().Context(), unknownGroupID).
+			Return(nil, resErr)
+
+		err = h.Handlers.GetGroupDetail(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		}
+	})
 }
 
 func TestHandlers_PutGroup(t *testing.T) {
