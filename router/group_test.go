@@ -326,6 +326,31 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
 	})
+
+	t.Run("NilGroupID", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/groups/%s", uuid.Nil.String()), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues(uuid.Nil.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+
+		resErr := errors.New("invalid UUID")
+
+		err = h.Handlers.GetGroupDetail(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
 }
 
 func TestHandlers_PutGroup(t *testing.T) {
