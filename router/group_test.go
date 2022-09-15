@@ -469,8 +469,7 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 	t.Run("FailedToGetGroup", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		var resErr error
-		errors.As(errors.New("failed to get group"), &resErr)
+		resErr := errors.New("failed to get groups")
 
 		date := time.Now()
 
@@ -510,8 +509,7 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 	t.Run("FailedToGetOwners", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		var resErr error
-		errors.As(errors.New("failed to get owners"), &resErr)
+		resErr := errors.New("failed to get owners")
 
 		date := time.Now()
 
@@ -556,8 +554,7 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 	t.Run("FailedToGetMembers", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		var resErr error
-		errors.As(errors.New("failed to get members"), &resErr)
+		resErr := errors.New("failed to get members")
 
 		date := time.Now()
 
