@@ -327,6 +327,30 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		}
 	})
 
+	t.Run("FailedWithUUID", func(t *testing.T) {
+		t.Parallel()
+
+		invalidUUID := "invalid-uuid"
+		_, resErr := uuid.Parse(invalidUUID)
+
+		ctrl := gomock.NewController(t)
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, "/api/groups/invalid-uuid", nil)
+		require.NoError(t, err)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues("invalid-uuid")
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		err = h.Handlers.GetGroupDetail(c)
+		if assert.Error(t, err) {
+			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		}
+	})
+
 	t.Run("NilGroupID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
