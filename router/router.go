@@ -87,6 +87,7 @@ func NewServer(h Handlers) *echo.Echo {
 			apiGroups.POST("", h.PostGroup, h.CheckAdminMiddleware)
 			apiGroupIDs := apiGroups.Group("/:groupID", retrieveGroupOwner)
 			{
+				apiGroupIDs.GET("", h.GetGroupDetail)
 				apiGroupIDs.PUT("", h.PutGroup, h.CheckAdminOrGroupOwnerMiddleware)
 				apiGroupIDs.DELETE("", h.DeleteGroup, h.CheckAdminOrGroupOwnerMiddleware)
 				apiGroupIDs.POST("/members", h.PostMember, h.CheckAdminOrGroupOwnerMiddleware)
