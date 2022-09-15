@@ -327,6 +327,66 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		}
 	})
 
+	t.Run("Success2", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		budget := random.Numeric(t, 1000000)
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/groups/%s", group.ID), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues(group.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetGroup(c.Request().Context(), group.ID).
+			Return(group, nil)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), group.ID).
+			Return([]*model.Owner{}, nil)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetMembers(c.Request().Context(), group.ID).
+			Return([]*model.Member{}, nil)
+
+		res := &GroupDetail{
+			ID:          group.ID,
+			Name:        group.Name,
+			Description: group.Description,
+			Budget:      group.Budget,
+			Owners:      []*uuid.UUID{},
+			Members:     []*uuid.UUID{},
+			CreatedAt:   group.CreatedAt,
+			UpdatedAt:   group.UpdatedAt,
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		err = h.Handlers.GetGroupDetail(c)
+		if assert.NoError(t, err) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+
 	t.Run("FailedWithUUID", func(t *testing.T) {
 		t.Parallel()
 
