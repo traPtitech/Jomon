@@ -221,6 +221,113 @@ func TestHandlers_PostGroup(t *testing.T) {
 	})
 }
 
+func TestHandlers_GetGroupDetail(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+		date := time.Now()
+
+		budget := random.Numeric(t, 1000000)
+		group := &model.Group{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			Description: random.AlphaNumeric(t, 50),
+			Budget:      &budget,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		user1 := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 50),
+			Admin:       true,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		user2 := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 50),
+			Admin:       true,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		user3 := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 50),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+		user4 := &model.User{
+			ID:          uuid.New(),
+			Name:        random.AlphaNumeric(t, 20),
+			DisplayName: random.AlphaNumeric(t, 50),
+			Admin:       false,
+			CreatedAt:   date,
+			UpdatedAt:   date,
+		}
+
+		owner1 := model.Owner{ID: user1.ID}
+		owner2 := model.Owner{ID: user2.ID}
+		owners := []*model.Owner{&owner1, &owner2}
+		ownerIDs := []*uuid.UUID{&user1.ID, &user2.ID}
+
+		member1 := model.Member{ID: user3.ID}
+		member2 := model.Member{ID: user4.ID}
+		members := []*model.Member{&member1, &member2}
+		memberIDs := []*uuid.UUID{&member1.ID, &member2.ID}
+
+		e := echo.New()
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/groups/%s", group.ID), nil)
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/api/groups/:groupID")
+		c.SetParamNames("groupID")
+		c.SetParamValues(group.ID.String())
+
+		h, err := NewTestHandlers(t, ctrl)
+		assert.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetGroup(c.Request().Context(), group.ID).
+			Return(group, nil)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), group.ID).
+			Return(owners, nil)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetMembers(c.Request().Context(), group.ID).
+			Return(members, nil)
+
+		res := &GroupDetail{
+			ID:          group.ID,
+			Name:        group.Name,
+			Description: group.Description,
+			Budget:      group.Budget,
+			Owners:      ownerIDs,
+			Members:     memberIDs,
+			CreatedAt:   group.CreatedAt,
+			UpdatedAt:   group.UpdatedAt,
+		}
+		resBody, err := json.Marshal(res)
+		require.NoError(t, err)
+
+		err = h.Handlers.GetGroupDetail(c)
+		if assert.NoError(t, err) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		}
+	})
+}
+
 func TestHandlers_PutGroup(t *testing.T) {
 	t.Parallel()
 
