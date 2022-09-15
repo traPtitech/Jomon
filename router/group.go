@@ -38,7 +38,7 @@ type GroupDetail struct {
 	Description string       `json:"description"`
 	Budget      *int         `json:"budget"`
 	Owners      []*uuid.UUID `json:"owners"`
-	Users       []*uuid.UUID `json:"users"`
+	Members     []*uuid.UUID `json:"members"`
 	CreatedAt   time.Time    `json:"created_at"`
 	UpdatedAt   time.Time    `json:"updated_at"`
 }
@@ -98,6 +98,9 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res)
 }
+
+// GetGroupDetail GET /groups/:groupID
+
 
 // PutGroup PUT /groups/:groupID
 func (h *Handlers) PutGroup(c echo.Context) error {
