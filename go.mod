@@ -3,6 +3,10 @@ module github.com/traPtitech/Jomon
 go 1.13
 
 require (
+	github.com/aws/aws-sdk-go-v2 v1.16.15
+	github.com/aws/aws-sdk-go-v2/config v1.17.6
+	github.com/aws/aws-sdk-go-v2/credentials v1.12.19
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.10
 	github.com/dvsekhvalnov/jose2go v0.0.0-20180829124132-7f401d37b68a
 	github.com/getkin/kin-openapi v0.2.1-0.20200220094608-fd25549e5e82
 	github.com/go-sql-driver/mysql v1.6.0
