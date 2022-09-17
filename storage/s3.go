@@ -36,7 +36,7 @@ func SetS3Storage(bucket string, region string, endpoint string, apiKey string, 
 	)
 
 	if err != nil {
-		return nil, err
+		return S3{}, err
 	}
 
 	client := s3.NewFromConfig(cfg)
