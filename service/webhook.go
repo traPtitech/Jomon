@@ -35,6 +35,13 @@ type CommentApplication struct {
 	Comment string    `json:"comment"`
 }
 
+type TransactionRequestApplication struct {
+	ID     uuid.UUID `json:"id"`
+	Amount int       `json:"amount"`
+	Tags   []*Tags   `json:"tags"`
+	Group  *Group    `json:"group"`
+}
+
 type Tags struct {
 	Name string `json:"name"`
 }
@@ -114,7 +121,30 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			message += resApp.Content + "\n"
 		}
 	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
-		//TODO
+		resApp := new(TransactionRequestApplication)
+		err := json.Unmarshal(resBody, resApp)
+		if err != nil {
+			return
+		}
+		if c.Request().Method == http.MethodPost {
+			message += "## :トランザクションが新規作成されました" + "\n"
+		} else if c.Request().Method == http.MethodPut {
+			message += "## :トランザクションが修正されました" + "\n"
+		}
+
+		message += fmt.Sprintf("- 支払金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
+
+		if resApp.Group != nil {
+			message += fmt.Sprintf("- 請求先グループ: %s", resApp.Group.Name) + "\n"
+		}
+
+		if resApp.Tags != nil {
+			message += "- タグ: "
+			for _, tag := range resApp.Tags {
+				message += tag.Name + ", "
+			}
+			message = message[:len(message)-len(", ")]
+		}
 	}
 
 	_ = RequestWebhook(message, webhookSecret, webhookChannelId, webhookId, 1)
