@@ -394,10 +394,10 @@ func (tq *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 			tq.withTransaction != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Tag).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Tag{config: tq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -455,14 +455,14 @@ func (tq *TagQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes 
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(uuid.UUID)}, values...), nil
+			return append([]any{new(uuid.UUID)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := *values[0].(*uuid.UUID)
 			inValue := *values[1].(*uuid.UUID)
 			if nids[inValue] == nil {
@@ -513,14 +513,14 @@ func (tq *TagQuery) loadTransaction(ctx context.Context, query *TransactionQuery
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(uuid.UUID)}, values...), nil
+			return append([]any{new(uuid.UUID)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := *values[0].(*uuid.UUID)
 			inValue := *values[1].(*uuid.UUID)
 			if nids[inValue] == nil {
@@ -661,7 +661,7 @@ func (tgb *TagGroupBy) Aggregate(fns ...AggregateFunc) *TagGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tgb *TagGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tgb *TagGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tgb.path(ctx)
 	if err != nil {
 		return err
@@ -670,7 +670,7 @@ func (tgb *TagGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return tgb.sqlScan(ctx, v)
 }
 
-func (tgb *TagGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tgb *TagGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tgb.fields {
 		if !tag.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -717,7 +717,7 @@ type TagSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ts *TagSelect) Scan(ctx context.Context, v interface{}) error {
+func (ts *TagSelect) Scan(ctx context.Context, v any) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -725,7 +725,7 @@ func (ts *TagSelect) Scan(ctx context.Context, v interface{}) error {
 	return ts.sqlScan(ctx, v)
 }
 
-func (ts *TagSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (ts *TagSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {

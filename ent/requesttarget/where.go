@@ -35,7 +35,7 @@ func IDNEQ(id uuid.UUID) predicate.RequestTarget {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...uuid.UUID) predicate.RequestTarget {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -126,7 +126,7 @@ func TargetNEQ(v string) predicate.RequestTarget {
 
 // TargetIn applies the In predicate on the "target" field.
 func TargetIn(vs ...string) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -137,7 +137,7 @@ func TargetIn(vs ...string) predicate.RequestTarget {
 
 // TargetNotIn applies the NotIn predicate on the "target" field.
 func TargetNotIn(vs ...string) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -225,7 +225,7 @@ func AmountNEQ(v int) predicate.RequestTarget {
 
 // AmountIn applies the In predicate on the "amount" field.
 func AmountIn(vs ...int) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -236,7 +236,7 @@ func AmountIn(vs ...int) predicate.RequestTarget {
 
 // AmountNotIn applies the NotIn predicate on the "amount" field.
 func AmountNotIn(vs ...int) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -289,7 +289,7 @@ func PaidAtNEQ(v time.Time) predicate.RequestTarget {
 
 // PaidAtIn applies the In predicate on the "paid_at" field.
 func PaidAtIn(vs ...time.Time) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -300,7 +300,7 @@ func PaidAtIn(vs ...time.Time) predicate.RequestTarget {
 
 // PaidAtNotIn applies the NotIn predicate on the "paid_at" field.
 func PaidAtNotIn(vs ...time.Time) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -367,7 +367,7 @@ func CreatedAtNEQ(v time.Time) predicate.RequestTarget {
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -378,7 +378,7 @@ func CreatedAtIn(vs ...time.Time) predicate.RequestTarget {
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
