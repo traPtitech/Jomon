@@ -2064,7 +2064,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
-			Comment:   comment.Comment,
+			Comment: CommentDetail{
+				ID:        comment.ID,
+				User:      comment.User,
+				Comment:   comment.Comment,
+				CreatedAt: comment.CreatedAt,
+				UpdatedAt: comment.UpdatedAt,
+			},
 			CreatedAt: status.CreatedAt,
 		}
 		resBody, err := json.Marshal(res)
@@ -2167,7 +2173,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
-			Comment:   comment.Comment,
+			Comment: CommentDetail{
+				ID:        comment.ID,
+				User:      comment.User,
+				Comment:   comment.Comment,
+				CreatedAt: comment.CreatedAt,
+				UpdatedAt: comment.UpdatedAt,
+			},
 			CreatedAt: status.CreatedAt,
 		}
 		resBody, err := json.Marshal(res)
@@ -2270,7 +2282,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
-			Comment:   comment.Comment,
+			Comment: CommentDetail{
+				ID:        comment.ID,
+				User:      comment.User,
+				Comment:   comment.Comment,
+				CreatedAt: comment.CreatedAt,
+				UpdatedAt: comment.UpdatedAt,
+			},
 			CreatedAt: status.CreatedAt,
 		}
 		resBody, err := json.Marshal(res)
@@ -2373,7 +2391,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
-			Comment:   comment.Comment,
+			Comment: CommentDetail{
+				ID:        comment.ID,
+				User:      comment.User,
+				Comment:   comment.Comment,
+				CreatedAt: comment.CreatedAt,
+				UpdatedAt: comment.UpdatedAt,
+			},
 			CreatedAt: status.CreatedAt,
 		}
 		resBody, err := json.Marshal(res)
@@ -2476,7 +2500,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
-			Comment:   comment.Comment,
+			Comment: CommentDetail{
+				ID:        comment.ID,
+				User:      comment.User,
+				Comment:   comment.Comment,
+				CreatedAt: comment.CreatedAt,
+				UpdatedAt: comment.UpdatedAt,
+			},
 			CreatedAt: status.CreatedAt,
 		}
 		resBody, err := json.Marshal(res)
@@ -2590,7 +2620,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 		res := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
-			Comment:   comment.Comment,
+			Comment: CommentDetail{
+				ID:        comment.ID,
+				User:      comment.User,
+				Comment:   comment.Comment,
+				CreatedAt: comment.CreatedAt,
+				UpdatedAt: comment.UpdatedAt,
+			},
 			CreatedAt: status.CreatedAt,
 		}
 		resBody, err := json.Marshal(res)
