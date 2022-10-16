@@ -35,7 +35,7 @@ func IDNEQ(id uuid.UUID) predicate.GroupBudget {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...uuid.UUID) predicate.GroupBudget {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.GroupBudget {
 	return predicate.GroupBudget(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -119,7 +119,7 @@ func AmountNEQ(v int) predicate.GroupBudget {
 
 // AmountIn applies the In predicate on the "amount" field.
 func AmountIn(vs ...int) predicate.GroupBudget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -130,7 +130,7 @@ func AmountIn(vs ...int) predicate.GroupBudget {
 
 // AmountNotIn applies the NotIn predicate on the "amount" field.
 func AmountNotIn(vs ...int) predicate.GroupBudget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -183,7 +183,7 @@ func CommentNEQ(v string) predicate.GroupBudget {
 
 // CommentIn applies the In predicate on the "comment" field.
 func CommentIn(vs ...string) predicate.GroupBudget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -194,7 +194,7 @@ func CommentIn(vs ...string) predicate.GroupBudget {
 
 // CommentNotIn applies the NotIn predicate on the "comment" field.
 func CommentNotIn(vs ...string) predicate.GroupBudget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -296,7 +296,7 @@ func CreatedAtNEQ(v time.Time) predicate.GroupBudget {
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.GroupBudget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -307,7 +307,7 @@ func CreatedAtIn(vs ...time.Time) predicate.GroupBudget {
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.GroupBudget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

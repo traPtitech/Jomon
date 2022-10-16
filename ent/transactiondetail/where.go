@@ -35,7 +35,7 @@ func IDNEQ(id uuid.UUID) predicate.TransactionDetail {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...uuid.UUID) predicate.TransactionDetail {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -126,7 +126,7 @@ func AmountNEQ(v int) predicate.TransactionDetail {
 
 // AmountIn applies the In predicate on the "amount" field.
 func AmountIn(vs ...int) predicate.TransactionDetail {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -137,7 +137,7 @@ func AmountIn(vs ...int) predicate.TransactionDetail {
 
 // AmountNotIn applies the NotIn predicate on the "amount" field.
 func AmountNotIn(vs ...int) predicate.TransactionDetail {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -190,7 +190,7 @@ func TargetNEQ(v string) predicate.TransactionDetail {
 
 // TargetIn applies the In predicate on the "target" field.
 func TargetIn(vs ...string) predicate.TransactionDetail {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -201,7 +201,7 @@ func TargetIn(vs ...string) predicate.TransactionDetail {
 
 // TargetNotIn applies the NotIn predicate on the "target" field.
 func TargetNotIn(vs ...string) predicate.TransactionDetail {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -289,7 +289,7 @@ func CreatedAtNEQ(v time.Time) predicate.TransactionDetail {
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.TransactionDetail {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -300,7 +300,7 @@ func CreatedAtIn(vs ...time.Time) predicate.TransactionDetail {
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.TransactionDetail {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -353,7 +353,7 @@ func UpdatedAtNEQ(v time.Time) predicate.TransactionDetail {
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
 func UpdatedAtIn(vs ...time.Time) predicate.TransactionDetail {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -364,7 +364,7 @@ func UpdatedAtIn(vs ...time.Time) predicate.TransactionDetail {
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
 func UpdatedAtNotIn(vs ...time.Time) predicate.TransactionDetail {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

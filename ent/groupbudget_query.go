@@ -402,10 +402,10 @@ func (gbq *GroupBudgetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, groupbudget.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*GroupBudget).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &GroupBudget{config: gbq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -612,7 +612,7 @@ func (gbgb *GroupBudgetGroupBy) Aggregate(fns ...AggregateFunc) *GroupBudgetGrou
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (gbgb *GroupBudgetGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (gbgb *GroupBudgetGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := gbgb.path(ctx)
 	if err != nil {
 		return err
@@ -621,7 +621,7 @@ func (gbgb *GroupBudgetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return gbgb.sqlScan(ctx, v)
 }
 
-func (gbgb *GroupBudgetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (gbgb *GroupBudgetGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range gbgb.fields {
 		if !groupbudget.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -668,7 +668,7 @@ type GroupBudgetSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (gbs *GroupBudgetSelect) Scan(ctx context.Context, v interface{}) error {
+func (gbs *GroupBudgetSelect) Scan(ctx context.Context, v any) error {
 	if err := gbs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -676,7 +676,7 @@ func (gbs *GroupBudgetSelect) Scan(ctx context.Context, v interface{}) error {
 	return gbs.sqlScan(ctx, v)
 }
 
-func (gbs *GroupBudgetSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (gbs *GroupBudgetSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := gbs.sql.Query()
 	if err := gbs.driver.Query(ctx, query, args, rows); err != nil {

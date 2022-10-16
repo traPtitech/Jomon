@@ -364,10 +364,10 @@ func (rtq *RequestTargetQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, requesttarget.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*RequestTarget).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &RequestTarget{config: rtq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -536,7 +536,7 @@ func (rtgb *RequestTargetGroupBy) Aggregate(fns ...AggregateFunc) *RequestTarget
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rtgb *RequestTargetGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rtgb *RequestTargetGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rtgb.path(ctx)
 	if err != nil {
 		return err
@@ -545,7 +545,7 @@ func (rtgb *RequestTargetGroupBy) Scan(ctx context.Context, v interface{}) error
 	return rtgb.sqlScan(ctx, v)
 }
 
-func (rtgb *RequestTargetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rtgb *RequestTargetGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rtgb.fields {
 		if !requesttarget.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -592,7 +592,7 @@ type RequestTargetSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rts *RequestTargetSelect) Scan(ctx context.Context, v interface{}) error {
+func (rts *RequestTargetSelect) Scan(ctx context.Context, v any) error {
 	if err := rts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -600,7 +600,7 @@ func (rts *RequestTargetSelect) Scan(ctx context.Context, v interface{}) error {
 	return rts.sqlScan(ctx, v)
 }
 
-func (rts *RequestTargetSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (rts *RequestTargetSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := rts.sql.Query()
 	if err := rts.driver.Query(ctx, query, args, rows); err != nil {

@@ -401,10 +401,10 @@ func (rsq *RequestStatusQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, requeststatus.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*RequestStatus).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &RequestStatus{config: rsq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -608,7 +608,7 @@ func (rsgb *RequestStatusGroupBy) Aggregate(fns ...AggregateFunc) *RequestStatus
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rsgb *RequestStatusGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rsgb *RequestStatusGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rsgb.path(ctx)
 	if err != nil {
 		return err
@@ -617,7 +617,7 @@ func (rsgb *RequestStatusGroupBy) Scan(ctx context.Context, v interface{}) error
 	return rsgb.sqlScan(ctx, v)
 }
 
-func (rsgb *RequestStatusGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rsgb *RequestStatusGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rsgb.fields {
 		if !requeststatus.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -664,7 +664,7 @@ type RequestStatusSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rss *RequestStatusSelect) Scan(ctx context.Context, v interface{}) error {
+func (rss *RequestStatusSelect) Scan(ctx context.Context, v any) error {
 	if err := rss.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -672,7 +672,7 @@ func (rss *RequestStatusSelect) Scan(ctx context.Context, v interface{}) error {
 	return rss.sqlScan(ctx, v)
 }
 
-func (rss *RequestStatusSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (rss *RequestStatusSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := rss.sql.Query()
 	if err := rss.driver.Query(ctx, query, args, rows); err != nil {
