@@ -1253,9 +1253,7 @@ components:
         status:
           $ref: "#/components/schemas/StatusEnum"
         comment:
-          type: string
-          default: null
-          example: "これは雑すぎますね。"
+          $ref: "#/components/schemas/Comment"
         created_at:
           type: string
           format: date-time

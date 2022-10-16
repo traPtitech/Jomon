@@ -88,10 +88,10 @@ type PutStatus struct {
 	Comment string       `json:"comment"`
 }
 type StatusResponse struct {
-	CreatedBy uuid.UUID    `json:"created_by"`
-	Status    model.Status `json:"status"`
-	Comment   string       `json:"comment"`
-	CreatedAt time.Time    `json:"created_at"`
+	CreatedBy uuid.UUID     `json:"created_by"`
+	Status    model.Status  `json:"status"`
+	Comment   CommentDetail `json:"comment"`
+	CreatedAt time.Time     `json:"created_at"`
 }
 
 type Target struct {
@@ -588,7 +588,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	}
 	if req.Comment == "" {
 		if !IsAbleNoCommentChangeStatus(req.Status, request.Status) {
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New(fmt.Sprintf("unable to change %v to %v without comment", request.Status.String(), req.Status.String())))
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("unable to change %v to %v without comment", request.Status.String(), req.Status.String()))
 		}
 	}
 
@@ -601,7 +601,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	}
 	if u.Admin {
 		if !IsAbleAdminChangeState(req.Status, request.Status) {
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New(fmt.Sprintf("admin unable to change %v to %v", request.Status.String(), req.Status.String())))
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("admin unable to change %v to %v", request.Status.String(), req.Status.String()))
 		}
 		if req.Status == model.Submitted && request.Status == model.Accepted {
 			targets, err := h.Repository.GetRequestTargets(ctx, requestID)
@@ -623,7 +623,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 
 	if !u.Admin && user.ID == request.CreatedBy {
 		if !IsAbleCreatorChangeStatus(req.Status, request.Status) {
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New(fmt.Sprintf("creator unable to change %v to %v", request.Status.String(), req.Status.String())))
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("creator unable to change %v to %v", request.Status.String(), req.Status.String()))
 		}
 	}
 
@@ -636,13 +636,19 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	var resComment string
+	var resComment CommentDetail
 	if req.Comment != "" {
 		comment, err := h.Repository.CreateComment(ctx, req.Comment, request.ID, user.ID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
-		resComment = comment.Comment
+		resComment = CommentDetail{
+			ID:        comment.ID,
+			User:      comment.User,
+			Comment:   comment.Comment,
+			CreatedAt: comment.CreatedAt,
+			UpdatedAt: comment.UpdatedAt,
+		}
 	}
 
 	res := &StatusResponse{
