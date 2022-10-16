@@ -553,6 +553,12 @@ paths:
       responses:
         "200":
           description: 追加に成功した場合。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrapID"
         "400":
           $ref: "#/components/responses/400"
         "403":
@@ -606,6 +612,12 @@ paths:
       responses:
         "200":
           description: 追加に成功した場合。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrapID"
         "400":
           $ref: "#/components/responses/400"
         "403":
