@@ -62,6 +62,26 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 			}).
 			WithUser().
 			Order(ent.Desc(request.FieldTitle))
+	} else if *query.Sort == "amount" {
+		requestsq = repo.client.Request.
+			Query().
+			WithTag().
+			WithGroup().
+			WithStatus(func(q *ent.RequestStatusQuery) {
+				q.Order(ent.Desc(requeststatus.FieldCreatedAt))
+			}).
+			WithUser().
+			Order(ent.Asc(request.FieldAmount))
+	} else if *query.Sort == "-amount" {
+		requestsq = repo.client.Request.
+			Query().
+			WithTag().
+			WithGroup().
+			WithStatus(func(q *ent.RequestStatusQuery) {
+				q.Order(ent.Desc(requeststatus.FieldCreatedAt))
+			}).
+			WithUser().
+			Order(ent.Desc(request.FieldAmount))
 	}
 
 	if query.Target != nil && *query.Target != "" {
