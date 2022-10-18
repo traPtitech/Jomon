@@ -283,7 +283,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Status"
+                $ref: "#/components/schemas/PutStatusResponse"
         "400":
           $ref: "#/components/responses/400"
         "404":
@@ -1258,6 +1258,24 @@ components:
       required:
         - comment
     Status:
+      type: object
+      properties:
+        created_by:
+          $ref: "#/components/schemas/TrapID"
+        status:
+          $ref: "#/components/schemas/StatusEnum"
+        comment:
+          type: string
+          default: null
+          example: "これは雑すぎますね。"
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - created_by
+        - status
+        - created_at
+    PutStatusResponse:
       type: object
       properties:
         created_by:
