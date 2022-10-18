@@ -283,7 +283,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PutStatusResponse"
+                $ref: "#/components/schemas/StatusDetail"
         "400":
           $ref: "#/components/responses/400"
         "404":
@@ -1275,7 +1275,7 @@ components:
         - created_by
         - status
         - created_at
-    PutStatusResponse:
+    StatusDetail:
       type: object
       properties:
         created_by:
