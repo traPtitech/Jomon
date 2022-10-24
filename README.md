@@ -28,7 +28,7 @@ make test
 
 1. Run the following command in the project root.
 
-```shell script
+```sh
 make up
 ```
 
@@ -36,7 +36,7 @@ Now, you can send http requests to `localhost:3000`.
 
 2. Run the following command in the project root when making the server down.
 
-```shell script
+```sh
 make down
 ```
 
@@ -44,9 +44,13 @@ make down
 
 1.Enter the server for Jomon staging server and run the following command in the project root.
 
-```shell script
+```sh
 sudo docker pull ghcr.io/traptitech/jomon:latest
 sudo docker run -d -p 1323:1323 --env-file .env ghcr.io/traptitech/jomon
+```
+```sh
+sudo docker pull ghcr.io/traptitech/jomon-v2:latest
+sudo docker run -d -p 1323:1323 --env-file .env ghcr.io/traptitech/jomon-v2
 ```
 
 (At first, you need to set .env file)
