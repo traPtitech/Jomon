@@ -1,0 +1,29 @@
+name: Build image for v2
+
+on:
+  push:
+    branches:
+      - v2
+
+env:
+  V2_IMAGE_NAME: jomon-v2
+  V2_IMAGE_TAG: latest
+
+jobs:
+  image-v2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: traptitech
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ghcr.io/traptitech/${{ env.V2_IMAGE_NAME }}:{{ env.V2_IMAGE_TAG }}
