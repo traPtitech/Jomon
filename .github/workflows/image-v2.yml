@@ -26,4 +26,4 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            ghcr.io/traptitech/${{ env.V2_IMAGE_NAME }}:{{ env.V2_IMAGE_TAG }}
+            ghcr.io/traptitech/$V2_IMAGE_NAME:$V2_IMAGE_TAG
