@@ -7,7 +7,7 @@
     <a href="https://apis.trap.jp/?urls.primaryName=Jomon%20v2%20API">Jomon API</a>&emsp;<a href="https://github.com/traPtitech/Jomon-UI">Jomon-UI</a>
   </p>
   <p>
-    <a href="https://github.com/traPtitech/Jomon/actions/workflows/image.yml"><img src="https://github.com/traPtitech/Jomon/actions/workflows/image.yml/badge.svg"></a>
+    <a href="https://github.com/traPtitech/Jomon/actions/workflows/image-v2.yml"><img src="https://github.com/traPtitech/Jomon/actions/workflows/image-v2.yml/badge.svg"></a>
     <a href="https://github.com/traPtitech/Jomon/actions/workflows/go.yml"><img src="https://github.com/traPtitech/Jomon/actions/workflows/go.yml/badge.svg"></a>
     <a href="https://codecov.io/gh/traPtitech/Jomon"><img src="https://codecov.io/gh/traPtitech/Jomon/branch/v2/graph/badge.svg"></a>
   </p>
