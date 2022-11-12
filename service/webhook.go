@@ -35,6 +35,15 @@ type CommentApplication struct {
 	Comment string    `json:"comment"`
 }
 
+type TransactionRequestApplication struct {
+	ID      uuid.UUID `json:"id"`
+	Amount  int       `json:"amount"`
+	Title   string    `json:"title"`
+	Content string    `json:"content"`
+	Tags    []*Tags   `json:"tags"`
+	Group   *Group    `json:"group"`
+}
+
 type Tags struct {
 	Name string `json:"name"`
 }
@@ -71,7 +80,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			}
 			splitedPath := strings.Split(c.Request().URL.Path, "/")
 
-			message += fmt.Sprintf("## :comment:[依頼](%s/requests/%s)", "https://jomon.trap.jp", splitedPath[3])
+			message += fmt.Sprintf("## :comment:[申請](%s/requests/%s)", "https://jomon.trap.jp", splitedPath[3])
 			message += "に対する"
 			message += fmt.Sprintf("[コメント](%s/requests/%s/comments/%s)", "https://jomon.trap.jp", splitedPath[3], resApp.ID)
 			message += "が作成されました" + "\n"
@@ -91,9 +100,9 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				return
 			}
 			if c.Request().Method == http.MethodPost {
-				message += "## :receipt:依頼が作成されました" + "\n"
+				message += "## :receipt:申請が作成されました" + "\n"
 			} else if c.Request().Method == http.MethodPut {
-				message += "## :receipt:依頼が更新されました" + "\n"
+				message += "## :receipt:申請が更新されました" + "\n"
 			}
 
 			message += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
@@ -114,7 +123,36 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			message += resApp.Content + "\n"
 		}
 	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
-		//TODO
+		resApp := new(TransactionRequestApplication)
+		err := json.Unmarshal(resBody, resApp)
+		if err != nil {
+			return
+		}
+		if c.Request().Method == http.MethodPost {
+			message += "## :scroll:トランザクションが新規作成されました" + "\n"
+		} else if c.Request().Method == http.MethodPut {
+			message += "## :scroll:トランザクションが修正されました" + "\n"
+		}
+		message += fmt.Sprintf("### [トランザクション%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
+		if resApp.Amount < 0 {
+			if resApp.Group != nil {
+				message += fmt.Sprintf("- %s", resApp.Group.Name) + "からの"
+			}
+			message += fmt.Sprintf("支払金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
+		} else {
+			if resApp.Group != nil {
+				message += fmt.Sprintf("- %s", resApp.Group.Name) + "から"
+			}
+			message += fmt.Sprintf("- 振り込まれた金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
+		}
+
+		if resApp.Tags != nil {
+			message += "- タグ: "
+			for _, tag := range resApp.Tags {
+				message += tag.Name + ", "
+			}
+			message = message[:len(message)-len(", ")]
+		}
 	}
 
 	_ = RequestWebhook(message, webhookSecret, webhookChannelId, webhookId, 1)
