@@ -38,6 +38,7 @@ type CommentApplication struct {
 type TransactionRequestApplication struct {
 	ID     uuid.UUID `json:"id"`
 	Amount int       `json:"amount"`
+	Target string    `json:"target"`
 	Tags   []*Tags   `json:"tags"`
 	Group  *Group    `json:"group"`
 }
@@ -78,7 +79,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			}
 			splitedPath := strings.Split(c.Request().URL.Path, "/")
 
-			message += fmt.Sprintf("## :comment:[依頼](%s/requests/%s)", "https://jomon.trap.jp", splitedPath[3])
+			message += fmt.Sprintf("## :comment:[申請](%s/requests/%s)", "https://jomon.trap.jp", splitedPath[3])
 			message += "に対する"
 			message += fmt.Sprintf("[コメント](%s/requests/%s/comments/%s)", "https://jomon.trap.jp", splitedPath[3], resApp.ID)
 			message += "が作成されました" + "\n"
@@ -98,9 +99,9 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				return
 			}
 			if c.Request().Method == http.MethodPost {
-				message += "## :receipt:依頼が作成されました" + "\n"
+				message += "## :receipt:申請が作成されました" + "\n"
 			} else if c.Request().Method == http.MethodPut {
-				message += "## :receipt:依頼が更新されました" + "\n"
+				message += "## :receipt:申請が更新されました" + "\n"
 			}
 
 			message += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
@@ -127,17 +128,24 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			return
 		}
 		if c.Request().Method == http.MethodPost {
-			message += "## :トランザクションが新規作成されました" + "\n"
+			message += "## :scroll:"
+			message += fmt.Sprintf("[入出金記録](%s/applications/%s)", "https://jomon.trap.jp", resApp.ID) + "が新規作成されました" + "\n"
 		} else if c.Request().Method == http.MethodPut {
-			message += "## :トランザクションが修正されました" + "\n"
+			message += "## :scroll:"
+			message += fmt.Sprintf("[入出金記録](%s/applications/%s)", "https://jomon.trap.jp", resApp.ID) + "が修正されました" + "\n"
 		}
-
-		message += fmt.Sprintf("- 支払金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
-
-		if resApp.Group != nil {
-			message += fmt.Sprintf("- 請求先グループ: %s", resApp.Group.Name) + "\n"
+		if resApp.Amount < 0 {
+			if resApp.Group != nil {
+				message += fmt.Sprintf("- %s", resApp.Target) + "への振込" + "\n"
+			}
+			message += fmt.Sprintf("- 支払い金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
+		} else {
+			if resApp.Group != nil {
+				message += fmt.Sprintf("- %s", resApp.Target) + "からの振込" + "\n"
+			}
+			message += fmt.Sprintf("- 受け取り金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
 		}
-
+		message += fmt.Sprintf("- 関連するグループ: %s", resApp.Group.Name) + "\n"	
 		if resApp.Tags != nil {
 			message += "- タグ: "
 			for _, tag := range resApp.Tags {
