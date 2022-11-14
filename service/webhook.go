@@ -121,6 +121,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			message += "\n" + "\n"
 			message += resApp.Content + "\n"
 		}
+		}
 	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
 		resApp := new(TransactionRequestApplication)
 		err := json.Unmarshal(resBody, resApp)
