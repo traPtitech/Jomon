@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	entgo.io/ent v0.11.3-0.20220824145844-79fe0ebcd627
-	github.com/go-sql-driver/mysql v1.6.0
+	github.com/go-sql-driver/mysql v1.7.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/sessions v1.2.1
