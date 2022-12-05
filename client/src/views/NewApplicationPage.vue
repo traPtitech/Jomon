@@ -229,7 +229,8 @@ export default {
           })
           .then(response => {
             this.response = response.data;
-            this.snackbar = true;
+            alert("作成できました");
+            this.$router.push("/");
           });
       }
     },
