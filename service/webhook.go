@@ -103,6 +103,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			} else if c.Request().Method == http.MethodPut {
 				message += "## :receipt:依頼が更新されました" + "\n"
 			}
+
 			message += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
 			message += fmt.Sprintf("- 支払金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
 
@@ -121,7 +122,8 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			message += resApp.Content + "\n"
 		}
 	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
-		resApp := new(TransactionRequestApplication)
+		var resApps []TransactionRequestApplication
+		resApp := resApps[0]
 		err := json.Unmarshal(resBody, resApp)
 		if err != nil {
 			return
@@ -130,11 +132,6 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			message += fmt.Sprintf("## :scroll:[入出金記録](%s/transactions/%s)が新規作成されました\n", "https://jomon.trap.jp", resApp.ID)
 		} else if c.Request().Method == http.MethodPut {
 			message += fmt.Sprintf("## :scroll:[入出金記録](%s/transactions/%s)が修正されました\n", "https://jomon.trap.jp", resApp.ID)
-		}
-		if resApp.Amount < 0 {
-			message += fmt.Sprintf("- %sへの支払い\n- 支払い金額: % s円\n", resApp.Target, strconv.Itoa(-resApp.Amount))
-		} else {
-			message += fmt.Sprintf("- %sからの振込\n- 受け取り金額: %s円\n", resApp.Target, strconv.Itoa(resApp.Amount))
 		}
 		if resApp.Group != nil {
 			message += fmt.Sprintf("- 関連するグループ: %s", resApp.Group.Name) + "\n"
@@ -145,7 +142,22 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				tags[i] = tag.Name
 			}
 
-			message += fmt.Sprintf("- タグ: %s", strings.Join(tags, ","))
+			message += fmt.Sprintf("- タグ: `%s`", strings.Join(tags, ","))
+		}
+		if cap(resApps) == 1 {
+			if resApp.Amount < 0 {
+				message += fmt.Sprintf("- %sへの支払い\n    - 支払い金額: %s円\n", resApp.Target, strconv.Itoa(-resApp.Amount))
+			} else {
+				message += fmt.Sprintf("- %sからの振込\n    - 受け取り金額: %s円\n", resApp.Target, strconv.Itoa(resApp.Amount))
+			}
+		} else {
+			for i := 0; i < cap(resApps); i++ {
+				if resApps[i].Amount < 0 {
+					message += fmt.Sprintf("- %sへの支払い\n    - 支払い金額: %s円\n", resApps[i].Target, strconv.Itoa(-resApp.Amount))
+				} else {
+					message += fmt.Sprintf("- %sからの振込\n    - 受け取り金額: %s円\n", resApps[i].Target, strconv.Itoa(resApp.Amount))
+				}
+			}
 		}
 	}
 
