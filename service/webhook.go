@@ -140,9 +140,9 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 		}
 		if len(resApps) == 1 {
 			if resApp.Amount < 0 {
-				message += fmt.Sprintf("- `%s`への支払い\n    - 支払い金額: %s円\n", resApp.Target, strconv.Itoa(-resApp.Amount))
+				message += fmt.Sprintf("- `%s`への支払い\n    - 支払い金額: %d円\n", resApp.Target, -resApp.Amount)
 			} else {
-				message += fmt.Sprintf("- `%s`からの振込\n    - 受け取り金額: %s円\n", resApp.Target, strconv.Itoa(resApp.Amount))
+				message += fmt.Sprintf("- `%s`からの振込\n    - 受け取り金額: %d円\n", resApp.Target, resApp.Amount)
 			}
 		} else {
 			targets := make([]string, len(resApp.Target))
@@ -152,9 +152,9 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			}
 
 			if resApp.Amount < 0 {
-				message += fmt.Sprintf("への支払い\n    - 支払い金額: 計%s円\n,      (一人当たりの支払い金額: 計%s円\n", strconv.Itoa(-len(resApp.Target)*resApp.Amount), strconv.Itoa(-resApp.Amount))
+				message += fmt.Sprintf("への支払い\n    - 支払い金額: 計%d円\n,      (一人当たりの支払い金額: 計%d円\n", -len(resApp.Target)*resApp.Amount, -resApp.Amount)
 			} else {
-				message += fmt.Sprintf("からの振込\n    - 受け取り金額: 計%s円\n,      (一人当たりの受け取り金額: 計%s円\n", strconv.Itoa(len(resApp.Target)*resApp.Amount), strconv.Itoa(resApp.Amount))
+				message += fmt.Sprintf("からの振込\n    - 受け取り金額: 計%d円\n,      (一人当たりの受け取り金額: 計%d円\n", len(resApp.Target)*resApp.Amount, resApp.Amount)
 			}
 
 		}
