@@ -36,12 +36,11 @@ type CommentApplication struct {
 }
 
 type TransactionRequestApplication struct {
-	ID      uuid.UUID  `json:"id"`
-	Amount  int        `json:"amount"`
-	Target  string     `json:"target"`
-	Targets []*Targets `json:"targets"`
-	Tags    []*Tags    `json:"tags"`
-	Group   *Group     `json:"group"`
+	ID     uuid.UUID `json:"id"`
+	Amount int       `json:"amount"`
+	Target string    `json:"target"`
+	Tags   []*Tags   `json:"tags"`
+	Group  *Group    `json:"group"`
 }
 
 type Targets struct {
@@ -145,12 +144,10 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				message += fmt.Sprintf("- `%s`からの振込\n    - 受け取り金額: %d円\n", resApp.Target, resApp.Amount)
 			}
 		} else {
-			targets := make([]string, len(resApp.Target))
-			for i, target := range resApp.Targets {
-				targets[i] = target.Name
-				message += fmt.Sprintf("- `%s`", strings.Join(targets, " "))
+			for i := 0; i < len(resApp.Target); i++ {
+				target := resApps[i].Target
+				message += target + " "
 			}
-
 			if resApp.Amount < 0 {
 				message += fmt.Sprintf("への支払い\n    - 支払い金額: 計%d円\n,      (一人当たりの支払い金額: 計%d円\n", -len(resApp.Target)*resApp.Amount, -resApp.Amount)
 			} else {
