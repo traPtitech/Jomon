@@ -2871,7 +2871,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		err = h.Handlers.PutStatus(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusUnauthorized, resErr), err)
+			assert.Equal(t, echo.NewHTTPError(http.StatusForbidden, resErr), err)
 		}
 	})
 
@@ -3537,7 +3537,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		err = h.Handlers.PutStatus(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusUnauthorized), err)
+			assert.Equal(t, echo.NewHTTPError(http.StatusForbidden), err)
 		}
 	})
 }

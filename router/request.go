@@ -566,7 +566,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	}
 	user, ok := sess.Values[sessionUserKey].(*User)
 	if !ok {
-		return echo.NewHTTPError(http.StatusUnauthorized, errors.New("sessionUser not found"))
+		return echo.NewHTTPError(http.StatusForbidden, errors.New("sessionUser not found"))
 	}
 
 	if err = c.Bind(&req); err != nil {
@@ -628,7 +628,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	}
 
 	if user.ID != request.CreatedBy && !u.Admin {
-		return echo.NewHTTPError(http.StatusUnauthorized)
+		return echo.NewHTTPError(http.StatusForbidden)
 	}
 
 	// create status and comment: keep the two in this order
