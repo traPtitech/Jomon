@@ -75,7 +75,7 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		_, ok := sess.Values[sessionUserKey].(*User)
 		if !ok {
-			return c.Redirect(http.StatusSeeOther, "/api/auth/genpkce")
+			return echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
 		}
 
 		return next(c)
