@@ -140,10 +140,11 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				message += fmt.Sprintf("- `%s`からの振込\n    - 受け取り金額: %d円\n", resApp.Target, resApp.Amount)
 			}
 		} else {
+			targets := make([]string, len(resApp.Target))
 			for i := 0; i < len(resApp.Target); i++ {
-				target := resApps[i].Target
-				message += target + " "
+				targets[i] = resApps[i].Target
 			}
+			message += fmt.Sprintf("`%s`", strings.Join(targets, " "))
 			if resApp.Amount < 0 {
 				message += fmt.Sprintf("への支払い\n    - 支払い金額: 計%d円(一人当たりの支払い金額: 計%d円)\n", -len(resApp.Target)*resApp.Amount, -resApp.Amount)
 			} else {
@@ -152,7 +153,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 
 		}
 		if resApp.Group != nil {
-			message += fmt.Sprintf("- 関連するグループ: %s", resApp.Group.Name) + "\n"
+			message += fmt.Sprintf("- 関連するグループ: %s\n", resApp.Group.Name)
 		}
 		if resApp.Tags != nil {
 			tags := make([]string, len(resApp.Tags))
