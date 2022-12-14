@@ -43,10 +43,6 @@ type TransactionRequestApplication struct {
 	Group  *Group    `json:"group"`
 }
 
-type Targets struct {
-	Name string `json:"name"`
-}
-
 type Tags struct {
 	Name string `json:"name"`
 }
