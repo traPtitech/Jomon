@@ -69,5 +69,3 @@ make down
 sudo docker pull ghcr.io/traptitech/jomon-v2:latest
 sudo docker run -d -p 1323:1323 --env-file .env ghcr.io/traptitech/jomon-v2
 ```
-
-(At first, you need to set .env file)
