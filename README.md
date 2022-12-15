@@ -42,7 +42,28 @@ make down
 
 ## Staging
 
-1.Enter the server for Jomon staging server and run the following command in the project root.
+1. Set .env file.
+
+- `IS_DEBUG_MODE`: Set `true` if you want to run the server in debug mode, otherwise do not set this variable.
+- `PORT`: Port number for Jomon staging server
+- `UPLOAD_DIR`: Directory for uploading files
+- `MARIADB_USERNAME`: Username for MariaDB
+- `MARIADB_PASSWORD`: Password for MariaDB
+- `MARIADB_HOSTNAME`: Hostname for MariaDB
+- `MARIADB_PORT`: Port number for MariaDB
+- `MARIADB_DATABASE`: Database name for MariaDB
+- `SESSION_KEY`: Session key for Jomon staging server
+- `TRAQ_CLIENT_ID`: Client ID for traQ
+- `WEBHOOK_SECRET`: Webhook secret for traQ
+- `WEBHOOK_ID`: Webhook ID for traQ
+- `OS_CONTAINER`: Container name for SwiftStorage
+- `OS_USERNAME`: Username for SwiftStorage
+- `OS_PASSWORD`: Password for SwiftStorage
+- `OS_TENANT_NAME`: Tenant name for SwiftStorage
+- `OS_TENANT_ID`: Tenant ID for SwiftStorage
+- `OS_AUTH_URL`: Auth URL for SwiftStorage
+
+2. Enter the server for Jomon staging server and run the following command in the project root.
 
 ```sh
 sudo docker pull ghcr.io/traptitech/jomon-v2:latest
