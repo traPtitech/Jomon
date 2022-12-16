@@ -837,6 +837,7 @@ components:
           example: "SysAd班"
         budget:
           type: integer
+          nullable: true
           example: 250000
         created_at:
           type: string
@@ -865,6 +866,7 @@ components:
           example: "SysAd班"
         budget:
           type: integer
+          nullable: true
           example: 250000
         members:
           type: array
@@ -900,6 +902,7 @@ components:
           example: "SysAd班"
         budget:
           type: integer
+          nullable: true
           example: 250000
       required:
         - name
@@ -916,6 +919,7 @@ components:
           example: "SysAd班"
         budget:
           type: integer
+          nullable: true
           example: 250000
       required:
         - name
@@ -982,6 +986,7 @@ components:
           type: string
         paid_at:
           type: string
+          nullable: true
           format: date-time
         created_at:
           type: string
@@ -1027,6 +1032,7 @@ components:
           items:
             $ref: "#/components/schemas/Tag"
         group:
+          nullable: true
           $ref: "#/components/schemas/Group"
       required:
         - id
@@ -1077,6 +1083,7 @@ components:
           items:
             $ref: "#/components/schemas/Tag"
         group:
+          nullable: true
           $ref: "#/components/schemas/Group"
         targets:
           type: array
@@ -1124,6 +1131,7 @@ components:
             format: uuid
         group:
           type: string
+          nullable: true
           format: uuid
         targets:
           type: array
@@ -1152,12 +1160,14 @@ components:
           $ref: "#/components/schemas/Target"
         request:
           type: string
+          nullable: true
           format: uuid
         tags:
           type: array
           items:
             $ref: "#/components/schemas/Tag"
         group:
+          nullable: true
           $ref: "#/components/schemas/Group"
         created_at:
           type: string
@@ -1191,9 +1201,11 @@ components:
             format: uuid
         group:
           type: string
+          nullable: true
           format: uuid
         request:
           type: string
+          nullable: true
           format: uuid
       required:
         - amount
@@ -1216,9 +1228,11 @@ components:
             format: uuid
         group:
           type: string
+          nullable: true
           format: uuid
         request:
           type: string
+          nullable: true
           format: uuid
       required:
         - amount
@@ -1319,6 +1333,7 @@ components:
           format: "date-time"
         deleted_at:
           type: string
+          nullable: true
           format: "date-time"
       required:
         - name
