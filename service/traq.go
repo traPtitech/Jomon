@@ -56,11 +56,11 @@ func RequestAccessToken(code, codeVerifier string) (Authority, error) {
 }
 
 type TraQUser struct {
-	DisplayName string `json:"display_name"`
+	DisplayName string `json:"displayName"`
 	Name        string `json:"name"`
 }
 
-func FetchTraQUserInfo(token string) (TraQUser, error) {  //GetMe
+func FetchTraQUserInfo(token string) (TraQUser, error) { //GetMe
 	req, err := http.NewRequest("GET", TraQBaseURL+"/users/me", nil)
 	if err != nil {
 		return TraQUser{}, err
