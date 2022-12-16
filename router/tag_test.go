@@ -69,7 +69,7 @@ func TestHandlers_GetTags(t *testing.T) {
 				UpdatedAt:   tag.UpdatedAt,
 			})
 		}
-		res := TagResponse{resOverview}
+		res := resOverview
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
@@ -100,7 +100,7 @@ func TestHandlers_GetTags(t *testing.T) {
 			Return(tags, nil)
 
 		resOverview := []*TagOverview{}
-		res := TagResponse{resOverview}
+		res := resOverview
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
