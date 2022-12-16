@@ -34,11 +34,10 @@ func (repo *EntRepository) GetTag(ctx context.Context, tagID uuid.UUID) (*Tag, e
 	return ConvertEntTagToModelTag(tag), nil
 }
 
-func (repo *EntRepository) CreateTag(ctx context.Context, name string, description string) (*Tag, error) {
+func (repo *EntRepository) CreateTag(ctx context.Context, name string) (*Tag, error) {
 	created, err := repo.client.Tag.
 		Create().
 		SetName(name).
-		SetDescription(description).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -46,11 +45,10 @@ func (repo *EntRepository) CreateTag(ctx context.Context, name string, descripti
 	return ConvertEntTagToModelTag(created), nil
 }
 
-func (repo *EntRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name string, description string) (*Tag, error) {
+func (repo *EntRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name string) (*Tag, error) {
 	tag, err := repo.client.Tag.
 		UpdateOneID(tagID).
 		SetName(name).
-		SetDescription(description).
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
@@ -68,11 +66,10 @@ func (repo *EntRepository) DeleteTag(ctx context.Context, tagID uuid.UUID) error
 
 func ConvertEntTagToModelTag(enttag *ent.Tag) *Tag {
 	return &Tag{
-		ID:          enttag.ID,
-		Name:        enttag.Name,
-		Description: enttag.Description,
-		CreatedAt:   enttag.CreatedAt,
-		UpdatedAt:   enttag.UpdatedAt,
-		DeletedAt:   enttag.DeletedAt,
+		ID:        enttag.ID,
+		Name:      enttag.Name,
+		CreatedAt: enttag.CreatedAt,
+		UpdatedAt: enttag.UpdatedAt,
+		DeletedAt: enttag.DeletedAt,
 	}
 }

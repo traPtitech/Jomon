@@ -37,18 +37,18 @@ func (m *MockTagRepository) EXPECT() *MockTagRepositoryMockRecorder {
 }
 
 // CreateTag mocks base method.
-func (m *MockTagRepository) CreateTag(ctx context.Context, name, description string) (*model.Tag, error) {
+func (m *MockTagRepository) CreateTag(ctx context.Context, name string) (*model.Tag, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateTag", ctx, name, description)
+	ret := m.ctrl.Call(m, "CreateTag", ctx, name)
 	ret0, _ := ret[0].(*model.Tag)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateTag indicates an expected call of CreateTag.
-func (mr *MockTagRepositoryMockRecorder) CreateTag(ctx, name, description interface{}) *gomock.Call {
+func (mr *MockTagRepositoryMockRecorder) CreateTag(ctx, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTag", reflect.TypeOf((*MockTagRepository)(nil).CreateTag), ctx, name, description)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTag", reflect.TypeOf((*MockTagRepository)(nil).CreateTag), ctx, name)
 }
 
 // DeleteTag mocks base method.
@@ -96,16 +96,16 @@ func (mr *MockTagRepositoryMockRecorder) GetTags(ctx interface{}) *gomock.Call {
 }
 
 // UpdateTag mocks base method.
-func (m *MockTagRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name, description string) (*model.Tag, error) {
+func (m *MockTagRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name string) (*model.Tag, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateTag", ctx, tagID, name, description)
+	ret := m.ctrl.Call(m, "UpdateTag", ctx, tagID, name)
 	ret0, _ := ret[0].(*model.Tag)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateTag indicates an expected call of UpdateTag.
-func (mr *MockTagRepositoryMockRecorder) UpdateTag(ctx, tagID, name, description interface{}) *gomock.Call {
+func (mr *MockTagRepositoryMockRecorder) UpdateTag(ctx, tagID, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTag", reflect.TypeOf((*MockTagRepository)(nil).UpdateTag), ctx, tagID, name, description)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTag", reflect.TypeOf((*MockTagRepository)(nil).UpdateTag), ctx, tagID, name)
 }
