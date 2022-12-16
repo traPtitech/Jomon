@@ -170,7 +170,7 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 	}
 
 	var tags []*TagOverview
-	var requests []*RequestResponse
+	var requests []*RequestResponse = make([]*RequestResponse, len(modelrequests))
 	for _, request := range modelrequests {
 		for _, tag := range request.Tags {
 			tags = append(tags, &TagOverview{
