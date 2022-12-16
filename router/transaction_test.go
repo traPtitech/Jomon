@@ -822,11 +822,6 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			UpdatedAt: time.Now(),
 		}
 
-		tags := []*uuid.UUID{}
-		for _, modelTag := range tx.Tags {
-			tags = append(tags, &modelTag.ID)
-		}
-
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/transactions/%s", tx.ID), nil)
 		require.NoError(t, err)
@@ -941,11 +936,6 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			},
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
-		}
-
-		tags := []*uuid.UUID{}
-		for _, modelTag := range tx.Tags {
-			tags = append(tags, &modelTag.ID)
 		}
 
 		updatedTags := []*uuid.UUID{}
