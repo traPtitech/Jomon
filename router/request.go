@@ -169,8 +169,8 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	var tags []*TagOverview
-	var requests []*RequestResponse
+	tags := []*TagOverview{}
+	requests := []*RequestResponse{}
 	for _, request := range modelrequests {
 		for _, tag := range request.Tags {
 			tags = append(tags, &TagOverview{
@@ -182,9 +182,9 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 			})
 		}
 
-		var reqtargets []*TargetOverview
+		restargets := []*TargetOverview{}
 		for _, target := range request.Targets {
-			reqtargets = append(reqtargets, &TargetOverview{
+			restargets = append(restargets, &TargetOverview{
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
@@ -214,9 +214,10 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 			Amount:    request.Amount,
 			Title:     request.Title,
 			Content:   request.Content,
-			Targets:   reqtargets,
+			Targets:   restargets,
 			Tags:      tags,
 			Group:     resgroup,
+			Comments:  []*CommentDetail{},
 		}
 		requests = append(requests, res)
 	}
