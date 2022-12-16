@@ -13,6 +13,8 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
 )
 
@@ -60,10 +62,17 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	ctx := c.Request().Context()
-	modelUser, err := h.Repository.GetUserByName(ctx, u.Name)
+	var modelUser *model.User
+	modelUser, err = h.Repository.GetUserByName(c.Request().Context(), u.Name)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		if ent.IsNotFound(err) {
+			modelUser, err = h.Repository.CreateUser(c.Request().Context(), u.Name, u.DisplayName, false)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err)
+			}
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
 	}
 
 	user := &User{
