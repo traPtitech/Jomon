@@ -105,11 +105,10 @@ func (h *Handlers) GetTransactions(c echo.Context) error {
 		tags := []*TagOverview{}
 		for _, tag := range tx.Tags {
 			tags = append(tags, &TagOverview{
-				ID:          tag.ID,
-				Name:        tag.Name,
-				Description: tag.Description,
-				CreatedAt:   tag.CreatedAt,
-				UpdatedAt:   tag.UpdatedAt,
+				ID:        tag.ID,
+				Name:      tag.Name,
+				CreatedAt: tag.CreatedAt,
+				UpdatedAt: tag.UpdatedAt,
 			})
 		}
 		group := &GroupOverview{
@@ -156,11 +155,10 @@ func (h *Handlers) PostTransaction(c echo.Context) error {
 		tags := []*TagOverview{}
 		for _, tag := range created.Tags {
 			tags = append(tags, &TagOverview{
-				ID:          tag.ID,
-				Name:        tag.Name,
-				Description: tag.Description,
-				CreatedAt:   tag.CreatedAt,
-				UpdatedAt:   tag.UpdatedAt,
+				ID:        tag.ID,
+				Name:      tag.Name,
+				CreatedAt: tag.CreatedAt,
+				UpdatedAt: tag.UpdatedAt,
 			})
 		}
 		group := &GroupOverview{
@@ -202,11 +200,10 @@ func (h *Handlers) GetTransaction(c echo.Context) error {
 	tags := []*TagOverview{}
 	for _, tag := range tx.Tags {
 		tags = append(tags, &TagOverview{
-			ID:          tag.ID,
-			Name:        tag.Name,
-			Description: tag.Description,
-			CreatedAt:   tag.CreatedAt,
-			UpdatedAt:   tag.UpdatedAt,
+			ID:        tag.ID,
+			Name:      tag.Name,
+			CreatedAt: tag.CreatedAt,
+			UpdatedAt: tag.UpdatedAt,
 		})
 	}
 	group := &GroupOverview{
@@ -251,11 +248,10 @@ func (h *Handlers) PutTransaction(c echo.Context) error {
 	tags := []*TagOverview{}
 	for _, tag := range updated.Tags {
 		tags = append(tags, &TagOverview{
-			ID:          tag.ID,
-			Name:        tag.Name,
-			Description: tag.Description,
-			CreatedAt:   tag.CreatedAt,
-			UpdatedAt:   tag.UpdatedAt,
+			ID:        tag.ID,
+			Name:      tag.Name,
+			CreatedAt: tag.CreatedAt,
+			UpdatedAt: tag.UpdatedAt,
 		})
 	}
 	group := &GroupOverview{

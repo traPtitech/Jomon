@@ -174,11 +174,10 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 	for _, request := range modelrequests {
 		for _, tag := range request.Tags {
 			tags = append(tags, &TagOverview{
-				ID:          tag.ID,
-				Name:        tag.Name,
-				Description: tag.Description,
-				CreatedAt:   tag.CreatedAt,
-				UpdatedAt:   tag.UpdatedAt,
+				ID:        tag.ID,
+				Name:      tag.Name,
+				CreatedAt: tag.CreatedAt,
+				UpdatedAt: tag.UpdatedAt,
 			})
 		}
 
@@ -291,11 +290,10 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 	var restags []*TagOverview
 	for _, tag := range request.Tags {
 		restags = append(restags, &TagOverview{
-			ID:          tag.ID,
-			Name:        tag.Name,
-			Description: tag.Description,
-			CreatedAt:   tag.CreatedAt,
-			UpdatedAt:   tag.UpdatedAt,
+			ID:        tag.ID,
+			Name:      tag.Name,
+			CreatedAt: tag.CreatedAt,
+			UpdatedAt: tag.UpdatedAt,
 		})
 	}
 	res := &RequestResponse{
@@ -370,11 +368,10 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 	var restags []*TagOverview
 	for _, tag := range request.Tags {
 		restags = append(restags, &TagOverview{
-			ID:          tag.ID,
-			Name:        tag.Name,
-			Description: tag.Description,
-			CreatedAt:   tag.CreatedAt,
-			UpdatedAt:   tag.UpdatedAt,
+			ID:        tag.ID,
+			Name:      tag.Name,
+			CreatedAt: tag.CreatedAt,
+			UpdatedAt: tag.UpdatedAt,
 		})
 	}
 	res := &RequestResponse{
@@ -476,11 +473,10 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	var restags []*TagOverview
 	for _, tag := range request.Tags {
 		restags = append(restags, &TagOverview{
-			ID:          tag.ID,
-			Name:        tag.Name,
-			Description: tag.Description,
-			CreatedAt:   tag.CreatedAt,
-			UpdatedAt:   tag.UpdatedAt,
+			ID:        tag.ID,
+			Name:      tag.Name,
+			CreatedAt: tag.CreatedAt,
+			UpdatedAt: tag.UpdatedAt,
 		})
 	}
 	var restargets []*TargetOverview
