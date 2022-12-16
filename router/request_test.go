@@ -82,6 +82,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Amount:    request2.Amount,
 				Title:     request2.Title,
 				Content:   request2.Content,
+				Targets:   []*TargetOverview{},
+				Comments:  []*CommentDetail{},
+				Tags:      []*TagOverview{},
 			},
 			{
 				ID:        request1.ID,
@@ -92,6 +95,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Amount:    request1.Amount,
 				Title:     request1.Title,
 				Content:   request1.Content,
+				Targets:   []*TargetOverview{},
+				Comments:  []*CommentDetail{},
+				Tags:      []*TagOverview{},
 			},
 		}
 		resBody, err := json.Marshal(res)
@@ -123,7 +129,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 			GetRequests(c.Request().Context(), model.RequestQuery{}).
 			Return(requests, nil)
 
-		var res []*RequestResponse
+		res := []*RequestResponse{}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
@@ -179,6 +185,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Amount:    request1.Amount,
 				Title:     request1.Title,
 				Content:   request1.Content,
+				Targets:   []*TargetOverview{},
+				Comments:  []*CommentDetail{},
+				Tags:      []*TagOverview{},
 			},
 		}
 		resBody, err := json.Marshal(res)
@@ -237,6 +246,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Amount:    request1.Amount,
 				Title:     request1.Title,
 				Content:   request1.Content,
+				Targets:   []*TargetOverview{},
+				Comments:  []*CommentDetail{},
+				Tags:      []*TagOverview{},
 			},
 		}
 		resBody, err := json.Marshal(res)
@@ -295,6 +307,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Amount:    request1.Amount,
 				Title:     request1.Title,
 				Content:   request1.Content,
+				Targets:   []*TargetOverview{},
+				Comments:  []*CommentDetail{},
+				Tags:      []*TagOverview{},
 			},
 		}
 		resBody, err := json.Marshal(res)
@@ -368,6 +383,8 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Title:     request1.Title,
 				Tags:      []*TagOverview{&tag1ov},
 				Content:   request1.Content,
+				Targets:   []*TargetOverview{},
+				Comments:  []*CommentDetail{},
 			},
 		}
 		resBody, err := json.Marshal(res)
