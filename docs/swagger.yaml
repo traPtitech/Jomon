@@ -303,7 +303,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/TrapID"
+                  $ref: "#/components/schemas/UserID"
         "400":
           $ref: "#/components/responses/400"
         "403":
@@ -320,7 +320,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/TrapID"
+                $ref: "#/components/schemas/UserID"
       responses:
         "200":
           description: 追加に成功した場合。
@@ -340,7 +340,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/TrapID"
+                $ref: "#/components/schemas/UserID"
       responses:
         "200":
           description: 削除できた場合。
@@ -549,7 +549,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/TrapID"
+                $ref: "#/components/schemas/UserID"
       responses:
         "200":
           description: 追加に成功した場合。
@@ -558,7 +558,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/TrapID"
+                  $ref: "#/components/schemas/UserID"
         "400":
           $ref: "#/components/responses/400"
         "403":
@@ -577,7 +577,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/TrapID"
+                $ref: "#/components/schemas/UserID"
       responses:
         "200":
           description: 削除に成功した場合。
@@ -608,7 +608,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/TrapID"
+                $ref: "#/components/schemas/UserID"
       responses:
         "200":
           description: 追加に成功した場合。
@@ -617,7 +617,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/TrapID"
+                  $ref: "#/components/schemas/UserID"
         "400":
           $ref: "#/components/responses/400"
         "403":
@@ -636,7 +636,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/TrapID"
+                $ref: "#/components/schemas/UserID"
       responses:
         "200":
           description: 削除に成功した場合。
@@ -792,7 +792,7 @@ components:
     StatusEnum:
       type: string
       enum: [submitted, fix_required, accepted, completed, rejected]
-    TrapID:
+    UserID:
       type: string
       format: uuid
     Tag:
@@ -869,11 +869,11 @@ components:
         members:
           type: array
           items:
-            $ref: "#/components/schemas/TrapID"
+            $ref: "#/components/schemas/UserID"
         owners:
           type: array
           items:
-            $ref: "#/components/schemas/TrapID"
+            $ref: "#/components/schemas/UserID"
         created_at:
           type: string
           format: date-time
@@ -1008,7 +1008,7 @@ components:
           type: string
           format: date-time
         created_by:
-          $ref: "#/components/schemas/TrapID"
+          $ref: "#/components/schemas/UserID"
         amount:
           type: integer
           example: 1200
@@ -1107,7 +1107,7 @@ components:
       type: object
       properties:
         created_by:
-          $ref: "#/components/schemas/TrapID"
+          $ref: "#/components/schemas/UserID"
         amount:
           type: integer
           example: 1200
@@ -1233,7 +1233,7 @@ components:
           type: string
           format: uuid
         user:
-          $ref: "#/components/schemas/TrapID"
+          $ref: "#/components/schemas/UserID"
         comment:
           type: string
           example: "コメント内容"
@@ -1261,7 +1261,7 @@ components:
       type: object
       properties:
         created_by:
-          $ref: "#/components/schemas/TrapID"
+          $ref: "#/components/schemas/UserID"
         status:
           $ref: "#/components/schemas/StatusEnum"
         created_at:
@@ -1275,7 +1275,7 @@ components:
       type: object
       properties:
         created_by:
-          $ref: "#/components/schemas/TrapID"
+          $ref: "#/components/schemas/UserID"
         status:
           $ref: "#/components/schemas/StatusEnum"
         comment:
@@ -1301,22 +1301,24 @@ components:
     User:
       type: "object"
       properties:
+        id:
+          $ref: "#/components/schemas/UserID"
         name:
-          type: "string"
+          type: string
           example: "nagatech"
         display_name:
-          type: "string"
+          type: string
           example: "ながてち"
         admin:
-          type: "boolean"
+          type: boolean
         created_at:
-          type: "string"
+          type: string
           format: "date-time"
         updated_at:
-          type: "string"
+          type: string
           format: "date-time"
         deleted_at:
-          type: "string"
+          type: string
           format: "date-time"
       required:
         - name
