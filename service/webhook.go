@@ -140,14 +140,14 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				message += fmt.Sprintf("- `%s`からの振込\n    - 受け取り金額: %d円\n", resApp.Target, resApp.Amount)
 			}
 		} else {
-			targets := make([]string, len(resApp.Target))
-			for i := 0; i < len(resApp.Target); i++ {
+			targets := make([]string, len(resApps))
+			for i := 0; i < len(resApps); i++ {
 				targets[i] = fmt.Sprintf(`%s`, resApps[i].Target)
 			}
 			if resApp.Amount < 0 {
-				message += fmt.Sprintf("- %sへの支払い\n    - 支払い金額: 計%d円(一人当たりの支払い金額: 計%d円)\n", targets, -len(resApp.Target)*resApp.Amount, -resApp.Amount)
+				message += fmt.Sprintf("- %sへの支払い\n    - 支払い金額: 計%d円(一人当たりの支払い金額: 計%d円)\n", targets, -len(resApps)*resApp.Amount, -resApp.Amount)
 			} else {
-				message += fmt.Sprintf("- %sからの振込\n    - 受け取り金額: 計%d円(一人当たりの受け取り金額: 計%d円)\n", targets, len(resApp.Target)*resApp.Amount, resApp.Amount)
+				message += fmt.Sprintf("- %sからの振込\n    - 受け取り金額: 計%d円(一人当たりの受け取り金額: 計%d円)\n", targets, len(resApps)*resApp.Amount, resApp.Amount)
 			}
 
 		}
