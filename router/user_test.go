@@ -39,12 +39,16 @@ func TestHandlers_GetUsers(t *testing.T) {
 			Name:        user1.Name,
 			DisplayName: user1.DisplayName,
 			Admin:       user1.Admin,
+			CreatedAt:   user1.CreatedAt,
+			UpdatedAt:   user1.UpdatedAt,
 		}
 		resUser2 := &User{
 			ID:          user2.ID,
 			Name:        user2.Name,
 			DisplayName: user2.DisplayName,
 			Admin:       user2.Admin,
+			CreatedAt:   user2.CreatedAt,
+			UpdatedAt:   user2.UpdatedAt,
 		}
 		resUsers := []*User{resUser1, resUser2}
 		resBody, err := json.Marshal(resUsers)
@@ -288,6 +292,8 @@ func TestHandlers_GetMe(t *testing.T) {
 			Name:        accessUser.Name,
 			DisplayName: accessUser.DisplayName,
 			Admin:       accessUser.Admin,
+			CreatedAt:   accessUser.CreatedAt,
+			UpdatedAt:   accessUser.UpdatedAt,
 		}
 		bodyAccessUser, err := json.Marshal(user)
 		assert.NoError(t, err)
