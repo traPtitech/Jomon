@@ -142,13 +142,12 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 		} else {
 			targets := make([]string, len(resApp.Target))
 			for i := 0; i < len(resApp.Target); i++ {
-				targets[i] = resApps[i].Target
+				targets[i] = fmt.Sprintf(`%s`, resApps[i].Target)
 			}
-			message += fmt.Sprintf("`%s`", strings.Join(targets, " "))
 			if resApp.Amount < 0 {
-				message += fmt.Sprintf("への支払い\n    - 支払い金額: 計%d円(一人当たりの支払い金額: 計%d円)\n", -len(resApp.Target)*resApp.Amount, -resApp.Amount)
+				message += fmt.Sprintf("- %sへの支払い\n    - 支払い金額: 計%d円(一人当たりの支払い金額: 計%d円)\n", targets, -len(resApp.Target)*resApp.Amount, -resApp.Amount)
 			} else {
-				message += fmt.Sprintf("からの振込\n    - 受け取り金額: 計%d円(一人当たりの受け取り金額: 計%d円)\n", len(resApp.Target)*resApp.Amount, resApp.Amount)
+				message += fmt.Sprintf("- %sからの振込\n    - 受け取り金額: 計%d円(一人当たりの受け取り金額: 計%d円)\n", targets, len(resApp.Target)*resApp.Amount, resApp.Amount)
 			}
 
 		}
@@ -158,10 +157,10 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 		if resApp.Tags != nil {
 			tags := make([]string, len(resApp.Tags))
 			for i, tag := range resApp.Tags {
-				tags[i] = tag.Name
+				tags[i] = fmt.Sprintf(`%s`, tag.Name)
 			}
 
-			message += fmt.Sprintf("- タグ: `%s`", strings.Join(tags, " "))
+			message += fmt.Sprintf("- タグ: %s", tags)
 		}
 	}
 
