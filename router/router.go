@@ -28,6 +28,7 @@ func NewServer(h Handlers) *echo.Echo {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))))
+	e.Use(middleware.BodyDump(service.WebhookEventHandler))
 
 	retrieveGroupOwner := h.RetrieveGroupOwner(h.Repository)
 	retrieveRequestCreator := h.RetrieveRequestCreator(h.Repository)
