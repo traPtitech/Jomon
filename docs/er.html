@@ -37,7 +37,6 @@ erDiagram
     }
     Request {
         uuidDOTUUID id
-        int amount
         string title
         string content
         timeDOTTime created_at
@@ -101,18 +100,20 @@ erDiagram
     	Transaction }o--o{ Tag : "tag/transaction"
 		</div>
 	<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+	<script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js"></script>
 	<script>
 		mermaid.mermaidAPI.initialize({
 			startOnLoad: true,
 		});
 		var observer = new MutationObserver((event) => {
-			document.querySelectorAll('text[id^=entity]').forEach(text => {
+			document.querySelectorAll('text[id^=text-entity]').forEach(text => {
 				text.textContent = text.textContent.replace('DOT', '.');
 				text.textContent = text.textContent.replace('STAR', '*');
 				text.textContent = text.textContent.replace('LBRACK', '[');
 				text.textContent = text.textContent.replace('RBRACK', ']');
 			});
 			observer.disconnect();
+			panzoom(document.getElementById('er-diagram'));
 		});
 		observer.observe(document.getElementById('er-diagram'), { attributes: true, childList: true });
 	</script>
