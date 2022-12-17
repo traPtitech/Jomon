@@ -62,26 +62,6 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 			}).
 			WithUser().
 			Order(ent.Desc(request.FieldTitle))
-	} else if *query.Sort == "amount" {
-		requestsq = repo.client.Request.
-			Query().
-			WithTag().
-			WithGroup().
-			WithStatus(func(q *ent.RequestStatusQuery) {
-				q.Order(ent.Desc(requeststatus.FieldCreatedAt))
-			}).
-			WithUser().
-			Order(ent.Asc(request.FieldAmount))
-	} else if *query.Sort == "-amount" {
-		requestsq = repo.client.Request.
-			Query().
-			WithTag().
-			WithGroup().
-			WithStatus(func(q *ent.RequestStatusQuery) {
-				q.Order(ent.Desc(requeststatus.FieldCreatedAt))
-			}).
-			WithUser().
-			Order(ent.Desc(request.FieldAmount))
 	}
 
 	if query.Target != nil && *query.Target != uuid.Nil {
@@ -144,7 +124,7 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 	return reqres, nil
 }
 
-func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title string, content string, tags []*Tag, targets []*RequestTarget, group *Group, userID uuid.UUID) (*RequestDetail, error) {
+func (repo *EntRepository) CreateRequest(ctx context.Context, title string, content string, tags []*Tag, targets []*RequestTarget, group *Group, userID uuid.UUID) (*RequestDetail, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -162,7 +142,6 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 	created, err := tx.Client().Request.
 		Create().
 		SetTitle(title).
-		SetAmount(amount).
 		SetContent(content).
 		SetCreatedAt(time.Now()).
 		SetUpdatedAt(time.Now()).
@@ -211,7 +190,6 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, amount int, title 
 	reqdetail := &RequestDetail{
 		ID:        created.ID,
 		Status:    convertEntRequestStatusToModelStatus(&status.Status),
-		Amount:    created.Amount,
 		Title:     created.Title,
 		Content:   created.Content,
 		Tags:      tags,
@@ -253,7 +231,6 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 	reqdetail := &RequestDetail{
 		ID:        request.ID,
 		Status:    convertEntRequestStatusToModelStatus(&request.Edges.Status[0].Status),
-		Amount:    request.Amount,
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      tags,
@@ -266,7 +243,7 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 	return reqdetail, nil
 }
 
-func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, amount int, title string, content string, tags []*Tag, targets []*RequestTarget, group *Group) (*RequestDetail, error) {
+func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, title string, content string, tags []*Tag, targets []*RequestTarget, group *Group) (*RequestDetail, error) {
 	mu.Lock()
 	defer mu.Unlock()
 	tx, err := repo.client.Tx(ctx)
@@ -285,7 +262,6 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	}
 	updated, err := tx.Client().Request.
 		UpdateOneID(requestID).
-		SetAmount(amount).
 		SetTitle(title).
 		SetContent(content).
 		ClearTag().
@@ -360,7 +336,6 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	reqdetail := &RequestDetail{
 		ID:        updated.ID,
 		Status:    convertEntRequestStatusToModelStatus(&status.Status),
-		Amount:    updated.Amount,
 		Title:     updated.Title,
 		Content:   updated.Content,
 		Tags:      modeltags,
@@ -387,7 +362,6 @@ func convertEntRequestResponseToModelRequestResponse(request *ent.Request, tags 
 		CreatedAt: request.CreatedAt,
 		UpdatedAt: request.UpdatedAt,
 		CreatedBy: user.ID,
-		Amount:    request.Amount,
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      modeltags,

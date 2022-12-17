@@ -1026,9 +1026,6 @@ components:
           format: date-time
         created_by:
           $ref: "#/components/schemas/UserID"
-        amount:
-          type: integer
-          example: 1200
         title:
           type: string
           example: "SysAd講習会の開催費用"
@@ -1065,9 +1062,6 @@ components:
           format: uuid
         status:
           $ref: "#/components/schemas/StatusEnum"
-        amount:
-          type: integer
-          example: 1200
         title:
           type: string
           example: "SysAd講習会の開催費用"
@@ -1127,9 +1121,6 @@ components:
       properties:
         created_by:
           $ref: "#/components/schemas/UserID"
-        amount:
-          type: integer
-          example: 1200
         title:
           type: string
           example: "SysAd講習会の開催費用"

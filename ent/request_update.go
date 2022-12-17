@@ -37,19 +37,6 @@ func (ru *RequestUpdate) Where(ps ...predicate.Request) *RequestUpdate {
 	return ru
 }
 
-// SetAmount sets the "amount" field.
-func (ru *RequestUpdate) SetAmount(i int) *RequestUpdate {
-	ru.mutation.ResetAmount()
-	ru.mutation.SetAmount(i)
-	return ru
-}
-
-// AddAmount adds i to the "amount" field.
-func (ru *RequestUpdate) AddAmount(i int) *RequestUpdate {
-	ru.mutation.AddAmount(i)
-	return ru
-}
-
 // SetTitle sets the "title" field.
 func (ru *RequestUpdate) SetTitle(s string) *RequestUpdate {
 	ru.mutation.SetTitle(s)
@@ -433,20 +420,6 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := ru.mutation.Amount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: request.FieldAmount,
-		})
-	}
-	if value, ok := ru.mutation.AddedAmount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: request.FieldAmount,
-		})
 	}
 	if value, ok := ru.mutation.Title(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -889,19 +862,6 @@ type RequestUpdateOne struct {
 	mutation *RequestMutation
 }
 
-// SetAmount sets the "amount" field.
-func (ruo *RequestUpdateOne) SetAmount(i int) *RequestUpdateOne {
-	ruo.mutation.ResetAmount()
-	ruo.mutation.SetAmount(i)
-	return ruo
-}
-
-// AddAmount adds i to the "amount" field.
-func (ruo *RequestUpdateOne) AddAmount(i int) *RequestUpdateOne {
-	ruo.mutation.AddAmount(i)
-	return ruo
-}
-
 // SetTitle sets the "title" field.
 func (ruo *RequestUpdateOne) SetTitle(s string) *RequestUpdateOne {
 	ruo.mutation.SetTitle(s)
@@ -1315,20 +1275,6 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := ruo.mutation.Amount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: request.FieldAmount,
-		})
-	}
-	if value, ok := ruo.mutation.AddedAmount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: request.FieldAmount,
-		})
 	}
 	if value, ok := ruo.mutation.Title(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

@@ -40,7 +40,6 @@ func (s Status) String() string {
 
 type Request struct {
 	CreatedBy uuid.UUID    `json:"created_by"`
-	Amount    int          `json:"amount"`
 	Title     string       `json:"title"`
 	Content   string       `json:"content"`
 	Tags      []*uuid.UUID `json:"tags"`
@@ -49,7 +48,6 @@ type Request struct {
 }
 
 type PutRequest struct {
-	Amount  int          `json:"amount"`
 	Title   string       `json:"title"`
 	Content string       `json:"content"`
 	Tags    []*uuid.UUID `json:"tags"`
@@ -63,7 +61,6 @@ type RequestResponse struct {
 	CreatedAt time.Time         `json:"created_at"`
 	UpdatedAt time.Time         `json:"updated_at"`
 	CreatedBy uuid.UUID         `json:"created_by"`
-	Amount    int               `json:"amount"`
 	Title     string            `json:"title"`
 	Content   string            `json:"content"`
 	Tags      []*TagOverview    `json:"tags"`
@@ -214,7 +211,6 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 			CreatedAt: request.CreatedAt,
 			UpdatedAt: request.UpdatedAt,
 			CreatedBy: request.CreatedBy,
-			Amount:    request.Amount,
 			Title:     request.Title,
 			Content:   request.Content,
 			Targets:   restargets,
@@ -263,7 +259,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
-	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, targets, group, req.CreatedBy)
+	request, err := h.Repository.CreateRequest(ctx, req.Title, req.Content, tags, targets, group, req.CreatedBy)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return echo.NewHTTPError(http.StatusNotFound, err)
@@ -306,7 +302,6 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		CreatedAt: request.CreatedAt,
 		UpdatedAt: request.UpdatedAt,
 		CreatedBy: request.CreatedBy,
-		Amount:    request.Amount,
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      restags,
@@ -384,7 +379,6 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 		CreatedAt: request.CreatedAt,
 		UpdatedAt: request.UpdatedAt,
 		CreatedBy: request.CreatedBy,
-		Amount:    request.Amount,
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      restags,
@@ -440,7 +434,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		}
 	}
 	ctx := context.Background()
-	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Amount, req.Title, req.Content, tags, targets, group)
+	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Title, req.Content, tags, targets, group)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return echo.NewHTTPError(http.StatusNotFound, err)
@@ -499,7 +493,6 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		CreatedAt: request.CreatedAt,
 		UpdatedAt: request.UpdatedAt,
 		CreatedBy: request.CreatedBy,
-		Amount:    request.Amount,
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      restags,

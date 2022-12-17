@@ -19,8 +19,6 @@ type Request struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// Amount holds the value of the "amount" field.
-	Amount int `json:"amount,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Content holds the value of the "content" field.
@@ -144,8 +142,6 @@ func (*Request) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case request.FieldAmount:
-			values[i] = new(sql.NullInt64)
 		case request.FieldTitle, request.FieldContent:
 			values[i] = new(sql.NullString)
 		case request.FieldCreatedAt, request.FieldUpdatedAt:
@@ -176,12 +172,6 @@ func (r *Request) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				r.ID = *value
-			}
-		case request.FieldAmount:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field amount", values[i])
-			} else if value.Valid {
-				r.Amount = int(value.Int64)
 			}
 		case request.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -289,9 +279,6 @@ func (r *Request) String() string {
 	var builder strings.Builder
 	builder.WriteString("Request(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", r.ID))
-	builder.WriteString("amount=")
-	builder.WriteString(fmt.Sprintf("%v", r.Amount))
-	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(r.Title)
 	builder.WriteString(", ")

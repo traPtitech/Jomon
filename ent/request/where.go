@@ -82,13 +82,6 @@ func IDLTE(id uuid.UUID) predicate.Request {
 	})
 }
 
-// Amount applies equality check predicate on the "amount" field. It's identical to AmountEQ.
-func Amount(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAmount), v))
-	})
-}
-
 // Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
 func Title(v string) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
@@ -114,70 +107,6 @@ func CreatedAt(v time.Time) predicate.Request {
 func UpdatedAt(v time.Time) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
-	})
-}
-
-// AmountEQ applies the EQ predicate on the "amount" field.
-func AmountEQ(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAmount), v))
-	})
-}
-
-// AmountNEQ applies the NEQ predicate on the "amount" field.
-func AmountNEQ(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldAmount), v))
-	})
-}
-
-// AmountIn applies the In predicate on the "amount" field.
-func AmountIn(vs ...int) predicate.Request {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldAmount), v...))
-	})
-}
-
-// AmountNotIn applies the NotIn predicate on the "amount" field.
-func AmountNotIn(vs ...int) predicate.Request {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldAmount), v...))
-	})
-}
-
-// AmountGT applies the GT predicate on the "amount" field.
-func AmountGT(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldAmount), v))
-	})
-}
-
-// AmountGTE applies the GTE predicate on the "amount" field.
-func AmountGTE(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldAmount), v))
-	})
-}
-
-// AmountLT applies the LT predicate on the "amount" field.
-func AmountLT(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldAmount), v))
-	})
-}
-
-// AmountLTE applies the LTE predicate on the "amount" field.
-func AmountLTE(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldAmount), v))
 	})
 }
 

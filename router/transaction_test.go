@@ -719,7 +719,6 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
 			Status:    model.Status(model.Accepted),
-			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			Comments:  []*model.Comment{},

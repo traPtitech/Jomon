@@ -13,8 +13,6 @@ const (
 	Label = "request"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldAmount holds the string denoting the amount field in the database.
-	FieldAmount = "amount"
 	// FieldTitle holds the string denoting the title field in the database.
 	FieldTitle = "title"
 	// FieldContent holds the string denoting the content field in the database.
@@ -100,7 +98,6 @@ const (
 // Columns holds all SQL columns for request fields.
 var Columns = []string{
 	FieldID,
-	FieldAmount,
 	FieldTitle,
 	FieldContent,
 	FieldCreatedAt,
