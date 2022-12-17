@@ -710,6 +710,34 @@ func HasFileWith(preds ...predicate.File) predicate.User {
 	})
 }
 
+// HasRequestTarget applies the HasEdge predicate on the "request_target" edge.
+func HasRequestTarget() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RequestTargetTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, RequestTargetTable, RequestTargetColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRequestTargetWith applies the HasEdge predicate on the "request_target" edge with a given conditions (other predicates).
+func HasRequestTargetWith(preds ...predicate.RequestTarget) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RequestTargetInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, RequestTargetTable, RequestTargetColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {

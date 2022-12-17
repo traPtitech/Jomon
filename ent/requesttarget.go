@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // RequestTarget is the model entity for the RequestTarget schema.
@@ -18,8 +19,6 @@ type RequestTarget struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// Target holds the value of the "target" field.
-	Target string `json:"target,omitempty"`
 	// Amount holds the value of the "amount" field.
 	Amount int `json:"amount,omitempty"`
 	// PaidAt holds the value of the "paid_at" field.
@@ -28,17 +27,20 @@ type RequestTarget struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RequestTargetQuery when eager-loading is set.
-	Edges          RequestTargetEdges `json:"edges"`
-	request_target *uuid.UUID
+	Edges               RequestTargetEdges `json:"edges"`
+	request_target      *uuid.UUID
+	request_target_user *uuid.UUID
 }
 
 // RequestTargetEdges holds the relations/edges for other nodes in the graph.
 type RequestTargetEdges struct {
 	// Request holds the value of the request edge.
 	Request *Request `json:"request,omitempty"`
+	// User holds the value of the user edge.
+	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // RequestOrErr returns the Request value or an error if the edge
@@ -54,6 +56,19 @@ func (e RequestTargetEdges) RequestOrErr() (*Request, error) {
 	return nil, &NotLoadedError{edge: "request"}
 }
 
+// UserOrErr returns the User value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RequestTargetEdges) UserOrErr() (*User, error) {
+	if e.loadedTypes[1] {
+		if e.User == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.User, nil
+	}
+	return nil, &NotLoadedError{edge: "user"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*RequestTarget) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -61,13 +76,13 @@ func (*RequestTarget) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case requesttarget.FieldAmount:
 			values[i] = new(sql.NullInt64)
-		case requesttarget.FieldTarget:
-			values[i] = new(sql.NullString)
 		case requesttarget.FieldPaidAt, requesttarget.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
 		case requesttarget.FieldID:
 			values[i] = new(uuid.UUID)
 		case requesttarget.ForeignKeys[0]: // request_target
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case requesttarget.ForeignKeys[1]: // request_target_user
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type RequestTarget", columns[i])
@@ -89,12 +104,6 @@ func (rt *RequestTarget) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				rt.ID = *value
-			}
-		case requesttarget.FieldTarget:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field target", values[i])
-			} else if value.Valid {
-				rt.Target = value.String
 			}
 		case requesttarget.FieldAmount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -122,6 +131,13 @@ func (rt *RequestTarget) assignValues(columns []string, values []any) error {
 				rt.request_target = new(uuid.UUID)
 				*rt.request_target = *value.S.(*uuid.UUID)
 			}
+		case requesttarget.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field request_target_user", values[i])
+			} else if value.Valid {
+				rt.request_target_user = new(uuid.UUID)
+				*rt.request_target_user = *value.S.(*uuid.UUID)
+			}
 		}
 	}
 	return nil
@@ -130,6 +146,11 @@ func (rt *RequestTarget) assignValues(columns []string, values []any) error {
 // QueryRequest queries the "request" edge of the RequestTarget entity.
 func (rt *RequestTarget) QueryRequest() *RequestQuery {
 	return (&RequestTargetClient{config: rt.config}).QueryRequest(rt)
+}
+
+// QueryUser queries the "user" edge of the RequestTarget entity.
+func (rt *RequestTarget) QueryUser() *UserQuery {
+	return (&RequestTargetClient{config: rt.config}).QueryUser(rt)
 }
 
 // Update returns a builder for updating this RequestTarget.
@@ -155,9 +176,6 @@ func (rt *RequestTarget) String() string {
 	var builder strings.Builder
 	builder.WriteString("RequestTarget(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", rt.ID))
-	builder.WriteString("target=")
-	builder.WriteString(rt.Target)
-	builder.WriteString(", ")
 	builder.WriteString("amount=")
 	builder.WriteString(fmt.Sprintf("%v", rt.Amount))
 	builder.WriteString(", ")

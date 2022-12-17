@@ -974,7 +974,19 @@ components:
     Target:
       type: string
       example: "hoge株式会社"
-    TargetDetail:
+    RequestTarget:
+      type: object
+      properties:
+        amount:
+          type: integer
+          example: 1200
+        target:
+          type: string
+          format: uuid
+      required:
+        - amount
+        - target
+    RequestTargetDetail:
       type: object
       properties:
         id:
@@ -1026,7 +1038,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/TargetDetail"
+            $ref: "#/components/schemas/RequestTargetDetail"
         tags:
           type: array
           items:
@@ -1088,7 +1100,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/TargetDetail"
+            $ref: "#/components/schemas/RequestTargetDetail"
         created_at:
           type: string
           format: date-time
@@ -1136,8 +1148,7 @@ components:
         targets:
           type: array
           items:
-            type: string
-            format: uuid
+            $ref: "#/components/schemas/RequestTarget"
       required:
         - amount
         - title
@@ -1398,6 +1409,7 @@ components:
       in: query
       schema:
         type: string
+        format: uuid
     sinceQuery:
       name: since
       description: いつからの依頼か

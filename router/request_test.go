@@ -672,7 +672,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		date := time.Now()
 
 		target := &model.RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: uuid.New(),
 			Amount: random.Numeric(t, 1000000),
 		}
 
@@ -1071,7 +1071,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 		target := &TargetOverview{
 			ID:        uuid.New(),
-			Target:    random.AlphaNumeric(t, 20),
+			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 1000000),
 			PaidAt:    nil,
 			CreatedAt: date,
@@ -1439,14 +1439,14 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 		target1 := &model.RequestTargetDetail{
 			ID:        uuid.New(),
-			Target:    random.AlphaNumeric(t, 20),
+			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 100000),
 			PaidAt:    nil,
 			CreatedAt: date,
 		}
 		target2 := &model.RequestTargetDetail{
 			ID:        uuid.New(),
-			Target:    random.AlphaNumeric(t, 20),
+			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 100000),
 			PaidAt:    nil,
 			CreatedAt: date,
@@ -2550,7 +2550,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		target := &model.RequestTargetDetail{
 			ID:        uuid.New(),
-			Target:    random.AlphaNumeric(t, 20),
+			Target:    uuid.New(),
 			PaidAt:    nil,
 			CreatedAt: date,
 		}
@@ -3339,7 +3339,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 		target := &model.RequestTargetDetail{
 			ID:        uuid.New(),
-			Target:    random.AlphaNumeric(t, 20),
+			Target:    uuid.New(),
 			PaidAt:    &date,
 			CreatedAt: date,
 		}

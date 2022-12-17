@@ -13,8 +13,6 @@ const (
 	Label = "request_target"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldTarget holds the string denoting the target field in the database.
-	FieldTarget = "target"
 	// FieldAmount holds the string denoting the amount field in the database.
 	FieldAmount = "amount"
 	// FieldPaidAt holds the string denoting the paid_at field in the database.
@@ -23,6 +21,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// EdgeRequest holds the string denoting the request edge name in mutations.
 	EdgeRequest = "request"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 	// Table holds the table name of the requesttarget in the database.
 	Table = "request_targets"
 	// RequestTable is the table that holds the request relation/edge.
@@ -32,12 +32,18 @@ const (
 	RequestInverseTable = "requests"
 	// RequestColumn is the table column denoting the request relation/edge.
 	RequestColumn = "request_target"
+	// UserTable is the table that holds the user relation/edge.
+	UserTable = "request_targets"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "request_target_user"
 )
 
 // Columns holds all SQL columns for requesttarget fields.
 var Columns = []string{
 	FieldID,
-	FieldTarget,
 	FieldAmount,
 	FieldPaidAt,
 	FieldCreatedAt,
@@ -47,6 +53,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"request_target",
+	"request_target_user",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -53,7 +53,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 
@@ -100,7 +100,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		tag, err := repo2.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 
@@ -147,7 +147,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		tag, err := repo3.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 
@@ -193,7 +193,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		tag, err := repo4.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 
@@ -239,11 +239,11 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		tag, err := repo5.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target1 := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 		target2 := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user2.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 
@@ -281,7 +281,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		tag, err := repo6.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 
@@ -320,7 +320,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		tag, err := repo7.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 
@@ -359,7 +359,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		tag, err := repo8.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 
@@ -403,7 +403,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		tag, err := repo9.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 
@@ -449,7 +449,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		tag, err := repo10.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 
@@ -504,7 +504,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 
@@ -605,7 +605,7 @@ func TestEntRepository_GetRequest(t *testing.T) {
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 		budget := random.Numeric(t, 10000)
@@ -652,7 +652,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 		budget := random.Numeric(t, 10000)
@@ -685,7 +685,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 		budget := random.Numeric(t, 10000)
@@ -718,7 +718,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 		budget := random.Numeric(t, 10000)
@@ -750,7 +750,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 		budget := random.Numeric(t, 10000)
@@ -778,7 +778,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 		target := &RequestTarget{
-			Target: random.AlphaNumeric(t, 20),
+			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
 		budget := random.Numeric(t, 10000)

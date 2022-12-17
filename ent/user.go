@@ -48,9 +48,11 @@ type UserEdges struct {
 	Request []*Request `json:"request,omitempty"`
 	// File holds the value of the file edge.
 	File []*File `json:"file,omitempty"`
+	// RequestTarget holds the value of the request_target edge.
+	RequestTarget []*RequestTarget `json:"request_target,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [7]bool
 }
 
 // GroupUserOrErr returns the GroupUser value or an error if the edge
@@ -105,6 +107,15 @@ func (e UserEdges) FileOrErr() ([]*File, error) {
 		return e.File, nil
 	}
 	return nil, &NotLoadedError{edge: "file"}
+}
+
+// RequestTargetOrErr returns the RequestTarget value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RequestTargetOrErr() ([]*RequestTarget, error) {
+	if e.loadedTypes[6] {
+		return e.RequestTarget, nil
+	}
+	return nil, &NotLoadedError{edge: "request_target"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -211,6 +222,11 @@ func (u *User) QueryRequest() *RequestQuery {
 // QueryFile queries the "file" edge of the User entity.
 func (u *User) QueryFile() *FileQuery {
 	return (&UserClient{config: u.config}).QueryFile(u)
+}
+
+// QueryRequestTarget queries the "request_target" edge of the User entity.
+func (u *User) QueryRequestTarget() *RequestTargetQuery {
+	return (&UserClient{config: u.config}).QueryRequestTarget(u)
 }
 
 // Update returns a builder for updating this User.

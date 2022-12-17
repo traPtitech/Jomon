@@ -84,11 +84,13 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 			Order(ent.Desc(request.FieldAmount))
 	}
 
-	if query.Target != nil && *query.Target != "" {
+	if query.Target != nil && *query.Target != uuid.Nil {
 		requestsq = requestsq.
 			Where(
 				request.HasTargetWith(
-					requesttarget.TargetEQ(*query.Target),
+					requesttarget.HasUserWith(
+						user.IDEQ(*query.Target),
+					),
 				),
 			)
 	}
@@ -227,7 +229,9 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 		Query().
 		Where(request.IDEQ(requestID)).
 		WithTag().
-		WithTarget().
+		WithTarget(func(q *ent.RequestTargetQuery) {
+			q.WithUser()
+		}).
 		WithGroup().
 		WithStatus(func(q *ent.RequestStatusQuery) {
 			q.Order(ent.Desc(requeststatus.FieldCreatedAt)).Limit(1)
