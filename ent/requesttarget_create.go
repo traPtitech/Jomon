@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // RequestTargetCreate is the builder for creating a RequestTarget entity.
@@ -20,12 +21,6 @@ type RequestTargetCreate struct {
 	config
 	mutation *RequestTargetMutation
 	hooks    []Hook
-}
-
-// SetTarget sets the "target" field.
-func (rtc *RequestTargetCreate) SetTarget(s string) *RequestTargetCreate {
-	rtc.mutation.SetTarget(s)
-	return rtc
 }
 
 // SetAmount sets the "amount" field.
@@ -85,6 +80,17 @@ func (rtc *RequestTargetCreate) SetRequestID(id uuid.UUID) *RequestTargetCreate 
 // SetRequest sets the "request" edge to the Request entity.
 func (rtc *RequestTargetCreate) SetRequest(r *Request) *RequestTargetCreate {
 	return rtc.SetRequestID(r.ID)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (rtc *RequestTargetCreate) SetUserID(id uuid.UUID) *RequestTargetCreate {
+	rtc.mutation.SetUserID(id)
+	return rtc
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (rtc *RequestTargetCreate) SetUser(u *User) *RequestTargetCreate {
+	return rtc.SetUserID(u.ID)
 }
 
 // Mutation returns the RequestTargetMutation object of the builder.
@@ -176,9 +182,6 @@ func (rtc *RequestTargetCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (rtc *RequestTargetCreate) check() error {
-	if _, ok := rtc.mutation.Target(); !ok {
-		return &ValidationError{Name: "target", err: errors.New(`ent: missing required field "RequestTarget.target"`)}
-	}
 	if _, ok := rtc.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "RequestTarget.amount"`)}
 	}
@@ -187,6 +190,9 @@ func (rtc *RequestTargetCreate) check() error {
 	}
 	if _, ok := rtc.mutation.RequestID(); !ok {
 		return &ValidationError{Name: "request", err: errors.New(`ent: missing required edge "RequestTarget.request"`)}
+	}
+	if _, ok := rtc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "RequestTarget.user"`)}
 	}
 	return nil
 }
@@ -223,14 +229,6 @@ func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSp
 	if id, ok := rtc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := rtc.mutation.Target(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: requesttarget.FieldTarget,
-		})
-		_node.Target = value
 	}
 	if value, ok := rtc.mutation.Amount(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -274,6 +272,26 @@ func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSp
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.request_target = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := rtc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   requesttarget.UserTable,
+			Columns: []string{requesttarget.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.request_target_user = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

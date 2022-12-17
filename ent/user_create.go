@@ -16,6 +16,7 @@ import (
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
+	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -196,6 +197,21 @@ func (uc *UserCreate) AddFile(f ...*File) *UserCreate {
 		ids[i] = f[i].ID
 	}
 	return uc.AddFileIDs(ids...)
+}
+
+// AddRequestTargetIDs adds the "request_target" edge to the RequestTarget entity by IDs.
+func (uc *UserCreate) AddRequestTargetIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddRequestTargetIDs(ids...)
+	return uc
+}
+
+// AddRequestTarget adds the "request_target" edges to the RequestTarget entity.
+func (uc *UserCreate) AddRequestTarget(r ...*RequestTarget) *UserCreate {
+	ids := make([]uuid.UUID, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uc.AddRequestTargetIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -505,6 +521,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: file.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.RequestTargetIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.RequestTargetTable,
+			Columns: []string{user.RequestTargetColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: requesttarget.FieldID,
 				},
 			},
 		}

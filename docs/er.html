@@ -50,7 +50,6 @@ erDiagram
     }
     RequestTarget {
         uuidDOTUUID id
-        string target
         int amount
         timeDOTTime paid_at
         timeDOTTime created_at
@@ -58,7 +57,6 @@ erDiagram
     Tag {
         uuidDOTUUID id
         string name
-        string description
         timeDOTTime created_at
         timeDOTTime updated_at
         timeDOTTime deleted_at
@@ -98,6 +96,7 @@ erDiagram
     	Request |o--o{ Comment : "comment/request"
     	Request }o--o| User : "user/request"
     	RequestStatus }o--o| User : "user/request_status"
+    	RequestTarget }o--o| User : "user/request_target"
     	Transaction |o--o| TransactionDetail : "detail/transaction"
     	Transaction }o--o{ Tag : "tag/transaction"
 		</div>

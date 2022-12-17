@@ -95,13 +95,13 @@ type StatusResponse struct {
 }
 
 type Target struct {
-	Target string `json:"target"`
-	Amount int    `json:"amount"`
+	Target uuid.UUID `json:"target"`
+	Amount int       `json:"amount"`
 }
 
 type TargetOverview struct {
 	ID        uuid.UUID  `json:"id"`
-	Target    string     `json:"target"`
+	Target    uuid.UUID  `json:"target"`
 	Amount    int        `json:"amount"`
 	PaidAt    *time.Time `json:"paid_at"`
 	CreatedAt time.Time  `json:"created_at"`
@@ -124,8 +124,12 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 	if s := status.String(); s != "" {
 		ss = &s
 	}
-	var target *string
-	if t := c.QueryParam("target"); t != "" {
+	var target *uuid.UUID
+	if c.QueryParam("target") != "" {
+		t, err := uuid.Parse(c.QueryParam("target"))
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
 		target = &t
 	}
 	var since *time.Time

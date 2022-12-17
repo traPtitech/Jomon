@@ -14,13 +14,13 @@ type RequestTargetRepository interface {
 
 type RequestTargetDetail struct {
 	ID        uuid.UUID
-	Target    string
+	Target    uuid.UUID
 	Amount    int
 	PaidAt    *time.Time
 	CreatedAt time.Time
 }
 
 type RequestTarget struct {
-	Target string
+	Target uuid.UUID
 	Amount int
 }

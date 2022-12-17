@@ -55,7 +55,7 @@ type RequestDetail struct {
 
 type RequestQuery struct {
 	Sort   *string
-	Target *string
+	Target *uuid.UUID
 	Status *string
 	Since  *time.Time
 	Until  *time.Time

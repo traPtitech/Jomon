@@ -15,6 +15,7 @@ import (
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // RequestTargetUpdate is the builder for updating RequestTarget entities.
@@ -27,12 +28,6 @@ type RequestTargetUpdate struct {
 // Where appends a list predicates to the RequestTargetUpdate builder.
 func (rtu *RequestTargetUpdate) Where(ps ...predicate.RequestTarget) *RequestTargetUpdate {
 	rtu.mutation.Where(ps...)
-	return rtu
-}
-
-// SetTarget sets the "target" field.
-func (rtu *RequestTargetUpdate) SetTarget(s string) *RequestTargetUpdate {
-	rtu.mutation.SetTarget(s)
 	return rtu
 }
 
@@ -94,6 +89,17 @@ func (rtu *RequestTargetUpdate) SetRequest(r *Request) *RequestTargetUpdate {
 	return rtu.SetRequestID(r.ID)
 }
 
+// SetUserID sets the "user" edge to the User entity by ID.
+func (rtu *RequestTargetUpdate) SetUserID(id uuid.UUID) *RequestTargetUpdate {
+	rtu.mutation.SetUserID(id)
+	return rtu
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (rtu *RequestTargetUpdate) SetUser(u *User) *RequestTargetUpdate {
+	return rtu.SetUserID(u.ID)
+}
+
 // Mutation returns the RequestTargetMutation object of the builder.
 func (rtu *RequestTargetUpdate) Mutation() *RequestTargetMutation {
 	return rtu.mutation
@@ -102,6 +108,12 @@ func (rtu *RequestTargetUpdate) Mutation() *RequestTargetMutation {
 // ClearRequest clears the "request" edge to the Request entity.
 func (rtu *RequestTargetUpdate) ClearRequest() *RequestTargetUpdate {
 	rtu.mutation.ClearRequest()
+	return rtu
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (rtu *RequestTargetUpdate) ClearUser() *RequestTargetUpdate {
+	rtu.mutation.ClearUser()
 	return rtu
 }
 
@@ -170,6 +182,9 @@ func (rtu *RequestTargetUpdate) check() error {
 	if _, ok := rtu.mutation.RequestID(); rtu.mutation.RequestCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "RequestTarget.request"`)
 	}
+	if _, ok := rtu.mutation.UserID(); rtu.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "RequestTarget.user"`)
+	}
 	return nil
 }
 
@@ -190,13 +205,6 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := rtu.mutation.Target(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: requesttarget.FieldTarget,
-		})
 	}
 	if value, ok := rtu.mutation.Amount(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -267,6 +275,41 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if rtu.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   requesttarget.UserTable,
+			Columns: []string{requesttarget.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := rtu.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   requesttarget.UserTable,
+			Columns: []string{requesttarget.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, rtu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{requesttarget.Label}
@@ -284,12 +327,6 @@ type RequestTargetUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *RequestTargetMutation
-}
-
-// SetTarget sets the "target" field.
-func (rtuo *RequestTargetUpdateOne) SetTarget(s string) *RequestTargetUpdateOne {
-	rtuo.mutation.SetTarget(s)
-	return rtuo
 }
 
 // SetAmount sets the "amount" field.
@@ -350,6 +387,17 @@ func (rtuo *RequestTargetUpdateOne) SetRequest(r *Request) *RequestTargetUpdateO
 	return rtuo.SetRequestID(r.ID)
 }
 
+// SetUserID sets the "user" edge to the User entity by ID.
+func (rtuo *RequestTargetUpdateOne) SetUserID(id uuid.UUID) *RequestTargetUpdateOne {
+	rtuo.mutation.SetUserID(id)
+	return rtuo
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (rtuo *RequestTargetUpdateOne) SetUser(u *User) *RequestTargetUpdateOne {
+	return rtuo.SetUserID(u.ID)
+}
+
 // Mutation returns the RequestTargetMutation object of the builder.
 func (rtuo *RequestTargetUpdateOne) Mutation() *RequestTargetMutation {
 	return rtuo.mutation
@@ -358,6 +406,12 @@ func (rtuo *RequestTargetUpdateOne) Mutation() *RequestTargetMutation {
 // ClearRequest clears the "request" edge to the Request entity.
 func (rtuo *RequestTargetUpdateOne) ClearRequest() *RequestTargetUpdateOne {
 	rtuo.mutation.ClearRequest()
+	return rtuo
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (rtuo *RequestTargetUpdateOne) ClearUser() *RequestTargetUpdateOne {
+	rtuo.mutation.ClearUser()
 	return rtuo
 }
 
@@ -439,6 +493,9 @@ func (rtuo *RequestTargetUpdateOne) check() error {
 	if _, ok := rtuo.mutation.RequestID(); rtuo.mutation.RequestCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "RequestTarget.request"`)
 	}
+	if _, ok := rtuo.mutation.UserID(); rtuo.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "RequestTarget.user"`)
+	}
 	return nil
 }
 
@@ -476,13 +533,6 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := rtuo.mutation.Target(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: requesttarget.FieldTarget,
-		})
 	}
 	if value, ok := rtuo.mutation.Amount(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -545,6 +595,41 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: request.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if rtuo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   requesttarget.UserTable,
+			Columns: []string{requesttarget.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := rtuo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   requesttarget.UserTable,
+			Columns: []string{requesttarget.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: user.FieldID,
 				},
 			},
 		}
