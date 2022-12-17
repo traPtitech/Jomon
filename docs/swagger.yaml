@@ -1374,7 +1374,7 @@ components:
   parameters:
     sortRequestQuery:
       name: sort
-      description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", タイトルの昇順 "title", タイトルの降順 "-title", 金額の昇順 "amount", 金額の降順 "-amount")
+      description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", タイトルの昇順 "title", タイトルの降順 "-title")
       required: false
       in: query
       schema:
