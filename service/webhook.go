@@ -145,9 +145,9 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				targets[i] = fmt.Sprintf(`%s`, resApps[i].Target)
 			}
 			if resApp.Amount < 0 {
-				message += fmt.Sprintf("- %sへの支払い\n    - 支払い金額: 計%d円(一人当たりの支払い金額: 計%d円)\n", targets, -len(resApps)*resApp.Amount, -resApp.Amount)
+				message += fmt.Sprintf("- %sへの支払い\n    - 支払い金額: 計%d円(一人当たりの支払い金額: 計%d円)\n", strings.Join(targets," "), -len(resApps)*resApp.Amount, -resApp.Amount)
 			} else {
-				message += fmt.Sprintf("- %sからの振込\n    - 受け取り金額: 計%d円(一人当たりの受け取り金額: 計%d円)\n", targets, len(resApps)*resApp.Amount, resApp.Amount)
+				message += fmt.Sprintf("- %sからの振込\n    - 受け取り金額: 計%d円(一人当たりの受け取り金額: 計%d円)\n", strings.Join(targets," "), len(resApps)*resApp.Amount, resApp.Amount)
 			}
 
 		}
@@ -160,7 +160,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				tags[i] = fmt.Sprintf(`%s`, tag.Name)
 			}
 
-			message += fmt.Sprintf("- タグ: %s", tags)
+			message += fmt.Sprintf("- タグ: %s", strings.Join(tags," "))
 		}
 	}
 
