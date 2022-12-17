@@ -30,7 +30,7 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 			Amount: random.Numeric(t, 100000),
 		}
 
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil, user1.ID)
+		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil, user1.ID)
 		require.NoError(t, err)
 		got, err := repo.GetRequestTargets(ctx, request.ID)
 		assert.NoError(t, err)
@@ -52,7 +52,7 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user.ID)
+		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 		got, err := repo.GetRequestTargets(ctx, request.ID)
 		assert.NoError(t, err)
@@ -81,7 +81,7 @@ func TestEntRepository_createRequestTargets(t *testing.T) {
 			Amount: random.Numeric(t, 100000),
 		}
 
-		got, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil, user1.ID)
+		got, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil, user1.ID)
 		assert.NoError(t, err)
 		if got.Targets[0].Target == target1.Target {
 			assert.Equal(t, got.Targets[0].Target, target1.Target)
@@ -118,9 +118,9 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 			Amount: random.Numeric(t, 100000),
 		}
 
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil, user1.ID)
+		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil, user1.ID)
 		require.NoError(t, err)
-		_, err = repo.UpdateRequest(ctx, request.ID, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{}, nil)
+		_, err = repo.UpdateRequest(ctx, request.ID, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{}, nil)
 		assert.NoError(t, err)
 		got, err := repo.GetRequestTargets(ctx, request.ID)
 		assert.NoError(t, err)
@@ -142,9 +142,9 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 			Amount: random.Numeric(t, 100000),
 		}
 
-		request, err := repo.CreateRequest(ctx, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user1.ID)
+		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user1.ID)
 		require.NoError(t, err)
-		_, err = repo.UpdateRequest(ctx, request.ID, random.Numeric(t, 1000000), random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil)
+		_, err = repo.UpdateRequest(ctx, request.ID, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil)
 		assert.NoError(t, err)
 		got, err := repo.GetRequestTargets(ctx, request.ID)
 		assert.NoError(t, err)

@@ -2950,8 +2950,6 @@ type RequestMutation struct {
 	op                 Op
 	typ                string
 	id                 *uuid.UUID
-	amount             *int
-	addamount          *int
 	title              *string
 	content            *string
 	created_at         *time.Time
@@ -3086,62 +3084,6 @@ func (m *RequestMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetAmount sets the "amount" field.
-func (m *RequestMutation) SetAmount(i int) {
-	m.amount = &i
-	m.addamount = nil
-}
-
-// Amount returns the value of the "amount" field in the mutation.
-func (m *RequestMutation) Amount() (r int, exists bool) {
-	v := m.amount
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAmount returns the old "amount" field's value of the Request entity.
-// If the Request object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestMutation) OldAmount(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAmount is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAmount requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAmount: %w", err)
-	}
-	return oldValue.Amount, nil
-}
-
-// AddAmount adds i to the "amount" field.
-func (m *RequestMutation) AddAmount(i int) {
-	if m.addamount != nil {
-		*m.addamount += i
-	} else {
-		m.addamount = &i
-	}
-}
-
-// AddedAmount returns the value that was added to the "amount" field in this mutation.
-func (m *RequestMutation) AddedAmount() (r int, exists bool) {
-	v := m.addamount
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetAmount resets all changes to the "amount" field.
-func (m *RequestMutation) ResetAmount() {
-	m.amount = nil
-	m.addamount = nil
 }
 
 // SetTitle sets the "title" field.
@@ -3709,10 +3651,7 @@ func (m *RequestMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RequestMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.amount != nil {
-		fields = append(fields, request.FieldAmount)
-	}
+	fields := make([]string, 0, 4)
 	if m.title != nil {
 		fields = append(fields, request.FieldTitle)
 	}
@@ -3733,8 +3672,6 @@ func (m *RequestMutation) Fields() []string {
 // schema.
 func (m *RequestMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case request.FieldAmount:
-		return m.Amount()
 	case request.FieldTitle:
 		return m.Title()
 	case request.FieldContent:
@@ -3752,8 +3689,6 @@ func (m *RequestMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *RequestMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case request.FieldAmount:
-		return m.OldAmount(ctx)
 	case request.FieldTitle:
 		return m.OldTitle(ctx)
 	case request.FieldContent:
@@ -3771,13 +3706,6 @@ func (m *RequestMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *RequestMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case request.FieldAmount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAmount(v)
-		return nil
 	case request.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
@@ -3813,21 +3741,13 @@ func (m *RequestMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *RequestMutation) AddedFields() []string {
-	var fields []string
-	if m.addamount != nil {
-		fields = append(fields, request.FieldAmount)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *RequestMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case request.FieldAmount:
-		return m.AddedAmount()
-	}
 	return nil, false
 }
 
@@ -3836,13 +3756,6 @@ func (m *RequestMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *RequestMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case request.FieldAmount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddAmount(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Request numeric field %s", name)
 }
@@ -3870,9 +3783,6 @@ func (m *RequestMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *RequestMutation) ResetField(name string) error {
 	switch name {
-	case request.FieldAmount:
-		m.ResetAmount()
-		return nil
 	case request.FieldTitle:
 		m.ResetTitle()
 		return nil

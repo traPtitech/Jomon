@@ -544,12 +544,12 @@ func (rq *RequestQuery) WithGroup(opts ...func(*GroupQuery)) *RequestQuery {
 // Example:
 //
 //	var v []struct {
-//		Amount int `json:"amount,omitempty"`
+//		Title string `json:"title,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Request.Query().
-//		GroupBy(request.FieldAmount).
+//		GroupBy(request.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (rq *RequestQuery) GroupBy(field string, fields ...string) *RequestGroupBy {
@@ -572,11 +572,11 @@ func (rq *RequestQuery) GroupBy(field string, fields ...string) *RequestGroupBy 
 // Example:
 //
 //	var v []struct {
-//		Amount int `json:"amount,omitempty"`
+//		Title string `json:"title,omitempty"`
 //	}
 //
 //	client.Request.Query().
-//		Select(request.FieldAmount).
+//		Select(request.FieldTitle).
 //		Scan(ctx, &v)
 func (rq *RequestQuery) Select(fields ...string) *RequestSelect {
 	rq.fields = append(rq.fields, fields...)

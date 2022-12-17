@@ -109,7 +109,6 @@ var (
 	// RequestsColumns holds the columns for the "requests" table.
 	RequestsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "amount", Type: field.TypeInt},
 		{Name: "title", Type: field.TypeString},
 		{Name: "content", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
@@ -125,13 +124,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "requests_groups_request",
-				Columns:    []*schema.Column{RequestsColumns[6]},
+				Columns:    []*schema.Column{RequestsColumns[5]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "requests_users_user",
-				Columns:    []*schema.Column{RequestsColumns[7]},
+				Columns:    []*schema.Column{RequestsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
