@@ -1339,6 +1339,7 @@ components:
           nullable: true
           format: "date-time"
       required:
+        - id
         - name
         - display_name
         - admin
