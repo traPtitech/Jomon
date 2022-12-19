@@ -332,7 +332,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	var comments []*CommentDetail
+	comments := []*CommentDetail{}
 	for _, modelcomment := range modelcomments {
 		comment := &CommentDetail{
 			ID:        modelcomment.ID,
@@ -354,7 +354,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 			UpdatedAt:   request.Group.UpdatedAt,
 		}
 	}
-	var reqtargets []*TargetOverview
+	reqtargets := []*TargetOverview{}
 	for _, target := range request.Targets {
 		reqtargets = append(reqtargets, &TargetOverview{
 			ID:        target.ID,
@@ -364,7 +364,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 			CreatedAt: target.CreatedAt,
 		})
 	}
-	var restags []*TagOverview
+	restags := []*TagOverview{}
 	for _, tag := range request.Tags {
 		restags = append(restags, &TagOverview{
 			ID:        tag.ID,
@@ -403,7 +403,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	if err = c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	var tags []*model.Tag
+	tags := []*model.Tag{}
 	for _, tagID := range req.Tags {
 		ctx := c.Request().Context()
 		tag, err := h.Repository.GetTag(ctx, *tagID)
@@ -415,7 +415,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
-	var targets []*model.RequestTarget
+	targets := []*model.RequestTarget{}
 	for _, target := range req.Targets {
 		targets = append(targets, &model.RequestTarget{
 			Target: target.Target,

@@ -453,8 +453,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		var tags []*model.Tag
-		var targets []*model.RequestTarget
+		tags := []*model.Tag{}
+		targets := []*model.RequestTarget{}
 		var group *model.Group
 
 		e := echo.New()
@@ -521,7 +521,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		var targets []*model.RequestTarget
+		targets := []*model.RequestTarget{}
 		var group *model.Group
 
 		e := echo.New()
@@ -598,8 +598,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		var tags []*model.Tag
-		var targets []*model.RequestTarget
+		tags := []*model.Tag{}
+		targets := []*model.RequestTarget{}
 
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
@@ -686,7 +686,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		var tags []*model.Tag
+		tags := []*model.Tag{}
 		var group *model.Group
 
 		e := echo.New()
@@ -849,8 +849,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		var tags []*model.Tag
-		var targets []*model.RequestTarget
+		tags := []*model.Tag{}
+		targets := []*model.RequestTarget{}
 		var group *model.Group
 
 		e := echo.New()
@@ -928,6 +928,9 @@ func TestHandlers_GetRequest(t *testing.T) {
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
 			Content:   request.Content,
+			Tags:      []*TagOverview{},
+			Comments:  []*CommentDetail{},
+			Targets:   []*TargetOverview{},
 		}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
@@ -1020,6 +1023,8 @@ func TestHandlers_GetRequest(t *testing.T) {
 			Title:     request.Title,
 			Content:   request.Content,
 			Comments:  resComments,
+			Tags:      []*TagOverview{},
+			Targets:   []*TargetOverview{},
 		}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
@@ -1096,6 +1101,8 @@ func TestHandlers_GetRequest(t *testing.T) {
 			Title:     request.Title,
 			Content:   request.Content,
 			Targets:   []*TargetOverview{target},
+			Tags:      []*TagOverview{},
+			Comments:  []*CommentDetail{},
 		}
 
 		resBody, err := json.Marshal(res)
@@ -1206,6 +1213,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
+			Tags:      []*model.Tag{},
+			Targets:   []*model.RequestTargetDetail{},
 		}
 
 		reqRequest := PutRequest{
@@ -1214,8 +1223,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		var tags []*model.Tag
-		var targets []*model.RequestTarget
+		tags := []*model.Tag{}
+		targets := []*model.RequestTarget{}
 		var group *model.Group
 
 		updateRequest := &model.RequestDetail{
@@ -1302,7 +1311,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		var targets []*model.RequestTarget
+		targets := []*model.RequestTarget{}
 		var group *model.Group
 
 		updateRequest := &model.RequestDetail{
@@ -1434,7 +1443,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		var tags []*model.Tag
+		tags := []*model.Tag{}
 		var group *model.Group
 
 		updateRequest := &model.RequestDetail{
@@ -1535,8 +1544,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		var tags []*model.Tag
-		var targets []*model.RequestTarget
+		tags := []*model.Tag{}
+		targets := []*model.RequestTarget{}
 
 		updateRequest := &model.RequestDetail{
 			ID:        request.ID,
@@ -1623,8 +1632,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		var tags []*model.Tag
-		var targets []*model.RequestTarget
+		tags := []*model.Tag{}
+		targets := []*model.RequestTarget{}
 		var group *model.Group
 
 		updateRequest := &model.RequestDetail{
@@ -1771,8 +1780,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		var tags []*model.Tag
-		var targets []*model.RequestTarget
+		tags := []*model.Tag{}
+		targets := []*model.RequestTarget{}
 		var group *model.Group
 
 		e := echo.New()
