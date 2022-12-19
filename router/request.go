@@ -231,7 +231,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	ctx := c.Request().Context()
-	var tags []*model.Tag
+	tags := []*model.Tag{}
 	for _, tagID := range req.Tags {
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
@@ -242,7 +242,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
-	var targets []*model.RequestTarget
+	targets := []*model.RequestTarget{}
 	for _, target := range req.Targets {
 		targets = append(targets, &model.RequestTarget{
 			Target: target.Target,

@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
@@ -35,7 +34,8 @@ func (repo *EntRepository) createRequestTargets(ctx context.Context, tx *ent.Tx,
 	var bulk []*ent.RequestTargetCreate
 	for _, t := range targets {
 		bulk = append(bulk,
-			tx.Client().RequestTarget.Create().
+			tx.Client().RequestTarget.
+				Create().
 				SetAmount(t.Amount).
 				SetRequestID(requestID).
 				SetUserID(t.Target),
@@ -81,7 +81,6 @@ func (repo *EntRepository) deleteRequestTargets(ctx context.Context, tx *ent.Tx,
 }
 
 func ConvertEntRequestTargetToModelRequestTargetDetail(t *ent.RequestTarget) *RequestTargetDetail {
-	fmt.Printf("hoge %#v\n", t)
 	return &RequestTargetDetail{
 		ID:        t.ID,
 		Target:    t.Edges.User.ID,
