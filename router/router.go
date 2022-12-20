@@ -28,6 +28,7 @@ func NewServer(h Handlers) *echo.Echo {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))))
+	e.Use(middleware.BodyDump(service.WebhookEventHandler))
 
 	retrieveGroupOwner := h.RetrieveGroupOwner(h.Repository)
 	retrieveRequestCreator := h.RetrieveRequestCreator(h.Repository)
@@ -57,9 +58,9 @@ func NewServer(h Handlers) *echo.Echo {
 		apiTransactions := api.Group("/transactions", h.CheckLoginMiddleware)
 		{
 			apiTransactions.GET("", h.GetTransactions)
-			apiTransactions.POST("", h.PostTransaction, h.CheckAdminMiddleware)
+			apiTransactions.POST("", h.PostTransaction, middleware.BodyDump(service.WebhookEventHandler), h.CheckAdminMiddleware)
 			apiTransactions.GET("/:transactionID", h.GetTransaction)
-			apiTransactions.PUT("/:transactionID", h.PutTransaction, h.CheckAdminMiddleware)
+			apiTransactions.PUT("/:transactionID", h.PutTransaction, middleware.BodyDump(service.WebhookEventHandler), h.CheckAdminMiddleware)
 		}
 
 		apiFiles := api.Group("/files", h.CheckLoginMiddleware)
