@@ -13,6 +13,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo-contrib/session"
@@ -24,8 +25,8 @@ type RequestApplication struct {
 	CreatedBy uuid.UUID `json:"created_by"`
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
-	Amount    int       `json:"amount"`
-	Tags      []*Tags   `json:"tags"`
+	Tags      []*Tag    `json:"tags"`
+	Targets   []*Target `json:"targets"`
 	Group     *Group    `json:"group"`
 }
 
@@ -35,8 +36,15 @@ type CommentApplication struct {
 	Comment string    `json:"comment"`
 }
 
-type Tags struct {
+type Tag struct {
 	Name string `json:"name"`
+}
+
+type Target struct {
+	ID        uuid.UUID `json:"id"`
+	Target    uuid.UUID `json:"target"`
+	Amount    int       `json:"amount"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Group struct {
@@ -97,7 +105,12 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			}
 
 			message += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
-			message += fmt.Sprintf("- 支払金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
+
+			amount := 0
+			for _, target := range resApp.Targets {
+				amount += target.Amount
+			}
+			message += fmt.Sprintf("- 支払金額金額: %d円", amount) + "\n"
 
 			if resApp.Group != nil {
 				message += fmt.Sprintf("- 請求先グループ: %s", resApp.Group.Name) + "\n"
