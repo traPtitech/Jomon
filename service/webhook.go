@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -83,14 +82,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			message += "に対する"
 			message += fmt.Sprintf("[コメント](%s/requests/%s/comments/%s)", "https://jomon.trap.jp", splitedPath[3], resApp.ID)
 			message += "が作成されました" + "\n"
-
-			sess, _ := session.Get("session", c)
-			bodyUser, _ := sess.Values["user"].([]byte)
-			user := new(User)
-			_ = json.Unmarshal(bodyUser, user)
-
-			message += fmt.Sprintf("- 作成者: @%s", user.Name)
-			message += "\n" + "\n"
+			message += "\n"
 			message += resApp.Comment + "\n"
 		} else {
 			resApp := new(RequestApplication)

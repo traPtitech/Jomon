@@ -264,7 +264,7 @@ func (h Handlers) RetrieveRequestCreator(repo model.Repository) echo.MiddlewareF
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
-			gob.Register(&uuid.UUID{})
+			gob.Register(uuid.UUID{})
 
 			sess.Values[sessionRequestCreatorKey] = request.CreatedBy
 
@@ -295,7 +295,7 @@ func (h Handlers) RetrieveFileCreator(repo model.Repository) echo.MiddlewareFunc
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
-			gob.Register(&uuid.UUID{})
+			gob.Register(uuid.UUID{})
 
 			sess.Values[sessionFileCreatorKey] = file.CreatedBy
 
