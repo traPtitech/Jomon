@@ -1,7 +1,6 @@
 package router
 
 import (
-	"encoding/gob"
 	"errors"
 	"net/http"
 	"strconv"
@@ -233,8 +232,6 @@ func (h Handlers) RetrieveGroupOwner(repo model.Repository) echo.MiddlewareFunc 
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
-			gob.Register([]*model.Owner{})
-
 			sess.Values[sessionOwnerKey] = owners
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
@@ -264,8 +261,6 @@ func (h Handlers) RetrieveRequestCreator(repo model.Repository) echo.MiddlewareF
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
-			gob.Register(uuid.UUID{})
-
 			sess.Values[sessionRequestCreatorKey] = request.CreatedBy
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
@@ -294,8 +289,6 @@ func (h Handlers) RetrieveFileCreator(repo model.Repository) echo.MiddlewareFunc
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
-
-			gob.Register(uuid.UUID{})
 
 			sess.Values[sessionFileCreatorKey] = file.CreatedBy
 

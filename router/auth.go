@@ -3,7 +3,6 @@ package router
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/gob"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -82,7 +81,6 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		Admin:       modelUser.Admin,
 	}
 
-	gob.Register(&User{})
 	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {
@@ -93,7 +91,6 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 }
 
 func (h Handlers) GeneratePKCE(c echo.Context) error {
-	gob.Register(&User{})
 	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
