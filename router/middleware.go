@@ -68,6 +68,7 @@ func (h Handlers) AccessLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFun
 
 func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		gob.Register(&User{})
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
