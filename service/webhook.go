@@ -102,7 +102,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			for _, target := range resApp.Targets {
 				amount += target.Amount
 			}
-			message += fmt.Sprintf("- 支払金額金額: %d円", amount) + "\n"
+			message += fmt.Sprintf("- 支払金額: %d円", amount) + "\n"
 
 			if resApp.Group != nil {
 				message += fmt.Sprintf("- 請求先グループ: %s", resApp.Group.Name) + "\n"
