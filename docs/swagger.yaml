@@ -996,6 +996,7 @@ components:
           type: integer
         target:
           type: string
+          format: uuid
         paid_at:
           type: string
           nullable: true
