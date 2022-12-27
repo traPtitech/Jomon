@@ -25,7 +25,7 @@ type RequestApplication struct {
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
 	Amount    int       `json:"amount"`
-	Tags      []*Tags   `json:"tags"`
+	Tags      []*Tag    `json:"tags"`
 	Group     *Group    `json:"group"`
 }
 
@@ -39,11 +39,11 @@ type TransactionRequestApplication struct {
 	ID     uuid.UUID `json:"id"`
 	Amount int       `json:"amount"`
 	Target string    `json:"target"`
-	Tags   []*Tags   `json:"tags"`
+	Tags   []*Tag    `json:"tags"`
 	Group  *Group    `json:"group"`
 }
 
-type Tags struct {
+type Tag struct {
 	Name string `json:"name"`
 }
 
@@ -145,9 +145,9 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				targets[i] = fmt.Sprintf(`%s`, resApps[i].Target)
 			}
 			if resApp.Amount < 0 {
-				message += fmt.Sprintf("- %sへの支払い\n    - 支払い金額: 計%d円(一人当たりの支払い金額: 計%d円)\n", strings.Join(targets," "), -len(resApps)*resApp.Amount, -resApp.Amount)
+				message += fmt.Sprintf("- %sへの支払い\n    - 支払い金額: 計%d円(一人当たりの支払い金額: 計%d円)\n", strings.Join(targets, " "), -len(resApps)*resApp.Amount, -resApp.Amount)
 			} else {
-				message += fmt.Sprintf("- %sからの振込\n    - 受け取り金額: 計%d円(一人当たりの受け取り金額: 計%d円)\n", strings.Join(targets," "), len(resApps)*resApp.Amount, resApp.Amount)
+				message += fmt.Sprintf("- %sからの振込\n    - 受け取り金額: 計%d円(一人当たりの受け取り金額: 計%d円)\n", strings.Join(targets, " "), len(resApps)*resApp.Amount, resApp.Amount)
 			}
 
 		}
@@ -160,7 +160,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				tags[i] = fmt.Sprintf(`%s`, tag.Name)
 			}
 
-			message += fmt.Sprintf("- タグ: %s", strings.Join(tags," "))
+			message += fmt.Sprintf("- タグ: %s", strings.Join(tags, " "))
 		}
 	}
 
