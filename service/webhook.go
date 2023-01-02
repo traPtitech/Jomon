@@ -141,8 +141,8 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			}
 		} else {
 			targets := make([]string, len(resApps))
-			for i := 0; i < len(resApps); i++ {
-				targets[i] = fmt.Sprintf(`%s`, resApps[i].Target)
+			for i, resApp := range resApps {
+				targets[i] = fmt.Sprintf(`%s`, resApp.Target)
 			}
 			if resApp.Amount < 0 {
 				message += fmt.Sprintf("- %sへの支払い\n    - 支払い金額: 計%d円(一人当たりの支払い金額: 計%d円)\n", strings.Join(targets, " "), -len(resApps)*resApp.Amount, -resApp.Amount)
