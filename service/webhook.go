@@ -24,8 +24,8 @@ type RequestApplication struct {
 	CreatedBy uuid.UUID `json:"created_by"`
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
-	Amount    int       `json:"amount"`
 	Tags      []*Tag    `json:"tags"`
+	Targets   []*Target `json:"targets"`
 	Group     *Group    `json:"group"`
 }
 
@@ -41,6 +41,10 @@ type TransactionRequestApplication struct {
 	Target string    `json:"target"`
 	Tags   []*Tag    `json:"tags"`
 	Group  *Group    `json:"group"`
+}
+
+type Target struct {
+	Amount int `json:"amount"`
 }
 
 type Tag struct {
@@ -103,9 +107,16 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			} else if c.Request().Method == http.MethodPut {
 				message += "## :receipt:依頼が更新されました" + "\n"
 			}
-
+			
+			targets := make([]int, len(resApp.Targets))
+			var Amount = 0
+			for i, target := range resApp.Targets {
+				targets[i] = target.Amount
+				Amount += targets[i]
+			}
+			
 			message += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
-			message += fmt.Sprintf("- 支払金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
+			message += fmt.Sprintf("- 支払金額: %s円", strconv.Itoa(Amount)) + "\n"
 
 			if resApp.Group != nil {
 				message += fmt.Sprintf("- 請求先グループ: %s", resApp.Group.Name) + "\n"
