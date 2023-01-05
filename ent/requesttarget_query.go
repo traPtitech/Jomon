@@ -14,6 +14,7 @@ import (
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
+	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // RequestTargetQuery is the builder for querying RequestTarget entities.
@@ -26,6 +27,7 @@ type RequestTargetQuery struct {
 	fields      []string
 	predicates  []predicate.RequestTarget
 	withRequest *RequestQuery
+	withUser    *UserQuery
 	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -78,6 +80,28 @@ func (rtq *RequestTargetQuery) QueryRequest() *RequestQuery {
 			sqlgraph.From(requesttarget.Table, requesttarget.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, requesttarget.RequestTable, requesttarget.RequestColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(rtq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUser chains the current query on the "user" edge.
+func (rtq *RequestTargetQuery) QueryUser() *UserQuery {
+	query := &UserQuery{config: rtq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := rtq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := rtq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(requesttarget.Table, requesttarget.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, requesttarget.UserTable, requesttarget.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(rtq.driver.Dialect(), step)
 		return fromU, nil
@@ -267,6 +291,7 @@ func (rtq *RequestTargetQuery) Clone() *RequestTargetQuery {
 		order:       append([]OrderFunc{}, rtq.order...),
 		predicates:  append([]predicate.RequestTarget{}, rtq.predicates...),
 		withRequest: rtq.withRequest.Clone(),
+		withUser:    rtq.withUser.Clone(),
 		// clone intermediate query.
 		sql:    rtq.sql.Clone(),
 		path:   rtq.path,
@@ -285,18 +310,29 @@ func (rtq *RequestTargetQuery) WithRequest(opts ...func(*RequestQuery)) *Request
 	return rtq
 }
 
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (rtq *RequestTargetQuery) WithUser(opts ...func(*UserQuery)) *RequestTargetQuery {
+	query := &UserQuery{config: rtq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	rtq.withUser = query
+	return rtq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		Target string `json:"target,omitempty"`
+//		Amount int `json:"amount,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.RequestTarget.Query().
-//		GroupBy(requesttarget.FieldTarget).
+//		GroupBy(requesttarget.FieldAmount).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (rtq *RequestTargetQuery) GroupBy(field string, fields ...string) *RequestTargetGroupBy {
@@ -319,11 +355,11 @@ func (rtq *RequestTargetQuery) GroupBy(field string, fields ...string) *RequestT
 // Example:
 //
 //	var v []struct {
-//		Target string `json:"target,omitempty"`
+//		Amount int `json:"amount,omitempty"`
 //	}
 //
 //	client.RequestTarget.Query().
-//		Select(requesttarget.FieldTarget).
+//		Select(requesttarget.FieldAmount).
 //		Scan(ctx, &v)
 func (rtq *RequestTargetQuery) Select(fields ...string) *RequestTargetSelect {
 	rtq.fields = append(rtq.fields, fields...)
@@ -354,20 +390,21 @@ func (rtq *RequestTargetQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 		nodes       = []*RequestTarget{}
 		withFKs     = rtq.withFKs
 		_spec       = rtq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			rtq.withRequest != nil,
+			rtq.withUser != nil,
 		}
 	)
-	if rtq.withRequest != nil {
+	if rtq.withRequest != nil || rtq.withUser != nil {
 		withFKs = true
 	}
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, requesttarget.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*RequestTarget).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &RequestTarget{config: rtq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -385,6 +422,12 @@ func (rtq *RequestTargetQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	if query := rtq.withRequest; query != nil {
 		if err := rtq.loadRequest(ctx, query, nodes, nil,
 			func(n *RequestTarget, e *Request) { n.Edges.Request = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := rtq.withUser; query != nil {
+		if err := rtq.loadUser(ctx, query, nodes, nil,
+			func(n *RequestTarget, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -413,6 +456,35 @@ func (rtq *RequestTargetQuery) loadRequest(ctx context.Context, query *RequestQu
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "request_target" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (rtq *RequestTargetQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*RequestTarget, init func(*RequestTarget), assign func(*RequestTarget, *User)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*RequestTarget)
+	for i := range nodes {
+		if nodes[i].request_target_user == nil {
+			continue
+		}
+		fk := *nodes[i].request_target_user
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "request_target_user" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -536,7 +608,7 @@ func (rtgb *RequestTargetGroupBy) Aggregate(fns ...AggregateFunc) *RequestTarget
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rtgb *RequestTargetGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rtgb *RequestTargetGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rtgb.path(ctx)
 	if err != nil {
 		return err
@@ -545,7 +617,7 @@ func (rtgb *RequestTargetGroupBy) Scan(ctx context.Context, v interface{}) error
 	return rtgb.sqlScan(ctx, v)
 }
 
-func (rtgb *RequestTargetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rtgb *RequestTargetGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rtgb.fields {
 		if !requesttarget.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -592,7 +664,7 @@ type RequestTargetSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rts *RequestTargetSelect) Scan(ctx context.Context, v interface{}) error {
+func (rts *RequestTargetSelect) Scan(ctx context.Context, v any) error {
 	if err := rts.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -600,7 +672,7 @@ func (rts *RequestTargetSelect) Scan(ctx context.Context, v interface{}) error {
 	return rts.sqlScan(ctx, v)
 }
 
-func (rts *RequestTargetSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (rts *RequestTargetSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := rts.sql.Query()
 	if err := rts.driver.Query(ctx, query, args, rows); err != nil {

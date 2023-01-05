@@ -18,6 +18,7 @@ func (repo *EntRepository) GetRequestTargets(ctx context.Context, requestID uuid
 				request.IDEQ(requestID),
 			),
 		).
+		WithUser().
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -33,14 +34,29 @@ func (repo *EntRepository) createRequestTargets(ctx context.Context, tx *ent.Tx,
 	var bulk []*ent.RequestTargetCreate
 	for _, t := range targets {
 		bulk = append(bulk,
-			tx.Client().RequestTarget.Create().
-				SetTarget(t.Target).
+			tx.Client().RequestTarget.
+				Create().
 				SetAmount(t.Amount).
-				SetRequestID(requestID),
+				SetRequestID(requestID).
+				SetUserID(t.Target),
 		)
 	}
-	created, err := tx.Client().RequestTarget.CreateBulk(bulk...).
+	cs, err := tx.Client().RequestTarget.CreateBulk(bulk...).
 		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ids := []uuid.UUID{}
+	for _, c := range cs {
+		ids = append(ids, c.ID)
+	}
+	created, err := tx.Client().RequestTarget.
+		Query().
+		Where(
+			requesttarget.IDIn(ids...),
+		).
+		WithUser().
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +83,7 @@ func (repo *EntRepository) deleteRequestTargets(ctx context.Context, tx *ent.Tx,
 func ConvertEntRequestTargetToModelRequestTargetDetail(t *ent.RequestTarget) *RequestTargetDetail {
 	return &RequestTargetDetail{
 		ID:        t.ID,
-		Target:    t.Target,
+		Target:    t.Edges.User.ID,
 		Amount:    t.Amount,
 		PaidAt:    t.PaidAt,
 		CreatedAt: t.CreatedAt,

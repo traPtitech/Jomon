@@ -4,15 +4,15 @@ go 1.19
 
 require (
 	entgo.io/ent v0.11.3-0.20220824145844-79fe0ebcd627
-	github.com/go-sql-driver/mysql v1.6.0
+	github.com/go-sql-driver/mysql v1.7.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/sessions v1.2.1
 	github.com/labstack/echo-contrib v0.13.0
-	github.com/labstack/echo/v4 v4.9.0
+	github.com/labstack/echo/v4 v4.9.1
 	github.com/ncw/swift v1.0.53
-	github.com/stretchr/testify v1.8.0
-	go.uber.org/zap v1.23.0
+	github.com/stretchr/testify v1.8.1
+	go.uber.org/zap v1.24.0
 )
 
 require (
@@ -26,7 +26,7 @@ require (
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/hashicorp/hcl/v2 v2.14.0 // indirect
-	github.com/labstack/gommon v0.3.1 // indirect
+	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect

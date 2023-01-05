@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo-contrib/session"
@@ -9,10 +10,13 @@ import (
 )
 
 type User struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	DisplayName string    `json:"display_name"`
-	Admin       bool      `json:"admin"`
+	ID          uuid.UUID  `json:"id"`
+	Name        string     `json:"name"`
+	DisplayName string     `json:"display_name"`
+	Admin       bool       `json:"admin"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
+	DeletedAt   *time.Time `json:"deleted_at"`
 }
 
 func (h *Handlers) GetUsers(c echo.Context) error {
@@ -28,6 +32,9 @@ func (h *Handlers) GetUsers(c echo.Context) error {
 			Name:        user.Name,
 			DisplayName: user.DisplayName,
 			Admin:       user.Admin,
+			CreatedAt:   user.CreatedAt,
+			UpdatedAt:   user.UpdatedAt,
+			DeletedAt:   user.DeletedAt,
 		})
 	}
 
@@ -69,7 +76,7 @@ func (h *Handlers) GetMe(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	user, ok := sess.Values[sessionUserKey].(User)
+	user, ok := sess.Values[sessionUserKey].(*User)
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user info")
 	}

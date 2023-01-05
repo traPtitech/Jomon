@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -19,7 +20,6 @@ func (RequestTarget) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
-		field.String("target"),
 		field.Int("amount"),
 		field.Time("paid_at").
 			Optional().
@@ -36,5 +36,11 @@ func (RequestTarget) Edges() []ent.Edge {
 			Ref("target").
 			Unique().
 			Required(),
+		edge.To("user", User.Type).
+			Unique().
+			Required().
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.NoAction,
+			}),
 	}
 }

@@ -364,10 +364,10 @@ func (tdq *TransactionDetailQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, transactiondetail.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*TransactionDetail).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &TransactionDetail{config: tdq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -536,7 +536,7 @@ func (tdgb *TransactionDetailGroupBy) Aggregate(fns ...AggregateFunc) *Transacti
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tdgb *TransactionDetailGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tdgb *TransactionDetailGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tdgb.path(ctx)
 	if err != nil {
 		return err
@@ -545,7 +545,7 @@ func (tdgb *TransactionDetailGroupBy) Scan(ctx context.Context, v interface{}) e
 	return tdgb.sqlScan(ctx, v)
 }
 
-func (tdgb *TransactionDetailGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tdgb *TransactionDetailGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tdgb.fields {
 		if !transactiondetail.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -592,7 +592,7 @@ type TransactionDetailSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (tds *TransactionDetailSelect) Scan(ctx context.Context, v interface{}) error {
+func (tds *TransactionDetailSelect) Scan(ctx context.Context, v any) error {
 	if err := tds.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -600,7 +600,7 @@ func (tds *TransactionDetailSelect) Scan(ctx context.Context, v interface{}) err
 	return tds.sqlScan(ctx, v)
 }
 
-func (tds *TransactionDetailSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (tds *TransactionDetailSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := tds.sql.Query()
 	if err := tds.driver.Query(ctx, query, args, rows); err != nil {

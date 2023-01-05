@@ -32,11 +32,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		budget := random.Numeric(t, 1000000)
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 		tx1 := &model.TransactionResponse{
 			ID:     uuid.New(),
@@ -104,11 +103,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			tag := []*TagOverview{}
 			for _, modelTag := range tx.Tags {
 				tag = append(tag, &TagOverview{
-					ID:          modelTag.ID,
-					Name:        modelTag.Name,
-					Description: modelTag.Description,
-					CreatedAt:   modelTag.CreatedAt,
-					UpdatedAt:   modelTag.UpdatedAt,
+					ID:        modelTag.ID,
+					Name:      modelTag.Name,
+					CreatedAt: modelTag.CreatedAt,
+					UpdatedAt: modelTag.UpdatedAt,
 				})
 			}
 			group := &GroupOverview{
@@ -148,11 +146,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		budget := random.Numeric(t, 1000000)
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 		tx1 := &model.TransactionResponse{
 			ID:     uuid.New(),
@@ -218,11 +215,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			tag := []*TagOverview{}
 			for _, modelTag := range tx.Tags {
 				tag = append(tag, &TagOverview{
-					ID:          modelTag.ID,
-					Name:        modelTag.Name,
-					Description: modelTag.Description,
-					CreatedAt:   modelTag.CreatedAt,
-					UpdatedAt:   modelTag.UpdatedAt,
+					ID:        modelTag.ID,
+					Name:      modelTag.Name,
+					CreatedAt: modelTag.CreatedAt,
+					UpdatedAt: modelTag.UpdatedAt,
 				})
 			}
 			group := &GroupOverview{
@@ -262,11 +258,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		budget := random.Numeric(t, 1000000)
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 		tx1 := &model.TransactionResponse{
 			ID:     uuid.New(),
@@ -333,11 +328,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			tag := []*TagOverview{}
 			for _, modelTag := range tx.Tags {
 				tag = append(tag, &TagOverview{
-					ID:          modelTag.ID,
-					Name:        modelTag.Name,
-					Description: modelTag.Description,
-					CreatedAt:   modelTag.CreatedAt,
-					UpdatedAt:   modelTag.UpdatedAt,
+					ID:        modelTag.ID,
+					Name:      modelTag.Name,
+					CreatedAt: modelTag.CreatedAt,
+					UpdatedAt: modelTag.UpdatedAt,
 				})
 			}
 			group := &GroupOverview{
@@ -377,11 +371,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		budget := random.Numeric(t, 1000000)
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		target1 := random.AlphaNumeric(t, 20)
@@ -450,11 +443,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			tag := []*TagOverview{}
 			for _, modelTag := range tx.Tags {
 				tag = append(tag, &TagOverview{
-					ID:          modelTag.ID,
-					Name:        modelTag.Name,
-					Description: modelTag.Description,
-					CreatedAt:   modelTag.CreatedAt,
-					UpdatedAt:   modelTag.UpdatedAt,
+					ID:        modelTag.ID,
+					Name:      modelTag.Name,
+					CreatedAt: modelTag.CreatedAt,
+					UpdatedAt: modelTag.UpdatedAt,
 				})
 			}
 			group := &GroupOverview{
@@ -494,11 +486,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		budget := random.Numeric(t, 1000000)
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		target1 := random.AlphaNumeric(t, 20)
@@ -551,11 +542,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			tag := []*TagOverview{}
 			for _, modelTag := range tx.Tags {
 				tag = append(tag, &TagOverview{
-					ID:          modelTag.ID,
-					Name:        modelTag.Name,
-					Description: modelTag.Description,
-					CreatedAt:   modelTag.CreatedAt,
-					UpdatedAt:   modelTag.UpdatedAt,
+					ID:        modelTag.ID,
+					Name:      modelTag.Name,
+					CreatedAt: modelTag.CreatedAt,
+					UpdatedAt: modelTag.UpdatedAt,
 				})
 			}
 			group := &GroupOverview{
@@ -599,11 +589,10 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		budget := random.Numeric(t, 1000000)
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		target1 := random.AlphaNumeric(t, 20)
@@ -653,11 +642,10 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			tag := []*TagOverview{}
 			for _, modelTag := range tx.Tags {
 				tag = append(tag, &TagOverview{
-					ID:          modelTag.ID,
-					Name:        modelTag.Name,
-					Description: modelTag.Description,
-					CreatedAt:   modelTag.CreatedAt,
-					UpdatedAt:   modelTag.UpdatedAt,
+					ID:        modelTag.ID,
+					Name:      modelTag.Name,
+					CreatedAt: modelTag.CreatedAt,
+					UpdatedAt: modelTag.UpdatedAt,
 				})
 			}
 			group := &GroupOverview{
@@ -698,11 +686,10 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		budget := random.Numeric(t, 1000000)
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: date,
+			UpdatedAt: date,
 		}
 
 		target1 := random.AlphaNumeric(t, 20)
@@ -732,7 +719,6 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
 			Status:    model.Status(model.Accepted),
-			Amount:    random.Numeric(t, 1000000),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			Comments:  []*model.Comment{},
@@ -765,11 +751,10 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		to := []*TagOverview{}
 		for _, modelTag := range tx.Tags {
 			to = append(to, &TagOverview{
-				ID:          modelTag.ID,
-				Name:        modelTag.Name,
-				Description: modelTag.Description,
-				CreatedAt:   modelTag.CreatedAt,
-				UpdatedAt:   modelTag.UpdatedAt,
+				ID:        modelTag.ID,
+				Name:      modelTag.Name,
+				CreatedAt: modelTag.CreatedAt,
+				UpdatedAt: modelTag.UpdatedAt,
 			})
 		}
 		grov := &GroupOverview{
@@ -811,11 +796,10 @@ func TestHandlers_GetTransaction(t *testing.T) {
 		budget := random.Numeric(t, 1000000)
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		}
 
 		tx := &model.TransactionResponse{
@@ -835,11 +819,6 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			},
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
-		}
-
-		tags := []*uuid.UUID{}
-		for _, modelTag := range tx.Tags {
-			tags = append(tags, &modelTag.ID)
 		}
 
 		e := echo.New()
@@ -863,11 +842,10 @@ func TestHandlers_GetTransaction(t *testing.T) {
 		to := []*TagOverview{}
 		for _, modelTag := range tx.Tags {
 			to = append(to, &TagOverview{
-				ID:          modelTag.ID,
-				Name:        modelTag.Name,
-				Description: modelTag.Description,
-				CreatedAt:   modelTag.CreatedAt,
-				UpdatedAt:   modelTag.UpdatedAt,
+				ID:        modelTag.ID,
+				Name:      modelTag.Name,
+				CreatedAt: modelTag.CreatedAt,
+				UpdatedAt: modelTag.UpdatedAt,
 			})
 		}
 		grov := &GroupOverview{
@@ -908,19 +886,17 @@ func TestHandlers_PutTransaction(t *testing.T) {
 		budget := random.Numeric(t, 1000000)
 
 		tag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		}
 
 		updatedTag := &model.Tag{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		}
 
 		tx := &model.TransactionResponse{
@@ -961,11 +937,6 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			UpdatedAt: time.Now(),
 		}
 
-		tags := []*uuid.UUID{}
-		for _, modelTag := range tx.Tags {
-			tags = append(tags, &modelTag.ID)
-		}
-
 		updatedTags := []*uuid.UUID{}
 		for _, modelTag := range updated.Tags {
 			updatedTags = append(updatedTags, &modelTag.ID)
@@ -992,11 +963,10 @@ func TestHandlers_PutTransaction(t *testing.T) {
 		to := []*TagOverview{}
 		for _, modelTag := range updated.Tags {
 			to = append(to, &TagOverview{
-				ID:          modelTag.ID,
-				Name:        modelTag.Name,
-				Description: modelTag.Description,
-				CreatedAt:   modelTag.CreatedAt,
-				UpdatedAt:   modelTag.UpdatedAt,
+				ID:        modelTag.ID,
+				Name:      modelTag.Name,
+				CreatedAt: modelTag.CreatedAt,
+				UpdatedAt: modelTag.UpdatedAt,
 			})
 		}
 		grov := &GroupOverview{

@@ -35,7 +35,7 @@ func IDNEQ(id uuid.UUID) predicate.File {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...uuid.UUID) predicate.File {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -126,7 +126,7 @@ func NameNEQ(v string) predicate.File {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -137,7 +137,7 @@ func NameIn(vs ...string) predicate.File {
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -225,7 +225,7 @@ func MimeTypeNEQ(v string) predicate.File {
 
 // MimeTypeIn applies the In predicate on the "mime_type" field.
 func MimeTypeIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -236,7 +236,7 @@ func MimeTypeIn(vs ...string) predicate.File {
 
 // MimeTypeNotIn applies the NotIn predicate on the "mime_type" field.
 func MimeTypeNotIn(vs ...string) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -324,7 +324,7 @@ func CreatedAtNEQ(v time.Time) predicate.File {
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -335,7 +335,7 @@ func CreatedAtIn(vs ...time.Time) predicate.File {
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -388,7 +388,7 @@ func DeletedAtNEQ(v time.Time) predicate.File {
 
 // DeletedAtIn applies the In predicate on the "deleted_at" field.
 func DeletedAtIn(vs ...time.Time) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -399,7 +399,7 @@ func DeletedAtIn(vs ...time.Time) predicate.File {
 
 // DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
 func DeletedAtNotIn(vs ...time.Time) predicate.File {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

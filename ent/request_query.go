@@ -544,12 +544,12 @@ func (rq *RequestQuery) WithGroup(opts ...func(*GroupQuery)) *RequestQuery {
 // Example:
 //
 //	var v []struct {
-//		Amount int `json:"amount,omitempty"`
+//		Title string `json:"title,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Request.Query().
-//		GroupBy(request.FieldAmount).
+//		GroupBy(request.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (rq *RequestQuery) GroupBy(field string, fields ...string) *RequestGroupBy {
@@ -572,11 +572,11 @@ func (rq *RequestQuery) GroupBy(field string, fields ...string) *RequestGroupBy 
 // Example:
 //
 //	var v []struct {
-//		Amount int `json:"amount,omitempty"`
+//		Title string `json:"title,omitempty"`
 //	}
 //
 //	client.Request.Query().
-//		Select(request.FieldAmount).
+//		Select(request.FieldTitle).
 //		Scan(ctx, &v)
 func (rq *RequestQuery) Select(fields ...string) *RequestSelect {
 	rq.fields = append(rq.fields, fields...)
@@ -624,10 +624,10 @@ func (rq *RequestQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Requ
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, request.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Request).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Request{config: rq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -818,14 +818,14 @@ func (rq *RequestQuery) loadTag(ctx context.Context, query *TagQuery, nodes []*R
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(uuid.UUID)}, values...), nil
+			return append([]any{new(uuid.UUID)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := *values[0].(*uuid.UUID)
 			inValue := *values[1].(*uuid.UUID)
 			if nids[inValue] == nil {
@@ -1086,7 +1086,7 @@ func (rgb *RequestGroupBy) Aggregate(fns ...AggregateFunc) *RequestGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rgb *RequestGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rgb *RequestGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rgb.path(ctx)
 	if err != nil {
 		return err
@@ -1095,7 +1095,7 @@ func (rgb *RequestGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return rgb.sqlScan(ctx, v)
 }
 
-func (rgb *RequestGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rgb *RequestGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rgb.fields {
 		if !request.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -1142,7 +1142,7 @@ type RequestSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rs *RequestSelect) Scan(ctx context.Context, v interface{}) error {
+func (rs *RequestSelect) Scan(ctx context.Context, v any) error {
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -1150,7 +1150,7 @@ func (rs *RequestSelect) Scan(ctx context.Context, v interface{}) error {
 	return rs.sqlScan(ctx, v)
 }
 
-func (rs *RequestSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (rs *RequestSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := rs.sql.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {

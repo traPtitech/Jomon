@@ -1155,6 +1155,22 @@ func (c *RequestTargetClient) QueryRequest(rt *RequestTarget) *RequestQuery {
 	return query
 }
 
+// QueryUser queries the user edge of a RequestTarget.
+func (c *RequestTargetClient) QueryUser(rt *RequestTarget) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := rt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(requesttarget.Table, requesttarget.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, requesttarget.UserTable, requesttarget.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(rt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *RequestTargetClient) Hooks() []Hook {
 	return c.hooks.RequestTarget
@@ -1716,6 +1732,22 @@ func (c *UserClient) QueryFile(u *User) *FileQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.FileTable, user.FileColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequestTarget queries the request_target edge of a User.
+func (c *UserClient) QueryRequestTarget(u *User) *RequestTargetQuery {
+	query := &RequestTargetQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(requesttarget.Table, requesttarget.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.RequestTargetTable, user.RequestTargetColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

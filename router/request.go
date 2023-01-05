@@ -40,7 +40,6 @@ func (s Status) String() string {
 
 type Request struct {
 	CreatedBy uuid.UUID    `json:"created_by"`
-	Amount    int          `json:"amount"`
 	Title     string       `json:"title"`
 	Content   string       `json:"content"`
 	Tags      []*uuid.UUID `json:"tags"`
@@ -49,7 +48,6 @@ type Request struct {
 }
 
 type PutRequest struct {
-	Amount  int          `json:"amount"`
 	Title   string       `json:"title"`
 	Content string       `json:"content"`
 	Tags    []*uuid.UUID `json:"tags"`
@@ -63,7 +61,6 @@ type RequestResponse struct {
 	CreatedAt time.Time         `json:"created_at"`
 	UpdatedAt time.Time         `json:"updated_at"`
 	CreatedBy uuid.UUID         `json:"created_by"`
-	Amount    int               `json:"amount"`
 	Title     string            `json:"title"`
 	Content   string            `json:"content"`
 	Tags      []*TagOverview    `json:"tags"`
@@ -88,20 +85,20 @@ type PutStatus struct {
 	Comment string       `json:"comment"`
 }
 type StatusResponse struct {
-	CreatedBy uuid.UUID    `json:"created_by"`
-	Status    model.Status `json:"status"`
-	Comment   string       `json:"comment"`
-	CreatedAt time.Time    `json:"created_at"`
+	CreatedBy uuid.UUID     `json:"created_by"`
+	Status    model.Status  `json:"status"`
+	Comment   CommentDetail `json:"comment"`
+	CreatedAt time.Time     `json:"created_at"`
 }
 
 type Target struct {
-	Target string `json:"target"`
-	Amount int    `json:"amount"`
+	Target uuid.UUID `json:"target"`
+	Amount int       `json:"amount"`
 }
 
 type TargetOverview struct {
 	ID        uuid.UUID  `json:"id"`
-	Target    string     `json:"target"`
+	Target    uuid.UUID  `json:"target"`
 	Amount    int        `json:"amount"`
 	PaidAt    *time.Time `json:"paid_at"`
 	CreatedAt time.Time  `json:"created_at"`
@@ -124,8 +121,12 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 	if s := status.String(); s != "" {
 		ss = &s
 	}
-	var target *string
-	if t := c.QueryParam("target"); t != "" {
+	var target *uuid.UUID
+	if c.QueryParam("target") != "" {
+		t, err := uuid.Parse(c.QueryParam("target"))
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
 		target = &t
 	}
 	var since *time.Time
@@ -169,22 +170,21 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	var tags []*TagOverview
-	var requests []*RequestResponse
+	tags := []*TagOverview{}
+	requests := []*RequestResponse{}
 	for _, request := range modelrequests {
 		for _, tag := range request.Tags {
 			tags = append(tags, &TagOverview{
-				ID:          tag.ID,
-				Name:        tag.Name,
-				Description: tag.Description,
-				CreatedAt:   tag.CreatedAt,
-				UpdatedAt:   tag.UpdatedAt,
+				ID:        tag.ID,
+				Name:      tag.Name,
+				CreatedAt: tag.CreatedAt,
+				UpdatedAt: tag.UpdatedAt,
 			})
 		}
 
-		var reqtargets []*TargetOverview
+		restargets := []*TargetOverview{}
 		for _, target := range request.Targets {
-			reqtargets = append(reqtargets, &TargetOverview{
+			restargets = append(restargets, &TargetOverview{
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
@@ -211,12 +211,12 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 			CreatedAt: request.CreatedAt,
 			UpdatedAt: request.UpdatedAt,
 			CreatedBy: request.CreatedBy,
-			Amount:    request.Amount,
 			Title:     request.Title,
 			Content:   request.Content,
-			Targets:   reqtargets,
+			Targets:   restargets,
 			Tags:      tags,
 			Group:     resgroup,
+			Comments:  []*CommentDetail{},
 		}
 		requests = append(requests, res)
 	}
@@ -231,7 +231,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	ctx := c.Request().Context()
-	var tags []*model.Tag
+	tags := []*model.Tag{}
 	for _, tagID := range req.Tags {
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
@@ -242,7 +242,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
-	var targets []*model.RequestTarget
+	targets := []*model.RequestTarget{}
 	for _, target := range req.Targets {
 		targets = append(targets, &model.RequestTarget{
 			Target: target.Target,
@@ -259,7 +259,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
-	request, err := h.Repository.CreateRequest(ctx, req.Amount, req.Title, req.Content, tags, targets, group, req.CreatedBy)
+	request, err := h.Repository.CreateRequest(ctx, req.Title, req.Content, tags, targets, group, req.CreatedBy)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return echo.NewHTTPError(http.StatusNotFound, err)
@@ -290,11 +290,10 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 	var restags []*TagOverview
 	for _, tag := range request.Tags {
 		restags = append(restags, &TagOverview{
-			ID:          tag.ID,
-			Name:        tag.Name,
-			Description: tag.Description,
-			CreatedAt:   tag.CreatedAt,
-			UpdatedAt:   tag.UpdatedAt,
+			ID:        tag.ID,
+			Name:      tag.Name,
+			CreatedAt: tag.CreatedAt,
+			UpdatedAt: tag.UpdatedAt,
 		})
 	}
 	res := &RequestResponse{
@@ -303,7 +302,6 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		CreatedAt: request.CreatedAt,
 		UpdatedAt: request.UpdatedAt,
 		CreatedBy: request.CreatedBy,
-		Amount:    request.Amount,
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      restags,
@@ -334,7 +332,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	var comments []*CommentDetail
+	comments := []*CommentDetail{}
 	for _, modelcomment := range modelcomments {
 		comment := &CommentDetail{
 			ID:        modelcomment.ID,
@@ -356,7 +354,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 			UpdatedAt:   request.Group.UpdatedAt,
 		}
 	}
-	var reqtargets []*TargetOverview
+	reqtargets := []*TargetOverview{}
 	for _, target := range request.Targets {
 		reqtargets = append(reqtargets, &TargetOverview{
 			ID:        target.ID,
@@ -366,14 +364,13 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 			CreatedAt: target.CreatedAt,
 		})
 	}
-	var restags []*TagOverview
+	restags := []*TagOverview{}
 	for _, tag := range request.Tags {
 		restags = append(restags, &TagOverview{
-			ID:          tag.ID,
-			Name:        tag.Name,
-			Description: tag.Description,
-			CreatedAt:   tag.CreatedAt,
-			UpdatedAt:   tag.UpdatedAt,
+			ID:        tag.ID,
+			Name:      tag.Name,
+			CreatedAt: tag.CreatedAt,
+			UpdatedAt: tag.UpdatedAt,
 		})
 	}
 	res := &RequestResponse{
@@ -382,7 +379,6 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 		CreatedAt: request.CreatedAt,
 		UpdatedAt: request.UpdatedAt,
 		CreatedBy: request.CreatedBy,
-		Amount:    request.Amount,
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      restags,
@@ -407,7 +403,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	if err = c.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	var tags []*model.Tag
+	tags := []*model.Tag{}
 	for _, tagID := range req.Tags {
 		ctx := c.Request().Context()
 		tag, err := h.Repository.GetTag(ctx, *tagID)
@@ -419,7 +415,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
-	var targets []*model.RequestTarget
+	targets := []*model.RequestTarget{}
 	for _, target := range req.Targets {
 		targets = append(targets, &model.RequestTarget{
 			Target: target.Target,
@@ -438,7 +434,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		}
 	}
 	ctx := context.Background()
-	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Amount, req.Title, req.Content, tags, targets, group)
+	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Title, req.Content, tags, targets, group)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return echo.NewHTTPError(http.StatusNotFound, err)
@@ -475,11 +471,10 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	var restags []*TagOverview
 	for _, tag := range request.Tags {
 		restags = append(restags, &TagOverview{
-			ID:          tag.ID,
-			Name:        tag.Name,
-			Description: tag.Description,
-			CreatedAt:   tag.CreatedAt,
-			UpdatedAt:   tag.UpdatedAt,
+			ID:        tag.ID,
+			Name:      tag.Name,
+			CreatedAt: tag.CreatedAt,
+			UpdatedAt: tag.UpdatedAt,
 		})
 	}
 	var restargets []*TargetOverview
@@ -498,7 +493,6 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		CreatedAt: request.CreatedAt,
 		UpdatedAt: request.UpdatedAt,
 		CreatedBy: request.CreatedBy,
-		Amount:    request.Amount,
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      restags,
@@ -566,7 +560,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	}
 	user, ok := sess.Values[sessionUserKey].(*User)
 	if !ok {
-		return echo.NewHTTPError(http.StatusUnauthorized, errors.New("sessionUser not found"))
+		return echo.NewHTTPError(http.StatusForbidden, errors.New("sessionUser not found"))
 	}
 
 	if err = c.Bind(&req); err != nil {
@@ -588,7 +582,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	}
 	if req.Comment == "" {
 		if !IsAbleNoCommentChangeStatus(req.Status, request.Status) {
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New(fmt.Sprintf("unable to change %v to %v without comment", request.Status.String(), req.Status.String())))
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("unable to change %v to %v without comment", request.Status.String(), req.Status.String()))
 		}
 	}
 
@@ -601,7 +595,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	}
 	if u.Admin {
 		if !IsAbleAdminChangeState(req.Status, request.Status) {
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New(fmt.Sprintf("admin unable to change %v to %v", request.Status.String(), req.Status.String())))
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("admin unable to change %v to %v", request.Status.String(), req.Status.String()))
 		}
 		if req.Status == model.Submitted && request.Status == model.Accepted {
 			targets, err := h.Repository.GetRequestTargets(ctx, requestID)
@@ -623,12 +617,12 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 
 	if !u.Admin && user.ID == request.CreatedBy {
 		if !IsAbleCreatorChangeStatus(req.Status, request.Status) {
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New(fmt.Sprintf("creator unable to change %v to %v", request.Status.String(), req.Status.String())))
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("creator unable to change %v to %v", request.Status.String(), req.Status.String()))
 		}
 	}
 
 	if user.ID != request.CreatedBy && !u.Admin {
-		return echo.NewHTTPError(http.StatusUnauthorized)
+		return echo.NewHTTPError(http.StatusForbidden)
 	}
 
 	// create status and comment: keep the two in this order
@@ -636,13 +630,19 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	var resComment string
+	var resComment CommentDetail
 	if req.Comment != "" {
 		comment, err := h.Repository.CreateComment(ctx, req.Comment, request.ID, user.ID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
-		resComment = comment.Comment
+		resComment = CommentDetail{
+			ID:        comment.ID,
+			User:      comment.User,
+			Comment:   comment.Comment,
+			CreatedAt: comment.CreatedAt,
+			UpdatedAt: comment.UpdatedAt,
+		}
 	}
 
 	res := &StatusResponse{

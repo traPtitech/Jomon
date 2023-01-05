@@ -35,7 +35,7 @@ func IDNEQ(id uuid.UUID) predicate.Request {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...uuid.UUID) predicate.Request {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -82,13 +82,6 @@ func IDLTE(id uuid.UUID) predicate.Request {
 	})
 }
 
-// Amount applies equality check predicate on the "amount" field. It's identical to AmountEQ.
-func Amount(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAmount), v))
-	})
-}
-
 // Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
 func Title(v string) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
@@ -117,70 +110,6 @@ func UpdatedAt(v time.Time) predicate.Request {
 	})
 }
 
-// AmountEQ applies the EQ predicate on the "amount" field.
-func AmountEQ(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAmount), v))
-	})
-}
-
-// AmountNEQ applies the NEQ predicate on the "amount" field.
-func AmountNEQ(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldAmount), v))
-	})
-}
-
-// AmountIn applies the In predicate on the "amount" field.
-func AmountIn(vs ...int) predicate.Request {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldAmount), v...))
-	})
-}
-
-// AmountNotIn applies the NotIn predicate on the "amount" field.
-func AmountNotIn(vs ...int) predicate.Request {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldAmount), v...))
-	})
-}
-
-// AmountGT applies the GT predicate on the "amount" field.
-func AmountGT(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldAmount), v))
-	})
-}
-
-// AmountGTE applies the GTE predicate on the "amount" field.
-func AmountGTE(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldAmount), v))
-	})
-}
-
-// AmountLT applies the LT predicate on the "amount" field.
-func AmountLT(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldAmount), v))
-	})
-}
-
-// AmountLTE applies the LTE predicate on the "amount" field.
-func AmountLTE(v int) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldAmount), v))
-	})
-}
-
 // TitleEQ applies the EQ predicate on the "title" field.
 func TitleEQ(v string) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
@@ -197,7 +126,7 @@ func TitleNEQ(v string) predicate.Request {
 
 // TitleIn applies the In predicate on the "title" field.
 func TitleIn(vs ...string) predicate.Request {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -208,7 +137,7 @@ func TitleIn(vs ...string) predicate.Request {
 
 // TitleNotIn applies the NotIn predicate on the "title" field.
 func TitleNotIn(vs ...string) predicate.Request {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -296,7 +225,7 @@ func ContentNEQ(v string) predicate.Request {
 
 // ContentIn applies the In predicate on the "content" field.
 func ContentIn(vs ...string) predicate.Request {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -307,7 +236,7 @@ func ContentIn(vs ...string) predicate.Request {
 
 // ContentNotIn applies the NotIn predicate on the "content" field.
 func ContentNotIn(vs ...string) predicate.Request {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -395,7 +324,7 @@ func CreatedAtNEQ(v time.Time) predicate.Request {
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.Request {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -406,7 +335,7 @@ func CreatedAtIn(vs ...time.Time) predicate.Request {
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.Request {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -459,7 +388,7 @@ func UpdatedAtNEQ(v time.Time) predicate.Request {
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
 func UpdatedAtIn(vs ...time.Time) predicate.Request {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -470,7 +399,7 @@ func UpdatedAtIn(vs ...time.Time) predicate.Request {
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
 func UpdatedAtNotIn(vs ...time.Time) predicate.Request {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

@@ -35,7 +35,7 @@ func IDNEQ(id uuid.UUID) predicate.RequestTarget {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...uuid.UUID) predicate.RequestTarget {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -82,13 +82,6 @@ func IDLTE(id uuid.UUID) predicate.RequestTarget {
 	})
 }
 
-// Target applies equality check predicate on the "target" field. It's identical to TargetEQ.
-func Target(v string) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTarget), v))
-	})
-}
-
 // Amount applies equality check predicate on the "amount" field. It's identical to AmountEQ.
 func Amount(v int) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
@@ -110,105 +103,6 @@ func CreatedAt(v time.Time) predicate.RequestTarget {
 	})
 }
 
-// TargetEQ applies the EQ predicate on the "target" field.
-func TargetEQ(v string) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTarget), v))
-	})
-}
-
-// TargetNEQ applies the NEQ predicate on the "target" field.
-func TargetNEQ(v string) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldTarget), v))
-	})
-}
-
-// TargetIn applies the In predicate on the "target" field.
-func TargetIn(vs ...string) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldTarget), v...))
-	})
-}
-
-// TargetNotIn applies the NotIn predicate on the "target" field.
-func TargetNotIn(vs ...string) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldTarget), v...))
-	})
-}
-
-// TargetGT applies the GT predicate on the "target" field.
-func TargetGT(v string) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldTarget), v))
-	})
-}
-
-// TargetGTE applies the GTE predicate on the "target" field.
-func TargetGTE(v string) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldTarget), v))
-	})
-}
-
-// TargetLT applies the LT predicate on the "target" field.
-func TargetLT(v string) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldTarget), v))
-	})
-}
-
-// TargetLTE applies the LTE predicate on the "target" field.
-func TargetLTE(v string) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldTarget), v))
-	})
-}
-
-// TargetContains applies the Contains predicate on the "target" field.
-func TargetContains(v string) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldTarget), v))
-	})
-}
-
-// TargetHasPrefix applies the HasPrefix predicate on the "target" field.
-func TargetHasPrefix(v string) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldTarget), v))
-	})
-}
-
-// TargetHasSuffix applies the HasSuffix predicate on the "target" field.
-func TargetHasSuffix(v string) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldTarget), v))
-	})
-}
-
-// TargetEqualFold applies the EqualFold predicate on the "target" field.
-func TargetEqualFold(v string) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldTarget), v))
-	})
-}
-
-// TargetContainsFold applies the ContainsFold predicate on the "target" field.
-func TargetContainsFold(v string) predicate.RequestTarget {
-	return predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldTarget), v))
-	})
-}
-
 // AmountEQ applies the EQ predicate on the "amount" field.
 func AmountEQ(v int) predicate.RequestTarget {
 	return predicate.RequestTarget(func(s *sql.Selector) {
@@ -225,7 +119,7 @@ func AmountNEQ(v int) predicate.RequestTarget {
 
 // AmountIn applies the In predicate on the "amount" field.
 func AmountIn(vs ...int) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -236,7 +130,7 @@ func AmountIn(vs ...int) predicate.RequestTarget {
 
 // AmountNotIn applies the NotIn predicate on the "amount" field.
 func AmountNotIn(vs ...int) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -289,7 +183,7 @@ func PaidAtNEQ(v time.Time) predicate.RequestTarget {
 
 // PaidAtIn applies the In predicate on the "paid_at" field.
 func PaidAtIn(vs ...time.Time) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -300,7 +194,7 @@ func PaidAtIn(vs ...time.Time) predicate.RequestTarget {
 
 // PaidAtNotIn applies the NotIn predicate on the "paid_at" field.
 func PaidAtNotIn(vs ...time.Time) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -367,7 +261,7 @@ func CreatedAtNEQ(v time.Time) predicate.RequestTarget {
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -378,7 +272,7 @@ func CreatedAtIn(vs ...time.Time) predicate.RequestTarget {
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.RequestTarget {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -434,6 +328,34 @@ func HasRequestWith(preds ...predicate.Request) predicate.RequestTarget {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(RequestInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasUser applies the HasEdge predicate on the "user" edge.
+func HasUser() predicate.RequestTarget {
+	return predicate.RequestTarget(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
+func HasUserWith(preds ...predicate.User) predicate.RequestTarget {
+	return predicate.RequestTarget(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

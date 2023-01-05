@@ -29,12 +29,6 @@ type RequestCreate struct {
 	hooks    []Hook
 }
 
-// SetAmount sets the "amount" field.
-func (rc *RequestCreate) SetAmount(i int) *RequestCreate {
-	rc.mutation.SetAmount(i)
-	return rc
-}
-
 // SetTitle sets the "title" field.
 func (rc *RequestCreate) SetTitle(s string) *RequestCreate {
 	rc.mutation.SetTitle(s)
@@ -310,9 +304,6 @@ func (rc *RequestCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (rc *RequestCreate) check() error {
-	if _, ok := rc.mutation.Amount(); !ok {
-		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "Request.amount"`)}
-	}
 	if _, ok := rc.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Request.title"`)}
 	}
@@ -360,14 +351,6 @@ func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 	if id, ok := rc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
-	}
-	if value, ok := rc.mutation.Amount(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: request.FieldAmount,
-		})
-		_node.Amount = value
 	}
 	if value, ok := rc.mutation.Title(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

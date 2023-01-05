@@ -37,12 +37,6 @@ func (tu *TagUpdate) SetName(s string) *TagUpdate {
 	return tu
 }
 
-// SetDescription sets the "description" field.
-func (tu *TagUpdate) SetDescription(s string) *TagUpdate {
-	tu.mutation.SetDescription(s)
-	return tu
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (tu *TagUpdate) SetCreatedAt(t time.Time) *TagUpdate {
 	tu.mutation.SetCreatedAt(t)
@@ -264,13 +258,6 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: tag.FieldName,
 		})
 	}
-	if value, ok := tu.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: tag.FieldDescription,
-		})
-	}
 	if value, ok := tu.mutation.CreatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -428,12 +415,6 @@ type TagUpdateOne struct {
 // SetName sets the "name" field.
 func (tuo *TagUpdateOne) SetName(s string) *TagUpdateOne {
 	tuo.mutation.SetName(s)
-	return tuo
-}
-
-// SetDescription sets the "description" field.
-func (tuo *TagUpdateOne) SetDescription(s string) *TagUpdateOne {
-	tuo.mutation.SetDescription(s)
 	return tuo
 }
 
@@ -686,13 +667,6 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: tag.FieldName,
-		})
-	}
-	if value, ok := tuo.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: tag.FieldDescription,
 		})
 	}
 	if value, ok := tuo.mutation.CreatedAt(); ok {

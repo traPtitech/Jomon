@@ -1,4 +1,4 @@
-FROM golang:1.19.1-alpine as build
+FROM golang:1.19.4-alpine as build
 ENV DOCKERIZE_VERSION v0.6.1
 ENV CGO_ENABLED 0
 ENV TZ Asia/Tokyo
@@ -11,8 +11,7 @@ RUN apk --update --no-cache add tzdata \
     && cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
     && apk del tzdata
 RUN apk --update --no-cache add ca-certificates \
-    && update-ca-certificates \
-    && rm -rf /usr/share/ca-certificates /etc/ssl/certificates
+    && update-ca-certificates
 
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \

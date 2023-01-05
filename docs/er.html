@@ -37,7 +37,6 @@ erDiagram
     }
     Request {
         uuidDOTUUID id
-        int amount
         string title
         string content
         timeDOTTime created_at
@@ -50,7 +49,6 @@ erDiagram
     }
     RequestTarget {
         uuidDOTUUID id
-        string target
         int amount
         timeDOTTime paid_at
         timeDOTTime created_at
@@ -58,7 +56,6 @@ erDiagram
     Tag {
         uuidDOTUUID id
         string name
-        string description
         timeDOTTime created_at
         timeDOTTime updated_at
         timeDOTTime deleted_at
@@ -98,22 +95,25 @@ erDiagram
     	Request |o--o{ Comment : "comment/request"
     	Request }o--o| User : "user/request"
     	RequestStatus }o--o| User : "user/request_status"
+    	RequestTarget }o--o| User : "user/request_target"
     	Transaction |o--o| TransactionDetail : "detail/transaction"
     	Transaction }o--o{ Tag : "tag/transaction"
 		</div>
 	<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+	<script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js"></script>
 	<script>
 		mermaid.mermaidAPI.initialize({
 			startOnLoad: true,
 		});
 		var observer = new MutationObserver((event) => {
-			document.querySelectorAll('text[id^=entity]').forEach(text => {
+			document.querySelectorAll('text[id^=text-entity]').forEach(text => {
 				text.textContent = text.textContent.replace('DOT', '.');
 				text.textContent = text.textContent.replace('STAR', '*');
 				text.textContent = text.textContent.replace('LBRACK', '[');
 				text.textContent = text.textContent.replace('RBRACK', ']');
 			});
 			observer.disconnect();
+			panzoom(document.getElementById('er-diagram'));
 		});
 		observer.observe(document.getElementById('er-diagram'), { attributes: true, childList: true });
 	</script>

@@ -3,7 +3,6 @@ package router
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/gob"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -13,6 +12,8 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
 )
 
@@ -60,10 +61,17 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	ctx := c.Request().Context()
-	modelUser, err := h.Repository.GetUserByName(ctx, u.Name)
+	var modelUser *model.User
+	modelUser, err = h.Repository.GetUserByName(c.Request().Context(), u.Name)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		if ent.IsNotFound(err) {
+			modelUser, err = h.Repository.CreateUser(c.Request().Context(), u.Name, u.DisplayName, false)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, err)
+			}
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
 	}
 
 	user := &User{
@@ -73,7 +81,6 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		Admin:       modelUser.Admin,
 	}
 
-	gob.Register(&User{})
 	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {
@@ -84,7 +91,6 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 }
 
 func (h Handlers) GeneratePKCE(c echo.Context) error {
-	gob.Register(&User{})
 	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)

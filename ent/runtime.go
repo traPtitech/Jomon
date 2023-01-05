@@ -87,11 +87,11 @@ func init() {
 	requestFields := schema.Request{}.Fields()
 	_ = requestFields
 	// requestDescCreatedAt is the schema descriptor for created_at field.
-	requestDescCreatedAt := requestFields[4].Descriptor()
+	requestDescCreatedAt := requestFields[3].Descriptor()
 	// request.DefaultCreatedAt holds the default value on creation for the created_at field.
 	request.DefaultCreatedAt = requestDescCreatedAt.Default.(func() time.Time)
 	// requestDescUpdatedAt is the schema descriptor for updated_at field.
-	requestDescUpdatedAt := requestFields[5].Descriptor()
+	requestDescUpdatedAt := requestFields[4].Descriptor()
 	// request.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	request.DefaultUpdatedAt = requestDescUpdatedAt.Default.(func() time.Time)
 	// request.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -113,7 +113,7 @@ func init() {
 	requesttargetFields := schema.RequestTarget{}.Fields()
 	_ = requesttargetFields
 	// requesttargetDescCreatedAt is the schema descriptor for created_at field.
-	requesttargetDescCreatedAt := requesttargetFields[4].Descriptor()
+	requesttargetDescCreatedAt := requesttargetFields[3].Descriptor()
 	// requesttarget.DefaultCreatedAt holds the default value on creation for the created_at field.
 	requesttarget.DefaultCreatedAt = requesttargetDescCreatedAt.Default.(func() time.Time)
 	// requesttargetDescID is the schema descriptor for id field.
@@ -127,11 +127,11 @@ func init() {
 	// tag.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	tag.NameValidator = tagDescName.Validators[0].(func(string) error)
 	// tagDescCreatedAt is the schema descriptor for created_at field.
-	tagDescCreatedAt := tagFields[3].Descriptor()
+	tagDescCreatedAt := tagFields[2].Descriptor()
 	// tag.DefaultCreatedAt holds the default value on creation for the created_at field.
 	tag.DefaultCreatedAt = tagDescCreatedAt.Default.(func() time.Time)
 	// tagDescUpdatedAt is the schema descriptor for updated_at field.
-	tagDescUpdatedAt := tagFields[4].Descriptor()
+	tagDescUpdatedAt := tagFields[3].Descriptor()
 	// tag.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	tag.DefaultUpdatedAt = tagDescUpdatedAt.Default.(func() time.Time)
 	// tag.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

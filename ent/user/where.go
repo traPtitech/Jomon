@@ -35,7 +35,7 @@ func IDNEQ(id uuid.UUID) predicate.User {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...uuid.UUID) predicate.User {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -140,7 +140,7 @@ func NameNEQ(v string) predicate.User {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -151,7 +151,7 @@ func NameIn(vs ...string) predicate.User {
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -239,7 +239,7 @@ func DisplayNameNEQ(v string) predicate.User {
 
 // DisplayNameIn applies the In predicate on the "display_name" field.
 func DisplayNameIn(vs ...string) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -250,7 +250,7 @@ func DisplayNameIn(vs ...string) predicate.User {
 
 // DisplayNameNotIn applies the NotIn predicate on the "display_name" field.
 func DisplayNameNotIn(vs ...string) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -352,7 +352,7 @@ func CreatedAtNEQ(v time.Time) predicate.User {
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -363,7 +363,7 @@ func CreatedAtIn(vs ...time.Time) predicate.User {
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -416,7 +416,7 @@ func UpdatedAtNEQ(v time.Time) predicate.User {
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
 func UpdatedAtIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -427,7 +427,7 @@ func UpdatedAtIn(vs ...time.Time) predicate.User {
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
 func UpdatedAtNotIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -480,7 +480,7 @@ func DeletedAtNEQ(v time.Time) predicate.User {
 
 // DeletedAtIn applies the In predicate on the "deleted_at" field.
 func DeletedAtIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -491,7 +491,7 @@ func DeletedAtIn(vs ...time.Time) predicate.User {
 
 // DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
 func DeletedAtNotIn(vs ...time.Time) predicate.User {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -701,6 +701,34 @@ func HasFileWith(preds ...predicate.File) predicate.User {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(FileInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, FileTable, FileColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasRequestTarget applies the HasEdge predicate on the "request_target" edge.
+func HasRequestTarget() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RequestTargetTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, RequestTargetTable, RequestTargetColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRequestTargetWith applies the HasEdge predicate on the "request_target" edge with a given conditions (other predicates).
+func HasRequestTargetWith(preds ...predicate.RequestTarget) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RequestTargetInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, RequestTargetTable, RequestTargetColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

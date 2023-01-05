@@ -35,7 +35,7 @@ func IDNEQ(id uuid.UUID) predicate.Tag {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.Tag {
 	return predicate.Tag(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -46,7 +46,7 @@ func IDIn(ids ...uuid.UUID) predicate.Tag {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.Tag {
 	return predicate.Tag(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -89,13 +89,6 @@ func Name(v string) predicate.Tag {
 	})
 }
 
-// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
-func Description(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDescription), v))
-	})
-}
-
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Tag {
 	return predicate.Tag(func(s *sql.Selector) {
@@ -133,7 +126,7 @@ func NameNEQ(v string) predicate.Tag {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.Tag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -144,7 +137,7 @@ func NameIn(vs ...string) predicate.Tag {
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.Tag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -216,105 +209,6 @@ func NameContainsFold(v string) predicate.Tag {
 	})
 }
 
-// DescriptionEQ applies the EQ predicate on the "description" field.
-func DescriptionEQ(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDescription), v))
-	})
-}
-
-// DescriptionNEQ applies the NEQ predicate on the "description" field.
-func DescriptionNEQ(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDescription), v))
-	})
-}
-
-// DescriptionIn applies the In predicate on the "description" field.
-func DescriptionIn(vs ...string) predicate.Tag {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldDescription), v...))
-	})
-}
-
-// DescriptionNotIn applies the NotIn predicate on the "description" field.
-func DescriptionNotIn(vs ...string) predicate.Tag {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldDescription), v...))
-	})
-}
-
-// DescriptionGT applies the GT predicate on the "description" field.
-func DescriptionGT(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDescription), v))
-	})
-}
-
-// DescriptionGTE applies the GTE predicate on the "description" field.
-func DescriptionGTE(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDescription), v))
-	})
-}
-
-// DescriptionLT applies the LT predicate on the "description" field.
-func DescriptionLT(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDescription), v))
-	})
-}
-
-// DescriptionLTE applies the LTE predicate on the "description" field.
-func DescriptionLTE(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDescription), v))
-	})
-}
-
-// DescriptionContains applies the Contains predicate on the "description" field.
-func DescriptionContains(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldDescription), v))
-	})
-}
-
-// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
-func DescriptionHasPrefix(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldDescription), v))
-	})
-}
-
-// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
-func DescriptionHasSuffix(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldDescription), v))
-	})
-}
-
-// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
-func DescriptionEqualFold(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldDescription), v))
-	})
-}
-
-// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
-func DescriptionContainsFold(v string) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldDescription), v))
-	})
-}
-
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Tag {
 	return predicate.Tag(func(s *sql.Selector) {
@@ -331,7 +225,7 @@ func CreatedAtNEQ(v time.Time) predicate.Tag {
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.Tag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -342,7 +236,7 @@ func CreatedAtIn(vs ...time.Time) predicate.Tag {
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.Tag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -395,7 +289,7 @@ func UpdatedAtNEQ(v time.Time) predicate.Tag {
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
 func UpdatedAtIn(vs ...time.Time) predicate.Tag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -406,7 +300,7 @@ func UpdatedAtIn(vs ...time.Time) predicate.Tag {
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
 func UpdatedAtNotIn(vs ...time.Time) predicate.Tag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -459,7 +353,7 @@ func DeletedAtNEQ(v time.Time) predicate.Tag {
 
 // DeletedAtIn applies the In predicate on the "deleted_at" field.
 func DeletedAtIn(vs ...time.Time) predicate.Tag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -470,7 +364,7 @@ func DeletedAtIn(vs ...time.Time) predicate.Tag {
 
 // DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
 func DeletedAtNotIn(vs ...time.Time) predicate.Tag {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}

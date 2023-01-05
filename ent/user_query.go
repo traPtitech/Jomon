@@ -18,6 +18,7 @@ import (
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
+	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -36,6 +37,7 @@ type UserQuery struct {
 	withRequestStatus *RequestStatusQuery
 	withRequest       *RequestQuery
 	withFile          *FileQuery
+	withRequestTarget *RequestTargetQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -197,6 +199,28 @@ func (uq *UserQuery) QueryFile() *FileQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.FileTable, user.FileColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRequestTarget chains the current query on the "request_target" edge.
+func (uq *UserQuery) QueryRequestTarget() *RequestTargetQuery {
+	query := &RequestTargetQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(requesttarget.Table, requesttarget.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.RequestTargetTable, user.RequestTargetColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -391,6 +415,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withRequestStatus: uq.withRequestStatus.Clone(),
 		withRequest:       uq.withRequest.Clone(),
 		withFile:          uq.withFile.Clone(),
+		withRequestTarget: uq.withRequestTarget.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -464,6 +489,17 @@ func (uq *UserQuery) WithFile(opts ...func(*FileQuery)) *UserQuery {
 	return uq
 }
 
+// WithRequestTarget tells the query-builder to eager-load the nodes that are connected to
+// the "request_target" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithRequestTarget(opts ...func(*RequestTargetQuery)) *UserQuery {
+	query := &RequestTargetQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withRequestTarget = query
+	return uq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -532,19 +568,20 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [7]bool{
 			uq.withGroupUser != nil,
 			uq.withGroupOwner != nil,
 			uq.withComment != nil,
 			uq.withRequestStatus != nil,
 			uq.withRequest != nil,
 			uq.withFile != nil,
+			uq.withRequestTarget != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*User).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -601,6 +638,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
+	if query := uq.withRequestTarget; query != nil {
+		if err := uq.loadRequestTarget(ctx, query, nodes,
+			func(n *User) { n.Edges.RequestTarget = []*RequestTarget{} },
+			func(n *User, e *RequestTarget) { n.Edges.RequestTarget = append(n.Edges.RequestTarget, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -630,14 +674,14 @@ func (uq *UserQuery) loadGroupUser(ctx context.Context, query *GroupQuery, nodes
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(uuid.UUID)}, values...), nil
+			return append([]any{new(uuid.UUID)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := *values[0].(*uuid.UUID)
 			inValue := *values[1].(*uuid.UUID)
 			if nids[inValue] == nil {
@@ -688,14 +732,14 @@ func (uq *UserQuery) loadGroupOwner(ctx context.Context, query *GroupQuery, node
 	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
 		assign := spec.Assign
 		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]interface{}, error) {
+		spec.ScanValues = func(columns []string) ([]any, error) {
 			values, err := values(columns[1:])
 			if err != nil {
 				return nil, err
 			}
-			return append([]interface{}{new(uuid.UUID)}, values...), nil
+			return append([]any{new(uuid.UUID)}, values...), nil
 		}
-		spec.Assign = func(columns []string, values []interface{}) error {
+		spec.Assign = func(columns []string, values []any) error {
 			outValue := *values[0].(*uuid.UUID)
 			inValue := *values[1].(*uuid.UUID)
 			if nids[inValue] == nil {
@@ -844,6 +888,37 @@ func (uq *UserQuery) loadFile(ctx context.Context, query *FileQuery, nodes []*Us
 	}
 	return nil
 }
+func (uq *UserQuery) loadRequestTarget(ctx context.Context, query *RequestTargetQuery, nodes []*User, init func(*User), assign func(*User, *RequestTarget)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.RequestTarget(func(s *sql.Selector) {
+		s.Where(sql.InValues(user.RequestTargetColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.request_target_user
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "request_target_user" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "request_target_user" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 
 func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := uq.querySpec()
@@ -960,7 +1035,7 @@ func (ugb *UserGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (ugb *UserGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := ugb.path(ctx)
 	if err != nil {
 		return err
@@ -969,7 +1044,7 @@ func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return ugb.sqlScan(ctx, v)
 }
 
-func (ugb *UserGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (ugb *UserGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range ugb.fields {
 		if !user.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -1016,7 +1091,7 @@ type UserSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
+func (us *UserSelect) Scan(ctx context.Context, v any) error {
 	if err := us.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -1024,7 +1099,7 @@ func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
 	return us.sqlScan(ctx, v)
 }
 
-func (us *UserSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (us *UserSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := us.sql.Query()
 	if err := us.driver.Query(ctx, query, args, rows); err != nil {

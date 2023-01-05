@@ -283,7 +283,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Status"
+                $ref: "#/components/schemas/StatusDetail"
         "400":
           $ref: "#/components/responses/400"
         "404":
@@ -303,7 +303,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/TrapID"
+                  $ref: "#/components/schemas/UserID"
         "400":
           $ref: "#/components/responses/400"
         "403":
@@ -320,7 +320,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/TrapID"
+                $ref: "#/components/schemas/UserID"
       responses:
         "200":
           description: 追加に成功した場合。
@@ -340,7 +340,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/TrapID"
+                $ref: "#/components/schemas/UserID"
       responses:
         "200":
           description: 削除できた場合。
@@ -549,10 +549,16 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/TrapID"
+                $ref: "#/components/schemas/UserID"
       responses:
         "200":
           description: 追加に成功した場合。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserID"
         "400":
           $ref: "#/components/responses/400"
         "403":
@@ -571,7 +577,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/TrapID"
+                $ref: "#/components/schemas/UserID"
       responses:
         "200":
           description: 削除に成功した場合。
@@ -602,10 +608,16 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/TrapID"
+                $ref: "#/components/schemas/UserID"
       responses:
         "200":
           description: 追加に成功した場合。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserID"
         "400":
           $ref: "#/components/responses/400"
         "403":
@@ -624,7 +636,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/TrapID"
+                $ref: "#/components/schemas/UserID"
       responses:
         "200":
           description: 削除に成功した場合。
@@ -780,7 +792,7 @@ components:
     StatusEnum:
       type: string
       enum: [submitted, fix_required, accepted, completed, rejected]
-    TrapID:
+    UserID:
       type: string
       format: uuid
     Tag:
@@ -825,6 +837,7 @@ components:
           example: "SysAd班"
         budget:
           type: integer
+          nullable: true
           example: 250000
         created_at:
           type: string
@@ -853,15 +866,16 @@ components:
           example: "SysAd班"
         budget:
           type: integer
+          nullable: true
           example: 250000
         members:
           type: array
           items:
-            $ref: "#/components/schemas/TrapID"
+            $ref: "#/components/schemas/UserID"
         owners:
           type: array
           items:
-            $ref: "#/components/schemas/TrapID"
+            $ref: "#/components/schemas/UserID"
         created_at:
           type: string
           format: date-time
@@ -888,6 +902,7 @@ components:
           example: "SysAd班"
         budget:
           type: integer
+          nullable: true
           example: 250000
       required:
         - name
@@ -904,6 +919,7 @@ components:
           example: "SysAd班"
         budget:
           type: integer
+          nullable: true
           example: 250000
       required:
         - name
@@ -958,7 +974,19 @@ components:
     Target:
       type: string
       example: "hoge株式会社"
-    TargetDetail:
+    RequestTarget:
+      type: object
+      properties:
+        amount:
+          type: integer
+          example: 1200
+        target:
+          type: string
+          format: uuid
+      required:
+        - amount
+        - target
+    RequestTargetDetail:
       type: object
       properties:
         id:
@@ -968,8 +996,10 @@ components:
           type: integer
         target:
           type: string
+          format: uuid
         paid_at:
           type: string
+          nullable: true
           format: date-time
         created_at:
           type: string
@@ -996,10 +1026,7 @@ components:
           type: string
           format: date-time
         created_by:
-          $ref: "#/components/schemas/TrapID"
-        amount:
-          type: integer
-          example: 1200
+          $ref: "#/components/schemas/UserID"
         title:
           type: string
           example: "SysAd講習会の開催費用"
@@ -1009,12 +1036,13 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/TargetDetail"
+            $ref: "#/components/schemas/RequestTargetDetail"
         tags:
           type: array
           items:
             $ref: "#/components/schemas/Tag"
         group:
+          nullable: true
           $ref: "#/components/schemas/Group"
       required:
         - id
@@ -1025,6 +1053,7 @@ components:
         - amount
         - title
         - content
+        - targets
         - tags
         - group
     RequestDetail:
@@ -1035,9 +1064,6 @@ components:
           format: uuid
         status:
           $ref: "#/components/schemas/StatusEnum"
-        amount:
-          type: integer
-          example: 1200
         title:
           type: string
           example: "SysAd講習会の開催費用"
@@ -1065,11 +1091,12 @@ components:
           items:
             $ref: "#/components/schemas/Tag"
         group:
+          nullable: true
           $ref: "#/components/schemas/Group"
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/TargetDetail"
+            $ref: "#/components/schemas/RequestTargetDetail"
         created_at:
           type: string
           format: date-time
@@ -1095,10 +1122,7 @@ components:
       type: object
       properties:
         created_by:
-          $ref: "#/components/schemas/TrapID"
-        amount:
-          type: integer
-          example: 1200
+          $ref: "#/components/schemas/UserID"
         title:
           type: string
           example: "SysAd講習会の開催費用"
@@ -1112,12 +1136,12 @@ components:
             format: uuid
         group:
           type: string
+          nullable: true
           format: uuid
         targets:
           type: array
           items:
-            type: string
-            format: uuid
+            $ref: "#/components/schemas/RequestTarget"
       required:
         - amount
         - title
@@ -1140,12 +1164,14 @@ components:
           $ref: "#/components/schemas/Target"
         request:
           type: string
+          nullable: true
           format: uuid
         tags:
           type: array
           items:
             $ref: "#/components/schemas/Tag"
         group:
+          nullable: true
           $ref: "#/components/schemas/Group"
         created_at:
           type: string
@@ -1179,9 +1205,11 @@ components:
             format: uuid
         group:
           type: string
+          nullable: true
           format: uuid
         request:
           type: string
+          nullable: true
           format: uuid
       required:
         - amount
@@ -1204,9 +1232,11 @@ components:
             format: uuid
         group:
           type: string
+          nullable: true
           format: uuid
         request:
           type: string
+          nullable: true
           format: uuid
       required:
         - amount
@@ -1221,7 +1251,7 @@ components:
           type: string
           format: uuid
         user:
-          $ref: "#/components/schemas/TrapID"
+          $ref: "#/components/schemas/UserID"
         comment:
           type: string
           example: "コメント内容"
@@ -1249,13 +1279,25 @@ components:
       type: object
       properties:
         created_by:
-          $ref: "#/components/schemas/TrapID"
+          $ref: "#/components/schemas/UserID"
+        status:
+          $ref: "#/components/schemas/StatusEnum"
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - created_by
+        - status
+        - created_at
+    StatusDetail:
+      type: object
+      properties:
+        created_by:
+          $ref: "#/components/schemas/UserID"
         status:
           $ref: "#/components/schemas/StatusEnum"
         comment:
-          type: string
-          default: null
-          example: "これは雑すぎますね。"
+          $ref: "#/components/schemas/Comment"
         created_at:
           type: string
           format: date-time
@@ -1277,24 +1319,28 @@ components:
     User:
       type: "object"
       properties:
+        id:
+          $ref: "#/components/schemas/UserID"
         name:
-          type: "string"
+          type: string
           example: "nagatech"
         display_name:
-          type: "string"
+          type: string
           example: "ながてち"
         admin:
-          type: "boolean"
+          type: boolean
         created_at:
-          type: "string"
+          type: string
           format: "date-time"
         updated_at:
-          type: "string"
+          type: string
           format: "date-time"
         deleted_at:
-          type: "string"
+          type: string
+          nullable: true
           format: "date-time"
       required:
+        - id
         - name
         - display_name
         - admin
@@ -1357,6 +1403,7 @@ components:
       in: query
       schema:
         type: string
+        format: uuid
     sinceQuery:
       name: since
       description: いつからの依頼か

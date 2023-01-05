@@ -20,7 +20,6 @@ func (Request) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
-		field.Int("amount"),
 		field.String("title"),
 		field.String("content"),
 		field.Time("created_at").

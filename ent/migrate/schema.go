@@ -109,7 +109,6 @@ var (
 	// RequestsColumns holds the columns for the "requests" table.
 	RequestsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "amount", Type: field.TypeInt},
 		{Name: "title", Type: field.TypeString},
 		{Name: "content", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
@@ -125,13 +124,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "requests_groups_request",
-				Columns:    []*schema.Column{RequestsColumns[6]},
+				Columns:    []*schema.Column{RequestsColumns[5]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "requests_users_user",
-				Columns:    []*schema.Column{RequestsColumns[7]},
+				Columns:    []*schema.Column{RequestsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -168,11 +167,11 @@ var (
 	// RequestTargetsColumns holds the columns for the "request_targets" table.
 	RequestTargetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "target", Type: field.TypeString},
 		{Name: "amount", Type: field.TypeInt},
 		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "request_target", Type: field.TypeUUID},
+		{Name: "request_target_user", Type: field.TypeUUID},
 	}
 	// RequestTargetsTable holds the schema information for the "request_targets" table.
 	RequestTargetsTable = &schema.Table{
@@ -182,9 +181,15 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "request_targets_requests_target",
-				Columns:    []*schema.Column{RequestTargetsColumns[5]},
+				Columns:    []*schema.Column{RequestTargetsColumns[4]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
 				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "request_targets_users_user",
+				Columns:    []*schema.Column{RequestTargetsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -192,7 +197,6 @@ var (
 	TagsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "name", Type: field.TypeString},
-		{Name: "description", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
@@ -400,6 +404,7 @@ func init() {
 	RequestStatusTable.ForeignKeys[0].RefTable = RequestsTable
 	RequestStatusTable.ForeignKeys[1].RefTable = UsersTable
 	RequestTargetsTable.ForeignKeys[0].RefTable = RequestsTable
+	RequestTargetsTable.ForeignKeys[1].RefTable = UsersTable
 	TransactionsTable.ForeignKeys[0].RefTable = GroupBudgetsTable
 	TransactionsTable.ForeignKeys[1].RefTable = RequestsTable
 	TransactionDetailsTable.ForeignKeys[0].RefTable = TransactionsTable

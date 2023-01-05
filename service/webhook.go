@@ -13,9 +13,9 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,8 +24,8 @@ type RequestApplication struct {
 	CreatedBy uuid.UUID `json:"created_by"`
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
-	Amount    int       `json:"amount"`
 	Tags      []*Tag    `json:"tags"`
+	Targets   []*Target `json:"targets"`
 	Group     *Group    `json:"group"`
 }
 
@@ -45,6 +45,13 @@ type TransactionRequestApplication struct {
 
 type Tag struct {
 	Name string `json:"name"`
+}
+
+type Target struct {
+	ID        uuid.UUID `json:"id"`
+	Target    uuid.UUID `json:"target"`
+	Amount    int       `json:"amount"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Group struct {
@@ -83,14 +90,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			message += "に対する"
 			message += fmt.Sprintf("[コメント](%s/requests/%s/comments/%s)", "https://jomon.trap.jp", splitedPath[3], resApp.ID)
 			message += "が作成されました" + "\n"
-
-			sess, _ := session.Get("session", c)
-			bodyUser, _ := sess.Values["user"].([]byte)
-			user := new(User)
-			_ = json.Unmarshal(bodyUser, user)
-
-			message += fmt.Sprintf("- 作成者: @%s", user.Name)
-			message += "\n" + "\n"
+			message += "\n"
 			message += resApp.Comment + "\n"
 		} else {
 			resApp := new(RequestApplication)
@@ -105,7 +105,12 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			}
 
 			message += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
-			message += fmt.Sprintf("- 支払金額: %s円", strconv.Itoa(resApp.Amount)) + "\n"
+
+			amount := 0
+			for _, target := range resApp.Targets {
+				amount += target.Amount
+			}
+			message += fmt.Sprintf("- 支払金額: %d円", amount) + "\n"
 
 			if resApp.Group != nil {
 				message += fmt.Sprintf("- 請求先グループ: %s", resApp.Group.Name) + "\n"
