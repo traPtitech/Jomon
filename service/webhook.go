@@ -149,7 +149,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 		} else {
 			targets := make([]string, len(resApps))
 			for i, resApp := range resApps {
-				targets[i] = fmt.Sprintf(`%s`, resApp.Target)
+				targets[i] = resApp.Target
 			}
 			if resApp.Amount < 0 {
 				message += fmt.Sprintf("- %sへの支払い\n", strings.Join(targets, " "))
@@ -166,7 +166,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 		if resApp.Tags != nil {
 			tags := make([]string, len(resApp.Tags))
 			for i, tag := range resApp.Tags {
-				tags[i] = fmt.Sprintf(`%s`, tag.Name)
+				tags[i] = tag.Name
 			}
 
 			message += fmt.Sprintf("- タグ: %s", strings.Join(tags, " "))
