@@ -129,10 +129,10 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
 		var resApps []TransactionRequestApplication
 		err := json.Unmarshal(resBody, &resApps)
+		resApp := resApps[0]
 		if err != nil {
 			return
 		}
-		resApp := resApps[0]
 		if c.Request().Method == http.MethodPost {
 			message += fmt.Sprintf("## :scroll:[入出金記録](%s/transactions/%s)が新規作成されました\n", "https://jomon.trap.jp", resApp.ID)
 		} else if c.Request().Method == http.MethodPut {
@@ -140,23 +140,19 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 		}
 		if len(resApps) == 1 {
 			if resApp.Amount < 0 {
-				message += fmt.Sprintf("- `%s`への支払い\n", resApp.Target)
-				message += fmt.Sprintf("    - 支払い金額: %d円\n", -resApp.Amount)
+				message += fmt.Sprintf("- `%s`への支払い\n    - 支払い金額: %d円\n", resApp.Target, -resApp.Amount)
 			} else {
-				message += fmt.Sprintf("- `%s`からの振込\n", resApp.Target)
-				message += fmt.Sprintf("    - 受け取り金額: %d円\n", resApp.Amount)
+				message += fmt.Sprintf("- `%s`からの振込\n    - 受け取り金額: %d円\n", resApp.Target, resApp.Amount)
 			}
 		} else {
 			targets := make([]string, len(resApps))
 			for i, resApp := range resApps {
-				targets[i] = resApp.Target
+				targets[i] = fmt.Sprintf(`%s`, resApp.Target)
 			}
 			if resApp.Amount < 0 {
-				message += fmt.Sprintf("- %sへの支払い\n", strings.Join(targets, " "))
-				message += fmt.Sprintf("    - 支払い金額: 計%d円(一人当たりの支払い金額: 計%d円)\n", -len(resApps)*resApp.Amount, -resApp.Amount)
+				message += fmt.Sprintf("- %sへの支払い\n    - 支払い金額: 計%d円(一人当たりの支払い金額: 計%d円)\n", strings.Join(targets, " "), -len(resApps)*resApp.Amount, -resApp.Amount)
 			} else {
-				message += fmt.Sprintf("- %sからの振込\n", strings.Join(targets, " "))
-				message += fmt.Sprintf("    - 受け取り金額: 計%d円(一人当たりの受け取り金額: 計%d円)\n", len(resApps)*resApp.Amount, resApp.Amount)
+				message += fmt.Sprintf("- %sからの振込\n    - 受け取り金額: 計%d円(一人当たりの受け取り金額: 計%d円)\n", strings.Join(targets, " "), len(resApps)*resApp.Amount, resApp.Amount)
 			}
 
 		}
@@ -166,7 +162,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 		if resApp.Tags != nil {
 			tags := make([]string, len(resApp.Tags))
 			for i, tag := range resApp.Tags {
-				tags[i] = tag.Name
+				tags[i] = fmt.Sprintf(`%s`, tag.Name)
 			}
 
 			message += fmt.Sprintf("- タグ: %s", strings.Join(tags, " "))
