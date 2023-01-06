@@ -129,10 +129,10 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
 		var resApps []TransactionRequestApplication
 		err := json.Unmarshal(resBody, &resApps)
-		resApp := resApps[0]
 		if err != nil {
 			return
 		}
+		resApp := resApps[0]
 		if c.Request().Method == http.MethodPost {
 			message += fmt.Sprintf("## :scroll:[入出金記録](%s/transactions/%s)が新規作成されました\n", "https://jomon.trap.jp", resApp.ID)
 		} else if c.Request().Method == http.MethodPut {
