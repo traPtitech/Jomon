@@ -3,7 +3,6 @@ package router
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/gob"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -81,7 +80,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		DisplayName: modelUser.DisplayName,
 		Admin:       modelUser.Admin,
 	}
-	gob.Register(User{})
+
 	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {

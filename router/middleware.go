@@ -72,7 +72,7 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		_, ok := sess.Values[sessionUserKey].(*User)
+		_, ok := sess.Values[sessionUserKey].(User)
 		if !ok {
 			return echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
 		}

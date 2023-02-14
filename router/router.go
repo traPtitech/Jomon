@@ -1,6 +1,7 @@
 package router
 
 import (
+	"encoding/gob"
 	"os"
 
 	"github.com/gorilla/sessions"
@@ -28,6 +29,7 @@ func NewServer(h Handlers) *echo.Echo {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))))
+	gob.Register(User{})
 
 	retrieveGroupOwner := h.RetrieveGroupOwner(h.Repository)
 	retrieveRequestCreator := h.RetrieveRequestCreator(h.Repository)
