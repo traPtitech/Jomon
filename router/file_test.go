@@ -35,7 +35,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		request := uuid.New()
-		user := &User{
+		user := User{
 			ID:          uuid.New(),
 			Name:        "test",
 			DisplayName: "test",
@@ -104,7 +104,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		request := uuid.New()
-		user := &User{
+		user := User{
 			ID:          uuid.New(),
 			Name:        "test",
 			DisplayName: "test",
@@ -168,7 +168,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		request := uuid.New()
-		user := &User{
+		user := User{
 			ID:          uuid.New(),
 			Name:        "test",
 			DisplayName: "test",

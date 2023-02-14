@@ -74,7 +74,7 @@ func (h *Handlers) PostFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	user, ok := sess.Values[sessionUserKey].(*User)
+	user, ok := sess.Values[sessionUserKey].(User)
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("invalid user"))
 	}
