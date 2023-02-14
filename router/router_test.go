@@ -1,6 +1,7 @@
 package router
 
 import (
+	"encoding/gob"
 	"testing"
 	"time"
 
@@ -73,6 +74,7 @@ func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, erro
 	if err != nil {
 		return nil, err
 	}
+	gob.Register(User{})
 	repository := NewMockRepository(ctrl)
 	storage := NewMockStorage(ctrl)
 	sessionName := "session"

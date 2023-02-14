@@ -2,7 +2,6 @@ package router
 
 import (
 	"bytes"
-	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -313,7 +312,6 @@ func TestHandlers_GetMe(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		gob.Register(&User{})
 		sess, err := session.Get(h.Handlers.SessionName, c)
 		require.NoError(t, err)
 		sess.Values[sessionUserKey] = &user
