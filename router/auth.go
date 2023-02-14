@@ -3,6 +3,7 @@ package router
 import (
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/gob"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -48,7 +49,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
 	if !ok {
-		return echo.ErrInternalServerError
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("code_verifier is not found in session"))
 	}
 
 	res, err := service.RequestAccessToken(code, codeVerifier)
@@ -80,11 +81,11 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		DisplayName: modelUser.DisplayName,
 		Admin:       modelUser.Admin,
 	}
-
+	gob.Register(User{})
 	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {
-		return echo.ErrInternalServerError
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/")
