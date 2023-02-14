@@ -157,7 +157,7 @@ func (h Handlers) CheckAdminOrGroupOwnerMiddleware(next echo.HandlerFunc) echo.H
 
 		owners, ok := sess.Values[sessionOwnerKey].([]*model.Owner)
 		if !ok {
-			return echo.ErrInternalServerError
+			return echo.NewHTTPError(http.StatusInternalServerError, "session owner key is not set")
 		}
 
 		for _, owner := range owners {
@@ -235,7 +235,7 @@ func (h Handlers) RetrieveGroupOwner(repo model.Repository) echo.MiddlewareFunc 
 			sess.Values[sessionOwnerKey] = owners
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				return echo.ErrInternalServerError
+				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
 			return next(c)
@@ -264,7 +264,7 @@ func (h Handlers) RetrieveRequestCreator(repo model.Repository) echo.MiddlewareF
 			sess.Values[sessionRequestCreatorKey] = request.CreatedBy
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				return echo.ErrInternalServerError
+				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
 			return next(c)
@@ -293,7 +293,7 @@ func (h Handlers) RetrieveFileCreator(repo model.Repository) echo.MiddlewareFunc
 			sess.Values[sessionFileCreatorKey] = file.CreatedBy
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				return echo.ErrInternalServerError
+				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
 			return next(c)
