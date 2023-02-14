@@ -76,7 +76,7 @@ func (h *Handlers) GetMe(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	user, ok := sess.Values[sessionUserKey].(*User)
+	user, ok := sess.Values[sessionUserKey].(User)
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user info")
 	}

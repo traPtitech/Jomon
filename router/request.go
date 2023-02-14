@@ -521,7 +521,7 @@ func (h *Handlers) PostComment(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	user, ok := sess.Values[sessionUserKey].(*User)
+	user, ok := sess.Values[sessionUserKey].(User)
 	if !ok {
 		return echo.NewHTTPError(http.StatusUnauthorized, errors.New("sessionUser not found"))
 	}
@@ -558,7 +558,7 @@ func (h *Handlers) PutStatus(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	user, ok := sess.Values[sessionUserKey].(*User)
+	user, ok := sess.Values[sessionUserKey].(User)
 	if !ok {
 		return echo.NewHTTPError(http.StatusForbidden, errors.New("sessionUser not found"))
 	}

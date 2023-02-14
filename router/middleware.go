@@ -302,10 +302,10 @@ func (h Handlers) RetrieveFileCreator(repo model.Repository) echo.MiddlewareFunc
 }
 
 func getUserInfo(sess *sessions.Session) (*User, error) {
-	user, ok := sess.Values[sessionUserKey].(*User)
+	user, ok := sess.Values[sessionUserKey].(User)
 	if !ok {
 		return nil, errors.New("user not found")
 	}
 
-	return user, nil
+	return &user, nil
 }
