@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -30,6 +31,7 @@ func NewServer(h Handlers) *echo.Echo {
 	e.Use(middleware.Secure())
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))))
 	gob.Register(User{})
+	gob.Register(uuid.UUID{})
 
 	retrieveGroupOwner := h.RetrieveGroupOwner(h.Repository)
 	retrieveRequestCreator := h.RetrieveRequestCreator(h.Repository)
