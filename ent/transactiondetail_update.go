@@ -117,35 +117,8 @@ func (tdu *TransactionDetailUpdate) ClearTransaction() *TransactionDetailUpdate 
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tdu *TransactionDetailUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	tdu.defaults()
-	if len(tdu.hooks) == 0 {
-		affected, err = tdu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TransactionDetailMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			tdu.mutation = mutation
-			affected, err = tdu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(tdu.hooks) - 1; i >= 0; i-- {
-			if tdu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tdu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, tdu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, TransactionDetailMutation](ctx, tdu.sqlSave, tdu.mutation, tdu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -179,16 +152,7 @@ func (tdu *TransactionDetailUpdate) defaults() {
 }
 
 func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   transactiondetail.Table,
-			Columns: transactiondetail.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: transactiondetail.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(transactiondetail.Table, transactiondetail.Columns, sqlgraph.NewFieldSpec(transactiondetail.FieldID, field.TypeUUID))
 	if ps := tdu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -197,39 +161,19 @@ func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 	}
 	if value, ok := tdu.mutation.Amount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: transactiondetail.FieldAmount,
-		})
+		_spec.SetField(transactiondetail.FieldAmount, field.TypeInt, value)
 	}
 	if value, ok := tdu.mutation.AddedAmount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: transactiondetail.FieldAmount,
-		})
+		_spec.AddField(transactiondetail.FieldAmount, field.TypeInt, value)
 	}
 	if value, ok := tdu.mutation.Target(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: transactiondetail.FieldTarget,
-		})
+		_spec.SetField(transactiondetail.FieldTarget, field.TypeString, value)
 	}
 	if value, ok := tdu.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: transactiondetail.FieldCreatedAt,
-		})
+		_spec.SetField(transactiondetail.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := tdu.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: transactiondetail.FieldUpdatedAt,
-		})
+		_spec.SetField(transactiondetail.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if tdu.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -274,6 +218,7 @@ func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		return 0, err
 	}
+	tdu.mutation.done = true
 	return n, nil
 }
 
@@ -370,6 +315,12 @@ func (tduo *TransactionDetailUpdateOne) ClearTransaction() *TransactionDetailUpd
 	return tduo
 }
 
+// Where appends a list predicates to the TransactionDetailUpdate builder.
+func (tduo *TransactionDetailUpdateOne) Where(ps ...predicate.TransactionDetail) *TransactionDetailUpdateOne {
+	tduo.mutation.Where(ps...)
+	return tduo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (tduo *TransactionDetailUpdateOne) Select(field string, fields ...string) *TransactionDetailUpdateOne {
@@ -379,41 +330,8 @@ func (tduo *TransactionDetailUpdateOne) Select(field string, fields ...string) *
 
 // Save executes the query and returns the updated TransactionDetail entity.
 func (tduo *TransactionDetailUpdateOne) Save(ctx context.Context) (*TransactionDetail, error) {
-	var (
-		err  error
-		node *TransactionDetail
-	)
 	tduo.defaults()
-	if len(tduo.hooks) == 0 {
-		node, err = tduo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TransactionDetailMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			tduo.mutation = mutation
-			node, err = tduo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(tduo.hooks) - 1; i >= 0; i-- {
-			if tduo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tduo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, tduo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*TransactionDetail)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TransactionDetailMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*TransactionDetail, TransactionDetailMutation](ctx, tduo.sqlSave, tduo.mutation, tduo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -447,16 +365,7 @@ func (tduo *TransactionDetailUpdateOne) defaults() {
 }
 
 func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *TransactionDetail, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   transactiondetail.Table,
-			Columns: transactiondetail.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: transactiondetail.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(transactiondetail.Table, transactiondetail.Columns, sqlgraph.NewFieldSpec(transactiondetail.FieldID, field.TypeUUID))
 	id, ok := tduo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "TransactionDetail.id" for update`)}
@@ -482,39 +391,19 @@ func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *Tra
 		}
 	}
 	if value, ok := tduo.mutation.Amount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: transactiondetail.FieldAmount,
-		})
+		_spec.SetField(transactiondetail.FieldAmount, field.TypeInt, value)
 	}
 	if value, ok := tduo.mutation.AddedAmount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: transactiondetail.FieldAmount,
-		})
+		_spec.AddField(transactiondetail.FieldAmount, field.TypeInt, value)
 	}
 	if value, ok := tduo.mutation.Target(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: transactiondetail.FieldTarget,
-		})
+		_spec.SetField(transactiondetail.FieldTarget, field.TypeString, value)
 	}
 	if value, ok := tduo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: transactiondetail.FieldCreatedAt,
-		})
+		_spec.SetField(transactiondetail.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := tduo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: transactiondetail.FieldUpdatedAt,
-		})
+		_spec.SetField(transactiondetail.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if tduo.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -562,5 +451,6 @@ func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *Tra
 		}
 		return nil, err
 	}
+	tduo.mutation.done = true
 	return _node, nil
 }

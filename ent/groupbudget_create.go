@@ -104,50 +104,8 @@ func (gbc *GroupBudgetCreate) Mutation() *GroupBudgetMutation {
 
 // Save creates the GroupBudget in the database.
 func (gbc *GroupBudgetCreate) Save(ctx context.Context) (*GroupBudget, error) {
-	var (
-		err  error
-		node *GroupBudget
-	)
 	gbc.defaults()
-	if len(gbc.hooks) == 0 {
-		if err = gbc.check(); err != nil {
-			return nil, err
-		}
-		node, err = gbc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupBudgetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gbc.check(); err != nil {
-				return nil, err
-			}
-			gbc.mutation = mutation
-			if node, err = gbc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gbc.hooks) - 1; i >= 0; i-- {
-			if gbc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gbc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gbc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GroupBudget)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GroupBudgetMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GroupBudget, GroupBudgetMutation](ctx, gbc.sqlSave, gbc.mutation, gbc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -199,6 +157,9 @@ func (gbc *GroupBudgetCreate) check() error {
 }
 
 func (gbc *GroupBudgetCreate) sqlSave(ctx context.Context) (*GroupBudget, error) {
+	if err := gbc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := gbc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gbc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -213,46 +174,30 @@ func (gbc *GroupBudgetCreate) sqlSave(ctx context.Context) (*GroupBudget, error)
 			return nil, err
 		}
 	}
+	gbc.mutation.id = &_node.ID
+	gbc.mutation.done = true
 	return _node, nil
 }
 
 func (gbc *GroupBudgetCreate) createSpec() (*GroupBudget, *sqlgraph.CreateSpec) {
 	var (
 		_node = &GroupBudget{config: gbc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: groupbudget.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: groupbudget.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(groupbudget.Table, sqlgraph.NewFieldSpec(groupbudget.FieldID, field.TypeUUID))
 	)
 	if id, ok := gbc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
 	if value, ok := gbc.mutation.Amount(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: groupbudget.FieldAmount,
-		})
+		_spec.SetField(groupbudget.FieldAmount, field.TypeInt, value)
 		_node.Amount = value
 	}
 	if value, ok := gbc.mutation.Comment(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: groupbudget.FieldComment,
-		})
+		_spec.SetField(groupbudget.FieldComment, field.TypeString, value)
 		_node.Comment = &value
 	}
 	if value, ok := gbc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: groupbudget.FieldCreatedAt,
-		})
+		_spec.SetField(groupbudget.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if nodes := gbc.mutation.GroupIDs(); len(nodes) > 0 {

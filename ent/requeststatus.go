@@ -136,19 +136,19 @@ func (rs *RequestStatus) assignValues(columns []string, values []any) error {
 
 // QueryRequest queries the "request" edge of the RequestStatus entity.
 func (rs *RequestStatus) QueryRequest() *RequestQuery {
-	return (&RequestStatusClient{config: rs.config}).QueryRequest(rs)
+	return NewRequestStatusClient(rs.config).QueryRequest(rs)
 }
 
 // QueryUser queries the "user" edge of the RequestStatus entity.
 func (rs *RequestStatus) QueryUser() *UserQuery {
-	return (&RequestStatusClient{config: rs.config}).QueryUser(rs)
+	return NewRequestStatusClient(rs.config).QueryUser(rs)
 }
 
 // Update returns a builder for updating this RequestStatus.
 // Note that you need to call RequestStatus.Unwrap() before calling this method if this RequestStatus
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (rs *RequestStatus) Update() *RequestStatusUpdateOne {
-	return (&RequestStatusClient{config: rs.config}).UpdateOne(rs)
+	return NewRequestStatusClient(rs.config).UpdateOne(rs)
 }
 
 // Unwrap unwraps the RequestStatus entity that was returned from a transaction after it was closed,
@@ -178,9 +178,3 @@ func (rs *RequestStatus) String() string {
 
 // RequestStatusSlice is a parsable slice of RequestStatus.
 type RequestStatusSlice []*RequestStatus
-
-func (rs RequestStatusSlice) config(cfg config) {
-	for _i := range rs {
-		rs[_i].config = cfg
-	}
-}

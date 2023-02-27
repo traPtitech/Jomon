@@ -13,406 +13,262 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Comment(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Comment(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Comment(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Comment(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Comment(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Comment(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Comment(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Comment(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Comment(sql.FieldLTE(FieldID, id))
 }
 
 // Comment applies equality check predicate on the "comment" field. It's identical to CommentEQ.
 func Comment(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldComment), v))
-	})
+	return predicate.Comment(sql.FieldEQ(FieldComment, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
-	})
+	return predicate.Comment(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.Comment(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
 func DeletedAt(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDeletedAt), v))
-	})
+	return predicate.Comment(sql.FieldEQ(FieldDeletedAt, v))
 }
 
 // CommentEQ applies the EQ predicate on the "comment" field.
 func CommentEQ(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldComment), v))
-	})
+	return predicate.Comment(sql.FieldEQ(FieldComment, v))
 }
 
 // CommentNEQ applies the NEQ predicate on the "comment" field.
 func CommentNEQ(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldComment), v))
-	})
+	return predicate.Comment(sql.FieldNEQ(FieldComment, v))
 }
 
 // CommentIn applies the In predicate on the "comment" field.
 func CommentIn(vs ...string) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldComment), v...))
-	})
+	return predicate.Comment(sql.FieldIn(FieldComment, vs...))
 }
 
 // CommentNotIn applies the NotIn predicate on the "comment" field.
 func CommentNotIn(vs ...string) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldComment), v...))
-	})
+	return predicate.Comment(sql.FieldNotIn(FieldComment, vs...))
 }
 
 // CommentGT applies the GT predicate on the "comment" field.
 func CommentGT(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldComment), v))
-	})
+	return predicate.Comment(sql.FieldGT(FieldComment, v))
 }
 
 // CommentGTE applies the GTE predicate on the "comment" field.
 func CommentGTE(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldComment), v))
-	})
+	return predicate.Comment(sql.FieldGTE(FieldComment, v))
 }
 
 // CommentLT applies the LT predicate on the "comment" field.
 func CommentLT(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldComment), v))
-	})
+	return predicate.Comment(sql.FieldLT(FieldComment, v))
 }
 
 // CommentLTE applies the LTE predicate on the "comment" field.
 func CommentLTE(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldComment), v))
-	})
+	return predicate.Comment(sql.FieldLTE(FieldComment, v))
 }
 
 // CommentContains applies the Contains predicate on the "comment" field.
 func CommentContains(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldComment), v))
-	})
+	return predicate.Comment(sql.FieldContains(FieldComment, v))
 }
 
 // CommentHasPrefix applies the HasPrefix predicate on the "comment" field.
 func CommentHasPrefix(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldComment), v))
-	})
+	return predicate.Comment(sql.FieldHasPrefix(FieldComment, v))
 }
 
 // CommentHasSuffix applies the HasSuffix predicate on the "comment" field.
 func CommentHasSuffix(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldComment), v))
-	})
+	return predicate.Comment(sql.FieldHasSuffix(FieldComment, v))
 }
 
 // CommentEqualFold applies the EqualFold predicate on the "comment" field.
 func CommentEqualFold(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldComment), v))
-	})
+	return predicate.Comment(sql.FieldEqualFold(FieldComment, v))
 }
 
 // CommentContainsFold applies the ContainsFold predicate on the "comment" field.
 func CommentContainsFold(v string) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldComment), v))
-	})
+	return predicate.Comment(sql.FieldContainsFold(FieldComment, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
-	})
+	return predicate.Comment(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
 func CreatedAtNEQ(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
-	})
+	return predicate.Comment(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreatedAt), v...))
-	})
+	return predicate.Comment(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
-	})
+	return predicate.Comment(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
 func CreatedAtGT(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreatedAt), v))
-	})
+	return predicate.Comment(sql.FieldGT(FieldCreatedAt, v))
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
 func CreatedAtGTE(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
-	})
+	return predicate.Comment(sql.FieldGTE(FieldCreatedAt, v))
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
 func CreatedAtLT(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreatedAt), v))
-	})
+	return predicate.Comment(sql.FieldLT(FieldCreatedAt, v))
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
-	})
+	return predicate.Comment(sql.FieldLTE(FieldCreatedAt, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
 func UpdatedAtEQ(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.Comment(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
 func UpdatedAtNEQ(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.Comment(sql.FieldNEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
 func UpdatedAtIn(vs ...time.Time) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUpdatedAt), v...))
-	})
+	return predicate.Comment(sql.FieldIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
 func UpdatedAtNotIn(vs ...time.Time) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUpdatedAt), v...))
-	})
+	return predicate.Comment(sql.FieldNotIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtGT applies the GT predicate on the "updated_at" field.
 func UpdatedAtGT(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.Comment(sql.FieldGT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
 func UpdatedAtGTE(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.Comment(sql.FieldGTE(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLT applies the LT predicate on the "updated_at" field.
 func UpdatedAtLT(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.Comment(sql.FieldLT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.Comment(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
 // DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
 func DeletedAtEQ(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDeletedAt), v))
-	})
+	return predicate.Comment(sql.FieldEQ(FieldDeletedAt, v))
 }
 
 // DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
 func DeletedAtNEQ(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDeletedAt), v))
-	})
+	return predicate.Comment(sql.FieldNEQ(FieldDeletedAt, v))
 }
 
 // DeletedAtIn applies the In predicate on the "deleted_at" field.
 func DeletedAtIn(vs ...time.Time) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldDeletedAt), v...))
-	})
+	return predicate.Comment(sql.FieldIn(FieldDeletedAt, vs...))
 }
 
 // DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
 func DeletedAtNotIn(vs ...time.Time) predicate.Comment {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldDeletedAt), v...))
-	})
+	return predicate.Comment(sql.FieldNotIn(FieldDeletedAt, vs...))
 }
 
 // DeletedAtGT applies the GT predicate on the "deleted_at" field.
 func DeletedAtGT(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDeletedAt), v))
-	})
+	return predicate.Comment(sql.FieldGT(FieldDeletedAt, v))
 }
 
 // DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
 func DeletedAtGTE(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDeletedAt), v))
-	})
+	return predicate.Comment(sql.FieldGTE(FieldDeletedAt, v))
 }
 
 // DeletedAtLT applies the LT predicate on the "deleted_at" field.
 func DeletedAtLT(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDeletedAt), v))
-	})
+	return predicate.Comment(sql.FieldLT(FieldDeletedAt, v))
 }
 
 // DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
 func DeletedAtLTE(v time.Time) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDeletedAt), v))
-	})
+	return predicate.Comment(sql.FieldLTE(FieldDeletedAt, v))
 }
 
 // DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
 func DeletedAtIsNil() predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldDeletedAt)))
-	})
+	return predicate.Comment(sql.FieldIsNull(FieldDeletedAt))
 }
 
 // DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
 func DeletedAtNotNil() predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldDeletedAt)))
-	})
+	return predicate.Comment(sql.FieldNotNull(FieldDeletedAt))
 }
 
 // HasRequest applies the HasEdge predicate on the "request" edge.
@@ -420,7 +276,6 @@ func HasRequest() predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(RequestTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -448,7 +303,6 @@ func HasUser() predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

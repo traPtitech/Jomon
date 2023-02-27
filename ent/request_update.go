@@ -342,35 +342,8 @@ func (ru *RequestUpdate) ClearGroup() *RequestUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ru *RequestUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	ru.defaults()
-	if len(ru.hooks) == 0 {
-		affected, err = ru.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RequestMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ru.mutation = mutation
-			affected, err = ru.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ru.hooks) - 1; i >= 0; i-- {
-			if ru.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ru.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ru.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, RequestMutation](ctx, ru.sqlSave, ru.mutation, ru.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -404,16 +377,7 @@ func (ru *RequestUpdate) defaults() {
 }
 
 func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   request.Table,
-			Columns: request.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: request.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(request.Table, request.Columns, sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID))
 	if ps := ru.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -422,32 +386,16 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ru.mutation.Title(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: request.FieldTitle,
-		})
+		_spec.SetField(request.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := ru.mutation.Content(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: request.FieldContent,
-		})
+		_spec.SetField(request.FieldContent, field.TypeString, value)
 	}
 	if value, ok := ru.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: request.FieldCreatedAt,
-		})
+		_spec.SetField(request.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := ru.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: request.FieldUpdatedAt,
-		})
+		_spec.SetField(request.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if ru.mutation.StatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -851,6 +799,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	ru.mutation.done = true
 	return n, nil
 }
 
@@ -1165,6 +1114,12 @@ func (ruo *RequestUpdateOne) ClearGroup() *RequestUpdateOne {
 	return ruo
 }
 
+// Where appends a list predicates to the RequestUpdate builder.
+func (ruo *RequestUpdateOne) Where(ps ...predicate.Request) *RequestUpdateOne {
+	ruo.mutation.Where(ps...)
+	return ruo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ruo *RequestUpdateOne) Select(field string, fields ...string) *RequestUpdateOne {
@@ -1174,41 +1129,8 @@ func (ruo *RequestUpdateOne) Select(field string, fields ...string) *RequestUpda
 
 // Save executes the query and returns the updated Request entity.
 func (ruo *RequestUpdateOne) Save(ctx context.Context) (*Request, error) {
-	var (
-		err  error
-		node *Request
-	)
 	ruo.defaults()
-	if len(ruo.hooks) == 0 {
-		node, err = ruo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RequestMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ruo.mutation = mutation
-			node, err = ruo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ruo.hooks) - 1; i >= 0; i-- {
-			if ruo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ruo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ruo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Request)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from RequestMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Request, RequestMutation](ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -1242,16 +1164,7 @@ func (ruo *RequestUpdateOne) defaults() {
 }
 
 func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   request.Table,
-			Columns: request.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: request.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(request.Table, request.Columns, sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID))
 	id, ok := ruo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Request.id" for update`)}
@@ -1277,32 +1190,16 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 	}
 	if value, ok := ruo.mutation.Title(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: request.FieldTitle,
-		})
+		_spec.SetField(request.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := ruo.mutation.Content(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: request.FieldContent,
-		})
+		_spec.SetField(request.FieldContent, field.TypeString, value)
 	}
 	if value, ok := ruo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: request.FieldCreatedAt,
-		})
+		_spec.SetField(request.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := ruo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: request.FieldUpdatedAt,
-		})
+		_spec.SetField(request.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if ruo.mutation.StatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1709,5 +1606,6 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		return nil, err
 	}
+	ruo.mutation.done = true
 	return _node, nil
 }

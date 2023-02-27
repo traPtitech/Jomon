@@ -119,40 +119,7 @@ func (rtu *RequestTargetUpdate) ClearUser() *RequestTargetUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (rtu *RequestTargetUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(rtu.hooks) == 0 {
-		if err = rtu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = rtu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RequestTargetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = rtu.check(); err != nil {
-				return 0, err
-			}
-			rtu.mutation = mutation
-			affected, err = rtu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(rtu.hooks) - 1; i >= 0; i-- {
-			if rtu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = rtu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, rtu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, RequestTargetMutation](ctx, rtu.sqlSave, rtu.mutation, rtu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -189,16 +156,10 @@ func (rtu *RequestTargetUpdate) check() error {
 }
 
 func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   requesttarget.Table,
-			Columns: requesttarget.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: requesttarget.FieldID,
-			},
-		},
+	if err := rtu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(requesttarget.Table, requesttarget.Columns, sqlgraph.NewFieldSpec(requesttarget.FieldID, field.TypeUUID))
 	if ps := rtu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -207,38 +168,19 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 	}
 	if value, ok := rtu.mutation.Amount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: requesttarget.FieldAmount,
-		})
+		_spec.SetField(requesttarget.FieldAmount, field.TypeInt, value)
 	}
 	if value, ok := rtu.mutation.AddedAmount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: requesttarget.FieldAmount,
-		})
+		_spec.AddField(requesttarget.FieldAmount, field.TypeInt, value)
 	}
 	if value, ok := rtu.mutation.PaidAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: requesttarget.FieldPaidAt,
-		})
+		_spec.SetField(requesttarget.FieldPaidAt, field.TypeTime, value)
 	}
 	if rtu.mutation.PaidAtCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: requesttarget.FieldPaidAt,
-		})
+		_spec.ClearField(requesttarget.FieldPaidAt, field.TypeTime)
 	}
 	if value, ok := rtu.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: requesttarget.FieldCreatedAt,
-		})
+		_spec.SetField(requesttarget.FieldCreatedAt, field.TypeTime, value)
 	}
 	if rtu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -318,6 +260,7 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		return 0, err
 	}
+	rtu.mutation.done = true
 	return n, nil
 }
 
@@ -415,6 +358,12 @@ func (rtuo *RequestTargetUpdateOne) ClearUser() *RequestTargetUpdateOne {
 	return rtuo
 }
 
+// Where appends a list predicates to the RequestTargetUpdate builder.
+func (rtuo *RequestTargetUpdateOne) Where(ps ...predicate.RequestTarget) *RequestTargetUpdateOne {
+	rtuo.mutation.Where(ps...)
+	return rtuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (rtuo *RequestTargetUpdateOne) Select(field string, fields ...string) *RequestTargetUpdateOne {
@@ -424,46 +373,7 @@ func (rtuo *RequestTargetUpdateOne) Select(field string, fields ...string) *Requ
 
 // Save executes the query and returns the updated RequestTarget entity.
 func (rtuo *RequestTargetUpdateOne) Save(ctx context.Context) (*RequestTarget, error) {
-	var (
-		err  error
-		node *RequestTarget
-	)
-	if len(rtuo.hooks) == 0 {
-		if err = rtuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = rtuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RequestTargetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = rtuo.check(); err != nil {
-				return nil, err
-			}
-			rtuo.mutation = mutation
-			node, err = rtuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(rtuo.hooks) - 1; i >= 0; i-- {
-			if rtuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = rtuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, rtuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*RequestTarget)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from RequestTargetMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*RequestTarget, RequestTargetMutation](ctx, rtuo.sqlSave, rtuo.mutation, rtuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -500,16 +410,10 @@ func (rtuo *RequestTargetUpdateOne) check() error {
 }
 
 func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *RequestTarget, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   requesttarget.Table,
-			Columns: requesttarget.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: requesttarget.FieldID,
-			},
-		},
+	if err := rtuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(requesttarget.Table, requesttarget.Columns, sqlgraph.NewFieldSpec(requesttarget.FieldID, field.TypeUUID))
 	id, ok := rtuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "RequestTarget.id" for update`)}
@@ -535,38 +439,19 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 		}
 	}
 	if value, ok := rtuo.mutation.Amount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: requesttarget.FieldAmount,
-		})
+		_spec.SetField(requesttarget.FieldAmount, field.TypeInt, value)
 	}
 	if value, ok := rtuo.mutation.AddedAmount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: requesttarget.FieldAmount,
-		})
+		_spec.AddField(requesttarget.FieldAmount, field.TypeInt, value)
 	}
 	if value, ok := rtuo.mutation.PaidAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: requesttarget.FieldPaidAt,
-		})
+		_spec.SetField(requesttarget.FieldPaidAt, field.TypeTime, value)
 	}
 	if rtuo.mutation.PaidAtCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: requesttarget.FieldPaidAt,
-		})
+		_spec.ClearField(requesttarget.FieldPaidAt, field.TypeTime)
 	}
 	if value, ok := rtuo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: requesttarget.FieldCreatedAt,
-		})
+		_spec.SetField(requesttarget.FieldCreatedAt, field.TypeTime, value)
 	}
 	if rtuo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -649,5 +534,6 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 		}
 		return nil, err
 	}
+	rtuo.mutation.done = true
 	return _node, nil
 }

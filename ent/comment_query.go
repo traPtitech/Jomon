@@ -20,11 +20,9 @@ import (
 // CommentQuery is the builder for querying Comment entities.
 type CommentQuery struct {
 	config
-	limit       *int
-	offset      *int
-	unique      *bool
+	ctx         *QueryContext
 	order       []OrderFunc
-	fields      []string
+	inters      []Interceptor
 	predicates  []predicate.Comment
 	withRequest *RequestQuery
 	withUser    *UserQuery
@@ -40,26 +38,26 @@ func (cq *CommentQuery) Where(ps ...predicate.Comment) *CommentQuery {
 	return cq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (cq *CommentQuery) Limit(limit int) *CommentQuery {
-	cq.limit = &limit
+	cq.ctx.Limit = &limit
 	return cq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (cq *CommentQuery) Offset(offset int) *CommentQuery {
-	cq.offset = &offset
+	cq.ctx.Offset = &offset
 	return cq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (cq *CommentQuery) Unique(unique bool) *CommentQuery {
-	cq.unique = &unique
+	cq.ctx.Unique = &unique
 	return cq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (cq *CommentQuery) Order(o ...OrderFunc) *CommentQuery {
 	cq.order = append(cq.order, o...)
 	return cq
@@ -67,7 +65,7 @@ func (cq *CommentQuery) Order(o ...OrderFunc) *CommentQuery {
 
 // QueryRequest chains the current query on the "request" edge.
 func (cq *CommentQuery) QueryRequest() *RequestQuery {
-	query := &RequestQuery{config: cq.config}
+	query := (&RequestClient{config: cq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -89,7 +87,7 @@ func (cq *CommentQuery) QueryRequest() *RequestQuery {
 
 // QueryUser chains the current query on the "user" edge.
 func (cq *CommentQuery) QueryUser() *UserQuery {
-	query := &UserQuery{config: cq.config}
+	query := (&UserClient{config: cq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -112,7 +110,7 @@ func (cq *CommentQuery) QueryUser() *UserQuery {
 // First returns the first Comment entity from the query.
 // Returns a *NotFoundError when no Comment was found.
 func (cq *CommentQuery) First(ctx context.Context) (*Comment, error) {
-	nodes, err := cq.Limit(1).All(ctx)
+	nodes, err := cq.Limit(1).All(setContextOp(ctx, cq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +133,7 @@ func (cq *CommentQuery) FirstX(ctx context.Context) *Comment {
 // Returns a *NotFoundError when no Comment ID was found.
 func (cq *CommentQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -158,7 +156,7 @@ func (cq *CommentQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one Comment entity is found.
 // Returns a *NotFoundError when no Comment entities are found.
 func (cq *CommentQuery) Only(ctx context.Context) (*Comment, error) {
-	nodes, err := cq.Limit(2).All(ctx)
+	nodes, err := cq.Limit(2).All(setContextOp(ctx, cq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +184,7 @@ func (cq *CommentQuery) OnlyX(ctx context.Context) *Comment {
 // Returns a *NotFoundError when no entities are found.
 func (cq *CommentQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -211,10 +209,12 @@ func (cq *CommentQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Comments.
 func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
+	ctx = setContextOp(ctx, cq.ctx, "All")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return cq.sqlAll(ctx)
+	qr := querierAll[[]*Comment, *CommentQuery]()
+	return withInterceptors[[]*Comment](ctx, cq, qr, cq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -227,9 +227,12 @@ func (cq *CommentQuery) AllX(ctx context.Context) []*Comment {
 }
 
 // IDs executes the query and returns a list of Comment IDs.
-func (cq *CommentQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := cq.Select(comment.FieldID).Scan(ctx, &ids); err != nil {
+func (cq *CommentQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if cq.ctx.Unique == nil && cq.path != nil {
+		cq.Unique(true)
+	}
+	ctx = setContextOp(ctx, cq.ctx, "IDs")
+	if err = cq.Select(comment.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -246,10 +249,11 @@ func (cq *CommentQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (cq *CommentQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, cq.ctx, "Count")
 	if err := cq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return cq.sqlCount(ctx)
+	return withInterceptors[int](ctx, cq, querierCount[*CommentQuery](), cq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -263,10 +267,15 @@ func (cq *CommentQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CommentQuery) Exist(ctx context.Context) (bool, error) {
-	if err := cq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, cq.ctx, "Exist")
+	switch _, err := cq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return cq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -286,23 +295,22 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 	}
 	return &CommentQuery{
 		config:      cq.config,
-		limit:       cq.limit,
-		offset:      cq.offset,
+		ctx:         cq.ctx.Clone(),
 		order:       append([]OrderFunc{}, cq.order...),
+		inters:      append([]Interceptor{}, cq.inters...),
 		predicates:  append([]predicate.Comment{}, cq.predicates...),
 		withRequest: cq.withRequest.Clone(),
 		withUser:    cq.withUser.Clone(),
 		// clone intermediate query.
-		sql:    cq.sql.Clone(),
-		path:   cq.path,
-		unique: cq.unique,
+		sql:  cq.sql.Clone(),
+		path: cq.path,
 	}
 }
 
 // WithRequest tells the query-builder to eager-load the nodes that are connected to
 // the "request" edge. The optional arguments are used to configure the query builder of the edge.
 func (cq *CommentQuery) WithRequest(opts ...func(*RequestQuery)) *CommentQuery {
-	query := &RequestQuery{config: cq.config}
+	query := (&RequestClient{config: cq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -313,7 +321,7 @@ func (cq *CommentQuery) WithRequest(opts ...func(*RequestQuery)) *CommentQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (cq *CommentQuery) WithUser(opts ...func(*UserQuery)) *CommentQuery {
-	query := &UserQuery{config: cq.config}
+	query := (&UserClient{config: cq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -336,16 +344,11 @@ func (cq *CommentQuery) WithUser(opts ...func(*UserQuery)) *CommentQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy {
-	grbuild := &CommentGroupBy{config: cq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return cq.sqlQuery(ctx), nil
-	}
+	cq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &CommentGroupBy{build: cq}
+	grbuild.flds = &cq.ctx.Fields
 	grbuild.label = comment.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -362,15 +365,30 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 //		Select(comment.FieldComment).
 //		Scan(ctx, &v)
 func (cq *CommentQuery) Select(fields ...string) *CommentSelect {
-	cq.fields = append(cq.fields, fields...)
-	selbuild := &CommentSelect{CommentQuery: cq}
-	selbuild.label = comment.Label
-	selbuild.flds, selbuild.scan = &cq.fields, selbuild.Scan
-	return selbuild
+	cq.ctx.Fields = append(cq.ctx.Fields, fields...)
+	sbuild := &CommentSelect{CommentQuery: cq}
+	sbuild.label = comment.Label
+	sbuild.flds, sbuild.scan = &cq.ctx.Fields, sbuild.Scan
+	return sbuild
+}
+
+// Aggregate returns a CommentSelect configured with the given aggregations.
+func (cq *CommentQuery) Aggregate(fns ...AggregateFunc) *CommentSelect {
+	return cq.Select().Aggregate(fns...)
 }
 
 func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range cq.fields {
+	for _, inter := range cq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, cq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range cq.ctx.Fields {
 		if !comment.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -447,6 +465,9 @@ func (cq *CommentQuery) loadRequest(ctx context.Context, query *RequestQuery, no
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(request.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -476,6 +497,9 @@ func (cq *CommentQuery) loadUser(ctx context.Context, query *UserQuery, nodes []
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -495,38 +519,22 @@ func (cq *CommentQuery) loadUser(ctx context.Context, query *UserQuery, nodes []
 
 func (cq *CommentQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cq.querySpec()
-	_spec.Node.Columns = cq.fields
-	if len(cq.fields) > 0 {
-		_spec.Unique = cq.unique != nil && *cq.unique
+	_spec.Node.Columns = cq.ctx.Fields
+	if len(cq.ctx.Fields) > 0 {
+		_spec.Unique = cq.ctx.Unique != nil && *cq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
 }
 
-func (cq *CommentQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	}
-	return n > 0, nil
-}
-
 func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   comment.Table,
-			Columns: comment.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: comment.FieldID,
-			},
-		},
-		From:   cq.sql,
-		Unique: true,
-	}
-	if unique := cq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(comment.Table, comment.Columns, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeUUID))
+	_spec.From = cq.sql
+	if unique := cq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if cq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := cq.fields; len(fields) > 0 {
+	if fields := cq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, comment.FieldID)
 		for i := range fields {
@@ -542,10 +550,10 @@ func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := cq.limit; limit != nil {
+	if limit := cq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := cq.offset; offset != nil {
+	if offset := cq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := cq.order; len(ps) > 0 {
@@ -561,7 +569,7 @@ func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 func (cq *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cq.driver.Dialect())
 	t1 := builder.Table(comment.Table)
-	columns := cq.fields
+	columns := cq.ctx.Fields
 	if len(columns) == 0 {
 		columns = comment.Columns
 	}
@@ -570,7 +578,7 @@ func (cq *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = cq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if cq.unique != nil && *cq.unique {
+	if cq.ctx.Unique != nil && *cq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range cq.predicates {
@@ -579,12 +587,12 @@ func (cq *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range cq.order {
 		p(selector)
 	}
-	if offset := cq.offset; offset != nil {
+	if offset := cq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := cq.limit; limit != nil {
+	if limit := cq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -592,13 +600,8 @@ func (cq *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // CommentGroupBy is the group-by builder for Comment entities.
 type CommentGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *CommentQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -607,74 +610,77 @@ func (cgb *CommentGroupBy) Aggregate(fns ...AggregateFunc) *CommentGroupBy {
 	return cgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cgb *CommentGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := cgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, cgb.build.ctx, "GroupBy")
+	if err := cgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cgb.sql = query
-	return cgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*CommentQuery, *CommentGroupBy](ctx, cgb.build, cgb, cgb.build.inters, v)
 }
 
-func (cgb *CommentGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range cgb.fields {
-		if !comment.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (cgb *CommentGroupBy) sqlScan(ctx context.Context, root *CommentQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(cgb.fns))
+	for _, fn := range cgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := cgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*cgb.flds)+len(cgb.fns))
+		for _, f := range *cgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*cgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := cgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (cgb *CommentGroupBy) sqlQuery() *sql.Selector {
-	selector := cgb.sql.Select()
-	aggregation := make([]string, 0, len(cgb.fns))
-	for _, fn := range cgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
-		for _, f := range cgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(cgb.fields...)...)
-}
-
 // CommentSelect is the builder for selecting fields of Comment entities.
 type CommentSelect struct {
 	*CommentQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (cs *CommentSelect) Aggregate(fns ...AggregateFunc) *CommentSelect {
+	cs.fns = append(cs.fns, fns...)
+	return cs
 }
 
 // Scan applies the selector query and scans the result into the given value.
 func (cs *CommentSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, cs.ctx, "Select")
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.sql = cs.CommentQuery.sqlQuery(ctx)
-	return cs.sqlScan(ctx, v)
+	return scanWithInterceptors[*CommentQuery, *CommentSelect](ctx, cs.CommentQuery, cs, cs.inters, v)
 }
 
-func (cs *CommentSelect) sqlScan(ctx context.Context, v any) error {
+func (cs *CommentSelect) sqlScan(ctx context.Context, root *CommentQuery, v any) error {
+	selector := root.sqlQuery(ctx)
+	aggregation := make([]string, 0, len(cs.fns))
+	for _, fn := range cs.fns {
+		aggregation = append(aggregation, fn(selector))
+	}
+	switch n := len(*cs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		selector.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		selector.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
-	query, args := cs.sql.Query()
+	query, args := selector.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

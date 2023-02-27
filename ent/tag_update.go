@@ -156,41 +156,8 @@ func (tu *TagUpdate) RemoveTransaction(t ...*Transaction) *TagUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TagUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	tu.defaults()
-	if len(tu.hooks) == 0 {
-		if err = tu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = tu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TagMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = tu.check(); err != nil {
-				return 0, err
-			}
-			tu.mutation = mutation
-			affected, err = tu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(tu.hooks) - 1; i >= 0; i-- {
-			if tu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, tu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, TagMutation](ctx, tu.sqlSave, tu.mutation, tu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -234,16 +201,10 @@ func (tu *TagUpdate) check() error {
 }
 
 func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   tag.Table,
-			Columns: tag.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: tag.FieldID,
-			},
-		},
+	if err := tu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(tag.Table, tag.Columns, sqlgraph.NewFieldSpec(tag.FieldID, field.TypeUUID))
 	if ps := tu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -252,38 +213,19 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := tu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: tag.FieldName,
-		})
+		_spec.SetField(tag.FieldName, field.TypeString, value)
 	}
 	if value, ok := tu.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: tag.FieldCreatedAt,
-		})
+		_spec.SetField(tag.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := tu.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: tag.FieldUpdatedAt,
-		})
+		_spec.SetField(tag.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := tu.mutation.DeletedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: tag.FieldDeletedAt,
-		})
+		_spec.SetField(tag.FieldDeletedAt, field.TypeTime, value)
 	}
 	if tu.mutation.DeletedAtCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: tag.FieldDeletedAt,
-		})
+		_spec.ClearField(tag.FieldDeletedAt, field.TypeTime)
 	}
 	if tu.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -401,6 +343,7 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	tu.mutation.done = true
 	return n, nil
 }
 
@@ -535,6 +478,12 @@ func (tuo *TagUpdateOne) RemoveTransaction(t ...*Transaction) *TagUpdateOne {
 	return tuo.RemoveTransactionIDs(ids...)
 }
 
+// Where appends a list predicates to the TagUpdate builder.
+func (tuo *TagUpdateOne) Where(ps ...predicate.Tag) *TagUpdateOne {
+	tuo.mutation.Where(ps...)
+	return tuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (tuo *TagUpdateOne) Select(field string, fields ...string) *TagUpdateOne {
@@ -544,47 +493,8 @@ func (tuo *TagUpdateOne) Select(field string, fields ...string) *TagUpdateOne {
 
 // Save executes the query and returns the updated Tag entity.
 func (tuo *TagUpdateOne) Save(ctx context.Context) (*Tag, error) {
-	var (
-		err  error
-		node *Tag
-	)
 	tuo.defaults()
-	if len(tuo.hooks) == 0 {
-		if err = tuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = tuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TagMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = tuo.check(); err != nil {
-				return nil, err
-			}
-			tuo.mutation = mutation
-			node, err = tuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(tuo.hooks) - 1; i >= 0; i-- {
-			if tuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, tuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Tag)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TagMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Tag, TagMutation](ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -628,16 +538,10 @@ func (tuo *TagUpdateOne) check() error {
 }
 
 func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   tag.Table,
-			Columns: tag.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: tag.FieldID,
-			},
-		},
+	if err := tuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(tag.Table, tag.Columns, sqlgraph.NewFieldSpec(tag.FieldID, field.TypeUUID))
 	id, ok := tuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Tag.id" for update`)}
@@ -663,38 +567,19 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 	}
 	if value, ok := tuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: tag.FieldName,
-		})
+		_spec.SetField(tag.FieldName, field.TypeString, value)
 	}
 	if value, ok := tuo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: tag.FieldCreatedAt,
-		})
+		_spec.SetField(tag.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := tuo.mutation.UpdatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: tag.FieldUpdatedAt,
-		})
+		_spec.SetField(tag.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := tuo.mutation.DeletedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: tag.FieldDeletedAt,
-		})
+		_spec.SetField(tag.FieldDeletedAt, field.TypeTime, value)
 	}
 	if tuo.mutation.DeletedAtCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: tag.FieldDeletedAt,
-		})
+		_spec.ClearField(tag.FieldDeletedAt, field.TypeTime)
 	}
 	if tuo.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -815,5 +700,6 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		return nil, err
 	}
+	tuo.mutation.done = true
 	return _node, nil
 }

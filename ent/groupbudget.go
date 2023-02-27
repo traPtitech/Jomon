@@ -132,19 +132,19 @@ func (gb *GroupBudget) assignValues(columns []string, values []any) error {
 
 // QueryGroup queries the "group" edge of the GroupBudget entity.
 func (gb *GroupBudget) QueryGroup() *GroupQuery {
-	return (&GroupBudgetClient{config: gb.config}).QueryGroup(gb)
+	return NewGroupBudgetClient(gb.config).QueryGroup(gb)
 }
 
 // QueryTransaction queries the "transaction" edge of the GroupBudget entity.
 func (gb *GroupBudget) QueryTransaction() *TransactionQuery {
-	return (&GroupBudgetClient{config: gb.config}).QueryTransaction(gb)
+	return NewGroupBudgetClient(gb.config).QueryTransaction(gb)
 }
 
 // Update returns a builder for updating this GroupBudget.
 // Note that you need to call GroupBudget.Unwrap() before calling this method if this GroupBudget
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gb *GroupBudget) Update() *GroupBudgetUpdateOne {
-	return (&GroupBudgetClient{config: gb.config}).UpdateOne(gb)
+	return NewGroupBudgetClient(gb.config).UpdateOne(gb)
 }
 
 // Unwrap unwraps the GroupBudget entity that was returned from a transaction after it was closed,
@@ -179,9 +179,3 @@ func (gb *GroupBudget) String() string {
 
 // GroupBudgets is a parsable slice of GroupBudget.
 type GroupBudgets []*GroupBudget
-
-func (gb GroupBudgets) config(cfg config) {
-	for _i := range gb {
-		gb[_i].config = cfg
-	}
-}

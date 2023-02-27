@@ -153,19 +153,19 @@ func (c *Comment) assignValues(columns []string, values []any) error {
 
 // QueryRequest queries the "request" edge of the Comment entity.
 func (c *Comment) QueryRequest() *RequestQuery {
-	return (&CommentClient{config: c.config}).QueryRequest(c)
+	return NewCommentClient(c.config).QueryRequest(c)
 }
 
 // QueryUser queries the "user" edge of the Comment entity.
 func (c *Comment) QueryUser() *UserQuery {
-	return (&CommentClient{config: c.config}).QueryUser(c)
+	return NewCommentClient(c.config).QueryUser(c)
 }
 
 // Update returns a builder for updating this Comment.
 // Note that you need to call Comment.Unwrap() before calling this method if this Comment
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Comment) Update() *CommentUpdateOne {
-	return (&CommentClient{config: c.config}).UpdateOne(c)
+	return NewCommentClient(c.config).UpdateOne(c)
 }
 
 // Unwrap unwraps the Comment entity that was returned from a transaction after it was closed,
@@ -203,9 +203,3 @@ func (c *Comment) String() string {
 
 // Comments is a parsable slice of Comment.
 type Comments []*Comment
-
-func (c Comments) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

@@ -153,29 +153,29 @@ func (t *Transaction) assignValues(columns []string, values []any) error {
 
 // QueryDetail queries the "detail" edge of the Transaction entity.
 func (t *Transaction) QueryDetail() *TransactionDetailQuery {
-	return (&TransactionClient{config: t.config}).QueryDetail(t)
+	return NewTransactionClient(t.config).QueryDetail(t)
 }
 
 // QueryTag queries the "tag" edge of the Transaction entity.
 func (t *Transaction) QueryTag() *TagQuery {
-	return (&TransactionClient{config: t.config}).QueryTag(t)
+	return NewTransactionClient(t.config).QueryTag(t)
 }
 
 // QueryGroupBudget queries the "group_budget" edge of the Transaction entity.
 func (t *Transaction) QueryGroupBudget() *GroupBudgetQuery {
-	return (&TransactionClient{config: t.config}).QueryGroupBudget(t)
+	return NewTransactionClient(t.config).QueryGroupBudget(t)
 }
 
 // QueryRequest queries the "request" edge of the Transaction entity.
 func (t *Transaction) QueryRequest() *RequestQuery {
-	return (&TransactionClient{config: t.config}).QueryRequest(t)
+	return NewTransactionClient(t.config).QueryRequest(t)
 }
 
 // Update returns a builder for updating this Transaction.
 // Note that you need to call Transaction.Unwrap() before calling this method if this Transaction
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (t *Transaction) Update() *TransactionUpdateOne {
-	return (&TransactionClient{config: t.config}).UpdateOne(t)
+	return NewTransactionClient(t.config).UpdateOne(t)
 }
 
 // Unwrap unwraps the Transaction entity that was returned from a transaction after it was closed,
@@ -202,9 +202,3 @@ func (t *Transaction) String() string {
 
 // Transactions is a parsable slice of Transaction.
 type Transactions []*Transaction
-
-func (t Transactions) config(cfg config) {
-	for _i := range t {
-		t[_i].config = cfg
-	}
-}

@@ -196,44 +196,44 @@ func (u *User) assignValues(columns []string, values []any) error {
 
 // QueryGroupUser queries the "group_user" edge of the User entity.
 func (u *User) QueryGroupUser() *GroupQuery {
-	return (&UserClient{config: u.config}).QueryGroupUser(u)
+	return NewUserClient(u.config).QueryGroupUser(u)
 }
 
 // QueryGroupOwner queries the "group_owner" edge of the User entity.
 func (u *User) QueryGroupOwner() *GroupQuery {
-	return (&UserClient{config: u.config}).QueryGroupOwner(u)
+	return NewUserClient(u.config).QueryGroupOwner(u)
 }
 
 // QueryComment queries the "comment" edge of the User entity.
 func (u *User) QueryComment() *CommentQuery {
-	return (&UserClient{config: u.config}).QueryComment(u)
+	return NewUserClient(u.config).QueryComment(u)
 }
 
 // QueryRequestStatus queries the "request_status" edge of the User entity.
 func (u *User) QueryRequestStatus() *RequestStatusQuery {
-	return (&UserClient{config: u.config}).QueryRequestStatus(u)
+	return NewUserClient(u.config).QueryRequestStatus(u)
 }
 
 // QueryRequest queries the "request" edge of the User entity.
 func (u *User) QueryRequest() *RequestQuery {
-	return (&UserClient{config: u.config}).QueryRequest(u)
+	return NewUserClient(u.config).QueryRequest(u)
 }
 
 // QueryFile queries the "file" edge of the User entity.
 func (u *User) QueryFile() *FileQuery {
-	return (&UserClient{config: u.config}).QueryFile(u)
+	return NewUserClient(u.config).QueryFile(u)
 }
 
 // QueryRequestTarget queries the "request_target" edge of the User entity.
 func (u *User) QueryRequestTarget() *RequestTargetQuery {
-	return (&UserClient{config: u.config}).QueryRequestTarget(u)
+	return NewUserClient(u.config).QueryRequestTarget(u)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
-	return (&UserClient{config: u.config}).UpdateOne(u)
+	return NewUserClient(u.config).UpdateOne(u)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
@@ -277,9 +277,3 @@ func (u *User) String() string {
 
 // Users is a parsable slice of User.
 type Users []*User
-
-func (u Users) config(cfg config) {
-	for _i := range u {
-		u[_i].config = cfg
-	}
-}
