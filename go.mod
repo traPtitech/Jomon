@@ -1,6 +1,6 @@
 module github.com/traPtitech/Jomon
 
-go 1.19
+go 1.20
 
 require (
 	entgo.io/ent v0.11.3-0.20220824145844-79fe0ebcd627
