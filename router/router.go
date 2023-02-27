@@ -58,12 +58,12 @@ func NewServer(h Handlers) *echo.Echo {
 			}
 		}
 
-		apiComments := api.Group("/transactions", h.CheckLoginMiddleware)
+		apiTransactions := api.Group("/transactions", h.CheckLoginMiddleware)
 		{
-			apiComments.GET("", h.GetTransactions)
-			apiComments.POST("", h.PostTransaction, h.CheckAdminMiddleware)
-			apiComments.GET("/:transactionID", h.GetTransaction)
-			apiComments.PUT("/:transactionID", h.PutTransaction, h.CheckAdminMiddleware)
+			apiTransactions.GET("", h.GetTransactions)
+			apiTransactions.POST("", h.PostTransaction, h.CheckAdminMiddleware)
+			apiTransactions.GET("/:transactionID", h.GetTransaction)
+			apiTransactions.PUT("/:transactionID", h.PutTransaction, h.CheckAdminMiddleware)
 		}
 
 		apiFiles := api.Group("/files", h.CheckLoginMiddleware)
