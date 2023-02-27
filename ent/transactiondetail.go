@@ -128,14 +128,14 @@ func (td *TransactionDetail) assignValues(columns []string, values []any) error 
 
 // QueryTransaction queries the "transaction" edge of the TransactionDetail entity.
 func (td *TransactionDetail) QueryTransaction() *TransactionQuery {
-	return (&TransactionDetailClient{config: td.config}).QueryTransaction(td)
+	return NewTransactionDetailClient(td.config).QueryTransaction(td)
 }
 
 // Update returns a builder for updating this TransactionDetail.
 // Note that you need to call TransactionDetail.Unwrap() before calling this method if this TransactionDetail
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (td *TransactionDetail) Update() *TransactionDetailUpdateOne {
-	return (&TransactionDetailClient{config: td.config}).UpdateOne(td)
+	return NewTransactionDetailClient(td.config).UpdateOne(td)
 }
 
 // Unwrap unwraps the TransactionDetail entity that was returned from a transaction after it was closed,
@@ -171,9 +171,3 @@ func (td *TransactionDetail) String() string {
 
 // TransactionDetails is a parsable slice of TransactionDetail.
 type TransactionDetails []*TransactionDetail
-
-func (td TransactionDetails) config(cfg config) {
-	for _i := range td {
-		td[_i].config = cfg
-	}
-}

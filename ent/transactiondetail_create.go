@@ -118,50 +118,8 @@ func (tdc *TransactionDetailCreate) Mutation() *TransactionDetailMutation {
 
 // Save creates the TransactionDetail in the database.
 func (tdc *TransactionDetailCreate) Save(ctx context.Context) (*TransactionDetail, error) {
-	var (
-		err  error
-		node *TransactionDetail
-	)
 	tdc.defaults()
-	if len(tdc.hooks) == 0 {
-		if err = tdc.check(); err != nil {
-			return nil, err
-		}
-		node, err = tdc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TransactionDetailMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = tdc.check(); err != nil {
-				return nil, err
-			}
-			tdc.mutation = mutation
-			if node, err = tdc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(tdc.hooks) - 1; i >= 0; i-- {
-			if tdc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tdc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, tdc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*TransactionDetail)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TransactionDetailMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*TransactionDetail, TransactionDetailMutation](ctx, tdc.sqlSave, tdc.mutation, tdc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -228,6 +186,9 @@ func (tdc *TransactionDetailCreate) check() error {
 }
 
 func (tdc *TransactionDetailCreate) sqlSave(ctx context.Context) (*TransactionDetail, error) {
+	if err := tdc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := tdc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tdc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -242,54 +203,34 @@ func (tdc *TransactionDetailCreate) sqlSave(ctx context.Context) (*TransactionDe
 			return nil, err
 		}
 	}
+	tdc.mutation.id = &_node.ID
+	tdc.mutation.done = true
 	return _node, nil
 }
 
 func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.CreateSpec) {
 	var (
 		_node = &TransactionDetail{config: tdc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: transactiondetail.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: transactiondetail.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(transactiondetail.Table, sqlgraph.NewFieldSpec(transactiondetail.FieldID, field.TypeUUID))
 	)
 	if id, ok := tdc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
 	if value, ok := tdc.mutation.Amount(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: transactiondetail.FieldAmount,
-		})
+		_spec.SetField(transactiondetail.FieldAmount, field.TypeInt, value)
 		_node.Amount = value
 	}
 	if value, ok := tdc.mutation.Target(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: transactiondetail.FieldTarget,
-		})
+		_spec.SetField(transactiondetail.FieldTarget, field.TypeString, value)
 		_node.Target = value
 	}
 	if value, ok := tdc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: transactiondetail.FieldCreatedAt,
-		})
+		_spec.SetField(transactiondetail.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := tdc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: transactiondetail.FieldUpdatedAt,
-		})
+		_spec.SetField(transactiondetail.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if nodes := tdc.mutation.TransactionIDs(); len(nodes) > 0 {

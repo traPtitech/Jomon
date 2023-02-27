@@ -20,22 +20,39 @@ type config struct {
 	log func(...any)
 	// hooks to execute on mutations.
 	hooks *hooks
+	// interceptors to execute on queries.
+	inters *inters
 }
 
-// hooks per client, for fast access.
-type hooks struct {
-	Comment           []ent.Hook
-	File              []ent.Hook
-	Group             []ent.Hook
-	GroupBudget       []ent.Hook
-	Request           []ent.Hook
-	RequestStatus     []ent.Hook
-	RequestTarget     []ent.Hook
-	Tag               []ent.Hook
-	Transaction       []ent.Hook
-	TransactionDetail []ent.Hook
-	User              []ent.Hook
-}
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		Comment           []ent.Hook
+		File              []ent.Hook
+		Group             []ent.Hook
+		GroupBudget       []ent.Hook
+		Request           []ent.Hook
+		RequestStatus     []ent.Hook
+		RequestTarget     []ent.Hook
+		Tag               []ent.Hook
+		Transaction       []ent.Hook
+		TransactionDetail []ent.Hook
+		User              []ent.Hook
+	}
+	inters struct {
+		Comment           []ent.Interceptor
+		File              []ent.Interceptor
+		Group             []ent.Interceptor
+		GroupBudget       []ent.Interceptor
+		Request           []ent.Interceptor
+		RequestStatus     []ent.Interceptor
+		RequestTarget     []ent.Interceptor
+		Tag               []ent.Interceptor
+		Transaction       []ent.Interceptor
+		TransactionDetail []ent.Interceptor
+		User              []ent.Interceptor
+	}
+)
 
 // Options applies the options on the config object.
 func (c *config) options(opts ...Option) {

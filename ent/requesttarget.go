@@ -145,19 +145,19 @@ func (rt *RequestTarget) assignValues(columns []string, values []any) error {
 
 // QueryRequest queries the "request" edge of the RequestTarget entity.
 func (rt *RequestTarget) QueryRequest() *RequestQuery {
-	return (&RequestTargetClient{config: rt.config}).QueryRequest(rt)
+	return NewRequestTargetClient(rt.config).QueryRequest(rt)
 }
 
 // QueryUser queries the "user" edge of the RequestTarget entity.
 func (rt *RequestTarget) QueryUser() *UserQuery {
-	return (&RequestTargetClient{config: rt.config}).QueryUser(rt)
+	return NewRequestTargetClient(rt.config).QueryUser(rt)
 }
 
 // Update returns a builder for updating this RequestTarget.
 // Note that you need to call RequestTarget.Unwrap() before calling this method if this RequestTarget
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (rt *RequestTarget) Update() *RequestTargetUpdateOne {
-	return (&RequestTargetClient{config: rt.config}).UpdateOne(rt)
+	return NewRequestTargetClient(rt.config).UpdateOne(rt)
 }
 
 // Unwrap unwraps the RequestTarget entity that was returned from a transaction after it was closed,
@@ -192,9 +192,3 @@ func (rt *RequestTarget) String() string {
 
 // RequestTargets is a parsable slice of RequestTarget.
 type RequestTargets []*RequestTarget
-
-func (rt RequestTargets) config(cfg config) {
-	for _i := range rt {
-		rt[_i].config = cfg
-	}
-}

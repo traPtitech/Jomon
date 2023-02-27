@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,34 +27,7 @@ func (rsd *RequestStatusDelete) Where(ps ...predicate.RequestStatus) *RequestSta
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (rsd *RequestStatusDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(rsd.hooks) == 0 {
-		affected, err = rsd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RequestStatusMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			rsd.mutation = mutation
-			affected, err = rsd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(rsd.hooks) - 1; i >= 0; i-- {
-			if rsd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = rsd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, rsd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, RequestStatusMutation](ctx, rsd.sqlExec, rsd.mutation, rsd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +40,7 @@ func (rsd *RequestStatusDelete) ExecX(ctx context.Context) int {
 }
 
 func (rsd *RequestStatusDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: requeststatus.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: requeststatus.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(requeststatus.Table, sqlgraph.NewFieldSpec(requeststatus.FieldID, field.TypeUUID))
 	if ps := rsd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +52,19 @@ func (rsd *RequestStatusDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	rsd.mutation.done = true
 	return affected, err
 }
 
 // RequestStatusDeleteOne is the builder for deleting a single RequestStatus entity.
 type RequestStatusDeleteOne struct {
 	rsd *RequestStatusDelete
+}
+
+// Where appends a list predicates to the RequestStatusDelete builder.
+func (rsdo *RequestStatusDeleteOne) Where(ps ...predicate.RequestStatus) *RequestStatusDeleteOne {
+	rsdo.rsd.mutation.Where(ps...)
+	return rsdo
 }
 
 // Exec executes the deletion query.
@@ -111,5 +82,7 @@ func (rsdo *RequestStatusDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (rsdo *RequestStatusDeleteOne) ExecX(ctx context.Context) {
-	rsdo.rsd.ExecX(ctx)
+	if err := rsdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,34 +27,7 @@ func (rtd *RequestTargetDelete) Where(ps ...predicate.RequestTarget) *RequestTar
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (rtd *RequestTargetDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(rtd.hooks) == 0 {
-		affected, err = rtd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RequestTargetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			rtd.mutation = mutation
-			affected, err = rtd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(rtd.hooks) - 1; i >= 0; i-- {
-			if rtd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = rtd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, rtd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, RequestTargetMutation](ctx, rtd.sqlExec, rtd.mutation, rtd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +40,7 @@ func (rtd *RequestTargetDelete) ExecX(ctx context.Context) int {
 }
 
 func (rtd *RequestTargetDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: requesttarget.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: requesttarget.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(requesttarget.Table, sqlgraph.NewFieldSpec(requesttarget.FieldID, field.TypeUUID))
 	if ps := rtd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +52,19 @@ func (rtd *RequestTargetDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	rtd.mutation.done = true
 	return affected, err
 }
 
 // RequestTargetDeleteOne is the builder for deleting a single RequestTarget entity.
 type RequestTargetDeleteOne struct {
 	rtd *RequestTargetDelete
+}
+
+// Where appends a list predicates to the RequestTargetDelete builder.
+func (rtdo *RequestTargetDeleteOne) Where(ps ...predicate.RequestTarget) *RequestTargetDeleteOne {
+	rtdo.rtd.mutation.Where(ps...)
+	return rtdo
 }
 
 // Exec executes the deletion query.
@@ -111,5 +82,7 @@ func (rtdo *RequestTargetDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (rtdo *RequestTargetDeleteOne) ExecX(ctx context.Context) {
-	rtdo.rtd.ExecX(ctx)
+	if err := rtdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

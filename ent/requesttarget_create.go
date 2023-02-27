@@ -100,50 +100,8 @@ func (rtc *RequestTargetCreate) Mutation() *RequestTargetMutation {
 
 // Save creates the RequestTarget in the database.
 func (rtc *RequestTargetCreate) Save(ctx context.Context) (*RequestTarget, error) {
-	var (
-		err  error
-		node *RequestTarget
-	)
 	rtc.defaults()
-	if len(rtc.hooks) == 0 {
-		if err = rtc.check(); err != nil {
-			return nil, err
-		}
-		node, err = rtc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RequestTargetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = rtc.check(); err != nil {
-				return nil, err
-			}
-			rtc.mutation = mutation
-			if node, err = rtc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(rtc.hooks) - 1; i >= 0; i-- {
-			if rtc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = rtc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, rtc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*RequestTarget)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from RequestTargetMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*RequestTarget, RequestTargetMutation](ctx, rtc.sqlSave, rtc.mutation, rtc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -198,6 +156,9 @@ func (rtc *RequestTargetCreate) check() error {
 }
 
 func (rtc *RequestTargetCreate) sqlSave(ctx context.Context) (*RequestTarget, error) {
+	if err := rtc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := rtc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, rtc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -212,46 +173,30 @@ func (rtc *RequestTargetCreate) sqlSave(ctx context.Context) (*RequestTarget, er
 			return nil, err
 		}
 	}
+	rtc.mutation.id = &_node.ID
+	rtc.mutation.done = true
 	return _node, nil
 }
 
 func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSpec) {
 	var (
 		_node = &RequestTarget{config: rtc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: requesttarget.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: requesttarget.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(requesttarget.Table, sqlgraph.NewFieldSpec(requesttarget.FieldID, field.TypeUUID))
 	)
 	if id, ok := rtc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
 	if value, ok := rtc.mutation.Amount(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: requesttarget.FieldAmount,
-		})
+		_spec.SetField(requesttarget.FieldAmount, field.TypeInt, value)
 		_node.Amount = value
 	}
 	if value, ok := rtc.mutation.PaidAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: requesttarget.FieldPaidAt,
-		})
+		_spec.SetField(requesttarget.FieldPaidAt, field.TypeTime, value)
 		_node.PaidAt = &value
 	}
 	if value, ok := rtc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: requesttarget.FieldCreatedAt,
-		})
+		_spec.SetField(requesttarget.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if nodes := rtc.mutation.RequestIDs(); len(nodes) > 0 {
