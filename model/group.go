@@ -15,8 +15,8 @@ type GroupRepository interface {
 	UpdateGroup(ctx context.Context, groupID uuid.UUID, name string, description string, budget *int) (*Group, error)
 	DeleteGroup(ctx context.Context, groupID uuid.UUID) error
 	GetOwners(ctx context.Context, groupID uuid.UUID) ([]*Owner, error)
-	AddOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) (*Owner, error)
-	DeleteOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) error
+	AddOwners(ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID) ([]*Owner, error)
+	DeleteOwners(ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID) error
 	GetMembers(ctx context.Context, groupID uuid.UUID) ([]*Member, error)
 	AddMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*Member, error)
 	DeleteMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) error

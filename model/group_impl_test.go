@@ -327,9 +327,7 @@ func TestEntRepository_GetOwners(t *testing.T) {
 		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 
-		_, err = repo.AddOwner(ctx, group.ID, user1.ID)
-		require.NoError(t, err)
-		_, err = repo.AddOwner(ctx, group.ID, user2.ID)
+		_, err = repo.AddOwners(ctx, group.ID, []uuid.UUID{user1.ID, user2.ID})
 		require.NoError(t, err)
 
 		got, err := repo.GetOwners(ctx, group.ID)
@@ -371,9 +369,9 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 
-		owner, err := repo.AddOwner(ctx, group.ID, user.ID)
+		owner, err := repo.AddOwners(ctx, group.ID, []uuid.UUID{user.ID})
 		assert.NoError(t, err)
-		assert.Equal(t, owner.ID, user.ID)
+		assert.Equal(t, owner[0].ID, user.ID)
 	})
 
 	t.Run("UnknownUser", func(t *testing.T) {
@@ -383,7 +381,7 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
 		require.NoError(t, err)
 
-		_, err = repo.AddOwner(ctx, group.ID, uuid.New())
+		_, err = repo.AddOwners(ctx, group.ID, []uuid.UUID{uuid.New()})
 		assert.Error(t, err)
 	})
 }
@@ -402,10 +400,10 @@ func TestEntRepository_DeleteOwner(t *testing.T) {
 
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
-		owner, err := repo.AddOwner(ctx, group.ID, user.ID)
+		_, err = repo.AddOwners(ctx, group.ID, []uuid.UUID{user.ID})
 		require.NoError(t, err)
 
-		err = repo.DeleteOwner(ctx, group.ID, owner.ID)
+		err = repo.DeleteOwners(ctx, group.ID, []uuid.UUID{user.ID})
 		assert.NoError(t, err)
 	})
 }
