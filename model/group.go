@@ -18,8 +18,8 @@ type GroupRepository interface {
 	AddOwners(ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID) ([]*Owner, error)
 	DeleteOwners(ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID) error
 	GetMembers(ctx context.Context, groupID uuid.UUID) ([]*Member, error)
-	AddMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*Member, error)
-	DeleteMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) error
+	AddMembers(ctx context.Context, groupID uuid.UUID, userIDs []uuid.UUID) ([]*Member, error)
+	DeleteMembers(ctx context.Context, groupID uuid.UUID, userIDs []uuid.UUID) error
 }
 
 type Group struct {
