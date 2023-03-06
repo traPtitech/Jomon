@@ -32,6 +32,7 @@ func NewServer(h Handlers) *echo.Echo {
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))))
 	gob.Register(User{})
 	gob.Register(uuid.UUID{})
+	gob.Register([]*model.Owner{})
 
 	retrieveGroupOwner := h.RetrieveGroupOwner(h.Repository)
 	retrieveRequestCreator := h.RetrieveRequestCreator(h.Repository)
