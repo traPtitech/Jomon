@@ -160,11 +160,13 @@ func (h Handlers) CheckAdminOrGroupOwnerMiddleware(next echo.HandlerFunc) echo.H
 			return echo.NewHTTPError(http.StatusInternalServerError, "session owner key is not set")
 		}
 
+		if user.Admin {
+			return next(c)
+		}
+
 		for _, owner := range owners {
 			if owner.ID == user.ID {
-				if user.Admin {
-					return next(c)
-				}
+				return next(c)
 			}
 		}
 
