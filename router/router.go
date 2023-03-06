@@ -112,7 +112,7 @@ func NewServer(h Handlers) *echo.Echo {
 		{
 			apiAdmins.GET("", h.GetAdmins)
 			apiAdmins.POST("", h.PostAdmins)
-			apiAdmins.DELETE("/:userID", h.DeleteAdmins)
+			apiAdmins.DELETE("", h.DeleteAdmins)
 		}
 	}
 
