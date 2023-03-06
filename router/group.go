@@ -259,7 +259,7 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 // PostOwner POST /groups/:groupID/owners
 func (h *Handlers) PostOwner(c echo.Context) error {
 	ctx := c.Request().Context()
-	var owner Owner
+	var owners []uuid.UUID
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -267,10 +267,10 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 	if groupID == uuid.Nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
-	if err := c.Bind(&owner); err != nil {
+	if err := c.Bind(&owners); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	added, err := h.Repository.AddOwner(ctx, groupID, owner.ID)
+	added, err := h.Repository.AddOwners(ctx, groupID, owners)
 	if err != nil {
 		if ent.IsConstraintError(err) {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -278,8 +278,9 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := &Owner{
-		ID: added.ID,
+	res := make([]uuid.UUID, len(added))
+	for i, owner := range added {
+		res[i] = owner.ID
 	}
 
 	return c.JSON(http.StatusOK, res)
@@ -295,15 +296,12 @@ func (h *Handlers) DeleteOwner(c echo.Context) error {
 	if groupID == uuid.Nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
-	ownerID, err := uuid.Parse(c.Param("ownerID"))
-	if err != nil {
+	var ownerIDs []uuid.UUID
+	if err := c.Bind(&ownerIDs); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	if ownerID == uuid.Nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
-	}
 
-	err = h.Repository.DeleteOwner(ctx, groupID, ownerID)
+	err = h.Repository.DeleteOwners(ctx, groupID, ownerIDs)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return echo.NewHTTPError(http.StatusNotFound, err)

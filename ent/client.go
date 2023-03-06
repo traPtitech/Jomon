@@ -11,6 +11,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/migrate"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/group"
@@ -22,10 +26,6 @@ import (
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
 	"github.com/traPtitech/Jomon/ent/user"
-
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -79,6 +79,55 @@ func (c *Client) init() {
 	c.Transaction = NewTransactionClient(c.config)
 	c.TransactionDetail = NewTransactionDetailClient(c.config)
 	c.User = NewUserClient(c.config)
+}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters *inters
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -181,33 +230,23 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Comment.Use(hooks...)
-	c.File.Use(hooks...)
-	c.Group.Use(hooks...)
-	c.GroupBudget.Use(hooks...)
-	c.Request.Use(hooks...)
-	c.RequestStatus.Use(hooks...)
-	c.RequestTarget.Use(hooks...)
-	c.Tag.Use(hooks...)
-	c.Transaction.Use(hooks...)
-	c.TransactionDetail.Use(hooks...)
-	c.User.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Comment, c.File, c.Group, c.GroupBudget, c.Request, c.RequestStatus,
+		c.RequestTarget, c.Tag, c.Transaction, c.TransactionDetail, c.User,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Comment.Intercept(interceptors...)
-	c.File.Intercept(interceptors...)
-	c.Group.Intercept(interceptors...)
-	c.GroupBudget.Intercept(interceptors...)
-	c.Request.Intercept(interceptors...)
-	c.RequestStatus.Intercept(interceptors...)
-	c.RequestTarget.Intercept(interceptors...)
-	c.Tag.Intercept(interceptors...)
-	c.Transaction.Intercept(interceptors...)
-	c.TransactionDetail.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Comment, c.File, c.Group, c.GroupBudget, c.Request, c.RequestStatus,
+		c.RequestTarget, c.Tag, c.Transaction, c.TransactionDetail, c.User,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -2113,3 +2152,15 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 		return nil, fmt.Errorf("ent: unknown User mutation op: %q", m.Op())
 	}
 }
+
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		Comment, File, Group, GroupBudget, Request, RequestStatus, RequestTarget, Tag,
+		Transaction, TransactionDetail, User []ent.Hook
+	}
+	inters struct {
+		Comment, File, Group, GroupBudget, Request, RequestStatus, RequestTarget, Tag,
+		Transaction, TransactionDetail, User []ent.Interceptor
+	}
+)

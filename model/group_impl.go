@@ -89,27 +89,28 @@ func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]
 	return owners, nil
 }
 
-func (repo *EntRepository) AddOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) (*Owner, error) {
+func (repo *EntRepository) AddOwners(ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID) ([]*Owner, error) {
 	_, err := repo.client.Group.
 		Update().
 		Where(group.IDEQ(groupID)).
-		AddOwnerIDs(ownerID).
+		AddOwnerIDs(ownerIDs...).
 		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
-	resowner := &Owner{
-		ID: ownerID,
+	resowners := []*Owner{}
+	for _, owner := range ownerIDs {
+		resowners = append(resowners, &Owner{ID: owner})
 	}
-	return resowner, nil
 
+	return resowners, nil
 }
 
-func (repo *EntRepository) DeleteOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) error {
+func (repo *EntRepository) DeleteOwners(ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID) error {
 	_, err := repo.client.Group.
 		Update().
 		Where(group.IDEQ(groupID)).
-		RemoveOwnerIDs(ownerID).
+		RemoveOwnerIDs(ownerIDs...).
 		Save(ctx)
 
 	return err
