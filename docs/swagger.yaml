@@ -825,6 +825,7 @@ components:
         - name
     Group:
       type: object
+      nullable: true
       properties:
         id:
           type: string
