@@ -838,7 +838,7 @@ components:
         budget:
           oneOf:
             - type: integer
-            - type: null
+            - type: 'null'
           example: 250000
         created_at:
           type: string
@@ -903,7 +903,7 @@ components:
         budget:
           oneOf:
             - type: integer
-            - type: null
+            - type: 'null'
           example: 250000
       required:
         - name
@@ -921,7 +921,7 @@ components:
         budget:
           oneOf:
             - type: integer
-            - type: null
+            - type: 'null'
           example: 250000
       required:
         - name
@@ -1002,7 +1002,7 @@ components:
         paid_at:
           oneOf:
             - type: string
-            - type: null
+            - type: 'null'
           format: date-time
         created_at:
           type: string
@@ -1047,7 +1047,7 @@ components:
         group:
           oneOf:
             - $ref: "#/components/schemas/Group"
-            - type: null
+            - type: 'null'
       required:
         - id
         - status
@@ -1097,7 +1097,7 @@ components:
         group:
           oneOf:
             - $ref: "#/components/schemas/Group"
-            - type: null
+            - type: 'null'
         targets:
           type: array
           items:
@@ -1142,7 +1142,7 @@ components:
         group:
           oneOf:
             - type: string
-            - type: null
+            - type: 'null'
           format: uuid
         targets:
           type: array
@@ -1171,7 +1171,7 @@ components:
         request:
           oneOf:
             - type: string
-            - type: null
+            - type: 'null'
           format: uuid
         tags:
           type: array
@@ -1180,7 +1180,7 @@ components:
         group:
           oneOf:
             - $ref: "#/components/schemas/Group"
-            - type: null
+            - type: 'null'
         created_at:
           type: string
           format: date-time
@@ -1214,12 +1214,12 @@ components:
         group:
           oneOf:
             - type: string
-            - type: null
+            - type: 'null'
           format: uuid
         request:
           oneOf:
             - type: string
-            - type: null
+            - type: 'null'
           format: uuid
       required:
         - amount
@@ -1243,12 +1243,12 @@ components:
         group:
           oneOf:
             - type: string
-            - type: null
+            - type: 'null'
           format: uuid
         request:
           oneOf:
             - type: string
-            - type: null
+            - type: 'null'
           format: uuid
       required:
         - amount
@@ -1350,7 +1350,7 @@ components:
         deleted_at:
           oneOf:
             - type: string
-            - type: null
+            - type: 'null'
           format: "date-time"
       required:
         - id
