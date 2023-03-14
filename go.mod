@@ -3,7 +3,7 @@ module github.com/traPtitech/Jomon
 go 1.20
 
 require (
-	entgo.io/ent v0.11.9
+	entgo.io/ent v0.11.10
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
@@ -16,7 +16,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.9.1 // indirect
+	ariga.io/atlas v0.9.2-0.20230303073438-03a4779a6338 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
