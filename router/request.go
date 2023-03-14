@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -56,17 +55,18 @@ type PutRequest struct {
 }
 
 type RequestResponse struct {
-	ID        uuid.UUID         `json:"id"`
-	Status    model.Status      `json:"status"`
-	CreatedAt time.Time         `json:"created_at"`
-	UpdatedAt time.Time         `json:"updated_at"`
-	CreatedBy uuid.UUID         `json:"created_by"`
-	Title     string            `json:"title"`
-	Content   string            `json:"content"`
-	Tags      []*TagOverview    `json:"tags"`
-	Targets   []*TargetOverview `json:"targets"`
-	Group     *GroupOverview    `json:"group"`
-	Comments  []*CommentDetail  `json:"comments"`
+	ID        uuid.UUID                 `json:"id"`
+	Status    model.Status              `json:"status"`
+	CreatedAt time.Time                 `json:"created_at"`
+	UpdatedAt time.Time                 `json:"updated_at"`
+	CreatedBy uuid.UUID                 `json:"created_by"`
+	Title     string                    `json:"title"`
+	Content   string                    `json:"content"`
+	Tags      []*TagOverview            `json:"tags"`
+	Targets   []*TargetOverview         `json:"targets"`
+	Group     *GroupOverview            `json:"group"`
+	Statuses  []*StatusResponseOverview `json:"statuses"`
+	Comments  []*CommentDetail          `json:"comments"`
 }
 
 type Comment struct {
@@ -84,6 +84,13 @@ type PutStatus struct {
 	Status  model.Status `json:"status"`
 	Comment string       `json:"comment"`
 }
+
+type StatusResponseOverview struct {
+	CreatedBy uuid.UUID    `json:"created_by"`
+	Status    model.Status `json:"status"`
+	CreatedAt time.Time    `json:"created_at"`
+}
+
 type StatusResponse struct {
 	CreatedBy uuid.UUID     `json:"created_by"`
 	Status    model.Status  `json:"status"`
@@ -296,6 +303,15 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 			UpdatedAt: tag.UpdatedAt,
 		})
 	}
+	var statuses []*StatusResponseOverview
+	for _, status := range request.Statuses {
+		statuses = append(statuses, &StatusResponseOverview{
+			Status:    status.Status,
+			CreatedAt: status.CreatedAt,
+			CreatedBy: status.CreatedBy,
+		})
+	}
+
 	res := &RequestResponse{
 		ID:        request.ID,
 		Status:    request.Status,
@@ -306,6 +322,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 		Content:   request.Content,
 		Tags:      restags,
 		Targets:   reqtargets,
+		Statuses:  statuses,
 		Group:     resgroup,
 	}
 	return c.JSON(http.StatusOK, res)
@@ -373,6 +390,14 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 			UpdatedAt: tag.UpdatedAt,
 		})
 	}
+	var resstatuses []*StatusResponseOverview
+	for _, status := range request.Statuses {
+		resstatuses = append(resstatuses, &StatusResponseOverview{
+			CreatedBy: status.CreatedBy,
+			Status:    status.Status,
+			CreatedAt: status.CreatedAt,
+		})
+	}
 	res := &RequestResponse{
 		ID:        request.ID,
 		Status:    request.Status,
@@ -383,6 +408,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 		Content:   request.Content,
 		Tags:      restags,
 		Targets:   reqtargets,
+		Statuses:  resstatuses,
 		Group:     resgroup,
 		Comments:  comments,
 	}
@@ -390,6 +416,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 }
 
 func (h *Handlers) PutRequest(c echo.Context) error {
+	ctx := c.Request().Context()
 	var req PutRequest
 	var err error
 	requestID, err := uuid.Parse(c.Param("requestID"))
@@ -405,7 +432,6 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	}
 	tags := []*model.Tag{}
 	for _, tagID := range req.Tags {
-		ctx := c.Request().Context()
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
 			if ent.IsNotFound(err) {
@@ -424,7 +450,6 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	}
 	var group *model.Group
 	if req.Group != nil {
-		ctx := c.Request().Context()
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
 			if ent.IsNotFound(err) {
@@ -433,7 +458,6 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
-	ctx := context.Background()
 	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Title, req.Content, tags, targets, group)
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -487,6 +511,14 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 			CreatedAt: target.CreatedAt,
 		})
 	}
+	var resstatuses []*StatusResponseOverview
+	for _, status := range request.Statuses {
+		resstatuses = append(resstatuses, &StatusResponseOverview{
+			CreatedBy: status.CreatedBy,
+			Status:    status.Status,
+			CreatedAt: status.CreatedAt,
+		})
+	}
 	res := &RequestResponse{
 		ID:        request.ID,
 		Status:    request.Status,
@@ -495,6 +527,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 		CreatedBy: request.CreatedBy,
 		Title:     request.Title,
 		Content:   request.Content,
+		Statuses:  resstatuses,
 		Tags:      restags,
 		Targets:   restargets,
 		Group:     resgroup,
