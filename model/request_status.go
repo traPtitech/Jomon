@@ -38,7 +38,7 @@ func (s Status) String() string {
 	}
 }
 
-//dbにstringいれる今の実装だとMarshalJson入らなそう。
+// dbにstringいれる今の実装だとMarshalJson入らなそう。
 func (s Status) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.String())
 }
@@ -74,6 +74,7 @@ type RequestStatusRepository interface {
 
 type RequestStatus struct {
 	ID        uuid.UUID
+	CreatedBy uuid.UUID
 	Status    Status
 	CreatedAt time.Time
 }

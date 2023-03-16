@@ -167,13 +167,22 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, title string, cont
 			return nil, err
 		}
 	}
-	status, err := tx.Client().RequestStatus.
+	s, err := tx.Client().RequestStatus.
 		Create().
 		SetStatus(requeststatus.StatusSubmitted).
 		SetCreatedAt(time.Now()).
 		SetRequest(created).
 		SetUser(user).
 		Save(ctx)
+	if err != nil {
+		err = RollbackWithError(tx, err)
+		return nil, err
+	}
+	status, err := tx.Client().RequestStatus.
+		Query().
+		Where(requeststatus.IDEQ(s.ID)).
+		WithUser().
+		First(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
 		return nil, err
@@ -187,6 +196,7 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, title string, cont
 	if err != nil {
 		return nil, err
 	}
+	statuses := []*RequestStatus{convertEntRequestStatusToModelRequestStatus(status)}
 	reqdetail := &RequestDetail{
 		ID:        created.ID,
 		Status:    convertEntRequestStatusToModelStatus(&status.Status),
@@ -195,6 +205,7 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, title string, cont
 		Tags:      tags,
 		Targets:   ts,
 		Group:     group,
+		Statuses:  statuses,
 		CreatedAt: created.CreatedAt,
 		UpdatedAt: created.UpdatedAt,
 		CreatedBy: user.ID,
@@ -212,7 +223,8 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 		}).
 		WithGroup().
 		WithStatus(func(q *ent.RequestStatusQuery) {
-			q.Order(ent.Desc(requeststatus.FieldCreatedAt)).Limit(1)
+			q.Order(ent.Desc(requeststatus.FieldCreatedAt))
+			q.WithUser()
 		}).
 		WithUser().
 		Only(ctx)
@@ -228,6 +240,10 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 		targets = append(targets, ConvertEntRequestTargetToModelRequestTargetDetail(target))
 	}
 	group := ConvertEntGroupToModelGroup(request.Edges.Group)
+	var statuses []*RequestStatus
+	for _, status := range request.Edges.Status {
+		statuses = append(statuses, convertEntRequestStatusToModelRequestStatus(status))
+	}
 	reqdetail := &RequestDetail{
 		ID:        request.ID,
 		Status:    convertEntRequestStatusToModelStatus(&request.Edges.Status[0].Status),
@@ -235,6 +251,7 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 		Content:   request.Content,
 		Tags:      tags,
 		Targets:   targets,
+		Statuses:  statuses,
 		Group:     group,
 		CreatedAt: request.CreatedAt,
 		UpdatedAt: request.UpdatedAt,
@@ -244,8 +261,6 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 }
 
 func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, title string, content string, tags []*Tag, targets []*RequestTarget, group *Group) (*RequestDetail, error) {
-	mu.Lock()
-	defer mu.Unlock()
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -289,11 +304,16 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		return nil, err
 	}
 
-	status, err := updated.QueryStatus().Select(requeststatus.FieldStatus).First(ctx)
+	entstatuses, err := updated.QueryStatus().
+		Select(requeststatus.FieldStatus).
+		WithUser().
+		Order(ent.Desc(requeststatus.FieldCreatedAt)).
+		All(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
 		return nil, err
 	}
+	status := entstatuses[0]
 	user, err := updated.QueryUser().Select(user.FieldID).First(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
@@ -331,6 +351,10 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	if err != nil {
 		return nil, err
 	}
+	var statuses []*RequestStatus
+	for _, s := range entstatuses {
+		statuses = append(statuses, convertEntRequestStatusToModelRequestStatus(s))
+	}
 
 	modelgroup := ConvertEntGroupToModelGroup(entgroup)
 	reqdetail := &RequestDetail{
@@ -341,6 +365,7 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		Tags:      modeltags,
 		Targets:   modeltargets,
 		Group:     modelgroup,
+		Statuses:  statuses,
 		CreatedAt: updated.CreatedAt,
 		UpdatedAt: updated.UpdatedAt,
 		CreatedBy: user.ID,
