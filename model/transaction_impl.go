@@ -21,6 +21,7 @@ func (repo *EntRepository) GetTransactions(ctx context.Context, query Transactio
 			Query().
 			WithTag().
 			WithDetail().
+			WithRequest().
 			WithGroupBudget(func(q *ent.GroupBudgetQuery) {
 				q.WithGroup()
 			}).
@@ -30,6 +31,7 @@ func (repo *EntRepository) GetTransactions(ctx context.Context, query Transactio
 			Query().
 			WithTag().
 			WithDetail().
+			WithRequest().
 			WithGroupBudget(func(q *ent.GroupBudgetQuery) {
 				q.WithGroup()
 			}).
@@ -96,6 +98,7 @@ func (repo *EntRepository) GetTransaction(ctx context.Context, transactionID uui
 		Where(transaction.ID(transactionID)).
 		WithTag().
 		WithDetail().
+		WithRequest().
 		WithGroupBudget(func(q *ent.GroupBudgetQuery) {
 			q.WithGroup()
 		}).
@@ -188,6 +191,7 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 		Where(transaction.ID(trns.ID)).
 		WithTag().
 		WithDetail().
+		WithRequest().
 		WithGroupBudget(func(q *ent.GroupBudgetQuery) {
 			q.WithGroup()
 		}).
