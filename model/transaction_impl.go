@@ -286,6 +286,7 @@ func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID 
 		Where(transaction.ID(transactionID)).
 		WithTag().
 		WithDetail().
+		WithRequest().
 		WithGroupBudget(func(q *ent.GroupBudgetQuery) {
 			q.WithGroup()
 		}).
@@ -317,15 +318,11 @@ func ConvertEntTransactionToModelTransactionResponse(transaction *ent.Transactio
 		tags = append(tags, ConvertEntTagToModelTag(tag))
 	}
 	var group *Group
-	if transaction.Edges.GroupBudget == nil {
-		group = nil
-	} else {
+	if transaction.Edges.GroupBudget != nil {
 		group = ConvertEntGroupToModelGroup(transaction.Edges.GroupBudget.Edges.Group)
 	}
 	var request *uuid.UUID
-	if transaction.Edges.Request == nil {
-		request = nil
-	} else {
+	if transaction.Edges.Request != nil {
 		request = &transaction.Edges.Request.ID
 	}
 	return &TransactionResponse{
