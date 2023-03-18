@@ -15,7 +15,6 @@ updates:
       - cskd8
     labels:
       - "dependencies"
-      - "go"
 
   - package-ecosystem: docker
     directory: "/"
