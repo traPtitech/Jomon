@@ -16,14 +16,6 @@ jobs:
         go-version: 1.20.1
       id: go
 
-    - name: Check cache
-      uses: actions/cache@v3
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-
     - name: Download dependencies
       run: go mod download
 
@@ -52,14 +44,6 @@ jobs:
       with:
         go-version: 1.20.1
       id: go
-
-    - name: Check cache
-      uses: actions/cache@v3
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
 
     - name: Download dependencies
       run: go mod download
