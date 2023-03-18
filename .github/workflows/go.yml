@@ -13,7 +13,7 @@ jobs:
     - name: Set up Go 1.20.1
       uses: actions/setup-go@v4
       with:
-        go-version: 1.20.1
+        go-version-file: ./go.mod
       id: go
 
     - name: Download dependencies
@@ -42,7 +42,7 @@ jobs:
     - name: Set up Go 1.20.1
       uses: actions/setup-go@v4
       with:
-        go-version: 1.20.1
+        go-version-file: ./go.mod
       id: go
 
     - name: Download dependencies
