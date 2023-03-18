@@ -263,13 +263,16 @@ func (h *Handlers) PutTransaction(c echo.Context) error {
 			UpdatedAt: tag.UpdatedAt,
 		})
 	}
-	group := &GroupOverview{
-		ID:          updated.Group.ID,
-		Name:        updated.Group.Name,
-		Description: updated.Group.Description,
-		Budget:      updated.Group.Budget,
-		CreatedAt:   updated.Group.CreatedAt,
-		UpdatedAt:   updated.Group.UpdatedAt,
+	var group *GroupOverview
+	if updated.Group != nil {
+		group = &GroupOverview{
+			ID:          updated.Group.ID,
+			Name:        updated.Group.Name,
+			Description: updated.Group.Description,
+			Budget:      updated.Group.Budget,
+			CreatedAt:   updated.Group.CreatedAt,
+			UpdatedAt:   updated.Group.UpdatedAt,
+		}
 	}
 	res := Transaction{
 		ID:        updated.ID,
