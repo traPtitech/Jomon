@@ -111,13 +111,16 @@ func (h *Handlers) GetTransactions(c echo.Context) error {
 				UpdatedAt: tag.UpdatedAt,
 			})
 		}
-		group := &GroupOverview{
-			ID:          tx.Group.ID,
-			Name:        tx.Group.Name,
-			Description: tx.Group.Description,
-			Budget:      tx.Group.Budget,
-			CreatedAt:   tx.Group.CreatedAt,
-			UpdatedAt:   tx.Group.UpdatedAt,
+		var group *GroupOverview
+		if tx.Group != nil {
+			group = &GroupOverview{
+				ID:          tx.Group.ID,
+				Name:        tx.Group.Name,
+				Description: tx.Group.Description,
+				Budget:      tx.Group.Budget,
+				CreatedAt:   tx.Group.CreatedAt,
+				UpdatedAt:   tx.Group.UpdatedAt,
+			}
 		}
 		tx := &Transaction{
 			ID:        tx.ID,
@@ -161,13 +164,16 @@ func (h *Handlers) PostTransaction(c echo.Context) error {
 				UpdatedAt: tag.UpdatedAt,
 			})
 		}
-		group := &GroupOverview{
-			ID:          created.Group.ID,
-			Name:        created.Group.Name,
-			Description: created.Group.Description,
-			Budget:      created.Group.Budget,
-			CreatedAt:   created.Group.CreatedAt,
-			UpdatedAt:   created.Group.UpdatedAt,
+		var group *GroupOverview
+		if created.Group != nil {
+			group = &GroupOverview{
+				ID:          created.Group.ID,
+				Name:        created.Group.Name,
+				Description: created.Group.Description,
+				Budget:      created.Group.Budget,
+				CreatedAt:   created.Group.CreatedAt,
+				UpdatedAt:   created.Group.UpdatedAt,
+			}
 		}
 		res := Transaction{
 			ID:        created.ID,
@@ -206,13 +212,16 @@ func (h *Handlers) GetTransaction(c echo.Context) error {
 			UpdatedAt: tag.UpdatedAt,
 		})
 	}
-	group := &GroupOverview{
-		ID:          tx.Group.ID,
-		Name:        tx.Group.Name,
-		Description: tx.Group.Description,
-		Budget:      tx.Group.Budget,
-		CreatedAt:   tx.Group.CreatedAt,
-		UpdatedAt:   tx.Group.UpdatedAt,
+	var group *GroupOverview
+	if tx.Group != nil {
+		group = &GroupOverview{
+			ID:          tx.Group.ID,
+			Name:        tx.Group.Name,
+			Description: tx.Group.Description,
+			Budget:      tx.Group.Budget,
+			CreatedAt:   tx.Group.CreatedAt,
+			UpdatedAt:   tx.Group.UpdatedAt,
+		}
 	}
 	res := Transaction{
 		ID:        tx.ID,
@@ -254,13 +263,16 @@ func (h *Handlers) PutTransaction(c echo.Context) error {
 			UpdatedAt: tag.UpdatedAt,
 		})
 	}
-	group := &GroupOverview{
-		ID:          updated.Group.ID,
-		Name:        updated.Group.Name,
-		Description: updated.Group.Description,
-		Budget:      updated.Group.Budget,
-		CreatedAt:   updated.Group.CreatedAt,
-		UpdatedAt:   updated.Group.UpdatedAt,
+	var group *GroupOverview
+	if updated.Group != nil {
+		group = &GroupOverview{
+			ID:          updated.Group.ID,
+			Name:        updated.Group.Name,
+			Description: updated.Group.Description,
+			Budget:      updated.Group.Budget,
+			CreatedAt:   updated.Group.CreatedAt,
+			UpdatedAt:   updated.Group.UpdatedAt,
+		}
 	}
 	res := Transaction{
 		ID:        updated.ID,
