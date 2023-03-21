@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/group"
@@ -36,6 +37,34 @@ func (repo *EntRepository) GetTransactions(ctx context.Context, query Transactio
 				q.WithGroup()
 			}).
 			Order(ent.Asc(transaction.FieldCreatedAt))
+	} else if *query.Sort == "amount" {
+		transactionsq = repo.client.Transaction.
+			Query().
+			WithTag().
+			WithDetail().
+			WithRequest().
+			WithGroupBudget(func(q *ent.GroupBudgetQuery) {
+				q.WithGroup()
+			}).
+			Order(func(s *sql.Selector) {
+				t := sql.Table(transactiondetail.Table)
+				s.Join(t).On(s.C(transaction.FieldID), t.C(transactiondetail.TransactionColumn))
+				s.OrderBy(sql.Asc(t.C(transactiondetail.FieldAmount)))
+			})
+	} else if *query.Sort == "-amount" {
+		transactionsq = repo.client.Transaction.
+			Query().
+			WithTag().
+			WithDetail().
+			WithRequest().
+			WithGroupBudget(func(q *ent.GroupBudgetQuery) {
+				q.WithGroup()
+			}).
+			Order(func(s *sql.Selector) {
+				t := sql.Table(transactiondetail.Table)
+				s.Join(t).On(s.C(transaction.FieldID), t.C(transactiondetail.TransactionColumn))
+				s.OrderBy(sql.Desc(t.C(transactiondetail.FieldAmount)))
+			})
 	}
 
 	if query.Target != nil && *query.Target != "" {
