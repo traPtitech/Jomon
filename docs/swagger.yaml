@@ -1392,7 +1392,7 @@ components:
         $ref: "#/components/schemas/StatusEnum"
     sortTransactionQuery:
       name: sort
-      description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at")
+      description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", 金額の昇順 "amount", 金額の降順 "-amount")
       required: false
       in: query
       schema:
