@@ -16,9 +16,39 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 	client, storage, err := setup(t, ctx, "get_transactions")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
+	client2, storage2, err := setup(t, ctx, "get_transactions2")
+	require.NoError(t, err)
+	repo2 := NewEntRepository(client2, storage2)
+	client3, storage3, err := setup(t, ctx, "get_transactions3")
+	require.NoError(t, err)
+	repo3 := NewEntRepository(client3, storage3)
+	client4, storage4, err := setup(t, ctx, "get_transactions4")
+	require.NoError(t, err)
+	repo4 := NewEntRepository(client4, storage4)
+	client5, storage5, err := setup(t, ctx, "get_transactions5")
+	require.NoError(t, err)
+	repo5 := NewEntRepository(client5, storage5)
+	client6, storage6, err := setup(t, ctx, "get_transactions6")
+	require.NoError(t, err)
+	repo6 := NewEntRepository(client6, storage6)
+	client7, storage7, err := setup(t, ctx, "get_transactions7")
+	require.NoError(t, err)
+	repo7 := NewEntRepository(client7, storage7)
+	client8, storage8, err := setup(t, ctx, "get_transactions8")
+	require.NoError(t, err)
+	repo8 := NewEntRepository(client8, storage8)
+	client9, storage9, err := setup(t, ctx, "get_transactions9")
+	require.NoError(t, err)
+	repo9 := NewEntRepository(client9, storage9)
+	client10, storage10, err := setup(t, ctx, "get_transactions10")
+	require.NoError(t, err)
+	repo10 := NewEntRepository(client10, storage10)
+	client11, storage11, err := setup(t, ctx, "get_transactions11")
+	require.NoError(t, err)
+	repo11 := NewEntRepository(client11, storage11)
 
 	t.Run("SuccessWithSortCreatedAt", func(t *testing.T) {
-		ctx := context.Background()
+		t.Parallel()
 
 		// Create user
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
@@ -58,24 +88,21 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 	})
 
 	t.Run("SuccessWithSortCreatedAtDesc", func(t *testing.T) {
-		err := dropAll(t, ctx, client)
-		require.NoError(t, err)
-		ctx := context.Background()
+		t.Parallel()
 
 		// Create user
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
+		user, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
 		require.NoError(t, err)
 
 		// Create Transactions
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
+		request, err := repo2.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx1, err := repo2.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
-		time.Sleep(1 * time.Second)
-		tx2, err := repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx2, err := repo2.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -83,7 +110,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		query := TransactionQuery{
 			Sort: &sort,
 		}
-		got, err := repo.GetTransactions(ctx, query)
+		got, err := repo2.GetTransactions(ctx, query)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) {
 			assert.Equal(t, tx1.ID, got[0].ID)
@@ -100,23 +127,21 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 	})
 
 	t.Run("SuccessWithSortAmount", func(t *testing.T) {
-		err := dropAll(t, ctx, client)
-		require.NoError(t, err)
-		ctx := context.Background()
+		t.Parallel()
 
 		// Create user
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
+		user, err := repo3.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
 		require.NoError(t, err)
 
 		// Create Transactions
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), nil, nil, nil, user.ID)
+		request, err := repo3.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo.CreateTransaction(ctx, 100, target, nil, nil, &request.ID)
+		tx1, err := repo3.CreateTransaction(ctx, 100, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo.CreateTransaction(ctx, 10000, target, nil, nil, &request.ID)
+		tx2, err := repo3.CreateTransaction(ctx, 10000, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -124,7 +149,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		query := TransactionQuery{
 			Sort: &sort,
 		}
-		got, err := repo.GetTransactions(ctx, query)
+		got, err := repo3.GetTransactions(ctx, query)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) {
 			assert.Equal(t, tx1.ID, got[0].ID)
@@ -146,18 +171,18 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		ctx := context.Background()
 
 		// Create user
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
+		user, err := repo4.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
 		require.NoError(t, err)
 
 		// Create Transactions
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), nil, nil, nil, user.ID)
+		request, err := repo4.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo.CreateTransaction(ctx, 100, target, nil, nil, &request.ID)
+		tx1, err := repo4.CreateTransaction(ctx, 100, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo.CreateTransaction(ctx, 10000, target, nil, nil, &request.ID)
+		tx2, err := repo4.CreateTransaction(ctx, 10000, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -165,7 +190,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		query := TransactionQuery{
 			Sort: &sort,
 		}
-		got, err := repo.GetTransactions(ctx, query)
+		got, err := repo4.GetTransactions(ctx, query)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) {
 			assert.Equal(t, tx2.ID, got[0].ID)
@@ -182,24 +207,22 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 	})
 
 	t.Run("SuccessWithNoneSort", func(t *testing.T) {
-		err := dropAll(t, ctx, client)
-		require.NoError(t, err)
-		ctx := context.Background()
+		t.Parallel()
 
 		// Create user
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
+		user, err := repo5.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
 		require.NoError(t, err)
 
 		// Create Transactions
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
+		request, err := repo5.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx1, err := repo5.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx2, err := repo5.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -207,7 +230,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		query := TransactionQuery{
 			Sort: &sort,
 		}
-		got, err := repo.GetTransactions(ctx, query)
+		got, err := repo5.GetTransactions(ctx, query)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) {
 			assert.Equal(t, tx1.ID, got[1].ID)
@@ -224,32 +247,30 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 	})
 
 	t.Run("SuccessWithTarget", func(t *testing.T) {
-		err := dropAll(t, ctx, client)
-		require.NoError(t, err)
-		ctx := context.Background()
+		t.Parallel()
 
 		// Create user
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
+		user, err := repo6.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
 		require.NoError(t, err)
 
 		// Create Transactions
 		amount := random.Numeric(t, 100000)
 		target1 := random.AlphaNumeric(t, 20)
 		target2 := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
+		request, err := repo6.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
-		tx, err := repo.CreateTransaction(ctx, amount, target1, nil, nil, &request.ID)
+		tx, err := repo6.CreateTransaction(ctx, amount, target1, nil, nil, &request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		_, err = repo.CreateTransaction(ctx, amount, target2, nil, nil, &request.ID)
+		_, err = repo6.CreateTransaction(ctx, amount, target2, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
 		query := TransactionQuery{
 			Target: &target1,
 		}
-		got, err := repo.GetTransactions(ctx, query)
+		got, err := repo6.GetTransactions(ctx, query)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
 			assert.Equal(t, tx.ID, got[0].ID)
@@ -261,21 +282,19 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 	})
 
 	t.Run("SuccessWithSinceUntil", func(t *testing.T) {
-		err := dropAll(t, ctx, client)
-		require.NoError(t, err)
-		ctx := context.Background()
+		t.Parallel()
 
 		// Create user
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
+		user, err := repo7.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
 		require.NoError(t, err)
 
 		// Create Transactions
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
+		request, err := repo7.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
-		_, err = repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		_, err = repo7.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -287,10 +306,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 
 		time.Sleep(1 * time.Second)
-		tx, err := repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx, err := repo7.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
-		got, err := repo.GetTransactions(ctx, query)
+		got, err := repo7.GetTransactions(ctx, query)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
 			assert.Equal(t, tx.ID, got[0].ID)
@@ -302,23 +321,21 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 	})
 
 	t.Run("SuccessWithTag", func(t *testing.T) {
-		err := dropAll(t, ctx, client)
-		require.NoError(t, err)
-		ctx := context.Background()
+		t.Parallel()
 
 		// Create user
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
+		user, err := repo8.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
 		require.NoError(t, err)
 
 		// Create Transactions
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
-		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
+		tag, err := repo8.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
+		request, err := repo8.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
-		_, err = repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		_, err = repo8.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -327,10 +344,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 
 		time.Sleep(1 * time.Second)
-		tx, err := repo.CreateTransaction(ctx, amount, target, []*uuid.UUID{&tag.ID}, nil, &request.ID)
+		tx, err := repo8.CreateTransaction(ctx, amount, target, []*uuid.UUID{&tag.ID}, nil, &request.ID)
 		require.NoError(t, err)
 
-		got, err := repo.GetTransactions(ctx, query)
+		got, err := repo8.GetTransactions(ctx, query)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
 			assert.Equal(t, tx.ID, got[0].ID)
@@ -342,24 +359,22 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 	})
 
 	t.Run("SuccessWithGroup", func(t *testing.T) {
-		err := dropAll(t, ctx, client)
-		require.NoError(t, err)
-		ctx := context.Background()
+		t.Parallel()
 
 		// Create user
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
+		user, err := repo9.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
 		require.NoError(t, err)
 
 		// Create Transactions
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
+		group, err := repo9.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), &budget)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
+		request, err := repo9.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
-		_, err = repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		_, err = repo9.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -368,10 +383,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 
 		time.Sleep(1 * time.Second)
-		tx, err := repo.CreateTransaction(ctx, amount, target, nil, &group.ID, &request.ID)
+		tx, err := repo9.CreateTransaction(ctx, amount, target, nil, &group.ID, &request.ID)
 		require.NoError(t, err)
 
-		got, err := repo.GetTransactions(ctx, query)
+		got, err := repo9.GetTransactions(ctx, query)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
 			assert.Equal(t, tx.ID, got[0].ID)
@@ -383,21 +398,19 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 	})
 
 	t.Run("SuccessWithRequest", func(t *testing.T) {
-		err := dropAll(t, ctx, client)
-		require.NoError(t, err)
-		ctx := context.Background()
+		t.Parallel()
 
 		// Create user
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
+		user, err := repo10.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 20), random.Numeric(t, 1) == 0)
 		require.NoError(t, err)
 
 		// Create Transactions
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
+		request, err := repo10.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), nil, nil, nil, user.ID)
 		require.NoError(t, err)
 
-		_, err = repo.CreateTransaction(ctx, amount, target, nil, nil, nil)
+		_, err = repo10.CreateTransaction(ctx, amount, target, nil, nil, nil)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -406,10 +419,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 
 		time.Sleep(1 * time.Second)
-		tx, err := repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx, err := repo10.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
-		got, err := repo.GetTransactions(ctx, query)
+		got, err := repo10.GetTransactions(ctx, query)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
 			assert.Equal(t, tx.ID, got[0].ID)
@@ -421,13 +434,11 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		err := dropAll(t, ctx, client)
-		require.NoError(t, err)
-		ctx := context.Background()
+		t.Parallel()
 
 		// Get Transactions
 		query := TransactionQuery{}
-		got, err := repo.GetTransactions(ctx, query)
+		got, err := repo11.GetTransactions(ctx, query)
 		assert.NoError(t, err)
 		assert.Len(t, got, 0)
 	})
