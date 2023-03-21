@@ -12,6 +12,7 @@ import (
 )
 
 func TestEntRepository_GetTransactions(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx, "get_transactions")
 	require.NoError(t, err)
@@ -102,6 +103,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 
 		tx1, err := repo2.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
+		time.Sleep(1 * time.Second)
 		tx2, err := repo2.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
@@ -262,7 +264,6 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 
 		tx, err := repo6.CreateTransaction(ctx, amount, target1, nil, nil, &request.ID)
 		require.NoError(t, err)
-		time.Sleep(1 * time.Second)
 		_, err = repo6.CreateTransaction(ctx, amount, target2, nil, nil, &request.ID)
 		require.NoError(t, err)
 
@@ -343,7 +344,6 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			Tag: &tag.Name,
 		}
 
-		time.Sleep(1 * time.Second)
 		tx, err := repo8.CreateTransaction(ctx, amount, target, []*uuid.UUID{&tag.ID}, nil, &request.ID)
 		require.NoError(t, err)
 
@@ -382,7 +382,6 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			Group: &group.Name,
 		}
 
-		time.Sleep(1 * time.Second)
 		tx, err := repo9.CreateTransaction(ctx, amount, target, nil, &group.ID, &request.ID)
 		require.NoError(t, err)
 
@@ -418,7 +417,6 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			Request: &request.ID,
 		}
 
-		time.Sleep(1 * time.Second)
 		tx, err := repo10.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
@@ -445,6 +443,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 }
 
 func TestEntRepository_GetTransaction(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx, "get_transaction")
 	require.NoError(t, err)
@@ -480,6 +479,7 @@ func TestEntRepository_GetTransaction(t *testing.T) {
 }
 
 func TestEntRepository_CreateTransaction(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx, "create_transaction")
 	require.NoError(t, err)
@@ -630,6 +630,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 }
 
 func TestEntRepository_UpdateTransaction(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx, "update_transaction")
 	require.NoError(t, err)
