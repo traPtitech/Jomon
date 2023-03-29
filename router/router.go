@@ -34,9 +34,9 @@ func NewServer(h Handlers) *echo.Echo {
 	gob.Register(uuid.UUID{})
 	gob.Register([]*model.Owner{})
 
-	retrieveGroupOwner := h.RetrieveGroupOwner(h.Repository)
-	retrieveRequestCreator := h.RetrieveRequestCreator(h.Repository)
-	retrieveFileCreator := h.RetrieveFileCreator(h.Repository)
+	retrieveGroupOwner := h.RetrieveGroupOwner()
+	retrieveRequestCreator := h.RetrieveRequestCreator()
+	retrieveFileCreator := h.RetrieveFileCreator()
 
 	api := e.Group("/api")
 	{
