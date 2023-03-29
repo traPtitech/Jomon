@@ -216,7 +216,7 @@ func (h Handlers) CheckAdminOrFileCreatorMiddleware(next echo.HandlerFunc) echo.
 	}
 }
 
-func (h Handlers) RetrieveGroupOwner(repo model.Repository) echo.MiddlewareFunc {
+func (h Handlers) RetrieveGroupOwner() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			sess, err := session.Get(h.SessionName, c)
@@ -229,7 +229,7 @@ func (h Handlers) RetrieveGroupOwner(repo model.Repository) echo.MiddlewareFunc 
 			}
 
 			ctx := c.Request().Context()
-			owners, err := repo.GetOwners(ctx, id)
+			owners, err := h.Repository.GetOwners(ctx, id)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
@@ -245,7 +245,7 @@ func (h Handlers) RetrieveGroupOwner(repo model.Repository) echo.MiddlewareFunc 
 	}
 }
 
-func (h Handlers) RetrieveRequestCreator(repo model.Repository) echo.MiddlewareFunc {
+func (h Handlers) RetrieveRequestCreator() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			sess, err := session.Get(h.SessionName, c)
@@ -258,7 +258,7 @@ func (h Handlers) RetrieveRequestCreator(repo model.Repository) echo.MiddlewareF
 			}
 
 			ctx := c.Request().Context()
-			request, err := repo.GetRequest(ctx, id)
+			request, err := h.Repository.GetRequest(ctx, id)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
@@ -274,7 +274,7 @@ func (h Handlers) RetrieveRequestCreator(repo model.Repository) echo.MiddlewareF
 	}
 }
 
-func (h Handlers) RetrieveFileCreator(repo model.Repository) echo.MiddlewareFunc {
+func (h Handlers) RetrieveFileCreator() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			sess, err := session.Get(h.SessionName, c)
@@ -287,7 +287,7 @@ func (h Handlers) RetrieveFileCreator(repo model.Repository) echo.MiddlewareFunc
 			}
 
 			ctx := c.Request().Context()
-			file, err := repo.GetFile(ctx, id)
+			file, err := h.Repository.GetFile(ctx, id)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
