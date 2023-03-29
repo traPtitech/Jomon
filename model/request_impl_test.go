@@ -633,7 +633,6 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 
 	t.Run("UnknownTag", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
 		user, err := repo4.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		tag, err := repo4.CreateTag(ctx, random.AlphaNumeric(t, 20))
@@ -661,7 +660,6 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 
 	t.Run("UnknownGroup", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
 		user, err := repo5.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		tag, err := repo5.CreateTag(ctx, random.AlphaNumeric(t, 20))
