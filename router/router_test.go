@@ -64,7 +64,7 @@ func NewMockStorage(ctrl *gomock.Controller) *MockStorage {
 }
 
 type TestHandlers struct {
-	Handlers   *Handlers
+	Handlers   Handlers
 	Repository *MockRepository
 	Storage    *MockStorage
 }
@@ -80,7 +80,7 @@ func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, erro
 	sessionName := "session"
 
 	return &TestHandlers{
-		&Handlers{
+		Handlers{
 			Repository:  repository,
 			Storage:     storage,
 			Logger:      logger,

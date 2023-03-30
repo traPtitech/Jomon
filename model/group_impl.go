@@ -17,21 +17,21 @@ func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
 		return nil, err
 	}
 	modelgroups := []*Group{}
-	for _, group := range groups {
-		modelgroups = append(modelgroups, ConvertEntGroupToModelGroup(group))
+	for _, g := range groups {
+		modelgroups = append(modelgroups, ConvertEntGroupToModelGroup(g))
 	}
 	return modelgroups, nil
 }
 
 func (repo *EntRepository) GetGroup(ctx context.Context, groupID uuid.UUID) (*Group, error) {
-	group, err := repo.client.Group.
+	g, err := repo.client.Group.
 		Query().
 		Where(group.IDEQ(groupID)).
 		Only(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return ConvertEntGroupToModelGroup(group), nil
+	return ConvertEntGroupToModelGroup(g), nil
 }
 
 func (repo *EntRepository) CreateGroup(ctx context.Context, name string, description string, budget *int) (*Group, error) {

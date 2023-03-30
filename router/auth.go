@@ -19,7 +19,6 @@ import (
 
 const (
 	sessionDuration        = 24 * 60 * 60 * 7
-	sessionKey             = "sessions"
 	sessionCodeVerifierKey = "code_verifier"
 )
 

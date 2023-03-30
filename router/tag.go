@@ -21,7 +21,7 @@ type TagOverview struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func (h *Handlers) GetTags(c echo.Context) error {
+func (h Handlers) GetTags(c echo.Context) error {
 	ctx := c.Request().Context()
 	tags, err := h.Repository.GetTags(ctx)
 	if err != nil {
@@ -41,7 +41,7 @@ func (h *Handlers) GetTags(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PostTag(c echo.Context) error {
+func (h Handlers) PostTag(c echo.Context) error {
 	var tag Tag
 	if err := c.Bind(&tag); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -63,7 +63,7 @@ func (h *Handlers) PostTag(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PutTag(c echo.Context) error {
+func (h Handlers) PutTag(c echo.Context) error {
 	tagID, err := uuid.Parse(c.Param("tagID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -92,7 +92,7 @@ func (h *Handlers) PutTag(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) DeleteTag(c echo.Context) error {
+func (h Handlers) DeleteTag(c echo.Context) error {
 	tagID, err := uuid.Parse(c.Param("tagID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
