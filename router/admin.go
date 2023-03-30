@@ -8,7 +8,7 @@ import (
 	"github.com/traPtitech/Jomon/ent"
 )
 
-func (h *Handlers) GetAdmins(c echo.Context) error {
+func (h Handlers) GetAdmins(c echo.Context) error {
 	ctx := c.Request().Context()
 	admins, err := h.Repository.GetAdmins(ctx)
 	if err != nil {
@@ -23,7 +23,7 @@ func (h *Handlers) GetAdmins(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PostAdmins(c echo.Context) error {
+func (h Handlers) PostAdmins(c echo.Context) error {
 	var admin []uuid.UUID
 	if err := c.Bind(&admin); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -41,7 +41,7 @@ func (h *Handlers) PostAdmins(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-func (h *Handlers) DeleteAdmins(c echo.Context) error {
+func (h Handlers) DeleteAdmins(c echo.Context) error {
 	var admin []uuid.UUID
 	if err := c.Bind(&admin); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)

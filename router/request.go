@@ -111,7 +111,7 @@ type TargetOverview struct {
 	CreatedAt time.Time  `json:"created_at"`
 }
 
-func (h *Handlers) GetRequests(c echo.Context) error {
+func (h Handlers) GetRequests(c echo.Context) error {
 	ctx := c.Request().Context()
 	var sort *string
 	if s := c.QueryParam("sort"); s != "" {
@@ -231,7 +231,7 @@ func (h *Handlers) GetRequests(c echo.Context) error {
 	return c.JSON(http.StatusOK, requests)
 }
 
-func (h *Handlers) PostRequest(c echo.Context) error {
+func (h Handlers) PostRequest(c echo.Context) error {
 	var req Request
 	var err error
 	if err = c.Bind(&req); err != nil {
@@ -328,7 +328,7 @@ func (h *Handlers) PostRequest(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) GetRequest(c echo.Context) error {
+func (h Handlers) GetRequest(c echo.Context) error {
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -415,7 +415,7 @@ func (h *Handlers) GetRequest(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PutRequest(c echo.Context) error {
+func (h Handlers) PutRequest(c echo.Context) error {
 	ctx := c.Request().Context()
 	var req PutRequest
 	var err error
@@ -536,7 +536,7 @@ func (h *Handlers) PutRequest(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PostComment(c echo.Context) error {
+func (h Handlers) PostComment(c echo.Context) error {
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -577,7 +577,7 @@ func (h *Handlers) PostComment(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PutStatus(c echo.Context) error {
+func (h Handlers) PutStatus(c echo.Context) error {
 	var req PutStatus
 	var err error
 	requestID, err := uuid.Parse(c.Param("requestID"))

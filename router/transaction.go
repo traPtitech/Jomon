@@ -37,7 +37,7 @@ type TransactionOverviewWithOneTarget struct {
 	Request *uuid.UUID   `json:"request"`
 }
 
-func (h *Handlers) GetTransactions(c echo.Context) error {
+func (h Handlers) GetTransactions(c echo.Context) error {
 	ctx := c.Request().Context()
 	var sort *string
 	if c.QueryParam("sort") != "" {
@@ -138,7 +138,7 @@ func (h *Handlers) GetTransactions(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PostTransaction(c echo.Context) error {
+func (h Handlers) PostTransaction(c echo.Context) error {
 	var tx *TransactionOverview
 	if err := c.Bind(&tx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -191,7 +191,7 @@ func (h *Handlers) PostTransaction(c echo.Context) error {
 	return c.JSON(http.StatusOK, transactions)
 }
 
-func (h *Handlers) GetTransaction(c echo.Context) error {
+func (h Handlers) GetTransaction(c echo.Context) error {
 	txID, err := uuid.Parse(c.Param("transactionID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -237,7 +237,7 @@ func (h *Handlers) GetTransaction(c echo.Context) error {
 	return c.JSON(http.StatusOK, &res)
 }
 
-func (h *Handlers) PutTransaction(c echo.Context) error {
+func (h Handlers) PutTransaction(c echo.Context) error {
 	txID, err := uuid.Parse(c.Param("transactionID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)

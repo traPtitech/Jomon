@@ -52,7 +52,7 @@ type Member struct {
 }
 
 // GetGroups GET /groups
-func (h *Handlers) GetGroups(c echo.Context) error {
+func (h Handlers) GetGroups(c echo.Context) error {
 	ctx := c.Request().Context()
 	groups, err := h.Repository.GetGroups(ctx)
 	if err != nil {
@@ -75,7 +75,7 @@ func (h *Handlers) GetGroups(c echo.Context) error {
 }
 
 // PostGroup POST /groups
-func (h *Handlers) PostGroup(c echo.Context) error {
+func (h Handlers) PostGroup(c echo.Context) error {
 	var group Group
 	if err := c.Bind(&group); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -100,7 +100,7 @@ func (h *Handlers) PostGroup(c echo.Context) error {
 }
 
 // GetGroupDetail GET /groups/:groupID
-func (h *Handlers) GetGroupDetail(c echo.Context) error {
+func (h Handlers) GetGroupDetail(c echo.Context) error {
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -146,7 +146,7 @@ func (h *Handlers) GetGroupDetail(c echo.Context) error {
 }
 
 // PutGroup PUT /groups/:groupID
-func (h *Handlers) PutGroup(c echo.Context) error {
+func (h Handlers) PutGroup(c echo.Context) error {
 	var group Group
 	if err := c.Bind(&group); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -179,7 +179,7 @@ func (h *Handlers) PutGroup(c echo.Context) error {
 }
 
 // DeleteGroup DELETE /groups/:groupID
-func (h *Handlers) DeleteGroup(c echo.Context) error {
+func (h Handlers) DeleteGroup(c echo.Context) error {
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -198,7 +198,7 @@ func (h *Handlers) DeleteGroup(c echo.Context) error {
 }
 
 // PostMember POST /groups/:groupID/members
-func (h *Handlers) PostMember(c echo.Context) error {
+func (h Handlers) PostMember(c echo.Context) error {
 	ctx := c.Request().Context()
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
@@ -223,7 +223,7 @@ func (h *Handlers) PostMember(c echo.Context) error {
 }
 
 // DeleteMember DELETE /groups/:groupID/members
-func (h *Handlers) DeleteMember(c echo.Context) error {
+func (h Handlers) DeleteMember(c echo.Context) error {
 	ctx := c.Request().Context()
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
@@ -244,7 +244,7 @@ func (h *Handlers) DeleteMember(c echo.Context) error {
 }
 
 // PostOwner POST /groups/:groupID/owners
-func (h *Handlers) PostOwner(c echo.Context) error {
+func (h Handlers) PostOwner(c echo.Context) error {
 	ctx := c.Request().Context()
 	var owners []uuid.UUID
 	groupID, err := uuid.Parse(c.Param("groupID"))
@@ -274,7 +274,7 @@ func (h *Handlers) PostOwner(c echo.Context) error {
 }
 
 // DeleteOwner DELETE /groups/:groupID/owners
-func (h *Handlers) DeleteOwner(c echo.Context) error {
+func (h Handlers) DeleteOwner(c echo.Context) error {
 	ctx := c.Request().Context()
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
