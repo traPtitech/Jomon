@@ -164,8 +164,11 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			for i, tag := range resApp.Tags {
 				tags[i] = fmt.Sprintf(`%s`, tag.Name)
 			}
-
-			message += fmt.Sprintf("- タグ: %s", strings.Join(tags, " "))
+			if len(resApp.Tags) == 0 {
+				message += fmt.Sprintf("")
+			} else {
+				message += fmt.Sprintf("- タグ: %s", strings.Join(tags, " "))
+			}
 		}
 	}
 
