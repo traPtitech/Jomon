@@ -35,6 +35,14 @@ type CommentApplication struct {
 	Comment string    `json:"comment"`
 }
 
+type TransactionRequestApplication struct {
+	ID     uuid.UUID `json:"id"`
+	Amount int       `json:"amount"`
+	Target string    `json:"target"`
+	Tags   []*Tag    `json:"tags"`
+	Group  *Group    `json:"group"`
+}
+
 type Tag struct {
 	Name string `json:"name"`
 }
@@ -119,7 +127,49 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			message += resApp.Content + "\n"
 		}
 	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
-		//TODO
+		var resApps []TransactionRequestApplication
+		err := json.Unmarshal(resBody, &resApps)
+		resApp := resApps[0]
+		if err != nil {
+			return
+		}
+		if c.Request().Method == http.MethodPost {
+			message += fmt.Sprintf("## :scroll:[入出金記録](%s/transactions/%s)が新規作成されました\n", "https://jomon.trap.jp", resApp.ID)
+		} else if c.Request().Method == http.MethodPut {
+			message += fmt.Sprintf("## :scroll:[入出金記録](%s/transactions/%s)が修正されました\n", "https://jomon.trap.jp", resApp.ID)
+		}
+		if len(resApps) == 1 {
+			if resApp.Amount < 0 {
+				message += fmt.Sprintf("- `%s`への支払い\n    - 支払い金額: %d円\n", resApp.Target, -resApp.Amount)
+			} else {
+				message += fmt.Sprintf("- `%s`からの振込\n    - 受け取り金額: %d円\n", resApp.Target, resApp.Amount)
+			}
+		} else {
+			targets := make([]string, len(resApps))
+			for i, resApp := range resApps {
+				targets[i] = fmt.Sprintf(`%s`, resApp.Target)
+			}
+			if resApp.Amount < 0 {
+				message += fmt.Sprintf("- %sへの支払い\n    - 支払い金額: 計%d円(一人当たりへの支払い金額: %d円)\n", strings.Join(targets, " "), -len(resApps)*resApp.Amount, -resApp.Amount)
+			} else {
+				message += fmt.Sprintf("- %sからの振込\n    - 受け取り金額: 計%d円(一人当たりからの受け取り金額: %d円)\n", strings.Join(targets, " "), len(resApps)*resApp.Amount, resApp.Amount)
+			}
+
+		}
+		if resApp.Group != nil {
+			message += fmt.Sprintf("- 関連するグループ: %s\n", resApp.Group.Name)
+		}
+		if resApp.Tags != nil {
+			tags := make([]string, len(resApp.Tags))
+			for i, tag := range resApp.Tags {
+				tags[i] = fmt.Sprintf(`%s`, tag.Name)
+			}
+			if len(resApp.Tags) == 0 {
+				message += fmt.Sprintf("")
+			} else {
+				message += fmt.Sprintf("- タグ: %s", strings.Join(tags, " "))
+			}
+		}
 	}
 
 	_ = RequestWebhook(message, webhookSecret, webhookChannelId, webhookId, 1)
