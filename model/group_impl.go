@@ -17,21 +17,21 @@ func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
 		return nil, err
 	}
 	modelgroups := []*Group{}
-	for _, group := range groups {
-		modelgroups = append(modelgroups, ConvertEntGroupToModelGroup(group))
+	for _, g := range groups {
+		modelgroups = append(modelgroups, ConvertEntGroupToModelGroup(g))
 	}
 	return modelgroups, nil
 }
 
 func (repo *EntRepository) GetGroup(ctx context.Context, groupID uuid.UUID) (*Group, error) {
-	group, err := repo.client.Group.
+	g, err := repo.client.Group.
 		Query().
 		Where(group.IDEQ(groupID)).
 		Only(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return ConvertEntGroupToModelGroup(group), nil
+	return ConvertEntGroupToModelGroup(g), nil
 }
 
 func (repo *EntRepository) CreateGroup(ctx context.Context, name string, description string, budget *int) (*Group, error) {
@@ -89,27 +89,28 @@ func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]
 	return owners, nil
 }
 
-func (repo *EntRepository) AddOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) (*Owner, error) {
+func (repo *EntRepository) AddOwners(ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID) ([]*Owner, error) {
 	_, err := repo.client.Group.
 		Update().
 		Where(group.IDEQ(groupID)).
-		AddOwnerIDs(ownerID).
+		AddOwnerIDs(ownerIDs...).
 		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
-	resowner := &Owner{
-		ID: ownerID,
+	resowners := []*Owner{}
+	for _, owner := range ownerIDs {
+		resowners = append(resowners, &Owner{ID: owner})
 	}
-	return resowner, nil
 
+	return resowners, nil
 }
 
-func (repo *EntRepository) DeleteOwner(ctx context.Context, groupID uuid.UUID, ownerID uuid.UUID) error {
+func (repo *EntRepository) DeleteOwners(ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID) error {
 	_, err := repo.client.Group.
 		Update().
 		Where(group.IDEQ(groupID)).
-		RemoveOwnerIDs(ownerID).
+		RemoveOwnerIDs(ownerIDs...).
 		Save(ctx)
 
 	return err
@@ -133,24 +134,29 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	return modelmembers, nil
 }
 
-func (repo *EntRepository) AddMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) (*Member, error) {
+func (repo *EntRepository) AddMembers(ctx context.Context, groupID uuid.UUID, userIDs []uuid.UUID) ([]*Member, error) {
 	_, err := repo.client.Group.
-		UpdateOneID(groupID).
-		AddUserIDs(userID).
+		Update().
+		Where(group.IDEQ(groupID)).
+		AddUserIDs(userIDs...).
 		Save(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	created := &Member{userID}
-	return created, nil
+	resMembers := []*Member{}
+	for _, member := range userIDs {
+		resMembers = append(resMembers, &Member{member})
+	}
+	return resMembers, nil
 }
 
-func (repo *EntRepository) DeleteMember(ctx context.Context, groupID uuid.UUID, userID uuid.UUID) error {
+func (repo *EntRepository) DeleteMembers(ctx context.Context, groupID uuid.UUID, userIDs []uuid.UUID) error {
 	_, err := repo.client.Group.
-		UpdateOneID(groupID).
-		RemoveUserIDs(userID).
+		Update().
+		Where(group.IDEQ(groupID)).
+		RemoveUserIDs(userIDs...).
 		Save(ctx)
 
 	if err != nil {

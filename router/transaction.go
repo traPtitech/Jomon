@@ -37,7 +37,7 @@ type TransactionOverviewWithOneTarget struct {
 	Request *uuid.UUID   `json:"request"`
 }
 
-func (h *Handlers) GetTransactions(c echo.Context) error {
+func (h Handlers) GetTransactions(c echo.Context) error {
 	ctx := c.Request().Context()
 	var sort *string
 	if c.QueryParam("sort") != "" {
@@ -111,13 +111,16 @@ func (h *Handlers) GetTransactions(c echo.Context) error {
 				UpdatedAt: tag.UpdatedAt,
 			})
 		}
-		group := &GroupOverview{
-			ID:          tx.Group.ID,
-			Name:        tx.Group.Name,
-			Description: tx.Group.Description,
-			Budget:      tx.Group.Budget,
-			CreatedAt:   tx.Group.CreatedAt,
-			UpdatedAt:   tx.Group.UpdatedAt,
+		var group *GroupOverview
+		if tx.Group != nil {
+			group = &GroupOverview{
+				ID:          tx.Group.ID,
+				Name:        tx.Group.Name,
+				Description: tx.Group.Description,
+				Budget:      tx.Group.Budget,
+				CreatedAt:   tx.Group.CreatedAt,
+				UpdatedAt:   tx.Group.UpdatedAt,
+			}
 		}
 		tx := &Transaction{
 			ID:        tx.ID,
@@ -135,7 +138,7 @@ func (h *Handlers) GetTransactions(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *Handlers) PostTransaction(c echo.Context) error {
+func (h Handlers) PostTransaction(c echo.Context) error {
 	var tx *TransactionOverview
 	if err := c.Bind(&tx); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -161,13 +164,16 @@ func (h *Handlers) PostTransaction(c echo.Context) error {
 				UpdatedAt: tag.UpdatedAt,
 			})
 		}
-		group := &GroupOverview{
-			ID:          created.Group.ID,
-			Name:        created.Group.Name,
-			Description: created.Group.Description,
-			Budget:      created.Group.Budget,
-			CreatedAt:   created.Group.CreatedAt,
-			UpdatedAt:   created.Group.UpdatedAt,
+		var group *GroupOverview
+		if created.Group != nil {
+			group = &GroupOverview{
+				ID:          created.Group.ID,
+				Name:        created.Group.Name,
+				Description: created.Group.Description,
+				Budget:      created.Group.Budget,
+				CreatedAt:   created.Group.CreatedAt,
+				UpdatedAt:   created.Group.UpdatedAt,
+			}
 		}
 		res := Transaction{
 			ID:        created.ID,
@@ -185,7 +191,7 @@ func (h *Handlers) PostTransaction(c echo.Context) error {
 	return c.JSON(http.StatusOK, transactions)
 }
 
-func (h *Handlers) GetTransaction(c echo.Context) error {
+func (h Handlers) GetTransaction(c echo.Context) error {
 	txID, err := uuid.Parse(c.Param("transactionID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -206,13 +212,16 @@ func (h *Handlers) GetTransaction(c echo.Context) error {
 			UpdatedAt: tag.UpdatedAt,
 		})
 	}
-	group := &GroupOverview{
-		ID:          tx.Group.ID,
-		Name:        tx.Group.Name,
-		Description: tx.Group.Description,
-		Budget:      tx.Group.Budget,
-		CreatedAt:   tx.Group.CreatedAt,
-		UpdatedAt:   tx.Group.UpdatedAt,
+	var group *GroupOverview
+	if tx.Group != nil {
+		group = &GroupOverview{
+			ID:          tx.Group.ID,
+			Name:        tx.Group.Name,
+			Description: tx.Group.Description,
+			Budget:      tx.Group.Budget,
+			CreatedAt:   tx.Group.CreatedAt,
+			UpdatedAt:   tx.Group.UpdatedAt,
+		}
 	}
 	res := Transaction{
 		ID:        tx.ID,
@@ -228,7 +237,7 @@ func (h *Handlers) GetTransaction(c echo.Context) error {
 	return c.JSON(http.StatusOK, &res)
 }
 
-func (h *Handlers) PutTransaction(c echo.Context) error {
+func (h Handlers) PutTransaction(c echo.Context) error {
 	txID, err := uuid.Parse(c.Param("transactionID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -254,13 +263,16 @@ func (h *Handlers) PutTransaction(c echo.Context) error {
 			UpdatedAt: tag.UpdatedAt,
 		})
 	}
-	group := &GroupOverview{
-		ID:          updated.Group.ID,
-		Name:        updated.Group.Name,
-		Description: updated.Group.Description,
-		Budget:      updated.Group.Budget,
-		CreatedAt:   updated.Group.CreatedAt,
-		UpdatedAt:   updated.Group.UpdatedAt,
+	var group *GroupOverview
+	if updated.Group != nil {
+		group = &GroupOverview{
+			ID:          updated.Group.ID,
+			Name:        updated.Group.Name,
+			Description: updated.Group.Description,
+			Budget:      updated.Group.Budget,
+			CreatedAt:   updated.Group.CreatedAt,
+			UpdatedAt:   updated.Group.UpdatedAt,
+		}
 	}
 	res := Transaction{
 		ID:        updated.ID,

@@ -32,6 +32,7 @@ type RequestResponse struct {
 	Content   string
 	Tags      []*Tag
 	Targets   []*RequestTargetDetail
+	Statuses  []*RequestStatus
 	Group     *Group
 }
 

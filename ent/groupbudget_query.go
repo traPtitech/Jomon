@@ -21,11 +21,9 @@ import (
 // GroupBudgetQuery is the builder for querying GroupBudget entities.
 type GroupBudgetQuery struct {
 	config
-	limit           *int
-	offset          *int
-	unique          *bool
+	ctx             *QueryContext
 	order           []OrderFunc
-	fields          []string
+	inters          []Interceptor
 	predicates      []predicate.GroupBudget
 	withGroup       *GroupQuery
 	withTransaction *TransactionQuery
@@ -41,26 +39,26 @@ func (gbq *GroupBudgetQuery) Where(ps ...predicate.GroupBudget) *GroupBudgetQuer
 	return gbq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (gbq *GroupBudgetQuery) Limit(limit int) *GroupBudgetQuery {
-	gbq.limit = &limit
+	gbq.ctx.Limit = &limit
 	return gbq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (gbq *GroupBudgetQuery) Offset(offset int) *GroupBudgetQuery {
-	gbq.offset = &offset
+	gbq.ctx.Offset = &offset
 	return gbq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (gbq *GroupBudgetQuery) Unique(unique bool) *GroupBudgetQuery {
-	gbq.unique = &unique
+	gbq.ctx.Unique = &unique
 	return gbq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (gbq *GroupBudgetQuery) Order(o ...OrderFunc) *GroupBudgetQuery {
 	gbq.order = append(gbq.order, o...)
 	return gbq
@@ -68,7 +66,7 @@ func (gbq *GroupBudgetQuery) Order(o ...OrderFunc) *GroupBudgetQuery {
 
 // QueryGroup chains the current query on the "group" edge.
 func (gbq *GroupBudgetQuery) QueryGroup() *GroupQuery {
-	query := &GroupQuery{config: gbq.config}
+	query := (&GroupClient{config: gbq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := gbq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -90,7 +88,7 @@ func (gbq *GroupBudgetQuery) QueryGroup() *GroupQuery {
 
 // QueryTransaction chains the current query on the "transaction" edge.
 func (gbq *GroupBudgetQuery) QueryTransaction() *TransactionQuery {
-	query := &TransactionQuery{config: gbq.config}
+	query := (&TransactionClient{config: gbq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := gbq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -113,7 +111,7 @@ func (gbq *GroupBudgetQuery) QueryTransaction() *TransactionQuery {
 // First returns the first GroupBudget entity from the query.
 // Returns a *NotFoundError when no GroupBudget was found.
 func (gbq *GroupBudgetQuery) First(ctx context.Context) (*GroupBudget, error) {
-	nodes, err := gbq.Limit(1).All(ctx)
+	nodes, err := gbq.Limit(1).All(setContextOp(ctx, gbq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +134,7 @@ func (gbq *GroupBudgetQuery) FirstX(ctx context.Context) *GroupBudget {
 // Returns a *NotFoundError when no GroupBudget ID was found.
 func (gbq *GroupBudgetQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = gbq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = gbq.Limit(1).IDs(setContextOp(ctx, gbq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -159,7 +157,7 @@ func (gbq *GroupBudgetQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one GroupBudget entity is found.
 // Returns a *NotFoundError when no GroupBudget entities are found.
 func (gbq *GroupBudgetQuery) Only(ctx context.Context) (*GroupBudget, error) {
-	nodes, err := gbq.Limit(2).All(ctx)
+	nodes, err := gbq.Limit(2).All(setContextOp(ctx, gbq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +185,7 @@ func (gbq *GroupBudgetQuery) OnlyX(ctx context.Context) *GroupBudget {
 // Returns a *NotFoundError when no entities are found.
 func (gbq *GroupBudgetQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = gbq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = gbq.Limit(2).IDs(setContextOp(ctx, gbq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -212,10 +210,12 @@ func (gbq *GroupBudgetQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of GroupBudgets.
 func (gbq *GroupBudgetQuery) All(ctx context.Context) ([]*GroupBudget, error) {
+	ctx = setContextOp(ctx, gbq.ctx, "All")
 	if err := gbq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return gbq.sqlAll(ctx)
+	qr := querierAll[[]*GroupBudget, *GroupBudgetQuery]()
+	return withInterceptors[[]*GroupBudget](ctx, gbq, qr, gbq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -228,9 +228,12 @@ func (gbq *GroupBudgetQuery) AllX(ctx context.Context) []*GroupBudget {
 }
 
 // IDs executes the query and returns a list of GroupBudget IDs.
-func (gbq *GroupBudgetQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := gbq.Select(groupbudget.FieldID).Scan(ctx, &ids); err != nil {
+func (gbq *GroupBudgetQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if gbq.ctx.Unique == nil && gbq.path != nil {
+		gbq.Unique(true)
+	}
+	ctx = setContextOp(ctx, gbq.ctx, "IDs")
+	if err = gbq.Select(groupbudget.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -247,10 +250,11 @@ func (gbq *GroupBudgetQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (gbq *GroupBudgetQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, gbq.ctx, "Count")
 	if err := gbq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return gbq.sqlCount(ctx)
+	return withInterceptors[int](ctx, gbq, querierCount[*GroupBudgetQuery](), gbq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -264,10 +268,15 @@ func (gbq *GroupBudgetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gbq *GroupBudgetQuery) Exist(ctx context.Context) (bool, error) {
-	if err := gbq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, gbq.ctx, "Exist")
+	switch _, err := gbq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return gbq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -287,23 +296,22 @@ func (gbq *GroupBudgetQuery) Clone() *GroupBudgetQuery {
 	}
 	return &GroupBudgetQuery{
 		config:          gbq.config,
-		limit:           gbq.limit,
-		offset:          gbq.offset,
+		ctx:             gbq.ctx.Clone(),
 		order:           append([]OrderFunc{}, gbq.order...),
+		inters:          append([]Interceptor{}, gbq.inters...),
 		predicates:      append([]predicate.GroupBudget{}, gbq.predicates...),
 		withGroup:       gbq.withGroup.Clone(),
 		withTransaction: gbq.withTransaction.Clone(),
 		// clone intermediate query.
-		sql:    gbq.sql.Clone(),
-		path:   gbq.path,
-		unique: gbq.unique,
+		sql:  gbq.sql.Clone(),
+		path: gbq.path,
 	}
 }
 
 // WithGroup tells the query-builder to eager-load the nodes that are connected to
 // the "group" edge. The optional arguments are used to configure the query builder of the edge.
 func (gbq *GroupBudgetQuery) WithGroup(opts ...func(*GroupQuery)) *GroupBudgetQuery {
-	query := &GroupQuery{config: gbq.config}
+	query := (&GroupClient{config: gbq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -314,7 +322,7 @@ func (gbq *GroupBudgetQuery) WithGroup(opts ...func(*GroupQuery)) *GroupBudgetQu
 // WithTransaction tells the query-builder to eager-load the nodes that are connected to
 // the "transaction" edge. The optional arguments are used to configure the query builder of the edge.
 func (gbq *GroupBudgetQuery) WithTransaction(opts ...func(*TransactionQuery)) *GroupBudgetQuery {
-	query := &TransactionQuery{config: gbq.config}
+	query := (&TransactionClient{config: gbq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -337,16 +345,11 @@ func (gbq *GroupBudgetQuery) WithTransaction(opts ...func(*TransactionQuery)) *G
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (gbq *GroupBudgetQuery) GroupBy(field string, fields ...string) *GroupBudgetGroupBy {
-	grbuild := &GroupBudgetGroupBy{config: gbq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := gbq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return gbq.sqlQuery(ctx), nil
-	}
+	gbq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &GroupBudgetGroupBy{build: gbq}
+	grbuild.flds = &gbq.ctx.Fields
 	grbuild.label = groupbudget.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -363,15 +366,30 @@ func (gbq *GroupBudgetQuery) GroupBy(field string, fields ...string) *GroupBudge
 //		Select(groupbudget.FieldAmount).
 //		Scan(ctx, &v)
 func (gbq *GroupBudgetQuery) Select(fields ...string) *GroupBudgetSelect {
-	gbq.fields = append(gbq.fields, fields...)
-	selbuild := &GroupBudgetSelect{GroupBudgetQuery: gbq}
-	selbuild.label = groupbudget.Label
-	selbuild.flds, selbuild.scan = &gbq.fields, selbuild.Scan
-	return selbuild
+	gbq.ctx.Fields = append(gbq.ctx.Fields, fields...)
+	sbuild := &GroupBudgetSelect{GroupBudgetQuery: gbq}
+	sbuild.label = groupbudget.Label
+	sbuild.flds, sbuild.scan = &gbq.ctx.Fields, sbuild.Scan
+	return sbuild
+}
+
+// Aggregate returns a GroupBudgetSelect configured with the given aggregations.
+func (gbq *GroupBudgetQuery) Aggregate(fns ...AggregateFunc) *GroupBudgetSelect {
+	return gbq.Select().Aggregate(fns...)
 }
 
 func (gbq *GroupBudgetQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range gbq.fields {
+	for _, inter := range gbq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, gbq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range gbq.ctx.Fields {
 		if !groupbudget.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -449,6 +467,9 @@ func (gbq *GroupBudgetQuery) loadGroup(ctx context.Context, query *GroupQuery, n
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(group.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -499,38 +520,22 @@ func (gbq *GroupBudgetQuery) loadTransaction(ctx context.Context, query *Transac
 
 func (gbq *GroupBudgetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := gbq.querySpec()
-	_spec.Node.Columns = gbq.fields
-	if len(gbq.fields) > 0 {
-		_spec.Unique = gbq.unique != nil && *gbq.unique
+	_spec.Node.Columns = gbq.ctx.Fields
+	if len(gbq.ctx.Fields) > 0 {
+		_spec.Unique = gbq.ctx.Unique != nil && *gbq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, gbq.driver, _spec)
 }
 
-func (gbq *GroupBudgetQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := gbq.sqlCount(ctx)
-	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	}
-	return n > 0, nil
-}
-
 func (gbq *GroupBudgetQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   groupbudget.Table,
-			Columns: groupbudget.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: groupbudget.FieldID,
-			},
-		},
-		From:   gbq.sql,
-		Unique: true,
-	}
-	if unique := gbq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(groupbudget.Table, groupbudget.Columns, sqlgraph.NewFieldSpec(groupbudget.FieldID, field.TypeUUID))
+	_spec.From = gbq.sql
+	if unique := gbq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if gbq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := gbq.fields; len(fields) > 0 {
+	if fields := gbq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, groupbudget.FieldID)
 		for i := range fields {
@@ -546,10 +551,10 @@ func (gbq *GroupBudgetQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := gbq.limit; limit != nil {
+	if limit := gbq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := gbq.offset; offset != nil {
+	if offset := gbq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := gbq.order; len(ps) > 0 {
@@ -565,7 +570,7 @@ func (gbq *GroupBudgetQuery) querySpec() *sqlgraph.QuerySpec {
 func (gbq *GroupBudgetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(gbq.driver.Dialect())
 	t1 := builder.Table(groupbudget.Table)
-	columns := gbq.fields
+	columns := gbq.ctx.Fields
 	if len(columns) == 0 {
 		columns = groupbudget.Columns
 	}
@@ -574,7 +579,7 @@ func (gbq *GroupBudgetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = gbq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if gbq.unique != nil && *gbq.unique {
+	if gbq.ctx.Unique != nil && *gbq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range gbq.predicates {
@@ -583,12 +588,12 @@ func (gbq *GroupBudgetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range gbq.order {
 		p(selector)
 	}
-	if offset := gbq.offset; offset != nil {
+	if offset := gbq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := gbq.limit; limit != nil {
+	if limit := gbq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -596,13 +601,8 @@ func (gbq *GroupBudgetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // GroupBudgetGroupBy is the group-by builder for GroupBudget entities.
 type GroupBudgetGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *GroupBudgetQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -611,74 +611,77 @@ func (gbgb *GroupBudgetGroupBy) Aggregate(fns ...AggregateFunc) *GroupBudgetGrou
 	return gbgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (gbgb *GroupBudgetGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := gbgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, gbgb.build.ctx, "GroupBy")
+	if err := gbgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gbgb.sql = query
-	return gbgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*GroupBudgetQuery, *GroupBudgetGroupBy](ctx, gbgb.build, gbgb, gbgb.build.inters, v)
 }
 
-func (gbgb *GroupBudgetGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range gbgb.fields {
-		if !groupbudget.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (gbgb *GroupBudgetGroupBy) sqlScan(ctx context.Context, root *GroupBudgetQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(gbgb.fns))
+	for _, fn := range gbgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := gbgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*gbgb.flds)+len(gbgb.fns))
+		for _, f := range *gbgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*gbgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := gbgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := gbgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (gbgb *GroupBudgetGroupBy) sqlQuery() *sql.Selector {
-	selector := gbgb.sql.Select()
-	aggregation := make([]string, 0, len(gbgb.fns))
-	for _, fn := range gbgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(gbgb.fields)+len(gbgb.fns))
-		for _, f := range gbgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(gbgb.fields...)...)
-}
-
 // GroupBudgetSelect is the builder for selecting fields of GroupBudget entities.
 type GroupBudgetSelect struct {
 	*GroupBudgetQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
+}
+
+// Aggregate adds the given aggregation functions to the selector query.
+func (gbs *GroupBudgetSelect) Aggregate(fns ...AggregateFunc) *GroupBudgetSelect {
+	gbs.fns = append(gbs.fns, fns...)
+	return gbs
 }
 
 // Scan applies the selector query and scans the result into the given value.
 func (gbs *GroupBudgetSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, gbs.ctx, "Select")
 	if err := gbs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gbs.sql = gbs.GroupBudgetQuery.sqlQuery(ctx)
-	return gbs.sqlScan(ctx, v)
+	return scanWithInterceptors[*GroupBudgetQuery, *GroupBudgetSelect](ctx, gbs.GroupBudgetQuery, gbs, gbs.inters, v)
 }
 
-func (gbs *GroupBudgetSelect) sqlScan(ctx context.Context, v any) error {
+func (gbs *GroupBudgetSelect) sqlScan(ctx context.Context, root *GroupBudgetQuery, v any) error {
+	selector := root.sqlQuery(ctx)
+	aggregation := make([]string, 0, len(gbs.fns))
+	for _, fn := range gbs.fns {
+		aggregation = append(aggregation, fn(selector))
+	}
+	switch n := len(*gbs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		selector.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		selector.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
-	query, args := gbs.sql.Query()
+	query, args := selector.Query()
 	if err := gbs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

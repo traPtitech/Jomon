@@ -14,6 +14,9 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 	client, storage, err := setup(t, ctx, "get_request_targets")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
+	client2, storage2, err := setup(t, ctx, "get_request_targets2")
+	require.NoError(t, err)
+	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -50,11 +53,11 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user.ID)
+		request, err := repo2.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user.ID)
 		require.NoError(t, err)
-		got, err := repo.GetRequestTargets(ctx, request.ID)
+		got, err := repo2.GetRequestTargets(ctx, request.ID)
 		assert.NoError(t, err)
 		assert.Len(t, got, 0)
 	})
@@ -102,6 +105,9 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 	client, storage, err := setup(t, ctx, "delete_request_targets")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
+	client2, storage2, err := setup(t, ctx, "delete_request_targets2")
+	require.NoError(t, err)
+	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -129,9 +135,9 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
-		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user1, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
-		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user2, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
 		require.NoError(t, err)
 		target1 := &RequestTarget{
 			Target: user1.ID,
@@ -142,11 +148,11 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 			Amount: random.Numeric(t, 100000),
 		}
 
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user1.ID)
+		request, err := repo2.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user1.ID)
 		require.NoError(t, err)
-		_, err = repo.UpdateRequest(ctx, request.ID, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil)
+		_, err = repo2.UpdateRequest(ctx, request.ID, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil)
 		assert.NoError(t, err)
-		got, err := repo.GetRequestTargets(ctx, request.ID)
+		got, err := repo2.GetRequestTargets(ctx, request.ID)
 		assert.NoError(t, err)
 		assert.Len(t, got, 2)
 	})

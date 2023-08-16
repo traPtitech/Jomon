@@ -10,13 +10,21 @@ import (
 )
 
 func (repo *EntRepository) CreateStatus(ctx context.Context, requestID uuid.UUID, userID uuid.UUID, status Status) (*RequestStatus, error) {
-	created, err := repo.client.RequestStatus.
+	c, err := repo.client.RequestStatus.
 		Create().
 		SetStatus(requeststatus.Status(status.String())).
 		SetCreatedAt(time.Now()).
 		SetRequestID(requestID).
 		SetUserID(userID).
 		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	created, err := repo.client.RequestStatus.
+		Query().
+		Where(requeststatus.ID(c.ID)).
+		WithUser().
+		Only(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -29,6 +37,7 @@ func convertEntRequestStatusToModelRequestStatus(requestStatus *ent.RequestStatu
 	}
 	return &RequestStatus{
 		ID:        requestStatus.ID,
+		CreatedBy: requestStatus.Edges.User.ID,
 		Status:    convertEntRequestStatusToModelStatus(&requestStatus.Status),
 		CreatedAt: requestStatus.CreatedAt,
 	}

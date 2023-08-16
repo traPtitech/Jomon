@@ -5,6 +5,6 @@ package runtime
 // The schema-stitching logic is generated in github.com/traPtitech/Jomon/ent/runtime.go
 
 const (
-	Version = "v0.11.3-0.20220824145844-79fe0ebcd627"           // Version of ent codegen.
-	Sum     = "h1:egVC7Wqsd5Yw9fbYrfOvTzqr1dMeAunS3tgUa528fHc=" // Sum of ent codegen.
+	Version = "v0.11.9"                                         // Version of ent codegen.
+	Sum     = "h1:dbbCkAiPVTRBIJwoZctiSYjB7zxQIBOzVSU5H9VYIQI=" // Sum of ent codegen.
 )

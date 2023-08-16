@@ -30,7 +30,7 @@ func (repo *EntRepository) CreateFile(ctx context.Context, name string, mimetype
 		return nil, err
 	}
 
-	file := &File{
+	f := &File{
 		ID:        created.ID,
 		Name:      name,
 		MimeType:  mimetype,
@@ -38,11 +38,11 @@ func (repo *EntRepository) CreateFile(ctx context.Context, name string, mimetype
 		CreatedAt: created.CreatedAt,
 	}
 
-	return file, nil
+	return f, nil
 }
 
 func (repo *EntRepository) GetFile(ctx context.Context, fileID uuid.UUID) (*File, error) {
-	file, err := repo.client.File.
+	f, err := repo.client.File.
 		Query().
 		Where(file.IDEQ(fileID)).
 		WithUser().
@@ -51,7 +51,7 @@ func (repo *EntRepository) GetFile(ctx context.Context, fileID uuid.UUID) (*File
 		return nil, err
 	}
 
-	return ConvertEntFileToModelFile(file), nil
+	return ConvertEntFileToModelFile(f), nil
 }
 
 func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) error {

@@ -19,7 +19,6 @@ import (
 
 const (
 	sessionDuration        = 24 * 60 * 60 * 7
-	sessionKey             = "sessions"
 	sessionCodeVerifierKey = "code_verifier"
 )
 
@@ -48,7 +47,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
 	if !ok {
-		return echo.ErrInternalServerError
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("code_verifier is not found in session"))
 	}
 
 	res, err := service.RequestAccessToken(code, codeVerifier)
@@ -84,7 +83,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {
-		return echo.ErrInternalServerError
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/")

@@ -887,9 +887,7 @@ func TestHandlers_PostMember(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
-		member := Member{
-			ID: user.ID,
-		}
+		member := []uuid.UUID{user.ID}
 		reqBody, err := json.Marshal(member)
 		require.NoError(t, err)
 
@@ -905,16 +903,17 @@ func TestHandlers_PostMember(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockGroupRepository.
-			EXPECT().
-			AddMember(c.Request().Context(), group.ID, user.ID).
-			Return(&model.Member{
-				ID: user.ID,
-			}, nil)
-
-		res := &Member{
+		modelMember := &model.Member{
 			ID: user.ID,
 		}
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			AddMembers(c.Request().Context(), group.ID, []uuid.UUID{user.ID}).
+			Return([]*model.Member{
+				modelMember,
+			}, nil)
+
+		res := []uuid.UUID{modelMember.ID}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
@@ -929,9 +928,7 @@ func TestHandlers_PostMember(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		member := Member{
-			ID: uuid.New(),
-		}
+		member := []uuid.UUID{uuid.New()}
 		reqBody, err := json.Marshal(member)
 		require.NoError(t, err)
 
@@ -960,9 +957,7 @@ func TestHandlers_PostMember(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		member := Member{
-			ID: uuid.Nil,
-		}
+		member := []uuid.UUID{uuid.Nil}
 		reqBody, err := json.Marshal(member)
 		require.NoError(t, err)
 
@@ -1005,9 +1000,7 @@ func TestHandlers_PostMember(t *testing.T) {
 		var resErr *ent.ConstraintError
 		errors.As(errors.New("unknown group id"), &resErr)
 
-		member := Member{
-			ID: user.ID,
-		}
+		member := []uuid.UUID{user.ID}
 		reqBody, err := json.Marshal(member)
 		require.NoError(t, err)
 
@@ -1025,12 +1018,12 @@ func TestHandlers_PostMember(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			AddMember(c.Request().Context(), unknownGroupID, user.ID).
+			AddMembers(c.Request().Context(), unknownGroupID, []uuid.UUID{user.ID}).
 			Return(nil, resErr)
 
 		err = h.Handlers.PostMember(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 		}
 	})
 
@@ -1053,9 +1046,7 @@ func TestHandlers_PostMember(t *testing.T) {
 		var resErr *ent.ConstraintError
 		errors.As(errors.New("unknown user id"), &resErr)
 
-		member := Member{
-			ID: unknownUserID,
-		}
+		member := []uuid.UUID{unknownUserID}
 		reqBody, err := json.Marshal(member)
 		require.NoError(t, err)
 
@@ -1073,12 +1064,12 @@ func TestHandlers_PostMember(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			AddMember(c.Request().Context(), group.ID, unknownUserID).
+			AddMembers(c.Request().Context(), group.ID, []uuid.UUID{unknownUserID}).
 			Return(nil, resErr)
 
 		err = h.Handlers.PostMember(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 		}
 	})
 }
@@ -1110,21 +1101,25 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
+		member := []uuid.UUID{user.ID}
+		reqBody, err := json.Marshal(member)
+		require.NoError(t, err)
+
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members/%s", group.ID.String(), user.ID.String()), nil)
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members", group.ID.String()), bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/members/:memberID")
-		c.SetParamNames("groupID", "memberID")
-		c.SetParamValues(group.ID.String(), user.ID.String())
+		c.SetPath("/api/groups/:groupID/members")
+		c.SetParamNames("groupID")
+		c.SetParamValues(group.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			DeleteMember(c.Request().Context(), group.ID, user.ID).
+			DeleteMembers(c.Request().Context(), group.ID, []uuid.UUID{user.ID}).
 			Return(nil)
 
 		if assert.NoError(t, h.Handlers.DeleteMember(c)) {
@@ -1146,15 +1141,19 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
+		member := []uuid.UUID{user.ID}
+		reqBody, err := json.Marshal(member)
+		require.NoError(t, err)
+
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members/%s", uuid.Nil.String(), user.ID.String()), nil)
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members", uuid.Nil.String()), bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/members/:memberID")
-		c.SetParamNames("groupID", "memberID")
-		c.SetParamValues(uuid.Nil.String(), user.ID.String())
+		c.SetPath("/api/groups/:groupID/members")
+		c.SetParamNames("groupID")
+		c.SetParamValues(uuid.Nil.String())
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1185,26 +1184,30 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		var resErr *ent.NotFoundError
 		errors.As(errors.New("unknown group id"), &resErr)
 
+		member := []uuid.UUID{user.ID}
+		reqBody, err := json.Marshal(member)
+		require.NoError(t, err)
+
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members/%s", unknownGroupID.String(), user.ID.String()), nil)
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members", unknownGroupID.String()), bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/members/:memberID")
-		c.SetParamNames("groupID", "memberID")
-		c.SetParamValues(unknownGroupID.String(), user.ID.String())
+		c.SetPath("/api/groups/:groupID/members")
+		c.SetParamNames("groupID")
+		c.SetParamValues(unknownGroupID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			DeleteMember(c.Request().Context(), unknownGroupID, user.ID).
+			DeleteMembers(c.Request().Context(), unknownGroupID, []uuid.UUID{user.ID}).
 			Return(resErr)
 
 		err = h.Handlers.DeleteMember(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 		}
 	})
 
@@ -1227,97 +1230,54 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		var resErr *ent.NotFoundError
 		errors.As(errors.New("unknown member id"), &resErr)
 
+		member := []uuid.UUID{unknownUserID}
+		reqBody, err := json.Marshal(member)
+		require.NoError(t, err)
+
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members/%s", group.ID.String(), unknownUserID.String()), nil)
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members", group.ID.String()), bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/members/:memberID")
-		c.SetParamNames("groupID", "memberID")
-		c.SetParamValues(group.ID.String(), unknownUserID.String())
+		c.SetPath("/api/groups/:groupID/members")
+		c.SetParamNames("groupID")
+		c.SetParamValues(group.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			DeleteMember(c.Request().Context(), group.ID, unknownUserID).
+			DeleteMembers(c.Request().Context(), group.ID, []uuid.UUID{unknownUserID}).
 			Return(resErr)
 
 		err = h.Handlers.DeleteMember(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-		}
-	})
-
-	t.Run("InvalidMemberUUID", func(t *testing.T) {
-		t.Parallel()
-		ctrl := gomock.NewController(t)
-		date := time.Now()
-
-		budget := random.Numeric(t, 1000000)
-
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-
-		invID := "po"
-
-		_, resErr := uuid.Parse(invID)
-
-		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members/%s", group.ID.String(), invID), nil)
-		assert.NoError(t, err)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/members/:memberID")
-		c.SetParamNames("groupID", "memberID")
-		c.SetParamValues(group.ID.String(), invID)
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-
-		err = h.Handlers.DeleteMember(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 		}
 	})
 
 	t.Run("InvalidGroupUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		date := time.Now()
-
-		budget := random.Numeric(t, 1000000)
-
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
 
 		invID := "po"
 
 		_, resErr := uuid.Parse(invID)
 
+		member := []uuid.UUID{uuid.New()}
+		reqBody, err := json.Marshal(member)
+		require.NoError(t, err)
+
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members/%s", invID, group.ID.String()), nil)
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members", invID), bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/members/:memberID")
-		c.SetParamNames("groupID", "memberID")
-		c.SetParamValues(invID, group.ID.String())
+		c.SetPath("/api/groups/:groupID/members")
+		c.SetParamNames("groupID")
+		c.SetParamValues(invID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1325,43 +1285,6 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		err = h.Handlers.DeleteMember(c)
 		if assert.Error(t, err) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
-	})
-
-	t.Run("NilMemberUUID", func(t *testing.T) {
-		t.Parallel()
-		ctrl := gomock.NewController(t)
-		date := time.Now()
-
-		budget := random.Numeric(t, 1000000)
-
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-
-		invID := uuid.Nil
-
-		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members/%s", group.ID.String(), invID), nil)
-		assert.NoError(t, err)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/members/:memberID")
-		c.SetParamNames("groupID", "memberID")
-		c.SetParamValues(group.ID.String(), invID.String())
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-
-		err = h.Handlers.DeleteMember(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID")), err)
 		}
 	})
 }
@@ -1394,9 +1317,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
-		owner := Owner{
-			ID: user.ID,
-		}
+		owner := []uuid.UUID{user.ID}
 		reqBody, err := json.Marshal(owner)
 		require.NoError(t, err)
 
@@ -1412,16 +1333,17 @@ func TestHandlers_PostOwner(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockGroupRepository.
-			EXPECT().
-			AddOwner(c.Request().Context(), group.ID, user.ID).
-			Return(&model.Owner{
-				ID: user.ID,
-			}, nil)
-
-		res := &Owner{
+		modelOwner := &model.Owner{
 			ID: user.ID,
 		}
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			AddOwners(c.Request().Context(), group.ID, owner).
+			Return([]*model.Owner{
+				modelOwner,
+			}, nil)
+
+		res := owner
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
@@ -1436,9 +1358,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		owner := Owner{
-			ID: uuid.New(),
-		}
+		owner := []string{"hoge"}
 		reqBody, err := json.Marshal(owner)
 		require.NoError(t, err)
 
@@ -1467,9 +1387,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		owner := Owner{
-			ID: uuid.Nil,
-		}
+		owner := []uuid.UUID{uuid.New()}
 		reqBody, err := json.Marshal(owner)
 		require.NoError(t, err)
 
@@ -1488,7 +1406,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 
 		resErr := errors.New("invalid UUID")
 
-		err = h.Handlers.PostMember(c)
+		err = h.Handlers.PostOwner(c)
 		if assert.Error(t, err) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 		}
@@ -1512,9 +1430,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 		var resErr *ent.ConstraintError
 		errors.As(errors.New("unknown group id"), &resErr)
 
-		owner := Owner{
-			ID: user.ID,
-		}
+		owner := []uuid.UUID{user.ID}
 		reqBody, err := json.Marshal(owner)
 		require.NoError(t, err)
 
@@ -1532,7 +1448,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			AddOwner(c.Request().Context(), unknownGroupID, user.ID).
+			AddOwners(c.Request().Context(), unknownGroupID, []uuid.UUID{user.ID}).
 			Return(nil, resErr)
 
 		err = h.Handlers.PostOwner(c)
@@ -1560,9 +1476,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 		var resErr *ent.ConstraintError
 		errors.As(errors.New("unknown user id"), &resErr)
 
-		owner := Owner{
-			ID: unknownUserID,
-		}
+		owner := []uuid.UUID{unknownUserID}
 		reqBody, err := json.Marshal(owner)
 		require.NoError(t, err)
 
@@ -1580,7 +1494,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			AddOwner(c.Request().Context(), group.ID, unknownUserID).
+			AddOwners(c.Request().Context(), group.ID, []uuid.UUID{unknownUserID}).
 			Return(nil, resErr)
 
 		err = h.Handlers.PostOwner(c)
@@ -1617,21 +1531,25 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 			UpdatedAt:   date,
 		}
 
+		owner := []uuid.UUID{user.ID}
+		reqBody, err := json.Marshal(owner)
+		require.NoError(t, err)
+
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners/%s", group.ID.String(), user.ID.String()), nil)
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners", group.ID.String()), bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/owners/:ownerID")
-		c.SetParamNames("groupID", "ownerID")
-		c.SetParamValues(group.ID.String(), user.ID.String())
+		c.SetPath("/api/groups/:groupID/owners")
+		c.SetParamNames("groupID")
+		c.SetParamValues(group.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			DeleteOwner(c.Request().Context(), group.ID, user.ID).
+			DeleteOwners(c.Request().Context(), group.ID, []uuid.UUID{user.ID}).
 			Return(nil)
 
 		if assert.NoError(t, h.Handlers.DeleteOwner(c)) {
@@ -1642,26 +1560,20 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 	t.Run("NilGroupUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
-		user := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
+		owner := []uuid.UUID{uuid.Nil}
+		reqBody, err := json.Marshal(owner)
+		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners/%s", uuid.Nil.String(), user.ID.String()), nil)
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners", uuid.Nil.String()), bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/owners/:ownerID")
-		c.SetParamNames("groupID", "ownerID")
-		c.SetParamValues(uuid.Nil.String(), user.ID.String())
+		c.SetPath("/api/groups/:groupID/owners")
+		c.SetParamNames("groupID")
+		c.SetParamValues(uuid.Nil.String())
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1692,21 +1604,25 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		var resErr *ent.NotFoundError
 		errors.As(errors.New("unknown group id"), &resErr)
 
+		owner := []uuid.UUID{user.ID}
+		reqBody, err := json.Marshal(owner)
+		require.NoError(t, err)
+
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners/%s", unknownGroupID, user.ID.String()), nil)
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners", unknownGroupID), bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/owners/:ownerID")
-		c.SetParamNames("groupID", "ownerID")
-		c.SetParamValues(unknownGroupID.String(), user.ID.String())
+		c.SetPath("/api/groups/:groupID/owners")
+		c.SetParamNames("groupID")
+		c.SetParamValues(unknownGroupID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			DeleteOwner(c.Request().Context(), unknownGroupID, user.ID).
+			DeleteOwners(c.Request().Context(), unknownGroupID, []uuid.UUID{user.ID}).
 			Return(resErr)
 
 		err = h.Handlers.DeleteOwner(c)
@@ -1731,24 +1647,26 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		}
 
 		unknownUserID := uuid.New()
+		reqBody, err := json.Marshal([]uuid.UUID{unknownUserID})
+		require.NoError(t, err)
 		var resErr *ent.NotFoundError
 		errors.As(errors.New("unknown owner id"), &resErr)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners/%s", group.ID.String(), unknownUserID.String()), nil)
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners", group.ID.String()), bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/owners/:ownerID")
-		c.SetParamNames("groupID", "ownerID")
-		c.SetParamValues(group.ID.String(), unknownUserID.String())
+		c.SetPath("/api/groups/:groupID/owners")
+		c.SetParamNames("groupID")
+		c.SetParamValues(group.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			DeleteOwner(c.Request().Context(), group.ID, unknownUserID).
+			DeleteOwners(c.Request().Context(), group.ID, []uuid.UUID{unknownUserID}).
 			Return(resErr)
 
 		err = h.Handlers.DeleteOwner(c)
@@ -1757,74 +1675,26 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		}
 	})
 
-	t.Run("InvalidOwnerUUID", func(t *testing.T) {
-		t.Parallel()
-		ctrl := gomock.NewController(t)
-		date := time.Now()
-
-		budget := random.Numeric(t, 1000000)
-
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-
-		invID := "po"
-
-		_, resErr := uuid.Parse(invID)
-
-		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners/%s", group.ID.String(), invID), nil)
-		assert.NoError(t, err)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/owners/:ownerID")
-		c.SetParamNames("groupID", "ownerID")
-		c.SetParamValues(group.ID.String(), invID)
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-
-		err = h.Handlers.DeleteOwner(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
-	})
-
 	t.Run("InvalidGroupUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		date := time.Now()
-
-		budget := random.Numeric(t, 1000000)
-
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
 
 		invID := "po"
+		owner := []uuid.UUID{uuid.New()}
+		reqBody, err := json.Marshal(owner)
+		require.NoError(t, err)
 
 		_, resErr := uuid.Parse(invID)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners/%s", invID, group.ID.String()), nil)
+		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners", invID), bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/owners/:ownerID")
-		c.SetParamNames("groupID", "ownerID")
-		c.SetParamValues(invID, group.ID.String())
+		c.SetPath("/api/groups/:groupID/owners")
+		c.SetParamNames("groupID")
+		c.SetParamValues(invID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1832,43 +1702,6 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		err = h.Handlers.DeleteOwner(c)
 		if assert.Error(t, err) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
-	})
-
-	t.Run("NilOwnerUUID", func(t *testing.T) {
-		t.Parallel()
-		ctrl := gomock.NewController(t)
-		date := time.Now()
-
-		budget := random.Numeric(t, 1000000)
-
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-
-		invID := uuid.Nil
-
-		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners/%s", group.ID.String(), invID), nil)
-		assert.NoError(t, err)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetPath("/api/groups/:groupID/owners/:ownerID")
-		c.SetParamNames("groupID", "ownerID")
-		c.SetParamValues(group.ID.String(), invID.String())
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-
-		err = h.Handlers.DeleteOwner(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID")), err)
 		}
 	})
 }

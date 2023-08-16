@@ -164,29 +164,29 @@ func (gr *Group) assignValues(columns []string, values []any) error {
 
 // QueryGroupBudget queries the "group_budget" edge of the Group entity.
 func (gr *Group) QueryGroupBudget() *GroupBudgetQuery {
-	return (&GroupClient{config: gr.config}).QueryGroupBudget(gr)
+	return NewGroupClient(gr.config).QueryGroupBudget(gr)
 }
 
 // QueryUser queries the "user" edge of the Group entity.
 func (gr *Group) QueryUser() *UserQuery {
-	return (&GroupClient{config: gr.config}).QueryUser(gr)
+	return NewGroupClient(gr.config).QueryUser(gr)
 }
 
 // QueryOwner queries the "owner" edge of the Group entity.
 func (gr *Group) QueryOwner() *UserQuery {
-	return (&GroupClient{config: gr.config}).QueryOwner(gr)
+	return NewGroupClient(gr.config).QueryOwner(gr)
 }
 
 // QueryRequest queries the "request" edge of the Group entity.
 func (gr *Group) QueryRequest() *RequestQuery {
-	return (&GroupClient{config: gr.config}).QueryRequest(gr)
+	return NewGroupClient(gr.config).QueryRequest(gr)
 }
 
 // Update returns a builder for updating this Group.
 // Note that you need to call Group.Unwrap() before calling this method if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gr *Group) Update() *GroupUpdateOne {
-	return (&GroupClient{config: gr.config}).UpdateOne(gr)
+	return NewGroupClient(gr.config).UpdateOne(gr)
 }
 
 // Unwrap unwraps the Group entity that was returned from a transaction after it was closed,
@@ -232,9 +232,3 @@ func (gr *Group) String() string {
 
 // Groups is a parsable slice of Group.
 type Groups []*Group
-
-func (gr Groups) config(cfg config) {
-	for _i := range gr {
-		gr[_i].config = cfg
-	}
-}

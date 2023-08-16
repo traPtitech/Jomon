@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,34 +27,7 @@ func (tdd *TransactionDetailDelete) Where(ps ...predicate.TransactionDetail) *Tr
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (tdd *TransactionDetailDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(tdd.hooks) == 0 {
-		affected, err = tdd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TransactionDetailMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			tdd.mutation = mutation
-			affected, err = tdd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(tdd.hooks) - 1; i >= 0; i-- {
-			if tdd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tdd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, tdd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, TransactionDetailMutation](ctx, tdd.sqlExec, tdd.mutation, tdd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +40,7 @@ func (tdd *TransactionDetailDelete) ExecX(ctx context.Context) int {
 }
 
 func (tdd *TransactionDetailDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: transactiondetail.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: transactiondetail.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(transactiondetail.Table, sqlgraph.NewFieldSpec(transactiondetail.FieldID, field.TypeUUID))
 	if ps := tdd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +52,19 @@ func (tdd *TransactionDetailDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	tdd.mutation.done = true
 	return affected, err
 }
 
 // TransactionDetailDeleteOne is the builder for deleting a single TransactionDetail entity.
 type TransactionDetailDeleteOne struct {
 	tdd *TransactionDetailDelete
+}
+
+// Where appends a list predicates to the TransactionDetailDelete builder.
+func (tddo *TransactionDetailDeleteOne) Where(ps ...predicate.TransactionDetail) *TransactionDetailDeleteOne {
+	tddo.tdd.mutation.Where(ps...)
+	return tddo
 }
 
 // Exec executes the deletion query.
@@ -111,5 +82,7 @@ func (tddo *TransactionDetailDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (tddo *TransactionDetailDeleteOne) ExecX(ctx context.Context) {
-	tddo.tdd.ExecX(ctx)
+	if err := tddo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

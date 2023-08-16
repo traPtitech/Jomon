@@ -32,8 +32,8 @@ func (repo *EntRepository) GetComments(ctx context.Context, requestID uuid.UUID)
 		return nil, err
 	}
 	modelcomments := []*Comment{}
-	for _, comment := range comments {
-		modelcomments = append(modelcomments, ConvertEntCommentToModelComment(comment, comment.Edges.User.ID))
+	for _, c := range comments {
+		modelcomments = append(modelcomments, ConvertEntCommentToModelComment(c, c.Edges.User.ID))
 	}
 	return modelcomments, nil
 }
@@ -73,7 +73,7 @@ func (repo *EntRepository) UpdateComment(ctx context.Context, commentContent str
 }
 
 func (repo *EntRepository) DeleteComment(ctx context.Context, requestID uuid.UUID, commentID uuid.UUID) error {
-	comment, err := repo.client.Comment.
+	c, err := repo.client.Comment.
 		Query().
 		Where(
 			comment.HasRequestWith(
@@ -86,7 +86,7 @@ func (repo *EntRepository) DeleteComment(ctx context.Context, requestID uuid.UUI
 		return err
 	}
 	err = repo.client.Comment.
-		DeleteOne(comment).
+		DeleteOne(c).
 		Exec(ctx)
 	return err
 }

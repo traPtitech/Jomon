@@ -94,50 +94,8 @@ func (rsc *RequestStatusCreate) Mutation() *RequestStatusMutation {
 
 // Save creates the RequestStatus in the database.
 func (rsc *RequestStatusCreate) Save(ctx context.Context) (*RequestStatus, error) {
-	var (
-		err  error
-		node *RequestStatus
-	)
 	rsc.defaults()
-	if len(rsc.hooks) == 0 {
-		if err = rsc.check(); err != nil {
-			return nil, err
-		}
-		node, err = rsc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RequestStatusMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = rsc.check(); err != nil {
-				return nil, err
-			}
-			rsc.mutation = mutation
-			if node, err = rsc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(rsc.hooks) - 1; i >= 0; i-- {
-			if rsc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = rsc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, rsc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*RequestStatus)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from RequestStatusMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*RequestStatus, RequestStatusMutation](ctx, rsc.sqlSave, rsc.mutation, rsc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -201,6 +159,9 @@ func (rsc *RequestStatusCreate) check() error {
 }
 
 func (rsc *RequestStatusCreate) sqlSave(ctx context.Context) (*RequestStatus, error) {
+	if err := rsc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := rsc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, rsc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -215,38 +176,26 @@ func (rsc *RequestStatusCreate) sqlSave(ctx context.Context) (*RequestStatus, er
 			return nil, err
 		}
 	}
+	rsc.mutation.id = &_node.ID
+	rsc.mutation.done = true
 	return _node, nil
 }
 
 func (rsc *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSpec) {
 	var (
 		_node = &RequestStatus{config: rsc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: requeststatus.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: requeststatus.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(requeststatus.Table, sqlgraph.NewFieldSpec(requeststatus.FieldID, field.TypeUUID))
 	)
 	if id, ok := rsc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
 	if value, ok := rsc.mutation.Status(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: requeststatus.FieldStatus,
-		})
+		_spec.SetField(requeststatus.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
 	if value, ok := rsc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: requeststatus.FieldCreatedAt,
-		})
+		_spec.SetField(requeststatus.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if nodes := rsc.mutation.RequestIDs(); len(nodes) > 0 {

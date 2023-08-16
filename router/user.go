@@ -19,7 +19,7 @@ type User struct {
 	DeletedAt   *time.Time `json:"deleted_at"`
 }
 
-func (h *Handlers) GetUsers(c echo.Context) error {
+func (h Handlers) GetUsers(c echo.Context) error {
 	users, err := h.Repository.GetUsers(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -47,7 +47,7 @@ type PutUserRequest struct {
 	Admin       bool   `json:"admin"`
 }
 
-func (h *Handlers) UpdateUserInfo(c echo.Context) error {
+func (h Handlers) UpdateUserInfo(c echo.Context) error {
 	var newUser PutUserRequest
 	if err := c.Bind(&newUser); err != nil {
 		return c.NoContent(http.StatusBadRequest)
@@ -71,12 +71,12 @@ func (h *Handlers) UpdateUserInfo(c echo.Context) error {
 	})
 }
 
-func (h *Handlers) GetMe(c echo.Context) error {
+func (h Handlers) GetMe(c echo.Context) error {
 	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	user, ok := sess.Values[sessionUserKey].(*User)
+	user, ok := sess.Values[sessionUserKey].(User)
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user info")
 	}

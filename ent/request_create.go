@@ -218,50 +218,8 @@ func (rc *RequestCreate) Mutation() *RequestMutation {
 
 // Save creates the Request in the database.
 func (rc *RequestCreate) Save(ctx context.Context) (*Request, error) {
-	var (
-		err  error
-		node *Request
-	)
 	rc.defaults()
-	if len(rc.hooks) == 0 {
-		if err = rc.check(); err != nil {
-			return nil, err
-		}
-		node, err = rc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RequestMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = rc.check(); err != nil {
-				return nil, err
-			}
-			rc.mutation = mutation
-			if node, err = rc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(rc.hooks) - 1; i >= 0; i-- {
-			if rc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = rc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, rc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Request)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from RequestMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Request, RequestMutation](ctx, rc.sqlSave, rc.mutation, rc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -320,6 +278,9 @@ func (rc *RequestCreate) check() error {
 }
 
 func (rc *RequestCreate) sqlSave(ctx context.Context) (*Request, error) {
+	if err := rc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := rc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, rc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -334,54 +295,34 @@ func (rc *RequestCreate) sqlSave(ctx context.Context) (*Request, error) {
 			return nil, err
 		}
 	}
+	rc.mutation.id = &_node.ID
+	rc.mutation.done = true
 	return _node, nil
 }
 
 func (rc *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Request{config: rc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: request.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: request.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(request.Table, sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID))
 	)
 	if id, ok := rc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
 	if value, ok := rc.mutation.Title(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: request.FieldTitle,
-		})
+		_spec.SetField(request.FieldTitle, field.TypeString, value)
 		_node.Title = value
 	}
 	if value, ok := rc.mutation.Content(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: request.FieldContent,
-		})
+		_spec.SetField(request.FieldContent, field.TypeString, value)
 		_node.Content = value
 	}
 	if value, ok := rc.mutation.CreatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: request.FieldCreatedAt,
-		})
+		_spec.SetField(request.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := rc.mutation.UpdatedAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: request.FieldUpdatedAt,
-		})
+		_spec.SetField(request.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if nodes := rc.mutation.StatusIDs(); len(nodes) > 0 {

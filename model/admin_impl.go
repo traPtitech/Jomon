@@ -17,9 +17,9 @@ func (repo *EntRepository) GetAdmins(ctx context.Context) ([]*Admin, error) {
 	}
 
 	admins := []*Admin{}
-	for _, user := range users {
+	for _, u := range users {
 		admins = append(admins, &Admin{
-			ID: user.ID,
+			ID: u.ID,
 		})
 	}
 

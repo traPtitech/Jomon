@@ -13,392 +13,252 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.TransactionDetail(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.TransactionDetail(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.TransactionDetail(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.TransactionDetail(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.TransactionDetail(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.TransactionDetail(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.TransactionDetail(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.TransactionDetail(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.TransactionDetail(sql.FieldLTE(FieldID, id))
 }
 
 // Amount applies equality check predicate on the "amount" field. It's identical to AmountEQ.
 func Amount(v int) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAmount), v))
-	})
+	return predicate.TransactionDetail(sql.FieldEQ(FieldAmount, v))
 }
 
 // Target applies equality check predicate on the "target" field. It's identical to TargetEQ.
 func Target(v string) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTarget), v))
-	})
+	return predicate.TransactionDetail(sql.FieldEQ(FieldTarget, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // AmountEQ applies the EQ predicate on the "amount" field.
 func AmountEQ(v int) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAmount), v))
-	})
+	return predicate.TransactionDetail(sql.FieldEQ(FieldAmount, v))
 }
 
 // AmountNEQ applies the NEQ predicate on the "amount" field.
 func AmountNEQ(v int) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldAmount), v))
-	})
+	return predicate.TransactionDetail(sql.FieldNEQ(FieldAmount, v))
 }
 
 // AmountIn applies the In predicate on the "amount" field.
 func AmountIn(vs ...int) predicate.TransactionDetail {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldAmount), v...))
-	})
+	return predicate.TransactionDetail(sql.FieldIn(FieldAmount, vs...))
 }
 
 // AmountNotIn applies the NotIn predicate on the "amount" field.
 func AmountNotIn(vs ...int) predicate.TransactionDetail {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldAmount), v...))
-	})
+	return predicate.TransactionDetail(sql.FieldNotIn(FieldAmount, vs...))
 }
 
 // AmountGT applies the GT predicate on the "amount" field.
 func AmountGT(v int) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldAmount), v))
-	})
+	return predicate.TransactionDetail(sql.FieldGT(FieldAmount, v))
 }
 
 // AmountGTE applies the GTE predicate on the "amount" field.
 func AmountGTE(v int) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldAmount), v))
-	})
+	return predicate.TransactionDetail(sql.FieldGTE(FieldAmount, v))
 }
 
 // AmountLT applies the LT predicate on the "amount" field.
 func AmountLT(v int) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldAmount), v))
-	})
+	return predicate.TransactionDetail(sql.FieldLT(FieldAmount, v))
 }
 
 // AmountLTE applies the LTE predicate on the "amount" field.
 func AmountLTE(v int) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldAmount), v))
-	})
+	return predicate.TransactionDetail(sql.FieldLTE(FieldAmount, v))
 }
 
 // TargetEQ applies the EQ predicate on the "target" field.
 func TargetEQ(v string) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTarget), v))
-	})
+	return predicate.TransactionDetail(sql.FieldEQ(FieldTarget, v))
 }
 
 // TargetNEQ applies the NEQ predicate on the "target" field.
 func TargetNEQ(v string) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldTarget), v))
-	})
+	return predicate.TransactionDetail(sql.FieldNEQ(FieldTarget, v))
 }
 
 // TargetIn applies the In predicate on the "target" field.
 func TargetIn(vs ...string) predicate.TransactionDetail {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldTarget), v...))
-	})
+	return predicate.TransactionDetail(sql.FieldIn(FieldTarget, vs...))
 }
 
 // TargetNotIn applies the NotIn predicate on the "target" field.
 func TargetNotIn(vs ...string) predicate.TransactionDetail {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldTarget), v...))
-	})
+	return predicate.TransactionDetail(sql.FieldNotIn(FieldTarget, vs...))
 }
 
 // TargetGT applies the GT predicate on the "target" field.
 func TargetGT(v string) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldTarget), v))
-	})
+	return predicate.TransactionDetail(sql.FieldGT(FieldTarget, v))
 }
 
 // TargetGTE applies the GTE predicate on the "target" field.
 func TargetGTE(v string) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldTarget), v))
-	})
+	return predicate.TransactionDetail(sql.FieldGTE(FieldTarget, v))
 }
 
 // TargetLT applies the LT predicate on the "target" field.
 func TargetLT(v string) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldTarget), v))
-	})
+	return predicate.TransactionDetail(sql.FieldLT(FieldTarget, v))
 }
 
 // TargetLTE applies the LTE predicate on the "target" field.
 func TargetLTE(v string) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldTarget), v))
-	})
+	return predicate.TransactionDetail(sql.FieldLTE(FieldTarget, v))
 }
 
 // TargetContains applies the Contains predicate on the "target" field.
 func TargetContains(v string) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldTarget), v))
-	})
+	return predicate.TransactionDetail(sql.FieldContains(FieldTarget, v))
 }
 
 // TargetHasPrefix applies the HasPrefix predicate on the "target" field.
 func TargetHasPrefix(v string) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldTarget), v))
-	})
+	return predicate.TransactionDetail(sql.FieldHasPrefix(FieldTarget, v))
 }
 
 // TargetHasSuffix applies the HasSuffix predicate on the "target" field.
 func TargetHasSuffix(v string) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldTarget), v))
-	})
+	return predicate.TransactionDetail(sql.FieldHasSuffix(FieldTarget, v))
 }
 
 // TargetEqualFold applies the EqualFold predicate on the "target" field.
 func TargetEqualFold(v string) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldTarget), v))
-	})
+	return predicate.TransactionDetail(sql.FieldEqualFold(FieldTarget, v))
 }
 
 // TargetContainsFold applies the ContainsFold predicate on the "target" field.
 func TargetContainsFold(v string) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldTarget), v))
-	})
+	return predicate.TransactionDetail(sql.FieldContainsFold(FieldTarget, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
 func CreatedAtNEQ(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldNEQ(FieldCreatedAt, v))
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
 func CreatedAtIn(vs ...time.Time) predicate.TransactionDetail {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreatedAt), v...))
-	})
+	return predicate.TransactionDetail(sql.FieldIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
 func CreatedAtNotIn(vs ...time.Time) predicate.TransactionDetail {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreatedAt), v...))
-	})
+	return predicate.TransactionDetail(sql.FieldNotIn(FieldCreatedAt, vs...))
 }
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
 func CreatedAtGT(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldGT(FieldCreatedAt, v))
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
 func CreatedAtGTE(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldGTE(FieldCreatedAt, v))
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
 func CreatedAtLT(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldLT(FieldCreatedAt, v))
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldLTE(FieldCreatedAt, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
 func UpdatedAtEQ(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
 func UpdatedAtNEQ(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldNEQ(FieldUpdatedAt, v))
 }
 
 // UpdatedAtIn applies the In predicate on the "updated_at" field.
 func UpdatedAtIn(vs ...time.Time) predicate.TransactionDetail {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUpdatedAt), v...))
-	})
+	return predicate.TransactionDetail(sql.FieldIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
 func UpdatedAtNotIn(vs ...time.Time) predicate.TransactionDetail {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUpdatedAt), v...))
-	})
+	return predicate.TransactionDetail(sql.FieldNotIn(FieldUpdatedAt, vs...))
 }
 
 // UpdatedAtGT applies the GT predicate on the "updated_at" field.
 func UpdatedAtGT(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldGT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
 func UpdatedAtGTE(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldGTE(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLT applies the LT predicate on the "updated_at" field.
 func UpdatedAtLT(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldLT(FieldUpdatedAt, v))
 }
 
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.TransactionDetail {
-	return predicate.TransactionDetail(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdatedAt), v))
-	})
+	return predicate.TransactionDetail(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
 // HasTransaction applies the HasEdge predicate on the "transaction" edge.
@@ -406,7 +266,6 @@ func HasTransaction() predicate.TransactionDetail {
 	return predicate.TransactionDetail(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TransactionTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, TransactionTable, TransactionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

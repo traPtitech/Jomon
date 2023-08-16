@@ -33,7 +33,7 @@ var acceptedMimeTypes = map[string]bool{
 	"application/zip":    true,
 }
 
-func (h *Handlers) PostFile(c echo.Context) error {
+func (h Handlers) PostFile(c echo.Context) error {
 	form, err := c.MultipartForm()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -74,7 +74,7 @@ func (h *Handlers) PostFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	user, ok := sess.Values[sessionUserKey].(*User)
+	user, ok := sess.Values[sessionUserKey].(User)
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("invalid user"))
 	}
@@ -93,7 +93,7 @@ func (h *Handlers) PostFile(c echo.Context) error {
 	return c.JSON(http.StatusOK, &FileResponse{file.ID})
 }
 
-func (h *Handlers) GetFile(c echo.Context) error {
+func (h Handlers) GetFile(c echo.Context) error {
 	fileID, err := uuid.Parse(c.Param("fileID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -133,7 +133,7 @@ func (h *Handlers) GetFile(c echo.Context) error {
 	return c.Stream(http.StatusOK, file.MimeType, f)
 }
 
-func (h *Handlers) GetFileMeta(c echo.Context) error {
+func (h Handlers) GetFileMeta(c echo.Context) error {
 	fileID, err := uuid.Parse(c.Param("fileID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -157,7 +157,7 @@ func (h *Handlers) GetFileMeta(c echo.Context) error {
 	})
 }
 
-func (h *Handlers) DeleteFile(c echo.Context) error {
+func (h Handlers) DeleteFile(c echo.Context) error {
 	fileID, err := uuid.Parse(c.Param("fileID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)

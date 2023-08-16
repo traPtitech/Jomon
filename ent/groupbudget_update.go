@@ -138,40 +138,7 @@ func (gbu *GroupBudgetUpdate) RemoveTransaction(t ...*Transaction) *GroupBudgetU
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (gbu *GroupBudgetUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(gbu.hooks) == 0 {
-		if err = gbu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = gbu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupBudgetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gbu.check(); err != nil {
-				return 0, err
-			}
-			gbu.mutation = mutation
-			affected, err = gbu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(gbu.hooks) - 1; i >= 0; i-- {
-			if gbu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gbu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, gbu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, GroupBudgetMutation](ctx, gbu.sqlSave, gbu.mutation, gbu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -205,16 +172,10 @@ func (gbu *GroupBudgetUpdate) check() error {
 }
 
 func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   groupbudget.Table,
-			Columns: groupbudget.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: groupbudget.FieldID,
-			},
-		},
+	if err := gbu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(groupbudget.Table, groupbudget.Columns, sqlgraph.NewFieldSpec(groupbudget.FieldID, field.TypeUUID))
 	if ps := gbu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -223,38 +184,19 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := gbu.mutation.Amount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: groupbudget.FieldAmount,
-		})
+		_spec.SetField(groupbudget.FieldAmount, field.TypeInt, value)
 	}
 	if value, ok := gbu.mutation.AddedAmount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: groupbudget.FieldAmount,
-		})
+		_spec.AddField(groupbudget.FieldAmount, field.TypeInt, value)
 	}
 	if value, ok := gbu.mutation.Comment(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: groupbudget.FieldComment,
-		})
+		_spec.SetField(groupbudget.FieldComment, field.TypeString, value)
 	}
 	if gbu.mutation.CommentCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: groupbudget.FieldComment,
-		})
+		_spec.ClearField(groupbudget.FieldComment, field.TypeString)
 	}
 	if value, ok := gbu.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: groupbudget.FieldCreatedAt,
-		})
+		_spec.SetField(groupbudget.FieldCreatedAt, field.TypeTime, value)
 	}
 	if gbu.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -353,6 +295,7 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	gbu.mutation.done = true
 	return n, nil
 }
 
@@ -469,6 +412,12 @@ func (gbuo *GroupBudgetUpdateOne) RemoveTransaction(t ...*Transaction) *GroupBud
 	return gbuo.RemoveTransactionIDs(ids...)
 }
 
+// Where appends a list predicates to the GroupBudgetUpdate builder.
+func (gbuo *GroupBudgetUpdateOne) Where(ps ...predicate.GroupBudget) *GroupBudgetUpdateOne {
+	gbuo.mutation.Where(ps...)
+	return gbuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (gbuo *GroupBudgetUpdateOne) Select(field string, fields ...string) *GroupBudgetUpdateOne {
@@ -478,46 +427,7 @@ func (gbuo *GroupBudgetUpdateOne) Select(field string, fields ...string) *GroupB
 
 // Save executes the query and returns the updated GroupBudget entity.
 func (gbuo *GroupBudgetUpdateOne) Save(ctx context.Context) (*GroupBudget, error) {
-	var (
-		err  error
-		node *GroupBudget
-	)
-	if len(gbuo.hooks) == 0 {
-		if err = gbuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = gbuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupBudgetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = gbuo.check(); err != nil {
-				return nil, err
-			}
-			gbuo.mutation = mutation
-			node, err = gbuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(gbuo.hooks) - 1; i >= 0; i-- {
-			if gbuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gbuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, gbuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*GroupBudget)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from GroupBudgetMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*GroupBudget, GroupBudgetMutation](ctx, gbuo.sqlSave, gbuo.mutation, gbuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -551,16 +461,10 @@ func (gbuo *GroupBudgetUpdateOne) check() error {
 }
 
 func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudget, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   groupbudget.Table,
-			Columns: groupbudget.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: groupbudget.FieldID,
-			},
-		},
+	if err := gbuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(groupbudget.Table, groupbudget.Columns, sqlgraph.NewFieldSpec(groupbudget.FieldID, field.TypeUUID))
 	id, ok := gbuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "GroupBudget.id" for update`)}
@@ -586,38 +490,19 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 		}
 	}
 	if value, ok := gbuo.mutation.Amount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: groupbudget.FieldAmount,
-		})
+		_spec.SetField(groupbudget.FieldAmount, field.TypeInt, value)
 	}
 	if value, ok := gbuo.mutation.AddedAmount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: groupbudget.FieldAmount,
-		})
+		_spec.AddField(groupbudget.FieldAmount, field.TypeInt, value)
 	}
 	if value, ok := gbuo.mutation.Comment(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: groupbudget.FieldComment,
-		})
+		_spec.SetField(groupbudget.FieldComment, field.TypeString, value)
 	}
 	if gbuo.mutation.CommentCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: groupbudget.FieldComment,
-		})
+		_spec.ClearField(groupbudget.FieldComment, field.TypeString)
 	}
 	if value, ok := gbuo.mutation.CreatedAt(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: groupbudget.FieldCreatedAt,
-		})
+		_spec.SetField(groupbudget.FieldCreatedAt, field.TypeTime, value)
 	}
 	if gbuo.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -719,5 +604,6 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 		}
 		return nil, err
 	}
+	gbuo.mutation.done = true
 	return _node, nil
 }

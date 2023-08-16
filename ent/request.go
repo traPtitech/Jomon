@@ -218,49 +218,49 @@ func (r *Request) assignValues(columns []string, values []any) error {
 
 // QueryStatus queries the "status" edge of the Request entity.
 func (r *Request) QueryStatus() *RequestStatusQuery {
-	return (&RequestClient{config: r.config}).QueryStatus(r)
+	return NewRequestClient(r.config).QueryStatus(r)
 }
 
 // QueryTarget queries the "target" edge of the Request entity.
 func (r *Request) QueryTarget() *RequestTargetQuery {
-	return (&RequestClient{config: r.config}).QueryTarget(r)
+	return NewRequestClient(r.config).QueryTarget(r)
 }
 
 // QueryFile queries the "file" edge of the Request entity.
 func (r *Request) QueryFile() *FileQuery {
-	return (&RequestClient{config: r.config}).QueryFile(r)
+	return NewRequestClient(r.config).QueryFile(r)
 }
 
 // QueryTag queries the "tag" edge of the Request entity.
 func (r *Request) QueryTag() *TagQuery {
-	return (&RequestClient{config: r.config}).QueryTag(r)
+	return NewRequestClient(r.config).QueryTag(r)
 }
 
 // QueryTransaction queries the "transaction" edge of the Request entity.
 func (r *Request) QueryTransaction() *TransactionQuery {
-	return (&RequestClient{config: r.config}).QueryTransaction(r)
+	return NewRequestClient(r.config).QueryTransaction(r)
 }
 
 // QueryComment queries the "comment" edge of the Request entity.
 func (r *Request) QueryComment() *CommentQuery {
-	return (&RequestClient{config: r.config}).QueryComment(r)
+	return NewRequestClient(r.config).QueryComment(r)
 }
 
 // QueryUser queries the "user" edge of the Request entity.
 func (r *Request) QueryUser() *UserQuery {
-	return (&RequestClient{config: r.config}).QueryUser(r)
+	return NewRequestClient(r.config).QueryUser(r)
 }
 
 // QueryGroup queries the "group" edge of the Request entity.
 func (r *Request) QueryGroup() *GroupQuery {
-	return (&RequestClient{config: r.config}).QueryGroup(r)
+	return NewRequestClient(r.config).QueryGroup(r)
 }
 
 // Update returns a builder for updating this Request.
 // Note that you need to call Request.Unwrap() before calling this method if this Request
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (r *Request) Update() *RequestUpdateOne {
-	return (&RequestClient{config: r.config}).UpdateOne(r)
+	return NewRequestClient(r.config).UpdateOne(r)
 }
 
 // Unwrap unwraps the Request entity that was returned from a transaction after it was closed,
@@ -296,9 +296,3 @@ func (r *Request) String() string {
 
 // Requests is a parsable slice of Request.
 type Requests []*Request
-
-func (r Requests) config(cfg config) {
-	for _i := range r {
-		r[_i].config = cfg
-	}
-}

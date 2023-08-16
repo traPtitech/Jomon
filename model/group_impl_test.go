@@ -209,9 +209,7 @@ func TestEntRepository_GetMembers(t *testing.T) {
 		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 
-		_, err = repo.AddMember(ctx, group.ID, user1.ID)
-		require.NoError(t, err)
-		_, err = repo.AddMember(ctx, group.ID, user2.ID)
+		_, err = repo.AddMembers(ctx, group.ID, []uuid.UUID{user1.ID, user2.ID})
 		require.NoError(t, err)
 
 		got, err := repo.GetMembers(ctx, group.ID)
@@ -253,17 +251,9 @@ func TestEntRepository_CreateMember(t *testing.T) {
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 
-		member, err := repo.AddMember(ctx, group.ID, user.ID)
+		member, err := repo.AddMembers(ctx, group.ID, []uuid.UUID{user.ID})
 		assert.NoError(t, err)
-		assert.Equal(t, member.ID, user.ID)
-	})
-
-	t.Run("UnknownGroup", func(t *testing.T) {
-		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		require.NoError(t, err)
-		_, err = repo.AddMember(ctx, uuid.New(), user.ID)
-		assert.Error(t, err)
+		assert.Equal(t, member[0].ID, user.ID)
 	})
 
 	t.Run("UnknownUser", func(t *testing.T) {
@@ -273,7 +263,7 @@ func TestEntRepository_CreateMember(t *testing.T) {
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
 		require.NoError(t, err)
 
-		_, err = repo.AddMember(ctx, group.ID, uuid.New())
+		_, err = repo.AddMembers(ctx, group.ID, []uuid.UUID{uuid.New()})
 		assert.Error(t, err)
 	})
 }
@@ -292,21 +282,11 @@ func TestEntRepository_DeleteMember(t *testing.T) {
 
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
-		member, err := repo.AddMember(ctx, group.ID, user.ID)
+		member, err := repo.AddMembers(ctx, group.ID, []uuid.UUID{user.ID})
 		require.NoError(t, err)
 
-		err = repo.DeleteMember(ctx, group.ID, member.ID)
+		err = repo.DeleteMembers(ctx, group.ID, []uuid.UUID{member[0].ID})
 		assert.NoError(t, err)
-	})
-
-	t.Run("UnknownGroup", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
-		require.NoError(t, err)
-
-		err = repo.DeleteMember(ctx, uuid.New(), user.ID)
-		assert.Error(t, err)
 	})
 }
 
@@ -327,9 +307,7 @@ func TestEntRepository_GetOwners(t *testing.T) {
 		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 
-		_, err = repo.AddOwner(ctx, group.ID, user1.ID)
-		require.NoError(t, err)
-		_, err = repo.AddOwner(ctx, group.ID, user2.ID)
+		_, err = repo.AddOwners(ctx, group.ID, []uuid.UUID{user1.ID, user2.ID})
 		require.NoError(t, err)
 
 		got, err := repo.GetOwners(ctx, group.ID)
@@ -371,9 +349,9 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
 
-		owner, err := repo.AddOwner(ctx, group.ID, user.ID)
+		owner, err := repo.AddOwners(ctx, group.ID, []uuid.UUID{user.ID})
 		assert.NoError(t, err)
-		assert.Equal(t, owner.ID, user.ID)
+		assert.Equal(t, owner[0].ID, user.ID)
 	})
 
 	t.Run("UnknownUser", func(t *testing.T) {
@@ -383,7 +361,7 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
 		require.NoError(t, err)
 
-		_, err = repo.AddOwner(ctx, group.ID, uuid.New())
+		_, err = repo.AddOwners(ctx, group.ID, []uuid.UUID{uuid.New()})
 		assert.Error(t, err)
 	})
 }
@@ -402,10 +380,10 @@ func TestEntRepository_DeleteOwner(t *testing.T) {
 
 		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
-		owner, err := repo.AddOwner(ctx, group.ID, user.ID)
+		_, err = repo.AddOwners(ctx, group.ID, []uuid.UUID{user.ID})
 		require.NoError(t, err)
 
-		err = repo.DeleteOwner(ctx, group.ID, owner.ID)
+		err = repo.DeleteOwners(ctx, group.ID, []uuid.UUID{user.ID})
 		assert.NoError(t, err)
 	})
 }

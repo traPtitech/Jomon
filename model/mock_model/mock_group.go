@@ -36,34 +36,34 @@ func (m *MockGroupRepository) EXPECT() *MockGroupRepositoryMockRecorder {
 	return m.recorder
 }
 
-// AddMember mocks base method.
-func (m *MockGroupRepository) AddMember(ctx context.Context, groupID, userID uuid.UUID) (*model.Member, error) {
+// AddMembers mocks base method.
+func (m *MockGroupRepository) AddMembers(ctx context.Context, groupID uuid.UUID, userIDs []uuid.UUID) ([]*model.Member, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddMember", ctx, groupID, userID)
-	ret0, _ := ret[0].(*model.Member)
+	ret := m.ctrl.Call(m, "AddMembers", ctx, groupID, userIDs)
+	ret0, _ := ret[0].([]*model.Member)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// AddMember indicates an expected call of AddMember.
-func (mr *MockGroupRepositoryMockRecorder) AddMember(ctx, groupID, userID interface{}) *gomock.Call {
+// AddMembers indicates an expected call of AddMembers.
+func (mr *MockGroupRepositoryMockRecorder) AddMembers(ctx, groupID, userIDs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddMember", reflect.TypeOf((*MockGroupRepository)(nil).AddMember), ctx, groupID, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddMembers", reflect.TypeOf((*MockGroupRepository)(nil).AddMembers), ctx, groupID, userIDs)
 }
 
-// AddOwner mocks base method.
-func (m *MockGroupRepository) AddOwner(ctx context.Context, groupID, ownerID uuid.UUID) (*model.Owner, error) {
+// AddOwners mocks base method.
+func (m *MockGroupRepository) AddOwners(ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID) ([]*model.Owner, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddOwner", ctx, groupID, ownerID)
-	ret0, _ := ret[0].(*model.Owner)
+	ret := m.ctrl.Call(m, "AddOwners", ctx, groupID, ownerIDs)
+	ret0, _ := ret[0].([]*model.Owner)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// AddOwner indicates an expected call of AddOwner.
-func (mr *MockGroupRepositoryMockRecorder) AddOwner(ctx, groupID, ownerID interface{}) *gomock.Call {
+// AddOwners indicates an expected call of AddOwners.
+func (mr *MockGroupRepositoryMockRecorder) AddOwners(ctx, groupID, ownerIDs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOwner", reflect.TypeOf((*MockGroupRepository)(nil).AddOwner), ctx, groupID, ownerID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOwners", reflect.TypeOf((*MockGroupRepository)(nil).AddOwners), ctx, groupID, ownerIDs)
 }
 
 // CreateGroup mocks base method.
@@ -95,32 +95,32 @@ func (mr *MockGroupRepositoryMockRecorder) DeleteGroup(ctx, groupID interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteGroup", reflect.TypeOf((*MockGroupRepository)(nil).DeleteGroup), ctx, groupID)
 }
 
-// DeleteMember mocks base method.
-func (m *MockGroupRepository) DeleteMember(ctx context.Context, groupID, userID uuid.UUID) error {
+// DeleteMembers mocks base method.
+func (m *MockGroupRepository) DeleteMembers(ctx context.Context, groupID uuid.UUID, userIDs []uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteMember", ctx, groupID, userID)
+	ret := m.ctrl.Call(m, "DeleteMembers", ctx, groupID, userIDs)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteMember indicates an expected call of DeleteMember.
-func (mr *MockGroupRepositoryMockRecorder) DeleteMember(ctx, groupID, userID interface{}) *gomock.Call {
+// DeleteMembers indicates an expected call of DeleteMembers.
+func (mr *MockGroupRepositoryMockRecorder) DeleteMembers(ctx, groupID, userIDs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMember", reflect.TypeOf((*MockGroupRepository)(nil).DeleteMember), ctx, groupID, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMembers", reflect.TypeOf((*MockGroupRepository)(nil).DeleteMembers), ctx, groupID, userIDs)
 }
 
-// DeleteOwner mocks base method.
-func (m *MockGroupRepository) DeleteOwner(ctx context.Context, groupID, ownerID uuid.UUID) error {
+// DeleteOwners mocks base method.
+func (m *MockGroupRepository) DeleteOwners(ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteOwner", ctx, groupID, ownerID)
+	ret := m.ctrl.Call(m, "DeleteOwners", ctx, groupID, ownerIDs)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteOwner indicates an expected call of DeleteOwner.
-func (mr *MockGroupRepositoryMockRecorder) DeleteOwner(ctx, groupID, ownerID interface{}) *gomock.Call {
+// DeleteOwners indicates an expected call of DeleteOwners.
+func (mr *MockGroupRepositoryMockRecorder) DeleteOwners(ctx, groupID, ownerIDs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOwner", reflect.TypeOf((*MockGroupRepository)(nil).DeleteOwner), ctx, groupID, ownerID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOwners", reflect.TypeOf((*MockGroupRepository)(nil).DeleteOwners), ctx, groupID, ownerIDs)
 }
 
 // GetGroup mocks base method.

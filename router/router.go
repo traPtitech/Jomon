@@ -1,8 +1,10 @@
 package router
 
 import (
+	"encoding/gob"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -28,10 +30,13 @@ func NewServer(h Handlers) *echo.Echo {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))))
+	gob.Register(User{})
+	gob.Register(uuid.UUID{})
+	gob.Register([]*model.Owner{})
 
-	retrieveGroupOwner := h.RetrieveGroupOwner(h.Repository)
-	retrieveRequestCreator := h.RetrieveRequestCreator(h.Repository)
-	retrieveFileCreator := h.RetrieveFileCreator(h.Repository)
+	retrieveGroupOwner := h.RetrieveGroupOwner()
+	retrieveRequestCreator := h.RetrieveRequestCreator()
+	retrieveFileCreator := h.RetrieveFileCreator()
 
 	api := e.Group("/api")
 	{
@@ -108,7 +113,7 @@ func NewServer(h Handlers) *echo.Echo {
 		{
 			apiAdmins.GET("", h.GetAdmins)
 			apiAdmins.POST("", h.PostAdmins)
-			apiAdmins.DELETE("/:userID", h.DeleteAdmins)
+			apiAdmins.DELETE("", h.DeleteAdmins)
 		}
 	}
 

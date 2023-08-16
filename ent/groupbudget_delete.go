@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,34 +27,7 @@ func (gbd *GroupBudgetDelete) Where(ps ...predicate.GroupBudget) *GroupBudgetDel
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gbd *GroupBudgetDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(gbd.hooks) == 0 {
-		affected, err = gbd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupBudgetMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			gbd.mutation = mutation
-			affected, err = gbd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(gbd.hooks) - 1; i >= 0; i-- {
-			if gbd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = gbd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, gbd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, GroupBudgetMutation](ctx, gbd.sqlExec, gbd.mutation, gbd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +40,7 @@ func (gbd *GroupBudgetDelete) ExecX(ctx context.Context) int {
 }
 
 func (gbd *GroupBudgetDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: groupbudget.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: groupbudget.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(groupbudget.Table, sqlgraph.NewFieldSpec(groupbudget.FieldID, field.TypeUUID))
 	if ps := gbd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +52,19 @@ func (gbd *GroupBudgetDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	gbd.mutation.done = true
 	return affected, err
 }
 
 // GroupBudgetDeleteOne is the builder for deleting a single GroupBudget entity.
 type GroupBudgetDeleteOne struct {
 	gbd *GroupBudgetDelete
+}
+
+// Where appends a list predicates to the GroupBudgetDelete builder.
+func (gbdo *GroupBudgetDeleteOne) Where(ps ...predicate.GroupBudget) *GroupBudgetDeleteOne {
+	gbdo.gbd.mutation.Where(ps...)
+	return gbdo
 }
 
 // Exec executes the deletion query.
@@ -111,5 +82,7 @@ func (gbdo *GroupBudgetDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (gbdo *GroupBudgetDeleteOne) ExecX(ctx context.Context) {
-	gbdo.gbd.ExecX(ctx)
+	if err := gbdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

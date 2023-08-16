@@ -3,7 +3,6 @@ package router
 import (
 	"bytes"
 	"encoding/base64"
-	"encoding/gob"
 	"errors"
 	"fmt"
 	"io"
@@ -35,7 +34,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		request := uuid.New()
-		user := &User{
+		user := User{
 			ID:          uuid.New(),
 			Name:        "test",
 			DisplayName: "test",
@@ -78,7 +77,6 @@ func TestHandlers_PostFile(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		gob.Register(&User{})
 		sess, err := session.Get(h.Handlers.SessionName, c)
 		require.NoError(t, err)
 		sess.Values[sessionUserKey] = user
@@ -104,7 +102,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		request := uuid.New()
-		user := &User{
+		user := User{
 			ID:          uuid.New(),
 			Name:        "test",
 			DisplayName: "test",
@@ -143,7 +141,6 @@ func TestHandlers_PostFile(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		gob.Register(&User{})
 		sess, err := session.Get(h.Handlers.SessionName, c)
 		require.NoError(t, err)
 		sess.Values[sessionUserKey] = user
@@ -168,7 +165,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		request := uuid.New()
-		user := &User{
+		user := User{
 			ID:          uuid.New(),
 			Name:        "test",
 			DisplayName: "test",
@@ -211,7 +208,6 @@ func TestHandlers_PostFile(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		gob.Register(&User{})
 		sess, err := session.Get(h.Handlers.SessionName, c)
 		require.NoError(t, err)
 		sess.Values[sessionUserKey] = user

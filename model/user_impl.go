@@ -10,7 +10,7 @@ import (
 )
 
 func (repo *EntRepository) CreateUser(ctx context.Context, name string, dn string, admin bool) (*User, error) {
-	user, err := repo.client.User.
+	u, err := repo.client.User.
 		Create().
 		SetName(name).
 		SetDisplayName(dn).
@@ -19,29 +19,29 @@ func (repo *EntRepository) CreateUser(ctx context.Context, name string, dn strin
 	if err != nil {
 		return nil, err
 	}
-	return convertEntUserToModelUser(user), nil
+	return convertEntUserToModelUser(u), nil
 }
 
 func (repo *EntRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (*User, error) {
-	user, err := repo.client.User.
+	u, err := repo.client.User.
 		Query().
 		Where(user.IDEQ(userID)).
 		Only(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return convertEntUserToModelUser(user), nil
+	return convertEntUserToModelUser(u), nil
 }
 
 func (repo *EntRepository) GetUserByName(ctx context.Context, name string) (*User, error) {
-	user, err := repo.client.User.
+	u, err := repo.client.User.
 		Query().
 		Where(user.NameEQ(name)).
 		Only(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return convertEntUserToModelUser(user), nil
+	return convertEntUserToModelUser(u), nil
 }
 
 func (repo *EntRepository) GetUsers(ctx context.Context) ([]*User, error) {
@@ -52,14 +52,14 @@ func (repo *EntRepository) GetUsers(ctx context.Context) ([]*User, error) {
 		return nil, err
 	}
 	var modelusers []*User
-	for _, user := range users {
-		modelusers = append(modelusers, convertEntUserToModelUser(user))
+	for _, u := range users {
+		modelusers = append(modelusers, convertEntUserToModelUser(u))
 	}
 	return modelusers, nil
 }
 
 func (repo *EntRepository) UpdateUser(ctx context.Context, userID uuid.UUID, name string, dn string, admin bool) (*User, error) {
-	user, err := repo.client.User.
+	u, err := repo.client.User.
 		UpdateOneID(userID).
 		SetName(name).
 		SetDisplayName(dn).
@@ -69,7 +69,7 @@ func (repo *EntRepository) UpdateUser(ctx context.Context, userID uuid.UUID, nam
 	if err != nil {
 		return nil, err
 	}
-	return convertEntUserToModelUser(user), nil
+	return convertEntUserToModelUser(u), nil
 }
 
 func convertEntUserToModelUser(user *ent.User) *User {
