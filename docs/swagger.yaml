@@ -926,7 +926,7 @@ components:
         - name
         - description
         - budget
-    File:
+    RequestFile:
       type: object
       properties:
         file:
