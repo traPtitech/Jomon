@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
+	"go.uber.org/zap"
 )
 
 type Transaction struct {
@@ -54,6 +55,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		var err error
 		s, err := service.StrToDate(c.QueryParam("since"))
 		if err != nil {
+			h.Logger.Info("could not parse since as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		since = &s
@@ -63,6 +65,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		var err error
 		u, err := service.StrToDate(c.QueryParam("until"))
 		if err != nil {
+			h.Logger.Info("could not parse until as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		until = &u
@@ -82,6 +85,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		var r uuid.UUID
 		r, err := uuid.Parse(c.QueryParam("request"))
 		if err != nil {
+			h.Logger.Info("could not parse request as uuid.UUID", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		request = &r
@@ -141,6 +145,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 func (h Handlers) PostTransaction(c echo.Context) error {
 	var tx *TransactionOverview
 	if err := c.Bind(&tx); err != nil {
+		h.Logger.Info("could not get transaction overview from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
@@ -148,10 +153,12 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 	ctx := c.Request().Context()
 	for _, target := range tx.Targets {
 		if target == nil {
+			h.Logger.Info("target is nil")
 			return echo.NewHTTPError(http.StatusBadRequest, "target is nil")
 		}
 		created, err := h.Repository.CreateTransaction(ctx, tx.Amount, *target, tx.Tags, tx.Group, tx.Request)
 		if err != nil {
+			h.Logger.Error("failed to create transaction in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
@@ -194,12 +201,14 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 func (h Handlers) GetTransaction(c echo.Context) error {
 	txID, err := uuid.Parse(c.Param("transactionID"))
 	if err != nil {
+		h.Logger.Info("could not parse query parameter `transactionID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := c.Request().Context()
 	tx, err := h.Repository.GetTransaction(ctx, txID)
 	if err != nil {
+		h.Logger.Error("failed to get transaction from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -240,17 +249,20 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 func (h Handlers) PutTransaction(c echo.Context) error {
 	txID, err := uuid.Parse(c.Param("transactionID"))
 	if err != nil {
+		h.Logger.Info("could not parse query parameter `transactionID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	var tx *TransactionOverviewWithOneTarget
 	if err := c.Bind(&tx); err != nil {
+		h.Logger.Info("could not get transaction overview with one target from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := c.Request().Context()
 	updated, err := h.Repository.UpdateTransaction(ctx, txID, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
 	if err != nil {
+		h.Logger.Error("failed to update transaction in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 

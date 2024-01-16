@@ -12,6 +12,7 @@ import (
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
+	"go.uber.org/zap"
 )
 
 type Status string
@@ -132,6 +133,7 @@ func (h Handlers) GetRequests(c echo.Context) error {
 	if c.QueryParam("target") != "" {
 		t, err := uuid.Parse(c.QueryParam("target"))
 		if err != nil {
+			h.Logger.Info("could not parse query parameter `target` as UUID", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		target = &t
@@ -140,6 +142,7 @@ func (h Handlers) GetRequests(c echo.Context) error {
 	if c.QueryParam("since") != "" {
 		s, err := service.StrToDate(c.QueryParam("since"))
 		if err != nil {
+			h.Logger.Info("could not parse query parameter `since` as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		since = &s
@@ -148,6 +151,7 @@ func (h Handlers) GetRequests(c echo.Context) error {
 	if c.QueryParam("until") != "" {
 		u, err := service.StrToDate(c.QueryParam("until"))
 		if err != nil {
+			h.Logger.Info("could not parse query parameter `until` as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		until = &u
@@ -174,6 +178,7 @@ func (h Handlers) GetRequests(c echo.Context) error {
 
 	modelrequests, err := h.Repository.GetRequests(ctx, query)
 	if err != nil {
+		h.Logger.Error("failed to get requests from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -243,8 +248,10 @@ func (h Handlers) PostRequest(c echo.Context) error {
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
 			if ent.IsNotFound(err) {
+				h.Logger.Info("could not find tag in repository", zap.String("ID", tagID.String()))
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
+			h.Logger.Error("failed to get tag from repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 		tags = append(tags, tag)
@@ -261,16 +268,20 @@ func (h Handlers) PostRequest(c echo.Context) error {
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
 			if ent.IsNotFound(err) {
+				h.Logger.Info("could not find group in repository", zap.String("ID", req.Group.String()))
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
+			h.Logger.Error("failed to get group from repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
 	request, err := h.Repository.CreateRequest(ctx, req.Title, req.Content, tags, targets, group, req.CreatedBy)
 	if err != nil {
 		if ent.IsNotFound(err) {
+			h.Logger.Info("could not find request in repository", zap.String("ID", req.CreatedBy.String()))
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
+		h.Logger.Error("failed to create request in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	var resgroup *GroupOverview
@@ -331,9 +342,11 @@ func (h Handlers) PostRequest(c echo.Context) error {
 func (h Handlers) GetRequest(c echo.Context) error {
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
+		h.Logger.Info("could not parse query parameter `requestID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if requestID == uuid.Nil {
+		h.Logger.Info("invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
@@ -341,12 +354,18 @@ func (h Handlers) GetRequest(c echo.Context) error {
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
 		if ent.IsNotFound(err) {
+			h.Logger.Info(
+				"could not find request in repository",
+				zap.String("ID", requestID.String()),
+				zap.Error(err))
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
+		h.Logger.Error("failed to get request from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	modelcomments, err := h.Repository.GetComments(ctx, requestID)
 	if err != nil {
+		h.Logger.Error("failed to get comments from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	comments := []*CommentDetail{}
@@ -421,13 +440,16 @@ func (h Handlers) PutRequest(c echo.Context) error {
 	var err error
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
+		h.Logger.Info("could not parse query parameter `requestID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if requestID == uuid.Nil {
+		h.Logger.Info("invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
 	if err = c.Bind(&req); err != nil {
+		h.Logger.Info("failed to get request from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	tags := []*model.Tag{}
@@ -435,8 +457,10 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		tag, err := h.Repository.GetTag(ctx, *tagID)
 		if err != nil {
 			if ent.IsNotFound(err) {
+				h.Logger.Info("could not find tag in repository", zap.String("ID", tagID.String()))
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
+			h.Logger.Error("failed to get tag from repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 		tags = append(tags, tag)
@@ -453,20 +477,25 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
 			if ent.IsNotFound(err) {
+				h.Logger.Info("could not find group in repository", zap.String("ID", req.Group.String()))
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
+			h.Logger.Error("failed to get group from repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
 	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Title, req.Content, tags, targets, group)
 	if err != nil {
 		if ent.IsNotFound(err) {
+			h.Logger.Info("could not find request in repository", zap.String("ID", requestID.String()))
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
+		h.Logger.Error("failed to update request in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	modelcomments, err := h.Repository.GetComments(ctx, requestID)
 	if err != nil {
+		h.Logger.Error("failed to get comments from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	var comments []*CommentDetail
@@ -539,23 +568,28 @@ func (h Handlers) PutRequest(c echo.Context) error {
 func (h Handlers) PostComment(c echo.Context) error {
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
+		h.Logger.Info("could not parse query parameter `requestID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if requestID == uuid.Nil {
+		h.Logger.Info("invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	var req Comment
 	if err := c.Bind(&req); err != nil {
+		h.Logger.Info("failed to get comment from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
+		h.Logger.Error("failed to get session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	user, ok := sess.Values[sessionUserKey].(User)
 	if !ok {
+		h.Logger.Info("could not find use in session")
 		return echo.NewHTTPError(http.StatusUnauthorized, errors.New("sessionUser not found"))
 	}
 
@@ -563,8 +597,10 @@ func (h Handlers) PostComment(c echo.Context) error {
 	comment, err := h.Repository.CreateComment(ctx, req.Comment, requestID, user.ID)
 	if err != nil {
 		if ent.IsNotFound(err) {
+			h.Logger.Info("could not find request in repository", zap.String("ID", requestID.String()))
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
+		h.Logger.Error("failed to create comment in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	res := &CommentDetail{
@@ -582,21 +618,26 @@ func (h Handlers) PutStatus(c echo.Context) error {
 	var err error
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
+		h.Logger.Info("could not parse query parameter `requestID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if requestID == uuid.Nil {
+		h.Logger.Info("invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
+		h.Logger.Error("failed to get session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	user, ok := sess.Values[sessionUserKey].(User)
 	if !ok {
+		h.Logger.Info("could not find use in session")
 		return echo.NewHTTPError(http.StatusForbidden, errors.New("sessionUser not found"))
 	}
 
 	if err = c.Bind(&req); err != nil {
+		h.Logger.Info("could not get status from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
@@ -604,8 +645,10 @@ func (h Handlers) PutStatus(c echo.Context) error {
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
 		if ent.IsNotFound(err) {
+			h.Logger.Info("could not find request in repository", zap.String("ID", requestID.String()))
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
+		h.Logger.Error("failed to get request from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -622,17 +665,21 @@ func (h Handlers) PutStatus(c echo.Context) error {
 	u, err := h.Repository.GetUserByID(ctx, user.ID)
 	if err != nil {
 		if ent.IsNotFound(err) {
+			h.Logger.Info("could not find user in repository", zap.String("ID", user.ID.String()))
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
+		h.Logger.Error("failed to get user from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	if u.Admin {
 		if !IsAbleAdminChangeState(req.Status, request.Status) {
+			h.Logger.Info("admin unable to change status")
 			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("admin unable to change %v to %v", request.Status.String(), req.Status.String()))
 		}
 		if req.Status == model.Submitted && request.Status == model.Accepted {
 			targets, err := h.Repository.GetRequestTargets(ctx, requestID)
 			if err != nil {
+				h.Logger.Error("failed to get request targets from repository", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 			var paid bool
@@ -643,6 +690,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 				}
 			}
 			if paid {
+				h.Logger.Info("someone already paid")
 				return echo.NewHTTPError(http.StatusBadRequest, errors.New("someone already paid"))
 			}
 		}
@@ -650,23 +698,27 @@ func (h Handlers) PutStatus(c echo.Context) error {
 
 	if !u.Admin && user.ID == request.CreatedBy {
 		if !IsAbleCreatorChangeStatus(req.Status, request.Status) {
+			h.Logger.Info("creator unable to change status")
 			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("creator unable to change %v to %v", request.Status.String(), req.Status.String()))
 		}
 	}
 
 	if user.ID != request.CreatedBy && !u.Admin {
+		h.Logger.Info("use is not creator or admin")
 		return echo.NewHTTPError(http.StatusForbidden)
 	}
 
 	// create status and comment: keep the two in this order
 	created, err := h.Repository.CreateStatus(ctx, requestID, user.ID, req.Status)
 	if err != nil {
+		h.Logger.Error("failed to create status in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	var resComment CommentDetail
 	if req.Comment != "" {
 		comment, err := h.Repository.CreateComment(ctx, req.Comment, request.ID, user.ID)
 		if err != nil {
+			h.Logger.Error("failed to create comment in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 		resComment = CommentDetail{
