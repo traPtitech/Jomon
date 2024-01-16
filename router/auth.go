@@ -15,6 +15,7 @@ import (
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
+	"go.uber.org/zap"
 )
 
 const (
@@ -36,6 +37,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
+		h.Logger.Error("failed to get session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -52,11 +54,13 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	res, err := service.RequestAccessToken(code, codeVerifier)
 	if err != nil {
+		h.Logger.Error("failed to get access token", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	u, err := service.FetchTraQUserInfo(res.AccessToken)
 	if err != nil {
+		h.Logger.Error("failed to fetch traQ user info", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -66,9 +70,11 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		if ent.IsNotFound(err) {
 			modelUser, err = h.Repository.CreateUser(c.Request().Context(), u.Name, u.DisplayName, false)
 			if err != nil {
+				h.Logger.Error("failed to create user", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 		} else {
+			h.Logger.Error("failed to get user by name", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
@@ -83,6 +89,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {
+		h.Logger.Error("failed to save session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -92,6 +99,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 func (h Handlers) GeneratePKCE(c echo.Context) error {
 	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
+		h.Logger.Error("failed to get session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -111,6 +119,7 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 
 	err = sess.Save(c.Request(), c.Response())
 	if err != nil {
+		h.Logger.Error("failed to save session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
