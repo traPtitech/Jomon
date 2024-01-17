@@ -21,6 +21,7 @@ func (s *Service) GetImages(c echo.Context) error {
 		if gorm.IsRecordNotFoundError(err) {
 			return c.NoContent(http.StatusNotFound)
 		} else {
+			c.Logger().Error(err)
 			return c.NoContent(http.StatusInternalServerError)
 		}
 	}
@@ -39,6 +40,7 @@ func (s *Service) GetImages(c echo.Context) error {
 
 	f, err := s.Images.OpenApplicationsImage(image)
 	if err != nil {
+		c.Logger().Error(err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
@@ -61,6 +63,7 @@ func (s *Service) DeleteImages(c echo.Context) error {
 		if gorm.IsRecordNotFoundError(err) {
 			return c.NoContent(http.StatusNotFound)
 		} else {
+			c.Logger().Error(err)
 			return c.NoContent(http.StatusInternalServerError)
 		}
 	}
@@ -80,6 +83,7 @@ func (s *Service) DeleteImages(c echo.Context) error {
 	}
 
 	if err = s.Images.DeleteApplicationsImage(image); err != nil {
+		c.Logger().Error(err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
