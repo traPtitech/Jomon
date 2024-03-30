@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"go.uber.org/zap"
 )
 
 type User struct {
@@ -22,6 +23,7 @@ type User struct {
 func (h Handlers) GetUsers(c echo.Context) error {
 	users, err := h.Repository.GetUsers(c.Request().Context())
 	if err != nil {
+		h.Logger.Error("failed to get users from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -50,16 +52,19 @@ type PutUserRequest struct {
 func (h Handlers) UpdateUserInfo(c echo.Context) error {
 	var newUser PutUserRequest
 	if err := c.Bind(&newUser); err != nil {
+		h.Logger.Info("could not get user info from request", zap.Error(err))
 		return c.NoContent(http.StatusBadRequest)
 	}
 
 	user, err := h.Repository.GetUserByName(c.Request().Context(), newUser.Name)
 	if err != nil {
+		h.Logger.Error("failed to get user from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	updated, err := h.Repository.UpdateUser(c.Request().Context(), user.ID, newUser.Name, newUser.DisplayName, newUser.Admin)
 	if err != nil {
+		h.Logger.Error("failed to update user in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -74,10 +79,12 @@ func (h Handlers) UpdateUserInfo(c echo.Context) error {
 func (h Handlers) GetMe(c echo.Context) error {
 	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
+		h.Logger.Error("failed to get session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	user, ok := sess.Values[sessionUserKey].(User)
 	if !ok {
+		h.Logger.Error("failed to parse stored session as user info")
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user info")
 	}
 

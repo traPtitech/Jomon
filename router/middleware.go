@@ -69,6 +69,7 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
+			h.Logger.Error("failed to get session", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
@@ -85,11 +86,13 @@ func (h Handlers) CheckAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
+			h.Logger.Error("failed to get session", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, err := getUserInfo(sess)
 		if err != nil {
+			h.Logger.Error("failed to get user info", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
@@ -105,11 +108,13 @@ func (h Handlers) CheckRequestCreatorMiddleware(next echo.HandlerFunc) echo.Hand
 	return func(c echo.Context) error {
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
+			h.Logger.Error("failed to get session", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, err := getUserInfo(sess)
 		if err != nil {
+			h.Logger.Error("failed to get user info", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
@@ -126,11 +131,13 @@ func (h Handlers) CheckAdminOrRequestCreatorMiddleware(next echo.HandlerFunc) ec
 	return func(c echo.Context) error {
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
+			h.Logger.Error("failed to get session", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, err := getUserInfo(sess)
 		if err != nil {
+			h.Logger.Error("failed to get user info", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
@@ -147,16 +154,19 @@ func (h Handlers) CheckAdminOrGroupOwnerMiddleware(next echo.HandlerFunc) echo.H
 	return func(c echo.Context) error {
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
+			h.Logger.Error("failed to get session", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, err := getUserInfo(sess)
 		if err != nil {
+			h.Logger.Error("failed to get user info", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		owners, ok := sess.Values[sessionOwnerKey].([]*model.Owner)
 		if !ok {
+			h.Logger.Error("failed to get group owner", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, "session owner key is not set")
 		}
 
@@ -178,11 +188,13 @@ func (h Handlers) CheckFileCreatorMiddleware(next echo.HandlerFunc) echo.Handler
 	return func(c echo.Context) error {
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
+			h.Logger.Error("failed to get session", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, err := getUserInfo(sess)
 		if err != nil {
+			h.Logger.Error("failed to get user info", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
@@ -221,22 +233,26 @@ func (h Handlers) RetrieveGroupOwner() echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			sess, err := session.Get(h.SessionName, c)
 			if err != nil {
+				h.Logger.Error("failed to get session", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 			id, err := uuid.Parse(c.Param("groupID"))
 			if err != nil {
+				h.Logger.Info("could not parse group_id as UUID", zap.Error(err))
 				return echo.NewHTTPError(http.StatusBadRequest, err)
 			}
 
 			ctx := c.Request().Context()
 			owners, err := h.Repository.GetOwners(ctx, id)
 			if err != nil {
+				h.Logger.Error("failed to get owners from repository", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
 			sess.Values[sessionOwnerKey] = owners
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
+				h.Logger.Error("failed to save session", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
@@ -250,22 +266,26 @@ func (h Handlers) RetrieveRequestCreator() echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			sess, err := session.Get(h.SessionName, c)
 			if err != nil {
+				h.Logger.Error("failed to get session", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 			id, err := uuid.Parse(c.Param("requestID"))
 			if err != nil {
+				h.Logger.Info("could not parse request_id as UUID", zap.Error(err))
 				return echo.NewHTTPError(http.StatusBadRequest, err)
 			}
 
 			ctx := c.Request().Context()
 			request, err := h.Repository.GetRequest(ctx, id)
 			if err != nil {
+				h.Logger.Error("failed to get request from repository", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
 			sess.Values[sessionRequestCreatorKey] = request.CreatedBy
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
+				h.Logger.Error("failed to save session", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
@@ -279,22 +299,26 @@ func (h Handlers) RetrieveFileCreator() echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			sess, err := session.Get(h.SessionName, c)
 			if err != nil {
+				h.Logger.Error("failed to get session", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 			id, err := uuid.Parse(c.Param("fileID"))
 			if err != nil {
+				h.Logger.Info("could not parse file_id as UUID", zap.Error(err))
 				return echo.NewHTTPError(http.StatusBadRequest, err)
 			}
 
 			ctx := c.Request().Context()
 			file, err := h.Repository.GetFile(ctx, id)
 			if err != nil {
+				h.Logger.Error("failed to get file from repository", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
 			sess.Values[sessionFileCreatorKey] = file.CreatedBy
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
+				h.Logger.Error("failed to save session", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
