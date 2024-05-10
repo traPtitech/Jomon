@@ -12,6 +12,9 @@ env:
 jobs:
   image-v1:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
     steps:
       - name: Login to DockerHub
         uses: docker/login-action@v2
