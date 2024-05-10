@@ -124,21 +124,13 @@
       </v-card>
 
       <!-- todo focusしていないところのvalidateが機能していない -->
-      <v-btn :disabled="!valid" @click.stop="submit" class="ma-3"
+      <v-btn
+        :disabled="!valid || isSubmitting"
+        @click.stop="submit"
+        class="ma-3"
         >作成する
       </v-btn>
     </v-form>
-    <!-- ここ作成したらokを押しても押さなくても自動遷移 -->
-    <v-snackbar v-model="snackbar">
-      作成できました
-      <v-btn
-        :to="`/applications/` + response.application_id"
-        color="green darken-1"
-        text
-        @click="snackbar = false"
-        >OK
-      </v-btn>
-    </v-snackbar>
   </v-container>
 </template>
 
@@ -170,7 +162,7 @@ export default {
         paid_at: null
       }
     },
-    snackbar: false,
+    isSubmitting: false,
     date: null,
     menu: false,
     traPID: [],
@@ -209,6 +201,7 @@ export default {
     }),
     submit() {
       if (this.$refs.form.validate()) {
+        this.isSubmitting = true;
         let form = new FormData();
         let paid_at = new Date(this.date);
         let details = {
@@ -229,7 +222,14 @@ export default {
           })
           .then(response => {
             this.response = response.data;
-            this.snackbar = true;
+            alert("作成できました");
+            this.$router.push("/");
+          })
+          .catch(() => {
+            alert("エラーが発生しました");
+          })
+          .finally(() => {
+            this.isSubmitting = false;
           });
       }
     },
