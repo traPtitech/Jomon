@@ -39,7 +39,7 @@ func Numeric64(t *testing.T, max int64) int64 {
 
 func AlphaNumericSlice(t *testing.T, length int, max int64) []string {
 	slice := []string{}
-	for i := 0; i < length; i++ {
+	for range length {
 		slice = append(slice, AlphaNumeric(t, int(max)))
 	}
 	return slice
@@ -47,7 +47,7 @@ func AlphaNumericSlice(t *testing.T, length int, max int64) []string {
 
 func NumericSlice(t *testing.T, length int, max int) []int {
 	slice := []int{}
-	for i := 0; i < length; i++ {
+	for range length {
 		slice = append(slice, Numeric(t, max))
 	}
 	return slice
@@ -55,7 +55,7 @@ func NumericSlice(t *testing.T, length int, max int) []int {
 
 func Numeric64Slice(t *testing.T, length int, max int64) []int64 {
 	slice := []int64{}
-	for i := 0; i < length; i++ {
+	for range length {
 		slice = append(slice, Numeric64(t, max))
 	}
 	return slice
