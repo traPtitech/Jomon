@@ -36,6 +36,8 @@ type TransactionQuery struct {
 	Target  *string
 	Since   *time.Time
 	Until   *time.Time
+	Limit   int
+	Offset  int
 	Tag     *string
 	Group   *string
 	Request *uuid.UUID

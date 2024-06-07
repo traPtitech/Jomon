@@ -83,6 +83,8 @@ func (repo *EntRepository) GetTransactions(ctx context.Context, query Transactio
 			Where(transaction.CreatedAtLT(*query.Until))
 	}
 
+	transactionsq = transactionsq.Limit(query.Limit).Offset(query.Offset)
+
 	if query.Tag != nil {
 		transactionsq = transactionsq.
 			Where(transaction.HasTagWith(

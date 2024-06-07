@@ -1,7 +1,9 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -70,6 +72,19 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		}
 		until = &u
 	}
+	limit := 100
+	if limitQuery := c.QueryParam("limit"); limitQuery != "" {
+		limitI, err := strconv.Atoi(limitQuery)
+		if err != nil {
+			h.Logger.Info("could not parse limit as integer", zap.Error(err))
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		if limitI < 0 {
+			h.Logger.Info("received negative limit", zap.Int("limit", limitI))
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("negative limit(=%d) is invalid", limitI))
+		}
+		limit = limitI
+	}
 	var tag *string
 	if c.QueryParam("tag") != "" {
 		t := c.QueryParam("tag")
@@ -95,6 +110,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		Target:  target,
 		Since:   since,
 		Until:   until,
+		Limit:   limit,
 		Tag:     tag,
 		Group:   group,
 		Request: request,
