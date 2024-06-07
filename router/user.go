@@ -82,11 +82,27 @@ func (h Handlers) GetMe(c echo.Context) error {
 		h.Logger.Error("failed to get session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	user, ok := sess.Values[sessionUserKey].(User)
+	user_in_session, ok := sess.Values[sessionUserKey].(User)
 	if !ok {
 		h.Logger.Error("failed to parse stored session as user info")
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user info")
 	}
 
-	return c.JSON(http.StatusOK, user)
+	users, err := h.Repository.GetUsers(c.Request().Context())
+	if err != nil {
+		h.Logger.Error("failed to get users from repository", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	for _, user_i := range users {
+		if user_i.ID == user_in_session.ID {
+			return c.JSON(http.StatusOK, user_i)
+		}
+	}
+	// if user not found, create new user
+	new_user, err := h.Repository.CreateUser(c.Request().Context(), user_in_session.Name, user_in_session.DisplayName, user_in_session.Admin)
+	if err != nil {
+		h.Logger.Error("failed to create user", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	return c.JSON(http.StatusOK, new_user)
 }
