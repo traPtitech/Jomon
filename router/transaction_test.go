@@ -93,6 +93,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Target: nil,
 				Since:  nil,
 				Until:  nil,
+				Limit:  100,
+				Offset: 0,
 				Tag:    nil,
 				Group:  nil,
 			}).
@@ -206,7 +208,9 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		h.Repository.MockTransactionRepository.
 			EXPECT().
 			GetTransactions(c.Request().Context(), model.TransactionQuery{
-				Sort: &sortQuery,
+				Sort:   &sortQuery,
+				Limit:  100,
+				Offset: 0,
 			}).
 			Return(txs, nil)
 
@@ -319,7 +323,9 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		h.Repository.MockTransactionRepository.
 			EXPECT().
 			GetTransactions(c.Request().Context(), model.TransactionQuery{
-				Sort: &sortQuery,
+				Sort:   &sortQuery,
+				Limit:  100,
+				Offset: 0,
 			}).
 			Return(txs, nil)
 
@@ -435,6 +441,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			EXPECT().
 			GetTransactions(c.Request().Context(), model.TransactionQuery{
 				Target: &targetQuery,
+				Limit:  100,
+				Offset: 0,
 			}).
 			Return(txs, nil)
 
@@ -532,8 +540,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		h.Repository.MockTransactionRepository.
 			EXPECT().
 			GetTransactions(c.Request().Context(), model.TransactionQuery{
-				Since: &since,
-				Until: &until,
+				Since:  &since,
+				Until:  &until,
+				Limit:  100,
+				Offset: 0,
 			}).
 			Return(txs, nil)
 
@@ -575,6 +585,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
 	})
+	
+	// TODO: SuccessWithLimit, SuccessWithOffset
 }
 
 func TestHandlers_PostTransaction(t *testing.T) {
