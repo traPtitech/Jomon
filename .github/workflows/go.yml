@@ -64,4 +64,7 @@ jobs:
         MARIADB_PORT: 50000
 
     - name: Upload coverage to Codecov
-      run: bash <(curl -s https://codecov.io/bash)
+      uses: codecov/codecov-action@v4
+      with:
+        files: ./coverage.out
+        token: ${{ secrets.CODECOV_TOKEN }}
