@@ -17,6 +17,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 )
 
 type RequestApplication struct {
@@ -116,12 +117,12 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				message += fmt.Sprintf("- 請求先グループ: %s", resApp.Group.Name) + "\n"
 			}
 
-			if resApp.Tags != nil {
-				message += "- タグ: "
-				for _, tag := range resApp.Tags {
-					message += tag.Name + ", "
-				}
-				message = message[:len(message)-len(", ")]
+			if resApp.Tags != nil  && len(resApp.Tags) != 0 {
+				
+				tags := lo.Map(resApp.Tags, func(tag *Tag, index int) string {
+					return tag.Name
+				})
+				message += fmt.Sprintf("- タグ: %s", strings.Join(tags, ", "))
 			}
 			message += "\n" + "\n"
 			message += resApp.Content + "\n"
@@ -159,16 +160,11 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 		if resApp.Group != nil {
 			message += fmt.Sprintf("- 関連するグループ: %s\n", resApp.Group.Name)
 		}
-		if resApp.Tags != nil {
-			tags := make([]string, len(resApp.Tags))
-			for i, tag := range resApp.Tags {
-				tags[i] = fmt.Sprintf(`%s`, tag.Name)
-			}
-			if len(resApp.Tags) == 0 {
-				message += fmt.Sprintf("")
-			} else {
-				message += fmt.Sprintf("- タグ: %s", strings.Join(tags, " "))
-			}
+		if resApp.Tags != nil && len(resApp.Tags) != 0 {
+			tags := lo.Map(resApp.Tags, func(tag *Tag, index int) string {
+				return tag.Name
+			})
+			message += fmt.Sprintf("- タグ: %s", strings.Join(tags, ", "))
 		}
 	}
 
