@@ -24,7 +24,7 @@ func TestEntRepository_createTransactionDetail(t *testing.T) {
 		require.NoError(t, err)
 		defer func() {
 			if v := recover(); v != nil {
-				tx.Rollback()
+				_ = tx.Rollback()
 				panic(v)
 			}
 		}()
@@ -57,7 +57,7 @@ func TestEntRepository_updateTransactionDetail(t *testing.T) {
 		require.NoError(t, err)
 		defer func() {
 			if v := recover(); v != nil {
-				tx.Rollback()
+				_ = tx.Rollback()
 				panic(v)
 			}
 		}()

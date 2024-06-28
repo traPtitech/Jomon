@@ -47,7 +47,11 @@ func main() {
 	} else {
 		logger, err = zap.NewProduction()
 	}
-	defer logger.Sync()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			panic(err)
+		}
+	}()
 	if err != nil {
 		panic(err)
 	}
