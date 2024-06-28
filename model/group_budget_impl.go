@@ -2,6 +2,7 @@ package model
 
 import "github.com/traPtitech/Jomon/ent"
 
+// nolint:unused
 func convertEntGroupBudgetToModelGroupBudget(entgb *ent.GroupBudget) *GroupBudget {
 	if entgb == nil {
 		return nil
