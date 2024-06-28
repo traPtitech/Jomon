@@ -17,7 +17,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-
 	"github.com/samber/lo"
 )
 
@@ -118,7 +117,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				message += fmt.Sprintf("- 請求先グループ: %s", resApp.Group.Name) + "\n"
 			}
 
-			if resApp.Tags != nil  && len(resApp.Tags) == 0 {
+			if resApp.Tags != nil  && len(resApp.Tags) != 0 {
 				
 				tags := lo.Map(resApp.Tags, func(tag *Tag, index int) string {
 					return tag.Name
@@ -161,7 +160,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 		if resApp.Group != nil {
 			message += fmt.Sprintf("- 関連するグループ: %s\n", resApp.Group.Name)
 		}
-		if resApp.Tags != nil && len(resApp.Tags) == 0 {
+		if resApp.Tags != nil && len(resApp.Tags) != 0 {
 			tags := lo.Map(resApp.Tags, func(tag *Tag, index int) string {
 				return tag.Name
 			})
