@@ -585,7 +585,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
 	})
-	
+
 	// TODO: SuccessWithLimit, SuccessWithOffset
 }
 

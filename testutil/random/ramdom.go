@@ -14,7 +14,8 @@ const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 func AlphaNumeric(t *testing.T, n int) string {
 	t.Helper()
 	b := make([]byte, n)
-	_, err := rand.Read(b)
+	// FIXME: https://github.com/traPtitech/Jomon/issues/736
+	_, err := rand.Read(b) // nolint:staticcheck
 	require.NoError(t, err)
 
 	var result string

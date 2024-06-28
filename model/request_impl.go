@@ -127,7 +127,7 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, title string, cont
 	}
 	defer func() {
 		if v := recover(); v != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			panic(v)
 		}
 	}()
@@ -263,7 +263,7 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	}
 	defer func() {
 		if v := recover(); v != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			panic(v)
 		}
 	}()

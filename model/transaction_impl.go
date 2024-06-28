@@ -149,7 +149,7 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 	}
 	defer func() {
 		if v := recover(); v != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			panic(v)
 		}
 	}()
@@ -248,7 +248,7 @@ func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID 
 	}
 	defer func() {
 		if v := recover(); v != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			panic(v)
 		}
 	}()
