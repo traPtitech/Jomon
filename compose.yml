@@ -12,7 +12,6 @@ services:
     build:
       context: ./
       dockerfile: ./Dockerfile.dev
-    entrypoint: dockerize -wait tcp://db:3306 -timeout 60s
     command: "air -c .air.toml"
     environment:
       MARIADB_USERNAME: root
@@ -28,7 +27,8 @@ services:
     volumes:
       - "./:/src"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     tty: true
 
   db:
@@ -45,6 +45,18 @@ services:
       - "3306"
     ports:
       - "3306:3306"
+    healthcheck:
+      test: [
+        "CMD",
+        "mysqladmin",
+        "ping",
+        "-ujomon",
+        "-ppassword"
+      ]
+      interval: 10s
+      timeout: 5s
+      start_period: 5s
+      retries: 3
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
