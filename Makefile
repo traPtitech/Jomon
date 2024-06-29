@@ -1,14 +1,14 @@
 .PHONY: up
 up:
-	-@docker-compose up -d --build
+	-@docker compose up -d --build
 
 .PHONY: dev-up
 dev-up:
-	-@docker-compose up --build
+	-@docker compose up --build
 
 .PHONY: down
 down:
-	@docker-compose down -v
+	@docker compose down -v
 
 .PHONY: test
 test:
