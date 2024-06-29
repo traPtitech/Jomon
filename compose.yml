@@ -12,7 +12,6 @@ services:
     build:
       context: ./
       dockerfile: ./Dockerfile.dev
-    command: "air -c .air.toml"
     environment:
       MARIADB_USERNAME: root
       MARIADB_PASSWORD: password
@@ -25,11 +24,18 @@ services:
     ports:
       - "1323:1323"
     volumes:
-      - "./:/src"
+      - "./uploads:/src/uploads"
     depends_on:
       db:
         condition: service_healthy
     tty: true
+    develop:
+      watch:
+        - path: ./
+          action: sync+restart
+          target: /src
+          ignore:
+            - uploads
 
   db:
     image: mariadb:10.3.29
