@@ -38,7 +38,7 @@ services:
             - uploads
 
   db:
-    image: mariadb:10.3.29
+    image: mariadb:10.11.4
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: password
@@ -54,10 +54,10 @@ services:
     healthcheck:
       test: [
         "CMD",
-        "mysqladmin",
-        "ping",
-        "-ujomon",
-        "-ppassword"
+        "healthcheck.sh",
+        "--su-mysql",
+        "--connect",
+        "--innodb_initialized"
       ]
       interval: 10s
       timeout: 5s
