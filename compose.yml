@@ -12,8 +12,6 @@ services:
     build:
       context: ./
       dockerfile: ./Dockerfile.dev
-    entrypoint: dockerize -wait tcp://db:3306 -timeout 60s
-    command: "air -c .air.toml"
     environment:
       MARIADB_USERNAME: root
       MARIADB_PASSWORD: password
@@ -26,13 +24,21 @@ services:
     ports:
       - "1323:1323"
     volumes:
-      - "./:/src"
+      - "./uploads:/src/uploads"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     tty: true
+    develop:
+      watch:
+        - path: ./
+          action: sync+restart
+          target: /src
+          ignore:
+            - uploads
 
   db:
-    image: mariadb:10.3.29
+    image: mariadb:10.11.4
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: password
@@ -45,6 +51,18 @@ services:
       - "3306"
     ports:
       - "3306:3306"
+    healthcheck:
+      test: [
+        "CMD",
+        "healthcheck.sh",
+        "--su-mysql",
+        "--connect",
+        "--innodb_initialized"
+      ]
+      interval: 10s
+      timeout: 5s
+      start_period: 5s
+      retries: 3
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
