@@ -11,25 +11,23 @@ const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 // この関数はmath/randが生成する擬似乱数を使用します
 func AlphaNumeric(t *testing.T, n int) string {
 	t.Helper()
+	b := make([]byte, n)
 
-	var result string
-	for i := 0; i < n; i++ {
-		result += string(letters[rand.IntN(len(letters))])
+	for i := range n {
+		b[i] = letters[rand.IntN(len(letters))]
 	}
 
-	return result
+	return string(b)
 }
 
 func Numeric(t *testing.T, max int) int {
 	t.Helper()
-	n := rand.IntN(max)
-	return n
+	return rand.IntN(max)
 }
 
 func Numeric64(t *testing.T, max int64) int64 {
 	t.Helper()
-	n := rand.Int64N(max)
-	return n
+	return rand.Int64N(max)
 }
 
 func AlphaNumericSlice(t *testing.T, length int, max int64) []string {
