@@ -1,10 +1,8 @@
 package random
 
 import (
-	"math/rand"
+	"math/rand/v2"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -13,14 +11,10 @@ const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 // この関数はmath/randが生成する擬似乱数を使用します
 func AlphaNumeric(t *testing.T, n int) string {
 	t.Helper()
-	b := make([]byte, n)
-	// FIXME: https://github.com/traPtitech/Jomon/issues/736
-	_, err := rand.Read(b) // nolint:staticcheck
-	require.NoError(t, err)
 
 	var result string
-	for _, v := range b {
-		result += string(letters[int(v)%len(letters)])
+	for i := 0; i < n; i++ {
+		result += string(letters[rand.IntN(len(letters))])
 	}
 
 	return result
@@ -28,13 +22,13 @@ func AlphaNumeric(t *testing.T, n int) string {
 
 func Numeric(t *testing.T, max int) int {
 	t.Helper()
-	n := rand.Intn(max)
+	n := rand.IntN(max)
 	return n
 }
 
 func Numeric64(t *testing.T, max int64) int64 {
 	t.Helper()
-	n := rand.Int63n(max)
+	n := rand.Int64N(max)
 	return n
 }
 
