@@ -12,7 +12,6 @@ import (
 )
 
 func TestEntRepository_GetTransactions(t *testing.T) {
-	t.Parallel()
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx, "get_transactions")
 	require.NoError(t, err)
@@ -443,7 +442,6 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 }
 
 func TestEntRepository_GetTransaction(t *testing.T) {
-	t.Parallel()
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx, "get_transaction")
 	require.NoError(t, err)
@@ -479,7 +477,6 @@ func TestEntRepository_GetTransaction(t *testing.T) {
 }
 
 func TestEntRepository_CreateTransaction(t *testing.T) {
-	t.Parallel()
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx, "create_transaction")
 	require.NoError(t, err)
@@ -630,7 +627,6 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 }
 
 func TestEntRepository_UpdateTransaction(t *testing.T) {
-	t.Parallel()
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx, "update_transaction")
 	require.NoError(t, err)
