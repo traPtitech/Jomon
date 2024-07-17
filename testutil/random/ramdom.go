@@ -1,10 +1,8 @@
 package random
 
 import (
-	"math/rand"
+	"math/rand/v2"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -14,28 +12,22 @@ const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 func AlphaNumeric(t *testing.T, n int) string {
 	t.Helper()
 	b := make([]byte, n)
-	// FIXME: https://github.com/traPtitech/Jomon/issues/736
-	_, err := rand.Read(b) // nolint:staticcheck
-	require.NoError(t, err)
 
-	var result string
-	for _, v := range b {
-		result += string(letters[int(v)%len(letters)])
+	for i := range n {
+		b[i] = letters[rand.IntN(len(letters))]
 	}
 
-	return result
+	return string(b)
 }
 
 func Numeric(t *testing.T, max int) int {
 	t.Helper()
-	n := rand.Intn(max)
-	return n
+	return rand.IntN(max)
 }
 
 func Numeric64(t *testing.T, max int64) int64 {
 	t.Helper()
-	n := rand.Int63n(max)
-	return n
+	return rand.Int64N(max)
 }
 
 func AlphaNumericSlice(t *testing.T, length int, max int64) []string {
