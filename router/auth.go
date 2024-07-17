@@ -129,8 +129,7 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 var randSrcPool = sync.Pool{
 	New: func() interface{} {
 		var b [32]byte
-		_, err := crand.Read(b[:])
-		if err != nil {
+		if _, err := crand.Read(b[:]); err != nil {
 			panic(err)
 		}
 		return rand.New(rand.NewChaCha8(b))
