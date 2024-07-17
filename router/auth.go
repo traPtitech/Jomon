@@ -1,8 +1,8 @@
 package router
 
 import (
-	"crypto/sha256"
 	crand "crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"math/rand/v2"
@@ -130,7 +130,7 @@ var randSrcPool = sync.Pool{
 	New: func() interface{} {
 		var b [32]byte
 		_, err := crand.Read(b[:])
-		if (err != nil){
+		if err != nil {
 			panic(err)
 		}
 		return rand.New(rand.NewChaCha8(b))
