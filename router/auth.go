@@ -2,12 +2,12 @@ package router
 
 import (
 	"crypto/sha256"
+	crand "crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
@@ -128,7 +128,12 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 
 var randSrcPool = sync.Pool{
 	New: func() interface{} {
-		return rand.NewSource(time.Now().UnixNano())
+		var b [32]byte
+		_, err := crand.Read(b[:])
+		if (err != nil){
+			panic(err)
+		}
+		return rand.New(rand.NewChaCha8(b))
 	},
 }
 
@@ -141,11 +146,11 @@ const (
 
 func randAlphabetAndNumberString(n int) string {
 	b := make([]byte, n)
-	randSrc := randSrcPool.Get().(rand.Source)
-	cache, remain := randSrc.Int63(), rs6LetterIdxMax
+	randSrc := randSrcPool.Get().(*rand.Rand)
+	cache, remain := randSrc.Int64(), rs6LetterIdxMax
 	for i := n - 1; i >= 0; {
 		if remain == 0 {
-			cache, remain = randSrc.Int63(), rs6LetterIdxMax
+			cache, remain = randSrc.Int64(), rs6LetterIdxMax
 		}
 		idx := int(cache & rs6LetterIdxMask)
 		if idx < len(rs6Letters) {
