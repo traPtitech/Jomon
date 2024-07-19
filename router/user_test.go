@@ -349,5 +349,4 @@ func TestHandlers_GetMe(t *testing.T) {
 			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, "failed to get user info"), err)
 		}
 	})
-
 }

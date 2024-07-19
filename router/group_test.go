@@ -863,7 +863,6 @@ func TestHandlers_PostMember(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
-
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		date := time.Now()
@@ -924,7 +923,6 @@ func TestHandlers_PostMember(t *testing.T) {
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
-
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
@@ -1293,7 +1291,6 @@ func TestHandlers_PostOwner(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
-
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		date := time.Now()
@@ -1354,7 +1351,6 @@ func TestHandlers_PostOwner(t *testing.T) {
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
-
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
