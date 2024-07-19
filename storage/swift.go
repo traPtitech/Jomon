@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"io"
 
 	"github.com/ncw/swift"
@@ -43,7 +44,7 @@ func (s *Swift) Save(filename string, src io.Reader) error {
 func (s *Swift) Open(filename string) (io.ReadCloser, error) {
 	file, _, err := s.conn.ObjectOpen(s.container, filename, true, nil)
 	if err != nil {
-		if err == swift.ObjectNotFound {
+		if errors.Is(err, swift.ObjectNotFound) {
 			return nil, ErrFileNotFound
 		}
 		return nil, err
@@ -54,7 +55,7 @@ func (s *Swift) Open(filename string) (io.ReadCloser, error) {
 func (s *Swift) Delete(filename string) error {
 	err := s.conn.ObjectDelete(s.container, filename)
 	if err != nil {
-		if err == swift.ObjectNotFound {
+		if errors.Is(err, swift.ObjectNotFound) {
 			return ErrFileNotFound
 		}
 		return err
