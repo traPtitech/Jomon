@@ -179,7 +179,9 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 			Return(user, nil)
 		h.Repository.MockUserRepository.
 			EXPECT().
-			UpdateUser(c.Request().Context(), user.ID, updateUser.Name, updateUser.DisplayName, updateUser.Admin).
+			UpdateUser(
+				c.Request().Context(),
+				user.ID, updateUser.Name, updateUser.DisplayName, updateUser.Admin).
 			Return(updateUser, nil)
 
 		if assert.NoError(t, h.Handlers.UpdateUserInfo(c)) {
@@ -226,7 +228,9 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		mocErr := errors.New("failed to get users.")
 		h.Repository.MockUserRepository.
 			EXPECT().
-			UpdateUser(c.Request().Context(), user.ID, updateUser.Name, updateUser.DisplayName, updateUser.Admin).
+			UpdateUser(
+				c.Request().Context(),
+				user.ID, updateUser.Name, updateUser.DisplayName, updateUser.Admin).
 			Return(nil, mocErr)
 
 		err = h.Handlers.UpdateUserInfo(c)
@@ -346,7 +350,10 @@ func TestHandlers_GetMe(t *testing.T) {
 
 		err = h.Handlers.GetMe(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, "failed to get user info"), err)
+			assert.Equal(
+				t,
+				echo.NewHTTPError(http.StatusInternalServerError, "failed to get user info"),
+				err)
 		}
 	})
 }

@@ -214,7 +214,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 		requests := []*model.RequestResponse{request1}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests?until=%s", date2str), nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/requests?until=%s", date2str),
+			nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -273,7 +276,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 		requests := []*model.RequestResponse{request1}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests?since=%s", date2str), nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/requests?since=%s", date2str),
+			nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -344,7 +350,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 		requests := []*model.RequestResponse{request1}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests?tag=%s", tag1.Name), nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/requests?tag=%s", tag1.Name),
+			nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -476,7 +485,11 @@ func TestHandlers_PostRequest(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			CreateRequest(c.Request().Context(), reqRequest.Title, reqRequest.Content, tags, targets, group, reqRequest.CreatedBy).
+			CreateRequest(
+				c.Request().Context(),
+				reqRequest.Title, reqRequest.Content,
+				tags, targets,
+				group, reqRequest.CreatedBy).
 			Return(request, nil)
 
 		res := &RequestResponse{
@@ -562,7 +575,11 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Return(tag, nil)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			CreateRequest(c.Request().Context(), reqRequest.Title, reqRequest.Content, tags, targets, group, reqRequest.CreatedBy).
+			CreateRequest(
+				c.Request().Context(),
+				reqRequest.Title, reqRequest.Content,
+				tags, targets,
+				group, reqRequest.CreatedBy).
 			Return(request, nil)
 
 		res := &RequestResponse{
@@ -654,7 +671,11 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Return(group, nil)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			CreateRequest(c.Request().Context(), reqRequest.Title, reqRequest.Content, tags, targets, group, reqRequest.CreatedBy).
+			CreateRequest(
+				c.Request().Context(),
+				reqRequest.Title, reqRequest.Content,
+				tags, targets,
+				group, reqRequest.CreatedBy).
 			Return(request, nil)
 
 		res := &RequestResponse{
@@ -753,7 +774,11 @@ func TestHandlers_PostRequest(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			CreateRequest(c.Request().Context(), reqRequest.Title, reqRequest.Content, tags, []*model.RequestTarget{target}, group, reqRequest.CreatedBy).
+			CreateRequest(
+				c.Request().Context(),
+				reqRequest.Title, reqRequest.Content,
+				tags, []*model.RequestTarget{target},
+				group, reqRequest.CreatedBy).
 			Return(request, nil)
 
 		tgov := &TargetOverview{
@@ -927,7 +952,11 @@ func TestHandlers_PostRequest(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			CreateRequest(c.Request().Context(), reqRequest.Title, reqRequest.Content, tags, targets, group, reqRequest.CreatedBy).
+			CreateRequest(
+				c.Request().Context(),
+				reqRequest.Title, reqRequest.Content,
+				tags, targets,
+				group, reqRequest.CreatedBy).
 			Return(nil, resErr)
 
 		err = h.Handlers.PostRequest(c)
@@ -967,7 +996,10 @@ func TestHandlers_GetRequest(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests/%s", request.ID.String()), nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/requests/%s", request.ID.String()),
+			nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1058,7 +1090,10 @@ func TestHandlers_GetRequest(t *testing.T) {
 		comments := []*model.Comment{comment1, comment2}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests/%s", request.ID.String()), nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/requests/%s", request.ID.String()),
+			nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1166,7 +1201,10 @@ func TestHandlers_GetRequest(t *testing.T) {
 			CreatedBy: uuid.New(),
 		}
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests/%s", request.ID.String()), nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/requests/%s", request.ID.String()),
+			nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1273,7 +1311,10 @@ func TestHandlers_GetRequest(t *testing.T) {
 		unknownID := uuid.New()
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests/%s", unknownID.String()), nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/requests/%s", unknownID.String()),
+			nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1348,7 +1389,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s", request.ID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s", request.ID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1361,7 +1405,12 @@ func TestHandlers_PutRequest(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			UpdateRequest(c.Request().Context(), request.ID, reqRequest.Title, reqRequest.Content, tags, targets, group).
+			UpdateRequest(
+				c.Request().Context(),
+				request.ID,
+				reqRequest.Title, reqRequest.Content,
+				tags, targets,
+				group).
 			Return(updateRequest, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
@@ -1453,7 +1502,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1475,7 +1527,12 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Return(tag2, nil)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			UpdateRequest(c.Request().Context(), request.ID, reqRequest.Title, reqRequest.Content, tags, targets, group).
+			UpdateRequest(
+				c.Request().Context(),
+				request.ID,
+				reqRequest.Title, reqRequest.Content,
+				tags, targets,
+				group).
 			Return(updateRequest, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
@@ -1601,7 +1658,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1615,7 +1675,12 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			UpdateRequest(c.Request().Context(), request.ID, reqRequest.Title, reqRequest.Content, tags, targets, group).
+			UpdateRequest(
+				c.Request().Context(),
+				request.ID,
+				reqRequest.Title, reqRequest.Content,
+				tags, targets,
+				group).
 			Return(updateRequest, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
@@ -1718,7 +1783,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1736,7 +1804,12 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Return(group, nil)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			UpdateRequest(c.Request().Context(), request.ID, reqRequest.Title, reqRequest.Content, tags, targets, group).
+			UpdateRequest(
+				c.Request().Context(),
+				request.ID,
+				reqRequest.Title, reqRequest.Content,
+				tags, targets,
+				group).
 			Return(updateRequest, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
@@ -1837,7 +1910,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 		comments := []*model.Comment{comment1, comment2}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s", request.ID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s", request.ID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1850,7 +1926,12 @@ func TestHandlers_PutRequest(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			UpdateRequest(c.Request().Context(), request.ID, reqRequest.Title, reqRequest.Content, tags, targets, group).
+			UpdateRequest(
+				c.Request().Context(),
+				request.ID,
+				reqRequest.Title, reqRequest.Content,
+				tags, targets,
+				group).
 			Return(updateRequest, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
@@ -1966,7 +2047,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 		var group *model.Group
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s", unknownID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s", unknownID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1982,7 +2066,12 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			UpdateRequest(c.Request().Context(), unknownID, reqRequest.Title, reqRequest.Content, tags, targets, group).
+			UpdateRequest(
+				c.Request().Context(),
+				unknownID,
+				reqRequest.Title, reqRequest.Content,
+				tags, targets,
+				group).
 			Return(nil, resErr)
 
 		err = h.Handlers.PutRequest(c)
@@ -2022,7 +2111,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -2081,7 +2173,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -2153,7 +2248,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -2261,7 +2359,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -2369,7 +2470,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -2477,7 +2581,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -2585,7 +2692,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -2700,7 +2810,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -2799,7 +2912,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}`, invalidStatus, random.AlphaNumeric(t, 20))
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), strings.NewReader(reqStatus))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			strings.NewReader(reqStatus))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -2826,7 +2942,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		resErr := echo.NewHTTPError(http.StatusBadRequest)
-		resErrMessage := echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid Status %s", invalidStatus))
+		resErrMessage := echo.NewHTTPError(
+			http.StatusBadRequest,
+			fmt.Sprintf("invalid Status %s", invalidStatus))
 		resErrMessage.Internal = fmt.Errorf("invalid Status %s", invalidStatus)
 		resErr.Message = resErrMessage
 
@@ -2858,7 +2976,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", "hoge"), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", "hoge"),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -2914,7 +3035,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", uuid.Nil), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", uuid.Nil),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -2978,7 +3102,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -3034,7 +3161,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -3103,7 +3233,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -3135,7 +3268,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetRequest(ctx, request.ID).
 			Return(request, nil)
 
-		resErr := fmt.Errorf("unable to change %v to %v without comment", request.Status.String(), reqStatus.Status.String())
+		resErr := fmt.Errorf(
+			"unable to change %v to %v without comment",
+			request.Status.String(),
+			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
 		if assert.Error(t, err) {
@@ -3172,7 +3308,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -3204,7 +3343,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetRequest(ctx, request.ID).
 			Return(request, nil)
 
-		resErr := fmt.Errorf("unable to change %v to %v without comment", request.Status.String(), reqStatus.Status.String())
+		resErr := fmt.Errorf(
+			"unable to change %v to %v without comment",
+			request.Status.String(),
+			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
 		if assert.Error(t, err) {
@@ -3241,7 +3383,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -3273,7 +3418,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetRequest(ctx, request.ID).
 			Return(request, nil)
 
-		resErr := fmt.Errorf("unable to change %v to %v without comment", request.Status.String(), reqStatus.Status.String())
+		resErr := fmt.Errorf(
+			"unable to change %v to %v without comment",
+			request.Status.String(),
+			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
 		if assert.Error(t, err) {
@@ -3311,7 +3459,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -3386,7 +3537,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -3422,7 +3576,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetUserByID(ctx, user.ID).
 			Return(user, nil)
 
-		resErr := fmt.Errorf("admin unable to change %v to %v", request.Status.String(), reqStatus.Status.String())
+		resErr := fmt.Errorf(
+			"admin unable to change %v to %v",
+			request.Status.String(),
+			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
 		if assert.Error(t, err) {
@@ -3467,7 +3624,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -3545,7 +3705,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -3581,7 +3744,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetUserByID(ctx, user.ID).
 			Return(user, nil)
 
-		resErr := fmt.Errorf("creator unable to change %v to %v", request.Status.String(), reqStatus.Status.String())
+		resErr := fmt.Errorf(
+			"creator unable to change %v to %v",
+			request.Status.String(), reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
 		if assert.Error(t, err) {
@@ -3619,7 +3784,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s/status", request.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -3687,7 +3855,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 // 		require.NoError(t, err)
 
 // 		e := echo.New()
-// 		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/requests/%s/comments", requestID), bytes.NewReader(reqBody))
+// 		req, err := http.NewRequest(
+// 			http.MethodPost,
+// 			fmt.Sprintf("/api/requests/%s/comments", requestID),
+// 			bytes.NewReader(reqBody))
 // 		assert.NoError(t, err)
 // 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 // 		rec := httptest.NewRecorder()

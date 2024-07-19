@@ -49,7 +49,9 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
 	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("code_verifier is not found in session"))
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			fmt.Errorf("code_verifier is not found in session"))
 	}
 
 	res, err := service.RequestAccessToken(code, codeVerifier)
@@ -68,7 +70,8 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	modelUser, err = h.Repository.GetUserByName(c.Request().Context(), u.Name)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			modelUser, err = h.Repository.CreateUser(c.Request().Context(), u.Name, u.DisplayName, false)
+			modelUser, err = h.Repository.CreateUser(
+				c.Request().Context(), u.Name, u.DisplayName, false)
 			if err != nil {
 				h.Logger.Error("failed to create user", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -113,7 +116,9 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 	sess.Values[sessionCodeVerifierKey] = codeVerifier
 
 	codeVerifierHash := sha256.Sum256([]byte(codeVerifier))
-	encoder := base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_").WithPadding(base64.NoPadding)
+	encoder := base64.
+		NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_").
+		WithPadding(base64.NoPadding)
 
 	codeChallengeMethod := "S256"
 
@@ -122,8 +127,13 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 		h.Logger.Error("failed to save session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+	// nolint:lll
+	to := fmt.Sprintf(
+		"%s/oauth2/authorize?response_type=code&client_id=%s&code_challenge=%s&code_challenge_method=%s",
+		service.TraQBaseURL, service.JomonClientID,
+		encoder.EncodeToString(codeVerifierHash[:]), codeChallengeMethod)
 
-	return c.Redirect(http.StatusFound, fmt.Sprintf("%s/oauth2/authorize?response_type=code&client_id=%s&code_challenge=%s&code_challenge_method=%s", service.TraQBaseURL, service.JomonClientID, encoder.EncodeToString(codeVerifierHash[:]), codeChallengeMethod))
+	return c.Redirect(http.StatusFound, to)
 }
 
 var randSrcPool = sync.Pool{
