@@ -28,7 +28,7 @@ type EntRepository struct {
 	storage storagePkg.Storage
 }
 
-func NewEntRepository(client *ent.Client, storage storagePkg.Storage) Repository {
+func NewEntRepository(client *ent.Client, storage storagePkg.Storage) *EntRepository {
 	repo := &EntRepository{
 		client:  client,
 		storage: storage,

@@ -13,6 +13,7 @@ const (
 	dbPrefix = "jomon_test_repo_"
 )
 
+//nolint:ireturn
 func setup(t *testing.T, ctx context.Context, dbName string) (*ent.Client, storage.Storage, error) {
 	t.Helper()
 	client, err := SetupTestEntClient(t, dbPrefix+dbName)

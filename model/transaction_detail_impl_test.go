@@ -15,7 +15,7 @@ func TestEntRepository_createTransactionDetail(t *testing.T) {
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
-	r := repo.(*EntRepository)
+	r := repo
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -48,7 +48,7 @@ func TestEntRepository_updateTransactionDetail(t *testing.T) {
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
-	r := repo.(*EntRepository)
+	r := repo
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
