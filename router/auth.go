@@ -145,7 +145,10 @@ const (
 
 func randAlphabetAndNumberString(n int) string {
 	b := make([]byte, n)
-	randSrc := randSrcPool.Get().(*rand.Rand)
+	randSrc, ok := randSrcPool.Get().(*rand.Rand)
+	if !ok {
+		panic("failed to get rand source")
+	}
 	cache, remain := randSrc.Int64(), rs6LetterIdxMax
 	for i := n - 1; i >= 0; {
 		if remain == 0 {
