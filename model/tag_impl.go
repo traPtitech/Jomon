@@ -45,7 +45,9 @@ func (repo *EntRepository) CreateTag(ctx context.Context, name string) (*Tag, er
 	return ConvertEntTagToModelTag(created), nil
 }
 
-func (repo *EntRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name string) (*Tag, error) {
+func (repo *EntRepository) UpdateTag(
+	ctx context.Context, tagID uuid.UUID, name string,
+) (*Tag, error) {
 	t, err := repo.client.Tag.
 		UpdateOneID(tagID).
 		SetName(name).

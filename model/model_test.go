@@ -22,7 +22,9 @@ func SetupTestEntClient(t *testing.T, dbName string) (*ent.Client, error) {
 	dbHost := testutil.GetEnvOrDefault("MARIADB_HOSTNAME", "db")
 	dbPort := testutil.GetEnvOrDefault("MARIADB_PORT", "3306")
 
-	dbDsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort)
+	dbDsn := fmt.Sprintf(
+		"%s:%s@tcp(%s:%s)/?charset=utf8mb4&parseTime=True&loc=Local",
+		dbUser, dbPass, dbHost, dbPort)
 	conn, err := sql.Open("mysql", dbDsn)
 	if err != nil {
 		return nil, err
@@ -33,7 +35,9 @@ func SetupTestEntClient(t *testing.T, dbName string) (*ent.Client, error) {
 		return nil, err
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
+	dsn := fmt.Sprintf(
+		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		dbUser, dbPass, dbHost, dbPort, dbName)
 
 	client := enttest.Open(t, "mysql", dsn, entOptions...).Debug()
 

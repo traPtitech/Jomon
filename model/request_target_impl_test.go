@@ -20,9 +20,17 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user1, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user2, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
 		target1 := &RequestTarget{
 			Target: user1.ID,
@@ -33,7 +41,12 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 			Amount: random.Numeric(t, 100000),
 		}
 
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil, user1.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 40),
+			nil, []*RequestTarget{target1, target2},
+			nil, user1.ID)
 		require.NoError(t, err)
 		got, err := repo.GetRequestTargets(ctx, request.ID)
 		assert.NoError(t, err)
@@ -53,9 +66,18 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 
-		user, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo2.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo2.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user.ID)
+		request, err := repo2.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 40),
+			nil, nil,
+			nil, user.ID)
 		require.NoError(t, err)
 		got, err := repo2.GetRequestTargets(ctx, request.ID)
 		assert.NoError(t, err)
@@ -71,9 +93,17 @@ func TestEntRepository_createRequestTargets(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user1, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user2, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
 		target1 := &RequestTarget{
 			Target: user1.ID,
@@ -84,7 +114,12 @@ func TestEntRepository_createRequestTargets(t *testing.T) {
 			Amount: random.Numeric(t, 100000),
 		}
 
-		got, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil, user1.ID)
+		got, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 40),
+			nil, []*RequestTarget{target1, target2},
+			nil, user1.ID)
 		assert.NoError(t, err)
 		if got.Targets[0].Target == target1.Target {
 			assert.Equal(t, got.Targets[0].Target, target1.Target)
@@ -111,9 +146,17 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user1, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user2, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
 		target1 := &RequestTarget{
 			Target: user1.ID,
@@ -124,9 +167,20 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 			Amount: random.Numeric(t, 100000),
 		}
 
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil, user1.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 40),
+			nil, []*RequestTarget{target1, target2},
+			nil, user1.ID)
 		require.NoError(t, err)
-		_, err = repo.UpdateRequest(ctx, request.ID, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{}, nil)
+		_, err = repo.UpdateRequest(
+			ctx,
+			request.ID,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 40),
+			nil, []*RequestTarget{},
+			nil)
 		assert.NoError(t, err)
 		got, err := repo.GetRequestTargets(ctx, request.ID)
 		assert.NoError(t, err)
@@ -135,9 +189,17 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
-		user1, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user1, err := repo2.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		user2, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user2, err := repo2.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
 		target1 := &RequestTarget{
 			Target: user1.ID,
@@ -148,9 +210,20 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 			Amount: random.Numeric(t, 100000),
 		}
 
-		request, err := repo2.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user1.ID)
+		request, err := repo2.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 40),
+			nil, nil,
+			nil, user1.ID)
 		require.NoError(t, err)
-		_, err = repo2.UpdateRequest(ctx, request.ID, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, []*RequestTarget{target1, target2}, nil)
+		_, err = repo2.UpdateRequest(
+			ctx,
+			request.ID,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 40),
+			nil, []*RequestTarget{target1, target2},
+			nil)
 		assert.NoError(t, err)
 		got, err := repo2.GetRequestTargets(ctx, request.ID)
 		assert.NoError(t, err)
