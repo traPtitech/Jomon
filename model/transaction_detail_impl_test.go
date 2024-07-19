@@ -15,8 +15,6 @@ func TestEntRepository_createTransactionDetail(t *testing.T) {
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
-	r := repo
-
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
@@ -32,7 +30,7 @@ func TestEntRepository_createTransactionDetail(t *testing.T) {
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 10)
 		// Create TransactionDetail
-		td, err := r.createTransactionDetail(ctx, tx, amount, target)
+		td, err := repo.createTransactionDetail(ctx, tx, amount, target)
 		assert.NoError(t, err)
 		err = tx.Commit()
 		assert.NoError(t, err)
@@ -47,8 +45,6 @@ func TestEntRepository_updateTransactionDetail(t *testing.T) {
 	client, storage, err := setup(t, ctx, "update_transaction_detail")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
-
-	r := repo
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -72,7 +68,7 @@ func TestEntRepository_updateTransactionDetail(t *testing.T) {
 		// Update TransactionDetail
 		updatedAmount := 1000
 		updatedTarget := "fuga"
-		td, err := r.updateTransactionDetail(ctx, tx, trns.ID, updatedAmount, updatedTarget)
+		td, err := repo.updateTransactionDetail(ctx, tx, trns.ID, updatedAmount, updatedTarget)
 		assert.NoError(t, err)
 		err = tx.Commit()
 		assert.NoError(t, err)
