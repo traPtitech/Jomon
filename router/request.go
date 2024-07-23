@@ -766,28 +766,19 @@ func (h Handlers) PutStatus(c echo.Context) error {
 }
 
 func IsAbleNoCommentChangeStatus(status, latestStatus model.Status) bool {
-	if status == model.FixRequired && latestStatus == model.Submitted ||
-		status == model.Rejected && latestStatus == model.Submitted ||
-		status == model.Submitted && latestStatus == model.Accepted {
-		return false
-	}
-	return true
+	return !(status == model.FixRequired && latestStatus == model.Submitted) &&
+		!(status == model.Rejected && latestStatus == model.Submitted) &&
+		!(status == model.Submitted && latestStatus == model.Accepted)
 }
 
 func IsAbleCreatorChangeStatus(status, latestStatus model.Status) bool {
-	if status == model.Submitted && latestStatus == model.FixRequired {
-		return true
-	}
-	return false
+	return status == model.Submitted && latestStatus == model.FixRequired
 }
 
 func IsAbleAdminChangeState(status, latestStatus model.Status) bool {
-	if status == model.Rejected && latestStatus == model.Submitted ||
+	return status == model.Rejected && latestStatus == model.Submitted ||
 		status == model.Submitted && latestStatus == model.FixRequired ||
 		status == model.Accepted && latestStatus == model.Submitted ||
 		status == model.Submitted && latestStatus == model.Accepted ||
-		status == model.FixRequired && latestStatus == model.Submitted {
-		return true
-	}
-	return false
+		status == model.FixRequired && latestStatus == model.Submitted
 }
