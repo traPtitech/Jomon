@@ -9,7 +9,9 @@ import (
 	"github.com/traPtitech/Jomon/ent/requeststatus"
 )
 
-func (repo *EntRepository) CreateStatus(ctx context.Context, requestID uuid.UUID, userID uuid.UUID, status Status) (*RequestStatus, error) {
+func (repo *EntRepository) CreateStatus(
+	ctx context.Context, requestID uuid.UUID, userID uuid.UUID, status Status,
+) (*RequestStatus, error) {
 	c, err := repo.client.RequestStatus.
 		Create().
 		SetStatus(requeststatus.Status(status.String())).

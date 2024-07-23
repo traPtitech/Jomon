@@ -14,7 +14,9 @@ func TestHandler_GetCodeChallenge(t *testing.T) {
 	codeVerifier := "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
 	codeVerifierHash := sha256.Sum256([]byte(codeVerifier))
 
-	encoder := base64.NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_").WithPadding(base64.NoPadding)
+	encoder := base64.
+		NewEncoding("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_").
+		WithPadding(base64.NoPadding)
 	challenge := encoder.EncodeToString(codeVerifierHash[:])
 
 	assert.Equal(t, "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM", challenge)

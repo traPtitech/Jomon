@@ -22,7 +22,11 @@ func TestEntRepository_GetGroups(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
 		groups, err := repo.GetGroups(ctx)
@@ -48,7 +52,11 @@ func TestEntRepository_GetGroup(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
 		g, err := repo.GetGroup(ctx, group.ID)
@@ -112,7 +120,11 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
 		updatedBudget := random.Numeric(t, 10000)
@@ -132,14 +144,23 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 	t.Run("UnknownGroup", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		_, err := repo.UpdateGroup(ctx, uuid.New(), random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		_, err := repo.UpdateGroup(
+			ctx,
+			uuid.New(),
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		assert.Error(t, err)
 	})
 
 	t.Run("SuccessWithNilBudget", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
 		ug := Group{
@@ -158,7 +179,11 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 	t.Run("FailedWithEmptyName", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
 		_, err = repo.UpdateGroup(ctx, group.ID, "", random.AlphaNumeric(t, 15), &budget)
@@ -175,7 +200,11 @@ func TestEntRepository_DeleteGroup(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
 		err = repo.DeleteGroup(ctx, group.ID)
@@ -201,12 +230,24 @@ func TestEntRepository_GetMembers(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
-		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		user1, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			true)
 		require.NoError(t, err)
-		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		user2, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			true)
 		require.NoError(t, err)
 
 		_, err = repo.AddMembers(ctx, group.ID, []uuid.UUID{user1.ID, user2.ID})
@@ -227,7 +268,11 @@ func TestEntRepository_GetMembers(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
 		got, err := repo2.GetMembers(ctx, group.ID)
@@ -245,10 +290,18 @@ func TestEntRepository_CreateMember(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			true)
 		require.NoError(t, err)
 
 		member, err := repo.AddMembers(ctx, group.ID, []uuid.UUID{user.ID})
@@ -260,7 +313,11 @@ func TestEntRepository_CreateMember(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
 		_, err = repo.AddMembers(ctx, group.ID, []uuid.UUID{uuid.New()})
@@ -277,10 +334,18 @@ func TestEntRepository_DeleteMember(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			true)
 		require.NoError(t, err)
 		member, err := repo.AddMembers(ctx, group.ID, []uuid.UUID{user.ID})
 		require.NoError(t, err)
@@ -299,12 +364,23 @@ func TestEntRepository_GetOwners(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
-		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		user1, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15), true)
 		require.NoError(t, err)
-		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		user2, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			true)
 		require.NoError(t, err)
 
 		_, err = repo.AddOwners(ctx, group.ID, []uuid.UUID{user1.ID, user2.ID})
@@ -325,7 +401,11 @@ func TestEntRepository_GetOwners(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
 		got, err := repo.GetOwners(ctx, group.ID)
@@ -343,10 +423,18 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			true)
 		require.NoError(t, err)
 
 		owner, err := repo.AddOwners(ctx, group.ID, []uuid.UUID{user.ID})
@@ -358,7 +446,11 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
 		_, err = repo.AddOwners(ctx, group.ID, []uuid.UUID{uuid.New()})
@@ -375,10 +467,18 @@ func TestEntRepository_DeleteOwner(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), &budget)
+		group, err := repo.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			&budget)
 		require.NoError(t, err)
 
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 15), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 15),
+			true)
 		require.NoError(t, err)
 		_, err = repo.AddOwners(ctx, group.ID, []uuid.UUID{user.ID})
 		require.NoError(t, err)

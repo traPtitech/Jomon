@@ -14,7 +14,9 @@ import (
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
 )
 
-func (repo *EntRepository) GetTransactions(ctx context.Context, query TransactionQuery) ([]*TransactionResponse, error) {
+func (repo *EntRepository) GetTransactions(
+	ctx context.Context, query TransactionQuery,
+) ([]*TransactionResponse, error) {
 	// Querying
 	var transactionsq *ent.TransactionQuery
 	if query.Sort == nil || *query.Sort == "" || *query.Sort == "created_at" {
@@ -122,7 +124,9 @@ func (repo *EntRepository) GetTransactions(ctx context.Context, query Transactio
 	return res, nil
 }
 
-func (repo *EntRepository) GetTransaction(ctx context.Context, transactionID uuid.UUID) (*TransactionResponse, error) {
+func (repo *EntRepository) GetTransaction(
+	ctx context.Context, transactionID uuid.UUID,
+) (*TransactionResponse, error) {
 	// Querying
 	tx, err := repo.client.Transaction.
 		Query().
@@ -142,7 +146,10 @@ func (repo *EntRepository) GetTransaction(ctx context.Context, transactionID uui
 	return ConvertEntTransactionToModelTransactionResponse(tx), nil
 }
 
-func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
+func (repo *EntRepository) CreateTransaction(
+	ctx context.Context, amount int, target string,
+	tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID,
+) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -241,7 +248,10 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 	return ConvertEntTransactionToModelTransactionResponse(trns), nil
 }
 
-func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID uuid.UUID, amount int, target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
+func (repo *EntRepository) UpdateTransaction(
+	ctx context.Context, transactionID uuid.UUID, amount int, target string,
+	tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID,
+) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -368,7 +378,9 @@ func ConvertEntTransactionToModelTransaction(transaction *ent.Transaction) *Tran
 	}
 }
 
-func ConvertEntTransactionToModelTransactionResponse(transaction *ent.Transaction) *TransactionResponse {
+func ConvertEntTransactionToModelTransactionResponse(
+	transaction *ent.Transaction,
+) *TransactionResponse {
 	var tags []*Tag
 	for _, t := range transaction.Edges.Tag {
 		tags = append(tags, ConvertEntTagToModelTag(t))

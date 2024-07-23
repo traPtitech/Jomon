@@ -81,7 +81,8 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		}
 		if limitI < 0 {
 			h.Logger.Info("received negative limit", zap.Int("limit", limitI))
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("negative limit(=%d) is invalid", limitI))
+			err := fmt.Errorf("negative limit(=%d) is invalid", limitI)
+			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		limit = limitI
 	}
@@ -94,7 +95,8 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		}
 		if offsetI < 0 {
 			h.Logger.Info("received negative offset", zap.Int("offset", offsetI))
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("negative offset(=%d) is invalid", offsetI))
+			err := fmt.Errorf("negative offset(=%d) is invalid", offsetI)
+			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		offset = offsetI
 	}
@@ -186,7 +188,9 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 			h.Logger.Info("target is nil")
 			return echo.NewHTTPError(http.StatusBadRequest, "target is nil")
 		}
-		created, err := h.Repository.CreateTransaction(ctx, tx.Amount, *target, tx.Tags, tx.Group, tx.Request)
+		created, err := h.Repository.CreateTransaction(
+			ctx,
+			tx.Amount, *target, tx.Tags, tx.Group, tx.Request)
 		if err != nil {
 			h.Logger.Error("failed to create transaction in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -285,12 +289,16 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 
 	var tx *TransactionOverviewWithOneTarget
 	if err := c.Bind(&tx); err != nil {
-		h.Logger.Info("could not get transaction overview with one target from request", zap.Error(err))
+		h.Logger.Info(
+			"could not get transaction overview with one target from request",
+			zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := c.Request().Context()
-	updated, err := h.Repository.UpdateTransaction(ctx, txID, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
+	updated, err := h.Repository.UpdateTransaction(
+		ctx,
+		txID, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
 	if err != nil {
 		h.Logger.Error("failed to update transaction in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)

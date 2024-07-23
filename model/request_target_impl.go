@@ -9,7 +9,9 @@ import (
 	"github.com/traPtitech/Jomon/ent/requesttarget"
 )
 
-func (repo *EntRepository) GetRequestTargets(ctx context.Context, requestID uuid.UUID) ([]*RequestTargetDetail, error) {
+func (repo *EntRepository) GetRequestTargets(
+	ctx context.Context, requestID uuid.UUID,
+) ([]*RequestTargetDetail, error) {
 	// Querying
 	ts, err := repo.client.RequestTarget.
 		Query().
@@ -30,7 +32,9 @@ func (repo *EntRepository) GetRequestTargets(ctx context.Context, requestID uuid
 	return targets, err
 }
 
-func (repo *EntRepository) createRequestTargets(ctx context.Context, tx *ent.Tx, requestID uuid.UUID, targets []*RequestTarget) ([]*RequestTargetDetail, error) {
+func (repo *EntRepository) createRequestTargets(
+	ctx context.Context, tx *ent.Tx, requestID uuid.UUID, targets []*RequestTarget,
+) ([]*RequestTargetDetail, error) {
 	var bulk []*ent.RequestTargetCreate
 	for _, t := range targets {
 		bulk = append(bulk,
@@ -68,7 +72,9 @@ func (repo *EntRepository) createRequestTargets(ctx context.Context, tx *ent.Tx,
 	return ts, nil
 }
 
-func (repo *EntRepository) deleteRequestTargets(ctx context.Context, tx *ent.Tx, requestID uuid.UUID) error {
+func (repo *EntRepository) deleteRequestTargets(
+	ctx context.Context, tx *ent.Tx, requestID uuid.UUID,
+) error {
 	_, err := tx.Client().RequestTarget.
 		Delete().
 		Where(

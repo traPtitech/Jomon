@@ -10,3 +10,37 @@ linters:
     - unused
     # https://golangci-lint.run/usage/linters/#disabled-by-default
     - gofmt
+    - asasalint
+    - asciicheck
+    - contextcheck
+    - dogsled
+    - durationcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exhaustive
+    - fatcontext
+    - forbidigo
+    - forcetypeassert
+    - gocheckcompilerdirectives
+    - importas
+    - inamedparam
+    - intrange
+    - ireturn
+    - lll
+    - loggercheck
+    - makezero
+    - mirror
+    - musttag
+    - nilnil
+    - predeclared
+    - reassign
+    - thelper
+    - unconvert
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+linters-settings:
+  lll:
+    line-length: 100
+    tab-width: 4
