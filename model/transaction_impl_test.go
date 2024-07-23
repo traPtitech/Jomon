@@ -199,6 +199,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		ctx := context.Background()
 
 		// Create user
+		// nolint:contextcheck
 		user, err := repo4.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -208,6 +209,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 
 		// Create Transactions
 		target := random.AlphaNumeric(t, 20)
+		// nolint:contextcheck
 		request, err := repo4.CreateRequest(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -216,9 +218,11 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
+		// nolint:contextcheck
 		tx1, err := repo4.CreateTransaction(ctx, 100, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
+		// nolint:contextcheck
 		tx2, err := repo4.CreateTransaction(ctx, 10000, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
@@ -227,6 +231,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		query := TransactionQuery{
 			Sort: &sort,
 		}
+		// nolint:contextcheck
 		got, err := repo4.GetTransactions(ctx, query)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) {

@@ -16,7 +16,7 @@ const (
 //nolint:ireturn
 func setup(t *testing.T, ctx context.Context, dbName string) (*ent.Client, storage.Storage, error) {
 	t.Helper()
-	client, err := SetupTestEntClient(t, dbPrefix+dbName)
+	client, err := SetupTestEntClient(t, ctx, dbPrefix+dbName)
 	if err != nil {
 		return nil, nil, err
 	}

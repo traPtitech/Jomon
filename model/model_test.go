@@ -12,7 +12,7 @@ import (
 	"github.com/traPtitech/Jomon/testutil"
 )
 
-func SetupTestEntClient(t *testing.T, dbName string) (*ent.Client, error) {
+func SetupTestEntClient(t *testing.T, ctx context.Context, dbName string) (*ent.Client, error) {
 	t.Helper()
 	entOptions := []enttest.Option{
 		enttest.WithOptions(ent.Log(t.Log)),
@@ -39,9 +39,8 @@ func SetupTestEntClient(t *testing.T, dbName string) (*ent.Client, error) {
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		dbUser, dbPass, dbHost, dbPort, dbName)
 
+	// nolint:contextcheck
 	client := enttest.Open(t, "mysql", dsn, entOptions...).Debug()
-
-	ctx := context.Background()
 
 	if err := client.Schema.Create(ctx); err != nil {
 		return nil, err
