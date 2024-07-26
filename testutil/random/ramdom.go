@@ -3,6 +3,8 @@ package random
 import (
 	"math/rand/v2"
 	"testing"
+
+	"github.com/samber/lo"
 )
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -31,25 +33,19 @@ func Numeric64(t *testing.T, max int64) int64 {
 }
 
 func AlphaNumericSlice(t *testing.T, length int, max int64) []string {
-	slice := []string{}
-	for range length {
-		slice = append(slice, AlphaNumeric(t, int(max)))
-	}
-	return slice
+	return lo.Times(length, func(index int) string {
+		return AlphaNumeric(t, int(max))
+	})
 }
 
 func NumericSlice(t *testing.T, length int, max int) []int {
-	slice := []int{}
-	for range length {
-		slice = append(slice, Numeric(t, max))
-	}
-	return slice
+	return lo.Times(length, func(index int) int {
+		return Numeric(t, max)
+	})
 }
 
 func Numeric64Slice(t *testing.T, length int, max int64) []int64 {
-	slice := []int64{}
-	for range length {
-		slice = append(slice, Numeric64(t, max))
-	}
-	return slice
+	return lo.Times(length, func(index int) int64 {
+		return Numeric64(t, max)
+	})
 }
