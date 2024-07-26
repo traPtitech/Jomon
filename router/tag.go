@@ -7,6 +7,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
+	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
 )
 
@@ -30,15 +32,14 @@ func (h Handlers) GetTags(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := []*TagOverview{}
-	for _, tag := range tags {
-		res = append(res, &TagOverview{
+	res := lo.Map(tags, func(tag *model.Tag, index int) *TagOverview {
+		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
 			UpdatedAt: tag.UpdatedAt,
-		})
-	}
+		}
+	})
 
 	return c.JSON(http.StatusOK, res)
 }

@@ -7,7 +7,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
 )
 
@@ -61,17 +63,16 @@ func (h Handlers) GetGroups(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := []*GroupOverview{}
-	for _, group := range groups {
-		res = append(res, &GroupOverview{
+	res := lo.Map(groups, func(group *model.Group, index int) *GroupOverview {
+		return &GroupOverview{
 			ID:          group.ID,
 			Name:        group.Name,
 			Description: group.Description,
 			Budget:      group.Budget,
 			CreatedAt:   group.CreatedAt,
 			UpdatedAt:   group.UpdatedAt,
-		})
-	}
+		}
+	})
 
 	return c.JSON(http.StatusOK, res)
 }
@@ -143,17 +144,17 @@ func (h Handlers) GetGroupDetail(c echo.Context) error {
 		h.Logger.Error("failed to get owners from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	for _, owner := range owners {
-		res.Owners = append(res.Owners, &owner.ID)
-	}
+	res.Owners = lo.Map(owners, func(owner *model.Owner, index int) *uuid.UUID {
+		return &owner.ID
+	})
 	members, err := h.Repository.GetMembers(ctx, groupID)
 	if err != nil {
 		h.Logger.Error("failed to get members from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	for _, member := range members {
-		res.Members = append(res.Members, &member.ID)
-	}
+	res.Members = lo.Map(members, func(member *model.Member, indec int) *uuid.UUID {
+		return &member.ID
+	})
 
 	return c.JSON(http.StatusOK, res)
 }
@@ -238,10 +239,9 @@ func (h Handlers) PostMember(c echo.Context) error {
 		h.Logger.Error("failed to add member in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	res := []*uuid.UUID{}
-	for _, m := range added {
-		res = append(res, &m.ID)
-	}
+	res := lo.Map(added, func(m *model.Member, index int) *uuid.UUID {
+		return &m.ID
+	})
 	return c.JSON(http.StatusOK, res)
 }
 

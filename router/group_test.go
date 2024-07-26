@@ -14,6 +14,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/ent"
@@ -66,17 +67,16 @@ func TestHandlers_GetGroups(t *testing.T) {
 			GetGroups(c.Request().Context()).
 			Return(groups, nil)
 
-		resOverview := []*GroupOverview{}
-		for _, group := range groups {
-			resOverview = append(resOverview, &GroupOverview{
+		resOverview := lo.Map(groups, func(group *model.Group, index int) *GroupOverview {
+			return &GroupOverview{
 				ID:          group.ID,
 				Name:        group.Name,
 				Description: group.Description,
 				Budget:      group.Budget,
 				CreatedAt:   group.CreatedAt,
 				UpdatedAt:   group.UpdatedAt,
-			})
-		}
+			}
+		})
 		resBody, err := json.Marshal(resOverview)
 		require.NoError(t, err)
 

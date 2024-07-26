@@ -14,6 +14,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
@@ -57,15 +58,15 @@ func TestHandlers_GetTags(t *testing.T) {
 			GetTags(c.Request().Context()).
 			Return(tags, nil)
 
-		resOverview := []*TagOverview{}
-		for _, tag := range tags {
-			resOverview = append(resOverview, &TagOverview{
+		resOverview := lo.Map(tags, func(tag *model.Tag, index int) *TagOverview {
+			return &TagOverview{
 				ID:        tag.ID,
 				Name:      tag.Name,
 				CreatedAt: tag.CreatedAt,
 				UpdatedAt: tag.UpdatedAt,
-			})
-		}
+			}
+		})
+
 		res := resOverview
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)

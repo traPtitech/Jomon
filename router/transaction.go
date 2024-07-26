@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
 	"go.uber.org/zap"
@@ -134,17 +135,16 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := []*Transaction{}
-	for _, tx := range txs {
-		tags := []*TagOverview{}
-		for _, tag := range tx.Tags {
-			tags = append(tags, &TagOverview{
+	res := lo.Map(txs, func(tx *model.TransactionResponse, index int) *Transaction {
+		tags := lo.Map(tx.Tags, func(tag *model.Tag, index int) *TagOverview {
+			return &TagOverview{
 				ID:        tag.ID,
 				Name:      tag.Name,
 				CreatedAt: tag.CreatedAt,
 				UpdatedAt: tag.UpdatedAt,
-			})
-		}
+			}
+		})
+
 		var group *GroupOverview
 		if tx.Group != nil {
 			group = &GroupOverview{
@@ -156,7 +156,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
 		}
-		tx := &Transaction{
+		return &Transaction{
 			ID:        tx.ID,
 			Amount:    tx.Amount,
 			Target:    tx.Target,
@@ -166,8 +166,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			CreatedAt: tx.CreatedAt,
 			UpdatedAt: tx.UpdatedAt,
 		}
-		res = append(res, tx)
-	}
+	})
 
 	return c.JSON(http.StatusOK, res)
 }
@@ -192,15 +191,15 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		tags := []*TagOverview{}
-		for _, tag := range created.Tags {
-			tags = append(tags, &TagOverview{
+		tags := lo.Map(created.Tags, func(tag *model.Tag, index int) *TagOverview {
+			return &TagOverview{
 				ID:        tag.ID,
 				Name:      tag.Name,
 				CreatedAt: tag.CreatedAt,
 				UpdatedAt: tag.UpdatedAt,
-			})
-		}
+			}
+		})
+
 		var group *GroupOverview
 		if created.Group != nil {
 			group = &GroupOverview{
@@ -242,15 +241,15 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	tags := []*TagOverview{}
-	for _, tag := range tx.Tags {
-		tags = append(tags, &TagOverview{
+	tags := lo.Map(tx.Tags, func(tag *model.Tag, index int) *TagOverview {
+		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
 			UpdatedAt: tag.UpdatedAt,
-		})
-	}
+		}
+	})
+
 	var group *GroupOverview
 	if tx.Group != nil {
 		group = &GroupOverview{
@@ -296,15 +295,15 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	tags := []*TagOverview{}
-	for _, tag := range updated.Tags {
-		tags = append(tags, &TagOverview{
+	tags := lo.Map(updated.Tags, func(tag *model.Tag, index int) *TagOverview {
+		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
 			UpdatedAt: tag.UpdatedAt,
-		})
-	}
+		}
+	})
+
 	var group *GroupOverview
 	if updated.Group != nil {
 		group = &GroupOverview{
