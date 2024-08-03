@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/tag"
 )
@@ -16,10 +17,10 @@ func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
 	if err != nil {
 		return nil, err
 	}
-	modeltags := []*Tag{}
-	for _, t := range tags {
-		modeltags = append(modeltags, ConvertEntTagToModelTag(t))
-	}
+	modeltags := lo.Map(tags, func(t *ent.Tag, index int) *Tag {
+		return ConvertEntTagToModelTag(t)
+	})
+
 	return modeltags, nil
 }
 

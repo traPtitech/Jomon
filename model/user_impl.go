@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/user"
 )
@@ -51,10 +52,9 @@ func (repo *EntRepository) GetUsers(ctx context.Context) ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	var modelusers []*User
-	for _, u := range users {
-		modelusers = append(modelusers, convertEntUserToModelUser(u))
-	}
+	modelusers := lo.Map(users, func(u *ent.User, index int) *User {
+		return convertEntUserToModelUser(u)
+	})
 	return modelusers, nil
 }
 

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/request"
@@ -113,10 +114,10 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 		return nil, err
 	}
 
-	reqres := []*RequestResponse{}
-	for _, r := range requests {
-		reqres = append(reqres, convertEntRequestResponseToModelRequestResponse(r, r.Edges.Tag, r.Edges.Group, r.Edges.Status[0], r.Edges.User))
-	}
+	reqres := lo.Map(requests, func(r *ent.Request, index int) *RequestResponse {
+		return convertEntRequestResponseToModelRequestResponse(r, r.Edges.Tag, r.Edges.Group, r.Edges.Status[0], r.Edges.User)
+	})
+
 	return reqres, nil
 }
 
@@ -131,10 +132,9 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, title string, cont
 			panic(v)
 		}
 	}()
-	var tagIDs []uuid.UUID
-	for _, t := range tags {
-		tagIDs = append(tagIDs, t.ID)
-	}
+	tagIDs := lo.Map(tags, func(t *Tag, index int) uuid.UUID {
+		return t.ID
+	})
 	created, err := tx.Client().Request.
 		Create().
 		SetTitle(title).
@@ -227,19 +227,16 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 	if err != nil {
 		return nil, err
 	}
-	var tags []*Tag
-	for _, t := range r.Edges.Tag {
-		tags = append(tags, ConvertEntTagToModelTag(t))
-	}
-	var targets []*RequestTargetDetail
-	for _, target := range r.Edges.Target {
-		targets = append(targets, ConvertEntRequestTargetToModelRequestTargetDetail(target))
-	}
+	tags := lo.Map(r.Edges.Tag, func(t *ent.Tag, index int) *Tag {
+		return ConvertEntTagToModelTag(t)
+	})
+	targets := lo.Map(r.Edges.Target, func(target *ent.RequestTarget, index int) *RequestTargetDetail {
+		return ConvertEntRequestTargetToModelRequestTargetDetail(target)
+	})
 	modelGroup := ConvertEntGroupToModelGroup(r.Edges.Group)
-	var statuses []*RequestStatus
-	for _, status := range r.Edges.Status {
-		statuses = append(statuses, convertEntRequestStatusToModelRequestStatus(status))
-	}
+	statuses := lo.Map(r.Edges.Status, func(status *ent.RequestStatus, index int) *RequestStatus {
+		return convertEntRequestStatusToModelRequestStatus(status)
+	})
 	reqdetail := &RequestDetail{
 		ID:        r.ID,
 		Status:    convertEntRequestStatusToModelStatus(&r.Edges.Status[0].Status),
@@ -267,10 +264,9 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 			panic(v)
 		}
 	}()
-	var tagIDs []uuid.UUID
-	for _, t := range tags {
-		tagIDs = append(tagIDs, t.ID)
-	}
+	tagIDs := lo.Map(tags, func(t *Tag, index int) uuid.UUID {
+		return t.ID
+	})
 	updated, err := tx.Client().Request.
 		UpdateOneID(requestID).
 		SetTitle(title).
@@ -320,10 +316,9 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 		err = RollbackWithError(tx, err)
 		return nil, err
 	}
-	var modeltags []*Tag
-	for _, enttag := range enttags {
-		modeltags = append(modeltags, ConvertEntTagToModelTag(enttag))
-	}
+	modeltags := lo.Map(enttags, func(enttag *ent.Tag, index int) *Tag {
+		return ConvertEntTagToModelTag(enttag)
+	})
 	var entgroup *ent.Group
 	if group != nil {
 		entgroup, err = updated.QueryGroup().Only(ctx)
@@ -347,10 +342,9 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	if err != nil {
 		return nil, err
 	}
-	var statuses []*RequestStatus
-	for _, s := range entstatuses {
-		statuses = append(statuses, convertEntRequestStatusToModelRequestStatus(s))
-	}
+	statuses := lo.Map(entstatuses, func(s *ent.RequestStatus, index int) *RequestStatus {
+		return convertEntRequestStatusToModelRequestStatus(s)
+	})
 
 	modelgroup := ConvertEntGroupToModelGroup(entgroup)
 	reqdetail := &RequestDetail{
@@ -373,10 +367,9 @@ func convertEntRequestResponseToModelRequestResponse(request *ent.Request, tags 
 	if request == nil {
 		return nil
 	}
-	modeltags := []*Tag{}
-	for _, t := range tags {
-		modeltags = append(modeltags, ConvertEntTagToModelTag(t))
-	}
+	modeltags := lo.Map(tags, func(t *ent.Tag, index int) *Tag {
+		return ConvertEntTagToModelTag(t)
+	})
 	return &RequestResponse{
 		ID:        request.ID,
 		Status:    convertEntRequestStatusToModelStatus(&status.Status),

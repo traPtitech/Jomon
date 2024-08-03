@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/request"
@@ -31,10 +32,9 @@ func (repo *EntRepository) GetComments(ctx context.Context, requestID uuid.UUID)
 	if err != nil {
 		return nil, err
 	}
-	modelcomments := []*Comment{}
-	for _, c := range comments {
-		modelcomments = append(modelcomments, ConvertEntCommentToModelComment(c, c.Edges.User.ID))
-	}
+	modelcomments := lo.Map(comments, func(c *ent.Comment, index int) *Comment {
+		return ConvertEntCommentToModelComment(c, c.Edges.User.ID)
+	})
 	return modelcomments, nil
 }
 

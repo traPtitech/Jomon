@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/user"
@@ -16,10 +17,9 @@ func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	modelgroups := []*Group{}
-	for _, g := range groups {
-		modelgroups = append(modelgroups, ConvertEntGroupToModelGroup(g))
-	}
+	modelgroups := lo.Map(groups, func(g *ent.Group, index int) *Group {
+		return ConvertEntGroupToModelGroup(g)
+	})
 	return modelgroups, nil
 }
 
@@ -81,10 +81,9 @@ func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]
 	if err != nil {
 		return nil, err
 	}
-	owners := []*Owner{}
-	for _, groupowner := range groupowners {
-		owners = append(owners, &Owner{ID: groupowner.ID})
-	}
+	owners := lo.Map(groupowners, func(groupowner *ent.User, index int) *Owner {
+		return &Owner{ID: groupowner.ID}
+	})
 
 	return owners, nil
 }
@@ -98,10 +97,9 @@ func (repo *EntRepository) AddOwners(ctx context.Context, groupID uuid.UUID, own
 	if err != nil {
 		return nil, err
 	}
-	resowners := []*Owner{}
-	for _, owner := range ownerIDs {
-		resowners = append(resowners, &Owner{ID: owner})
-	}
+	resowners := lo.Map(ownerIDs, func(owner uuid.UUID, index int) *Owner {
+		return &Owner{ID: owner}
+	})
 
 	return resowners, nil
 }
@@ -127,10 +125,10 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	if err != nil {
 		return nil, err
 	}
-	modelmembers := []*Member{}
-	for _, member := range members {
-		modelmembers = append(modelmembers, &Member{member.ID})
-	}
+	modelmembers := lo.Map(members, func(member *ent.User, index int) *Member {
+		return &Member{member.ID}
+	})
+
 	return modelmembers, nil
 }
 
@@ -144,11 +142,10 @@ func (repo *EntRepository) AddMembers(ctx context.Context, groupID uuid.UUID, us
 	if err != nil {
 		return nil, err
 	}
+	resMembers := lo.Map(userIDs, func(member uuid.UUID, index int) *Member {
+		return &Member{member}
+	})
 
-	resMembers := []*Member{}
-	for _, member := range userIDs {
-		resMembers = append(resMembers, &Member{member})
-	}
 	return resMembers, nil
 }
 
