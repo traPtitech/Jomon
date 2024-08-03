@@ -34,7 +34,9 @@ func (repo *EntRepository) GetGroup(ctx context.Context, groupID uuid.UUID) (*Gr
 	return ConvertEntGroupToModelGroup(g), nil
 }
 
-func (repo *EntRepository) CreateGroup(ctx context.Context, name string, description string, budget *int) (*Group, error) {
+func (repo *EntRepository) CreateGroup(
+	ctx context.Context, name string, description string, budget *int,
+) (*Group, error) {
 	created, err := repo.client.Group.
 		Create().
 		SetName(name).
@@ -48,7 +50,9 @@ func (repo *EntRepository) CreateGroup(ctx context.Context, name string, descrip
 	return ConvertEntGroupToModelGroup(created), nil
 }
 
-func (repo *EntRepository) UpdateGroup(ctx context.Context, groupID uuid.UUID, name string, description string, budget *int) (*Group, error) {
+func (repo *EntRepository) UpdateGroup(
+	ctx context.Context, groupID uuid.UUID, name string, description string, budget *int,
+) (*Group, error) {
 	updated, err := repo.client.Group.
 		UpdateOneID(groupID).
 		SetName(name).
@@ -88,7 +92,9 @@ func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]
 	return owners, nil
 }
 
-func (repo *EntRepository) AddOwners(ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID) ([]*Owner, error) {
+func (repo *EntRepository) AddOwners(
+	ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID,
+) ([]*Owner, error) {
 	_, err := repo.client.Group.
 		Update().
 		Where(group.IDEQ(groupID)).
@@ -104,7 +110,9 @@ func (repo *EntRepository) AddOwners(ctx context.Context, groupID uuid.UUID, own
 	return resowners, nil
 }
 
-func (repo *EntRepository) DeleteOwners(ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID) error {
+func (repo *EntRepository) DeleteOwners(
+	ctx context.Context, groupID uuid.UUID, ownerIDs []uuid.UUID,
+) error {
 	_, err := repo.client.Group.
 		Update().
 		Where(group.IDEQ(groupID)).
@@ -132,7 +140,9 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	return modelmembers, nil
 }
 
-func (repo *EntRepository) AddMembers(ctx context.Context, groupID uuid.UUID, userIDs []uuid.UUID) ([]*Member, error) {
+func (repo *EntRepository) AddMembers(
+	ctx context.Context, groupID uuid.UUID, userIDs []uuid.UUID,
+) ([]*Member, error) {
 	_, err := repo.client.Group.
 		Update().
 		Where(group.IDEQ(groupID)).
@@ -149,7 +159,9 @@ func (repo *EntRepository) AddMembers(ctx context.Context, groupID uuid.UUID, us
 	return resMembers, nil
 }
 
-func (repo *EntRepository) DeleteMembers(ctx context.Context, groupID uuid.UUID, userIDs []uuid.UUID) error {
+func (repo *EntRepository) DeleteMembers(
+	ctx context.Context, groupID uuid.UUID, userIDs []uuid.UUID,
+) error {
 	_, err := repo.client.Group.
 		Update().
 		Where(group.IDEQ(groupID)).

@@ -264,17 +264,23 @@ func (h Handlers) PostRequest(c echo.Context) error {
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
 			if ent.IsNotFound(err) {
-				h.Logger.Info("could not find group in repository", zap.String("ID", req.Group.String()))
+				h.Logger.Info(
+					"could not find group in repository",
+					zap.String("ID", req.Group.String()))
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
 			h.Logger.Error("failed to get group from repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
-	request, err := h.Repository.CreateRequest(ctx, req.Title, req.Content, tags, targets, group, req.CreatedBy)
+	request, err := h.Repository.CreateRequest(
+		ctx,
+		req.Title, req.Content, tags, targets, group, req.CreatedBy)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			h.Logger.Info("could not find request in repository", zap.String("ID", req.CreatedBy.String()))
+			h.Logger.Info(
+				"could not find request in repository",
+				zap.String("ID", req.CreatedBy.String()))
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
 		h.Logger.Error("failed to create request in repository", zap.Error(err))
@@ -466,17 +472,23 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
 		if err != nil {
 			if ent.IsNotFound(err) {
-				h.Logger.Info("could not find group in repository", zap.String("ID", req.Group.String()))
+				h.Logger.Info(
+					"could not find group in repository",
+					zap.String("ID", req.Group.String()))
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
 			h.Logger.Error("failed to get group from repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
-	request, err := h.Repository.UpdateRequest(ctx, requestID, req.Title, req.Content, tags, targets, group)
+	request, err := h.Repository.UpdateRequest(
+		ctx,
+		requestID, req.Title, req.Content, tags, targets, group)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			h.Logger.Info("could not find request in repository", zap.String("ID", requestID.String()))
+			h.Logger.Info(
+				"could not find request in repository",
+				zap.String("ID", requestID.String()))
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
 		h.Logger.Error("failed to update request in repository", zap.Error(err))
@@ -584,7 +596,9 @@ func (h Handlers) PostComment(c echo.Context) error {
 	comment, err := h.Repository.CreateComment(ctx, req.Comment, requestID, user.ID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			h.Logger.Info("could not find request in repository", zap.String("ID", requestID.String()))
+			h.Logger.Info(
+				"could not find request in repository",
+				zap.String("ID", requestID.String()))
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
 		h.Logger.Error("failed to create comment in repository", zap.Error(err))
@@ -632,7 +646,9 @@ func (h Handlers) PutStatus(c echo.Context) error {
 	request, err := h.Repository.GetRequest(ctx, requestID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			h.Logger.Info("could not find request in repository", zap.String("ID", requestID.String()))
+			h.Logger.Info(
+				"could not find request in repository",
+				zap.String("ID", requestID.String()))
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
 		h.Logger.Error("failed to get request from repository", zap.Error(err))
@@ -645,7 +661,10 @@ func (h Handlers) PutStatus(c echo.Context) error {
 	}
 	if req.Comment == "" {
 		if !IsAbleNoCommentChangeStatus(req.Status, request.Status) {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("unable to change %v to %v without comment", request.Status.String(), req.Status.String()))
+			err := fmt.Errorf(
+				"unable to change %v to %v without comment",
+				request.Status.String(), req.Status.String())
+			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 	}
 
@@ -661,7 +680,10 @@ func (h Handlers) PutStatus(c echo.Context) error {
 	if u.Admin {
 		if !IsAbleAdminChangeState(req.Status, request.Status) {
 			h.Logger.Info("admin unable to change status")
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("admin unable to change %v to %v", request.Status.String(), req.Status.String()))
+			err := fmt.Errorf(
+				"admin unable to change %v to %v",
+				request.Status.String(), req.Status.String())
+			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		if req.Status == model.Submitted && request.Status == model.Accepted {
 			targets, err := h.Repository.GetRequestTargets(ctx, requestID)
@@ -686,7 +708,10 @@ func (h Handlers) PutStatus(c echo.Context) error {
 	if !u.Admin && user.ID == request.CreatedBy {
 		if !IsAbleCreatorChangeStatus(req.Status, request.Status) {
 			h.Logger.Info("creator unable to change status")
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("creator unable to change %v to %v", request.Status.String(), req.Status.String()))
+			err := fmt.Errorf(
+				"creator unable to change %v to %v",
+				request.Status.String(), req.Status.String())
+			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 	}
 
@@ -728,28 +753,19 @@ func (h Handlers) PutStatus(c echo.Context) error {
 }
 
 func IsAbleNoCommentChangeStatus(status, latestStatus model.Status) bool {
-	if status == model.FixRequired && latestStatus == model.Submitted ||
-		status == model.Rejected && latestStatus == model.Submitted ||
-		status == model.Submitted && latestStatus == model.Accepted {
-		return false
-	}
-	return true
+	return !(status == model.FixRequired && latestStatus == model.Submitted) &&
+		!(status == model.Rejected && latestStatus == model.Submitted) &&
+		!(status == model.Submitted && latestStatus == model.Accepted)
 }
 
 func IsAbleCreatorChangeStatus(status, latestStatus model.Status) bool {
-	if status == model.Submitted && latestStatus == model.FixRequired {
-		return true
-	}
-	return false
+	return status == model.Submitted && latestStatus == model.FixRequired
 }
 
 func IsAbleAdminChangeState(status, latestStatus model.Status) bool {
-	if status == model.Rejected && latestStatus == model.Submitted ||
+	return status == model.Rejected && latestStatus == model.Submitted ||
 		status == model.Submitted && latestStatus == model.FixRequired ||
 		status == model.Accepted && latestStatus == model.Submitted ||
 		status == model.Submitted && latestStatus == model.Accepted ||
-		status == model.FixRequired && latestStatus == model.Submitted {
-		return true
-	}
-	return false
+		status == model.FixRequired && latestStatus == model.Submitted
 }

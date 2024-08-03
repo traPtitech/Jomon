@@ -87,9 +87,16 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			}
 			splitedPath := strings.Split(c.Request().URL.Path, "/")
 
-			message += fmt.Sprintf("## :comment:[申請](%s/requests/%s)", "https://jomon.trap.jp", splitedPath[3])
+			message += fmt.Sprintf(
+				"## :comment:[申請](%s/requests/%s)",
+				"https://jomon.trap.jp",
+				splitedPath[3])
 			message += "に対する"
-			message += fmt.Sprintf("[コメント](%s/requests/%s/comments/%s)", "https://jomon.trap.jp", splitedPath[3], resApp.ID)
+			message += fmt.Sprintf(
+				"[コメント](%s/requests/%s/comments/%s)",
+				"https://jomon.trap.jp",
+				splitedPath[3],
+				resApp.ID)
 			message += "が作成されました\n\n"
 			message += resApp.Comment + "\n"
 		} else {
@@ -104,7 +111,11 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				message += "## :receipt:申請が更新されました\n"
 			}
 
-			message += fmt.Sprintf("### [%s](%s/applications/%s)", resApp.Title, "https://jomon.trap.jp", resApp.ID) + "\n"
+			message += fmt.Sprintf(
+				"### [%s](%s/applications/%s)\n",
+				resApp.Title,
+				"https://jomon.trap.jp",
+				resApp.ID)
 
 			amount := 0
 			for _, target := range resApp.Targets {
@@ -117,7 +128,6 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			}
 
 			if resApp.Tags != nil && len(resApp.Tags) != 0 {
-
 				tags := lo.Map(resApp.Tags, func(tag *Tag, index int) string {
 					return tag.Name
 				})
@@ -134,15 +144,27 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			return
 		}
 		if c.Request().Method == http.MethodPost {
-			message += fmt.Sprintf("## :scroll:[入出金記録](%s/transactions/%s)が新規作成されました\n", "https://jomon.trap.jp", resApp.ID)
+			message += fmt.Sprintf(
+				"## :scroll:[入出金記録](%s/transactions/%s)が新規作成されました\n",
+				"https://jomon.trap.jp",
+				resApp.ID)
 		} else if c.Request().Method == http.MethodPut {
-			message += fmt.Sprintf("## :scroll:[入出金記録](%s/transactions/%s)が修正されました\n", "https://jomon.trap.jp", resApp.ID)
+			message += fmt.Sprintf(
+				"## :scroll:[入出金記録](%s/transactions/%s)が修正されました\n",
+				"https://jomon.trap.jp",
+				resApp.ID)
 		}
 		if len(resApps) == 1 {
 			if resApp.Amount < 0 {
-				message += fmt.Sprintf("- `%s`への支払い\n    - 支払い金額: %d円\n", resApp.Target, -resApp.Amount)
+				message += fmt.Sprintf(
+					"- `%s`への支払い\n    - 支払い金額: %d円\n",
+					resApp.Target,
+					-resApp.Amount)
 			} else {
-				message += fmt.Sprintf("- `%s`からの振込\n    - 受け取り金額: %d円\n", resApp.Target, resApp.Amount)
+				message += fmt.Sprintf(
+					"- `%s`からの振込\n    - 受け取り金額: %d円\n",
+					resApp.Target,
+					resApp.Amount)
 			}
 		} else {
 			targets := make([]string, len(resApps))
@@ -150,11 +172,18 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				targets[i] = resApp.Target
 			}
 			if resApp.Amount < 0 {
-				message += fmt.Sprintf("- %sへの支払い\n    - 支払い金額: 計%d円(一人当たりへの支払い金額: %d円)\n", strings.Join(targets, " "), -len(resApps)*resApp.Amount, -resApp.Amount)
+				message += fmt.Sprintf(
+					"- %sへの支払い\n    - 支払い金額: 計%d円(一人当たりへの支払い金額: %d円)\n",
+					strings.Join(targets, " "),
+					-len(resApps)*resApp.Amount,
+					-resApp.Amount)
 			} else {
-				message += fmt.Sprintf("- %sからの振込\n    - 受け取り金額: 計%d円(一人当たりからの受け取り金額: %d円)\n", strings.Join(targets, " "), len(resApps)*resApp.Amount, resApp.Amount)
+				message += fmt.Sprintf(
+					"- %sからの振込\n    - 受け取り金額: 計%d円(一人当たりからの受け取り金額: %d円)\n",
+					strings.Join(targets, " "),
+					len(resApps)*resApp.Amount,
+					resApp.Amount)
 			}
-
 		}
 		if resApp.Group != nil {
 			message += fmt.Sprintf("- 関連するグループ: %s\n", resApp.Group.Name)

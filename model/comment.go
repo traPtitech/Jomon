@@ -18,7 +18,11 @@ type Comment struct {
 
 type CommentRepository interface {
 	GetComments(ctx context.Context, requestID uuid.UUID) ([]*Comment, error)
-	CreateComment(ctx context.Context, comment string, requestID uuid.UUID, userID uuid.UUID) (*Comment, error)
-	UpdateComment(ctx context.Context, comment string, requestID uuid.UUID, commentID uuid.UUID) (*Comment, error)
+	CreateComment(
+		ctx context.Context, comment string, requestID uuid.UUID, userID uuid.UUID,
+	) (*Comment, error)
+	UpdateComment(
+		ctx context.Context, comment string, requestID uuid.UUID, commentID uuid.UUID,
+	) (*Comment, error)
 	DeleteComment(ctx context.Context, requestID uuid.UUID, commentID uuid.UUID) error
 }

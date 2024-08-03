@@ -18,9 +18,18 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 40),
+			nil, nil,
+			nil, user.ID)
 		require.NoError(t, err)
 
 		status := Status(random.Numeric(t, 5) + 1)
@@ -31,9 +40,18 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 
 	t.Run("InvalidStatus", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 40),
+			nil, nil,
+			nil, user.ID)
 		require.NoError(t, err)
 
 		invalidStatus := Status(6)
@@ -43,7 +61,11 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 
 	t.Run("UnknownRequestID", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
 
 		status := Status(random.Numeric(t, 5) + 1)
@@ -53,9 +75,18 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 
 	t.Run("UnknownUserID", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 40), nil, nil, nil, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 40),
+			nil, nil,
+			nil, user.ID)
 		require.NoError(t, err)
 
 		status := Status(random.Numeric(t, 5) + 1)

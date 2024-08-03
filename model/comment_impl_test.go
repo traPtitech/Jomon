@@ -21,9 +21,18 @@ func TestEntRepository_GetComments(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, []*RequestTarget{}, nil, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{}, []*RequestTarget{},
+			nil, user.ID)
 		require.NoError(t, err)
 
 		comment1, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, user.ID)
@@ -52,9 +61,18 @@ func TestEntRepository_GetComments(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo2.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo2.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo2.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, []*RequestTarget{}, nil, user.ID)
+		request, err := repo2.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{}, []*RequestTarget{},
+			nil, user.ID)
 		require.NoError(t, err)
 
 		got, err := repo2.GetComments(ctx, request.ID)
@@ -77,13 +95,26 @@ func TestEntRepository_CreateComment(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, []*RequestTarget{}, nil, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{}, []*RequestTarget{},
+			nil, user.ID)
 		require.NoError(t, err)
 
 		comment := random.AlphaNumeric(t, 30)
-		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user2, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
 		created, err := repo.CreateComment(ctx, comment, request.ID, user2.ID)
 		assert.NoError(t, err)
@@ -93,7 +124,11 @@ func TestEntRepository_CreateComment(t *testing.T) {
 
 	t.Run("UnknownRequest", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
 		_, err = repo.CreateComment(ctx, random.AlphaNumeric(t, 30), uuid.New(), user.ID)
 		assert.Error(t, err)
@@ -101,9 +136,18 @@ func TestEntRepository_CreateComment(t *testing.T) {
 
 	t.Run("UnknownUser", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, []*RequestTarget{}, nil, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{}, []*RequestTarget{},
+			nil, user.ID)
 		require.NoError(t, err)
 
 		_, err = repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, uuid.New())
@@ -119,9 +163,18 @@ func TestEntREpository_UpdateComment(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, []*RequestTarget{}, nil, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{}, []*RequestTarget{},
+			nil, user.ID)
 		require.NoError(t, err)
 		created, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, user.ID)
 		require.NoError(t, err)
@@ -136,14 +189,28 @@ func TestEntREpository_UpdateComment(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request1, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, []*RequestTarget{}, nil, user.ID)
+		request1, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{}, []*RequestTarget{},
+			nil, user.ID)
 		require.NoError(t, err)
 		comment, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request1.ID, user.ID)
 		require.NoError(t, err)
 
-		request2, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, []*RequestTarget{}, nil, user.ID)
+		request2, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{}, []*RequestTarget{},
+			nil, user.ID)
 		require.NoError(t, err)
 		updated, err := repo.UpdateComment(ctx, comment.Comment, request2.ID, comment.ID)
 		assert.NoError(t, err)
@@ -160,20 +227,41 @@ func TestEntREpository_UpdateComment(t *testing.T) {
 
 	t.Run("UnknownComment", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, []*RequestTarget{}, nil, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{}, []*RequestTarget{},
+			nil, user.ID)
 		require.NoError(t, err)
 
-		_, err = repo.UpdateComment(ctx, random.AlphaNumeric(t, 30), request.ID, uuid.New())
+		_, err = repo.UpdateComment(
+			ctx,
+			random.AlphaNumeric(t, 30),
+			request.ID, uuid.New())
 		assert.Error(t, err)
 	})
 
 	t.Run("UnknownRequest", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, []*RequestTarget{}, nil, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{}, []*RequestTarget{},
+			nil, user.ID)
 		require.NoError(t, err)
 		comment, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, user.ID)
 		require.NoError(t, err)
@@ -191,9 +279,18 @@ func TestEntRepository_DeleteComment(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, []*RequestTarget{}, nil, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{}, []*RequestTarget{},
+			nil, user.ID)
 		require.NoError(t, err)
 		comment, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, user.ID)
 		require.NoError(t, err)
@@ -204,9 +301,18 @@ func TestEntRepository_DeleteComment(t *testing.T) {
 
 	t.Run("UnknownRequest", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, []*RequestTarget{}, nil, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{}, []*RequestTarget{},
+			nil, user.ID)
 		require.NoError(t, err)
 		comment, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, user.ID)
 		require.NoError(t, err)
@@ -217,9 +323,18 @@ func TestEntRepository_DeleteComment(t *testing.T) {
 
 	t.Run("UnknownComment", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 40), random.AlphaNumeric(t, 100), []*Tag{}, []*RequestTarget{}, nil, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{}, []*RequestTarget{},
+			nil, user.ID)
 		require.NoError(t, err)
 
 		err = repo.DeleteComment(ctx, request.ID, uuid.New())

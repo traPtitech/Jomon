@@ -10,7 +10,9 @@ import (
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
-func (repo *EntRepository) CreateUser(ctx context.Context, name string, dn string, admin bool) (*User, error) {
+func (repo *EntRepository) CreateUser(
+	ctx context.Context, name string, dn string, admin bool,
+) (*User, error) {
 	u, err := repo.client.User.
 		Create().
 		SetName(name).
@@ -58,7 +60,9 @@ func (repo *EntRepository) GetUsers(ctx context.Context) ([]*User, error) {
 	return modelusers, nil
 }
 
-func (repo *EntRepository) UpdateUser(ctx context.Context, userID uuid.UUID, name string, dn string, admin bool) (*User, error) {
+func (repo *EntRepository) UpdateUser(
+	ctx context.Context, userID uuid.UUID, name string, dn string, admin bool,
+) (*User, error) {
 	u, err := repo.client.User.
 		UpdateOneID(userID).
 		SetName(name).

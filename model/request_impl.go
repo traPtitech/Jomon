@@ -15,7 +15,9 @@ import (
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
-func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) ([]*RequestResponse, error) {
+func (repo *EntRepository) GetRequests(
+	ctx context.Context, query RequestQuery,
+) ([]*RequestResponse, error) {
 	// Querying
 	var requestsq *ent.RequestQuery
 	var err error
@@ -115,13 +117,17 @@ func (repo *EntRepository) GetRequests(ctx context.Context, query RequestQuery) 
 	}
 
 	reqres := lo.Map(requests, func(r *ent.Request, index int) *RequestResponse {
-		return convertEntRequestResponseToModelRequestResponse(r, r.Edges.Tag, r.Edges.Group, r.Edges.Status[0], r.Edges.User)
+		return convertEntRequestResponseToModelRequestResponse(
+			r, r.Edges.Tag, r.Edges.Group, r.Edges.Status[0], r.Edges.User)
 	})
 
 	return reqres, nil
 }
 
-func (repo *EntRepository) CreateRequest(ctx context.Context, title string, content string, tags []*Tag, targets []*RequestTarget, group *Group, userID uuid.UUID) (*RequestDetail, error) {
+func (repo *EntRepository) CreateRequest(
+	ctx context.Context, title string, content string,
+	tags []*Tag, targets []*RequestTarget, group *Group, userID uuid.UUID,
+) (*RequestDetail, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -209,7 +215,9 @@ func (repo *EntRepository) CreateRequest(ctx context.Context, title string, cont
 	return reqdetail, nil
 }
 
-func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) (*RequestDetail, error) {
+func (repo *EntRepository) GetRequest(
+	ctx context.Context, requestID uuid.UUID,
+) (*RequestDetail, error) {
 	r, err := repo.client.Request.
 		Query().
 		Where(request.IDEQ(requestID)).
@@ -253,7 +261,10 @@ func (repo *EntRepository) GetRequest(ctx context.Context, requestID uuid.UUID) 
 	return reqdetail, nil
 }
 
-func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUID, title string, content string, tags []*Tag, targets []*RequestTarget, group *Group) (*RequestDetail, error) {
+func (repo *EntRepository) UpdateRequest(
+	ctx context.Context, requestID uuid.UUID, title string, content string,
+	tags []*Tag, targets []*RequestTarget, group *Group,
+) (*RequestDetail, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -363,7 +374,10 @@ func (repo *EntRepository) UpdateRequest(ctx context.Context, requestID uuid.UUI
 	return reqdetail, nil
 }
 
-func convertEntRequestResponseToModelRequestResponse(request *ent.Request, tags []*ent.Tag, group *ent.Group, status *ent.RequestStatus, user *ent.User) *RequestResponse {
+func convertEntRequestResponseToModelRequestResponse(
+	request *ent.Request, tags []*ent.Tag,
+	group *ent.Group, status *ent.RequestStatus, user *ent.User,
+) *RequestResponse {
 	if request == nil {
 		return nil
 	}

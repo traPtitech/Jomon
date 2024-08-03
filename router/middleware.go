@@ -35,6 +35,7 @@ func (h Handlers) AccessLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFun
 
 			req := c.Request()
 			res := c.Response()
+			latency := strconv.FormatFloat(stop.Sub(start).Seconds(), 'f', 9, 64) + "s"
 			fields := []zapcore.Field{
 				zap.String("requestMethod", req.Method),
 				zap.Int("status", res.Status),
@@ -45,7 +46,7 @@ func (h Handlers) AccessLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFun
 				zap.String("requestUrl", req.URL.String()),
 				zap.String("requestSize", req.Header.Get(echo.HeaderContentLength)),
 				zap.String("responseSize", strconv.FormatInt(res.Size, 10)),
-				zap.String("latency", strconv.FormatFloat(stop.Sub(start).Seconds(), 'f', 9, 64)+"s"),
+				zap.String("latency", latency),
 			}
 			httpCode := res.Status
 			switch {
@@ -118,7 +119,12 @@ func (h Handlers) CheckRequestCreatorMiddleware(next echo.HandlerFunc) echo.Hand
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		creator := sess.Values[sessionRequestCreatorKey].(uuid.UUID)
+		creator, ok := sess.Values[sessionRequestCreatorKey].(uuid.UUID)
+		if !ok {
+			return echo.NewHTTPError(
+				http.StatusInternalServerError,
+				"session request creator key is not set")
+		}
 		if creator != user.ID {
 			return echo.NewHTTPError(http.StatusForbidden, "you are not creator")
 		}
@@ -141,7 +147,12 @@ func (h Handlers) CheckAdminOrRequestCreatorMiddleware(next echo.HandlerFunc) ec
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		creator := sess.Values[sessionRequestCreatorKey].(uuid.UUID)
+		creator, ok := sess.Values[sessionRequestCreatorKey].(uuid.UUID)
+		if !ok {
+			return echo.NewHTTPError(
+				http.StatusInternalServerError,
+				"session request creator key is not set")
+		}
 		if creator != user.ID && !user.Admin {
 			return echo.NewHTTPError(http.StatusForbidden, "you are not admin or creator")
 		}
@@ -198,7 +209,12 @@ func (h Handlers) CheckFileCreatorMiddleware(next echo.HandlerFunc) echo.Handler
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		creator := sess.Values[sessionFileCreatorKey].(uuid.UUID)
+		creator, ok := sess.Values[sessionFileCreatorKey].(uuid.UUID)
+		if !ok {
+			return echo.NewHTTPError(
+				http.StatusInternalServerError,
+				"session file creator key is not set")
+		}
 		if creator != user.ID {
 			return echo.NewHTTPError(http.StatusForbidden, "you are not creator")
 		}
@@ -219,7 +235,12 @@ func (h Handlers) CheckAdminOrFileCreatorMiddleware(next echo.HandlerFunc) echo.
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		creator := sess.Values[sessionFileCreatorKey].(uuid.UUID)
+		creator, ok := sess.Values[sessionFileCreatorKey].(uuid.UUID)
+		if !ok {
+			return echo.NewHTTPError(
+				http.StatusInternalServerError,
+				"session file creator key is not set")
+		}
 		if creator != user.ID && !user.Admin {
 			return echo.NewHTTPError(http.StatusForbidden, "you are not admin or creator")
 		}

@@ -66,7 +66,9 @@ func (h Handlers) PostFile(c echo.Context) error {
 	mimetype := reqfile.Header.Get(echo.HeaderContentType)
 	if !acceptedMimeTypes[mimetype] {
 		h.Logger.Info("requested unsupported mime type", zap.String("mime-type", mimetype))
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType, fmt.Errorf("unsupported media type"))
+		return echo.NewHTTPError(
+			http.StatusUnsupportedMediaType,
+			fmt.Errorf("unsupported media type"))
 	}
 
 	src, err := reqfile.Open()

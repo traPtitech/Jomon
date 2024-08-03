@@ -177,7 +177,9 @@ func (h Handlers) PutGroup(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	updated, err := h.Repository.UpdateGroup(ctx, groupID, group.Name, group.Description, group.Budget)
+	updated, err := h.Repository.UpdateGroup(
+		ctx,
+		groupID, group.Name, group.Description, group.Budget)
 	if err != nil {
 		h.Logger.Error("failed to update group in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)

@@ -63,7 +63,9 @@ func (h Handlers) UpdateUserInfo(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	updated, err := h.Repository.UpdateUser(c.Request().Context(), user.ID, newUser.Name, newUser.DisplayName, newUser.Admin)
+	updated, err := h.Repository.UpdateUser(
+		c.Request().Context(),
+		user.ID, newUser.Name, newUser.DisplayName, newUser.Admin)
 	if err != nil {
 		h.Logger.Error("failed to update user in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)

@@ -33,7 +33,7 @@ func RequestAccessToken(code, codeVerifier string) (Authority, error) {
 	form.Set("code_verifier", codeVerifier)
 
 	reqBody := strings.NewReader(form.Encode())
-	req, err := http.NewRequest("POST", TraQBaseURL+"/oauth2/token", reqBody)
+	req, err := http.NewRequest(http.MethodPost, TraQBaseURL+"/oauth2/token", reqBody)
 	if err != nil {
 		return Authority{}, err
 	}
@@ -61,7 +61,7 @@ type TraQUser struct {
 }
 
 func FetchTraQUserInfo(token string) (TraQUser, error) { //GetMe
-	req, err := http.NewRequest("GET", TraQBaseURL+"/users/me", nil)
+	req, err := http.NewRequest(http.MethodGet, TraQBaseURL+"/users/me", nil)
 	if err != nil {
 		return TraQUser{}, err
 	}

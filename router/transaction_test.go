@@ -1,7 +1,6 @@
 package router
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -425,7 +424,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		txs := []*model.TransactionResponse{tx1, tx2}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/transactions?target=%s", target1), nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/transactions?target=%s", target1),
+			nil)
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -525,7 +527,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/transactions?since=%s&until=%s", "2020-01-01", "2020-01-02"), nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/transactions?since=%s&until=%s", "2020-01-01", "2020-01-02"),
+			nil)
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -630,7 +635,13 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		group := tx1.Group.ID
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/transactions", bytes.NewBuffer([]byte(fmt.Sprintf(`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s"}`, tx1.Amount, tx1.Target, tag.ID, group))))
+		reqBody := fmt.Sprintf(
+			`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s"}`,
+			tx1.Amount, tx1.Target, tag.ID, group)
+		req, err := http.NewRequest(
+			http.MethodPost,
+			"/api/transactions",
+			strings.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -724,7 +735,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(model.Accepted),
+			Status:    model.Accepted,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			Comments:  []*model.Comment{},
@@ -738,7 +749,13 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/transactions", bytes.NewBuffer([]byte(fmt.Sprintf(`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s", "request": "%s"}`, tx.Amount, tx.Target, tag.ID, group, request.ID))))
+		reqBody := fmt.Sprintf(
+			`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s", "request": "%s"}`,
+			tx.Amount, tx.Target, tag.ID, group, request.ID)
+		req, err := http.NewRequest(
+			http.MethodPost,
+			"/api/transactions",
+			strings.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -749,7 +766,10 @@ func TestHandlers_PostTransaction(t *testing.T) {
 
 		h.Repository.MockTransactionRepository.
 			EXPECT().
-			CreateTransaction(c.Request().Context(), tx.Amount, tx.Target, tags, &group, &request.ID).
+			CreateTransaction(
+				c.Request().Context(),
+				tx.Amount, tx.Target,
+				tags, &group, &request.ID).
 			Return(tx, nil)
 
 		var resOverview Transaction
@@ -947,7 +967,13 @@ func TestHandlers_PutTransaction(t *testing.T) {
 		})
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/transactions/%s", tx.ID), strings.NewReader(fmt.Sprintf(`{"amount": %d, "target": "%s", "tags": ["%s"]}`, updated.Amount, updated.Target, updatedTag.ID)))
+		reqBody := fmt.Sprintf(
+			`{"amount": %d, "target": "%s", "tags": ["%s"]}`,
+			updated.Amount, updated.Target, updatedTag.ID)
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/transactions/%s", tx.ID),
+			strings.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -960,7 +986,10 @@ func TestHandlers_PutTransaction(t *testing.T) {
 
 		h.Repository.MockTransactionRepository.
 			EXPECT().
-			UpdateTransaction(c.Request().Context(), tx.ID, updated.Amount, updated.Target, updatedTags, nil, nil).
+			UpdateTransaction(
+				c.Request().Context(),
+				tx.ID, updated.Amount, updated.Target,
+				updatedTags, nil, nil).
 			Return(updated, nil)
 
 		var resOverview Transaction

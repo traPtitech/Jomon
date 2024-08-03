@@ -23,9 +23,18 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		var tags []*Tag
 		var targets []*RequestTarget
 		var group *Group
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, targets, group, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 50),
+			tags, targets,
+			group, user.ID)
 		require.NoError(t, err)
 
 		mimetype := "image/png"
@@ -42,7 +51,11 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
 		request := Request{
 			ID: uuid.New(),
@@ -63,9 +76,18 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		var tags []*Tag
 		var targets []*RequestTarget
 		var group *Group
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, targets, group, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 50),
+			tags, targets,
+			group, user.ID)
 		assert.NoError(t, err)
 
 		mimetype := "image/png"
@@ -88,9 +110,18 @@ func TestEntRepository_GetFile(t *testing.T) {
 		var tags []*Tag
 		var targets []*RequestTarget
 		var group *Group
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, targets, group, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 50),
+			tags, targets,
+			group, user.ID)
 		assert.NoError(t, err)
 
 		mimetype := "image/png"
@@ -128,9 +159,18 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 		var tags []*Tag
 		var targets []*RequestTarget
 		var group *Group
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 50), tags, targets, group, user.ID)
+		request, err := repo.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 50),
+			tags, targets,
+			group, user.ID)
 		assert.NoError(t, err)
 
 		mimetype := "image/png"

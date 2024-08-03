@@ -24,7 +24,9 @@ func SetupEntClient() (*ent.Client, error) {
 	dbName := testutil.GetEnvOrDefault("MARIADB_DATABASE", "jomon")
 	dbPort := testutil.GetEnvOrDefault("MARIADB_PORT", "3306")
 
-	dbDsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
+	dbDsn := fmt.Sprintf(
+		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		dbUser, dbPass, dbHost, dbPort, dbName)
 
 	client, err := ent.Open("mysql", dbDsn, entOptions...)
 	if err != nil {
