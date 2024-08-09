@@ -13,7 +13,6 @@ import (
 
 	"github.com/gorilla/sessions"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -23,6 +22,7 @@ import (
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/testutil/random"
+	"go.uber.org/mock/gomock"
 )
 
 // To do

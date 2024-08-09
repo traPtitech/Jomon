@@ -5,7 +5,6 @@ go 1.22.3
 require (
 	entgo.io/ent v0.14.0
 	github.com/go-sql-driver/mysql v1.8.1
-	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/sessions v1.2.2
 	github.com/labstack/echo-contrib v0.17.1
@@ -13,6 +12,7 @@ require (
 	github.com/ncw/swift v1.0.53
 	github.com/samber/lo v1.42.0
 	github.com/stretchr/testify v1.9.0
+	go.uber.org/mock v0.4.0
 	go.uber.org/zap v1.27.0
 )
 
