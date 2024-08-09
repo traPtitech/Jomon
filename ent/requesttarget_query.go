@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -21,7 +22,7 @@ import (
 type RequestTargetQuery struct {
 	config
 	ctx         *QueryContext
-	order       []OrderFunc
+	order       []requesttarget.OrderOption
 	inters      []Interceptor
 	predicates  []predicate.RequestTarget
 	withRequest *RequestQuery
@@ -58,7 +59,7 @@ func (rtq *RequestTargetQuery) Unique(unique bool) *RequestTargetQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (rtq *RequestTargetQuery) Order(o ...OrderFunc) *RequestTargetQuery {
+func (rtq *RequestTargetQuery) Order(o ...requesttarget.OrderOption) *RequestTargetQuery {
 	rtq.order = append(rtq.order, o...)
 	return rtq
 }
@@ -110,7 +111,7 @@ func (rtq *RequestTargetQuery) QueryUser() *UserQuery {
 // First returns the first RequestTarget entity from the query.
 // Returns a *NotFoundError when no RequestTarget was found.
 func (rtq *RequestTargetQuery) First(ctx context.Context) (*RequestTarget, error) {
-	nodes, err := rtq.Limit(1).All(setContextOp(ctx, rtq.ctx, "First"))
+	nodes, err := rtq.Limit(1).All(setContextOp(ctx, rtq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +134,7 @@ func (rtq *RequestTargetQuery) FirstX(ctx context.Context) *RequestTarget {
 // Returns a *NotFoundError when no RequestTarget ID was found.
 func (rtq *RequestTargetQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = rtq.Limit(1).IDs(setContextOp(ctx, rtq.ctx, "FirstID")); err != nil {
+	if ids, err = rtq.Limit(1).IDs(setContextOp(ctx, rtq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -156,7 +157,7 @@ func (rtq *RequestTargetQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one RequestTarget entity is found.
 // Returns a *NotFoundError when no RequestTarget entities are found.
 func (rtq *RequestTargetQuery) Only(ctx context.Context) (*RequestTarget, error) {
-	nodes, err := rtq.Limit(2).All(setContextOp(ctx, rtq.ctx, "Only"))
+	nodes, err := rtq.Limit(2).All(setContextOp(ctx, rtq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +185,7 @@ func (rtq *RequestTargetQuery) OnlyX(ctx context.Context) *RequestTarget {
 // Returns a *NotFoundError when no entities are found.
 func (rtq *RequestTargetQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = rtq.Limit(2).IDs(setContextOp(ctx, rtq.ctx, "OnlyID")); err != nil {
+	if ids, err = rtq.Limit(2).IDs(setContextOp(ctx, rtq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -209,7 +210,7 @@ func (rtq *RequestTargetQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of RequestTargets.
 func (rtq *RequestTargetQuery) All(ctx context.Context) ([]*RequestTarget, error) {
-	ctx = setContextOp(ctx, rtq.ctx, "All")
+	ctx = setContextOp(ctx, rtq.ctx, ent.OpQueryAll)
 	if err := rtq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -231,7 +232,7 @@ func (rtq *RequestTargetQuery) IDs(ctx context.Context) (ids []uuid.UUID, err er
 	if rtq.ctx.Unique == nil && rtq.path != nil {
 		rtq.Unique(true)
 	}
-	ctx = setContextOp(ctx, rtq.ctx, "IDs")
+	ctx = setContextOp(ctx, rtq.ctx, ent.OpQueryIDs)
 	if err = rtq.Select(requesttarget.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -249,7 +250,7 @@ func (rtq *RequestTargetQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (rtq *RequestTargetQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, rtq.ctx, "Count")
+	ctx = setContextOp(ctx, rtq.ctx, ent.OpQueryCount)
 	if err := rtq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -267,7 +268,7 @@ func (rtq *RequestTargetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (rtq *RequestTargetQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, rtq.ctx, "Exist")
+	ctx = setContextOp(ctx, rtq.ctx, ent.OpQueryExist)
 	switch _, err := rtq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -296,7 +297,7 @@ func (rtq *RequestTargetQuery) Clone() *RequestTargetQuery {
 	return &RequestTargetQuery{
 		config:      rtq.config,
 		ctx:         rtq.ctx.Clone(),
-		order:       append([]OrderFunc{}, rtq.order...),
+		order:       append([]requesttarget.OrderOption{}, rtq.order...),
 		inters:      append([]Interceptor{}, rtq.inters...),
 		predicates:  append([]predicate.RequestTarget{}, rtq.predicates...),
 		withRequest: rtq.withRequest.Clone(),
@@ -612,7 +613,7 @@ func (rtgb *RequestTargetGroupBy) Aggregate(fns ...AggregateFunc) *RequestTarget
 
 // Scan applies the selector query and scans the result into the given value.
 func (rtgb *RequestTargetGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rtgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, rtgb.build.ctx, ent.OpQueryGroupBy)
 	if err := rtgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -660,7 +661,7 @@ func (rts *RequestTargetSelect) Aggregate(fns ...AggregateFunc) *RequestTargetSe
 
 // Scan applies the selector query and scans the result into the given value.
 func (rts *RequestTargetSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rts.ctx, "Select")
+	ctx = setContextOp(ctx, rts.ctx, ent.OpQuerySelect)
 	if err := rts.prepareQuery(ctx); err != nil {
 		return err
 	}

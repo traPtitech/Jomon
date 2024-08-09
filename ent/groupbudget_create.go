@@ -105,7 +105,7 @@ func (gbc *GroupBudgetCreate) Mutation() *GroupBudgetMutation {
 // Save creates the GroupBudget in the database.
 func (gbc *GroupBudgetCreate) Save(ctx context.Context) (*GroupBudget, error) {
 	gbc.defaults()
-	return withHooks[*GroupBudget, GroupBudgetMutation](ctx, gbc.sqlSave, gbc.mutation, gbc.hooks)
+	return withHooks(ctx, gbc.sqlSave, gbc.mutation, gbc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -150,7 +150,7 @@ func (gbc *GroupBudgetCreate) check() error {
 	if _, ok := gbc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "GroupBudget.created_at"`)}
 	}
-	if _, ok := gbc.mutation.GroupID(); !ok {
+	if len(gbc.mutation.GroupIDs()) == 0 {
 		return &ValidationError{Name: "group", err: errors.New(`ent: missing required edge "GroupBudget.group"`)}
 	}
 	return nil
@@ -208,10 +208,7 @@ func (gbc *GroupBudgetCreate) createSpec() (*GroupBudget, *sqlgraph.CreateSpec) 
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -228,10 +225,7 @@ func (gbc *GroupBudgetCreate) createSpec() (*GroupBudget, *sqlgraph.CreateSpec) 
 			Columns: []string{groupbudget.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -245,11 +239,15 @@ func (gbc *GroupBudgetCreate) createSpec() (*GroupBudget, *sqlgraph.CreateSpec) 
 // GroupBudgetCreateBulk is the builder for creating many GroupBudget entities in bulk.
 type GroupBudgetCreateBulk struct {
 	config
+	err      error
 	builders []*GroupBudgetCreate
 }
 
 // Save creates the GroupBudget entities in the database.
 func (gbcb *GroupBudgetCreateBulk) Save(ctx context.Context) ([]*GroupBudget, error) {
+	if gbcb.err != nil {
+		return nil, gbcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(gbcb.builders))
 	nodes := make([]*GroupBudget, len(gbcb.builders))
 	mutators := make([]Mutator, len(gbcb.builders))
@@ -266,8 +264,8 @@ func (gbcb *GroupBudgetCreateBulk) Save(ctx context.Context) ([]*GroupBudget, er
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, gbcb.builders[i+1].mutation)
 				} else {

@@ -38,6 +38,14 @@ func (rtu *RequestTargetUpdate) SetAmount(i int) *RequestTargetUpdate {
 	return rtu
 }
 
+// SetNillableAmount sets the "amount" field if the given value is not nil.
+func (rtu *RequestTargetUpdate) SetNillableAmount(i *int) *RequestTargetUpdate {
+	if i != nil {
+		rtu.SetAmount(*i)
+	}
+	return rtu
+}
+
 // AddAmount adds i to the "amount" field.
 func (rtu *RequestTargetUpdate) AddAmount(i int) *RequestTargetUpdate {
 	rtu.mutation.AddAmount(i)
@@ -119,7 +127,7 @@ func (rtu *RequestTargetUpdate) ClearUser() *RequestTargetUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (rtu *RequestTargetUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, RequestTargetMutation](ctx, rtu.sqlSave, rtu.mutation, rtu.hooks)
+	return withHooks(ctx, rtu.sqlSave, rtu.mutation, rtu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -146,10 +154,10 @@ func (rtu *RequestTargetUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (rtu *RequestTargetUpdate) check() error {
-	if _, ok := rtu.mutation.RequestID(); rtu.mutation.RequestCleared() && !ok {
+	if rtu.mutation.RequestCleared() && len(rtu.mutation.RequestIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RequestTarget.request"`)
 	}
-	if _, ok := rtu.mutation.UserID(); rtu.mutation.UserCleared() && !ok {
+	if rtu.mutation.UserCleared() && len(rtu.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RequestTarget.user"`)
 	}
 	return nil
@@ -190,10 +198,7 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Columns: []string{requesttarget.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -206,10 +211,7 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Columns: []string{requesttarget.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -225,10 +227,7 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Columns: []string{requesttarget.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -241,10 +240,7 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Columns: []string{requesttarget.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -276,6 +272,14 @@ type RequestTargetUpdateOne struct {
 func (rtuo *RequestTargetUpdateOne) SetAmount(i int) *RequestTargetUpdateOne {
 	rtuo.mutation.ResetAmount()
 	rtuo.mutation.SetAmount(i)
+	return rtuo
+}
+
+// SetNillableAmount sets the "amount" field if the given value is not nil.
+func (rtuo *RequestTargetUpdateOne) SetNillableAmount(i *int) *RequestTargetUpdateOne {
+	if i != nil {
+		rtuo.SetAmount(*i)
+	}
 	return rtuo
 }
 
@@ -373,7 +377,7 @@ func (rtuo *RequestTargetUpdateOne) Select(field string, fields ...string) *Requ
 
 // Save executes the query and returns the updated RequestTarget entity.
 func (rtuo *RequestTargetUpdateOne) Save(ctx context.Context) (*RequestTarget, error) {
-	return withHooks[*RequestTarget, RequestTargetMutation](ctx, rtuo.sqlSave, rtuo.mutation, rtuo.hooks)
+	return withHooks(ctx, rtuo.sqlSave, rtuo.mutation, rtuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -400,10 +404,10 @@ func (rtuo *RequestTargetUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (rtuo *RequestTargetUpdateOne) check() error {
-	if _, ok := rtuo.mutation.RequestID(); rtuo.mutation.RequestCleared() && !ok {
+	if rtuo.mutation.RequestCleared() && len(rtuo.mutation.RequestIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RequestTarget.request"`)
 	}
-	if _, ok := rtuo.mutation.UserID(); rtuo.mutation.UserCleared() && !ok {
+	if rtuo.mutation.UserCleared() && len(rtuo.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RequestTarget.user"`)
 	}
 	return nil
@@ -461,10 +465,7 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			Columns: []string{requesttarget.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -477,10 +478,7 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			Columns: []string{requesttarget.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -496,10 +494,7 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			Columns: []string{requesttarget.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -512,10 +507,7 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			Columns: []string{requesttarget.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

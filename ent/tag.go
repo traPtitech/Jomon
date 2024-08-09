@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/tag"
@@ -27,7 +28,8 @@ type Tag struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TagQuery when eager-loading is set.
-	Edges TagEdges `json:"edges"`
+	Edges        TagEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // TagEdges holds the relations/edges for other nodes in the graph.
@@ -71,7 +73,7 @@ func (*Tag) scanValues(columns []string) ([]any, error) {
 		case tag.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Tag", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -116,9 +118,17 @@ func (t *Tag) assignValues(columns []string, values []any) error {
 				t.DeletedAt = new(time.Time)
 				*t.DeletedAt = value.Time
 			}
+		default:
+			t.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Tag.
+// This includes values selected through modifiers, order, etc.
+func (t *Tag) Value(name string) (ent.Value, error) {
+	return t.selectValues.Get(name)
 }
 
 // QueryRequest queries the "request" edge of the Tag entity.

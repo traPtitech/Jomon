@@ -300,11 +300,7 @@ func HasStatus() predicate.Request {
 // HasStatusWith applies the HasEdge predicate on the "status" edge with a given conditions (other predicates).
 func HasStatusWith(preds ...predicate.RequestStatus) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StatusInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, StatusTable, StatusColumn),
-		)
+		step := newStatusStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -327,11 +323,7 @@ func HasTarget() predicate.Request {
 // HasTargetWith applies the HasEdge predicate on the "target" edge with a given conditions (other predicates).
 func HasTargetWith(preds ...predicate.RequestTarget) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TargetInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TargetTable, TargetColumn),
-		)
+		step := newTargetStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -354,11 +346,7 @@ func HasFile() predicate.Request {
 // HasFileWith applies the HasEdge predicate on the "file" edge with a given conditions (other predicates).
 func HasFileWith(preds ...predicate.File) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FileInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, FileTable, FileColumn),
-		)
+		step := newFileStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -381,11 +369,7 @@ func HasTag() predicate.Request {
 // HasTagWith applies the HasEdge predicate on the "tag" edge with a given conditions (other predicates).
 func HasTagWith(preds ...predicate.Tag) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TagInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, TagTable, TagPrimaryKey...),
-		)
+		step := newTagStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -408,11 +392,7 @@ func HasTransaction() predicate.Request {
 // HasTransactionWith applies the HasEdge predicate on the "transaction" edge with a given conditions (other predicates).
 func HasTransactionWith(preds ...predicate.Transaction) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TransactionInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TransactionTable, TransactionColumn),
-		)
+		step := newTransactionStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -435,11 +415,7 @@ func HasComment() predicate.Request {
 // HasCommentWith applies the HasEdge predicate on the "comment" edge with a given conditions (other predicates).
 func HasCommentWith(preds ...predicate.Comment) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CommentInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, CommentTable, CommentColumn),
-		)
+		step := newCommentStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -462,11 +438,7 @@ func HasUser() predicate.Request {
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
-		)
+		step := newUserStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -489,11 +461,7 @@ func HasGroup() predicate.Request {
 // HasGroupWith applies the HasEdge predicate on the "group" edge with a given conditions (other predicates).
 func HasGroupWith(preds ...predicate.Group) predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GroupInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
-		)
+		step := newGroupStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -504,32 +472,15 @@ func HasGroupWith(preds ...predicate.Group) predicate.Request {
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Request) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for _, p := range predicates {
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.Request(sql.AndPredicates(predicates...))
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Request) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		s1 := s.Clone().SetP(nil)
-		for i, p := range predicates {
-			if i > 0 {
-				s1.Or()
-			}
-			p(s1)
-		}
-		s.Where(s1.P())
-	})
+	return predicate.Request(sql.OrPredicates(predicates...))
 }
 
 // Not applies the not operator on the given predicate.
 func Not(p predicate.Request) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		p(s.Not())
-	})
+	return predicate.Request(sql.NotPredicates(p))
 }
