@@ -5,7 +5,7 @@
 package mock_model
 
 import (
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockRequestTagRepository is a mock of RequestTagRepository interface.

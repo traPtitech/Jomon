@@ -5,7 +5,7 @@
 package mock_model
 
 import (
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockRequestFileRepository is a mock of RequestFileRepository interface.

@@ -5,7 +5,7 @@
 package mock_model
 
 import (
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockGroupBudgetRepository is a mock of GroupBudgetRepository interface.

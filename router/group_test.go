@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
@@ -19,6 +18,7 @@ import (
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/testutil/random"
+	"go.uber.org/mock/gomock"
 )
 
 func TestHandlers_GetGroups(t *testing.T) {
