@@ -5,6 +5,8 @@ package user
 import (
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -132,3 +134,188 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// OrderOption defines the ordering options for the User queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByDisplayName orders the results by the display_name field.
+func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
+}
+
+// ByAdmin orders the results by the admin field.
+func ByAdmin(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAdmin, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByGroupUserCount orders the results by group_user count.
+func ByGroupUserCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newGroupUserStep(), opts...)
+	}
+}
+
+// ByGroupUser orders the results by group_user terms.
+func ByGroupUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGroupUserStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByGroupOwnerCount orders the results by group_owner count.
+func ByGroupOwnerCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newGroupOwnerStep(), opts...)
+	}
+}
+
+// ByGroupOwner orders the results by group_owner terms.
+func ByGroupOwner(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGroupOwnerStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCommentCount orders the results by comment count.
+func ByCommentCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCommentStep(), opts...)
+	}
+}
+
+// ByComment orders the results by comment terms.
+func ByComment(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCommentStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByRequestStatusCount orders the results by request_status count.
+func ByRequestStatusCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRequestStatusStep(), opts...)
+	}
+}
+
+// ByRequestStatus orders the results by request_status terms.
+func ByRequestStatus(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRequestStatusStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByRequestCount orders the results by request count.
+func ByRequestCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRequestStep(), opts...)
+	}
+}
+
+// ByRequest orders the results by request terms.
+func ByRequest(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRequestStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByFileCount orders the results by file count.
+func ByFileCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFileStep(), opts...)
+	}
+}
+
+// ByFile orders the results by file terms.
+func ByFile(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFileStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByRequestTargetCount orders the results by request_target count.
+func ByRequestTargetCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRequestTargetStep(), opts...)
+	}
+}
+
+// ByRequestTarget orders the results by request_target terms.
+func ByRequestTarget(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRequestTargetStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newGroupUserStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GroupUserInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, GroupUserTable, GroupUserPrimaryKey...),
+	)
+}
+func newGroupOwnerStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GroupOwnerInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, GroupOwnerTable, GroupOwnerPrimaryKey...),
+	)
+}
+func newCommentStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CommentInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, CommentTable, CommentColumn),
+	)
+}
+func newRequestStatusStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RequestStatusInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, RequestStatusTable, RequestStatusColumn),
+	)
+}
+func newRequestStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RequestInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, RequestTable, RequestColumn),
+	)
+}
+func newFileStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FileInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, FileTable, FileColumn),
+	)
+}
+func newRequestTargetStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RequestTargetInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, RequestTargetTable, RequestTargetColumn),
+	)
+}

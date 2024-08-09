@@ -119,7 +119,7 @@ func (tdc *TransactionDetailCreate) Mutation() *TransactionDetailMutation {
 // Save creates the TransactionDetail in the database.
 func (tdc *TransactionDetailCreate) Save(ctx context.Context) (*TransactionDetail, error) {
 	tdc.defaults()
-	return withHooks[*TransactionDetail, TransactionDetailMutation](ctx, tdc.sqlSave, tdc.mutation, tdc.hooks)
+	return withHooks(ctx, tdc.sqlSave, tdc.mutation, tdc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -241,10 +241,7 @@ func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.
 			Columns: []string{transactiondetail.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -259,11 +256,15 @@ func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.
 // TransactionDetailCreateBulk is the builder for creating many TransactionDetail entities in bulk.
 type TransactionDetailCreateBulk struct {
 	config
+	err      error
 	builders []*TransactionDetailCreate
 }
 
 // Save creates the TransactionDetail entities in the database.
 func (tdcb *TransactionDetailCreateBulk) Save(ctx context.Context) ([]*TransactionDetail, error) {
+	if tdcb.err != nil {
+		return nil, tdcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(tdcb.builders))
 	nodes := make([]*TransactionDetail, len(tdcb.builders))
 	mutators := make([]Mutator, len(tdcb.builders))
@@ -280,8 +281,8 @@ func (tdcb *TransactionDetailCreateBulk) Save(ctx context.Context) ([]*Transacti
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, tdcb.builders[i+1].mutation)
 				} else {

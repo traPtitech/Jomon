@@ -38,6 +38,14 @@ func (gbu *GroupBudgetUpdate) SetAmount(i int) *GroupBudgetUpdate {
 	return gbu
 }
 
+// SetNillableAmount sets the "amount" field if the given value is not nil.
+func (gbu *GroupBudgetUpdate) SetNillableAmount(i *int) *GroupBudgetUpdate {
+	if i != nil {
+		gbu.SetAmount(*i)
+	}
+	return gbu
+}
+
 // AddAmount adds i to the "amount" field.
 func (gbu *GroupBudgetUpdate) AddAmount(i int) *GroupBudgetUpdate {
 	gbu.mutation.AddAmount(i)
@@ -138,7 +146,7 @@ func (gbu *GroupBudgetUpdate) RemoveTransaction(t ...*Transaction) *GroupBudgetU
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (gbu *GroupBudgetUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, GroupBudgetMutation](ctx, gbu.sqlSave, gbu.mutation, gbu.hooks)
+	return withHooks(ctx, gbu.sqlSave, gbu.mutation, gbu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -165,7 +173,7 @@ func (gbu *GroupBudgetUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (gbu *GroupBudgetUpdate) check() error {
-	if _, ok := gbu.mutation.GroupID(); gbu.mutation.GroupCleared() && !ok {
+	if gbu.mutation.GroupCleared() && len(gbu.mutation.GroupIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupBudget.group"`)
 	}
 	return nil
@@ -206,10 +214,7 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -222,10 +227,7 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -241,10 +243,7 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{groupbudget.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -257,10 +256,7 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{groupbudget.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -276,10 +272,7 @@ func (gbu *GroupBudgetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{groupbudget.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -311,6 +304,14 @@ type GroupBudgetUpdateOne struct {
 func (gbuo *GroupBudgetUpdateOne) SetAmount(i int) *GroupBudgetUpdateOne {
 	gbuo.mutation.ResetAmount()
 	gbuo.mutation.SetAmount(i)
+	return gbuo
+}
+
+// SetNillableAmount sets the "amount" field if the given value is not nil.
+func (gbuo *GroupBudgetUpdateOne) SetNillableAmount(i *int) *GroupBudgetUpdateOne {
+	if i != nil {
+		gbuo.SetAmount(*i)
+	}
 	return gbuo
 }
 
@@ -427,7 +428,7 @@ func (gbuo *GroupBudgetUpdateOne) Select(field string, fields ...string) *GroupB
 
 // Save executes the query and returns the updated GroupBudget entity.
 func (gbuo *GroupBudgetUpdateOne) Save(ctx context.Context) (*GroupBudget, error) {
-	return withHooks[*GroupBudget, GroupBudgetMutation](ctx, gbuo.sqlSave, gbuo.mutation, gbuo.hooks)
+	return withHooks(ctx, gbuo.sqlSave, gbuo.mutation, gbuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -454,7 +455,7 @@ func (gbuo *GroupBudgetUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (gbuo *GroupBudgetUpdateOne) check() error {
-	if _, ok := gbuo.mutation.GroupID(); gbuo.mutation.GroupCleared() && !ok {
+	if gbuo.mutation.GroupCleared() && len(gbuo.mutation.GroupIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupBudget.group"`)
 	}
 	return nil
@@ -512,10 +513,7 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -528,10 +526,7 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 			Columns: []string{groupbudget.GroupColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -547,10 +542,7 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 			Columns: []string{groupbudget.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -563,10 +555,7 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 			Columns: []string{groupbudget.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -582,10 +571,7 @@ func (gbuo *GroupBudgetUpdateOne) sqlSave(ctx context.Context) (_node *GroupBudg
 			Columns: []string{groupbudget.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

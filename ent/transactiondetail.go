@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/transaction"
@@ -30,6 +31,7 @@ type TransactionDetail struct {
 	// The values are being populated by the TransactionDetailQuery when eager-loading is set.
 	Edges              TransactionDetailEdges `json:"edges"`
 	transaction_detail *uuid.UUID
+	selectValues       sql.SelectValues
 }
 
 // TransactionDetailEdges holds the relations/edges for other nodes in the graph.
@@ -44,12 +46,10 @@ type TransactionDetailEdges struct {
 // TransactionOrErr returns the Transaction value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TransactionDetailEdges) TransactionOrErr() (*Transaction, error) {
-	if e.loadedTypes[0] {
-		if e.Transaction == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: transaction.Label}
-		}
+	if e.Transaction != nil {
 		return e.Transaction, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: transaction.Label}
 	}
 	return nil, &NotLoadedError{edge: "transaction"}
 }
@@ -70,7 +70,7 @@ func (*TransactionDetail) scanValues(columns []string) ([]any, error) {
 		case transactiondetail.ForeignKeys[0]: // transaction_detail
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type TransactionDetail", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -121,9 +121,17 @@ func (td *TransactionDetail) assignValues(columns []string, values []any) error 
 				td.transaction_detail = new(uuid.UUID)
 				*td.transaction_detail = *value.S.(*uuid.UUID)
 			}
+		default:
+			td.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the TransactionDetail.
+// This includes values selected through modifiers, order, etc.
+func (td *TransactionDetail) Value(name string) (ent.Value, error) {
+	return td.selectValues.Get(name)
 }
 
 // QueryTransaction queries the "transaction" edge of the TransactionDetail entity.

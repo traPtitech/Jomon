@@ -37,6 +37,14 @@ func (cu *CommentUpdate) SetComment(s string) *CommentUpdate {
 	return cu
 }
 
+// SetNillableComment sets the "comment" field if the given value is not nil.
+func (cu *CommentUpdate) SetNillableComment(s *string) *CommentUpdate {
+	if s != nil {
+		cu.SetComment(*s)
+	}
+	return cu
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (cu *CommentUpdate) SetCreatedAt(t time.Time) *CommentUpdate {
 	cu.mutation.SetCreatedAt(t)
@@ -119,7 +127,7 @@ func (cu *CommentUpdate) ClearUser() *CommentUpdate {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CommentUpdate) Save(ctx context.Context) (int, error) {
 	cu.defaults()
-	return withHooks[int, CommentMutation](ctx, cu.sqlSave, cu.mutation, cu.hooks)
+	return withHooks(ctx, cu.sqlSave, cu.mutation, cu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -154,10 +162,10 @@ func (cu *CommentUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cu *CommentUpdate) check() error {
-	if _, ok := cu.mutation.RequestID(); cu.mutation.RequestCleared() && !ok {
+	if cu.mutation.RequestCleared() && len(cu.mutation.RequestIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Comment.request"`)
 	}
-	if _, ok := cu.mutation.UserID(); cu.mutation.UserCleared() && !ok {
+	if cu.mutation.UserCleared() && len(cu.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Comment.user"`)
 	}
 	return nil
@@ -198,10 +206,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -214,10 +219,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -233,10 +235,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{comment.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -249,10 +248,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{comment.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -283,6 +279,14 @@ type CommentUpdateOne struct {
 // SetComment sets the "comment" field.
 func (cuo *CommentUpdateOne) SetComment(s string) *CommentUpdateOne {
 	cuo.mutation.SetComment(s)
+	return cuo
+}
+
+// SetNillableComment sets the "comment" field if the given value is not nil.
+func (cuo *CommentUpdateOne) SetNillableComment(s *string) *CommentUpdateOne {
+	if s != nil {
+		cuo.SetComment(*s)
+	}
 	return cuo
 }
 
@@ -381,7 +385,7 @@ func (cuo *CommentUpdateOne) Select(field string, fields ...string) *CommentUpda
 // Save executes the query and returns the updated Comment entity.
 func (cuo *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
 	cuo.defaults()
-	return withHooks[*Comment, CommentMutation](ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
+	return withHooks(ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -416,10 +420,10 @@ func (cuo *CommentUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cuo *CommentUpdateOne) check() error {
-	if _, ok := cuo.mutation.RequestID(); cuo.mutation.RequestCleared() && !ok {
+	if cuo.mutation.RequestCleared() && len(cuo.mutation.RequestIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Comment.request"`)
 	}
-	if _, ok := cuo.mutation.UserID(); cuo.mutation.UserCleared() && !ok {
+	if cuo.mutation.UserCleared() && len(cuo.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Comment.user"`)
 	}
 	return nil
@@ -477,10 +481,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -493,10 +494,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 			Columns: []string{comment.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -512,10 +510,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 			Columns: []string{comment.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -528,10 +523,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 			Columns: []string{comment.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

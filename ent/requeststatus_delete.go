@@ -27,7 +27,7 @@ func (rsd *RequestStatusDelete) Where(ps ...predicate.RequestStatus) *RequestSta
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (rsd *RequestStatusDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, RequestStatusMutation](ctx, rsd.sqlExec, rsd.mutation, rsd.hooks)
+	return withHooks(ctx, rsd.sqlExec, rsd.mutation, rsd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

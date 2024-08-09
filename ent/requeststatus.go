@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/request"
@@ -28,6 +29,7 @@ type RequestStatus struct {
 	Edges               RequestStatusEdges `json:"edges"`
 	request_status      *uuid.UUID
 	request_status_user *uuid.UUID
+	selectValues        sql.SelectValues
 }
 
 // RequestStatusEdges holds the relations/edges for other nodes in the graph.
@@ -44,12 +46,10 @@ type RequestStatusEdges struct {
 // RequestOrErr returns the Request value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e RequestStatusEdges) RequestOrErr() (*Request, error) {
-	if e.loadedTypes[0] {
-		if e.Request == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: request.Label}
-		}
+	if e.Request != nil {
 		return e.Request, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: request.Label}
 	}
 	return nil, &NotLoadedError{edge: "request"}
 }
@@ -57,12 +57,10 @@ func (e RequestStatusEdges) RequestOrErr() (*Request, error) {
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e RequestStatusEdges) UserOrErr() (*User, error) {
-	if e.loadedTypes[1] {
-		if e.User == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: user.Label}
-		}
+	if e.User != nil {
 		return e.User, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
 }
@@ -83,7 +81,7 @@ func (*RequestStatus) scanValues(columns []string) ([]any, error) {
 		case requeststatus.ForeignKeys[1]: // request_status_user
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type RequestStatus", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -129,9 +127,17 @@ func (rs *RequestStatus) assignValues(columns []string, values []any) error {
 				rs.request_status_user = new(uuid.UUID)
 				*rs.request_status_user = *value.S.(*uuid.UUID)
 			}
+		default:
+			rs.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the RequestStatus.
+// This includes values selected through modifiers, order, etc.
+func (rs *RequestStatus) Value(name string) (ent.Value, error) {
+	return rs.selectValues.Get(name)
 }
 
 // QueryRequest queries the "request" edge of the RequestStatus entity.

@@ -118,7 +118,7 @@ func (tdu *TransactionDetailUpdate) ClearTransaction() *TransactionDetailUpdate 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tdu *TransactionDetailUpdate) Save(ctx context.Context) (int, error) {
 	tdu.defaults()
-	return withHooks[int, TransactionDetailMutation](ctx, tdu.sqlSave, tdu.mutation, tdu.hooks)
+	return withHooks(ctx, tdu.sqlSave, tdu.mutation, tdu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -183,10 +183,7 @@ func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err err
 			Columns: []string{transactiondetail.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -199,10 +196,7 @@ func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err err
 			Columns: []string{transactiondetail.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -331,7 +325,7 @@ func (tduo *TransactionDetailUpdateOne) Select(field string, fields ...string) *
 // Save executes the query and returns the updated TransactionDetail entity.
 func (tduo *TransactionDetailUpdateOne) Save(ctx context.Context) (*TransactionDetail, error) {
 	tduo.defaults()
-	return withHooks[*TransactionDetail, TransactionDetailMutation](ctx, tduo.sqlSave, tduo.mutation, tduo.hooks)
+	return withHooks(ctx, tduo.sqlSave, tduo.mutation, tduo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -413,10 +407,7 @@ func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *Tra
 			Columns: []string{transactiondetail.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -429,10 +420,7 @@ func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *Tra
 			Columns: []string{transactiondetail.TransactionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

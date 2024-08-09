@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/file"
@@ -32,6 +33,7 @@ type File struct {
 	Edges        FileEdges `json:"edges"`
 	file_user    *uuid.UUID
 	request_file *uuid.UUID
+	selectValues sql.SelectValues
 }
 
 // FileEdges holds the relations/edges for other nodes in the graph.
@@ -48,12 +50,10 @@ type FileEdges struct {
 // RequestOrErr returns the Request value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e FileEdges) RequestOrErr() (*Request, error) {
-	if e.loadedTypes[0] {
-		if e.Request == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: request.Label}
-		}
+	if e.Request != nil {
 		return e.Request, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: request.Label}
 	}
 	return nil, &NotLoadedError{edge: "request"}
 }
@@ -61,12 +61,10 @@ func (e FileEdges) RequestOrErr() (*Request, error) {
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e FileEdges) UserOrErr() (*User, error) {
-	if e.loadedTypes[1] {
-		if e.User == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: user.Label}
-		}
+	if e.User != nil {
 		return e.User, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
 }
@@ -87,7 +85,7 @@ func (*File) scanValues(columns []string) ([]any, error) {
 		case file.ForeignKeys[1]: // request_file
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type File", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -146,9 +144,17 @@ func (f *File) assignValues(columns []string, values []any) error {
 				f.request_file = new(uuid.UUID)
 				*f.request_file = *value.S.(*uuid.UUID)
 			}
+		default:
+			f.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the File.
+// This includes values selected through modifiers, order, etc.
+func (f *File) Value(name string) (ent.Value, error) {
+	return f.selectValues.Get(name)
 }
 
 // QueryRequest queries the "request" edge of the File entity.
