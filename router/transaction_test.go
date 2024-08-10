@@ -656,7 +656,6 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Return(tx1, nil)
 
 		res := lo.Map(txs, func(tx *model.TransactionResponse, index int) *Transaction {
-
 			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, index int) *TagOverview {
 				return &TagOverview{
 					ID:        modelTag.ID,
