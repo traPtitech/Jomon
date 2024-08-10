@@ -238,9 +238,12 @@ func (repo *EntRepository) GetRequest(
 	tags := lo.Map(r.Edges.Tag, func(t *ent.Tag, index int) *Tag {
 		return ConvertEntTagToModelTag(t)
 	})
-	targets := lo.Map(r.Edges.Target, func(target *ent.RequestTarget, index int) *RequestTargetDetail {
-		return ConvertEntRequestTargetToModelRequestTargetDetail(target)
-	})
+	targets := lo.Map(
+		r.Edges.Target,
+		func(target *ent.RequestTarget, index int) *RequestTargetDetail {
+			return ConvertEntRequestTargetToModelRequestTargetDetail(target)
+		},
+	)
 	modelGroup := ConvertEntGroupToModelGroup(r.Edges.Group)
 	statuses := lo.Map(r.Edges.Status, func(status *ent.RequestStatus, index int) *RequestStatus {
 		return convertEntRequestStatusToModelRequestStatus(status)

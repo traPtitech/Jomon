@@ -183,52 +183,58 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	requests := lo.Map(modelrequests, func(request *model.RequestResponse, index int) *RequestResponse {
-		tags := lo.Map(request.Tags, func(tag *model.Tag, index int) *TagOverview {
-			return &TagOverview{
-				ID:        tag.ID,
-				Name:      tag.Name,
-				CreatedAt: tag.CreatedAt,
-				UpdatedAt: tag.UpdatedAt,
-			}
-		})
+	requests := lo.Map(
+		modelrequests,
+		func(request *model.RequestResponse, index int) *RequestResponse {
+			tags := lo.Map(request.Tags, func(tag *model.Tag, index int) *TagOverview {
+				return &TagOverview{
+					ID:        tag.ID,
+					Name:      tag.Name,
+					CreatedAt: tag.CreatedAt,
+					UpdatedAt: tag.UpdatedAt,
+				}
+			})
 
-		restargets := lo.Map(request.Targets, func(target *model.RequestTargetDetail, index int) *TargetOverview {
-			return &TargetOverview{
-				ID:        target.ID,
-				Target:    target.Target,
-				Amount:    target.Amount,
-				PaidAt:    target.PaidAt,
-				CreatedAt: target.CreatedAt,
-			}
-		})
+			restargets := lo.Map(
+				request.Targets,
+				func(target *model.RequestTargetDetail, index int) *TargetOverview {
+					return &TargetOverview{
+						ID:        target.ID,
+						Target:    target.Target,
+						Amount:    target.Amount,
+						PaidAt:    target.PaidAt,
+						CreatedAt: target.CreatedAt,
+					}
+				},
+			)
 
-		var resgroup *GroupOverview
-		if request.Group != nil {
-			resgroup = &GroupOverview{
-				ID:          request.Group.ID,
-				Name:        request.Group.Name,
-				Description: request.Group.Description,
-				Budget:      request.Group.Budget,
-				CreatedAt:   request.Group.CreatedAt,
-				UpdatedAt:   request.Group.UpdatedAt,
+			var resgroup *GroupOverview
+			if request.Group != nil {
+				resgroup = &GroupOverview{
+					ID:          request.Group.ID,
+					Name:        request.Group.Name,
+					Description: request.Group.Description,
+					Budget:      request.Group.Budget,
+					CreatedAt:   request.Group.CreatedAt,
+					UpdatedAt:   request.Group.UpdatedAt,
+				}
 			}
-		}
 
-		return &RequestResponse{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedAt: request.CreatedAt,
-			UpdatedAt: request.UpdatedAt,
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
-			Targets:   restargets,
-			Tags:      tags,
-			Group:     resgroup,
-			Comments:  []*CommentDetail{},
-		}
-	})
+			return &RequestResponse{
+				ID:        request.ID,
+				Status:    request.Status,
+				CreatedAt: request.CreatedAt,
+				UpdatedAt: request.UpdatedAt,
+				CreatedBy: request.CreatedBy,
+				Title:     request.Title,
+				Content:   request.Content,
+				Targets:   restargets,
+				Tags:      tags,
+				Group:     resgroup,
+				Comments:  []*CommentDetail{},
+			}
+		},
+	)
 
 	return c.JSON(http.StatusOK, requests)
 }
@@ -297,15 +303,18 @@ func (h Handlers) PostRequest(c echo.Context) error {
 			UpdatedAt:   request.Group.UpdatedAt,
 		}
 	}
-	reqtargets := lo.Map(request.Targets, func(target *model.RequestTargetDetail, index int) *TargetOverview {
-		return &TargetOverview{
-			ID:        target.ID,
-			Target:    target.Target,
-			Amount:    target.Amount,
-			PaidAt:    target.PaidAt,
-			CreatedAt: target.CreatedAt,
-		}
-	})
+	reqtargets := lo.Map(
+		request.Targets,
+		func(target *model.RequestTargetDetail, index int) *TargetOverview {
+			return &TargetOverview{
+				ID:        target.ID,
+				Target:    target.Target,
+				Amount:    target.Amount,
+				PaidAt:    target.PaidAt,
+				CreatedAt: target.CreatedAt,
+			}
+		},
+	)
 	restags := lo.Map(request.Tags, func(tag *model.Tag, index int) *TagOverview {
 		return &TagOverview{
 			ID:        tag.ID,
@@ -314,13 +323,16 @@ func (h Handlers) PostRequest(c echo.Context) error {
 			UpdatedAt: tag.UpdatedAt,
 		}
 	})
-	statuses := lo.Map(request.Statuses, func(status *model.RequestStatus, index int) *StatusResponseOverview {
-		return &StatusResponseOverview{
-			Status:    status.Status,
-			CreatedAt: status.CreatedAt,
-			CreatedBy: status.CreatedBy,
-		}
-	})
+	statuses := lo.Map(
+		request.Statuses,
+		func(status *model.RequestStatus, index int) *StatusResponseOverview {
+			return &StatusResponseOverview{
+				Status:    status.Status,
+				CreatedAt: status.CreatedAt,
+				CreatedBy: status.CreatedBy,
+			}
+		},
+	)
 
 	res := &RequestResponse{
 		ID:        request.ID,
@@ -387,15 +399,18 @@ func (h Handlers) GetRequest(c echo.Context) error {
 			UpdatedAt:   request.Group.UpdatedAt,
 		}
 	}
-	reqtargets := lo.Map(request.Targets, func(target *model.RequestTargetDetail, index int) *TargetOverview {
-		return &TargetOverview{
-			ID:        target.ID,
-			Target:    target.Target,
-			Amount:    target.Amount,
-			PaidAt:    target.PaidAt,
-			CreatedAt: target.CreatedAt,
-		}
-	})
+	reqtargets := lo.Map(
+		request.Targets,
+		func(target *model.RequestTargetDetail, index int) *TargetOverview {
+			return &TargetOverview{
+				ID:        target.ID,
+				Target:    target.Target,
+				Amount:    target.Amount,
+				PaidAt:    target.PaidAt,
+				CreatedAt: target.CreatedAt,
+			}
+		},
+	)
 	restags := lo.Map(request.Tags, func(tag *model.Tag, index int) *TagOverview {
 		return &TagOverview{
 			ID:        tag.ID,
@@ -405,13 +420,16 @@ func (h Handlers) GetRequest(c echo.Context) error {
 		}
 	})
 
-	resstatuses := lo.Map(request.Statuses, func(status *model.RequestStatus, index int) *StatusResponseOverview {
-		return &StatusResponseOverview{
-			CreatedBy: status.CreatedBy,
-			Status:    status.Status,
-			CreatedAt: status.CreatedAt,
-		}
-	})
+	resstatuses := lo.Map(
+		request.Statuses,
+		func(status *model.RequestStatus, index int) *StatusResponseOverview {
+			return &StatusResponseOverview{
+				CreatedBy: status.CreatedBy,
+				Status:    status.Status,
+				CreatedAt: status.CreatedAt,
+			}
+		},
+	)
 
 	res := &RequestResponse{
 		ID:        request.ID,
@@ -529,23 +547,29 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		}
 	})
 
-	restargets := lo.Map(request.Targets, func(target *model.RequestTargetDetail, index int) *TargetOverview {
-		return &TargetOverview{
-			ID:        target.ID,
-			Target:    target.Target,
-			Amount:    target.Amount,
-			PaidAt:    target.PaidAt,
-			CreatedAt: target.CreatedAt,
-		}
-	})
+	restargets := lo.Map(
+		request.Targets,
+		func(target *model.RequestTargetDetail, index int) *TargetOverview {
+			return &TargetOverview{
+				ID:        target.ID,
+				Target:    target.Target,
+				Amount:    target.Amount,
+				PaidAt:    target.PaidAt,
+				CreatedAt: target.CreatedAt,
+			}
+		},
+	)
 
-	resstatuses := lo.Map(request.Statuses, func(status *model.RequestStatus, index int) *StatusResponseOverview {
-		return &StatusResponseOverview{
-			CreatedBy: status.CreatedBy,
-			Status:    status.Status,
-			CreatedAt: status.CreatedAt,
-		}
-	})
+	resstatuses := lo.Map(
+		request.Statuses,
+		func(status *model.RequestStatus, index int) *StatusResponseOverview {
+			return &StatusResponseOverview{
+				CreatedBy: status.CreatedBy,
+				Status:    status.Status,
+				CreatedAt: status.CreatedAt,
+			}
+		},
+	)
 
 	res := &RequestResponse{
 		ID:        request.ID,
