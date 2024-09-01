@@ -20,39 +20,39 @@ func AlphaNumeric(t *testing.T, n int) string {
 	return string(b)
 }
 
-func Numeric(t *testing.T, max int) int {
+func Numeric(t *testing.T, n int) int {
 	t.Helper()
-	return rand.IntN(max)
+	return rand.IntN(n)
 }
 
-func Numeric64(t *testing.T, max int64) int64 {
+func Numeric64(t *testing.T, n int64) int64 {
 	t.Helper()
-	return rand.Int64N(max)
+	return rand.Int64N(n)
 }
 
-func AlphaNumericSlice(t *testing.T, length int, max int64) []string {
+func AlphaNumericSlice(t *testing.T, length int, n int64) []string {
 	t.Helper()
 	slice := []string{}
 	for range length {
-		slice = append(slice, AlphaNumeric(t, int(max)))
+		slice = append(slice, AlphaNumeric(t, int(n)))
 	}
 	return slice
 }
 
-func NumericSlice(t *testing.T, length int, max int) []int {
+func NumericSlice(t *testing.T, length int, n int) []int {
 	t.Helper()
 	slice := []int{}
 	for range length {
-		slice = append(slice, Numeric(t, max))
+		slice = append(slice, Numeric(t, n))
 	}
 	return slice
 }
 
-func Numeric64Slice(t *testing.T, length int, max int64) []int64 {
+func Numeric64Slice(t *testing.T, length int, n int64) []int64 {
 	t.Helper()
 	slice := []int64{}
 	for range length {
-		slice = append(slice, Numeric64(t, max))
+		slice = append(slice, Numeric64(t, n))
 	}
 	return slice
 }

@@ -1,5 +1,15 @@
 name: Go
-on: push
+
+on:
+  push:
+    branches:
+      - v2
+  pull_request:
+    branches:
+      - v2
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 1 * *"
 
 jobs:
 
