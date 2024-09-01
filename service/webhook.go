@@ -127,7 +127,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 				message += fmt.Sprintf("- 請求先グループ: %s\n", resApp.Group.Name)
 			}
 
-			if resApp.Tags != nil && len(resApp.Tags) != 0 {
+			if len(resApp.Tags) != 0 {
 				tags := lo.Map(resApp.Tags, func(tag *Tag, index int) string {
 					return tag.Name
 				})
@@ -188,7 +188,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 		if resApp.Group != nil {
 			message += fmt.Sprintf("- 関連するグループ: %s\n", resApp.Group.Name)
 		}
-		if resApp.Tags != nil && len(resApp.Tags) != 0 {
+		if len(resApp.Tags) != 0 {
 			tags := lo.Map(resApp.Tags, func(tag *Tag, index int) string {
 				return tag.Name
 			})
