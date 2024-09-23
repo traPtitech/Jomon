@@ -100,7 +100,7 @@ func (rsu *RequestStatusUpdate) ClearUser() *RequestStatusUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (rsu *RequestStatusUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, RequestStatusMutation](ctx, rsu.sqlSave, rsu.mutation, rsu.hooks)
+	return withHooks(ctx, rsu.sqlSave, rsu.mutation, rsu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -132,10 +132,10 @@ func (rsu *RequestStatusUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "RequestStatus.status": %w`, err)}
 		}
 	}
-	if _, ok := rsu.mutation.RequestID(); rsu.mutation.RequestCleared() && !ok {
+	if rsu.mutation.RequestCleared() && len(rsu.mutation.RequestIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RequestStatus.request"`)
 	}
-	if _, ok := rsu.mutation.UserID(); rsu.mutation.UserCleared() && !ok {
+	if rsu.mutation.UserCleared() && len(rsu.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RequestStatus.user"`)
 	}
 	return nil
@@ -167,10 +167,7 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -183,10 +180,7 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -202,10 +196,7 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Columns: []string{requeststatus.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -218,10 +209,7 @@ func (rsu *RequestStatusUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Columns: []string{requeststatus.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -331,7 +319,7 @@ func (rsuo *RequestStatusUpdateOne) Select(field string, fields ...string) *Requ
 
 // Save executes the query and returns the updated RequestStatus entity.
 func (rsuo *RequestStatusUpdateOne) Save(ctx context.Context) (*RequestStatus, error) {
-	return withHooks[*RequestStatus, RequestStatusMutation](ctx, rsuo.sqlSave, rsuo.mutation, rsuo.hooks)
+	return withHooks(ctx, rsuo.sqlSave, rsuo.mutation, rsuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -363,10 +351,10 @@ func (rsuo *RequestStatusUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "RequestStatus.status": %w`, err)}
 		}
 	}
-	if _, ok := rsuo.mutation.RequestID(); rsuo.mutation.RequestCleared() && !ok {
+	if rsuo.mutation.RequestCleared() && len(rsuo.mutation.RequestIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RequestStatus.request"`)
 	}
-	if _, ok := rsuo.mutation.UserID(); rsuo.mutation.UserCleared() && !ok {
+	if rsuo.mutation.UserCleared() && len(rsuo.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RequestStatus.user"`)
 	}
 	return nil
@@ -415,10 +403,7 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -431,10 +416,7 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -450,10 +432,7 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			Columns: []string{requeststatus.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -466,10 +445,7 @@ func (rsuo *RequestStatusUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			Columns: []string{requeststatus.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

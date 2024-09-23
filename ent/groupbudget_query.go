@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -22,7 +23,7 @@ import (
 type GroupBudgetQuery struct {
 	config
 	ctx             *QueryContext
-	order           []OrderFunc
+	order           []groupbudget.OrderOption
 	inters          []Interceptor
 	predicates      []predicate.GroupBudget
 	withGroup       *GroupQuery
@@ -59,7 +60,7 @@ func (gbq *GroupBudgetQuery) Unique(unique bool) *GroupBudgetQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (gbq *GroupBudgetQuery) Order(o ...OrderFunc) *GroupBudgetQuery {
+func (gbq *GroupBudgetQuery) Order(o ...groupbudget.OrderOption) *GroupBudgetQuery {
 	gbq.order = append(gbq.order, o...)
 	return gbq
 }
@@ -111,7 +112,7 @@ func (gbq *GroupBudgetQuery) QueryTransaction() *TransactionQuery {
 // First returns the first GroupBudget entity from the query.
 // Returns a *NotFoundError when no GroupBudget was found.
 func (gbq *GroupBudgetQuery) First(ctx context.Context) (*GroupBudget, error) {
-	nodes, err := gbq.Limit(1).All(setContextOp(ctx, gbq.ctx, "First"))
+	nodes, err := gbq.Limit(1).All(setContextOp(ctx, gbq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +135,7 @@ func (gbq *GroupBudgetQuery) FirstX(ctx context.Context) *GroupBudget {
 // Returns a *NotFoundError when no GroupBudget ID was found.
 func (gbq *GroupBudgetQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = gbq.Limit(1).IDs(setContextOp(ctx, gbq.ctx, "FirstID")); err != nil {
+	if ids, err = gbq.Limit(1).IDs(setContextOp(ctx, gbq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -157,7 +158,7 @@ func (gbq *GroupBudgetQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one GroupBudget entity is found.
 // Returns a *NotFoundError when no GroupBudget entities are found.
 func (gbq *GroupBudgetQuery) Only(ctx context.Context) (*GroupBudget, error) {
-	nodes, err := gbq.Limit(2).All(setContextOp(ctx, gbq.ctx, "Only"))
+	nodes, err := gbq.Limit(2).All(setContextOp(ctx, gbq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +186,7 @@ func (gbq *GroupBudgetQuery) OnlyX(ctx context.Context) *GroupBudget {
 // Returns a *NotFoundError when no entities are found.
 func (gbq *GroupBudgetQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = gbq.Limit(2).IDs(setContextOp(ctx, gbq.ctx, "OnlyID")); err != nil {
+	if ids, err = gbq.Limit(2).IDs(setContextOp(ctx, gbq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -210,7 +211,7 @@ func (gbq *GroupBudgetQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of GroupBudgets.
 func (gbq *GroupBudgetQuery) All(ctx context.Context) ([]*GroupBudget, error) {
-	ctx = setContextOp(ctx, gbq.ctx, "All")
+	ctx = setContextOp(ctx, gbq.ctx, ent.OpQueryAll)
 	if err := gbq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -232,7 +233,7 @@ func (gbq *GroupBudgetQuery) IDs(ctx context.Context) (ids []uuid.UUID, err erro
 	if gbq.ctx.Unique == nil && gbq.path != nil {
 		gbq.Unique(true)
 	}
-	ctx = setContextOp(ctx, gbq.ctx, "IDs")
+	ctx = setContextOp(ctx, gbq.ctx, ent.OpQueryIDs)
 	if err = gbq.Select(groupbudget.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -250,7 +251,7 @@ func (gbq *GroupBudgetQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (gbq *GroupBudgetQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, gbq.ctx, "Count")
+	ctx = setContextOp(ctx, gbq.ctx, ent.OpQueryCount)
 	if err := gbq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -268,7 +269,7 @@ func (gbq *GroupBudgetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (gbq *GroupBudgetQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, gbq.ctx, "Exist")
+	ctx = setContextOp(ctx, gbq.ctx, ent.OpQueryExist)
 	switch _, err := gbq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -297,7 +298,7 @@ func (gbq *GroupBudgetQuery) Clone() *GroupBudgetQuery {
 	return &GroupBudgetQuery{
 		config:          gbq.config,
 		ctx:             gbq.ctx.Clone(),
-		order:           append([]OrderFunc{}, gbq.order...),
+		order:           append([]groupbudget.OrderOption{}, gbq.order...),
 		inters:          append([]Interceptor{}, gbq.inters...),
 		predicates:      append([]predicate.GroupBudget{}, gbq.predicates...),
 		withGroup:       gbq.withGroup.Clone(),
@@ -498,7 +499,7 @@ func (gbq *GroupBudgetQuery) loadTransaction(ctx context.Context, query *Transac
 	}
 	query.withFKs = true
 	query.Where(predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.InValues(groupbudget.TransactionColumn, fks...))
+		s.Where(sql.InValues(s.C(groupbudget.TransactionColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -511,7 +512,7 @@ func (gbq *GroupBudgetQuery) loadTransaction(ctx context.Context, query *Transac
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "group_budget_transaction" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "group_budget_transaction" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -613,7 +614,7 @@ func (gbgb *GroupBudgetGroupBy) Aggregate(fns ...AggregateFunc) *GroupBudgetGrou
 
 // Scan applies the selector query and scans the result into the given value.
 func (gbgb *GroupBudgetGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, gbgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, gbgb.build.ctx, ent.OpQueryGroupBy)
 	if err := gbgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -661,7 +662,7 @@ func (gbs *GroupBudgetSelect) Aggregate(fns ...AggregateFunc) *GroupBudgetSelect
 
 // Scan applies the selector query and scans the result into the given value.
 func (gbs *GroupBudgetSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, gbs.ctx, "Select")
+	ctx = setContextOp(ctx, gbs.ctx, ent.OpQuerySelect)
 	if err := gbs.prepareQuery(ctx); err != nil {
 		return err
 	}

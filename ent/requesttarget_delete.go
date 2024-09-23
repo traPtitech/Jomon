@@ -27,7 +27,7 @@ func (rtd *RequestTargetDelete) Where(ps ...predicate.RequestTarget) *RequestTar
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (rtd *RequestTargetDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, RequestTargetMutation](ctx, rtd.sqlExec, rtd.mutation, rtd.hooks)
+	return withHooks(ctx, rtd.sqlExec, rtd.mutation, rtd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

@@ -7,11 +7,11 @@ import (
 
 	"github.com/traPtitech/Jomon/storage/mock_storage"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/model/mock_model"
 	"github.com/traPtitech/Jomon/testutil/random"
+	"go.uber.org/mock/gomock"
 	"go.uber.org/zap"
 )
 

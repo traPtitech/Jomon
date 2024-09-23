@@ -27,7 +27,7 @@ func (gbd *GroupBudgetDelete) Where(ps ...predicate.GroupBudget) *GroupBudgetDel
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gbd *GroupBudgetDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, GroupBudgetMutation](ctx, gbd.sqlExec, gbd.mutation, gbd.hooks)
+	return withHooks(ctx, gbd.sqlExec, gbd.mutation, gbd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
@@ -18,6 +17,7 @@ import (
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/testutil/random"
+	"go.uber.org/mock/gomock"
 )
 
 func TestHandlers_GetTransactions(t *testing.T) {

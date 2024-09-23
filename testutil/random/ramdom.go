@@ -3,8 +3,6 @@ package random
 import (
 	"math/rand/v2"
 	"testing"
-
-	"github.com/samber/lo"
 )
 
 const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -22,33 +20,39 @@ func AlphaNumeric(t *testing.T, n int) string {
 	return string(b)
 }
 
-func Numeric(t *testing.T, max int) int {
+func Numeric(t *testing.T, n int) int {
 	t.Helper()
-	return rand.IntN(max)
+	return rand.IntN(n)
 }
 
-func Numeric64(t *testing.T, max int64) int64 {
+func Numeric64(t *testing.T, n int64) int64 {
 	t.Helper()
-	return rand.Int64N(max)
+	return rand.Int64N(n)
 }
 
-func AlphaNumericSlice(t *testing.T, length int, max int64) []string {
+func AlphaNumericSlice(t *testing.T, length int, n int64) []string {
 	t.Helper()
-	return lo.Times(length, func(index int) string {
-		return AlphaNumeric(t, int(max))
-	})
+	slice := []string{}
+	for range length {
+		slice = append(slice, AlphaNumeric(t, int(n)))
+	}
+	return slice
 }
 
-func NumericSlice(t *testing.T, length int, max int) []int {
+func NumericSlice(t *testing.T, length int, n int) []int {
 	t.Helper()
-	return lo.Times(length, func(index int) int {
-		return Numeric(t, max)
-	})
+	slice := []int{}
+	for range length {
+		slice = append(slice, Numeric(t, n))
+	}
+	return slice
 }
 
-func Numeric64Slice(t *testing.T, length int, max int64) []int64 {
+func Numeric64Slice(t *testing.T, length int, n int64) []int64 {
 	t.Helper()
-	return lo.Times(length, func(index int) int64 {
-		return Numeric64(t, max)
-	})
+	slice := []int64{}
+	for range length {
+		slice = append(slice, Numeric64(t, n))
+	}
+	return slice
 }

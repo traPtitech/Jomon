@@ -38,9 +38,25 @@ func (gu *GroupUpdate) SetName(s string) *GroupUpdate {
 	return gu
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (gu *GroupUpdate) SetNillableName(s *string) *GroupUpdate {
+	if s != nil {
+		gu.SetName(*s)
+	}
+	return gu
+}
+
 // SetDescription sets the "description" field.
 func (gu *GroupUpdate) SetDescription(s string) *GroupUpdate {
 	gu.mutation.SetDescription(s)
+	return gu
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (gu *GroupUpdate) SetNillableDescription(s *string) *GroupUpdate {
+	if s != nil {
+		gu.SetDescription(*s)
+	}
 	return gu
 }
 
@@ -263,7 +279,7 @@ func (gu *GroupUpdate) RemoveRequest(r ...*Request) *GroupUpdate {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 	gu.defaults()
-	return withHooks[int, GroupMutation](ctx, gu.sqlSave, gu.mutation, gu.hooks)
+	return withHooks(ctx, gu.sqlSave, gu.mutation, gu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -353,10 +369,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: groupbudget.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(groupbudget.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -369,10 +382,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: groupbudget.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(groupbudget.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -388,10 +398,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: groupbudget.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(groupbudget.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -407,10 +414,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: group.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -423,10 +427,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: group.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -442,10 +443,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: group.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -461,10 +459,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: group.OwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -477,10 +472,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: group.OwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -496,10 +488,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: group.OwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -515,10 +504,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{group.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -531,10 +517,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{group.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -550,10 +533,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{group.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -587,9 +567,25 @@ func (guo *GroupUpdateOne) SetName(s string) *GroupUpdateOne {
 	return guo
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (guo *GroupUpdateOne) SetNillableName(s *string) *GroupUpdateOne {
+	if s != nil {
+		guo.SetName(*s)
+	}
+	return guo
+}
+
 // SetDescription sets the "description" field.
 func (guo *GroupUpdateOne) SetDescription(s string) *GroupUpdateOne {
 	guo.mutation.SetDescription(s)
+	return guo
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (guo *GroupUpdateOne) SetNillableDescription(s *string) *GroupUpdateOne {
+	if s != nil {
+		guo.SetDescription(*s)
+	}
 	return guo
 }
 
@@ -825,7 +821,7 @@ func (guo *GroupUpdateOne) Select(field string, fields ...string) *GroupUpdateOn
 // Save executes the query and returns the updated Group entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 	guo.defaults()
-	return withHooks[*Group, GroupMutation](ctx, guo.sqlSave, guo.mutation, guo.hooks)
+	return withHooks(ctx, guo.sqlSave, guo.mutation, guo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -932,10 +928,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: groupbudget.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(groupbudget.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -948,10 +941,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: groupbudget.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(groupbudget.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -967,10 +957,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Columns: []string{group.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: groupbudget.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(groupbudget.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -986,10 +973,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Columns: group.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1002,10 +986,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Columns: group.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1021,10 +1002,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Columns: group.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1040,10 +1018,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Columns: group.OwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1056,10 +1031,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Columns: group.OwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1075,10 +1047,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Columns: group.OwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1094,10 +1063,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Columns: []string{group.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1110,10 +1076,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Columns: []string{group.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1129,10 +1092,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			Columns: []string{group.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

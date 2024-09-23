@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -21,7 +22,7 @@ import (
 type CommentQuery struct {
 	config
 	ctx         *QueryContext
-	order       []OrderFunc
+	order       []comment.OrderOption
 	inters      []Interceptor
 	predicates  []predicate.Comment
 	withRequest *RequestQuery
@@ -58,7 +59,7 @@ func (cq *CommentQuery) Unique(unique bool) *CommentQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (cq *CommentQuery) Order(o ...OrderFunc) *CommentQuery {
+func (cq *CommentQuery) Order(o ...comment.OrderOption) *CommentQuery {
 	cq.order = append(cq.order, o...)
 	return cq
 }
@@ -110,7 +111,7 @@ func (cq *CommentQuery) QueryUser() *UserQuery {
 // First returns the first Comment entity from the query.
 // Returns a *NotFoundError when no Comment was found.
 func (cq *CommentQuery) First(ctx context.Context) (*Comment, error) {
-	nodes, err := cq.Limit(1).All(setContextOp(ctx, cq.ctx, "First"))
+	nodes, err := cq.Limit(1).All(setContextOp(ctx, cq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +134,7 @@ func (cq *CommentQuery) FirstX(ctx context.Context) *Comment {
 // Returns a *NotFoundError when no Comment ID was found.
 func (cq *CommentQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, "FirstID")); err != nil {
+	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -156,7 +157,7 @@ func (cq *CommentQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one Comment entity is found.
 // Returns a *NotFoundError when no Comment entities are found.
 func (cq *CommentQuery) Only(ctx context.Context) (*Comment, error) {
-	nodes, err := cq.Limit(2).All(setContextOp(ctx, cq.ctx, "Only"))
+	nodes, err := cq.Limit(2).All(setContextOp(ctx, cq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +185,7 @@ func (cq *CommentQuery) OnlyX(ctx context.Context) *Comment {
 // Returns a *NotFoundError when no entities are found.
 func (cq *CommentQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, "OnlyID")); err != nil {
+	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -209,7 +210,7 @@ func (cq *CommentQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Comments.
 func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
-	ctx = setContextOp(ctx, cq.ctx, "All")
+	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryAll)
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -231,7 +232,7 @@ func (cq *CommentQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if cq.ctx.Unique == nil && cq.path != nil {
 		cq.Unique(true)
 	}
-	ctx = setContextOp(ctx, cq.ctx, "IDs")
+	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryIDs)
 	if err = cq.Select(comment.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -249,7 +250,7 @@ func (cq *CommentQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (cq *CommentQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, cq.ctx, "Count")
+	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryCount)
 	if err := cq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -267,7 +268,7 @@ func (cq *CommentQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cq *CommentQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, cq.ctx, "Exist")
+	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryExist)
 	switch _, err := cq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -296,7 +297,7 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 	return &CommentQuery{
 		config:      cq.config,
 		ctx:         cq.ctx.Clone(),
-		order:       append([]OrderFunc{}, cq.order...),
+		order:       append([]comment.OrderOption{}, cq.order...),
 		inters:      append([]Interceptor{}, cq.inters...),
 		predicates:  append([]predicate.Comment{}, cq.predicates...),
 		withRequest: cq.withRequest.Clone(),
@@ -612,7 +613,7 @@ func (cgb *CommentGroupBy) Aggregate(fns ...AggregateFunc) *CommentGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cgb *CommentGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, cgb.build.ctx, ent.OpQueryGroupBy)
 	if err := cgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -660,7 +661,7 @@ func (cs *CommentSelect) Aggregate(fns ...AggregateFunc) *CommentSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (cs *CommentSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cs.ctx, "Select")
+	ctx = setContextOp(ctx, cs.ctx, ent.OpQuerySelect)
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
@@ -28,6 +29,7 @@ type GroupBudget struct {
 	// The values are being populated by the GroupBudgetQuery when eager-loading is set.
 	Edges              GroupBudgetEdges `json:"edges"`
 	group_group_budget *uuid.UUID
+	selectValues       sql.SelectValues
 }
 
 // GroupBudgetEdges holds the relations/edges for other nodes in the graph.
@@ -44,12 +46,10 @@ type GroupBudgetEdges struct {
 // GroupOrErr returns the Group value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e GroupBudgetEdges) GroupOrErr() (*Group, error) {
-	if e.loadedTypes[0] {
-		if e.Group == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: group.Label}
-		}
+	if e.Group != nil {
 		return e.Group, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: group.Label}
 	}
 	return nil, &NotLoadedError{edge: "group"}
 }
@@ -79,7 +79,7 @@ func (*GroupBudget) scanValues(columns []string) ([]any, error) {
 		case groupbudget.ForeignKeys[0]: // group_group_budget
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type GroupBudget", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -125,9 +125,17 @@ func (gb *GroupBudget) assignValues(columns []string, values []any) error {
 				gb.group_group_budget = new(uuid.UUID)
 				*gb.group_group_budget = *value.S.(*uuid.UUID)
 			}
+		default:
+			gb.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the GroupBudget.
+// This includes values selected through modifiers, order, etc.
+func (gb *GroupBudget) Value(name string) (ent.Value, error) {
+	return gb.selectValues.Get(name)
 }
 
 // QueryGroup queries the "group" edge of the GroupBudget entity.

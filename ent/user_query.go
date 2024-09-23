@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -26,7 +27,7 @@ import (
 type UserQuery struct {
 	config
 	ctx               *QueryContext
-	order             []OrderFunc
+	order             []user.OrderOption
 	inters            []Interceptor
 	predicates        []predicate.User
 	withGroupUser     *GroupQuery
@@ -67,7 +68,7 @@ func (uq *UserQuery) Unique(unique bool) *UserQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
+func (uq *UserQuery) Order(o ...user.OrderOption) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
 }
@@ -229,7 +230,7 @@ func (uq *UserQuery) QueryRequestTarget() *RequestTargetQuery {
 // First returns the first User entity from the query.
 // Returns a *NotFoundError when no User was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
-	nodes, err := uq.Limit(1).All(setContextOp(ctx, uq.ctx, "First"))
+	nodes, err := uq.Limit(1).All(setContextOp(ctx, uq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +253,7 @@ func (uq *UserQuery) FirstX(ctx context.Context) *User {
 // Returns a *NotFoundError when no User ID was found.
 func (uq *UserQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = uq.Limit(1).IDs(setContextOp(ctx, uq.ctx, "FirstID")); err != nil {
+	if ids, err = uq.Limit(1).IDs(setContextOp(ctx, uq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -275,7 +276,7 @@ func (uq *UserQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one User entity is found.
 // Returns a *NotFoundError when no User entities are found.
 func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
-	nodes, err := uq.Limit(2).All(setContextOp(ctx, uq.ctx, "Only"))
+	nodes, err := uq.Limit(2).All(setContextOp(ctx, uq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +304,7 @@ func (uq *UserQuery) OnlyX(ctx context.Context) *User {
 // Returns a *NotFoundError when no entities are found.
 func (uq *UserQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = uq.Limit(2).IDs(setContextOp(ctx, uq.ctx, "OnlyID")); err != nil {
+	if ids, err = uq.Limit(2).IDs(setContextOp(ctx, uq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -328,7 +329,7 @@ func (uq *UserQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Users.
 func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
-	ctx = setContextOp(ctx, uq.ctx, "All")
+	ctx = setContextOp(ctx, uq.ctx, ent.OpQueryAll)
 	if err := uq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -350,7 +351,7 @@ func (uq *UserQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if uq.ctx.Unique == nil && uq.path != nil {
 		uq.Unique(true)
 	}
-	ctx = setContextOp(ctx, uq.ctx, "IDs")
+	ctx = setContextOp(ctx, uq.ctx, ent.OpQueryIDs)
 	if err = uq.Select(user.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -368,7 +369,7 @@ func (uq *UserQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (uq *UserQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, uq.ctx, "Count")
+	ctx = setContextOp(ctx, uq.ctx, ent.OpQueryCount)
 	if err := uq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -386,7 +387,7 @@ func (uq *UserQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, uq.ctx, "Exist")
+	ctx = setContextOp(ctx, uq.ctx, ent.OpQueryExist)
 	switch _, err := uq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -415,7 +416,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 	return &UserQuery{
 		config:            uq.config,
 		ctx:               uq.ctx.Clone(),
-		order:             append([]OrderFunc{}, uq.order...),
+		order:             append([]user.OrderOption{}, uq.order...),
 		inters:            append([]Interceptor{}, uq.inters...),
 		predicates:        append([]predicate.User{}, uq.predicates...),
 		withGroupUser:     uq.withGroupUser.Clone(),
@@ -800,7 +801,7 @@ func (uq *UserQuery) loadComment(ctx context.Context, query *CommentQuery, nodes
 	}
 	query.withFKs = true
 	query.Where(predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.CommentColumn, fks...))
+		s.Where(sql.InValues(s.C(user.CommentColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -813,7 +814,7 @@ func (uq *UserQuery) loadComment(ctx context.Context, query *CommentQuery, nodes
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "comment_user" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "comment_user" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -831,7 +832,7 @@ func (uq *UserQuery) loadRequestStatus(ctx context.Context, query *RequestStatus
 	}
 	query.withFKs = true
 	query.Where(predicate.RequestStatus(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.RequestStatusColumn, fks...))
+		s.Where(sql.InValues(s.C(user.RequestStatusColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -844,7 +845,7 @@ func (uq *UserQuery) loadRequestStatus(ctx context.Context, query *RequestStatus
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "request_status_user" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "request_status_user" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -862,7 +863,7 @@ func (uq *UserQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes
 	}
 	query.withFKs = true
 	query.Where(predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.RequestColumn, fks...))
+		s.Where(sql.InValues(s.C(user.RequestColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -875,7 +876,7 @@ func (uq *UserQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "request_user" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "request_user" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -893,7 +894,7 @@ func (uq *UserQuery) loadFile(ctx context.Context, query *FileQuery, nodes []*Us
 	}
 	query.withFKs = true
 	query.Where(predicate.File(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.FileColumn, fks...))
+		s.Where(sql.InValues(s.C(user.FileColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -906,7 +907,7 @@ func (uq *UserQuery) loadFile(ctx context.Context, query *FileQuery, nodes []*Us
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "file_user" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "file_user" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -924,7 +925,7 @@ func (uq *UserQuery) loadRequestTarget(ctx context.Context, query *RequestTarget
 	}
 	query.withFKs = true
 	query.Where(predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.InValues(user.RequestTargetColumn, fks...))
+		s.Where(sql.InValues(s.C(user.RequestTargetColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -937,7 +938,7 @@ func (uq *UserQuery) loadRequestTarget(ctx context.Context, query *RequestTarget
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "request_target_user" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "request_target_user" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1039,7 +1040,7 @@ func (ugb *UserGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ugb *UserGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ugb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, ugb.build.ctx, ent.OpQueryGroupBy)
 	if err := ugb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -1087,7 +1088,7 @@ func (us *UserSelect) Aggregate(fns ...AggregateFunc) *UserSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (us *UserSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, us.ctx, "Select")
+	ctx = setContextOp(ctx, us.ctx, ent.OpQuerySelect)
 	if err := us.prepareQuery(ctx); err != nil {
 		return err
 	}

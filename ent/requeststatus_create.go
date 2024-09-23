@@ -95,7 +95,7 @@ func (rsc *RequestStatusCreate) Mutation() *RequestStatusMutation {
 // Save creates the RequestStatus in the database.
 func (rsc *RequestStatusCreate) Save(ctx context.Context) (*RequestStatus, error) {
 	rsc.defaults()
-	return withHooks[*RequestStatus, RequestStatusMutation](ctx, rsc.sqlSave, rsc.mutation, rsc.hooks)
+	return withHooks(ctx, rsc.sqlSave, rsc.mutation, rsc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -149,10 +149,10 @@ func (rsc *RequestStatusCreate) check() error {
 	if _, ok := rsc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "RequestStatus.created_at"`)}
 	}
-	if _, ok := rsc.mutation.RequestID(); !ok {
+	if len(rsc.mutation.RequestIDs()) == 0 {
 		return &ValidationError{Name: "request", err: errors.New(`ent: missing required edge "RequestStatus.request"`)}
 	}
-	if _, ok := rsc.mutation.UserID(); !ok {
+	if len(rsc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "RequestStatus.user"`)}
 	}
 	return nil
@@ -206,10 +206,7 @@ func (rsc *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSp
 			Columns: []string{requeststatus.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -226,10 +223,7 @@ func (rsc *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSp
 			Columns: []string{requeststatus.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -244,11 +238,15 @@ func (rsc *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSp
 // RequestStatusCreateBulk is the builder for creating many RequestStatus entities in bulk.
 type RequestStatusCreateBulk struct {
 	config
+	err      error
 	builders []*RequestStatusCreate
 }
 
 // Save creates the RequestStatus entities in the database.
 func (rscb *RequestStatusCreateBulk) Save(ctx context.Context) ([]*RequestStatus, error) {
+	if rscb.err != nil {
+		return nil, rscb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(rscb.builders))
 	nodes := make([]*RequestStatus, len(rscb.builders))
 	mutators := make([]Mutator, len(rscb.builders))
@@ -265,8 +263,8 @@ func (rscb *RequestStatusCreateBulk) Save(ctx context.Context) ([]*RequestStatus
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, rscb.builders[i+1].mutation)
 				} else {

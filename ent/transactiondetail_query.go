@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -20,7 +21,7 @@ import (
 type TransactionDetailQuery struct {
 	config
 	ctx             *QueryContext
-	order           []OrderFunc
+	order           []transactiondetail.OrderOption
 	inters          []Interceptor
 	predicates      []predicate.TransactionDetail
 	withTransaction *TransactionQuery
@@ -56,7 +57,7 @@ func (tdq *TransactionDetailQuery) Unique(unique bool) *TransactionDetailQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (tdq *TransactionDetailQuery) Order(o ...OrderFunc) *TransactionDetailQuery {
+func (tdq *TransactionDetailQuery) Order(o ...transactiondetail.OrderOption) *TransactionDetailQuery {
 	tdq.order = append(tdq.order, o...)
 	return tdq
 }
@@ -86,7 +87,7 @@ func (tdq *TransactionDetailQuery) QueryTransaction() *TransactionQuery {
 // First returns the first TransactionDetail entity from the query.
 // Returns a *NotFoundError when no TransactionDetail was found.
 func (tdq *TransactionDetailQuery) First(ctx context.Context) (*TransactionDetail, error) {
-	nodes, err := tdq.Limit(1).All(setContextOp(ctx, tdq.ctx, "First"))
+	nodes, err := tdq.Limit(1).All(setContextOp(ctx, tdq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +110,7 @@ func (tdq *TransactionDetailQuery) FirstX(ctx context.Context) *TransactionDetai
 // Returns a *NotFoundError when no TransactionDetail ID was found.
 func (tdq *TransactionDetailQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = tdq.Limit(1).IDs(setContextOp(ctx, tdq.ctx, "FirstID")); err != nil {
+	if ids, err = tdq.Limit(1).IDs(setContextOp(ctx, tdq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -132,7 +133,7 @@ func (tdq *TransactionDetailQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one TransactionDetail entity is found.
 // Returns a *NotFoundError when no TransactionDetail entities are found.
 func (tdq *TransactionDetailQuery) Only(ctx context.Context) (*TransactionDetail, error) {
-	nodes, err := tdq.Limit(2).All(setContextOp(ctx, tdq.ctx, "Only"))
+	nodes, err := tdq.Limit(2).All(setContextOp(ctx, tdq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +161,7 @@ func (tdq *TransactionDetailQuery) OnlyX(ctx context.Context) *TransactionDetail
 // Returns a *NotFoundError when no entities are found.
 func (tdq *TransactionDetailQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = tdq.Limit(2).IDs(setContextOp(ctx, tdq.ctx, "OnlyID")); err != nil {
+	if ids, err = tdq.Limit(2).IDs(setContextOp(ctx, tdq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -185,7 +186,7 @@ func (tdq *TransactionDetailQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of TransactionDetails.
 func (tdq *TransactionDetailQuery) All(ctx context.Context) ([]*TransactionDetail, error) {
-	ctx = setContextOp(ctx, tdq.ctx, "All")
+	ctx = setContextOp(ctx, tdq.ctx, ent.OpQueryAll)
 	if err := tdq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -207,7 +208,7 @@ func (tdq *TransactionDetailQuery) IDs(ctx context.Context) (ids []uuid.UUID, er
 	if tdq.ctx.Unique == nil && tdq.path != nil {
 		tdq.Unique(true)
 	}
-	ctx = setContextOp(ctx, tdq.ctx, "IDs")
+	ctx = setContextOp(ctx, tdq.ctx, ent.OpQueryIDs)
 	if err = tdq.Select(transactiondetail.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -225,7 +226,7 @@ func (tdq *TransactionDetailQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (tdq *TransactionDetailQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, tdq.ctx, "Count")
+	ctx = setContextOp(ctx, tdq.ctx, ent.OpQueryCount)
 	if err := tdq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -243,7 +244,7 @@ func (tdq *TransactionDetailQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (tdq *TransactionDetailQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, tdq.ctx, "Exist")
+	ctx = setContextOp(ctx, tdq.ctx, ent.OpQueryExist)
 	switch _, err := tdq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -272,7 +273,7 @@ func (tdq *TransactionDetailQuery) Clone() *TransactionDetailQuery {
 	return &TransactionDetailQuery{
 		config:          tdq.config,
 		ctx:             tdq.ctx.Clone(),
-		order:           append([]OrderFunc{}, tdq.order...),
+		order:           append([]transactiondetail.OrderOption{}, tdq.order...),
 		inters:          append([]Interceptor{}, tdq.inters...),
 		predicates:      append([]predicate.TransactionDetail{}, tdq.predicates...),
 		withTransaction: tdq.withTransaction.Clone(),
@@ -537,7 +538,7 @@ func (tdgb *TransactionDetailGroupBy) Aggregate(fns ...AggregateFunc) *Transacti
 
 // Scan applies the selector query and scans the result into the given value.
 func (tdgb *TransactionDetailGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, tdgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, tdgb.build.ctx, ent.OpQueryGroupBy)
 	if err := tdgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -585,7 +586,7 @@ func (tds *TransactionDetailSelect) Aggregate(fns ...AggregateFunc) *Transaction
 
 // Scan applies the selector query and scans the result into the given value.
 func (tds *TransactionDetailSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, tds.ctx, "Select")
+	ctx = setContextOp(ctx, tds.ctx, ent.OpQuerySelect)
 	if err := tds.prepareQuery(ctx); err != nil {
 		return err
 	}

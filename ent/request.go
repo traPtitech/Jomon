@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/group"
@@ -32,6 +33,7 @@ type Request struct {
 	Edges         RequestEdges `json:"edges"`
 	group_request *uuid.UUID
 	request_user  *uuid.UUID
+	selectValues  sql.SelectValues
 }
 
 // RequestEdges holds the relations/edges for other nodes in the graph.
@@ -114,12 +116,10 @@ func (e RequestEdges) CommentOrErr() ([]*Comment, error) {
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e RequestEdges) UserOrErr() (*User, error) {
-	if e.loadedTypes[6] {
-		if e.User == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: user.Label}
-		}
+	if e.User != nil {
 		return e.User, nil
+	} else if e.loadedTypes[6] {
+		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
 }
@@ -127,12 +127,10 @@ func (e RequestEdges) UserOrErr() (*User, error) {
 // GroupOrErr returns the Group value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e RequestEdges) GroupOrErr() (*Group, error) {
-	if e.loadedTypes[7] {
-		if e.Group == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: group.Label}
-		}
+	if e.Group != nil {
 		return e.Group, nil
+	} else if e.loadedTypes[7] {
+		return nil, &NotFoundError{label: group.Label}
 	}
 	return nil, &NotLoadedError{edge: "group"}
 }
@@ -153,7 +151,7 @@ func (*Request) scanValues(columns []string) ([]any, error) {
 		case request.ForeignKeys[1]: // request_user
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Request", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -211,9 +209,17 @@ func (r *Request) assignValues(columns []string, values []any) error {
 				r.request_user = new(uuid.UUID)
 				*r.request_user = *value.S.(*uuid.UUID)
 			}
+		default:
+			r.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Request.
+// This includes values selected through modifiers, order, etc.
+func (r *Request) Value(name string) (ent.Value, error) {
+	return r.selectValues.Get(name)
 }
 
 // QueryStatus queries the "status" edge of the Request entity.
