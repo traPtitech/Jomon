@@ -715,13 +715,12 @@ func (h Handlers) PutStatus(c echo.Context) error {
 				h.Logger.Error("failed to get request targets from repository", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
-			var paid bool
-			for _, target := range targets {
+			paid := lo.Reduce(targets, func(p bool, target *model.RequestTargetDetail, _ int) bool {
 				if target.PaidAt != nil {
-					paid = true
-					break
+					return true
 				}
-			}
+				return p
+			}, false)
 			if paid {
 				h.Logger.Info("someone already paid")
 				return echo.NewHTTPError(http.StatusBadRequest, errors.New("someone already paid"))

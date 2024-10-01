@@ -299,10 +299,9 @@ func (h Handlers) PostOwner(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := make([]uuid.UUID, len(added))
-	for i, owner := range added {
-		res[i] = owner.ID
-	}
+	res := lo.Map(added, func(owner *model.Owner, index int) uuid.UUID {
+		return owner.ID
+	})
 
 	return c.JSON(http.StatusOK, res)
 }
