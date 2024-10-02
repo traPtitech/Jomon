@@ -771,8 +771,6 @@ func TestHandlers_PostTransaction(t *testing.T) {
 				tags, &group, &request.ID).
 			Return(tx, nil)
 
-		var resOverview Transaction
-		res := []*Transaction{}
 		to := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        modelTag.ID,
@@ -790,16 +788,17 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			CreatedAt:   tx.Group.CreatedAt,
 			UpdatedAt:   tx.Group.UpdatedAt,
 		}
-		resOverview = Transaction{
-			ID:        tx.ID,
-			Amount:    tx.Amount,
-			Target:    tx.Target,
-			Tags:      to,
-			Group:     grov,
-			CreatedAt: tx.CreatedAt,
-			UpdatedAt: tx.UpdatedAt,
+		res := []*Transaction{
+			{
+				ID:        tx.ID,
+				Amount:    tx.Amount,
+				Target:    tx.Target,
+				Tags:      to,
+				Group:     grov,
+				CreatedAt: tx.CreatedAt,
+				UpdatedAt: tx.UpdatedAt,
+			},
 		}
-		res = append(res, &resOverview)
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
