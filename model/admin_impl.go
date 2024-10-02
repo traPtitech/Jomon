@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
+	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -16,12 +18,11 @@ func (repo *EntRepository) GetAdmins(ctx context.Context) ([]*Admin, error) {
 		return nil, err
 	}
 
-	admins := []*Admin{}
-	for _, u := range users {
-		admins = append(admins, &Admin{
+	admins := lo.Map(users, func(u *ent.User, _ int) *Admin {
+		return &Admin{
 			ID: u.ID,
-		})
-	}
+		}
+	})
 
 	return admins, nil
 }

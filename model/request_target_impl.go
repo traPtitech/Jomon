@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
@@ -25,35 +26,30 @@ func (repo *EntRepository) GetRequestTargets(
 	if err != nil {
 		return nil, err
 	}
-	var targets []*RequestTargetDetail
-	for _, t := range ts {
-		targets = append(targets, ConvertEntRequestTargetToModelRequestTargetDetail(t))
-	}
+	targets := lo.Map(ts, func(t *ent.RequestTarget, _ int) *RequestTargetDetail {
+		return ConvertEntRequestTargetToModelRequestTargetDetail(t)
+	})
 	return targets, err
 }
 
 func (repo *EntRepository) createRequestTargets(
 	ctx context.Context, tx *ent.Tx, requestID uuid.UUID, targets []*RequestTarget,
 ) ([]*RequestTargetDetail, error) {
-	var bulk []*ent.RequestTargetCreate
-	for _, t := range targets {
-		bulk = append(bulk,
-			tx.Client().RequestTarget.
-				Create().
-				SetAmount(t.Amount).
-				SetRequestID(requestID).
-				SetUserID(t.Target),
-		)
-	}
+	bulk := lo.Map(targets, func(t *RequestTarget, _ int) *ent.RequestTargetCreate {
+		return tx.Client().RequestTarget.
+			Create().
+			SetAmount(t.Amount).
+			SetRequestID(requestID).
+			SetUserID(t.Target)
+	})
 	cs, err := tx.Client().RequestTarget.CreateBulk(bulk...).
 		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
-	ids := []uuid.UUID{}
-	for _, c := range cs {
-		ids = append(ids, c.ID)
-	}
+	ids := lo.Map(cs, func(c *ent.RequestTarget, _ int) uuid.UUID {
+		return c.ID
+	})
 	created, err := tx.Client().RequestTarget.
 		Query().
 		Where(
@@ -65,10 +61,9 @@ func (repo *EntRepository) createRequestTargets(
 		return nil, err
 	}
 	// []*ent.RequestTarget to []*RequestTargetDetail
-	var ts []*RequestTargetDetail
-	for _, t := range created {
-		ts = append(ts, ConvertEntRequestTargetToModelRequestTargetDetail(t))
-	}
+	ts := lo.Map(created, func(t *ent.RequestTarget, _ int) *RequestTargetDetail {
+		return ConvertEntRequestTargetToModelRequestTargetDetail(t)
+	})
 	return ts, nil
 }
 

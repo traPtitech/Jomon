@@ -5,6 +5,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
@@ -116,10 +117,9 @@ func (repo *EntRepository) GetTransactions(
 	}
 
 	// Converting
-	var res []*TransactionResponse
-	for _, tx := range txs {
-		res = append(res, ConvertEntTransactionToModelTransactionResponse(tx))
-	}
+	res := lo.Map(txs, func(tx *ent.Transaction, _ int) *TransactionResponse {
+		return ConvertEntTransactionToModelTransactionResponse(tx)
+	})
 
 	return res, nil
 }
@@ -162,10 +162,9 @@ func (repo *EntRepository) CreateTransaction(
 	}()
 
 	// Get Tags
-	var tagIDs []uuid.UUID
-	for _, t := range tags {
-		tagIDs = append(tagIDs, *t)
-	}
+	tagIDs := lo.Map(tags, func(t *uuid.UUID, _ int) uuid.UUID {
+		return *t
+	})
 
 	// Create Transaction Detail
 	detail, err := repo.createTransactionDetail(ctx, tx, amount, target)
@@ -271,10 +270,9 @@ func (repo *EntRepository) UpdateTransaction(
 	}
 
 	// Get Tags
-	var tagIDs []uuid.UUID
-	for _, t := range tags {
-		tagIDs = append(tagIDs, *t)
-	}
+	tagIDs := lo.Map(tags, func(t *uuid.UUID, _ int) uuid.UUID {
+		return *t
+	})
 
 	// Delete Tag Transaction Edge
 	_, err = tx.Client().Tag.
@@ -381,10 +379,9 @@ func ConvertEntTransactionToModelTransaction(transaction *ent.Transaction) *Tran
 func ConvertEntTransactionToModelTransactionResponse(
 	transaction *ent.Transaction,
 ) *TransactionResponse {
-	var tags []*Tag
-	for _, t := range transaction.Edges.Tag {
-		tags = append(tags, ConvertEntTagToModelTag(t))
-	}
+	tags := lo.Map(transaction.Edges.Tag, func(t *ent.Tag, _ int) *Tag {
+		return ConvertEntTagToModelTag(t)
+	})
 	var g *Group
 	if transaction.Edges.GroupBudget != nil {
 		g = ConvertEntGroupToModelGroup(transaction.Edges.GroupBudget.Edges.Group)

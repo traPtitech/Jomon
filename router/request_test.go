@@ -507,6 +507,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 			},
 			Title:   request.Title,
 			Content: request.Content,
+			Tags:    []*TagOverview{},
+			Targets: []*TargetOverview{},
 		}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
@@ -603,6 +605,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 				CreatedAt: tag.CreatedAt,
 				UpdatedAt: tag.UpdatedAt,
 			}},
+			Targets: []*TargetOverview{},
 		}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
@@ -686,6 +689,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
 			Content:   request.Content,
+			Tags:      []*TagOverview{},
+			Targets:   []*TargetOverview{},
 			Statuses: []*StatusResponseOverview{
 				{
 					CreatedBy: request.Statuses[0].CreatedBy,
@@ -803,6 +808,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			},
 			Title:   request.Title,
 			Content: request.Content,
+			Tags:    []*TagOverview{},
 			Targets: []*TargetOverview{tgov},
 		}
 		resBody, err := json.Marshal(res)
@@ -1431,7 +1437,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 					CreatedBy: updateRequest.Statuses[0].CreatedBy,
 				},
 			},
-			Content: updateRequest.Content,
+			Content:  updateRequest.Content,
+			Tags:     []*TagOverview{},
+			Targets:  []*TargetOverview{},
+			Comments: []*CommentDetail{},
 		}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
@@ -1568,6 +1577,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 					UpdatedAt: tag2.UpdatedAt,
 				},
 			},
+			Targets:  []*TargetOverview{},
+			Comments: []*CommentDetail{},
 		}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
@@ -1717,6 +1728,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 					CreatedAt: target2.CreatedAt,
 				},
 			},
+			Tags:     []*TagOverview{},
+			Comments: []*CommentDetail{},
 		}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
@@ -1839,6 +1852,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 				CreatedAt:   group.CreatedAt,
 				UpdatedAt:   group.UpdatedAt,
 			},
+			Tags:     []*TagOverview{},
+			Targets:  []*TargetOverview{},
+			Comments: []*CommentDetail{},
 		}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
@@ -1971,6 +1987,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Title:    updateRequest.Title,
 			Content:  updateRequest.Content,
 			Comments: resComments,
+			Tags:     []*TagOverview{},
+			Targets:  []*TargetOverview{},
 		}
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)

@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
@@ -182,56 +183,58 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	tags := []*TagOverview{}
-	requests := []*RequestResponse{}
-	for _, request := range modelrequests {
-		for _, tag := range request.Tags {
-			tags = append(tags, &TagOverview{
-				ID:        tag.ID,
-				Name:      tag.Name,
-				CreatedAt: tag.CreatedAt,
-				UpdatedAt: tag.UpdatedAt,
+	requests := lo.Map(
+		modelrequests,
+		func(request *model.RequestResponse, _ int) *RequestResponse {
+			tags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagOverview {
+				return &TagOverview{
+					ID:        tag.ID,
+					Name:      tag.Name,
+					CreatedAt: tag.CreatedAt,
+					UpdatedAt: tag.UpdatedAt,
+				}
 			})
-		}
 
-		restargets := []*TargetOverview{}
-		for _, target := range request.Targets {
-			restargets = append(restargets, &TargetOverview{
-				ID:        target.ID,
-				Target:    target.Target,
-				Amount:    target.Amount,
-				PaidAt:    target.PaidAt,
-				CreatedAt: target.CreatedAt,
-			})
-		}
+			restargets := lo.Map(
+				request.Targets,
+				func(target *model.RequestTargetDetail, _ int) *TargetOverview {
+					return &TargetOverview{
+						ID:        target.ID,
+						Target:    target.Target,
+						Amount:    target.Amount,
+						PaidAt:    target.PaidAt,
+						CreatedAt: target.CreatedAt,
+					}
+				},
+			)
 
-		var resgroup *GroupOverview
-		if request.Group != nil {
-			resgroup = &GroupOverview{
-				ID:          request.Group.ID,
-				Name:        request.Group.Name,
-				Description: request.Group.Description,
-				Budget:      request.Group.Budget,
-				CreatedAt:   request.Group.CreatedAt,
-				UpdatedAt:   request.Group.UpdatedAt,
+			var resgroup *GroupOverview
+			if request.Group != nil {
+				resgroup = &GroupOverview{
+					ID:          request.Group.ID,
+					Name:        request.Group.Name,
+					Description: request.Group.Description,
+					Budget:      request.Group.Budget,
+					CreatedAt:   request.Group.CreatedAt,
+					UpdatedAt:   request.Group.UpdatedAt,
+				}
 			}
-		}
 
-		res := &RequestResponse{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedAt: request.CreatedAt,
-			UpdatedAt: request.UpdatedAt,
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
-			Targets:   restargets,
-			Tags:      tags,
-			Group:     resgroup,
-			Comments:  []*CommentDetail{},
-		}
-		requests = append(requests, res)
-	}
+			return &RequestResponse{
+				ID:        request.ID,
+				Status:    request.Status,
+				CreatedAt: request.CreatedAt,
+				UpdatedAt: request.UpdatedAt,
+				CreatedBy: request.CreatedBy,
+				Title:     request.Title,
+				Content:   request.Content,
+				Targets:   restargets,
+				Tags:      tags,
+				Group:     resgroup,
+				Comments:  []*CommentDetail{},
+			}
+		},
+	)
 
 	return c.JSON(http.StatusOK, requests)
 }
@@ -256,13 +259,12 @@ func (h Handlers) PostRequest(c echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
-	targets := []*model.RequestTarget{}
-	for _, target := range req.Targets {
-		targets = append(targets, &model.RequestTarget{
+	targets := lo.Map(req.Targets, func(target *Target, _ int) *model.RequestTarget {
+		return &model.RequestTarget{
 			Target: target.Target,
 			Amount: target.Amount,
-		})
-	}
+		}
+	})
 	var group *model.Group
 	if req.Group != nil {
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
@@ -301,33 +303,36 @@ func (h Handlers) PostRequest(c echo.Context) error {
 			UpdatedAt:   request.Group.UpdatedAt,
 		}
 	}
-	var reqtargets []*TargetOverview
-	for _, target := range request.Targets {
-		reqtargets = append(reqtargets, &TargetOverview{
-			ID:        target.ID,
-			Target:    target.Target,
-			Amount:    target.Amount,
-			PaidAt:    target.PaidAt,
-			CreatedAt: target.CreatedAt,
-		})
-	}
-	var restags []*TagOverview
-	for _, tag := range request.Tags {
-		restags = append(restags, &TagOverview{
+	reqtargets := lo.Map(
+		request.Targets,
+		func(target *model.RequestTargetDetail, _ int) *TargetOverview {
+			return &TargetOverview{
+				ID:        target.ID,
+				Target:    target.Target,
+				Amount:    target.Amount,
+				PaidAt:    target.PaidAt,
+				CreatedAt: target.CreatedAt,
+			}
+		},
+	)
+	restags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagOverview {
+		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
 			UpdatedAt: tag.UpdatedAt,
-		})
-	}
-	var statuses []*StatusResponseOverview
-	for _, status := range request.Statuses {
-		statuses = append(statuses, &StatusResponseOverview{
-			Status:    status.Status,
-			CreatedAt: status.CreatedAt,
-			CreatedBy: status.CreatedBy,
-		})
-	}
+		}
+	})
+	statuses := lo.Map(
+		request.Statuses,
+		func(status *model.RequestStatus, _ int) *StatusResponseOverview {
+			return &StatusResponseOverview{
+				Status:    status.Status,
+				CreatedAt: status.CreatedAt,
+				CreatedBy: status.CreatedBy,
+			}
+		},
+	)
 
 	res := &RequestResponse{
 		ID:        request.ID,
@@ -374,17 +379,15 @@ func (h Handlers) GetRequest(c echo.Context) error {
 		h.Logger.Error("failed to get comments from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	comments := []*CommentDetail{}
-	for _, modelcomment := range modelcomments {
-		comment := &CommentDetail{
+	comments := lo.Map(modelcomments, func(modelcomment *model.Comment, _ int) *CommentDetail {
+		return &CommentDetail{
 			ID:        modelcomment.ID,
 			User:      modelcomment.User,
 			Comment:   modelcomment.Comment,
 			CreatedAt: modelcomment.CreatedAt,
 			UpdatedAt: modelcomment.UpdatedAt,
 		}
-		comments = append(comments, comment)
-	}
+	})
 	var resgroup *GroupOverview
 	if request.Group != nil {
 		resgroup = &GroupOverview{
@@ -396,33 +399,38 @@ func (h Handlers) GetRequest(c echo.Context) error {
 			UpdatedAt:   request.Group.UpdatedAt,
 		}
 	}
-	reqtargets := []*TargetOverview{}
-	for _, target := range request.Targets {
-		reqtargets = append(reqtargets, &TargetOverview{
-			ID:        target.ID,
-			Target:    target.Target,
-			Amount:    target.Amount,
-			PaidAt:    target.PaidAt,
-			CreatedAt: target.CreatedAt,
-		})
-	}
-	restags := []*TagOverview{}
-	for _, tag := range request.Tags {
-		restags = append(restags, &TagOverview{
+	reqtargets := lo.Map(
+		request.Targets,
+		func(target *model.RequestTargetDetail, _ int) *TargetOverview {
+			return &TargetOverview{
+				ID:        target.ID,
+				Target:    target.Target,
+				Amount:    target.Amount,
+				PaidAt:    target.PaidAt,
+				CreatedAt: target.CreatedAt,
+			}
+		},
+	)
+	restags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagOverview {
+		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
 			UpdatedAt: tag.UpdatedAt,
-		})
-	}
-	var resstatuses []*StatusResponseOverview
-	for _, status := range request.Statuses {
-		resstatuses = append(resstatuses, &StatusResponseOverview{
-			CreatedBy: status.CreatedBy,
-			Status:    status.Status,
-			CreatedAt: status.CreatedAt,
-		})
-	}
+		}
+	})
+
+	resstatuses := lo.Map(
+		request.Statuses,
+		func(status *model.RequestStatus, _ int) *StatusResponseOverview {
+			return &StatusResponseOverview{
+				CreatedBy: status.CreatedBy,
+				Status:    status.Status,
+				CreatedAt: status.CreatedAt,
+			}
+		},
+	)
+
 	res := &RequestResponse{
 		ID:        request.ID,
 		Status:    request.Status,
@@ -471,13 +479,12 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
-	targets := []*model.RequestTarget{}
-	for _, target := range req.Targets {
-		targets = append(targets, &model.RequestTarget{
+	targets := lo.Map(req.Targets, func(target *Target, _ int) *model.RequestTarget {
+		return &model.RequestTarget{
 			Target: target.Target,
 			Amount: target.Amount,
-		})
-	}
+		}
+	})
 	var group *model.Group
 	if req.Group != nil {
 		group, err = h.Repository.GetGroup(ctx, *req.Group)
@@ -510,17 +517,15 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		h.Logger.Error("failed to get comments from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	var comments []*CommentDetail
-	for _, modelcomment := range modelcomments {
-		comment := &CommentDetail{
+	comments := lo.Map(modelcomments, func(modelcomment *model.Comment, _ int) *CommentDetail {
+		return &CommentDetail{
 			ID:        modelcomment.ID,
 			User:      modelcomment.User,
 			Comment:   modelcomment.Comment,
 			CreatedAt: modelcomment.CreatedAt,
 			UpdatedAt: modelcomment.UpdatedAt,
 		}
-		comments = append(comments, comment)
-	}
+	})
 
 	var resgroup *GroupOverview
 	if group != nil {
@@ -533,33 +538,39 @@ func (h Handlers) PutRequest(c echo.Context) error {
 			UpdatedAt:   request.Group.UpdatedAt,
 		}
 	}
-	var restags []*TagOverview
-	for _, tag := range request.Tags {
-		restags = append(restags, &TagOverview{
+	restags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagOverview {
+		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
 			UpdatedAt: tag.UpdatedAt,
-		})
-	}
-	var restargets []*TargetOverview
-	for _, target := range request.Targets {
-		restargets = append(restargets, &TargetOverview{
-			ID:        target.ID,
-			Target:    target.Target,
-			Amount:    target.Amount,
-			PaidAt:    target.PaidAt,
-			CreatedAt: target.CreatedAt,
-		})
-	}
-	var resstatuses []*StatusResponseOverview
-	for _, status := range request.Statuses {
-		resstatuses = append(resstatuses, &StatusResponseOverview{
-			CreatedBy: status.CreatedBy,
-			Status:    status.Status,
-			CreatedAt: status.CreatedAt,
-		})
-	}
+		}
+	})
+
+	restargets := lo.Map(
+		request.Targets,
+		func(target *model.RequestTargetDetail, _ int) *TargetOverview {
+			return &TargetOverview{
+				ID:        target.ID,
+				Target:    target.Target,
+				Amount:    target.Amount,
+				PaidAt:    target.PaidAt,
+				CreatedAt: target.CreatedAt,
+			}
+		},
+	)
+
+	resstatuses := lo.Map(
+		request.Statuses,
+		func(status *model.RequestStatus, _ int) *StatusResponseOverview {
+			return &StatusResponseOverview{
+				CreatedBy: status.CreatedBy,
+				Status:    status.Status,
+				CreatedAt: status.CreatedAt,
+			}
+		},
+	)
+
 	res := &RequestResponse{
 		ID:        request.ID,
 		Status:    request.Status,
@@ -704,13 +715,9 @@ func (h Handlers) PutStatus(c echo.Context) error {
 				h.Logger.Error("failed to get request targets from repository", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
-			var paid bool
-			for _, target := range targets {
-				if target.PaidAt != nil {
-					paid = true
-					break
-				}
-			}
+			paid := lo.Reduce(targets, func(p bool, target *model.RequestTargetDetail, _ int) bool {
+				return p || target.PaidAt != nil
+			}, false)
 			if paid {
 				h.Logger.Info("someone already paid")
 				return echo.NewHTTPError(http.StatusBadRequest, errors.New("someone already paid"))
