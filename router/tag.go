@@ -32,7 +32,7 @@ func (h Handlers) GetTags(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := lo.Map(tags, func(tag *model.Tag, index int) *TagOverview {
+	res := lo.Map(tags, func(tag *model.Tag, _ int) *TagOverview {
 		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,

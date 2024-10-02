@@ -185,8 +185,8 @@ func (h Handlers) GetRequests(c echo.Context) error {
 
 	requests := lo.Map(
 		modelrequests,
-		func(request *model.RequestResponse, index int) *RequestResponse {
-			tags := lo.Map(request.Tags, func(tag *model.Tag, index int) *TagOverview {
+		func(request *model.RequestResponse, _ int) *RequestResponse {
+			tags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagOverview {
 				return &TagOverview{
 					ID:        tag.ID,
 					Name:      tag.Name,
@@ -197,7 +197,7 @@ func (h Handlers) GetRequests(c echo.Context) error {
 
 			restargets := lo.Map(
 				request.Targets,
-				func(target *model.RequestTargetDetail, index int) *TargetOverview {
+				func(target *model.RequestTargetDetail, _ int) *TargetOverview {
 					return &TargetOverview{
 						ID:        target.ID,
 						Target:    target.Target,
@@ -259,7 +259,7 @@ func (h Handlers) PostRequest(c echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
-	targets := lo.Map(req.Targets, func(target *Target, index int) *model.RequestTarget {
+	targets := lo.Map(req.Targets, func(target *Target, _ int) *model.RequestTarget {
 		return &model.RequestTarget{
 			Target: target.Target,
 			Amount: target.Amount,
@@ -305,7 +305,7 @@ func (h Handlers) PostRequest(c echo.Context) error {
 	}
 	reqtargets := lo.Map(
 		request.Targets,
-		func(target *model.RequestTargetDetail, index int) *TargetOverview {
+		func(target *model.RequestTargetDetail, _ int) *TargetOverview {
 			return &TargetOverview{
 				ID:        target.ID,
 				Target:    target.Target,
@@ -315,7 +315,7 @@ func (h Handlers) PostRequest(c echo.Context) error {
 			}
 		},
 	)
-	restags := lo.Map(request.Tags, func(tag *model.Tag, index int) *TagOverview {
+	restags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagOverview {
 		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,
@@ -325,7 +325,7 @@ func (h Handlers) PostRequest(c echo.Context) error {
 	})
 	statuses := lo.Map(
 		request.Statuses,
-		func(status *model.RequestStatus, index int) *StatusResponseOverview {
+		func(status *model.RequestStatus, _ int) *StatusResponseOverview {
 			return &StatusResponseOverview{
 				Status:    status.Status,
 				CreatedAt: status.CreatedAt,
@@ -379,7 +379,7 @@ func (h Handlers) GetRequest(c echo.Context) error {
 		h.Logger.Error("failed to get comments from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	comments := lo.Map(modelcomments, func(modelcomment *model.Comment, index int) *CommentDetail {
+	comments := lo.Map(modelcomments, func(modelcomment *model.Comment, _ int) *CommentDetail {
 		return &CommentDetail{
 			ID:        modelcomment.ID,
 			User:      modelcomment.User,
@@ -401,7 +401,7 @@ func (h Handlers) GetRequest(c echo.Context) error {
 	}
 	reqtargets := lo.Map(
 		request.Targets,
-		func(target *model.RequestTargetDetail, index int) *TargetOverview {
+		func(target *model.RequestTargetDetail, _ int) *TargetOverview {
 			return &TargetOverview{
 				ID:        target.ID,
 				Target:    target.Target,
@@ -411,7 +411,7 @@ func (h Handlers) GetRequest(c echo.Context) error {
 			}
 		},
 	)
-	restags := lo.Map(request.Tags, func(tag *model.Tag, index int) *TagOverview {
+	restags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagOverview {
 		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,
@@ -422,7 +422,7 @@ func (h Handlers) GetRequest(c echo.Context) error {
 
 	resstatuses := lo.Map(
 		request.Statuses,
-		func(status *model.RequestStatus, index int) *StatusResponseOverview {
+		func(status *model.RequestStatus, _ int) *StatusResponseOverview {
 			return &StatusResponseOverview{
 				CreatedBy: status.CreatedBy,
 				Status:    status.Status,
@@ -479,7 +479,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
-	targets := lo.Map(req.Targets, func(target *Target, index int) *model.RequestTarget {
+	targets := lo.Map(req.Targets, func(target *Target, _ int) *model.RequestTarget {
 		return &model.RequestTarget{
 			Target: target.Target,
 			Amount: target.Amount,
@@ -517,7 +517,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		h.Logger.Error("failed to get comments from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	comments := lo.Map(modelcomments, func(modelcomment *model.Comment, index int) *CommentDetail {
+	comments := lo.Map(modelcomments, func(modelcomment *model.Comment, _ int) *CommentDetail {
 		return &CommentDetail{
 			ID:        modelcomment.ID,
 			User:      modelcomment.User,
@@ -538,7 +538,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 			UpdatedAt:   request.Group.UpdatedAt,
 		}
 	}
-	restags := lo.Map(request.Tags, func(tag *model.Tag, index int) *TagOverview {
+	restags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagOverview {
 		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,
@@ -549,7 +549,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 
 	restargets := lo.Map(
 		request.Targets,
-		func(target *model.RequestTargetDetail, index int) *TargetOverview {
+		func(target *model.RequestTargetDetail, _ int) *TargetOverview {
 			return &TargetOverview{
 				ID:        target.ID,
 				Target:    target.Target,
@@ -562,7 +562,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 
 	resstatuses := lo.Map(
 		request.Statuses,
-		func(status *model.RequestStatus, index int) *StatusResponseOverview {
+		func(status *model.RequestStatus, _ int) *StatusResponseOverview {
 			return &StatusResponseOverview{
 				CreatedBy: status.CreatedBy,
 				Status:    status.Status,

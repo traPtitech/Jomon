@@ -58,7 +58,7 @@ func TestHandlers_GetTags(t *testing.T) {
 			GetTags(c.Request().Context()).
 			Return(tags, nil)
 
-		resOverview := lo.Map(tags, func(tag *model.Tag, index int) *TagOverview {
+		resOverview := lo.Map(tags, func(tag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        tag.ID,
 				Name:      tag.Name,

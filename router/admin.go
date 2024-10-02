@@ -19,7 +19,7 @@ func (h Handlers) GetAdmins(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := lo.Map(admins, func(admin *model.Admin, index int) *uuid.UUID {
+	res := lo.Map(admins, func(admin *model.Admin, _ int) *uuid.UUID {
 		return &admin.ID
 	})
 

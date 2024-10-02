@@ -67,7 +67,7 @@ func TestHandlers_GetGroups(t *testing.T) {
 			GetGroups(c.Request().Context()).
 			Return(groups, nil)
 
-		resOverview := lo.Map(groups, func(group *model.Group, index int) *GroupOverview {
+		resOverview := lo.Map(groups, func(group *model.Group, _ int) *GroupOverview {
 			return &GroupOverview{
 				ID:          group.ID,
 				Name:        group.Name,

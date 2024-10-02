@@ -127,7 +127,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			}
 
 			if len(resApp.Tags) != 0 {
-				tags := lo.Map(resApp.Tags, func(tag *Tag, index int) string {
+				tags := lo.Map(resApp.Tags, func(tag *Tag, _ int) string {
 					return tag.Name
 				})
 				message += fmt.Sprintf("- タグ: %s", strings.Join(tags, ", "))
@@ -167,7 +167,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			}
 		} else {
 			targets := lo.Map(
-				resApps, func(resApp TransactionRequestApplication, index int) string {
+				resApps, func(resApp TransactionRequestApplication, _ int) string {
 					return resApp.Target
 				})
 			if resApp.Amount < 0 {
@@ -188,7 +188,7 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 			message += fmt.Sprintf("- 関連するグループ: %s\n", resApp.Group.Name)
 		}
 		if len(resApp.Tags) != 0 {
-			tags := lo.Map(resApp.Tags, func(tag *Tag, index int) string {
+			tags := lo.Map(resApp.Tags, func(tag *Tag, _ int) string {
 				return tag.Name
 			})
 			message += fmt.Sprintf("- タグ: %s", strings.Join(tags, ", "))

@@ -137,8 +137,8 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := lo.Map(txs, func(tx *model.TransactionResponse, index int) *Transaction {
-		tags := lo.Map(tx.Tags, func(tag *model.Tag, index int) *TagOverview {
+	res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		tags := lo.Map(tx.Tags, func(tag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        tag.ID,
 				Name:      tag.Name,
@@ -195,7 +195,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		tags := lo.Map(created.Tags, func(tag *model.Tag, index int) *TagOverview {
+		tags := lo.Map(created.Tags, func(tag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        tag.ID,
 				Name:      tag.Name,
@@ -245,7 +245,7 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	tags := lo.Map(tx.Tags, func(tag *model.Tag, index int) *TagOverview {
+	tags := lo.Map(tx.Tags, func(tag *model.Tag, _ int) *TagOverview {
 		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,
@@ -303,7 +303,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	tags := lo.Map(updated.Tags, func(tag *model.Tag, index int) *TagOverview {
+	tags := lo.Map(updated.Tags, func(tag *model.Tag, _ int) *TagOverview {
 		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,

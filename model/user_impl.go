@@ -54,7 +54,7 @@ func (repo *EntRepository) GetUsers(ctx context.Context) ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	modelusers := lo.Map(users, func(u *ent.User, index int) *User {
+	modelusers := lo.Map(users, func(u *ent.User, _ int) *User {
 		return convertEntUserToModelUser(u)
 	})
 	return modelusers, nil

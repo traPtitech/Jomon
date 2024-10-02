@@ -63,7 +63,7 @@ func (h Handlers) GetGroups(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := lo.Map(groups, func(group *model.Group, index int) *GroupOverview {
+	res := lo.Map(groups, func(group *model.Group, _ int) *GroupOverview {
 		return &GroupOverview{
 			ID:          group.ID,
 			Name:        group.Name,
@@ -144,7 +144,7 @@ func (h Handlers) GetGroupDetail(c echo.Context) error {
 		h.Logger.Error("failed to get owners from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	res.Owners = lo.Map(owners, func(owner *model.Owner, index int) *uuid.UUID {
+	res.Owners = lo.Map(owners, func(owner *model.Owner, _ int) *uuid.UUID {
 		return &owner.ID
 	})
 	members, err := h.Repository.GetMembers(ctx, groupID)
@@ -241,7 +241,7 @@ func (h Handlers) PostMember(c echo.Context) error {
 		h.Logger.Error("failed to add member in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	res := lo.Map(added, func(m *model.Member, index int) *uuid.UUID {
+	res := lo.Map(added, func(m *model.Member, _ int) *uuid.UUID {
 		return &m.ID
 	})
 	return c.JSON(http.StatusOK, res)
@@ -299,7 +299,7 @@ func (h Handlers) PostOwner(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := lo.Map(added, func(owner *model.Owner, index int) uuid.UUID {
+	res := lo.Map(added, func(owner *model.Owner, _ int) uuid.UUID {
 		return owner.ID
 	})
 

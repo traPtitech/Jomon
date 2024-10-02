@@ -34,21 +34,21 @@ func Numeric64(t *testing.T, n int64) int64 {
 
 func AlphaNumericSlice(t *testing.T, length int, n int64) []string {
 	t.Helper()
-	return lo.Times(length, func(index int) string {
+	return lo.Times(length, func(_ int) string {
 		return AlphaNumeric(t, int(n))
 	})
 }
 
 func NumericSlice(t *testing.T, length int, n int) []int {
 	t.Helper()
-	return lo.Times(length, func(index int) int {
+	return lo.Times(length, func(_ int) int {
 		return Numeric(t, n)
 	})
 }
 
 func Numeric64Slice(t *testing.T, length int, n int64) []int64 {
 	t.Helper()
-	return lo.Times(length, func(index int) int64 {
+	return lo.Times(length, func(_ int) int64 {
 		return Numeric64(t, n)
 	})
 }

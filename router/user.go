@@ -29,7 +29,7 @@ func (h Handlers) GetUsers(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := lo.Map(users, func(user *model.User, index int) User {
+	res := lo.Map(users, func(user *model.User, _ int) User {
 		return User{
 			ID:          user.ID,
 			Name:        user.Name,

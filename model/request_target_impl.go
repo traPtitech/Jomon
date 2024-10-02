@@ -26,7 +26,7 @@ func (repo *EntRepository) GetRequestTargets(
 	if err != nil {
 		return nil, err
 	}
-	targets := lo.Map(ts, func(t *ent.RequestTarget, index int) *RequestTargetDetail {
+	targets := lo.Map(ts, func(t *ent.RequestTarget, _ int) *RequestTargetDetail {
 		return ConvertEntRequestTargetToModelRequestTargetDetail(t)
 	})
 	return targets, err
@@ -35,7 +35,7 @@ func (repo *EntRepository) GetRequestTargets(
 func (repo *EntRepository) createRequestTargets(
 	ctx context.Context, tx *ent.Tx, requestID uuid.UUID, targets []*RequestTarget,
 ) ([]*RequestTargetDetail, error) {
-	bulk := lo.Map(targets, func(t *RequestTarget, index int) *ent.RequestTargetCreate {
+	bulk := lo.Map(targets, func(t *RequestTarget, _ int) *ent.RequestTargetCreate {
 		return tx.Client().RequestTarget.
 			Create().
 			SetAmount(t.Amount).
@@ -47,7 +47,7 @@ func (repo *EntRepository) createRequestTargets(
 	if err != nil {
 		return nil, err
 	}
-	ids := lo.Map(cs, func(c *ent.RequestTarget, index int) uuid.UUID {
+	ids := lo.Map(cs, func(c *ent.RequestTarget, _ int) uuid.UUID {
 		return c.ID
 	})
 	created, err := tx.Client().RequestTarget.
@@ -61,7 +61,7 @@ func (repo *EntRepository) createRequestTargets(
 		return nil, err
 	}
 	// []*ent.RequestTarget to []*RequestTargetDetail
-	ts := lo.Map(created, func(t *ent.RequestTarget, index int) *RequestTargetDetail {
+	ts := lo.Map(created, func(t *ent.RequestTarget, _ int) *RequestTargetDetail {
 		return ConvertEntRequestTargetToModelRequestTargetDetail(t)
 	})
 	return ts, nil

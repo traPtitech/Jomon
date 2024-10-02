@@ -100,8 +100,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		res := lo.Map(txs, func(tx *model.TransactionResponse, index int) *Transaction {
-			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, index int) *TagOverview {
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 				return &TagOverview{
 					ID:        modelTag.ID,
 					Name:      modelTag.Name,
@@ -213,8 +213,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		res := lo.Map(txs, func(tx *model.TransactionResponse, index int) *Transaction {
-			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, index int) *TagOverview {
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 				return &TagOverview{
 					ID:        modelTag.ID,
 					Name:      modelTag.Name,
@@ -327,8 +327,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		res := lo.Map(txs, func(tx *model.TransactionResponse, index int) *Transaction {
-			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, index int) *TagOverview {
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 				return &TagOverview{
 					ID:        modelTag.ID,
 					Name:      modelTag.Name,
@@ -446,8 +446,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		res := lo.Map(txs, func(tx *model.TransactionResponse, index int) *Transaction {
-			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, index int) *TagOverview {
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 				return &TagOverview{
 					ID:        modelTag.ID,
 					Name:      modelTag.Name,
@@ -549,8 +549,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		res := lo.Map(txs, func(tx *model.TransactionResponse, index int) *Transaction {
-			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, index int) *TagOverview {
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 				return &TagOverview{
 					ID:        modelTag.ID,
 					Name:      modelTag.Name,
@@ -655,8 +655,8 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			CreateTransaction(c.Request().Context(), tx1.Amount, tx1.Target, tags, &group, nil).
 			Return(tx1, nil)
 
-		res := lo.Map(txs, func(tx *model.TransactionResponse, index int) *Transaction {
-			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, index int) *TagOverview {
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 				return &TagOverview{
 					ID:        modelTag.ID,
 					Name:      modelTag.Name,
@@ -773,7 +773,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 
 		var resOverview Transaction
 		res := []*Transaction{}
-		to := lo.Map(tx.Tags, func(modelTag *model.Tag, index int) *TagOverview {
+		to := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        modelTag.ID,
 				Name:      modelTag.Name,
@@ -863,7 +863,7 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			Return(tx, nil)
 
 		var resOverview Transaction
-		to := lo.Map(tx.Tags, func(modelTag *model.Tag, index int) *TagOverview {
+		to := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        modelTag.ID,
 				Name:      modelTag.Name,
@@ -961,7 +961,7 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			UpdatedAt: time.Now(),
 		}
 
-		updatedTags := lo.Map(updated.Tags, func(modelTag *model.Tag, index int) *uuid.UUID {
+		updatedTags := lo.Map(updated.Tags, func(modelTag *model.Tag, _ int) *uuid.UUID {
 			return &modelTag.ID
 		})
 
@@ -992,7 +992,7 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			Return(updated, nil)
 
 		var resOverview Transaction
-		to := lo.Map(updated.Tags, func(modelTag *model.Tag, index int) *TagOverview {
+		to := lo.Map(updated.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        modelTag.ID,
 				Name:      modelTag.Name,

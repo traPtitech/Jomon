@@ -116,7 +116,7 @@ func (repo *EntRepository) GetRequests(
 		return nil, err
 	}
 
-	reqres := lo.Map(requests, func(r *ent.Request, index int) *RequestResponse {
+	reqres := lo.Map(requests, func(r *ent.Request, _ int) *RequestResponse {
 		return convertEntRequestResponseToModelRequestResponse(
 			r, r.Edges.Tag, r.Edges.Group, r.Edges.Status[0], r.Edges.User)
 	})
@@ -138,7 +138,7 @@ func (repo *EntRepository) CreateRequest(
 			panic(v)
 		}
 	}()
-	tagIDs := lo.Map(tags, func(t *Tag, index int) uuid.UUID {
+	tagIDs := lo.Map(tags, func(t *Tag, _ int) uuid.UUID {
 		return t.ID
 	})
 	created, err := tx.Client().Request.
@@ -235,17 +235,17 @@ func (repo *EntRepository) GetRequest(
 	if err != nil {
 		return nil, err
 	}
-	tags := lo.Map(r.Edges.Tag, func(t *ent.Tag, index int) *Tag {
+	tags := lo.Map(r.Edges.Tag, func(t *ent.Tag, _ int) *Tag {
 		return ConvertEntTagToModelTag(t)
 	})
 	targets := lo.Map(
 		r.Edges.Target,
-		func(target *ent.RequestTarget, index int) *RequestTargetDetail {
+		func(target *ent.RequestTarget, _ int) *RequestTargetDetail {
 			return ConvertEntRequestTargetToModelRequestTargetDetail(target)
 		},
 	)
 	modelGroup := ConvertEntGroupToModelGroup(r.Edges.Group)
-	statuses := lo.Map(r.Edges.Status, func(status *ent.RequestStatus, index int) *RequestStatus {
+	statuses := lo.Map(r.Edges.Status, func(status *ent.RequestStatus, _ int) *RequestStatus {
 		return convertEntRequestStatusToModelRequestStatus(status)
 	})
 	reqdetail := &RequestDetail{
@@ -278,7 +278,7 @@ func (repo *EntRepository) UpdateRequest(
 			panic(v)
 		}
 	}()
-	tagIDs := lo.Map(tags, func(t *Tag, index int) uuid.UUID {
+	tagIDs := lo.Map(tags, func(t *Tag, _ int) uuid.UUID {
 		return t.ID
 	})
 	updated, err := tx.Client().Request.
@@ -330,7 +330,7 @@ func (repo *EntRepository) UpdateRequest(
 		err = RollbackWithError(tx, err)
 		return nil, err
 	}
-	modeltags := lo.Map(enttags, func(enttag *ent.Tag, index int) *Tag {
+	modeltags := lo.Map(enttags, func(enttag *ent.Tag, _ int) *Tag {
 		return ConvertEntTagToModelTag(enttag)
 	})
 	var entgroup *ent.Group
@@ -356,7 +356,7 @@ func (repo *EntRepository) UpdateRequest(
 	if err != nil {
 		return nil, err
 	}
-	statuses := lo.Map(entstatuses, func(s *ent.RequestStatus, index int) *RequestStatus {
+	statuses := lo.Map(entstatuses, func(s *ent.RequestStatus, _ int) *RequestStatus {
 		return convertEntRequestStatusToModelRequestStatus(s)
 	})
 
@@ -384,7 +384,7 @@ func convertEntRequestResponseToModelRequestResponse(
 	if request == nil {
 		return nil
 	}
-	modeltags := lo.Map(tags, func(t *ent.Tag, index int) *Tag {
+	modeltags := lo.Map(tags, func(t *ent.Tag, _ int) *Tag {
 		return ConvertEntTagToModelTag(t)
 	})
 	return &RequestResponse{

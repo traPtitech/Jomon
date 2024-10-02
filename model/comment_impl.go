@@ -34,7 +34,7 @@ func (repo *EntRepository) GetComments(
 	if err != nil {
 		return nil, err
 	}
-	modelcomments := lo.Map(comments, func(c *ent.Comment, index int) *Comment {
+	modelcomments := lo.Map(comments, func(c *ent.Comment, _ int) *Comment {
 		return ConvertEntCommentToModelComment(c, c.Edges.User.ID)
 	})
 	return modelcomments, nil

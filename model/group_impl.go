@@ -17,7 +17,7 @@ func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	modelgroups := lo.Map(groups, func(g *ent.Group, index int) *Group {
+	modelgroups := lo.Map(groups, func(g *ent.Group, _ int) *Group {
 		return ConvertEntGroupToModelGroup(g)
 	})
 	return modelgroups, nil
@@ -85,7 +85,7 @@ func (repo *EntRepository) GetOwners(ctx context.Context, groupID uuid.UUID) ([]
 	if err != nil {
 		return nil, err
 	}
-	owners := lo.Map(groupowners, func(groupowner *ent.User, index int) *Owner {
+	owners := lo.Map(groupowners, func(groupowner *ent.User, _ int) *Owner {
 		return &Owner{ID: groupowner.ID}
 	})
 
@@ -103,7 +103,7 @@ func (repo *EntRepository) AddOwners(
 	if err != nil {
 		return nil, err
 	}
-	resowners := lo.Map(ownerIDs, func(owner uuid.UUID, index int) *Owner {
+	resowners := lo.Map(ownerIDs, func(owner uuid.UUID, _ int) *Owner {
 		return &Owner{ID: owner}
 	})
 
@@ -133,7 +133,7 @@ func (repo *EntRepository) GetMembers(ctx context.Context, groupID uuid.UUID) ([
 	if err != nil {
 		return nil, err
 	}
-	modelmembers := lo.Map(members, func(member *ent.User, index int) *Member {
+	modelmembers := lo.Map(members, func(member *ent.User, _ int) *Member {
 		return &Member{member.ID}
 	})
 
@@ -152,7 +152,7 @@ func (repo *EntRepository) AddMembers(
 	if err != nil {
 		return nil, err
 	}
-	resMembers := lo.Map(userIDs, func(member uuid.UUID, index int) *Member {
+	resMembers := lo.Map(userIDs, func(member uuid.UUID, _ int) *Member {
 		return &Member{member}
 	})
 

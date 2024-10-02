@@ -18,7 +18,7 @@ func (repo *EntRepository) GetAdmins(ctx context.Context) ([]*Admin, error) {
 		return nil, err
 	}
 
-	admins := lo.Map(users, func(u *ent.User, insex int) *Admin {
+	admins := lo.Map(users, func(u *ent.User, _ int) *Admin {
 		return &Admin{
 			ID: u.ID,
 		}

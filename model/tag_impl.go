@@ -17,7 +17,7 @@ func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
 	if err != nil {
 		return nil, err
 	}
-	modeltags := lo.Map(tags, func(t *ent.Tag, index int) *Tag {
+	modeltags := lo.Map(tags, func(t *ent.Tag, _ int) *Tag {
 		return ConvertEntTagToModelTag(t)
 	})
 

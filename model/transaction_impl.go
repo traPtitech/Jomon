@@ -117,7 +117,7 @@ func (repo *EntRepository) GetTransactions(
 	}
 
 	// Converting
-	res := lo.Map(txs, func(tx *ent.Transaction, index int) *TransactionResponse {
+	res := lo.Map(txs, func(tx *ent.Transaction, _ int) *TransactionResponse {
 		return ConvertEntTransactionToModelTransactionResponse(tx)
 	})
 
@@ -162,7 +162,7 @@ func (repo *EntRepository) CreateTransaction(
 	}()
 
 	// Get Tags
-	tagIDs := lo.Map(tags, func(t *uuid.UUID, index int) uuid.UUID {
+	tagIDs := lo.Map(tags, func(t *uuid.UUID, _ int) uuid.UUID {
 		return *t
 	})
 
@@ -270,7 +270,7 @@ func (repo *EntRepository) UpdateTransaction(
 	}
 
 	// Get Tags
-	tagIDs := lo.Map(tags, func(t *uuid.UUID, index int) uuid.UUID {
+	tagIDs := lo.Map(tags, func(t *uuid.UUID, _ int) uuid.UUID {
 		return *t
 	})
 
@@ -379,7 +379,7 @@ func ConvertEntTransactionToModelTransaction(transaction *ent.Transaction) *Tran
 func ConvertEntTransactionToModelTransactionResponse(
 	transaction *ent.Transaction,
 ) *TransactionResponse {
-	tags := lo.Map(transaction.Edges.Tag, func(t *ent.Tag, index int) *Tag {
+	tags := lo.Map(transaction.Edges.Tag, func(t *ent.Tag, _ int) *Tag {
 		return ConvertEntTagToModelTag(t)
 	})
 	var g *Group
