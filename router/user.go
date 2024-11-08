@@ -93,24 +93,8 @@ func (h Handlers) GetMe(c echo.Context) error {
 
 	user, err := h.Repository.GetUserByID(c.Request().Context(), userInSession.ID)
 	if err != nil {
-		users, err := h.Repository.GetUsers(c.Request().Context())
-		for _, user := range users {
-			if user.ID == userInSession.ID {
-				return c.JSON(http.StatusOK, user)
-			}
-		}
-		if err != nil {
-			h.Logger.Error("failed to get users from repository", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-		// if user not found, create new user
-		newUser, err := h.Repository.CreateUser(c.Request().Context(), userInSession.Name,
-			userInSession.DisplayName, userInSession.Admin)
-		if err != nil {
-			h.Logger.Error("failed to create user", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-		return c.JSON(http.StatusOK, newUser)
+		h.Logger.Error("failed to get user by ID")
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 	return c.JSON(http.StatusOK, user)
 }
