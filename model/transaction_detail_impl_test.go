@@ -27,10 +27,11 @@ func TestEntRepository_createTransactionDetail(t *testing.T) {
 			}
 		}()
 
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 10)
 		// Create TransactionDetail
-		td, err := repo.createTransactionDetail(ctx, tx, amount, target)
+		td, err := repo.createTransactionDetail(ctx, tx, title, amount, target)
 		assert.NoError(t, err)
 		err = tx.Commit()
 		assert.NoError(t, err)
@@ -58,17 +59,19 @@ func TestEntRepository_updateTransactionDetail(t *testing.T) {
 			}
 		}()
 
+		title := "Hoge"
 		amount := 100
 		target := "hoge"
 
 		// Create Transaction
-		trns, err := repo.CreateTransaction(ctx, amount, target, nil, nil, nil)
+		trns, err := repo.CreateTransaction(ctx, title, amount, target, nil, nil, nil)
 		require.NoError(t, err)
 
 		// Update TransactionDetail
+		updateTitle := "Fuga"
 		updatedAmount := 1000
 		updatedTarget := "fuga"
-		td, err := repo.updateTransactionDetail(ctx, tx, trns.ID, updatedAmount, updatedTarget)
+		td, err := repo.updateTransactionDetail(ctx, tx, trns.ID, updateTitle, updatedAmount, updatedTarget)
 		assert.NoError(t, err)
 		err = tx.Commit()
 		assert.NoError(t, err)

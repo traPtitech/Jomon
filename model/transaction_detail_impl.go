@@ -10,9 +10,10 @@ import (
 )
 
 func (repo *EntRepository) createTransactionDetail(
-	ctx context.Context, tx *ent.Tx, amount int, target string,
+	ctx context.Context, tx *ent.Tx, title string, amount int, target string,
 ) (*TransactionDetail, error) {
 	enttd, err := tx.Client().TransactionDetail.Create().
+		SetTitle(title).
 		SetAmount(amount).
 		SetTarget(target).
 		Save(ctx)
@@ -23,7 +24,7 @@ func (repo *EntRepository) createTransactionDetail(
 }
 
 func (repo *EntRepository) updateTransactionDetail(
-	ctx context.Context, tx *ent.Tx, transactionID uuid.UUID, amount int, target string,
+	ctx context.Context, tx *ent.Tx, transactionID uuid.UUID, title string, amount int, target string,
 ) (*TransactionDetail, error) {
 	_, err := tx.Client().TransactionDetail.Update().
 		Where(transactiondetail.HasTransactionWith(
@@ -35,6 +36,7 @@ func (repo *EntRepository) updateTransactionDetail(
 		return nil, err
 	}
 	enttd, err := tx.Client().TransactionDetail.Create().
+		SetTitle(title).
 		SetAmount(amount).
 		SetTarget(target).
 		SetTransactionID(transactionID).
@@ -53,6 +55,7 @@ func convertEntTransactionDetailToModelTransactionDetail(
 	}
 	return &TransactionDetail{
 		ID:        enttd.ID,
+		Title:     enttd.Title,
 		Amount:    enttd.Amount,
 		Target:    enttd.Target,
 		CreatedAt: enttd.CreatedAt,
