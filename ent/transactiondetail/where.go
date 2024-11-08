@@ -56,6 +56,11 @@ func IDLTE(id uuid.UUID) predicate.TransactionDetail {
 	return predicate.TransactionDetail(sql.FieldLTE(FieldID, id))
 }
 
+// Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
+func Title(v string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldEQ(FieldTitle, v))
+}
+
 // Amount applies equality check predicate on the "amount" field. It's identical to AmountEQ.
 func Amount(v int) predicate.TransactionDetail {
 	return predicate.TransactionDetail(sql.FieldEQ(FieldAmount, v))
@@ -74,6 +79,71 @@ func CreatedAt(v time.Time) predicate.TransactionDetail {
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.TransactionDetail {
 	return predicate.TransactionDetail(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// TitleEQ applies the EQ predicate on the "title" field.
+func TitleEQ(v string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldEQ(FieldTitle, v))
+}
+
+// TitleNEQ applies the NEQ predicate on the "title" field.
+func TitleNEQ(v string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldNEQ(FieldTitle, v))
+}
+
+// TitleIn applies the In predicate on the "title" field.
+func TitleIn(vs ...string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldIn(FieldTitle, vs...))
+}
+
+// TitleNotIn applies the NotIn predicate on the "title" field.
+func TitleNotIn(vs ...string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldNotIn(FieldTitle, vs...))
+}
+
+// TitleGT applies the GT predicate on the "title" field.
+func TitleGT(v string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldGT(FieldTitle, v))
+}
+
+// TitleGTE applies the GTE predicate on the "title" field.
+func TitleGTE(v string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldGTE(FieldTitle, v))
+}
+
+// TitleLT applies the LT predicate on the "title" field.
+func TitleLT(v string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldLT(FieldTitle, v))
+}
+
+// TitleLTE applies the LTE predicate on the "title" field.
+func TitleLTE(v string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldLTE(FieldTitle, v))
+}
+
+// TitleContains applies the Contains predicate on the "title" field.
+func TitleContains(v string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldContains(FieldTitle, v))
+}
+
+// TitleHasPrefix applies the HasPrefix predicate on the "title" field.
+func TitleHasPrefix(v string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldHasPrefix(FieldTitle, v))
+}
+
+// TitleHasSuffix applies the HasSuffix predicate on the "title" field.
+func TitleHasSuffix(v string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldHasSuffix(FieldTitle, v))
+}
+
+// TitleEqualFold applies the EqualFold predicate on the "title" field.
+func TitleEqualFold(v string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldEqualFold(FieldTitle, v))
+}
+
+// TitleContainsFold applies the ContainsFold predicate on the "title" field.
+func TitleContainsFold(v string) predicate.TransactionDetail {
+	return predicate.TransactionDetail(sql.FieldContainsFold(FieldTitle, v))
 }
 
 // AmountEQ applies the EQ predicate on the "amount" field.

@@ -22,6 +22,12 @@ type TransactionDetailCreate struct {
 	hooks    []Hook
 }
 
+// SetTitle sets the "title" field.
+func (tdc *TransactionDetailCreate) SetTitle(s string) *TransactionDetailCreate {
+	tdc.mutation.SetTitle(s)
+	return tdc
+}
+
 // SetAmount sets the "amount" field.
 func (tdc *TransactionDetailCreate) SetAmount(i int) *TransactionDetailCreate {
 	tdc.mutation.SetAmount(i)
@@ -170,6 +176,14 @@ func (tdc *TransactionDetailCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tdc *TransactionDetailCreate) check() error {
+	if _, ok := tdc.mutation.Title(); !ok {
+		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "TransactionDetail.title"`)}
+	}
+	if v, ok := tdc.mutation.Title(); ok {
+		if err := transactiondetail.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "TransactionDetail.title": %w`, err)}
+		}
+	}
 	if _, ok := tdc.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "TransactionDetail.amount"`)}
 	}
@@ -216,6 +230,10 @@ func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.
 	if id, ok := tdc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
+	}
+	if value, ok := tdc.mutation.Title(); ok {
+		_spec.SetField(transactiondetail.FieldTitle, field.TypeString, value)
+		_node.Title = value
 	}
 	if value, ok := tdc.mutation.Amount(); ok {
 		_spec.SetField(transactiondetail.FieldAmount, field.TypeInt, value)
