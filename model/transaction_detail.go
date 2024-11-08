@@ -12,6 +12,7 @@ type TransactionDetailRepository interface {
 
 type TransactionDetail struct {
 	ID        uuid.UUID
+	Title     string
 	Amount    int
 	Target    string
 	CreatedAt time.Time
