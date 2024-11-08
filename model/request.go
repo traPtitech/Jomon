@@ -64,6 +64,8 @@ type RequestQuery struct {
 	Status *string
 	Since  *time.Time
 	Until  *time.Time
+	Limit  int
+	Offset int
 	Tag    *string
 	Group  *string
 }

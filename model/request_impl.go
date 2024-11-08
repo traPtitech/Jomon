@@ -102,6 +102,8 @@ func (repo *EntRepository) GetRequests(
 			)
 	}
 
+	requestsq = requestsq.Limit(query.Limit).Offset(query.Offset)
+
 	if query.Group != nil && *query.Group != "" {
 		requestsq = requestsq.
 			Where(

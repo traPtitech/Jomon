@@ -149,6 +149,8 @@ paths:
         - $ref: "#/components/parameters/targetQuery"
         - $ref: "#/components/parameters/sinceQuery"
         - $ref: "#/components/parameters/untilQuery"
+        - $ref: "#/components/parameters/limitQuery"
+        - $ref: "#/components/parameters/offsetQuery"
         - $ref: "#/components/parameters/tagQuery"
         - $ref: "#/components/parameters/groupQuery"
       responses:
