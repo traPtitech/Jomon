@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
+	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
 )
@@ -93,6 +94,10 @@ func (h Handlers) GetMe(c echo.Context) error {
 
 	user, err := h.Repository.GetUserByID(c.Request().Context(), userInSession.ID)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			h.Logger.Error("failed to find user from DB by ID")
+			return c.JSON(http.StatusNotFound, err)
+		}
 		h.Logger.Error("failed to get user by ID")
 		return c.JSON(http.StatusInternalServerError, err)
 	}
