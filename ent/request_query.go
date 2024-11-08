@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -28,7 +29,7 @@ import (
 type RequestQuery struct {
 	config
 	ctx             *QueryContext
-	order           []OrderFunc
+	order           []request.OrderOption
 	inters          []Interceptor
 	predicates      []predicate.Request
 	withStatus      *RequestStatusQuery
@@ -71,7 +72,7 @@ func (rq *RequestQuery) Unique(unique bool) *RequestQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (rq *RequestQuery) Order(o ...OrderFunc) *RequestQuery {
+func (rq *RequestQuery) Order(o ...request.OrderOption) *RequestQuery {
 	rq.order = append(rq.order, o...)
 	return rq
 }
@@ -255,7 +256,7 @@ func (rq *RequestQuery) QueryGroup() *GroupQuery {
 // First returns the first Request entity from the query.
 // Returns a *NotFoundError when no Request was found.
 func (rq *RequestQuery) First(ctx context.Context) (*Request, error) {
-	nodes, err := rq.Limit(1).All(setContextOp(ctx, rq.ctx, "First"))
+	nodes, err := rq.Limit(1).All(setContextOp(ctx, rq.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -278,7 +279,7 @@ func (rq *RequestQuery) FirstX(ctx context.Context) *Request {
 // Returns a *NotFoundError when no Request ID was found.
 func (rq *RequestQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = rq.Limit(1).IDs(setContextOp(ctx, rq.ctx, "FirstID")); err != nil {
+	if ids, err = rq.Limit(1).IDs(setContextOp(ctx, rq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -301,7 +302,7 @@ func (rq *RequestQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one Request entity is found.
 // Returns a *NotFoundError when no Request entities are found.
 func (rq *RequestQuery) Only(ctx context.Context) (*Request, error) {
-	nodes, err := rq.Limit(2).All(setContextOp(ctx, rq.ctx, "Only"))
+	nodes, err := rq.Limit(2).All(setContextOp(ctx, rq.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -329,7 +330,7 @@ func (rq *RequestQuery) OnlyX(ctx context.Context) *Request {
 // Returns a *NotFoundError when no entities are found.
 func (rq *RequestQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = rq.Limit(2).IDs(setContextOp(ctx, rq.ctx, "OnlyID")); err != nil {
+	if ids, err = rq.Limit(2).IDs(setContextOp(ctx, rq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -354,7 +355,7 @@ func (rq *RequestQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Requests.
 func (rq *RequestQuery) All(ctx context.Context) ([]*Request, error) {
-	ctx = setContextOp(ctx, rq.ctx, "All")
+	ctx = setContextOp(ctx, rq.ctx, ent.OpQueryAll)
 	if err := rq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -376,7 +377,7 @@ func (rq *RequestQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if rq.ctx.Unique == nil && rq.path != nil {
 		rq.Unique(true)
 	}
-	ctx = setContextOp(ctx, rq.ctx, "IDs")
+	ctx = setContextOp(ctx, rq.ctx, ent.OpQueryIDs)
 	if err = rq.Select(request.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -394,7 +395,7 @@ func (rq *RequestQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (rq *RequestQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, rq.ctx, "Count")
+	ctx = setContextOp(ctx, rq.ctx, ent.OpQueryCount)
 	if err := rq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -412,7 +413,7 @@ func (rq *RequestQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (rq *RequestQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, rq.ctx, "Exist")
+	ctx = setContextOp(ctx, rq.ctx, ent.OpQueryExist)
 	switch _, err := rq.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -441,7 +442,7 @@ func (rq *RequestQuery) Clone() *RequestQuery {
 	return &RequestQuery{
 		config:          rq.config,
 		ctx:             rq.ctx.Clone(),
-		order:           append([]OrderFunc{}, rq.order...),
+		order:           append([]request.OrderOption{}, rq.order...),
 		inters:          append([]Interceptor{}, rq.inters...),
 		predicates:      append([]predicate.Request{}, rq.predicates...),
 		withStatus:      rq.withStatus.Clone(),
@@ -729,7 +730,7 @@ func (rq *RequestQuery) loadStatus(ctx context.Context, query *RequestStatusQuer
 	}
 	query.withFKs = true
 	query.Where(predicate.RequestStatus(func(s *sql.Selector) {
-		s.Where(sql.InValues(request.StatusColumn, fks...))
+		s.Where(sql.InValues(s.C(request.StatusColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -742,7 +743,7 @@ func (rq *RequestQuery) loadStatus(ctx context.Context, query *RequestStatusQuer
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "request_status" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "request_status" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -760,7 +761,7 @@ func (rq *RequestQuery) loadTarget(ctx context.Context, query *RequestTargetQuer
 	}
 	query.withFKs = true
 	query.Where(predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.InValues(request.TargetColumn, fks...))
+		s.Where(sql.InValues(s.C(request.TargetColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -773,7 +774,7 @@ func (rq *RequestQuery) loadTarget(ctx context.Context, query *RequestTargetQuer
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "request_target" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "request_target" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -791,7 +792,7 @@ func (rq *RequestQuery) loadFile(ctx context.Context, query *FileQuery, nodes []
 	}
 	query.withFKs = true
 	query.Where(predicate.File(func(s *sql.Selector) {
-		s.Where(sql.InValues(request.FileColumn, fks...))
+		s.Where(sql.InValues(s.C(request.FileColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -804,7 +805,7 @@ func (rq *RequestQuery) loadFile(ctx context.Context, query *FileQuery, nodes []
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "request_file" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "request_file" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -883,7 +884,7 @@ func (rq *RequestQuery) loadTransaction(ctx context.Context, query *TransactionQ
 	}
 	query.withFKs = true
 	query.Where(predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.InValues(request.TransactionColumn, fks...))
+		s.Where(sql.InValues(s.C(request.TransactionColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -896,7 +897,7 @@ func (rq *RequestQuery) loadTransaction(ctx context.Context, query *TransactionQ
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "request_transaction" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "request_transaction" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -914,7 +915,7 @@ func (rq *RequestQuery) loadComment(ctx context.Context, query *CommentQuery, no
 	}
 	query.withFKs = true
 	query.Where(predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.InValues(request.CommentColumn, fks...))
+		s.Where(sql.InValues(s.C(request.CommentColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -927,7 +928,7 @@ func (rq *RequestQuery) loadComment(ctx context.Context, query *CommentQuery, no
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "request_comment" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "request_comment" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -1093,7 +1094,7 @@ func (rgb *RequestGroupBy) Aggregate(fns ...AggregateFunc) *RequestGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (rgb *RequestGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rgb.build.ctx, "GroupBy")
+	ctx = setContextOp(ctx, rgb.build.ctx, ent.OpQueryGroupBy)
 	if err := rgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -1141,7 +1142,7 @@ func (rs *RequestSelect) Aggregate(fns ...AggregateFunc) *RequestSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (rs *RequestSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rs.ctx, "Select")
+	ctx = setContextOp(ctx, rs.ctx, ent.OpQuerySelect)
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}

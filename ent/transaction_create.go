@@ -125,7 +125,7 @@ func (tc *TransactionCreate) Mutation() *TransactionMutation {
 // Save creates the Transaction in the database.
 func (tc *TransactionCreate) Save(ctx context.Context) (*Transaction, error) {
 	tc.defaults()
-	return withHooks[*Transaction, TransactionMutation](ctx, tc.sqlSave, tc.mutation, tc.hooks)
+	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -167,7 +167,7 @@ func (tc *TransactionCreate) check() error {
 	if _, ok := tc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Transaction.created_at"`)}
 	}
-	if _, ok := tc.mutation.DetailID(); !ok {
+	if len(tc.mutation.DetailIDs()) == 0 {
 		return &ValidationError{Name: "detail", err: errors.New(`ent: missing required edge "Transaction.detail"`)}
 	}
 	return nil
@@ -217,10 +217,7 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Columns: []string{transaction.DetailColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transactiondetail.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transactiondetail.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -236,10 +233,7 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Columns: transaction.TagPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: tag.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -255,10 +249,7 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Columns: []string{transaction.GroupBudgetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: groupbudget.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(groupbudget.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -275,10 +266,7 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Columns: []string{transaction.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -293,11 +281,15 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 // TransactionCreateBulk is the builder for creating many Transaction entities in bulk.
 type TransactionCreateBulk struct {
 	config
+	err      error
 	builders []*TransactionCreate
 }
 
 // Save creates the Transaction entities in the database.
 func (tcb *TransactionCreateBulk) Save(ctx context.Context) ([]*Transaction, error) {
+	if tcb.err != nil {
+		return nil, tcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(tcb.builders))
 	nodes := make([]*Transaction, len(tcb.builders))
 	mutators := make([]Mutator, len(tcb.builders))
@@ -314,8 +306,8 @@ func (tcb *TransactionCreateBulk) Save(ctx context.Context) ([]*Transaction, err
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, tcb.builders[i+1].mutation)
 				} else {

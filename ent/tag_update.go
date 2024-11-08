@@ -37,6 +37,14 @@ func (tu *TagUpdate) SetName(s string) *TagUpdate {
 	return tu
 }
 
+// SetNillableName sets the "name" field if the given value is not nil.
+func (tu *TagUpdate) SetNillableName(s *string) *TagUpdate {
+	if s != nil {
+		tu.SetName(*s)
+	}
+	return tu
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (tu *TagUpdate) SetCreatedAt(t time.Time) *TagUpdate {
 	tu.mutation.SetCreatedAt(t)
@@ -157,7 +165,7 @@ func (tu *TagUpdate) RemoveTransaction(t ...*Transaction) *TagUpdate {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TagUpdate) Save(ctx context.Context) (int, error) {
 	tu.defaults()
-	return withHooks[int, TagMutation](ctx, tu.sqlSave, tu.mutation, tu.hooks)
+	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -235,10 +243,7 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tag.RequestPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -251,10 +256,7 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tag.RequestPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -270,10 +272,7 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tag.RequestPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -289,10 +288,7 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tag.TransactionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -305,10 +301,7 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tag.TransactionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -324,10 +317,7 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: tag.TransactionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -358,6 +348,14 @@ type TagUpdateOne struct {
 // SetName sets the "name" field.
 func (tuo *TagUpdateOne) SetName(s string) *TagUpdateOne {
 	tuo.mutation.SetName(s)
+	return tuo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (tuo *TagUpdateOne) SetNillableName(s *string) *TagUpdateOne {
+	if s != nil {
+		tuo.SetName(*s)
+	}
 	return tuo
 }
 
@@ -494,7 +492,7 @@ func (tuo *TagUpdateOne) Select(field string, fields ...string) *TagUpdateOne {
 // Save executes the query and returns the updated Tag entity.
 func (tuo *TagUpdateOne) Save(ctx context.Context) (*Tag, error) {
 	tuo.defaults()
-	return withHooks[*Tag, TagMutation](ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
+	return withHooks(ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -589,10 +587,7 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			Columns: tag.RequestPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -605,10 +600,7 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			Columns: tag.RequestPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -624,10 +616,7 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			Columns: tag.RequestPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -643,10 +632,7 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			Columns: tag.TransactionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -659,10 +645,7 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			Columns: tag.TransactionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -678,10 +661,7 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			Columns: tag.TransactionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: transaction.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

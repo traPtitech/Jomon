@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
@@ -27,6 +28,7 @@ type Transaction struct {
 	Edges                    TransactionEdges `json:"edges"`
 	group_budget_transaction *uuid.UUID
 	request_transaction      *uuid.UUID
+	selectValues             sql.SelectValues
 }
 
 // TransactionEdges holds the relations/edges for other nodes in the graph.
@@ -47,12 +49,10 @@ type TransactionEdges struct {
 // DetailOrErr returns the Detail value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TransactionEdges) DetailOrErr() (*TransactionDetail, error) {
-	if e.loadedTypes[0] {
-		if e.Detail == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: transactiondetail.Label}
-		}
+	if e.Detail != nil {
 		return e.Detail, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: transactiondetail.Label}
 	}
 	return nil, &NotLoadedError{edge: "detail"}
 }
@@ -69,12 +69,10 @@ func (e TransactionEdges) TagOrErr() ([]*Tag, error) {
 // GroupBudgetOrErr returns the GroupBudget value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TransactionEdges) GroupBudgetOrErr() (*GroupBudget, error) {
-	if e.loadedTypes[2] {
-		if e.GroupBudget == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: groupbudget.Label}
-		}
+	if e.GroupBudget != nil {
 		return e.GroupBudget, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: groupbudget.Label}
 	}
 	return nil, &NotLoadedError{edge: "group_budget"}
 }
@@ -82,12 +80,10 @@ func (e TransactionEdges) GroupBudgetOrErr() (*GroupBudget, error) {
 // RequestOrErr returns the Request value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TransactionEdges) RequestOrErr() (*Request, error) {
-	if e.loadedTypes[3] {
-		if e.Request == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: request.Label}
-		}
+	if e.Request != nil {
 		return e.Request, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: request.Label}
 	}
 	return nil, &NotLoadedError{edge: "request"}
 }
@@ -106,7 +102,7 @@ func (*Transaction) scanValues(columns []string) ([]any, error) {
 		case transaction.ForeignKeys[1]: // request_transaction
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Transaction", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -146,9 +142,17 @@ func (t *Transaction) assignValues(columns []string, values []any) error {
 				t.request_transaction = new(uuid.UUID)
 				*t.request_transaction = *value.S.(*uuid.UUID)
 			}
+		default:
+			t.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Transaction.
+// This includes values selected through modifiers, order, etc.
+func (t *Transaction) Value(name string) (ent.Value, error) {
+	return t.selectValues.Get(name)
 }
 
 // QueryDetail queries the "detail" edge of the Transaction entity.

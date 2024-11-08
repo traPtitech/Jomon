@@ -10,9 +10,15 @@ import (
 
 type TransactionRepository interface {
 	GetTransactions(ctx context.Context, query TransactionQuery) ([]*TransactionResponse, error)
-	CreateTransaction(ctx context.Context, Amount int, Target string, tags []*uuid.UUID, group *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error)
+	CreateTransaction(
+		ctx context.Context, Amount int, Target string,
+		tags []*uuid.UUID, group *uuid.UUID, requestID *uuid.UUID,
+	) (*TransactionResponse, error)
 	GetTransaction(ctx context.Context, transactionID uuid.UUID) (*TransactionResponse, error)
-	UpdateTransaction(ctx context.Context, transactionID uuid.UUID, Amount int, Target string, tags []*uuid.UUID, group *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error)
+	UpdateTransaction(
+		ctx context.Context, transactionID uuid.UUID, Amount int, Target string,
+		tags []*uuid.UUID, group *uuid.UUID, requestID *uuid.UUID,
+	) (*TransactionResponse, error)
 }
 
 type Transaction struct {
@@ -36,6 +42,8 @@ type TransactionQuery struct {
 	Target  *string
 	Since   *time.Time
 	Until   *time.Time
+	Limit   int
+	Offset  int
 	Tag     *string
 	Group   *string
 	Request *uuid.UUID

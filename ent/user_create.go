@@ -222,7 +222,7 @@ func (uc *UserCreate) Mutation() *UserMutation {
 // Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	uc.defaults()
-	return withHooks[*User, UserMutation](ctx, uc.sqlSave, uc.mutation, uc.hooks)
+	return withHooks(ctx, uc.sqlSave, uc.mutation, uc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -356,10 +356,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: user.GroupUserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -375,10 +372,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: user.GroupOwnerPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: group.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -394,10 +388,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.CommentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: comment.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(comment.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -413,10 +404,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.RequestStatusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: requeststatus.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(requeststatus.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -432,10 +420,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -451,10 +436,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.FileColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: file.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -470,10 +452,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.RequestTargetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: requesttarget.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(requesttarget.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -487,11 +466,15 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 // UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
+	err      error
 	builders []*UserCreate
 }
 
 // Save creates the User entities in the database.
 func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
+	if ucb.err != nil {
+		return nil, ucb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ucb.builders))
 	nodes := make([]*User, len(ucb.builders))
 	mutators := make([]Mutator, len(ucb.builders))
@@ -508,8 +491,8 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ucb.builders[i+1].mutation)
 				} else {

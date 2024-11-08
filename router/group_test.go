@@ -11,14 +11,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/testutil/random"
+	"go.uber.org/mock/gomock"
 )
 
 func TestHandlers_GetGroups(t *testing.T) {
@@ -66,17 +67,16 @@ func TestHandlers_GetGroups(t *testing.T) {
 			GetGroups(c.Request().Context()).
 			Return(groups, nil)
 
-		resOverview := []*GroupOverview{}
-		for _, group := range groups {
-			resOverview = append(resOverview, &GroupOverview{
+		resOverview := lo.Map(groups, func(group *model.Group, _ int) *GroupOverview {
+			return &GroupOverview{
 				ID:          group.ID,
 				Name:        group.Name,
 				Description: group.Description,
 				Budget:      group.Budget,
 				CreatedAt:   group.CreatedAt,
 				UpdatedAt:   group.UpdatedAt,
-			})
-		}
+			}
+		})
 		resBody, err := json.Marshal(resOverview)
 		require.NoError(t, err)
 
@@ -162,7 +162,13 @@ func TestHandlers_PostGroup(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/groups", strings.NewReader(fmt.Sprintf(`{"name":"%s","description":"%s","budget":%d}`, group.Name, group.Description, *group.Budget)))
+		reqBody := fmt.Sprintf(
+			`{"name":"%s","description":"%s","budget":%d}`,
+			group.Name, group.Description, *group.Budget)
+		req, err := http.NewRequest(
+			http.MethodPost,
+			"/api/groups",
+			strings.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -200,7 +206,11 @@ func TestHandlers_PostGroup(t *testing.T) {
 		budget := random.Numeric(t, 1000000)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/groups", strings.NewReader(fmt.Sprintf(`{"name":"test","description":"test","budget":%d}`, budget)))
+		reqBody := fmt.Sprintf(`{"name":"test","description":"test","budget":%d}`, budget)
+		req, err := http.NewRequest(
+			http.MethodPost,
+			"/api/groups",
+			strings.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -416,7 +426,10 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/groups/%s", uuid.Nil.String()), nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/groups/%s", uuid.Nil.String()),
+			nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -444,7 +457,10 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		errors.As(errors.New("unknown group id"), &resErr)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/groups/%s", unknownGroupID), nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/groups/%s", unknownGroupID),
+			nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -644,7 +660,13 @@ func TestHandlers_PutGroup(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/groups/%s", group.ID.String()), strings.NewReader(fmt.Sprintf(`{"name":"%s","description":"%s","budget":%d}`, updated.Name, updated.Description, *updated.Budget)))
+		reqBody := fmt.Sprintf(
+			`{"name":"%s","description":"%s","budget":%d}`,
+			updated.Name, updated.Description, *updated.Budget)
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/groups/%s", group.ID.String()),
+			strings.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -657,7 +679,10 @@ func TestHandlers_PutGroup(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			UpdateGroup(c.Request().Context(), group.ID, updated.Name, updated.Description, updated.Budget).
+			UpdateGroup(
+				c.Request().Context(),
+				group.ID, updated.Name,
+				updated.Description, updated.Budget).
 			Return(updated, nil)
 
 		res := &GroupOverview{
@@ -706,7 +731,13 @@ func TestHandlers_PutGroup(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/groups/%s", group.ID.String()), strings.NewReader(fmt.Sprintf(`{"name":"%s","description":"%s","budget":%d}`, updated.Name, updated.Description, *updated.Budget)))
+		reqBody := fmt.Sprintf(
+			`{"name":"%s","description":"%s","budget":%d}`,
+			updated.Name, updated.Description, *updated.Budget)
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/groups/%s", group.ID.String()),
+			strings.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -720,7 +751,9 @@ func TestHandlers_PutGroup(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockGroupRepository.
 			EXPECT().
-			UpdateGroup(c.Request().Context(), group.ID, updated.Name, updated.Description, updated.Budget).
+			UpdateGroup(
+				c.Request().Context(),
+				group.ID, updated.Name, updated.Description, updated.Budget).
 			Return(nil, resErr)
 
 		err = h.Handlers.PutGroup(c)
@@ -737,7 +770,10 @@ func TestHandlers_PutGroup(t *testing.T) {
 
 		ctrl := gomock.NewController(t)
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, "/api/groups/invalid-uuid", strings.NewReader(`{"name":"test","description":"test","budget":1000000}`))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			"/api/groups/invalid-uuid",
+			strings.NewReader(`{"name":"test","description":"test","budget":1000000}`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -775,7 +811,10 @@ func TestHandlers_DeleteGroup(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s", group.ID.String()), nil)
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/groups/%s", group.ID.String()),
+			nil)
 		require.NoError(t, err)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -812,7 +851,10 @@ func TestHandlers_DeleteGroup(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s", group.ID.String()), nil)
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/groups/%s", group.ID.String()),
+			nil)
 		require.NoError(t, err)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -863,7 +905,6 @@ func TestHandlers_PostMember(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
-
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		date := time.Now()
@@ -892,7 +933,10 @@ func TestHandlers_PostMember(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/groups/%s/members", group.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPost,
+			fmt.Sprintf("/api/groups/%s/members", group.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -924,7 +968,6 @@ func TestHandlers_PostMember(t *testing.T) {
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
-
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
@@ -933,7 +976,10 @@ func TestHandlers_PostMember(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/groups/hoge/members", bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPost,
+			"/api/groups/hoge/members",
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -962,7 +1008,10 @@ func TestHandlers_PostMember(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/groups/%s/members", uuid.Nil.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPost,
+			fmt.Sprintf("/api/groups/%s/members", uuid.Nil.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1005,7 +1054,10 @@ func TestHandlers_PostMember(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/groups/%s/members", unknownGroupID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPost,
+			fmt.Sprintf("/api/groups/%s/members", unknownGroupID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1051,7 +1103,10 @@ func TestHandlers_PostMember(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/groups/%s/members", group.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPost,
+			fmt.Sprintf("/api/groups/%s/members", group.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1106,7 +1161,10 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members", group.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/groups/%s/members", group.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1146,7 +1204,10 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members", uuid.Nil.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/groups/%s/members", uuid.Nil.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1189,7 +1250,10 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members", unknownGroupID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/groups/%s/members", unknownGroupID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1235,7 +1299,10 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members", group.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/groups/%s/members", group.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1270,7 +1337,10 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/members", invID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/groups/%s/members", invID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1293,7 +1363,6 @@ func TestHandlers_PostOwner(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
-
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		date := time.Now()
@@ -1322,7 +1391,10 @@ func TestHandlers_PostOwner(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/groups/%s/owners", group.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPost,
+			fmt.Sprintf("/api/groups/%s/owners", group.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1354,7 +1426,6 @@ func TestHandlers_PostOwner(t *testing.T) {
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
-
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
@@ -1363,7 +1434,10 @@ func TestHandlers_PostOwner(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/groups/hoge/owners", bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPost,
+			"/api/groups/hoge/owners",
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1392,7 +1466,10 @@ func TestHandlers_PostOwner(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/groups/%s/owners", uuid.Nil.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPost,
+			fmt.Sprintf("/api/groups/%s/owners", uuid.Nil.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1435,7 +1512,10 @@ func TestHandlers_PostOwner(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/groups/%s/owners", unknownGroupID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPost,
+			fmt.Sprintf("/api/groups/%s/owners", unknownGroupID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1481,7 +1561,10 @@ func TestHandlers_PostOwner(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/groups/%s/owners", group.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPost,
+			fmt.Sprintf("/api/groups/%s/owners", group.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1536,7 +1619,10 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners", group.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/groups/%s/owners", group.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1566,7 +1652,10 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners", uuid.Nil.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/groups/%s/owners", uuid.Nil.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1609,7 +1698,10 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners", unknownGroupID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/groups/%s/owners", unknownGroupID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1653,7 +1745,10 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		errors.As(errors.New("unknown owner id"), &resErr)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners", group.ID.String()), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/groups/%s/owners", group.ID.String()),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -1687,7 +1782,10 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		_, resErr := uuid.Parse(invID)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/groups/%s/owners", invID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/groups/%s/owners", invID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()

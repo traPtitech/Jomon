@@ -5,6 +5,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
@@ -14,7 +15,9 @@ import (
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
 )
 
-func (repo *EntRepository) GetTransactions(ctx context.Context, query TransactionQuery) ([]*TransactionResponse, error) {
+func (repo *EntRepository) GetTransactions(
+	ctx context.Context, query TransactionQuery,
+) ([]*TransactionResponse, error) {
 	// Querying
 	var transactionsq *ent.TransactionQuery
 	if query.Sort == nil || *query.Sort == "" || *query.Sort == "created_at" {
@@ -83,6 +86,8 @@ func (repo *EntRepository) GetTransactions(ctx context.Context, query Transactio
 			Where(transaction.CreatedAtLT(*query.Until))
 	}
 
+	transactionsq = transactionsq.Limit(query.Limit).Offset(query.Offset)
+
 	if query.Tag != nil {
 		transactionsq = transactionsq.
 			Where(transaction.HasTagWith(
@@ -112,15 +117,16 @@ func (repo *EntRepository) GetTransactions(ctx context.Context, query Transactio
 	}
 
 	// Converting
-	var res []*TransactionResponse
-	for _, tx := range txs {
-		res = append(res, ConvertEntTransactionToModelTransactionResponse(tx))
-	}
+	res := lo.Map(txs, func(tx *ent.Transaction, _ int) *TransactionResponse {
+		return ConvertEntTransactionToModelTransactionResponse(tx)
+	})
 
 	return res, nil
 }
 
-func (repo *EntRepository) GetTransaction(ctx context.Context, transactionID uuid.UUID) (*TransactionResponse, error) {
+func (repo *EntRepository) GetTransaction(
+	ctx context.Context, transactionID uuid.UUID,
+) (*TransactionResponse, error) {
 	// Querying
 	tx, err := repo.client.Transaction.
 		Query().
@@ -140,23 +146,25 @@ func (repo *EntRepository) GetTransaction(ctx context.Context, transactionID uui
 	return ConvertEntTransactionToModelTransactionResponse(tx), nil
 }
 
-func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
+func (repo *EntRepository) CreateTransaction(
+	ctx context.Context, amount int, target string,
+	tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID,
+) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer func() {
 		if v := recover(); v != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			panic(v)
 		}
 	}()
 
 	// Get Tags
-	var tagIDs []uuid.UUID
-	for _, t := range tags {
-		tagIDs = append(tagIDs, *t)
-	}
+	tagIDs := lo.Map(tags, func(t *uuid.UUID, _ int) uuid.UUID {
+		return *t
+	})
 
 	// Create Transaction Detail
 	detail, err := repo.createTransactionDetail(ctx, tx, amount, target)
@@ -239,14 +247,17 @@ func (repo *EntRepository) CreateTransaction(ctx context.Context, amount int, ta
 	return ConvertEntTransactionToModelTransactionResponse(trns), nil
 }
 
-func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID uuid.UUID, amount int, target string, tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID) (*TransactionResponse, error) {
+func (repo *EntRepository) UpdateTransaction(
+	ctx context.Context, transactionID uuid.UUID, amount int, target string,
+	tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID,
+) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 	defer func() {
 		if v := recover(); v != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			panic(v)
 		}
 	}()
@@ -259,10 +270,9 @@ func (repo *EntRepository) UpdateTransaction(ctx context.Context, transactionID 
 	}
 
 	// Get Tags
-	var tagIDs []uuid.UUID
-	for _, t := range tags {
-		tagIDs = append(tagIDs, *t)
-	}
+	tagIDs := lo.Map(tags, func(t *uuid.UUID, _ int) uuid.UUID {
+		return *t
+	})
 
 	// Delete Tag Transaction Edge
 	_, err = tx.Client().Tag.
@@ -366,11 +376,12 @@ func ConvertEntTransactionToModelTransaction(transaction *ent.Transaction) *Tran
 	}
 }
 
-func ConvertEntTransactionToModelTransactionResponse(transaction *ent.Transaction) *TransactionResponse {
-	var tags []*Tag
-	for _, t := range transaction.Edges.Tag {
-		tags = append(tags, ConvertEntTagToModelTag(t))
-	}
+func ConvertEntTransactionToModelTransactionResponse(
+	transaction *ent.Transaction,
+) *TransactionResponse {
+	tags := lo.Map(transaction.Edges.Tag, func(t *ent.Tag, _ int) *Tag {
+		return ConvertEntTagToModelTag(t)
+	})
 	var g *Group
 	if transaction.Edges.GroupBudget != nil {
 		g = ConvertEntGroupToModelGroup(transaction.Edges.GroupBudget.Edges.Group)

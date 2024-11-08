@@ -7,6 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
+	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
 )
 
@@ -27,9 +29,8 @@ func (h Handlers) GetUsers(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := make([]User, 0, len(users))
-	for _, user := range users {
-		res = append(res, User{
+	res := lo.Map(users, func(user *model.User, _ int) User {
+		return User{
 			ID:          user.ID,
 			Name:        user.Name,
 			DisplayName: user.DisplayName,
@@ -37,8 +38,8 @@ func (h Handlers) GetUsers(c echo.Context) error {
 			CreatedAt:   user.CreatedAt,
 			UpdatedAt:   user.UpdatedAt,
 			DeletedAt:   user.DeletedAt,
-		})
-	}
+		}
+	})
 
 	return c.JSON(http.StatusOK, res)
 }
@@ -62,7 +63,9 @@ func (h Handlers) UpdateUserInfo(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	updated, err := h.Repository.UpdateUser(c.Request().Context(), user.ID, newUser.Name, newUser.DisplayName, newUser.Admin)
+	updated, err := h.Repository.UpdateUser(
+		c.Request().Context(),
+		user.ID, newUser.Name, newUser.DisplayName, newUser.Admin)
 	if err != nil {
 		h.Logger.Error("failed to update user in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)

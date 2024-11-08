@@ -1,11 +1,14 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
 	"go.uber.org/zap"
@@ -70,6 +73,34 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		}
 		until = &u
 	}
+	limit := 100
+	if limitQuery := c.QueryParam("limit"); limitQuery != "" {
+		limitI, err := strconv.Atoi(limitQuery)
+		if err != nil {
+			h.Logger.Info("could not parse limit as integer", zap.Error(err))
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		if limitI < 0 {
+			h.Logger.Info("received negative limit", zap.Int("limit", limitI))
+			err := fmt.Errorf("negative limit(=%d) is invalid", limitI)
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		limit = limitI
+	}
+	offset := 0
+	if offsetQuery := c.QueryParam("offset"); offsetQuery != "" {
+		offsetI, err := strconv.Atoi(offsetQuery)
+		if err != nil {
+			h.Logger.Info("could not parse limit as integer", zap.Error(err))
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		if offsetI < 0 {
+			h.Logger.Info("received negative offset", zap.Int("offset", offsetI))
+			err := fmt.Errorf("negative offset(=%d) is invalid", offsetI)
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		offset = offsetI
+	}
 	var tag *string
 	if c.QueryParam("tag") != "" {
 		t := c.QueryParam("tag")
@@ -95,6 +126,8 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		Target:  target,
 		Since:   since,
 		Until:   until,
+		Limit:   limit,
+		Offset:  offset,
 		Tag:     tag,
 		Group:   group,
 		Request: request,
@@ -104,17 +137,16 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := []*Transaction{}
-	for _, tx := range txs {
-		tags := []*TagOverview{}
-		for _, tag := range tx.Tags {
-			tags = append(tags, &TagOverview{
+	res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		tags := lo.Map(tx.Tags, func(tag *model.Tag, _ int) *TagOverview {
+			return &TagOverview{
 				ID:        tag.ID,
 				Name:      tag.Name,
 				CreatedAt: tag.CreatedAt,
 				UpdatedAt: tag.UpdatedAt,
-			})
-		}
+			}
+		})
+
 		var group *GroupOverview
 		if tx.Group != nil {
 			group = &GroupOverview{
@@ -126,7 +158,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
 		}
-		tx := &Transaction{
+		return &Transaction{
 			ID:        tx.ID,
 			Amount:    tx.Amount,
 			Target:    tx.Target,
@@ -136,8 +168,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			CreatedAt: tx.CreatedAt,
 			UpdatedAt: tx.UpdatedAt,
 		}
-		res = append(res, tx)
-	}
+	})
 
 	return c.JSON(http.StatusOK, res)
 }
@@ -156,21 +187,23 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 			h.Logger.Info("target is nil")
 			return echo.NewHTTPError(http.StatusBadRequest, "target is nil")
 		}
-		created, err := h.Repository.CreateTransaction(ctx, tx.Amount, *target, tx.Tags, tx.Group, tx.Request)
+		created, err := h.Repository.CreateTransaction(
+			ctx,
+			tx.Amount, *target, tx.Tags, tx.Group, tx.Request)
 		if err != nil {
 			h.Logger.Error("failed to create transaction in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		tags := []*TagOverview{}
-		for _, tag := range created.Tags {
-			tags = append(tags, &TagOverview{
+		tags := lo.Map(created.Tags, func(tag *model.Tag, _ int) *TagOverview {
+			return &TagOverview{
 				ID:        tag.ID,
 				Name:      tag.Name,
 				CreatedAt: tag.CreatedAt,
 				UpdatedAt: tag.UpdatedAt,
-			})
-		}
+			}
+		})
+
 		var group *GroupOverview
 		if created.Group != nil {
 			group = &GroupOverview{
@@ -212,15 +245,15 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	tags := []*TagOverview{}
-	for _, tag := range tx.Tags {
-		tags = append(tags, &TagOverview{
+	tags := lo.Map(tx.Tags, func(tag *model.Tag, _ int) *TagOverview {
+		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
 			UpdatedAt: tag.UpdatedAt,
-		})
-	}
+		}
+	})
+
 	var group *GroupOverview
 	if tx.Group != nil {
 		group = &GroupOverview{
@@ -255,26 +288,30 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 
 	var tx *TransactionOverviewWithOneTarget
 	if err := c.Bind(&tx); err != nil {
-		h.Logger.Info("could not get transaction overview with one target from request", zap.Error(err))
+		h.Logger.Info(
+			"could not get transaction overview with one target from request",
+			zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	ctx := c.Request().Context()
-	updated, err := h.Repository.UpdateTransaction(ctx, txID, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
+	updated, err := h.Repository.UpdateTransaction(
+		ctx,
+		txID, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
 	if err != nil {
 		h.Logger.Error("failed to update transaction in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	tags := []*TagOverview{}
-	for _, tag := range updated.Tags {
-		tags = append(tags, &TagOverview{
+	tags := lo.Map(updated.Tags, func(tag *model.Tag, _ int) *TagOverview {
+		return &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
 			UpdatedAt: tag.UpdatedAt,
-		})
-	}
+		}
+	})
+
 	var group *GroupOverview
 	if updated.Group != nil {
 		group = &GroupOverview{

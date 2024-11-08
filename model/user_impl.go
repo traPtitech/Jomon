@@ -5,11 +5,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
-func (repo *EntRepository) CreateUser(ctx context.Context, name string, dn string, admin bool) (*User, error) {
+func (repo *EntRepository) CreateUser(
+	ctx context.Context, name string, dn string, admin bool,
+) (*User, error) {
 	u, err := repo.client.User.
 		Create().
 		SetName(name).
@@ -51,14 +54,15 @@ func (repo *EntRepository) GetUsers(ctx context.Context) ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	var modelusers []*User
-	for _, u := range users {
-		modelusers = append(modelusers, convertEntUserToModelUser(u))
-	}
+	modelusers := lo.Map(users, func(u *ent.User, _ int) *User {
+		return convertEntUserToModelUser(u)
+	})
 	return modelusers, nil
 }
 
-func (repo *EntRepository) UpdateUser(ctx context.Context, userID uuid.UUID, name string, dn string, admin bool) (*User, error) {
+func (repo *EntRepository) UpdateUser(
+	ctx context.Context, userID uuid.UUID, name string, dn string, admin bool,
+) (*User, error) {
 	u, err := repo.client.User.
 		UpdateOneID(userID).
 		SetName(name).

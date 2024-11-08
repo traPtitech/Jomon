@@ -5,7 +5,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
 )
 
@@ -17,10 +19,9 @@ func (h Handlers) GetAdmins(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := []*uuid.UUID{}
-	for _, admin := range admins {
-		res = append(res, &admin.ID)
-	}
+	res := lo.Map(admins, func(admin *model.Admin, _ int) *uuid.UUID {
+		return &admin.ID
+	})
 
 	return c.JSON(http.StatusOK, res)
 }

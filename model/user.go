@@ -23,5 +23,7 @@ type UserRepository interface {
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*User, error)
 	GetUserByName(ctx context.Context, name string) (*User, error)
 	GetUsers(ctx context.Context) ([]*User, error)
-	UpdateUser(ctx context.Context, userID uuid.UUID, name string, dn string, admin bool) (*User, error)
+	UpdateUser(
+		ctx context.Context, userID uuid.UUID, name string, dn string, admin bool,
+	) (*User, error)
 }

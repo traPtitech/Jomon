@@ -5,12 +5,15 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/request"
 )
 
-func (repo *EntRepository) GetComments(ctx context.Context, requestID uuid.UUID) ([]*Comment, error) {
+func (repo *EntRepository) GetComments(
+	ctx context.Context, requestID uuid.UUID,
+) ([]*Comment, error) {
 	_, err := repo.client.Request.
 		Query().
 		Where(request.IDEQ(requestID)).
@@ -31,14 +34,15 @@ func (repo *EntRepository) GetComments(ctx context.Context, requestID uuid.UUID)
 	if err != nil {
 		return nil, err
 	}
-	modelcomments := []*Comment{}
-	for _, c := range comments {
-		modelcomments = append(modelcomments, ConvertEntCommentToModelComment(c, c.Edges.User.ID))
-	}
+	modelcomments := lo.Map(comments, func(c *ent.Comment, _ int) *Comment {
+		return ConvertEntCommentToModelComment(c, c.Edges.User.ID)
+	})
 	return modelcomments, nil
 }
 
-func (repo *EntRepository) CreateComment(ctx context.Context, comment string, requestID uuid.UUID, userID uuid.UUID) (*Comment, error) {
+func (repo *EntRepository) CreateComment(
+	ctx context.Context, comment string, requestID uuid.UUID, userID uuid.UUID,
+) (*Comment, error) {
 	created, err := repo.client.Comment.
 		Create().
 		SetComment(comment).
@@ -51,7 +55,9 @@ func (repo *EntRepository) CreateComment(ctx context.Context, comment string, re
 	return ConvertEntCommentToModelComment(created, userID), nil
 }
 
-func (repo *EntRepository) UpdateComment(ctx context.Context, commentContent string, requestID uuid.UUID, commentID uuid.UUID) (*Comment, error) {
+func (repo *EntRepository) UpdateComment(
+	ctx context.Context, commentContent string, requestID uuid.UUID, commentID uuid.UUID,
+) (*Comment, error) {
 	updated, err := repo.client.Comment.
 		UpdateOneID(commentID).
 		SetComment(commentContent).
@@ -72,7 +78,9 @@ func (repo *EntRepository) UpdateComment(ctx context.Context, commentContent str
 	return ConvertEntCommentToModelComment(updated, updatedWithUser.Edges.User.ID), nil
 }
 
-func (repo *EntRepository) DeleteComment(ctx context.Context, requestID uuid.UUID, commentID uuid.UUID) error {
+func (repo *EntRepository) DeleteComment(
+	ctx context.Context, requestID uuid.UUID, commentID uuid.UUID,
+) error {
 	c, err := repo.client.Comment.
 		Query().
 		Where(

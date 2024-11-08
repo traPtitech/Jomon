@@ -69,7 +69,9 @@ func (s *Status) UnmarshalJSON(data []byte) error {
 }
 
 type RequestStatusRepository interface {
-	CreateStatus(ctx context.Context, requestID uuid.UUID, userID uuid.UUID, status Status) (*RequestStatus, error)
+	CreateStatus(
+		ctx context.Context, requestID uuid.UUID, userID uuid.UUID, status Status,
+	) (*RequestStatus, error)
 }
 
 type RequestStatus struct {

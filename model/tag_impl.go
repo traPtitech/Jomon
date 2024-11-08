@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/tag"
 )
@@ -16,10 +17,10 @@ func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
 	if err != nil {
 		return nil, err
 	}
-	modeltags := []*Tag{}
-	for _, t := range tags {
-		modeltags = append(modeltags, ConvertEntTagToModelTag(t))
-	}
+	modeltags := lo.Map(tags, func(t *ent.Tag, _ int) *Tag {
+		return ConvertEntTagToModelTag(t)
+	})
+
 	return modeltags, nil
 }
 
@@ -45,7 +46,9 @@ func (repo *EntRepository) CreateTag(ctx context.Context, name string) (*Tag, er
 	return ConvertEntTagToModelTag(created), nil
 }
 
-func (repo *EntRepository) UpdateTag(ctx context.Context, tagID uuid.UUID, name string) (*Tag, error) {
+func (repo *EntRepository) UpdateTag(
+	ctx context.Context, tagID uuid.UUID, name string,
+) (*Tag, error) {
 	t, err := repo.client.Tag.
 		UpdateOneID(tagID).
 		SetName(name).

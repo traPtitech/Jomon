@@ -13,7 +13,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
@@ -22,8 +21,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/testutil/random"
+	"go.uber.org/mock/gomock"
 )
 
+// nolint:lll
 var testJpeg = `/9j/4AAQSkZJRgABAQIAOAA4AAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////2wBDAf//////////////////////////////////////////////////////////////////////////////////////wAARCAABAAEDAREAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwBKBH//2Q`
 
 func TestHandlers_PostFile(t *testing.T) {
@@ -44,9 +45,14 @@ func TestHandlers_PostFile(t *testing.T) {
 		pr, pw := io.Pipe()
 		writer := multipart.NewWriter(pw)
 		go func() {
-			defer writer.Close()
-			writer.WriteField("name", "test")
-			writer.WriteField("request_id", request.String())
+			defer func() {
+				err := writer.Close()
+				assert.NoError(t, err)
+			}()
+			err := writer.WriteField("name", "test")
+			assert.NoError(t, err)
+			err = writer.WriteField("request_id", request.String())
+			assert.NoError(t, err)
 			part := make(textproto.MIMEHeader)
 			part.Set("Content-Type", "image/jpeg")
 			part.Set("Content-Disposition", `form-data; name="file"; filename="test.jpg"`)
@@ -112,9 +118,14 @@ func TestHandlers_PostFile(t *testing.T) {
 		pr, pw := io.Pipe()
 		writer := multipart.NewWriter(pw)
 		go func() {
-			defer writer.Close()
-			writer.WriteField("name", "test")
-			writer.WriteField("request_id", request.String())
+			defer func() {
+				err := writer.Close()
+				assert.NoError(t, err)
+			}()
+			err := writer.WriteField("name", "test")
+			assert.NoError(t, err)
+			err = writer.WriteField("request_id", request.String())
+			assert.NoError(t, err)
 			part := make(textproto.MIMEHeader)
 			part.Set("Content-Type", "image/jpeg")
 			part.Set("Content-Disposition", `form-data; name="file"; filename="test.jpg"`)
@@ -175,9 +186,14 @@ func TestHandlers_PostFile(t *testing.T) {
 		pr, pw := io.Pipe()
 		writer := multipart.NewWriter(pw)
 		go func() {
-			defer writer.Close()
-			writer.WriteField("name", "test")
-			writer.WriteField("request_id", request.String())
+			defer func() {
+				err := writer.Close()
+				assert.NoError(t, err)
+			}()
+			err := writer.WriteField("name", "test")
+			assert.NoError(t, err)
+			err = writer.WriteField("request_id", request.String())
+			assert.NoError(t, err)
 			part := make(textproto.MIMEHeader)
 			part.Set("Content-Type", "image/jpeg")
 			part.Set("Content-Disposition", `form-data; name="file"; filename="test.jpg"`)

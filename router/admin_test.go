@@ -8,13 +8,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
+	"go.uber.org/mock/gomock"
 )
 
 func TestHandler_GetAdmins(t *testing.T) {
@@ -124,7 +124,10 @@ func TestHandler_PostAdmin(t *testing.T) {
 		admin := []uuid.UUID{uuid.New()}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/admins", strings.NewReader(`["`+admin[0].String()+`"]`))
+		req, err := http.NewRequest(
+			http.MethodPost,
+			"/api/admins",
+			strings.NewReader(`["`+admin[0].String()+`"]`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -149,7 +152,10 @@ func TestHandler_PostAdmin(t *testing.T) {
 		adminID := uuid.New()
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/admins", strings.NewReader(`["`+adminID.String()+`"]`))
+		req, err := http.NewRequest(
+			http.MethodPost,
+			"/api/admins",
+			strings.NewReader(`["`+adminID.String()+`"]`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -177,7 +183,10 @@ func TestHandler_PostAdmin(t *testing.T) {
 		adminID := uuid.New()
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/admins", strings.NewReader(`["`+adminID.String()+`"]`))
+		req, err := http.NewRequest(
+			http.MethodPost,
+			"/api/admins",
+			strings.NewReader(`["`+adminID.String()+`"]`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -210,7 +219,10 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		admin := []uuid.UUID{uuid.New()}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, "/api/admins", strings.NewReader(`["`+admin[0].String()+`"]`))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			"/api/admins",
+			strings.NewReader(`["`+admin[0].String()+`"]`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -235,7 +247,10 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		adminID := uuid.New()
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, "/api/admins", strings.NewReader(`["`+adminID.String()+`"]`))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			"/api/admins",
+			strings.NewReader(`["`+adminID.String()+`"]`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -261,7 +276,10 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, "/api/admins", strings.NewReader(`["invalid"]`))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			"/api/admins",
+			strings.NewReader(`["invalid"]`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -281,7 +299,10 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		adminID := uuid.New()
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, "/api/admins", strings.NewReader(`["`+adminID.String()+`"]`))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			"/api/admins",
+			strings.NewReader(`["`+adminID.String()+`"]`))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()

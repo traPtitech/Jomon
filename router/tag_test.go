@@ -11,13 +11,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/testutil/random"
+	"go.uber.org/mock/gomock"
 )
 
 func TestHandlers_GetTags(t *testing.T) {
@@ -57,15 +58,15 @@ func TestHandlers_GetTags(t *testing.T) {
 			GetTags(c.Request().Context()).
 			Return(tags, nil)
 
-		resOverview := []*TagOverview{}
-		for _, tag := range tags {
-			resOverview = append(resOverview, &TagOverview{
+		resOverview := lo.Map(tags, func(tag *model.Tag, _ int) *TagOverview {
+			return &TagOverview{
 				ID:        tag.ID,
 				Name:      tag.Name,
 				CreatedAt: tag.CreatedAt,
 				UpdatedAt: tag.UpdatedAt,
-			})
-		}
+			}
+		})
+
 		res := resOverview
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
@@ -255,7 +256,10 @@ func TestHandlers_PutTag(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/tags/%s", tag.ID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/tags/%s", tag.ID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -306,7 +310,10 @@ func TestHandlers_PutTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/tags/%s", tag.ID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/tags/%s", tag.ID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -390,7 +397,10 @@ func TestHandlers_PutTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/tags/%s", tag.ID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/tags/%s", tag.ID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -404,7 +414,10 @@ func TestHandlers_PutTag(t *testing.T) {
 
 		err = h.Handlers.PutTag(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID")), err)
+			assert.Equal(
+				t,
+				echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID")),
+				err)
 		}
 	})
 }
@@ -432,7 +445,10 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/tags/%s", tag.ID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/tags/%s", tag.ID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -474,7 +490,10 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/tags/%s", tag.ID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/tags/%s", tag.ID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -558,7 +577,10 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/tags/%s", tag.ID), bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/tags/%s", tag.ID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -572,7 +594,10 @@ func TestHandlers_DeleteTag(t *testing.T) {
 
 		err = h.Handlers.DeleteTag(c)
 		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID")), err)
+			assert.Equal(
+				t,
+				echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID")),
+				err)
 		}
 	})
 }

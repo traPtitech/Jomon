@@ -1,7 +1,6 @@
 package router
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,14 +9,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/testutil/random"
+	"go.uber.org/mock/gomock"
 )
 
 func TestHandlers_GetTransactions(t *testing.T) {
@@ -93,22 +93,23 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Target: nil,
 				Since:  nil,
 				Until:  nil,
+				Limit:  100,
+				Offset: 0,
 				Tag:    nil,
 				Group:  nil,
 			}).
 			Return(txs, nil)
 
-		resOverview := []*Transaction{}
-		for _, tx := range txs {
-			tag := []*TagOverview{}
-			for _, modelTag := range tx.Tags {
-				tag = append(tag, &TagOverview{
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
+				return &TagOverview{
 					ID:        modelTag.ID,
 					Name:      modelTag.Name,
 					CreatedAt: modelTag.CreatedAt,
 					UpdatedAt: modelTag.UpdatedAt,
-				})
-			}
+				}
+			})
+
 			group := &GroupOverview{
 				ID:          tx.Group.ID,
 				Name:        tx.Group.Name,
@@ -117,7 +118,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				CreatedAt:   tx.Group.CreatedAt,
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
-			resOverview = append(resOverview, &Transaction{
+			return &Transaction{
 				ID:        tx.ID,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
@@ -125,9 +126,9 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Group:     group,
 				CreatedAt: tx.CreatedAt,
 				UpdatedAt: tx.UpdatedAt,
-			})
-		}
-		res := resOverview
+			}
+		})
+
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
@@ -206,21 +207,22 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		h.Repository.MockTransactionRepository.
 			EXPECT().
 			GetTransactions(c.Request().Context(), model.TransactionQuery{
-				Sort: &sortQuery,
+				Sort:   &sortQuery,
+				Limit:  100,
+				Offset: 0,
 			}).
 			Return(txs, nil)
 
-		resOverview := []*Transaction{}
-		for _, tx := range txs {
-			tag := []*TagOverview{}
-			for _, modelTag := range tx.Tags {
-				tag = append(tag, &TagOverview{
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
+				return &TagOverview{
 					ID:        modelTag.ID,
 					Name:      modelTag.Name,
 					CreatedAt: modelTag.CreatedAt,
 					UpdatedAt: modelTag.UpdatedAt,
-				})
-			}
+				}
+			})
+
 			group := &GroupOverview{
 				ID:          tx.Group.ID,
 				Name:        tx.Group.Name,
@@ -229,7 +231,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				CreatedAt:   tx.Group.CreatedAt,
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
-			resOverview = append(resOverview, &Transaction{
+			return &Transaction{
 				ID:        tx.ID,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
@@ -237,9 +239,9 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Group:     group,
 				CreatedAt: tx.CreatedAt,
 				UpdatedAt: tx.UpdatedAt,
-			})
-		}
-		res := resOverview
+			}
+		})
+
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
@@ -319,21 +321,22 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		h.Repository.MockTransactionRepository.
 			EXPECT().
 			GetTransactions(c.Request().Context(), model.TransactionQuery{
-				Sort: &sortQuery,
+				Sort:   &sortQuery,
+				Limit:  100,
+				Offset: 0,
 			}).
 			Return(txs, nil)
 
-		resOverview := []*Transaction{}
-		for _, tx := range txs {
-			tag := []*TagOverview{}
-			for _, modelTag := range tx.Tags {
-				tag = append(tag, &TagOverview{
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
+				return &TagOverview{
 					ID:        modelTag.ID,
 					Name:      modelTag.Name,
 					CreatedAt: modelTag.CreatedAt,
 					UpdatedAt: modelTag.UpdatedAt,
-				})
-			}
+				}
+			})
+
 			group := &GroupOverview{
 				ID:          tx.Group.ID,
 				Name:        tx.Group.Name,
@@ -342,7 +345,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				CreatedAt:   tx.Group.CreatedAt,
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
-			resOverview = append(resOverview, &Transaction{
+			return &Transaction{
 				ID:        tx.ID,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
@@ -350,9 +353,9 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Group:     group,
 				CreatedAt: tx.CreatedAt,
 				UpdatedAt: tx.UpdatedAt,
-			})
-		}
-		res := resOverview
+			}
+		})
+
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
@@ -421,7 +424,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		txs := []*model.TransactionResponse{tx1, tx2}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/transactions?target=%s", target1), nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/transactions?target=%s", target1),
+			nil)
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -435,20 +441,21 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			EXPECT().
 			GetTransactions(c.Request().Context(), model.TransactionQuery{
 				Target: &targetQuery,
+				Limit:  100,
+				Offset: 0,
 			}).
 			Return(txs, nil)
 
-		resOverview := []*Transaction{}
-		for _, tx := range txs {
-			tag := []*TagOverview{}
-			for _, modelTag := range tx.Tags {
-				tag = append(tag, &TagOverview{
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
+				return &TagOverview{
 					ID:        modelTag.ID,
 					Name:      modelTag.Name,
 					CreatedAt: modelTag.CreatedAt,
 					UpdatedAt: modelTag.UpdatedAt,
-				})
-			}
+				}
+			})
+
 			group := &GroupOverview{
 				ID:          tx.Group.ID,
 				Name:        tx.Group.Name,
@@ -457,7 +464,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				CreatedAt:   tx.Group.CreatedAt,
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
-			resOverview = append(resOverview, &Transaction{
+			return &Transaction{
 				ID:        tx.ID,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
@@ -465,9 +472,9 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Group:     group,
 				CreatedAt: tx.CreatedAt,
 				UpdatedAt: tx.UpdatedAt,
-			})
-		}
-		res := resOverview
+			}
+		})
+
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
@@ -520,7 +527,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/transactions?since=%s&until=%s", "2020-01-01", "2020-01-02"), nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/transactions?since=%s&until=%s", "2020-01-01", "2020-01-02"),
+			nil)
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -532,22 +542,23 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		h.Repository.MockTransactionRepository.
 			EXPECT().
 			GetTransactions(c.Request().Context(), model.TransactionQuery{
-				Since: &since,
-				Until: &until,
+				Since:  &since,
+				Until:  &until,
+				Limit:  100,
+				Offset: 0,
 			}).
 			Return(txs, nil)
 
-		resOverview := []*Transaction{}
-		for _, tx := range txs {
-			tag := []*TagOverview{}
-			for _, modelTag := range tx.Tags {
-				tag = append(tag, &TagOverview{
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
+				return &TagOverview{
 					ID:        modelTag.ID,
 					Name:      modelTag.Name,
 					CreatedAt: modelTag.CreatedAt,
 					UpdatedAt: modelTag.UpdatedAt,
-				})
-			}
+				}
+			})
+
 			group := &GroupOverview{
 				ID:          tx.Group.ID,
 				Name:        tx.Group.Name,
@@ -556,7 +567,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				CreatedAt:   tx.Group.CreatedAt,
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
-			resOverview = append(resOverview, &Transaction{
+			return &Transaction{
 				ID:        tx.ID,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
@@ -564,9 +575,9 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Group:     group,
 				CreatedAt: tx.CreatedAt,
 				UpdatedAt: tx.UpdatedAt,
-			})
-		}
-		res := resOverview
+			}
+		})
+
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
@@ -575,6 +586,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
 	})
+
+	// TODO: SuccessWithLimit, SuccessWithOffset
 }
 
 func TestHandlers_PostTransaction(t *testing.T) {
@@ -622,7 +635,13 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		group := tx1.Group.ID
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/transactions", bytes.NewBuffer([]byte(fmt.Sprintf(`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s"}`, tx1.Amount, tx1.Target, tag.ID, group))))
+		reqBody := fmt.Sprintf(
+			`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s"}`,
+			tx1.Amount, tx1.Target, tag.ID, group)
+		req, err := http.NewRequest(
+			http.MethodPost,
+			"/api/transactions",
+			strings.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -636,18 +655,16 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			CreateTransaction(c.Request().Context(), tx1.Amount, tx1.Target, tags, &group, nil).
 			Return(tx1, nil)
 
-		var resOverview Transaction
-		reses := []*Transaction{}
-		for _, tx := range txs {
-			tag := []*TagOverview{}
-			for _, modelTag := range tx.Tags {
-				tag = append(tag, &TagOverview{
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
+				return &TagOverview{
 					ID:        modelTag.ID,
 					Name:      modelTag.Name,
 					CreatedAt: modelTag.CreatedAt,
 					UpdatedAt: modelTag.UpdatedAt,
-				})
-			}
+				}
+			})
+
 			group := &GroupOverview{
 				ID:          tx.Group.ID,
 				Name:        tx.Group.Name,
@@ -656,7 +673,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 				CreatedAt:   tx.Group.CreatedAt,
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
-			resOverview = Transaction{
+			return &Transaction{
 				ID:        tx.ID,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
@@ -665,9 +682,8 @@ func TestHandlers_PostTransaction(t *testing.T) {
 				CreatedAt: tx.CreatedAt,
 				UpdatedAt: tx.UpdatedAt,
 			}
-			reses = append(reses, &resOverview)
-		}
-		res := reses
+		})
+
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
@@ -718,7 +734,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(model.Accepted),
+			Status:    model.Accepted,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			Comments:  []*model.Comment{},
@@ -732,7 +748,13 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/transactions", bytes.NewBuffer([]byte(fmt.Sprintf(`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s", "request": "%s"}`, tx.Amount, tx.Target, tag.ID, group, request.ID))))
+		reqBody := fmt.Sprintf(
+			`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s", "request": "%s"}`,
+			tx.Amount, tx.Target, tag.ID, group, request.ID)
+		req, err := http.NewRequest(
+			http.MethodPost,
+			"/api/transactions",
+			strings.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -743,20 +765,21 @@ func TestHandlers_PostTransaction(t *testing.T) {
 
 		h.Repository.MockTransactionRepository.
 			EXPECT().
-			CreateTransaction(c.Request().Context(), tx.Amount, tx.Target, tags, &group, &request.ID).
+			CreateTransaction(
+				c.Request().Context(),
+				tx.Amount, tx.Target,
+				tags, &group, &request.ID).
 			Return(tx, nil)
 
-		var resOverview Transaction
-		reses := []*Transaction{}
-		to := []*TagOverview{}
-		for _, modelTag := range tx.Tags {
-			to = append(to, &TagOverview{
+		to := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
+			return &TagOverview{
 				ID:        modelTag.ID,
 				Name:      modelTag.Name,
 				CreatedAt: modelTag.CreatedAt,
 				UpdatedAt: modelTag.UpdatedAt,
-			})
-		}
+			}
+		})
+
 		grov := &GroupOverview{
 			ID:          tx.Group.ID,
 			Name:        tx.Group.Name,
@@ -765,17 +788,17 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			CreatedAt:   tx.Group.CreatedAt,
 			UpdatedAt:   tx.Group.UpdatedAt,
 		}
-		resOverview = Transaction{
-			ID:        tx.ID,
-			Amount:    tx.Amount,
-			Target:    tx.Target,
-			Tags:      to,
-			Group:     grov,
-			CreatedAt: tx.CreatedAt,
-			UpdatedAt: tx.UpdatedAt,
+		res := []*Transaction{
+			{
+				ID:        tx.ID,
+				Amount:    tx.Amount,
+				Target:    tx.Target,
+				Tags:      to,
+				Group:     grov,
+				CreatedAt: tx.CreatedAt,
+				UpdatedAt: tx.UpdatedAt,
+			},
 		}
-		reses = append(reses, &resOverview)
-		res := reses
 		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
@@ -839,15 +862,15 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			Return(tx, nil)
 
 		var resOverview Transaction
-		to := []*TagOverview{}
-		for _, modelTag := range tx.Tags {
-			to = append(to, &TagOverview{
+		to := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
+			return &TagOverview{
 				ID:        modelTag.ID,
 				Name:      modelTag.Name,
 				CreatedAt: modelTag.CreatedAt,
 				UpdatedAt: modelTag.UpdatedAt,
-			})
-		}
+			}
+		})
+
 		grov := &GroupOverview{
 			ID:          tx.Group.ID,
 			Name:        tx.Group.Name,
@@ -937,13 +960,18 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			UpdatedAt: time.Now(),
 		}
 
-		updatedTags := []*uuid.UUID{}
-		for _, modelTag := range updated.Tags {
-			updatedTags = append(updatedTags, &modelTag.ID)
-		}
+		updatedTags := lo.Map(updated.Tags, func(modelTag *model.Tag, _ int) *uuid.UUID {
+			return &modelTag.ID
+		})
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/transactions/%s", tx.ID), strings.NewReader(fmt.Sprintf(`{"amount": %d, "target": "%s", "tags": ["%s"]}`, updated.Amount, updated.Target, updatedTag.ID)))
+		reqBody := fmt.Sprintf(
+			`{"amount": %d, "target": "%s", "tags": ["%s"]}`,
+			updated.Amount, updated.Target, updatedTag.ID)
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/transactions/%s", tx.ID),
+			strings.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -956,19 +984,21 @@ func TestHandlers_PutTransaction(t *testing.T) {
 
 		h.Repository.MockTransactionRepository.
 			EXPECT().
-			UpdateTransaction(c.Request().Context(), tx.ID, updated.Amount, updated.Target, updatedTags, nil, nil).
+			UpdateTransaction(
+				c.Request().Context(),
+				tx.ID, updated.Amount, updated.Target,
+				updatedTags, nil, nil).
 			Return(updated, nil)
 
 		var resOverview Transaction
-		to := []*TagOverview{}
-		for _, modelTag := range updated.Tags {
-			to = append(to, &TagOverview{
+		to := lo.Map(updated.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
+			return &TagOverview{
 				ID:        modelTag.ID,
 				Name:      modelTag.Name,
 				CreatedAt: modelTag.CreatedAt,
 				UpdatedAt: modelTag.UpdatedAt,
-			})
-		}
+			}
+		})
 		grov := &GroupOverview{
 			ID:          updated.Group.ID,
 			Name:        updated.Group.Name,

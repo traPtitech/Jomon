@@ -21,9 +21,17 @@ func TestEntRepository_GetAdmins(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		user1, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user1, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
-		user2, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user2, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
 
 		got, err := repo.GetAdmins(ctx)
@@ -54,7 +62,11 @@ func TestEntRepository_AddAdmins(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), false)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			false)
 		require.NoError(t, err)
 
 		err = repo.AddAdmins(ctx, []uuid.UUID{user.ID})
@@ -74,7 +86,11 @@ func TestEntRepository_DeleteAdmins(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		user, err := repo.CreateUser(ctx, random.AlphaNumeric(t, 20), random.AlphaNumeric(t, 30), true)
+		user, err := repo.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
 		require.NoError(t, err)
 
 		err = repo.DeleteAdmins(ctx, []uuid.UUID{user.ID})

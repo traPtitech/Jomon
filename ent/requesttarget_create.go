@@ -101,7 +101,7 @@ func (rtc *RequestTargetCreate) Mutation() *RequestTargetMutation {
 // Save creates the RequestTarget in the database.
 func (rtc *RequestTargetCreate) Save(ctx context.Context) (*RequestTarget, error) {
 	rtc.defaults()
-	return withHooks[*RequestTarget, RequestTargetMutation](ctx, rtc.sqlSave, rtc.mutation, rtc.hooks)
+	return withHooks(ctx, rtc.sqlSave, rtc.mutation, rtc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -146,10 +146,10 @@ func (rtc *RequestTargetCreate) check() error {
 	if _, ok := rtc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "RequestTarget.created_at"`)}
 	}
-	if _, ok := rtc.mutation.RequestID(); !ok {
+	if len(rtc.mutation.RequestIDs()) == 0 {
 		return &ValidationError{Name: "request", err: errors.New(`ent: missing required edge "RequestTarget.request"`)}
 	}
-	if _, ok := rtc.mutation.UserID(); !ok {
+	if len(rtc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "RequestTarget.user"`)}
 	}
 	return nil
@@ -207,10 +207,7 @@ func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSp
 			Columns: []string{requesttarget.RequestColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: request.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -227,10 +224,7 @@ func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSp
 			Columns: []string{requesttarget.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -245,11 +239,15 @@ func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSp
 // RequestTargetCreateBulk is the builder for creating many RequestTarget entities in bulk.
 type RequestTargetCreateBulk struct {
 	config
+	err      error
 	builders []*RequestTargetCreate
 }
 
 // Save creates the RequestTarget entities in the database.
 func (rtcb *RequestTargetCreateBulk) Save(ctx context.Context) ([]*RequestTarget, error) {
+	if rtcb.err != nil {
+		return nil, rtcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(rtcb.builders))
 	nodes := make([]*RequestTarget, len(rtcb.builders))
 	mutators := make([]Mutator, len(rtcb.builders))
@@ -266,8 +264,8 @@ func (rtcb *RequestTargetCreateBulk) Save(ctx context.Context) ([]*RequestTarget
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, rtcb.builders[i+1].mutation)
 				} else {
