@@ -667,7 +667,9 @@ func TestHandlers_PostTransaction(t *testing.T) {
 
 		h.Repository.MockTransactionRepository.
 			EXPECT().
-			CreateTransaction(c.Request().Context(), tx1.Title, tx1.Amount, tx1.Target, tags, &group, nil).
+			CreateTransaction(
+				c.Request().Context(),
+				tx1.Title, tx1.Amount, tx1.Target, tags, &group, nil).
 			Return(tx1, nil)
 
 		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {

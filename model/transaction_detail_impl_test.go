@@ -71,7 +71,9 @@ func TestEntRepository_updateTransactionDetail(t *testing.T) {
 		updateTitle := "Fuga"
 		updatedAmount := 1000
 		updatedTarget := "fuga"
-		td, err := repo.updateTransactionDetail(ctx, tx, trns.ID, updateTitle, updatedAmount, updatedTarget)
+		td, err := repo.updateTransactionDetail(
+			ctx, tx, trns.ID,
+			updateTitle, updatedAmount, updatedTarget)
 		assert.NoError(t, err)
 		err = tx.Commit()
 		assert.NoError(t, err)

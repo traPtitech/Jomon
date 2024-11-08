@@ -24,7 +24,8 @@ func (repo *EntRepository) createTransactionDetail(
 }
 
 func (repo *EntRepository) updateTransactionDetail(
-	ctx context.Context, tx *ent.Tx, transactionID uuid.UUID, title string, amount int, target string,
+	ctx context.Context, tx *ent.Tx, transactionID uuid.UUID,
+	title string, amount int, target string,
 ) (*TransactionDetail, error) {
 	_, err := tx.Client().TransactionDetail.Update().
 		Where(transactiondetail.HasTransactionWith(
