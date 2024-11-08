@@ -650,9 +650,10 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		group := tx1.Group.ID
 
 		e := echo.New()
+		// FIXME: json.Marshalを使う
 		reqBody := fmt.Sprintf(
-			`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s"}`,
-			tx1.Amount, tx1.Target, tag.ID, group)
+			`{"title": "%s", "amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s"}`,
+			tx1.Title, tx1.Amount, tx1.Target, tag.ID, group)
 		req, err := http.NewRequest(
 			http.MethodPost,
 			"/api/transactions",
@@ -767,9 +768,11 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		}
 
 		e := echo.New()
+		// FIXME: json.Marshalを使う
+		// nolint:lll
 		reqBody := fmt.Sprintf(
-			`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s", "request": "%s"}`,
-			tx.Amount, tx.Target, tag.ID, group, request.ID)
+			`{"title": "%s", "amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s", "request": "%s"}`,
+			tx.Title, tx.Amount, tx.Target, tag.ID, group, request.ID)
 		req, err := http.NewRequest(
 			http.MethodPost,
 			"/api/transactions",
@@ -827,6 +830,9 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
 	})
+
+	// TODO: FailWithoutTitle
+	// PostTransactionにvalidationが入ってから
 }
 
 func TestHandlers_GetTransaction(t *testing.T) {
