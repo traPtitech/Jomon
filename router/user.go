@@ -104,7 +104,8 @@ func (h Handlers) GetMe(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 		// if user not found, create new user
-		new_user, err := h.Repository.CreateUser(c.Request().Context(), userInSession.Name, userInSession.DisplayName, userInSession.Admin)
+		new_user, err := h.Repository.CreateUser(c.Request().Context(), userInSession.Name,
+			userInSession.DisplayName, userInSession.Admin)
 		if err != nil {
 			h.Logger.Error("failed to create user", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
