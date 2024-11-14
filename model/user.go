@@ -9,13 +9,13 @@ import (
 )
 
 type User struct {
-	ID          uuid.UUID
-	Name        string
-	DisplayName string
-	Admin       bool
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   *time.Time
+	ID          uuid.UUID  `json:"id"`
+	Name        string     `json:"name"`
+	DisplayName string     `json:"display_name"`
+	Admin       bool       `json:"admin"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
+	DeletedAt   *time.Time `json:"deleted_at"`
 }
 
 type UserRepository interface {

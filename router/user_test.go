@@ -289,7 +289,7 @@ func TestHandlers_GetMe(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, false)
+		accessUser := makeUser(t, random.Numeric(t, 2) == 1)
 		user := User{
 			ID:          accessUser.ID,
 			Name:        accessUser.Name,
@@ -320,6 +320,11 @@ func TestHandlers_GetMe(t *testing.T) {
 		require.NoError(t, err)
 		sess.Values[sessionUserKey] = user
 		require.NoError(t, sess.Save(c.Request(), c.Response()))
+
+		h.Repository.MockUserRepository.
+			EXPECT().
+			GetUserByID(c.Request().Context(), user.ID).
+			Return(accessUser, nil)
 
 		err = h.Handlers.GetMe(c)
 		if assert.NoError(t, err) {
