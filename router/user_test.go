@@ -22,6 +22,18 @@ import (
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
+func userFromModelUser(u model.User) User {
+	return User{
+		ID:          u.ID,
+		Name:        u.Name,
+		DisplayName: u.DisplayName,
+		Admin:       u.Admin,
+		CreatedAt:   u.CreatedAt,
+		UpdatedAt:   u.UpdatedAt,
+		DeletedAt:   u.DeletedAt,
+	}
+}
+
 func TestHandlers_GetUsers(t *testing.T) {
 	t.Parallel()
 
@@ -289,14 +301,14 @@ func TestHandlers_GetMe(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		accessUser := makeUser(t, random.Numeric(t, 2) == 1)
+		accessModelUser := makeUser(t, random.Numeric(t, 2) == 1)
 		user := User{
-			ID:          accessUser.ID,
-			Name:        accessUser.Name,
-			DisplayName: accessUser.DisplayName,
-			Admin:       accessUser.Admin,
-			CreatedAt:   accessUser.CreatedAt,
-			UpdatedAt:   accessUser.UpdatedAt,
+			ID:          accessModelUser.ID,
+			Name:        accessModelUser.Name,
+			DisplayName: accessModelUser.DisplayName,
+			Admin:       accessModelUser.Admin,
+			CreatedAt:   accessModelUser.CreatedAt,
+			UpdatedAt:   accessModelUser.UpdatedAt,
 		}
 		bodyAccessUser, err := json.Marshal(user)
 		assert.NoError(t, err)
@@ -320,6 +332,7 @@ func TestHandlers_GetMe(t *testing.T) {
 		require.NoError(t, err)
 		sess.Values[sessionUserKey] = user
 		require.NoError(t, sess.Save(c.Request(), c.Response()))
+		accessUser := userFromModelUser(*accessModelUser)
 
 		h.Repository.MockUserRepository.
 			EXPECT().
