@@ -42,7 +42,7 @@ make down
 
 ## Staging
 
-1. Set .env file.
+1. Set `.env` file. You can refer to `.env.example` as an example.
 
 - `IS_DEBUG_MODE`: Set `true` if you want to run the server in debug mode, otherwise do not set this variable.
 - `PORT`: Port number for Jomon staging server
