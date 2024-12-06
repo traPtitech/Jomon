@@ -72,13 +72,13 @@ func NewServer(h Handlers) *echo.Echo {
 			apiTransactions.POST(
 				"",
 				h.PostTransaction,
-				middleware.BodyDump(service.WebhookEventHandler),
+				middleware.BodyDump(service.WebhookPostEventHandler),
 				h.CheckAdminMiddleware)
 			apiTransactions.GET("/:transactionID", h.GetTransaction)
 			apiTransactions.PUT(
 				"/:transactionID",
 				h.PutTransaction,
-				middleware.BodyDump(service.WebhookEventHandler),
+				middleware.BodyDump(service.WebhookPutEventHandler),
 				h.CheckAdminMiddleware)
 		}
 
