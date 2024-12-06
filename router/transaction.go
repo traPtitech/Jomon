@@ -25,7 +25,7 @@ type TransactionNewCreate struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 }
 
-type TransactionCorrestion struct {
+type TransactionCorrection struct {
 	ID        uuid.UUID      `json:"id"`
 	Amount    int            `json:"amount"`
 	Target    string         `json:"target"`
@@ -276,7 +276,7 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 			UpdatedAt:   tx.Group.UpdatedAt,
 		}
 	}
-	res := TransactionCorrestion{
+	res := TransactionCorrection{
 		ID:        tx.ID,
 		Amount:    tx.Amount,
 		Target:    tx.Target,
@@ -334,7 +334,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 			UpdatedAt:   updated.Group.UpdatedAt,
 		}
 	}
-	res := TransactionCorrestion{
+	res := TransactionCorrection{
 		ID:        updated.ID,
 		Amount:    updated.Amount,
 		Target:    updated.Target,

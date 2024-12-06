@@ -861,7 +861,7 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			GetTransaction(c.Request().Context(), tx.ID).
 			Return(tx, nil)
 
-		var resOverview TransactionCorrestion
+		var resOverview TransactionCorrection
 		to := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        modelTag.ID,
@@ -879,7 +879,7 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			CreatedAt:   tx.Group.CreatedAt,
 			UpdatedAt:   tx.Group.UpdatedAt,
 		}
-		resOverview = TransactionCorrestion{
+		resOverview = TransactionCorrection{
 			ID:        tx.ID,
 			Amount:    tx.Amount,
 			Target:    tx.Target,
@@ -990,7 +990,7 @@ func TestHandlers_PutTransaction(t *testing.T) {
 				updatedTags, nil, nil).
 			Return(updated, nil)
 
-		var resOverview TransactionCorrestion
+		var resOverview TransactionCorrection
 		to := lo.Map(updated.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        modelTag.ID,
@@ -1007,7 +1007,7 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			CreatedAt:   updated.Group.CreatedAt,
 			UpdatedAt:   updated.Group.UpdatedAt,
 		}
-		resOverview = TransactionCorrestion{
+		resOverview = TransactionCorrection{
 			ID:        tx.ID,
 			Amount:    updated.Amount,
 			Target:    updated.Target,
