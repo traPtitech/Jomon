@@ -22,7 +22,12 @@ type Handlers struct {
 	Logger      *zap.Logger
 	SessionName string
 }
+type WebHookService struct {
+	webhookSecret string;
+	webhookChannelId string;
+	webhookId string;
 
+}
 func NewServer(h Handlers) *echo.Echo {
 	e := echo.New()
 	e.Debug = os.Getenv("IS_DEBUG_MODE") != ""
@@ -33,11 +38,13 @@ func NewServer(h Handlers) *echo.Echo {
 	gob.Register(User{})
 	gob.Register(uuid.UUID{})
 	gob.Register([]*model.Owner{})
-
 	retrieveGroupOwner := h.RetrieveGroupOwner()
 	retrieveRequestCreator := h.RetrieveRequestCreator()
 	retrieveFileCreator := h.RetrieveFileCreator()
-
+	setupWebhook := WebHookService{}
+	setupWebhook.webhookSecret = os.Getenv("WEBHOOK_SECRET")
+	setupWebhook.webhookChannelId = os.Getenv("WEBHOOK_CHANNEL_ID")
+	setupWebhook.webhookId = os.Getenv("WEBHOOK_ID")
 	api := e.Group("/api")
 	{
 		apiAuth := api.Group("/auth")
