@@ -100,7 +100,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionNewCreate {
 			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 				return &TagOverview{
 					ID:        modelTag.ID,
@@ -118,7 +118,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				CreatedAt:   tx.Group.CreatedAt,
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
-			return &Transaction{
+			return &TransactionNewCreate{
 				ID:        tx.ID,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
@@ -213,7 +213,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionNewCreate {
 			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 				return &TagOverview{
 					ID:        modelTag.ID,
@@ -231,7 +231,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				CreatedAt:   tx.Group.CreatedAt,
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
-			return &Transaction{
+			return &TransactionNewCreate{
 				ID:        tx.ID,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
@@ -327,7 +327,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionNewCreate {
 			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 				return &TagOverview{
 					ID:        modelTag.ID,
@@ -345,7 +345,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				CreatedAt:   tx.Group.CreatedAt,
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
-			return &Transaction{
+			return &TransactionNewCreate{
 				ID:        tx.ID,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
@@ -446,7 +446,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionNewCreate {
 			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 				return &TagOverview{
 					ID:        modelTag.ID,
@@ -464,7 +464,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				CreatedAt:   tx.Group.CreatedAt,
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
-			return &Transaction{
+			return &TransactionNewCreate{
 				ID:        tx.ID,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
@@ -549,7 +549,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionNewCreate {
 			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 				return &TagOverview{
 					ID:        modelTag.ID,
@@ -567,7 +567,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				CreatedAt:   tx.Group.CreatedAt,
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
-			return &Transaction{
+			return &TransactionNewCreate{
 				ID:        tx.ID,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
@@ -655,7 +655,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			CreateTransaction(c.Request().Context(), tx1.Amount, tx1.Target, tags, &group, nil).
 			Return(tx1, nil)
 
-		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionNewCreate {
 			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 				return &TagOverview{
 					ID:        modelTag.ID,
@@ -673,7 +673,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 				CreatedAt:   tx.Group.CreatedAt,
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
-			return &Transaction{
+			return &TransactionNewCreate{
 				ID:        tx.ID,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
@@ -788,7 +788,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			CreatedAt:   tx.Group.CreatedAt,
 			UpdatedAt:   tx.Group.UpdatedAt,
 		}
-		res := []*Transaction{
+		res := []*TransactionNewCreate{
 			{
 				ID:        tx.ID,
 				Amount:    tx.Amount,
@@ -861,7 +861,7 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			GetTransaction(c.Request().Context(), tx.ID).
 			Return(tx, nil)
 
-		var resOverview Transaction
+		var resOverview TransactionCorrestion
 		to := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        modelTag.ID,
@@ -879,7 +879,7 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			CreatedAt:   tx.Group.CreatedAt,
 			UpdatedAt:   tx.Group.UpdatedAt,
 		}
-		resOverview = Transaction{
+		resOverview = TransactionCorrestion{
 			ID:        tx.ID,
 			Amount:    tx.Amount,
 			Target:    tx.Target,
@@ -990,7 +990,7 @@ func TestHandlers_PutTransaction(t *testing.T) {
 				updatedTags, nil, nil).
 			Return(updated, nil)
 
-		var resOverview Transaction
+		var resOverview TransactionCorrestion
 		to := lo.Map(updated.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        modelTag.ID,
@@ -1007,7 +1007,7 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			CreatedAt:   updated.Group.CreatedAt,
 			UpdatedAt:   updated.Group.UpdatedAt,
 		}
-		resOverview = Transaction{
+		resOverview = TransactionCorrestion{
 			ID:        tx.ID,
 			Amount:    updated.Amount,
 			Target:    updated.Target,

@@ -14,7 +14,18 @@ import (
 	"go.uber.org/zap"
 )
 
-type Transaction struct {
+type TransactionNewCreate struct {
+	ID        uuid.UUID      `json:"id"`
+	Amount    int            `json:"amount"`
+	Target    string         `json:"target"`
+	Request   *uuid.UUID     `json:"request"`
+	Tags      []*TagOverview `json:"tags"`
+	Group     *GroupOverview `json:"group"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+}
+
+type TransactionCorrestion struct {
 	ID        uuid.UUID      `json:"id"`
 	Amount    int            `json:"amount"`
 	Target    string         `json:"target"`
@@ -137,7 +148,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+	res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionNewCreate {
 		tags := lo.Map(tx.Tags, func(tag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        tag.ID,
@@ -158,7 +169,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
 		}
-		return &Transaction{
+		return &TransactionNewCreate{
 			ID:        tx.ID,
 			Amount:    tx.Amount,
 			Target:    tx.Target,
@@ -180,7 +191,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	transactions := []*Transaction{}
+	transactions := []*TransactionNewCreate{}
 	ctx := c.Request().Context()
 	for _, target := range tx.Targets {
 		if target == nil {
@@ -215,7 +226,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 				UpdatedAt:   created.Group.UpdatedAt,
 			}
 		}
-		res := Transaction{
+		res := TransactionNewCreate{
 			ID:        created.ID,
 			Amount:    created.Amount,
 			Target:    created.Target,
@@ -265,7 +276,7 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 			UpdatedAt:   tx.Group.UpdatedAt,
 		}
 	}
-	res := Transaction{
+	res := TransactionCorrestion{
 		ID:        tx.ID,
 		Amount:    tx.Amount,
 		Target:    tx.Target,
@@ -323,7 +334,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 			UpdatedAt:   updated.Group.UpdatedAt,
 		}
 	}
-	res := Transaction{
+	res := TransactionCorrestion{
 		ID:        updated.ID,
 		Amount:    updated.Amount,
 		Target:    updated.Target,
