@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"errors"
+	"strings"
 	"time"
 
 	"entgo.io/ent"
@@ -19,6 +21,12 @@ func (TransactionDetail) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New),
+		field.String("title").NotEmpty().MaxLen(64).Validate(func(s string) error {
+			if strings.Contains(s, "\n") {
+				return errors.New("title cannot contain new line")
+			}
+			return nil
+		}),
 		field.Int("amount").
 			Default(0),
 		field.String("target").

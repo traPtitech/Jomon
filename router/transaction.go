@@ -16,6 +16,7 @@ import (
 
 type Transaction struct {
 	ID        uuid.UUID      `json:"id"`
+	Title     string         `json:"title"`
 	Amount    int            `json:"amount"`
 	Target    string         `json:"target"`
 	Request   *uuid.UUID     `json:"request"`
@@ -26,6 +27,7 @@ type Transaction struct {
 }
 
 type TransactionOverview struct {
+	Title   string       `json:"title"`
 	Amount  int          `json:"amount"`
 	Targets []*string    `json:"targets"`
 	Tags    []*uuid.UUID `json:"tags"`
@@ -34,6 +36,7 @@ type TransactionOverview struct {
 }
 
 type TransactionOverviewWithOneTarget struct {
+	Title   string       `json:"title"`
 	Amount  int          `json:"amount"`
 	Target  string       `json:"target"`
 	Tags    []*uuid.UUID `json:"tags"`
@@ -160,6 +163,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		}
 		return &Transaction{
 			ID:        tx.ID,
+			Title:     tx.Title,
 			Amount:    tx.Amount,
 			Target:    tx.Target,
 			Request:   tx.Request,
@@ -175,6 +179,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 
 func (h Handlers) PostTransaction(c echo.Context) error {
 	var tx *TransactionOverview
+	// TODO: validate
 	if err := c.Bind(&tx); err != nil {
 		h.Logger.Info("could not get transaction overview from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -189,7 +194,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 		}
 		created, err := h.Repository.CreateTransaction(
 			ctx,
-			tx.Amount, *target, tx.Tags, tx.Group, tx.Request)
+			tx.Title, tx.Amount, *target, tx.Tags, tx.Group, tx.Request)
 		if err != nil {
 			h.Logger.Error("failed to create transaction in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -217,6 +222,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 		}
 		res := Transaction{
 			ID:        created.ID,
+			Title:     created.Title,
 			Amount:    created.Amount,
 			Target:    created.Target,
 			Request:   created.Request,
@@ -267,6 +273,7 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 	}
 	res := Transaction{
 		ID:        tx.ID,
+		Title:     tx.Title,
 		Amount:    tx.Amount,
 		Target:    tx.Target,
 		Request:   tx.Request,
@@ -287,6 +294,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 	}
 
 	var tx *TransactionOverviewWithOneTarget
+	// TODO: validate
 	if err := c.Bind(&tx); err != nil {
 		h.Logger.Info(
 			"could not get transaction overview with one target from request",
@@ -297,7 +305,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 	ctx := c.Request().Context()
 	updated, err := h.Repository.UpdateTransaction(
 		ctx,
-		txID, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
+		txID, tx.Title, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
 	if err != nil {
 		h.Logger.Error("failed to update transaction in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -325,6 +333,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 	}
 	res := Transaction{
 		ID:        updated.ID,
+		Title:     updated.Title,
 		Amount:    updated.Amount,
 		Target:    updated.Target,
 		Request:   updated.Request,

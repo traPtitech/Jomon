@@ -147,7 +147,7 @@ func (repo *EntRepository) GetTransaction(
 }
 
 func (repo *EntRepository) CreateTransaction(
-	ctx context.Context, amount int, target string,
+	ctx context.Context, title string, amount int, target string,
 	tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID,
 ) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
@@ -167,7 +167,7 @@ func (repo *EntRepository) CreateTransaction(
 	})
 
 	// Create Transaction Detail
-	detail, err := repo.createTransactionDetail(ctx, tx, amount, target)
+	detail, err := repo.createTransactionDetail(ctx, tx, title, amount, target)
 	if err != nil {
 		err = RollbackWithError(tx, err)
 		return nil, err
@@ -248,7 +248,7 @@ func (repo *EntRepository) CreateTransaction(
 }
 
 func (repo *EntRepository) UpdateTransaction(
-	ctx context.Context, transactionID uuid.UUID, amount int, target string,
+	ctx context.Context, transactionID uuid.UUID, title string, amount int, target string,
 	tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID,
 ) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
@@ -263,7 +263,7 @@ func (repo *EntRepository) UpdateTransaction(
 	}()
 
 	// Update transaction Detail
-	_, err = repo.updateTransactionDetail(ctx, tx, transactionID, amount, target)
+	_, err = repo.updateTransactionDetail(ctx, tx, transactionID, title, amount, target)
 	if err != nil {
 		err = RollbackWithError(tx, err)
 		return nil, err
@@ -392,6 +392,7 @@ func ConvertEntTransactionToModelTransactionResponse(
 	}
 	return &TransactionResponse{
 		ID:        transaction.ID,
+		Title:     transaction.Edges.Detail.Title,
 		Amount:    transaction.Edges.Detail.Amount,
 		Target:    transaction.Edges.Detail.Target,
 		Request:   r,
