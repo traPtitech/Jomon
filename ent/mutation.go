@@ -6560,6 +6560,7 @@ type TransactionDetailMutation struct {
 	op                 Op
 	typ                string
 	id                 *uuid.UUID
+	title              *string
 	amount             *int
 	addamount          *int
 	target             *string
@@ -6675,6 +6676,42 @@ func (m *TransactionDetailMutation) IDs(ctx context.Context) ([]uuid.UUID, error
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetTitle sets the "title" field.
+func (m *TransactionDetailMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *TransactionDetailMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the TransactionDetail entity.
+// If the TransactionDetail object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionDetailMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *TransactionDetailMutation) ResetTitle() {
+	m.title = nil
 }
 
 // SetAmount sets the "amount" field.
@@ -6914,7 +6951,10 @@ func (m *TransactionDetailMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TransactionDetailMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
+	if m.title != nil {
+		fields = append(fields, transactiondetail.FieldTitle)
+	}
 	if m.amount != nil {
 		fields = append(fields, transactiondetail.FieldAmount)
 	}
@@ -6935,6 +6975,8 @@ func (m *TransactionDetailMutation) Fields() []string {
 // schema.
 func (m *TransactionDetailMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case transactiondetail.FieldTitle:
+		return m.Title()
 	case transactiondetail.FieldAmount:
 		return m.Amount()
 	case transactiondetail.FieldTarget:
@@ -6952,6 +6994,8 @@ func (m *TransactionDetailMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *TransactionDetailMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case transactiondetail.FieldTitle:
+		return m.OldTitle(ctx)
 	case transactiondetail.FieldAmount:
 		return m.OldAmount(ctx)
 	case transactiondetail.FieldTarget:
@@ -6969,6 +7013,13 @@ func (m *TransactionDetailMutation) OldField(ctx context.Context, name string) (
 // type.
 func (m *TransactionDetailMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case transactiondetail.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
 	case transactiondetail.FieldAmount:
 		v, ok := value.(int)
 		if !ok {
@@ -7061,6 +7112,9 @@ func (m *TransactionDetailMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *TransactionDetailMutation) ResetField(name string) error {
 	switch name {
+	case transactiondetail.FieldTitle:
+		m.ResetTitle()
+		return nil
 	case transactiondetail.FieldAmount:
 		m.ResetAmount()
 		return nil

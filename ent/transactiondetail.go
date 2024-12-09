@@ -19,6 +19,8 @@ type TransactionDetail struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// Title holds the value of the "title" field.
+	Title string `json:"title,omitempty"`
 	// Amount holds the value of the "amount" field.
 	Amount int `json:"amount,omitempty"`
 	// Target holds the value of the "target" field.
@@ -61,7 +63,7 @@ func (*TransactionDetail) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case transactiondetail.FieldAmount:
 			values[i] = new(sql.NullInt64)
-		case transactiondetail.FieldTarget:
+		case transactiondetail.FieldTitle, transactiondetail.FieldTarget:
 			values[i] = new(sql.NullString)
 		case transactiondetail.FieldCreatedAt, transactiondetail.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -89,6 +91,12 @@ func (td *TransactionDetail) assignValues(columns []string, values []any) error 
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				td.ID = *value
+			}
+		case transactiondetail.FieldTitle:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field title", values[i])
+			} else if value.Valid {
+				td.Title = value.String
 			}
 		case transactiondetail.FieldAmount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -162,6 +170,9 @@ func (td *TransactionDetail) String() string {
 	var builder strings.Builder
 	builder.WriteString("TransactionDetail(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", td.ID))
+	builder.WriteString("title=")
+	builder.WriteString(td.Title)
+	builder.WriteString(", ")
 	builder.WriteString("amount=")
 	builder.WriteString(fmt.Sprintf("%v", td.Amount))
 	builder.WriteString(", ")

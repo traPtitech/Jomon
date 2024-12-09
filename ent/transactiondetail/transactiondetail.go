@@ -15,6 +15,8 @@ const (
 	Label = "transaction_detail"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldTitle holds the string denoting the title field in the database.
+	FieldTitle = "title"
 	// FieldAmount holds the string denoting the amount field in the database.
 	FieldAmount = "amount"
 	// FieldTarget holds the string denoting the target field in the database.
@@ -39,6 +41,7 @@ const (
 // Columns holds all SQL columns for transactiondetail fields.
 var Columns = []string{
 	FieldID,
+	FieldTitle,
 	FieldAmount,
 	FieldTarget,
 	FieldCreatedAt,
@@ -67,6 +70,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	TitleValidator func(string) error
 	// DefaultAmount holds the default value on creation for the "amount" field.
 	DefaultAmount int
 	// DefaultTarget holds the default value on creation for the "target" field.
@@ -87,6 +92,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByTitle orders the results by the title field.
+func ByTitle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTitle, opts...).ToFunc()
 }
 
 // ByAmount orders the results by the amount field.

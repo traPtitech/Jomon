@@ -39,6 +39,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		}
 		tx1 := &model.TransactionResponse{
 			ID:     uuid.New(),
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: random.AlphaNumeric(t, 20),
 			Tags: []*model.Tag{
@@ -58,6 +59,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 		tx2 := &model.TransactionResponse{
 			ID:     uuid.New(),
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: random.AlphaNumeric(t, 20),
 			Tags: []*model.Tag{
@@ -120,6 +122,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}
 			return &TransactionNewCreate{
 				ID:        tx.ID,
+				Title:     tx.Title,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
 				Tags:      tag,
@@ -154,6 +157,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		}
 		tx1 := &model.TransactionResponse{
 			ID:     uuid.New(),
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: random.AlphaNumeric(t, 20),
 			Tags: []*model.Tag{
@@ -173,6 +177,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 		tx2 := &model.TransactionResponse{
 			ID:     uuid.New(),
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: random.AlphaNumeric(t, 20),
 			Tags: []*model.Tag{
@@ -233,6 +238,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}
 			return &TransactionNewCreate{
 				ID:        tx.ID,
+				Title:     tx.Title,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
 				Tags:      tag,
@@ -267,6 +273,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		}
 		tx1 := &model.TransactionResponse{
 			ID:     uuid.New(),
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: random.AlphaNumeric(t, 20),
 			Tags: []*model.Tag{
@@ -286,6 +293,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 		tx2 := &model.TransactionResponse{
 			ID:     uuid.New(),
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: random.AlphaNumeric(t, 20),
 			Tags: []*model.Tag{
@@ -347,6 +355,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}
 			return &TransactionNewCreate{
 				ID:        tx.ID,
+				Title:     tx.Title,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
 				Tags:      tag,
@@ -384,6 +393,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 		tx1 := &model.TransactionResponse{
 			ID:     uuid.New(),
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: target1,
 			Tags: []*model.Tag{
@@ -403,6 +413,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 		tx2 := &model.TransactionResponse{
 			ID:     uuid.New(),
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: random.AlphaNumeric(t, 20),
 			Tags: []*model.Tag{
@@ -466,6 +477,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}
 			return &TransactionNewCreate{
 				ID:        tx.ID,
+				Title:     tx.Title,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
 				Tags:      tag,
@@ -503,6 +515,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 		tx1 := &model.TransactionResponse{
 			ID:     uuid.New(),
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: target1,
 			Tags: []*model.Tag{
@@ -569,6 +582,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}
 			return &TransactionNewCreate{
 				ID:        tx.ID,
+				Title:     tx.Title,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
 				Tags:      tag,
@@ -612,6 +626,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 
 		tx1 := &model.TransactionResponse{
 			ID:     uuid.New(),
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: target1,
 			Tags: []*model.Tag{
@@ -635,9 +650,10 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		group := tx1.Group.ID
 
 		e := echo.New()
+		// FIXME: json.Marshalを使う
 		reqBody := fmt.Sprintf(
-			`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s"}`,
-			tx1.Amount, tx1.Target, tag.ID, group)
+			`{"title": "%s", "amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s"}`,
+			tx1.Title, tx1.Amount, tx1.Target, tag.ID, group)
 		req, err := http.NewRequest(
 			http.MethodPost,
 			"/api/transactions",
@@ -652,7 +668,9 @@ func TestHandlers_PostTransaction(t *testing.T) {
 
 		h.Repository.MockTransactionRepository.
 			EXPECT().
-			CreateTransaction(c.Request().Context(), tx1.Amount, tx1.Target, tags, &group, nil).
+			CreateTransaction(
+				c.Request().Context(),
+				tx1.Title, tx1.Amount, tx1.Target, tags, &group, nil).
 			Return(tx1, nil)
 
 		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionNewCreate {
@@ -675,6 +693,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			}
 			return &TransactionNewCreate{
 				ID:        tx.ID,
+				Title:     tx.Title,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
 				Tags:      tag,
@@ -712,6 +731,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 
 		tx := &model.TransactionResponse{
 			ID:     uuid.New(),
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: target1,
 			Tags: []*model.Tag{
@@ -748,9 +768,11 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		}
 
 		e := echo.New()
+		// FIXME: json.Marshalを使う
+		// nolint:lll
 		reqBody := fmt.Sprintf(
-			`{"amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s", "request": "%s"}`,
-			tx.Amount, tx.Target, tag.ID, group, request.ID)
+			`{"title": "%s", "amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s", "request": "%s"}`,
+			tx.Title, tx.Amount, tx.Target, tag.ID, group, request.ID)
 		req, err := http.NewRequest(
 			http.MethodPost,
 			"/api/transactions",
@@ -767,7 +789,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			EXPECT().
 			CreateTransaction(
 				c.Request().Context(),
-				tx.Amount, tx.Target,
+				tx.Title, tx.Amount, tx.Target,
 				tags, &group, &request.ID).
 			Return(tx, nil)
 
@@ -791,6 +813,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		res := []*TransactionNewCreate{
 			{
 				ID:        tx.ID,
+				Title:     tx.Title,
 				Amount:    tx.Amount,
 				Target:    tx.Target,
 				Tags:      to,
@@ -807,6 +830,9 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
 		}
 	})
+
+	// TODO: FailWithoutTitle
+	// PostTransactionにvalidationが入ってから
 }
 
 func TestHandlers_GetTransaction(t *testing.T) {
@@ -827,6 +853,7 @@ func TestHandlers_GetTransaction(t *testing.T) {
 
 		tx := &model.TransactionResponse{
 			ID:     uuid.New(),
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: random.AlphaNumeric(t, 20),
 			Tags: []*model.Tag{
@@ -861,7 +888,6 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			GetTransaction(c.Request().Context(), tx.ID).
 			Return(tx, nil)
 
-		var resOverview TransactionCorrection
 		to := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        modelTag.ID,
@@ -879,8 +905,9 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			CreatedAt:   tx.Group.CreatedAt,
 			UpdatedAt:   tx.Group.UpdatedAt,
 		}
-		resOverview = TransactionCorrection{
+		resOverview := TransactionCorrection{
 			ID:        tx.ID,
+			Title:     tx.Title,
 			Amount:    tx.Amount,
 			Target:    tx.Target,
 			Tags:      to,
@@ -924,6 +951,7 @@ func TestHandlers_PutTransaction(t *testing.T) {
 
 		tx := &model.TransactionResponse{
 			ID:     uuid.New(),
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: random.AlphaNumeric(t, 20),
 			Tags: []*model.Tag{
@@ -986,11 +1014,10 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			EXPECT().
 			UpdateTransaction(
 				c.Request().Context(),
-				tx.ID, updated.Amount, updated.Target,
+				tx.ID, updated.Title, updated.Amount, updated.Target,
 				updatedTags, nil, nil).
 			Return(updated, nil)
 
-		var resOverview TransactionCorrection
 		to := lo.Map(updated.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        modelTag.ID,
@@ -1007,8 +1034,9 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			CreatedAt:   updated.Group.CreatedAt,
 			UpdatedAt:   updated.Group.UpdatedAt,
 		}
-		resOverview = TransactionCorrection{
+		resOverview := TransactionCorrection{
 			ID:        tx.ID,
+			Title:     updated.Title,
 			Amount:    updated.Amount,
 			Target:    updated.Target,
 			Tags:      to,

@@ -11,12 +11,12 @@ import (
 type TransactionRepository interface {
 	GetTransactions(ctx context.Context, query TransactionQuery) ([]*TransactionResponse, error)
 	CreateTransaction(
-		ctx context.Context, Amount int, Target string,
+		ctx context.Context, title string, Amount int, Target string,
 		tags []*uuid.UUID, group *uuid.UUID, requestID *uuid.UUID,
 	) (*TransactionResponse, error)
 	GetTransaction(ctx context.Context, transactionID uuid.UUID) (*TransactionResponse, error)
 	UpdateTransaction(
-		ctx context.Context, transactionID uuid.UUID, Amount int, Target string,
+		ctx context.Context, transactionID uuid.UUID, title string, Amount int, Target string,
 		tags []*uuid.UUID, group *uuid.UUID, requestID *uuid.UUID,
 	) (*TransactionResponse, error)
 }
@@ -28,6 +28,7 @@ type Transaction struct {
 
 type TransactionResponse struct {
 	ID        uuid.UUID
+	Title     string
 	Amount    int
 	Target    string
 	Request   *uuid.UUID

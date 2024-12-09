@@ -300,12 +300,12 @@ func (tdq *TransactionDetailQuery) WithTransaction(opts ...func(*TransactionQuer
 // Example:
 //
 //	var v []struct {
-//		Amount int `json:"amount,omitempty"`
+//		Title string `json:"title,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.TransactionDetail.Query().
-//		GroupBy(transactiondetail.FieldAmount).
+//		GroupBy(transactiondetail.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (tdq *TransactionDetailQuery) GroupBy(field string, fields ...string) *TransactionDetailGroupBy {
@@ -323,11 +323,11 @@ func (tdq *TransactionDetailQuery) GroupBy(field string, fields ...string) *Tran
 // Example:
 //
 //	var v []struct {
-//		Amount int `json:"amount,omitempty"`
+//		Title string `json:"title,omitempty"`
 //	}
 //
 //	client.TransactionDetail.Query().
-//		Select(transactiondetail.FieldAmount).
+//		Select(transactiondetail.FieldTitle).
 //		Scan(ctx, &v)
 func (tdq *TransactionDetailQuery) Select(fields ...string) *TransactionDetailSelect {
 	tdq.ctx.Fields = append(tdq.ctx.Fields, fields...)
