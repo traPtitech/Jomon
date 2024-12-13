@@ -87,9 +87,12 @@ func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
 	var message string
 
 	if strings.Contains(c.Request().URL.Path, "/api/requests") {
-		message += WebhookRequestsEventHandler(c, resBody)
+		message = WebhookRequestsEventHandler(c, resBody)
 	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
-		message += WebhookTransactionsEventHandler(c, resBody)
+		message = WebhookTransactionsEventHandler(c, resBody)
+	}
+	if len(message) == 0 {
+		return
 	}
 	_ = RequestWebhook(message, webhookSecret, webhookChannelId, webhookId, 1)
 }
