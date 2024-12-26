@@ -49,19 +49,22 @@ func NewServer(h Handlers) *echo.Echo {
 		apiRequests := api.Group("/requests", h.CheckLoginMiddleware)
 		{
 			apiRequests.GET("", h.GetRequests)
-			apiRequests.POST("", h.PostRequest, middleware.BodyDump(service.WebhookEventHandler))
+			apiRequests.POST(
+				"",
+				h.PostRequest,
+				middleware.BodyDump(service.WebhookRequestsEventHandler))
 			apiRequestIDs := apiRequests.Group("/:requestID", retrieveRequestCreator)
 			{
 				apiRequestIDs.GET("", h.GetRequest)
 				apiRequestIDs.PUT(
 					"",
 					h.PutRequest,
-					middleware.BodyDump(service.WebhookEventHandler),
+					middleware.BodyDump(service.WebhookRequestsEventHandler),
 					h.CheckRequestCreatorMiddleware)
 				apiRequestIDs.POST(
 					"/comments",
 					h.PostComment,
-					middleware.BodyDump(service.WebhookEventHandler))
+					middleware.BodyDump(service.WebhookRequestsEventHandler))
 				apiRequestIDs.PUT("/status", h.PutStatus, h.CheckAdminOrRequestCreatorMiddleware)
 			}
 		}
@@ -72,13 +75,13 @@ func NewServer(h Handlers) *echo.Echo {
 			apiTransactions.POST(
 				"",
 				h.PostTransaction,
-				middleware.BodyDump(service.WebhookEventHandler),
+				middleware.BodyDump(service.WebhookTransactionsEventHandler),
 				h.CheckAdminMiddleware)
 			apiTransactions.GET("/:transactionID", h.GetTransaction)
 			apiTransactions.PUT(
 				"/:transactionID",
 				h.PutTransaction,
-				middleware.BodyDump(service.WebhookEventHandler),
+				middleware.BodyDump(service.WebhookTransactionsEventHandler),
 				h.CheckAdminMiddleware)
 		}
 

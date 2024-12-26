@@ -80,30 +80,17 @@ type Webhook struct {
 	ID        string
 }
 
-func WebhookEventHandler(c echo.Context, reqBody, resBody []byte) {
+func WebhookRequestsEventHandler(c echo.Context, reqBody, resBody []byte) {
 	webhookSecret := os.Getenv("WEBHOOK_SECRET")
 	webhookChannelId := os.Getenv("WEBHOOK_CHANNEL_ID")
 	webhookId := os.Getenv("WEBHOOK_ID")
 	var message string
 
-	if strings.Contains(c.Request().URL.Path, "/api/requests") {
-		message = WebhookRequestsEventHandler(c, resBody)
-	} else if strings.Contains(c.Request().URL.Path, "/api/transactions") {
-		message = WebhookTransactionsEventHandler(c, resBody)
-	}
-	if len(message) == 0 {
-		return
-	}
-	_ = RequestWebhook(message, webhookSecret, webhookChannelId, webhookId, 1)
-}
-
-func WebhookRequestsEventHandler(c echo.Context, resBody []byte) string {
-	var message string
 	if strings.Contains(c.Request().URL.Path, "/comments") {
 		resApp := new(CommentApplication)
 		err := json.Unmarshal(resBody, resApp)
 		if err != nil {
-			return ""
+			return
 		}
 		splitedPath := strings.Split(c.Request().URL.Path, "/")
 
@@ -123,7 +110,7 @@ func WebhookRequestsEventHandler(c echo.Context, resBody []byte) string {
 		resApp := new(RequestApplication)
 		err := json.Unmarshal(resBody, resApp)
 		if err != nil {
-			return ""
+			return
 		}
 		if c.Request().Method == http.MethodPost {
 			message += "## :receipt:申請が作成されました\n"
@@ -155,16 +142,20 @@ func WebhookRequestsEventHandler(c echo.Context, resBody []byte) string {
 		message += "\n\n"
 		message += resApp.Content + "\n"
 	}
-	return message
+	_ = RequestWebhook(message, webhookSecret, webhookChannelId, webhookId, 1)
 }
 
-func WebhookTransactionsEventHandler(c echo.Context, resBody []byte) string {
+func WebhookTransactionsEventHandler(c echo.Context, reqBody, resBody []byte) {
+	webhookSecret := os.Getenv("WEBHOOK_SECRET")
+	webhookChannelId := os.Getenv("WEBHOOK_CHANNEL_ID")
+	webhookId := os.Getenv("WEBHOOK_ID")
 	var message string
+
 	if c.Request().Method == http.MethodPost {
 		var resApps []TransactionPostRequestApplication
 		err := json.Unmarshal(resBody, &resApps)
 		if err != nil || len(resApps) < 1 {
-			return ""
+			return
 		}
 		message += fmt.Sprintf(
 			"## :scroll:[入出金記録](%s/transactions/%s)が新規作成されました\n",
@@ -200,7 +191,7 @@ func WebhookTransactionsEventHandler(c echo.Context, resBody []byte) string {
 		var resApp TransactionPutRequestApplication
 		err := json.Unmarshal(resBody, &resApp)
 		if err != nil {
-			return ""
+			return
 		}
 		message += fmt.Sprintf(
 			"## :scroll:[入出金記録](%s/transactions/%s)が修正されました\n",
@@ -227,7 +218,7 @@ func WebhookTransactionsEventHandler(c echo.Context, resBody []byte) string {
 			message += fmt.Sprintf("- タグ: %s", strings.Join(tags, ", "))
 		}
 	}
-	return message
+	_ = RequestWebhook(message, webhookSecret, webhookChannelId, webhookId, 1)
 }
 
 func RequestWebhook(message, secret, channelID, webhookID string, embed int) error {
