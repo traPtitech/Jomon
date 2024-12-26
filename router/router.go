@@ -22,12 +22,13 @@ type Handlers struct {
 	Logger      *zap.Logger
 	SessionName string
 }
-type WebHookService struct {
-	webhookSecret string;
-	webhookChannelId string;
-	webhookId string;
 
+type WebHookService struct {
+	webhookSecret    string
+	webhookChannelId string
+	webhookId        string
 }
+
 func NewServer(h Handlers) *echo.Echo {
 	e := echo.New()
 	e.Debug = os.Getenv("IS_DEBUG_MODE") != ""
