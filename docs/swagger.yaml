@@ -54,6 +54,7 @@ paths:
         - $ref: "#/components/parameters/tagQuery"
         - $ref: "#/components/parameters/groupQuery"
         - $ref: "#/components/parameters/requestQuery"
+        - $ref: "#/components/parameters/titleQuery"
       responses:
         "200":
           description: 該当するものがない場合は空配列を返却。
@@ -1463,3 +1464,10 @@ components:
       schema:
         type: string
         format: uuid
+    titleQuery:
+      name: title
+      description: タイトル
+      required: False
+      in: query
+      schema:
+        type: string

@@ -1,0 +1,3 @@
+apis:
+  docs/swagger.yaml:
+    alias: jomon-api
