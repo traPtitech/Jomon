@@ -391,6 +391,62 @@ func TestHandlers_GetRequests(t *testing.T) {
 		}
 	})
 
+	t.Run("Success7", func(t *testing.T) {
+		t.Parallel()
+		ctrl := gomock.NewController(t)
+
+		date := time.Now().Round(time.Second).UTC()
+		request := &model.RequestResponse{
+			ID:        uuid.New(),
+			Status:    model.Submitted,
+			CreatedBy: uuid.New(),
+			Title:     random.AlphaNumeric(t, 20),
+			Content:   random.AlphaNumeric(t, 50),
+			CreatedAt: date,
+			UpdatedAt: date,
+		}
+		modelRequests := []*model.RequestResponse{request}
+
+		e := echo.New()
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/requests?created_by=%s", request.CreatedBy.String()),
+			nil)
+		require.NoError(t, err)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		h, err := NewTestHandlers(t, ctrl)
+		require.NoError(t, err)
+		h.Repository.MockRequestRepository.
+			EXPECT().
+			GetRequests(c.Request().Context(), model.RequestQuery{CreatedBy: &request.CreatedBy}).
+			Return(modelRequests, nil)
+		err = h.Handlers.GetRequests(c)
+		if !assert.NoError(t, err) {
+			return
+		}
+		require.Equal(t, http.StatusOK, rec.Code)
+		var res []*RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &res)
+		require.NoError(t, err)
+		expectedBody := []*RequestResponse{
+			{
+				ID:        request.ID,
+				Status:    request.Status,
+				CreatedAt: date,
+				UpdatedAt: date,
+				CreatedBy: request.CreatedBy,
+				Title:     request.Title,
+				Content:   request.Content,
+				Tags:      []*TagOverview{},
+				Targets:   []*TargetOverview{},
+				Comments:  []*CommentDetail{},
+			},
+		}
+		require.Equal(t, expectedBody, res)
+	})
+
 	t.Run("InvaildStatus", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)

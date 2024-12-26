@@ -167,14 +167,24 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		g := c.QueryParam("group")
 		group = &g
 	}
+	var cratedBy *uuid.UUID
+	if c.QueryParam("created_by") != "" {
+		u, err := uuid.Parse(c.QueryParam("created_by"))
+		if err != nil {
+			h.Logger.Info("could not parse query parameter `created_by` as UUID", zap.Error(err))
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		cratedBy = &u
+	}
 	query := model.RequestQuery{
-		Sort:   sort,
-		Target: target,
-		Status: ss,
-		Since:  since,
-		Until:  until,
-		Tag:    tag,
-		Group:  group,
+		Sort:      sort,
+		Target:    target,
+		Status:    ss,
+		Since:     since,
+		Until:     until,
+		Tag:       tag,
+		Group:     group,
+		CreatedBy: cratedBy,
 	}
 
 	modelrequests, err := h.Repository.GetRequests(ctx, query)
