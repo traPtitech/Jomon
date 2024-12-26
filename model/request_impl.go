@@ -110,6 +110,14 @@ func (repo *EntRepository) GetRequests(
 				),
 			)
 	}
+	if query.CreatedBy != nil && *query.CreatedBy != uuid.Nil {
+		requestsq = requestsq.
+			Where(
+				request.HasUserWith(
+					user.IDEQ(*query.CreatedBy),
+				),
+			)
+	}
 
 	requests, err := requestsq.All(ctx)
 	if err != nil {
