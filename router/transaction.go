@@ -14,19 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type TransactionNewCreate struct {
-	ID        uuid.UUID      `json:"id"`
-	Title     string         `json:"title"`
-	Amount    int            `json:"amount"`
-	Target    string         `json:"target"`
-	Request   *uuid.UUID     `json:"request"`
-	Tags      []*TagOverview `json:"tags"`
-	Group     *GroupOverview `json:"group"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-}
-
-type TransactionCorrection struct {
+type Transaction struct {
 	ID        uuid.UUID      `json:"id"`
 	Title     string         `json:"title"`
 	Amount    int            `json:"amount"`
@@ -152,7 +140,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionNewCreate {
+	res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
 		tags := lo.Map(tx.Tags, func(tag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        tag.ID,
@@ -173,7 +161,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
 		}
-		return &TransactionNewCreate{
+		return &Transaction{
 			ID:        tx.ID,
 			Title:     tx.Title,
 			Amount:    tx.Amount,
@@ -197,7 +185,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	transactions := []*TransactionNewCreate{}
+	transactions := []*Transaction{}
 	ctx := c.Request().Context()
 	for _, target := range tx.Targets {
 		if target == nil {
@@ -232,7 +220,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 				UpdatedAt:   created.Group.UpdatedAt,
 			}
 		}
-		res := TransactionNewCreate{
+		res := Transaction{
 			ID:        created.ID,
 			Title:     created.Title,
 			Amount:    created.Amount,
@@ -283,7 +271,7 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 			UpdatedAt:   tx.Group.UpdatedAt,
 		}
 	}
-	res := TransactionCorrection{
+	res := Transaction{
 		ID:        tx.ID,
 		Title:     tx.Title,
 		Amount:    tx.Amount,
@@ -343,7 +331,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 			UpdatedAt:   updated.Group.UpdatedAt,
 		}
 	}
-	res := TransactionCorrection{
+	res := Transaction{
 		ID:        updated.ID,
 		Title:     updated.Title,
 		Amount:    updated.Amount,
