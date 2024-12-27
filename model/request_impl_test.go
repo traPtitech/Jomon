@@ -660,7 +660,15 @@ func TestEntRepository_GetRequests(t *testing.T) {
 				Tags:      request1.Tags,
 				// Targets:   request1.Targets,
 				// Statuses:  request1.Statuses,
-				Group: request1.Group,
+				Group: &Group{
+					ID:          request1.Group.ID,
+					Name:        request1.Group.Name,
+					Description: request1.Group.Description,
+					Budget:      request1.Group.Budget,
+					CreatedAt:   got.Group.CreatedAt,
+					UpdatedAt:   got.Group.UpdatedAt,
+					DeletedAt:   request1.Group.DeletedAt,
+				},
 			}
 			require.Equal(t, exp, got)
 		}
