@@ -2,11 +2,10 @@ package model
 
 import (
 	"context"
+	"github.com/traPtitech/Jomon/testutil"
 	"testing"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -27,31 +26,6 @@ func (rd *RequestDetail) toExpectedRequestResponse(t *testing.T) *RequestRespons
 		//Targets:   rd.Targets,
 		//Statuses:  rd.Statuses,
 		Group: rd.Group,
-	}
-}
-
-func CmpOptionsRequestResponse() cmp.Options {
-	return cmp.Options{cmpopts.EquateApproxTime(time.Second)}
-}
-
-func DiffRequestResponse(expected, actual *RequestResponse) string {
-	return cmp.Diff(expected, actual, CmpOptionsRequestResponse()...)
-}
-
-func AssertRequestResponseEqual(t *testing.T, expected, actual *RequestResponse) bool {
-	t.Helper()
-	diff := DiffRequestResponse(expected, actual)
-	if diff == "" {
-		return true
-	}
-	t.Errorf("RequestResponse is not equal (-expected +actual):\n%s", diff)
-	return false
-}
-
-func RequireRequestResponseEqual(t *testing.T, expected, actual *RequestResponse) {
-	t.Helper()
-	if !AssertRequestResponseEqual(t, expected, actual) {
-		t.FailNow()
 	}
 }
 
@@ -146,10 +120,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 				request2.toExpectedRequestResponse(t),
 				request1.toExpectedRequestResponse(t),
 			}
-			opts := CmpOptionsRequestResponse()
-			if diff := cmp.Diff(exp, got, opts...); diff != "" {
-				t.Errorf("[]*RequestResponse not equal (-expected +got):\n%s", diff)
-			}
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got, opts...)
 		}
 	})
 
@@ -214,10 +186,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 				request1.toExpectedRequestResponse(t),
 				request2.toExpectedRequestResponse(t),
 			}
-			opts := CmpOptionsRequestResponse()
-			if diff := cmp.Diff(exp, got, opts...); diff != "" {
-				t.Errorf("[]*RequestResponse not equal (-expected +got):\n%s", diff)
-			}
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got, opts...)
 		}
 	})
 
@@ -281,10 +251,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 				request2.toExpectedRequestResponse(t),
 				request1.toExpectedRequestResponse(t),
 			}
-			opts := CmpOptionsRequestResponse()
-			if diff := cmp.Diff(exp, got, opts...); diff != "" {
-				t.Errorf("[]*RequestResponse not equal (-expected +got):\n%s", diff)
-			}
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got, opts...)
 		}
 	})
 
@@ -348,10 +316,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 				request1.toExpectedRequestResponse(t),
 				request2.toExpectedRequestResponse(t),
 			}
-			opts := CmpOptionsRequestResponse()
-			if diff := cmp.Diff(exp, got, opts...); diff != "" {
-				t.Errorf("[]*RequestResponse not equal (-expected +got):\n%s", diff)
-			}
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got, opts...)
 		}
 	})
 
@@ -415,7 +381,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
 			exp := request1.toExpectedRequestResponse(t)
-			RequireRequestResponseEqual(t, exp, got[0])
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got[0], opts...)
 		}
 	})
 
@@ -476,7 +443,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
 			exp := request2.toExpectedRequestResponse(t)
-			RequireRequestResponseEqual(t, exp, got[0])
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got[0], opts...)
 		}
 	})
 
@@ -538,7 +506,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		if assert.Len(t, got, 1) {
 			exp := request1.toExpectedRequestResponse(t)
 			exp.Group.UpdatedAt = request2.Group.UpdatedAt
-			RequireRequestResponseEqual(t, exp, got[0])
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got[0], opts...)
 		}
 	})
 
@@ -606,7 +575,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			exp := request1.toExpectedRequestResponse(t)
 			exp.Status = Accepted
 			exp.Group.UpdatedAt = request2.Group.UpdatedAt
-			RequireRequestResponseEqual(t, exp, got[0])
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got[0], opts...)
 		}
 	})
 
@@ -663,7 +633,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		require.NoError(t, err)
 		if assert.Len(t, got, 1) {
 			exp := request1.toExpectedRequestResponse(t)
-			RequireRequestResponseEqual(t, exp, got[0])
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got[0], opts...)
 		}
 	})
 }
