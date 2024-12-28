@@ -320,7 +320,6 @@ func (repo *EntRepository) UpdateRequest(
 	}
 
 	entstatuses, err := updated.QueryStatus().
-		Select(requeststatus.FieldStatus).
 		WithUser().
 		Order(ent.Desc(requeststatus.FieldCreatedAt)).
 		All(ctx)
