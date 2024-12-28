@@ -2,13 +2,14 @@ package model
 
 import (
 	"context"
-	"github.com/traPtitech/Jomon/testutil"
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
@@ -686,12 +687,30 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 			[]*Tag{tag}, []*RequestTarget{target},
 			group, user.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, request.CreatedBy, user.ID)
-		assert.Equal(t, request.Status, Status(1))
-		assert.Equal(t, request.Title, title)
-		assert.Equal(t, request.Content, content)
-		assert.Equal(t, request.Tags, []*Tag{tag})
-		assert.Equal(t, request.Group, group)
+		exp := &RequestDetail{
+			Status:  Submitted,
+			Title:   title,
+			Content: content,
+			Tags:    []*Tag{tag},
+			Targets: []*RequestTargetDetail{{
+				Target: target.Target,
+				Amount: target.Amount,
+			}},
+			Statuses: []*RequestStatus{{
+				CreatedBy: user.ID,
+				Status:    Submitted,
+			}},
+			Group:     group,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			CreatedBy: user.ID,
+		}
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(RequestDetail{}, "ID"),
+			cmpopts.IgnoreFields(RequestTargetDetail{}, "ID", "PaidAt", "CreatedAt"),
+			cmpopts.IgnoreFields(RequestStatus{}, "ID", "CreatedAt"))
+		testutil.AssertEqual(t, exp, request, opts...)
 	})
 
 	t.Run("UnknownUser", func(t *testing.T) {
@@ -829,18 +848,8 @@ func TestEntRepository_GetRequest(t *testing.T) {
 
 		got, err := repo.GetRequest(ctx, request.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, got.CreatedBy, user.ID)
-		assert.Equal(t, got.Status, Status(1))
-		assert.Equal(t, got.Title, request.Title)
-		assert.Equal(t, got.Content, request.Content)
-		assert.Equal(t, got.Tags[0].ID, request.Tags[0].ID)
-		assert.Equal(t, got.Tags[0].Name, request.Tags[0].Name)
-		assert.Equal(t, got.Targets[0].Target, request.Targets[0].Target)
-		assert.Equal(t, got.Targets[0].Amount, request.Targets[0].Amount)
-		assert.Equal(t, got.Group.ID, request.Group.ID)
-		assert.Equal(t, got.Group.Name, request.Group.Name)
-		assert.Equal(t, got.Group.Description, request.Group.Description)
-		assert.Equal(t, got.Group.Budget, request.Group.Budget)
+		opts := testutil.ApproxEqualOptions()
+		testutil.AssertEqual(t, request, got, opts...)
 	})
 
 	t.Run("UnknownRequest", func(t *testing.T) {
@@ -905,16 +914,29 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			[]*Tag{tag}, []*RequestTarget{target},
 			group)
 		assert.NoError(t, err)
-		assert.Equal(t, updatedRequest.ID, request.ID)
-		assert.Equal(t, updatedRequest.Status, request.Status)
-		assert.Equal(t, updatedRequest.Title, request.Title)
-		assert.Equal(t, updatedRequest.Content, request.Content)
-		assert.Equal(t, updatedRequest.Tags[0].ID, tag.ID)
-		assert.Equal(t, updatedRequest.Tags[0].Name, tag.Name)
-		assert.Equal(t, updatedRequest.Group.ID, request.Group.ID)
-		assert.Equal(t, updatedRequest.Group.Name, request.Group.Name)
-		assert.Equal(t, updatedRequest.Group.Description, request.Group.Description)
-		assert.Equal(t, updatedRequest.Group.Budget, request.Group.Budget)
+		exp := &RequestDetail{
+			ID:       request.ID,
+			Status:   request.Status,
+			Title:    request.Title,
+			Content:  request.Content,
+			Comments: request.Comments,
+			Files:    request.Files,
+			Tags:     []*Tag{tag},
+			Targets: []*RequestTargetDetail{{
+				Target:    target.Target,
+				Amount:    target.Amount,
+				CreatedAt: time.Now(),
+			}},
+			Statuses:  request.Statuses,
+			Group:     group,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: time.Now(),
+			CreatedBy: request.CreatedBy,
+		}
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(RequestTargetDetail{}, "ID", "PaidAt"))
+		testutil.AssertEqual(t, exp, updatedRequest, opts...)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -954,16 +976,29 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			[]*Tag{tag}, []*RequestTarget{target},
 			group)
 		assert.NoError(t, err)
-		assert.Equal(t, updatedRequest.ID, request.ID)
-		assert.Equal(t, updatedRequest.Status, request.Status)
-		assert.Equal(t, updatedRequest.Title, title)
-		assert.Equal(t, updatedRequest.Content, request.Content)
-		assert.Equal(t, updatedRequest.Tags[0].ID, tag.ID)
-		assert.Equal(t, updatedRequest.Tags[0].Name, tag.Name)
-		assert.Equal(t, updatedRequest.Group.ID, request.Group.ID)
-		assert.Equal(t, updatedRequest.Group.Name, request.Group.Name)
-		assert.Equal(t, updatedRequest.Group.Description, request.Group.Description)
-		assert.Equal(t, updatedRequest.Group.Budget, request.Group.Budget)
+		exp := &RequestDetail{
+			ID:       request.ID,
+			Status:   request.Status,
+			Title:    title,
+			Content:  request.Content,
+			Comments: request.Comments,
+			Files:    request.Files,
+			Tags:     []*Tag{tag},
+			Targets: []*RequestTargetDetail{{
+				Target:    target.Target,
+				Amount:    target.Amount,
+				CreatedAt: time.Now(),
+			}},
+			Statuses:  request.Statuses,
+			Group:     group,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: time.Now(),
+			CreatedBy: request.CreatedBy,
+		}
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(RequestTargetDetail{}, "ID", "PaidAt"))
+		testutil.AssertEqual(t, exp, updatedRequest, opts...)
 	})
 
 	t.Run("Success3", func(t *testing.T) {
@@ -1002,16 +1037,29 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			[]*Tag{tag}, []*RequestTarget{target},
 			group)
 		assert.NoError(t, err)
-		assert.Equal(t, updatedRequest.ID, request.ID)
-		assert.Equal(t, updatedRequest.Status, request.Status)
-		assert.Equal(t, updatedRequest.Title, request.Title)
-		assert.Equal(t, updatedRequest.Content, content)
-		assert.Equal(t, updatedRequest.Tags[0].ID, tag.ID)
-		assert.Equal(t, updatedRequest.Tags[0].Name, tag.Name)
-		assert.Equal(t, updatedRequest.Group.ID, request.Group.ID)
-		assert.Equal(t, updatedRequest.Group.Name, request.Group.Name)
-		assert.Equal(t, updatedRequest.Group.Description, request.Group.Description)
-		assert.Equal(t, updatedRequest.Group.Budget, request.Group.Budget)
+		exp := &RequestDetail{
+			ID:       request.ID,
+			Status:   request.Status,
+			Title:    request.Title,
+			Content:  content,
+			Comments: request.Comments,
+			Files:    request.Files,
+			Tags:     []*Tag{tag},
+			Targets: []*RequestTargetDetail{{
+				Target:    target.Target,
+				Amount:    target.Amount,
+				CreatedAt: time.Now(),
+			}},
+			Statuses:  request.Statuses,
+			Group:     group,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: time.Now(),
+			CreatedBy: request.CreatedBy,
+		}
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(RequestTargetDetail{}, "ID", "PaidAt"))
+		testutil.AssertEqual(t, exp, updatedRequest, opts...)
 	})
 
 	t.Run("UnknownTag", func(t *testing.T) {
