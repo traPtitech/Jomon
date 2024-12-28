@@ -204,15 +204,16 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		cratedBy = &u
 	}
 	query := model.RequestQuery{
-		Sort:   sort,
-		Target: target,
-		Status: ss,
-		Since:  since,
-		Until:  until,
-		Limit:  limit,
-		Offset: offset,
-		Tag:    tag,
-		Group:  group,
+		Sort:      sort,
+		Target:    target,
+		Status:    ss,
+		Since:     since,
+		Until:     until,
+		Limit:     limit,
+		Offset:    offset,
+		Tag:       tag,
+		Group:     group,
+		CreatedBy: cratedBy,
 	}
 
 	modelrequests, err := h.Repository.GetRequests(ctx, query)

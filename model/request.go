@@ -59,13 +59,14 @@ type RequestDetail struct {
 }
 
 type RequestQuery struct {
-	Sort   *string
-	Target *uuid.UUID
-	Status *string
-	Since  *time.Time
-	Until  *time.Time
-	Limit  int
-	Offset int
-	Tag    *string
-	Group  *string
+	Sort      *string
+	Target    *uuid.UUID
+	Status    *string
+	Since     *time.Time
+	Until     *time.Time
+	Limit     int
+	Offset    int
+	Tag       *string
+	Group     *string
+	CreatedBy *uuid.UUID
 }
