@@ -5,11 +5,55 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
+
+func (rd *RequestDetail) toExpectedRequestResponse(t *testing.T) *RequestResponse {
+	t.Helper()
+	return &RequestResponse{
+		ID:        rd.ID,
+		Status:    rd.Status,
+		CreatedAt: rd.CreatedAt,
+		UpdatedAt: rd.UpdatedAt,
+		CreatedBy: rd.CreatedBy,
+		Title:     rd.Title,
+		Content:   rd.Content,
+		Tags:      rd.Tags,
+		//Targets:   rd.Targets,
+		//Statuses:  rd.Statuses,
+		Group: rd.Group,
+	}
+}
+
+func CmpOptionsRequestResponse() cmp.Options {
+	return cmp.Options{cmpopts.EquateApproxTime(time.Second)}
+}
+
+func DiffRequestResponse(expected, actual *RequestResponse) string {
+	return cmp.Diff(expected, actual, CmpOptionsRequestResponse()...)
+}
+
+func AssertRequestResponseEqual(t *testing.T, expected, actual *RequestResponse) bool {
+	t.Helper()
+	diff := DiffRequestResponse(expected, actual)
+	if diff == "" {
+		return true
+	}
+	t.Errorf("RequestResponse is not equal (-expected +actual):\n%s", diff)
+	return false
+}
+
+func RequireRequestResponseEqual(t *testing.T, expected, actual *RequestResponse) {
+	t.Helper()
+	if !AssertRequestResponseEqual(t, expected, actual) {
+		t.FailNow()
+	}
+}
 
 func TestEntRepository_GetRequests(t *testing.T) {
 	ctx := context.Background()
@@ -98,18 +142,14 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) && assert.Equal(t, got[1].ID, request1.ID) {
-			assert.Equal(t, got[1].ID, request1.ID)
-			assert.Equal(t, got[1].Status, request1.Status)
-			assert.Equal(t, got[1].Title, request1.Title)
-			assert.Equal(t, got[1].Content, request1.Content)
-			assert.Equal(t, got[1].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[1].Tags[0].Name, request1.Tags[0].Name)
-			assert.Equal(t, got[0].ID, request2.ID)
-			assert.Equal(t, got[0].Status, request2.Status)
-			assert.Equal(t, got[0].Title, request2.Title)
-			assert.Equal(t, got[0].Content, request2.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+			exp := []*RequestResponse{
+				request2.toExpectedRequestResponse(t),
+				request1.toExpectedRequestResponse(t),
+			}
+			opts := CmpOptionsRequestResponse()
+			if diff := cmp.Diff(exp, got, opts...); diff != "" {
+				t.Errorf("[]*RequestResponse not equal (-expected +got):\n%s", diff)
+			}
 		}
 	})
 
@@ -170,18 +210,14 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) && assert.Equal(t, got[0].ID, request1.ID) {
-			assert.Equal(t, got[0].ID, request1.ID)
-			assert.Equal(t, got[0].Status, request1.Status)
-			assert.Equal(t, got[0].Title, request1.Title)
-			assert.Equal(t, got[0].Content, request1.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
-			assert.Equal(t, got[1].ID, request2.ID)
-			assert.Equal(t, got[1].Status, request2.Status)
-			assert.Equal(t, got[1].Title, request2.Title)
-			assert.Equal(t, got[1].Content, request2.Content)
-			assert.Equal(t, got[1].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[1].Tags[0].Name, request1.Tags[0].Name)
+			exp := []*RequestResponse{
+				request1.toExpectedRequestResponse(t),
+				request2.toExpectedRequestResponse(t),
+			}
+			opts := CmpOptionsRequestResponse()
+			if diff := cmp.Diff(exp, got, opts...); diff != "" {
+				t.Errorf("[]*RequestResponse not equal (-expected +got):\n%s", diff)
+			}
 		}
 	})
 
@@ -241,18 +277,14 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) && assert.Equal(t, got[0].ID, request2.ID) {
-			assert.Equal(t, got[0].ID, request2.ID)
-			assert.Equal(t, got[0].Status, request2.Status)
-			assert.Equal(t, got[0].Title, request2.Title)
-			assert.Equal(t, got[0].Content, request2.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request2.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request2.Tags[0].Name)
-			assert.Equal(t, got[1].ID, request1.ID)
-			assert.Equal(t, got[1].Status, request1.Status)
-			assert.Equal(t, got[1].Title, request1.Title)
-			assert.Equal(t, got[1].Content, request1.Content)
-			assert.Equal(t, got[1].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[1].Tags[0].Name, request1.Tags[0].Name)
+			exp := []*RequestResponse{
+				request2.toExpectedRequestResponse(t),
+				request1.toExpectedRequestResponse(t),
+			}
+			opts := CmpOptionsRequestResponse()
+			if diff := cmp.Diff(exp, got, opts...); diff != "" {
+				t.Errorf("[]*RequestResponse not equal (-expected +got):\n%s", diff)
+			}
 		}
 	})
 
@@ -312,18 +344,14 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) && assert.Equal(t, got[0].ID, request1.ID) {
-			assert.Equal(t, got[0].ID, request1.ID)
-			assert.Equal(t, got[0].Status, request1.Status)
-			assert.Equal(t, got[0].Title, request1.Title)
-			assert.Equal(t, got[0].Content, request1.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
-			assert.Equal(t, got[1].ID, request2.ID)
-			assert.Equal(t, got[1].Status, request2.Status)
-			assert.Equal(t, got[1].Title, request2.Title)
-			assert.Equal(t, got[1].Content, request2.Content)
-			assert.Equal(t, got[1].Tags[0].ID, request2.Tags[0].ID)
-			assert.Equal(t, got[1].Tags[0].Name, request2.Tags[0].Name)
+			exp := []*RequestResponse{
+				request1.toExpectedRequestResponse(t),
+				request2.toExpectedRequestResponse(t),
+			}
+			opts := CmpOptionsRequestResponse()
+			if diff := cmp.Diff(exp, got, opts...); diff != "" {
+				t.Errorf("[]*RequestResponse not equal (-expected +got):\n%s", diff)
+			}
 		}
 	})
 
@@ -386,12 +414,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
-			assert.Equal(t, got[0].ID, request1.ID)
-			assert.Equal(t, got[0].Status, request1.Status)
-			assert.Equal(t, got[0].Title, request1.Title)
-			assert.Equal(t, got[0].Content, request1.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+			exp := request1.toExpectedRequestResponse(t)
+			RequireRequestResponseEqual(t, exp, got[0])
 		}
 	})
 
@@ -451,12 +475,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
-			assert.Equal(t, got[0].ID, request2.ID)
-			assert.Equal(t, got[0].Status, request2.Status)
-			assert.Equal(t, got[0].Title, request2.Title)
-			assert.Equal(t, got[0].Content, request2.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request2.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request2.Tags[0].Name)
+			exp := request2.toExpectedRequestResponse(t)
+			RequireRequestResponseEqual(t, exp, got[0])
 		}
 	})
 
@@ -516,12 +536,9 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
-			assert.Equal(t, got[0].ID, request1.ID)
-			assert.Equal(t, got[0].Status, request1.Status)
-			assert.Equal(t, got[0].Title, request1.Title)
-			assert.Equal(t, got[0].Content, request1.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+			exp := request1.toExpectedRequestResponse(t)
+			exp.Group.UpdatedAt = request2.Group.UpdatedAt
+			RequireRequestResponseEqual(t, exp, got[0])
 		}
 	})
 
@@ -565,7 +582,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			user1.ID)
 		require.NoError(t, err)
 		time.Sleep(2 * time.Second)
-		_, err = repo8.CreateRequest(
+		request2, err := repo8.CreateRequest(
 			ctx,
 			"a",
 			random.AlphaNumeric(t, 100),
@@ -586,12 +603,10 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
-			assert.Equal(t, got[0].ID, request1.ID)
-			assert.Equal(t, got[0].Status, Accepted)
-			assert.Equal(t, got[0].Title, request1.Title)
-			assert.Equal(t, got[0].Content, request1.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+			exp := request1.toExpectedRequestResponse(t)
+			exp.Status = Accepted
+			exp.Group.UpdatedAt = request2.Group.UpdatedAt
+			RequireRequestResponseEqual(t, exp, got[0])
 		}
 	})
 
@@ -647,30 +662,8 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		require.NoError(t, err)
 		if assert.Len(t, got, 1) {
-			got := got[0]
-			exp := &RequestResponse{
-				ID:     request1.ID,
-				Status: request1.Status,
-				// FIXME: time.Time の内部表現が異なるため、比較ができない
-				CreatedAt: got.CreatedAt,
-				UpdatedAt: got.UpdatedAt,
-				CreatedBy: request1.CreatedBy,
-				Title:     request1.Title,
-				Content:   request1.Content,
-				Tags:      request1.Tags,
-				// Targets:   request1.Targets,
-				// Statuses:  request1.Statuses,
-				Group: &Group{
-					ID:          request1.Group.ID,
-					Name:        request1.Group.Name,
-					Description: request1.Group.Description,
-					Budget:      request1.Group.Budget,
-					CreatedAt:   got.Group.CreatedAt,
-					UpdatedAt:   got.Group.UpdatedAt,
-					DeletedAt:   request1.Group.DeletedAt,
-				},
-			}
-			require.Equal(t, exp, got)
+			exp := request1.toExpectedRequestResponse(t)
+			RequireRequestResponseEqual(t, exp, got[0])
 		}
 	})
 }
