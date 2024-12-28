@@ -167,7 +167,10 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		}
 		if limitI < 0 {
 			h.Logger.Info("received negative limit", zap.Int("limit", limitI))
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("negative limit(=%d) is invalid", limitI))
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Errorf("negative limit(=%d) is invalid", limitI),
+			)
 		}
 		limit = limitI
 	}
@@ -180,7 +183,10 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		}
 		if offsetI < 0 {
 			h.Logger.Info("received negative offset", zap.Int("offset", offsetI))
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("negative offset(=%d) is invalid", offsetI))
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Errorf("negative offset(=%d) is invalid", offsetI),
+			)
 		}
 		offset = offsetI
 	}
