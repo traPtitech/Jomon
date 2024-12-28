@@ -3,9 +3,12 @@ package model
 import (
 	"context"
 	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
@@ -30,14 +33,21 @@ func TestEntRepository_createTransactionDetail(t *testing.T) {
 		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 10)
-		// Create TransactionDetail
 		td, err := repo.createTransactionDetail(ctx, tx, title, amount, target)
 		assert.NoError(t, err)
 		err = tx.Commit()
 		assert.NoError(t, err)
-		assert.NotNil(t, td)
-		assert.Equal(t, td.Amount, amount)
-		assert.Equal(t, td.Target, target)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(TransactionDetail{}, "ID"))
+		exp := &TransactionDetail{
+			Title:     title,
+			Amount:    amount,
+			Target:    target,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+		testutil.RequireEqual(t, exp, td, opts...)
 	})
 }
 
@@ -77,8 +87,15 @@ func TestEntRepository_updateTransactionDetail(t *testing.T) {
 		assert.NoError(t, err)
 		err = tx.Commit()
 		assert.NoError(t, err)
-		assert.NotNil(t, td)
-		assert.Equal(t, td.Amount, updatedAmount)
-		assert.Equal(t, td.Target, updatedTarget)
+		opts := testutil.ApproxEqualOptions()
+		exp := &TransactionDetail{
+			ID:        td.ID,
+			Title:     updateTitle,
+			Amount:    updatedAmount,
+			Target:    updatedTarget,
+			CreatedAt: td.CreatedAt,
+			UpdatedAt: time.Now(),
+		}
+		testutil.RequireEqual(t, exp, td, opts...)
 	})
 }

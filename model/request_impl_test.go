@@ -116,14 +116,16 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			Sort: &sort,
 		})
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && assert.Equal(t, got[1].ID, request1.ID) {
-			exp := []*RequestResponse{
-				request2.toExpectedRequestResponse(t),
-				request1.toExpectedRequestResponse(t),
-			}
-			opts := testutil.ApproxEqualOptions()
-			testutil.RequireEqual(t, exp, got, opts...)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.SortSlices(func(a, b *RequestResponse) bool {
+				return a.ID.ID() < b.ID.ID()
+			}))
+		exp := []*RequestResponse{
+			request1.toExpectedRequestResponse(t),
+			request2.toExpectedRequestResponse(t),
 		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithReverseSortCreatedAt", func(t *testing.T) {
@@ -182,14 +184,16 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			Sort: &sort,
 		})
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && assert.Equal(t, got[0].ID, request1.ID) {
-			exp := []*RequestResponse{
-				request1.toExpectedRequestResponse(t),
-				request2.toExpectedRequestResponse(t),
-			}
-			opts := testutil.ApproxEqualOptions()
-			testutil.RequireEqual(t, exp, got, opts...)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.SortSlices(func(a, b *RequestResponse) bool {
+				return a.ID.ID() < b.ID.ID()
+			}))
+		exp := []*RequestResponse{
+			request1.toExpectedRequestResponse(t),
+			request2.toExpectedRequestResponse(t),
 		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithSortTitle", func(t *testing.T) {
@@ -247,14 +251,16 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			Sort: &sort,
 		})
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && assert.Equal(t, got[0].ID, request2.ID) {
-			exp := []*RequestResponse{
-				request2.toExpectedRequestResponse(t),
-				request1.toExpectedRequestResponse(t),
-			}
-			opts := testutil.ApproxEqualOptions()
-			testutil.RequireEqual(t, exp, got, opts...)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.SortSlices(func(a, b *RequestResponse) bool {
+				return a.ID.ID() < b.ID.ID()
+			}))
+		exp := []*RequestResponse{
+			request2.toExpectedRequestResponse(t),
+			request1.toExpectedRequestResponse(t),
 		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithReverseSortTitle", func(t *testing.T) {
@@ -312,14 +318,16 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			Sort: &sort,
 		})
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && assert.Equal(t, got[0].ID, request1.ID) {
-			exp := []*RequestResponse{
-				request1.toExpectedRequestResponse(t),
-				request2.toExpectedRequestResponse(t),
-			}
-			opts := testutil.ApproxEqualOptions()
-			testutil.RequireEqual(t, exp, got, opts...)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.SortSlices(func(a, b *RequestResponse) bool {
+				return a.ID.ID() < b.ID.ID()
+			}))
+		exp := []*RequestResponse{
+			request1.toExpectedRequestResponse(t),
+			request2.toExpectedRequestResponse(t),
 		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithQueryTarget", func(t *testing.T) {

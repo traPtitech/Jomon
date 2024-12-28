@@ -5,9 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
@@ -83,19 +85,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 		got, err := repo.GetTransactions(ctx, query)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) {
-			assert.Equal(t, tx1.ID, got[1].ID)
-			assert.Equal(t, tx1.Title, got[1].Title)
-			assert.Equal(t, tx1.Amount, got[1].Amount)
-			assert.Equal(t, tx1.Target, got[1].Target)
-			assert.Equal(t, tx1.CreatedAt, got[1].CreatedAt)
-			assert.Equal(t, tx1.UpdatedAt, got[1].UpdatedAt)
-			assert.Equal(t, tx2.ID, got[0].ID)
-			assert.Equal(t, tx2.Amount, got[0].Amount)
-			assert.Equal(t, tx2.Target, got[0].Target)
-			assert.Equal(t, tx2.CreatedAt, got[0].CreatedAt)
-			assert.Equal(t, tx2.UpdatedAt, got[0].UpdatedAt)
-		}
+		assert.Len(t, got, 2)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*TransactionResponse{tx2, tx1}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithSortCreatedAtDesc", func(t *testing.T) {
@@ -134,19 +127,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 		got, err := repo2.GetTransactions(ctx, query)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) {
-			assert.Equal(t, tx1.ID, got[0].ID)
-			assert.Equal(t, tx1.Title, got[0].Title)
-			assert.Equal(t, tx1.Amount, got[0].Amount)
-			assert.Equal(t, tx1.Target, got[0].Target)
-			assert.Equal(t, tx1.CreatedAt, got[0].CreatedAt)
-			assert.Equal(t, tx1.UpdatedAt, got[0].UpdatedAt)
-			assert.Equal(t, tx2.ID, got[1].ID)
-			assert.Equal(t, tx2.Amount, got[1].Amount)
-			assert.Equal(t, tx2.Target, got[1].Target)
-			assert.Equal(t, tx2.CreatedAt, got[1].CreatedAt)
-			assert.Equal(t, tx2.UpdatedAt, got[1].UpdatedAt)
-		}
+		assert.Len(t, got, 2)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*TransactionResponse{tx1, tx2}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithSortAmount", func(t *testing.T) {
@@ -184,19 +168,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 		got, err := repo3.GetTransactions(ctx, query)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) {
-			assert.Equal(t, tx1.ID, got[0].ID)
-			assert.Equal(t, tx1.Title, got[0].Title)
-			assert.Equal(t, tx1.Amount, got[0].Amount)
-			assert.Equal(t, tx1.Target, got[0].Target)
-			assert.Equal(t, tx1.CreatedAt, got[0].CreatedAt)
-			assert.Equal(t, tx1.UpdatedAt, got[0].UpdatedAt)
-			assert.Equal(t, tx2.ID, got[1].ID)
-			assert.Equal(t, tx2.Amount, got[1].Amount)
-			assert.Equal(t, tx2.Target, got[1].Target)
-			assert.Equal(t, tx2.CreatedAt, got[1].CreatedAt)
-			assert.Equal(t, tx2.UpdatedAt, got[1].UpdatedAt)
-		}
+		assert.Len(t, got, 2)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*TransactionResponse{tx1, tx2}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithSortAmountDesc", func(t *testing.T) {
@@ -241,19 +216,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		// nolint:contextcheck
 		got, err := repo4.GetTransactions(ctx, query)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) {
-			assert.Equal(t, tx2.ID, got[0].ID)
-			assert.Equal(t, tx2.Title, got[0].Title)
-			assert.Equal(t, tx2.Amount, got[0].Amount)
-			assert.Equal(t, tx2.Target, got[0].Target)
-			assert.Equal(t, tx2.CreatedAt, got[0].CreatedAt)
-			assert.Equal(t, tx2.UpdatedAt, got[0].UpdatedAt)
-			assert.Equal(t, tx1.ID, got[1].ID)
-			assert.Equal(t, tx1.Amount, got[1].Amount)
-			assert.Equal(t, tx1.Target, got[1].Target)
-			assert.Equal(t, tx1.CreatedAt, got[1].CreatedAt)
-			assert.Equal(t, tx1.UpdatedAt, got[1].UpdatedAt)
-		}
+		assert.Len(t, got, 2)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*TransactionResponse{tx2, tx1}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithNoneSort", func(t *testing.T) {
@@ -292,19 +258,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 		got, err := repo5.GetTransactions(ctx, query)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) {
-			assert.Equal(t, tx1.ID, got[1].ID)
-			assert.Equal(t, tx1.Title, got[1].Title)
-			assert.Equal(t, tx1.Amount, got[1].Amount)
-			assert.Equal(t, tx1.Target, got[1].Target)
-			assert.Equal(t, tx1.CreatedAt, got[1].CreatedAt)
-			assert.Equal(t, tx1.UpdatedAt, got[1].UpdatedAt)
-			assert.Equal(t, tx2.ID, got[0].ID)
-			assert.Equal(t, tx2.Amount, got[0].Amount)
-			assert.Equal(t, tx2.Target, got[0].Target)
-			assert.Equal(t, tx2.CreatedAt, got[0].CreatedAt)
-			assert.Equal(t, tx2.UpdatedAt, got[0].UpdatedAt)
-		}
+		assert.Len(t, got, 2)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*TransactionResponse{tx2, tx1}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithTarget", func(t *testing.T) {
@@ -342,14 +299,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 		got, err := repo6.GetTransactions(ctx, query)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 1) {
-			assert.Equal(t, tx.ID, got[0].ID)
-			assert.Equal(t, tx.Title, got[0].Title)
-			assert.Equal(t, tx.Amount, got[0].Amount)
-			assert.Equal(t, tx.Target, got[0].Target)
-			assert.Equal(t, tx.CreatedAt, got[0].CreatedAt)
-			assert.Equal(t, tx.UpdatedAt, got[0].UpdatedAt)
-		}
+		assert.Len(t, got, 1)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*TransactionResponse{tx}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithSinceUntil", func(t *testing.T) {
@@ -392,13 +345,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 
 		got, err := repo7.GetTransactions(ctx, query)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 1) {
-			assert.Equal(t, tx.ID, got[0].ID)
-			assert.Equal(t, tx.Amount, got[0].Amount)
-			assert.Equal(t, tx.Target, got[0].Target)
-			assert.Equal(t, tx.CreatedAt, got[0].CreatedAt)
-			assert.Equal(t, tx.UpdatedAt, got[0].UpdatedAt)
-		}
+		assert.Len(t, got, 1)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*TransactionResponse{tx}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithTag", func(t *testing.T) {
@@ -442,14 +392,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 
 		got, err := repo8.GetTransactions(ctx, query)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 1) {
-			assert.Equal(t, tx.ID, got[0].ID)
-			assert.Equal(t, tx.Title, got[0].Title)
-			assert.Equal(t, tx.Amount, got[0].Amount)
-			assert.Equal(t, tx.Target, got[0].Target)
-			assert.Equal(t, tx.CreatedAt, got[0].CreatedAt)
-			assert.Equal(t, tx.UpdatedAt, got[0].UpdatedAt)
-		}
+		assert.Len(t, got, 1)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*TransactionResponse{tx}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithGroup", func(t *testing.T) {
@@ -495,14 +441,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 
 		got, err := repo9.GetTransactions(ctx, query)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 1) {
-			assert.Equal(t, tx.ID, got[0].ID)
-			assert.Equal(t, tx.Title, got[0].Title)
-			assert.Equal(t, tx.Amount, got[0].Amount)
-			assert.Equal(t, tx.Target, got[0].Target)
-			assert.Equal(t, tx.CreatedAt, got[0].CreatedAt)
-			assert.Equal(t, tx.UpdatedAt, got[0].UpdatedAt)
-		}
+		assert.Len(t, got, 1)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*TransactionResponse{tx}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithRequest", func(t *testing.T) {
@@ -541,14 +483,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 
 		got, err := repo10.GetTransactions(ctx, query)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 1) {
-			assert.Equal(t, tx.ID, got[0].ID)
-			assert.Equal(t, tx.Title, got[0].Title)
-			assert.Equal(t, tx.Amount, got[0].Amount)
-			assert.Equal(t, tx.Target, got[0].Target)
-			assert.Equal(t, tx.CreatedAt, got[0].CreatedAt)
-			assert.Equal(t, tx.UpdatedAt, got[0].UpdatedAt)
-		}
+		assert.Len(t, got, 1)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*TransactionResponse{tx}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("Success", func(t *testing.T) {
@@ -558,7 +496,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		query := TransactionQuery{}
 		got, err := repo11.GetTransactions(ctx, query)
 		assert.NoError(t, err)
-		assert.Len(t, got, 0)
+		assert.Empty(t, got)
 	})
 }
 
@@ -597,14 +535,9 @@ func TestEntRepository_GetTransaction(t *testing.T) {
 		// Get Transaction
 		got, err := repo.GetTransaction(ctx, tx.ID)
 		assert.NoError(t, err)
-		if assert.NotNil(t, got) {
-			assert.Equal(t, tx.ID, got.ID)
-			assert.Equal(t, tx.Title, got.Title)
-			assert.Equal(t, tx.Amount, got.Amount)
-			assert.Equal(t, tx.Target, got.Target)
-			assert.Equal(t, tx.CreatedAt, got.CreatedAt)
-			assert.Equal(t, tx.UpdatedAt, got.UpdatedAt)
-		}
+		assert.NotNil(t, got)
+		opts := testutil.ApproxEqualOptions()
+		testutil.RequireEqual(t, tx, got, opts...)
 	})
 }
 
@@ -656,21 +589,21 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 			title, amount, target,
 			[]*uuid.UUID{&tag.ID}, &group.ID, &request.ID)
 		assert.NoError(t, err)
-		if assert.NotNil(t, tx) {
-			assert.Equal(t, title, tx.Title)
-			assert.Equal(t, amount, tx.Amount)
-			assert.Equal(t, target, tx.Target)
-			if assert.Len(t, tx.Tags, 1) {
-				assert.Equal(t, tag.ID, tx.Tags[0].ID)
-				assert.Equal(t, tag.Name, tx.Tags[0].Name)
-			}
-			if assert.NotNil(t, tx.Group) {
-				assert.Equal(t, group.ID, tx.Group.ID)
-				assert.Equal(t, group.Name, tx.Group.Name)
-				assert.Equal(t, group.Description, tx.Group.Description)
-				assert.Equal(t, group.Budget, tx.Group.Budget)
-			}
+		opts := testutil.ApproxEqualOptions()
+		// FIXME: #831
+		opts = append(opts,
+			cmpopts.IgnoreFields(TransactionResponse{}, "ID", "UpdatedAt"))
+		exp := &TransactionResponse{
+			Title:     title,
+			Amount:    amount,
+			Target:    target,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Request:   &request.ID,
+			Tags:      []*Tag{tag},
+			Group:     group,
 		}
+		testutil.RequireEqual(t, exp, tx, opts...)
 	})
 
 	t.Run("SuccessWithoutTags", func(t *testing.T) {
@@ -708,18 +641,21 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 
 		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, &group.ID, &request.ID)
 		assert.NoError(t, err)
-		if assert.NotNil(t, tx) {
-			assert.Equal(t, title, tx.Title)
-			assert.Equal(t, amount, tx.Amount)
-			assert.Equal(t, target, tx.Target)
-			assert.Len(t, tx.Tags, 0)
-			if assert.NotNil(t, tx.Group) {
-				assert.Equal(t, group.ID, tx.Group.ID)
-				assert.Equal(t, group.Name, tx.Group.Name)
-				assert.Equal(t, group.Description, tx.Group.Description)
-				assert.Equal(t, group.Budget, tx.Group.Budget)
-			}
+		opts := testutil.ApproxEqualOptions()
+		// FIXME: #831
+		opts = append(opts,
+			cmpopts.IgnoreFields(TransactionResponse{}, "ID", "UpdatedAt"))
+		exp := &TransactionResponse{
+			Title:     title,
+			Amount:    amount,
+			Target:    target,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Request:   &request.ID,
+			Tags:      []*Tag{},
+			Group:     group,
 		}
+		testutil.RequireEqual(t, exp, tx, opts...)
 	})
 
 	t.Run("SuccessWithoutGroup", func(t *testing.T) {
@@ -756,16 +692,21 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 			title, amount, target,
 			[]*uuid.UUID{&tag.ID}, nil, &request.ID)
 		assert.NoError(t, err)
-		if assert.NotNil(t, tx) {
-			assert.Equal(t, title, tx.Title)
-			assert.Equal(t, amount, tx.Amount)
-			assert.Equal(t, target, tx.Target)
-			if assert.Len(t, tx.Tags, 1) {
-				assert.Equal(t, tag.ID, tx.Tags[0].ID)
-				assert.Equal(t, tag.Name, tx.Tags[0].Name)
-			}
-			assert.Nil(t, tx.Group)
+		opts := testutil.ApproxEqualOptions()
+		// FIXME: #831
+		opts = append(opts,
+			cmpopts.IgnoreFields(TransactionResponse{}, "ID", "UpdatedAt"))
+		exp := &TransactionResponse{
+			Title:     title,
+			Amount:    amount,
+			Target:    target,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Request:   &request.ID,
+			Tags:      []*Tag{tag},
+			Group:     nil,
 		}
+		testutil.RequireEqual(t, exp, tx, opts...)
 	})
 
 	t.Run("Success", func(t *testing.T) {
@@ -779,13 +720,21 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 
 		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, nil, nil)
 		assert.NoError(t, err)
-		if assert.NotNil(t, tx) {
-			assert.Equal(t, title, tx.Title)
-			assert.Equal(t, amount, tx.Amount)
-			assert.Equal(t, target, tx.Target)
-			assert.Len(t, tx.Tags, 0)
-			assert.Nil(t, tx.Group)
+		opts := testutil.ApproxEqualOptions()
+		// FIXME: #831
+		opts = append(opts,
+			cmpopts.IgnoreFields(TransactionResponse{}, "ID", "UpdatedAt"))
+		exp := &TransactionResponse{
+			Title:     title,
+			Amount:    amount,
+			Target:    target,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Request:   nil,
+			Tags:      []*Tag{},
+			Group:     nil,
 		}
+		testutil.RequireEqual(t, exp, tx, opts...)
 	})
 
 	t.Run("SuccessWithNegativeAmount", func(t *testing.T) {
@@ -799,13 +748,20 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 
 		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, nil, nil)
 		assert.NoError(t, err)
-		if assert.NotNil(t, tx) {
-			assert.Equal(t, title, tx.Title)
-			assert.Equal(t, amount, tx.Amount)
-			assert.Equal(t, target, tx.Target)
-			assert.Len(t, tx.Tags, 0)
-			assert.Nil(t, tx.Group)
+		opts := testutil.ApproxEqualOptions()
+		// FIXME: #831
+		opts = append(opts,
+			cmpopts.IgnoreFields(TransactionResponse{}, "ID", "UpdatedAt"))
+		exp := &TransactionResponse{
+			Title:     title,
+			Amount:    amount,
+			Target:    target,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Tags:      []*Tag{},
+			Group:     nil,
 		}
+		testutil.RequireEqual(t, exp, tx, opts...)
 	})
 }
 
@@ -884,25 +840,26 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		tx, err = repo.UpdateTransaction(
+		updated, err := repo.UpdateTransaction(
 			ctx,
 			tx.ID, title, amount, target,
 			[]*uuid.UUID{&tag.ID}, &group.ID, &request.ID)
 		assert.NoError(t, err)
-		if assert.NotNil(t, tx) {
-			assert.Equal(t, title, tx.Title)
-			assert.Equal(t, amount, tx.Amount)
-			assert.Equal(t, target, tx.Target)
-			if assert.Len(t, tx.Tags, 1) {
-				assert.Equal(t, tag.ID, tx.Tags[0].ID)
-				assert.Equal(t, tag.Name, tx.Tags[0].Name)
-			}
-			if assert.NotNil(t, tx.Group) {
-				assert.Equal(t, group.ID, tx.Group.ID)
-				assert.Equal(t, group.Name, tx.Group.Name)
-				assert.Equal(t, group.Description, tx.Group.Description)
-				assert.Equal(t, group.Budget, tx.Group.Budget)
-			}
+		opts := testutil.ApproxEqualOptions()
+		// FIXME: #831
+		opts = append(opts,
+			cmpopts.IgnoreFields(TransactionResponse{}, "UpdatedAt"))
+		exp := &TransactionResponse{
+			ID:        tx.ID,
+			Title:     title,
+			Amount:    amount,
+			Target:    target,
+			CreatedAt: tx.CreatedAt,
+			UpdatedAt: time.Now(),
+			Request:   &request.ID,
+			Tags:      []*Tag{tag},
+			Group:     group,
 		}
+		testutil.RequireEqual(t, exp, updated, opts...)
 	})
 }

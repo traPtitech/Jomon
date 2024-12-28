@@ -3,9 +3,12 @@ package model
 import (
 	"context"
 	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
@@ -24,7 +27,7 @@ func TestEntRepository_GetUsers(t *testing.T) {
 
 		got, err := repo.GetUsers(ctx)
 		assert.NoError(t, err)
-		assert.Len(t, got, 0)
+		assert.Empty(t, got)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -38,25 +41,14 @@ func TestEntRepository_GetUsers(t *testing.T) {
 
 		got, err := repo2.GetUsers(ctx)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && got[0].ID == user1.ID {
-			assert.Equal(t, got[0].ID, user1.ID)
-			assert.Equal(t, got[0].Name, user1.Name)
-			assert.Equal(t, got[0].DisplayName, user1.DisplayName)
-			assert.Equal(t, got[0].Admin, user1.Admin)
-			assert.Equal(t, got[1].ID, user2.ID)
-			assert.Equal(t, got[1].Name, user2.Name)
-			assert.Equal(t, got[1].DisplayName, user2.DisplayName)
-			assert.Equal(t, got[1].Admin, user2.Admin)
-		} else if assert.Len(t, got, 2) {
-			assert.Equal(t, got[0].ID, user2.ID)
-			assert.Equal(t, got[0].Name, user2.Name)
-			assert.Equal(t, got[0].DisplayName, user2.DisplayName)
-			assert.Equal(t, got[0].Admin, user2.Admin)
-			assert.Equal(t, got[1].ID, user1.ID)
-			assert.Equal(t, got[1].Name, user1.Name)
-			assert.Equal(t, got[1].DisplayName, user1.DisplayName)
-			assert.Equal(t, got[1].Admin, user1.Admin)
-		}
+		assert.Len(t, got, 2)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.SortSlices(func(l, r *User) bool {
+				return l.ID.ID() < r.ID.ID()
+			}))
+		exp := []*User{user1, user2}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 }
 
@@ -76,9 +68,17 @@ func TestEntRepository_CreateUser(t *testing.T) {
 
 		user, err := repo.CreateUser(ctx, name, dn, admin)
 		assert.NoError(t, err)
-		assert.Equal(t, user.Name, name)
-		assert.Equal(t, user.DisplayName, dn)
-		assert.Equal(t, user.Admin, admin)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts, cmpopts.IgnoreFields(User{}, "ID"))
+		exp := &User{
+			Name:        name,
+			DisplayName: dn,
+			Admin:       admin,
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+			DeletedAt:   nil,
+		}
+		testutil.RequireEqual(t, exp, user, opts...)
 	})
 
 	t.Run("MissingName", func(t *testing.T) {
@@ -115,10 +115,8 @@ func TestEntRepository_GetUserByName(t *testing.T) {
 
 		got, err := repo.GetUserByName(ctx, name)
 		assert.NoError(t, err)
-		assert.Equal(t, user.ID, got.ID)
-		assert.Equal(t, user.Name, got.Name)
-		assert.Equal(t, user.DisplayName, got.DisplayName)
-		assert.Equal(t, user.Admin, got.Admin)
+		opts := testutil.ApproxEqualOptions()
+		testutil.RequireEqual(t, user, got, opts...)
 	})
 
 	t.Run("UnknownName", func(t *testing.T) {
@@ -150,10 +148,8 @@ func TestEntRepository_GetUserByID(t *testing.T) {
 
 		got, err := repo.GetUserByID(ctx, user.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, user.ID, got.ID)
-		assert.Equal(t, user.Name, got.Name)
-		assert.Equal(t, user.DisplayName, got.DisplayName)
-		assert.Equal(t, user.Admin, got.Admin)
+		opts := testutil.ApproxEqualOptions()
+		testutil.RequireEqual(t, user, got, opts...)
 	})
 
 	t.Run("UnknownUserID", func(t *testing.T) {
@@ -186,11 +182,16 @@ func TestEntRepository_UpdateUser(t *testing.T) {
 		uadmin := random.Numeric(t, 2) == 1
 		got, err := repo.UpdateUser(ctx, user.ID, uname, udn, uadmin)
 		assert.NoError(t, err)
-
-		assert.NoError(t, err)
-		assert.Equal(t, got.Name, uname)
-		assert.Equal(t, got.DisplayName, udn)
-		assert.Equal(t, got.Admin, uadmin)
+		opts := testutil.ApproxEqualOptions()
+		exp := &User{
+			ID:          user.ID,
+			Name:        uname,
+			DisplayName: udn,
+			Admin:       uadmin,
+			CreatedAt:   user.CreatedAt,
+			UpdatedAt:   time.Now(),
+		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("MissingName", func(t *testing.T) {

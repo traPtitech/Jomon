@@ -3,10 +3,13 @@ package model
 import (
 	"context"
 	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
@@ -43,8 +46,16 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 		file, err := repo.CreateFile(ctx, name, mimetype, request.ID, user.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, name, file.Name)
-		assert.Equal(t, mimetype, file.MimeType)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(File{}, "ID"))
+		exp := &File{
+			Name:      name,
+			MimeType:  mimetype,
+			CreatedBy: user.ID,
+			CreatedAt: time.Now(),
+		}
+		testutil.RequireEqual(t, exp, file, opts...)
 	})
 
 	t.Run("UnknownRequest", func(t *testing.T) {
@@ -132,9 +143,15 @@ func TestEntRepository_GetFile(t *testing.T) {
 		assert.NoError(t, err)
 		got, err := repo.GetFile(ctx, file.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, file.ID, got.ID)
-		assert.Equal(t, file.Name, got.Name)
-		assert.Equal(t, file.MimeType, got.MimeType)
+		opts := testutil.ApproxEqualOptions()
+		exp := &File{
+			ID:        file.ID,
+			Name:      name,
+			MimeType:  mimetype,
+			CreatedBy: user.ID,
+			CreatedAt: file.CreatedAt,
+		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {
@@ -185,7 +202,7 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 
 		r, err := repo.GetRequest(ctx, request.ID)
 		require.NoError(t, err)
-		assert.Len(t, r.Files, 0)
+		assert.Empty(t, r.Files)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {

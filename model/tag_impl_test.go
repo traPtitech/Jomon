@@ -3,9 +3,12 @@ package model
 import (
 	"context"
 	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
@@ -25,24 +28,20 @@ func TestEntRepository_GetTags(t *testing.T) {
 
 		got, err := repo.GetTags(ctx)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && got[0].ID == tag1.ID {
-			assert.Equal(t, got[0].ID, tag1.ID)
-			assert.Equal(t, got[0].Name, tag1.Name)
-			assert.Equal(t, got[1].ID, tag2.ID)
-			assert.Equal(t, got[1].Name, tag2.Name)
-		} else if assert.Len(t, got, 2) {
-			assert.Equal(t, got[0].ID, tag2.ID)
-			assert.Equal(t, got[0].Name, tag2.Name)
-			assert.Equal(t, got[1].ID, tag1.ID)
-			assert.Equal(t, got[1].Name, tag1.Name)
-		}
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.SortSlices(func(l, r *Tag) bool {
+				return l.ID.ID() < r.ID.ID()
+			}))
+		exp := []*Tag{tag1, tag2}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		got, err := repo2.GetTags(ctx)
 		assert.NoError(t, err)
-		assert.Len(t, got, 0)
+		assert.Empty(t, got)
 	})
 }
 
@@ -58,7 +57,16 @@ func TestEntRepository_CreateTag(t *testing.T) {
 		tag, err := repo.CreateTag(ctx, name)
 
 		assert.NoError(t, err)
-		assert.Equal(t, name, tag.Name)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(Tag{}, "ID"))
+		exp := &Tag{
+			Name:      name,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			DeletedAt: nil,
+		}
+		testutil.RequireEqual(t, exp, tag, opts...)
 	})
 
 	t.Run("MissingName", func(t *testing.T) {
@@ -78,16 +86,23 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 
 	t.Run("Success1", func(t *testing.T) {
 		t.Parallel()
-		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
+		created, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		assert.NoError(t, err)
 
 		name := random.AlphaNumeric(t, 20)
 
-		updated, err := repo.UpdateTag(ctx, tag.ID, name)
+		updated, err := repo.UpdateTag(ctx, created.ID, name)
 
 		assert.NoError(t, err)
-		assert.Equal(t, tag.ID, updated.ID)
-		assert.Equal(t, name, updated.Name)
+		opts := testutil.ApproxEqualOptions()
+		exp := &Tag{
+			ID:        created.ID,
+			Name:      name,
+			CreatedAt: created.CreatedAt,
+			UpdatedAt: time.Now(),
+			DeletedAt: nil,
+		}
+		testutil.RequireEqual(t, exp, updated, opts...)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -98,8 +113,8 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 		updated, err := repo.UpdateTag(ctx, tag.ID, tag.Name)
 
 		assert.NoError(t, err)
-		assert.Equal(t, tag.ID, updated.ID)
-		assert.Equal(t, tag.Name, updated.Name)
+		opts := testutil.ApproxEqualOptions()
+		testutil.RequireEqual(t, tag, updated, opts...)
 	})
 
 	t.Run("MissingName", func(t *testing.T) {
