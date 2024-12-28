@@ -41,7 +41,7 @@ func TestHandler_GetAdmins(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
 			GetAdmins(c.Request().Context()).
@@ -70,7 +70,7 @@ func TestHandler_GetAdmins(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
 			GetAdmins(c.Request().Context()).
@@ -100,7 +100,7 @@ func TestHandler_GetAdmins(t *testing.T) {
 		resErr := errors.New("failed to get admins")
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
 			GetAdmins(c.Request().Context()).
@@ -133,7 +133,7 @@ func TestHandler_PostAdmin(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
 			AddAdmins(c.Request().Context(), admins).
@@ -163,7 +163,7 @@ func TestHandler_PostAdmin(t *testing.T) {
 		resErr := errors.New("failed to create admin")
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
 			AddAdmins(c.Request().Context(), admins).
@@ -196,7 +196,7 @@ func TestHandler_PostAdmin(t *testing.T) {
 		errors.As(errors.New("failed to create admin"), &resErr)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
 			AddAdmins(c.Request().Context(), admins).
@@ -230,7 +230,7 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
 			DeleteAdmins(c.Request().Context(), admins).
@@ -260,7 +260,7 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		resErr := errors.New("failed to delete admin")
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
 			DeleteAdmins(c.Request().Context(), admins).
@@ -289,9 +289,10 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		err = h.Handlers.DeleteAdmins(c)
+
 		assert.Error(t, err)
 		// FIXME: http.StatusBadRequestの判定をしたい
 	})
@@ -317,7 +318,7 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		errors.As(errors.New("failed to delete admin"), &resErr)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
 			DeleteAdmins(c.Request().Context(), admins).
