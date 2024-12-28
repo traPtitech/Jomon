@@ -59,6 +59,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create Transactions
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
 		request, err := repo.CreateRequest(
@@ -69,10 +70,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx1, err := repo.CreateTransaction(ctx, title, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx2, err := repo.CreateTransaction(ctx, title, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -84,6 +85,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) {
 			assert.Equal(t, tx1.ID, got[1].ID)
+			assert.Equal(t, tx1.Title, got[1].Title)
 			assert.Equal(t, tx1.Amount, got[1].Amount)
 			assert.Equal(t, tx1.Target, got[1].Target)
 			assert.Equal(t, tx1.CreatedAt, got[1].CreatedAt)
@@ -108,6 +110,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create Transactions
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
 		request, err := repo2.CreateRequest(
@@ -118,10 +121,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo2.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx1, err := repo2.CreateTransaction(ctx, title, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo2.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx2, err := repo2.CreateTransaction(ctx, title, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -133,6 +136,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) {
 			assert.Equal(t, tx1.ID, got[0].ID)
+			assert.Equal(t, tx1.Title, got[0].Title)
 			assert.Equal(t, tx1.Amount, got[0].Amount)
 			assert.Equal(t, tx1.Target, got[0].Target)
 			assert.Equal(t, tx1.CreatedAt, got[0].CreatedAt)
@@ -157,6 +161,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create Transactions
+		title := random.AlphaNumeric(t, 20)
 		target := random.AlphaNumeric(t, 20)
 		request, err := repo3.CreateRequest(
 			ctx,
@@ -166,10 +171,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo3.CreateTransaction(ctx, 100, target, nil, nil, &request.ID)
+		tx1, err := repo3.CreateTransaction(ctx, title, 100, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo3.CreateTransaction(ctx, 10000, target, nil, nil, &request.ID)
+		tx2, err := repo3.CreateTransaction(ctx, title, 10000, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -181,6 +186,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) {
 			assert.Equal(t, tx1.ID, got[0].ID)
+			assert.Equal(t, tx1.Title, got[0].Title)
 			assert.Equal(t, tx1.Amount, got[0].Amount)
 			assert.Equal(t, tx1.Target, got[0].Target)
 			assert.Equal(t, tx1.CreatedAt, got[0].CreatedAt)
@@ -208,6 +214,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create Transactions
+		title := random.AlphaNumeric(t, 20)
 		target := random.AlphaNumeric(t, 20)
 		// nolint:contextcheck
 		request, err := repo4.CreateRequest(
@@ -219,11 +226,11 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		// nolint:contextcheck
-		tx1, err := repo4.CreateTransaction(ctx, 100, target, nil, nil, &request.ID)
+		tx1, err := repo4.CreateTransaction(ctx, title, 100, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
 		// nolint:contextcheck
-		tx2, err := repo4.CreateTransaction(ctx, 10000, target, nil, nil, &request.ID)
+		tx2, err := repo4.CreateTransaction(ctx, title, 10000, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -236,6 +243,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) {
 			assert.Equal(t, tx2.ID, got[0].ID)
+			assert.Equal(t, tx2.Title, got[0].Title)
 			assert.Equal(t, tx2.Amount, got[0].Amount)
 			assert.Equal(t, tx2.Target, got[0].Target)
 			assert.Equal(t, tx2.CreatedAt, got[0].CreatedAt)
@@ -260,6 +268,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create Transactions
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
 		request, err := repo5.CreateRequest(
@@ -270,10 +279,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo5.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx1, err := repo5.CreateTransaction(ctx, title, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo5.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx2, err := repo5.CreateTransaction(ctx, title, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -285,6 +294,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, got, 2) {
 			assert.Equal(t, tx1.ID, got[1].ID)
+			assert.Equal(t, tx1.Title, got[1].Title)
 			assert.Equal(t, tx1.Amount, got[1].Amount)
 			assert.Equal(t, tx1.Target, got[1].Target)
 			assert.Equal(t, tx1.CreatedAt, got[1].CreatedAt)
@@ -309,6 +319,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create Transactions
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 		target1 := random.AlphaNumeric(t, 20)
 		target2 := random.AlphaNumeric(t, 20)
@@ -320,9 +331,9 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		tx, err := repo6.CreateTransaction(ctx, amount, target1, nil, nil, &request.ID)
+		tx, err := repo6.CreateTransaction(ctx, title, amount, target1, nil, nil, &request.ID)
 		require.NoError(t, err)
-		_, err = repo6.CreateTransaction(ctx, amount, target2, nil, nil, &request.ID)
+		_, err = repo6.CreateTransaction(ctx, title, amount, target2, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -333,6 +344,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
 			assert.Equal(t, tx.ID, got[0].ID)
+			assert.Equal(t, tx.Title, got[0].Title)
 			assert.Equal(t, tx.Amount, got[0].Amount)
 			assert.Equal(t, tx.Target, got[0].Target)
 			assert.Equal(t, tx.CreatedAt, got[0].CreatedAt)
@@ -352,6 +364,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create Transactions
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
 		request, err := repo7.CreateRequest(
@@ -362,7 +375,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		_, err = repo7.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		_, err = repo7.CreateTransaction(ctx, title, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -374,7 +387,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 
 		time.Sleep(1 * time.Second)
-		tx, err := repo7.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx, err := repo7.CreateTransaction(ctx, title, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		got, err := repo7.GetTransactions(ctx, query)
@@ -400,6 +413,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create Transactions
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
 		tag, err := repo8.CreateTag(ctx, random.AlphaNumeric(t, 20))
@@ -412,7 +426,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		_, err = repo8.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		_, err = repo8.CreateTransaction(ctx, title, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -422,7 +436,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 
 		tx, err := repo8.CreateTransaction(
 			ctx,
-			amount, target,
+			title, amount, target,
 			[]*uuid.UUID{&tag.ID}, nil, &request.ID)
 		require.NoError(t, err)
 
@@ -430,6 +444,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
 			assert.Equal(t, tx.ID, got[0].ID)
+			assert.Equal(t, tx.Title, got[0].Title)
 			assert.Equal(t, tx.Amount, got[0].Amount)
 			assert.Equal(t, tx.Target, got[0].Target)
 			assert.Equal(t, tx.CreatedAt, got[0].CreatedAt)
@@ -449,6 +464,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create Transactions
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
 		budget := random.Numeric(t, 100000)
@@ -466,7 +482,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		_, err = repo9.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		_, err = repo9.CreateTransaction(ctx, title, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -474,13 +490,14 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			Group: &group.Name,
 		}
 
-		tx, err := repo9.CreateTransaction(ctx, amount, target, nil, &group.ID, &request.ID)
+		tx, err := repo9.CreateTransaction(ctx, title, amount, target, nil, &group.ID, &request.ID)
 		require.NoError(t, err)
 
 		got, err := repo9.GetTransactions(ctx, query)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
 			assert.Equal(t, tx.ID, got[0].ID)
+			assert.Equal(t, tx.Title, got[0].Title)
 			assert.Equal(t, tx.Amount, got[0].Amount)
 			assert.Equal(t, tx.Target, got[0].Target)
 			assert.Equal(t, tx.CreatedAt, got[0].CreatedAt)
@@ -500,6 +517,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create Transactions
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
 		request, err := repo10.CreateRequest(
@@ -510,7 +528,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		_, err = repo10.CreateTransaction(ctx, amount, target, nil, nil, nil)
+		_, err = repo10.CreateTransaction(ctx, title, amount, target, nil, nil, nil)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -518,13 +536,14 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			Request: &request.ID,
 		}
 
-		tx, err := repo10.CreateTransaction(ctx, amount, target, nil, nil, &request.ID)
+		tx, err := repo10.CreateTransaction(ctx, title, amount, target, nil, nil, &request.ID)
 		require.NoError(t, err)
 
 		got, err := repo10.GetTransactions(ctx, query)
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
 			assert.Equal(t, tx.ID, got[0].ID)
+			assert.Equal(t, tx.Title, got[0].Title)
 			assert.Equal(t, tx.Amount, got[0].Amount)
 			assert.Equal(t, tx.Target, got[0].Target)
 			assert.Equal(t, tx.CreatedAt, got[0].CreatedAt)
@@ -561,6 +580,7 @@ func TestEntRepository_GetTransaction(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create Transactions
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
 		_, err = repo.CreateRequest(
@@ -571,7 +591,7 @@ func TestEntRepository_GetTransaction(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		tx, err := repo.CreateTransaction(ctx, amount, target, nil, nil, nil)
+		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, nil, nil)
 		require.NoError(t, err)
 
 		// Get Transaction
@@ -579,6 +599,7 @@ func TestEntRepository_GetTransaction(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.NotNil(t, got) {
 			assert.Equal(t, tx.ID, got.ID)
+			assert.Equal(t, tx.Title, got.Title)
 			assert.Equal(t, tx.Amount, got.Amount)
 			assert.Equal(t, tx.Target, got.Target)
 			assert.Equal(t, tx.CreatedAt, got.CreatedAt)
@@ -620,6 +641,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		require.NoError(t, err)
 
 		// Create Transactions
+		title := random.AlphaNumeric(t, 20)
 		target := random.AlphaNumeric(t, 20)
 		request, err := repo.CreateRequest(
 			ctx,
@@ -631,10 +653,11 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 
 		tx, err := repo.CreateTransaction(
 			ctx,
-			amount, target,
+			title, amount, target,
 			[]*uuid.UUID{&tag.ID}, &group.ID, &request.ID)
 		assert.NoError(t, err)
 		if assert.NotNil(t, tx) {
+			assert.Equal(t, title, tx.Title)
 			assert.Equal(t, amount, tx.Amount)
 			assert.Equal(t, target, tx.Target)
 			if assert.Len(t, tx.Tags, 1) {
@@ -654,6 +677,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 
 		// Create user
@@ -682,9 +706,10 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		tx, err := repo.CreateTransaction(ctx, amount, target, nil, &group.ID, &request.ID)
+		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, &group.ID, &request.ID)
 		assert.NoError(t, err)
 		if assert.NotNil(t, tx) {
+			assert.Equal(t, title, tx.Title)
 			assert.Equal(t, amount, tx.Amount)
 			assert.Equal(t, target, tx.Target)
 			assert.Len(t, tx.Tags, 0)
@@ -701,6 +726,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 
 		// Create user
@@ -727,10 +753,11 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 
 		tx, err := repo.CreateTransaction(
 			ctx,
-			amount, target,
+			title, amount, target,
 			[]*uuid.UUID{&tag.ID}, nil, &request.ID)
 		assert.NoError(t, err)
 		if assert.NotNil(t, tx) {
+			assert.Equal(t, title, tx.Title)
 			assert.Equal(t, amount, tx.Amount)
 			assert.Equal(t, target, tx.Target)
 			if assert.Len(t, tx.Tags, 1) {
@@ -746,12 +773,14 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		ctx := context.Background()
 
 		// Create Transactions
-		target := random.AlphaNumeric(t, 20)
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
+		target := random.AlphaNumeric(t, 20)
 
-		tx, err := repo.CreateTransaction(ctx, amount, target, nil, nil, nil)
+		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, nil, nil)
 		assert.NoError(t, err)
 		if assert.NotNil(t, tx) {
+			assert.Equal(t, title, tx.Title)
 			assert.Equal(t, amount, tx.Amount)
 			assert.Equal(t, target, tx.Target)
 			assert.Len(t, tx.Tags, 0)
@@ -764,12 +793,14 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		ctx := context.Background()
 
 		// Create Transactions
-		target := random.AlphaNumeric(t, 20)
+		title := random.AlphaNumeric(t, 20)
 		amount := -1 * random.Numeric(t, 100000)
+		target := random.AlphaNumeric(t, 20)
 
-		tx, err := repo.CreateTransaction(ctx, amount, target, nil, nil, nil)
+		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, nil, nil)
 		assert.NoError(t, err)
 		if assert.NotNil(t, tx) {
+			assert.Equal(t, title, tx.Title)
 			assert.Equal(t, amount, tx.Amount)
 			assert.Equal(t, target, tx.Target)
 			assert.Len(t, tx.Tags, 0)
@@ -788,6 +819,7 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
 
+		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
 
 		// Create user
@@ -822,11 +854,12 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 
 		tx, err := repo.CreateTransaction(
 			ctx,
-			amount, target,
+			title, amount, target,
 			[]*uuid.UUID{&tag.ID}, &group.ID, &request.ID)
 		require.NoError(t, err)
 
 		// Update Transactions
+		title = random.AlphaNumeric(t, 20)
 		amount = random.Numeric(t, 100000)
 
 		// Create tag
@@ -853,10 +886,11 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 
 		tx, err = repo.UpdateTransaction(
 			ctx,
-			tx.ID, amount, target,
+			tx.ID, title, amount, target,
 			[]*uuid.UUID{&tag.ID}, &group.ID, &request.ID)
 		assert.NoError(t, err)
 		if assert.NotNil(t, tx) {
+			assert.Equal(t, title, tx.Title)
 			assert.Equal(t, amount, tx.Amount)
 			assert.Equal(t, target, tx.Target)
 			if assert.Len(t, tx.Tags, 1) {

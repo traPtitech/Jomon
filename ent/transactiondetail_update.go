@@ -30,6 +30,20 @@ func (tdu *TransactionDetailUpdate) Where(ps ...predicate.TransactionDetail) *Tr
 	return tdu
 }
 
+// SetTitle sets the "title" field.
+func (tdu *TransactionDetailUpdate) SetTitle(s string) *TransactionDetailUpdate {
+	tdu.mutation.SetTitle(s)
+	return tdu
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (tdu *TransactionDetailUpdate) SetNillableTitle(s *string) *TransactionDetailUpdate {
+	if s != nil {
+		tdu.SetTitle(*s)
+	}
+	return tdu
+}
+
 // SetAmount sets the "amount" field.
 func (tdu *TransactionDetailUpdate) SetAmount(i int) *TransactionDetailUpdate {
 	tdu.mutation.ResetAmount()
@@ -151,7 +165,20 @@ func (tdu *TransactionDetailUpdate) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (tdu *TransactionDetailUpdate) check() error {
+	if v, ok := tdu.mutation.Title(); ok {
+		if err := transactiondetail.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "TransactionDetail.title": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := tdu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(transactiondetail.Table, transactiondetail.Columns, sqlgraph.NewFieldSpec(transactiondetail.FieldID, field.TypeUUID))
 	if ps := tdu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -159,6 +186,9 @@ func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err err
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := tdu.mutation.Title(); ok {
+		_spec.SetField(transactiondetail.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := tdu.mutation.Amount(); ok {
 		_spec.SetField(transactiondetail.FieldAmount, field.TypeInt, value)
@@ -222,6 +252,20 @@ type TransactionDetailUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *TransactionDetailMutation
+}
+
+// SetTitle sets the "title" field.
+func (tduo *TransactionDetailUpdateOne) SetTitle(s string) *TransactionDetailUpdateOne {
+	tduo.mutation.SetTitle(s)
+	return tduo
+}
+
+// SetNillableTitle sets the "title" field if the given value is not nil.
+func (tduo *TransactionDetailUpdateOne) SetNillableTitle(s *string) *TransactionDetailUpdateOne {
+	if s != nil {
+		tduo.SetTitle(*s)
+	}
+	return tduo
 }
 
 // SetAmount sets the "amount" field.
@@ -358,7 +402,20 @@ func (tduo *TransactionDetailUpdateOne) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (tduo *TransactionDetailUpdateOne) check() error {
+	if v, ok := tduo.mutation.Title(); ok {
+		if err := transactiondetail.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "TransactionDetail.title": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *TransactionDetail, err error) {
+	if err := tduo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(transactiondetail.Table, transactiondetail.Columns, sqlgraph.NewFieldSpec(transactiondetail.FieldID, field.TypeUUID))
 	id, ok := tduo.mutation.ID()
 	if !ok {
@@ -383,6 +440,9 @@ func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *Tra
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := tduo.mutation.Title(); ok {
+		_spec.SetField(transactiondetail.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := tduo.mutation.Amount(); ok {
 		_spec.SetField(transactiondetail.FieldAmount, field.TypeInt, value)

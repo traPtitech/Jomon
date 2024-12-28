@@ -37,6 +37,9 @@ func TestEntRepository_GetRequests(t *testing.T) {
 	client8, storage8, err := setup(t, ctx, "get_requests8")
 	require.NoError(t, err)
 	repo8 := NewEntRepository(client8, storage8)
+	client9, storage9, err := setup(t, ctx, "get_requests9")
+	require.NoError(t, err)
+	repo9 := NewEntRepository(client9, storage9)
 
 	t.Run("SuccessWithSortCreatedAt", func(t *testing.T) {
 		t.Parallel()
@@ -589,6 +592,85 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			assert.Equal(t, got[0].Content, request1.Content)
 			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
 			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+		}
+	})
+
+	t.Run("SuccessWithQueryCreatedBy", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		user1, err := repo9.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
+		require.NoError(t, err)
+		user2, err := repo9.CreateUser(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			true)
+		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: user1.ID,
+			Amount: random.Numeric(t, 10000),
+		}
+
+		budget := random.Numeric(t, 10000)
+		group, err := repo9.CreateGroup(
+			ctx,
+			random.AlphaNumeric(t, 20),
+			random.AlphaNumeric(t, 30),
+			&budget)
+		require.NoError(t, err)
+
+		request1, err := repo9.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{},
+			[]*RequestTarget{target},
+			group,
+			user1.ID)
+		require.NoError(t, err)
+		_, err = repo9.CreateRequest(
+			ctx,
+			random.AlphaNumeric(t, 40),
+			random.AlphaNumeric(t, 100),
+			[]*Tag{},
+			[]*RequestTarget{target},
+			group,
+			user2.ID)
+		require.NoError(t, err)
+
+		got, err := repo9.GetRequests(ctx, RequestQuery{
+			CreatedBy: &user1.ID,
+		})
+		require.NoError(t, err)
+		if assert.Len(t, got, 1) {
+			got := got[0]
+			exp := &RequestResponse{
+				ID:     request1.ID,
+				Status: request1.Status,
+				// FIXME: time.Time の内部表現が異なるため、比較ができない
+				CreatedAt: got.CreatedAt,
+				UpdatedAt: got.UpdatedAt,
+				CreatedBy: request1.CreatedBy,
+				Title:     request1.Title,
+				Content:   request1.Content,
+				Tags:      request1.Tags,
+				// Targets:   request1.Targets,
+				// Statuses:  request1.Statuses,
+				Group: &Group{
+					ID:          request1.Group.ID,
+					Name:        request1.Group.Name,
+					Description: request1.Group.Description,
+					Budget:      request1.Group.Budget,
+					CreatedAt:   got.Group.CreatedAt,
+					UpdatedAt:   got.Group.UpdatedAt,
+					DeletedAt:   request1.Group.DeletedAt,
+				},
+			}
+			require.Equal(t, exp, got)
 		}
 	})
 }

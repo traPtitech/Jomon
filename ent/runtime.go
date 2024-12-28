@@ -152,20 +152,39 @@ func init() {
 	transaction.DefaultID = transactionDescID.Default.(func() uuid.UUID)
 	transactiondetailFields := schema.TransactionDetail{}.Fields()
 	_ = transactiondetailFields
+	// transactiondetailDescTitle is the schema descriptor for title field.
+	transactiondetailDescTitle := transactiondetailFields[1].Descriptor()
+	// transactiondetail.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	transactiondetail.TitleValidator = func() func(string) error {
+		validators := transactiondetailDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+			validators[2].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// transactiondetailDescAmount is the schema descriptor for amount field.
-	transactiondetailDescAmount := transactiondetailFields[1].Descriptor()
+	transactiondetailDescAmount := transactiondetailFields[2].Descriptor()
 	// transactiondetail.DefaultAmount holds the default value on creation for the amount field.
 	transactiondetail.DefaultAmount = transactiondetailDescAmount.Default.(int)
 	// transactiondetailDescTarget is the schema descriptor for target field.
-	transactiondetailDescTarget := transactiondetailFields[2].Descriptor()
+	transactiondetailDescTarget := transactiondetailFields[3].Descriptor()
 	// transactiondetail.DefaultTarget holds the default value on creation for the target field.
 	transactiondetail.DefaultTarget = transactiondetailDescTarget.Default.(string)
 	// transactiondetailDescCreatedAt is the schema descriptor for created_at field.
-	transactiondetailDescCreatedAt := transactiondetailFields[3].Descriptor()
+	transactiondetailDescCreatedAt := transactiondetailFields[4].Descriptor()
 	// transactiondetail.DefaultCreatedAt holds the default value on creation for the created_at field.
 	transactiondetail.DefaultCreatedAt = transactiondetailDescCreatedAt.Default.(func() time.Time)
 	// transactiondetailDescUpdatedAt is the schema descriptor for updated_at field.
-	transactiondetailDescUpdatedAt := transactiondetailFields[4].Descriptor()
+	transactiondetailDescUpdatedAt := transactiondetailFields[5].Descriptor()
 	// transactiondetail.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	transactiondetail.DefaultUpdatedAt = transactiondetailDescUpdatedAt.Default.(func() time.Time)
 	// transactiondetail.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

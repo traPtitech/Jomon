@@ -237,6 +237,7 @@ var (
 	// TransactionDetailsColumns holds the columns for the "transaction_details" table.
 	TransactionDetailsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
+		{Name: "title", Type: field.TypeString, Size: 64},
 		{Name: "amount", Type: field.TypeInt, Default: 0},
 		{Name: "target", Type: field.TypeString, Default: ""},
 		{Name: "created_at", Type: field.TypeTime},
@@ -251,7 +252,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "transaction_details_transactions_detail",
-				Columns:    []*schema.Column{TransactionDetailsColumns[5]},
+				Columns:    []*schema.Column{TransactionDetailsColumns[6]},
 				RefColumns: []*schema.Column{TransactionsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
