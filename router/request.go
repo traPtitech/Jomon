@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -157,6 +158,38 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		}
 		until = &u
 	}
+	limit := 100
+	if limitQuery := c.QueryParam("limit"); limitQuery != "" {
+		limitI, err := strconv.Atoi(limitQuery)
+		if err != nil {
+			h.Logger.Info("could not parse limit as integer", zap.Error(err))
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		if limitI < 0 {
+			h.Logger.Info("received negative limit", zap.Int("limit", limitI))
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Errorf("negative limit(=%d) is invalid", limitI),
+			)
+		}
+		limit = limitI
+	}
+	offset := 0
+	if offsetQuery := c.QueryParam("offset"); offsetQuery != "" {
+		offsetI, err := strconv.Atoi(offsetQuery)
+		if err != nil {
+			h.Logger.Info("could not parse offset as integer", zap.Error(err))
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		if offsetI < 0 {
+			h.Logger.Info("received negative offset", zap.Int("offset", offsetI))
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Errorf("negative offset(=%d) is invalid", offsetI),
+			)
+		}
+		offset = offsetI
+	}
 	var tag *string
 	if c.QueryParam("tag") != "" {
 		t := c.QueryParam("tag")
@@ -182,6 +215,8 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		Status:    ss,
 		Since:     since,
 		Until:     until,
+		Limit:     limit,
+		Offset:    offset,
 		Tag:       tag,
 		Group:     group,
 		CreatedBy: cratedBy,
