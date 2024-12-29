@@ -1,6 +1,7 @@
 package router
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -16,9 +17,41 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 	"go.uber.org/mock/gomock"
 )
+
+// FIXME: 同様の処理がtransaction.goにもある
+func modelTransactionResponseToTransaction(tx *model.TransactionResponse) *Transaction {
+	tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
+		return &TagOverview{
+			ID:        modelTag.ID,
+			Name:      modelTag.Name,
+			CreatedAt: modelTag.CreatedAt,
+			UpdatedAt: modelTag.UpdatedAt,
+		}
+	})
+
+	group := &GroupOverview{
+		ID:          tx.Group.ID,
+		Name:        tx.Group.Name,
+		Description: tx.Group.Description,
+		Budget:      tx.Group.Budget,
+		CreatedAt:   tx.Group.CreatedAt,
+		UpdatedAt:   tx.Group.UpdatedAt,
+	}
+	return &Transaction{
+		ID:        tx.ID,
+		Title:     tx.Title,
+		Amount:    tx.Amount,
+		Target:    tx.Target,
+		Tags:      tag,
+		Group:     group,
+		CreatedAt: tx.CreatedAt,
+		UpdatedAt: tx.UpdatedAt,
+	}
+}
 
 func TestHandlers_GetTransactions(t *testing.T) {
 	t.Parallel()
@@ -101,44 +134,16 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Group:  nil,
 			}).
 			Return(txs, nil)
-
-		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
-			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
-				return &TagOverview{
-					ID:        modelTag.ID,
-					Name:      modelTag.Name,
-					CreatedAt: modelTag.CreatedAt,
-					UpdatedAt: modelTag.UpdatedAt,
-				}
-			})
-
-			group := &GroupOverview{
-				ID:          tx.Group.ID,
-				Name:        tx.Group.Name,
-				Description: tx.Group.Description,
-				Budget:      tx.Group.Budget,
-				CreatedAt:   tx.Group.CreatedAt,
-				UpdatedAt:   tx.Group.UpdatedAt,
-			}
-			return &Transaction{
-				ID:        tx.ID,
-				Title:     tx.Title,
-				Amount:    tx.Amount,
-				Target:    tx.Target,
-				Tags:      tag,
-				Group:     group,
-				CreatedAt: tx.CreatedAt,
-				UpdatedAt: tx.UpdatedAt,
-			}
-		})
-
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.GetTransactions(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*Transaction
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetTransactions(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			return modelTransactionResponseToTransaction(tx)
+		})
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithSort", func(t *testing.T) {
@@ -217,44 +222,16 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Offset: 0,
 			}).
 			Return(txs, nil)
-
-		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
-			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
-				return &TagOverview{
-					ID:        modelTag.ID,
-					Name:      modelTag.Name,
-					CreatedAt: modelTag.CreatedAt,
-					UpdatedAt: modelTag.UpdatedAt,
-				}
-			})
-
-			group := &GroupOverview{
-				ID:          tx.Group.ID,
-				Name:        tx.Group.Name,
-				Description: tx.Group.Description,
-				Budget:      tx.Group.Budget,
-				CreatedAt:   tx.Group.CreatedAt,
-				UpdatedAt:   tx.Group.UpdatedAt,
-			}
-			return &Transaction{
-				ID:        tx.ID,
-				Title:     tx.Title,
-				Amount:    tx.Amount,
-				Target:    tx.Target,
-				Tags:      tag,
-				Group:     group,
-				CreatedAt: tx.CreatedAt,
-				UpdatedAt: tx.UpdatedAt,
-			}
-		})
-
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.GetTransactions(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*Transaction
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetTransactions(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			return modelTransactionResponseToTransaction(tx)
+		})
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithAscSort", func(t *testing.T) {
@@ -334,44 +311,16 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Offset: 0,
 			}).
 			Return(txs, nil)
-
-		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
-			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
-				return &TagOverview{
-					ID:        modelTag.ID,
-					Name:      modelTag.Name,
-					CreatedAt: modelTag.CreatedAt,
-					UpdatedAt: modelTag.UpdatedAt,
-				}
-			})
-
-			group := &GroupOverview{
-				ID:          tx.Group.ID,
-				Name:        tx.Group.Name,
-				Description: tx.Group.Description,
-				Budget:      tx.Group.Budget,
-				CreatedAt:   tx.Group.CreatedAt,
-				UpdatedAt:   tx.Group.UpdatedAt,
-			}
-			return &Transaction{
-				ID:        tx.ID,
-				Title:     tx.Title,
-				Amount:    tx.Amount,
-				Target:    tx.Target,
-				Tags:      tag,
-				Group:     group,
-				CreatedAt: tx.CreatedAt,
-				UpdatedAt: tx.UpdatedAt,
-			}
-		})
-
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.GetTransactions(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*Transaction
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetTransactions(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			return modelTransactionResponseToTransaction(tx)
+		})
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithTarget", func(t *testing.T) {
@@ -456,44 +405,16 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Offset: 0,
 			}).
 			Return(txs, nil)
-
-		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
-			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
-				return &TagOverview{
-					ID:        modelTag.ID,
-					Name:      modelTag.Name,
-					CreatedAt: modelTag.CreatedAt,
-					UpdatedAt: modelTag.UpdatedAt,
-				}
-			})
-
-			group := &GroupOverview{
-				ID:          tx.Group.ID,
-				Name:        tx.Group.Name,
-				Description: tx.Group.Description,
-				Budget:      tx.Group.Budget,
-				CreatedAt:   tx.Group.CreatedAt,
-				UpdatedAt:   tx.Group.UpdatedAt,
-			}
-			return &Transaction{
-				ID:        tx.ID,
-				Title:     tx.Title,
-				Amount:    tx.Amount,
-				Target:    tx.Target,
-				Tags:      tag,
-				Group:     group,
-				CreatedAt: tx.CreatedAt,
-				UpdatedAt: tx.UpdatedAt,
-			}
-		})
-
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.GetTransactions(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*Transaction
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetTransactions(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			return modelTransactionResponseToTransaction(tx)
+		})
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithSinceUntil", func(t *testing.T) {
@@ -561,44 +482,16 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Offset: 0,
 			}).
 			Return(txs, nil)
-
-		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
-			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
-				return &TagOverview{
-					ID:        modelTag.ID,
-					Name:      modelTag.Name,
-					CreatedAt: modelTag.CreatedAt,
-					UpdatedAt: modelTag.UpdatedAt,
-				}
-			})
-
-			group := &GroupOverview{
-				ID:          tx.Group.ID,
-				Name:        tx.Group.Name,
-				Description: tx.Group.Description,
-				Budget:      tx.Group.Budget,
-				CreatedAt:   tx.Group.CreatedAt,
-				UpdatedAt:   tx.Group.UpdatedAt,
-			}
-			return &Transaction{
-				ID:        tx.ID,
-				Title:     tx.Title,
-				Amount:    tx.Amount,
-				Target:    tx.Target,
-				Tags:      tag,
-				Group:     group,
-				CreatedAt: tx.CreatedAt,
-				UpdatedAt: tx.UpdatedAt,
-			}
-		})
-
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.GetTransactions(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*Transaction
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetTransactions(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			return modelTransactionResponseToTransaction(tx)
+		})
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	// TODO: SuccessWithLimit, SuccessWithOffset
@@ -672,44 +565,16 @@ func TestHandlers_PostTransaction(t *testing.T) {
 				c.Request().Context(),
 				tx1.Title, tx1.Amount, tx1.Target, tags, &group, nil).
 			Return(tx1, nil)
-
-		res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
-			tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
-				return &TagOverview{
-					ID:        modelTag.ID,
-					Name:      modelTag.Name,
-					CreatedAt: modelTag.CreatedAt,
-					UpdatedAt: modelTag.UpdatedAt,
-				}
-			})
-
-			group := &GroupOverview{
-				ID:          tx.Group.ID,
-				Name:        tx.Group.Name,
-				Description: tx.Group.Description,
-				Budget:      tx.Group.Budget,
-				CreatedAt:   tx.Group.CreatedAt,
-				UpdatedAt:   tx.Group.UpdatedAt,
-			}
-			return &Transaction{
-				ID:        tx.ID,
-				Title:     tx.Title,
-				Amount:    tx.Amount,
-				Target:    tx.Target,
-				Tags:      tag,
-				Group:     group,
-				CreatedAt: tx.CreatedAt,
-				UpdatedAt: tx.UpdatedAt,
-			}
-		})
-
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.PostTransaction(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*Transaction
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PostTransaction(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+			return modelTransactionResponseToTransaction(tx)
+		})
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithRequest", func(t *testing.T) {
@@ -768,15 +633,19 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		}
 
 		e := echo.New()
-		// FIXME: json.Marshalを使う
-		// nolint:lll
-		reqBody := fmt.Sprintf(
-			`{"title": "%s", "amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s", "request": "%s"}`,
-			tx.Title, tx.Amount, tx.Target, tag.ID, group, request.ID)
+		reqBody, err := json.Marshal(&TransactionOverview{
+			Title:   tx.Title,
+			Amount:  tx.Amount,
+			Targets: []*string{&tx.Target},
+			Tags:    tags,
+			Group:   &group,
+			Request: &request.ID,
+		})
+		require.NoError(t, err)
 		req, err := http.NewRequest(
 			http.MethodPost,
 			"/api/transactions",
-			strings.NewReader(reqBody))
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -793,42 +662,18 @@ func TestHandlers_PostTransaction(t *testing.T) {
 				tags, &group, &request.ID).
 			Return(tx, nil)
 
-		to := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
-			return &TagOverview{
-				ID:        modelTag.ID,
-				Name:      modelTag.Name,
-				CreatedAt: modelTag.CreatedAt,
-				UpdatedAt: modelTag.UpdatedAt,
-			}
-		})
-
-		grov := &GroupOverview{
-			ID:          tx.Group.ID,
-			Name:        tx.Group.Name,
-			Description: tx.Group.Description,
-			Budget:      tx.Group.Budget,
-			CreatedAt:   tx.Group.CreatedAt,
-			UpdatedAt:   tx.Group.UpdatedAt,
-		}
-		res := []*Transaction{
-			{
-				ID:        tx.ID,
-				Title:     tx.Title,
-				Amount:    tx.Amount,
-				Target:    tx.Target,
-				Tags:      to,
-				Group:     grov,
-				CreatedAt: tx.CreatedAt,
-				UpdatedAt: tx.UpdatedAt,
-			},
-		}
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.PostTransaction(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*Transaction
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PostTransaction(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := lo.Map(
+			[]*model.TransactionResponse{tx},
+			func(tx *model.TransactionResponse, _ int) *Transaction {
+				return modelTransactionResponseToTransaction(tx)
+			})
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	// TODO: FailWithoutTitle
@@ -887,42 +732,14 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			EXPECT().
 			GetTransaction(c.Request().Context(), tx.ID).
 			Return(tx, nil)
-
-		to := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
-			return &TagOverview{
-				ID:        modelTag.ID,
-				Name:      modelTag.Name,
-				CreatedAt: modelTag.CreatedAt,
-				UpdatedAt: modelTag.UpdatedAt,
-			}
-		})
-
-		grov := &GroupOverview{
-			ID:          tx.Group.ID,
-			Name:        tx.Group.Name,
-			Description: tx.Group.Description,
-			Budget:      tx.Group.Budget,
-			CreatedAt:   tx.Group.CreatedAt,
-			UpdatedAt:   tx.Group.UpdatedAt,
-		}
-		resOverview := Transaction{
-			ID:        tx.ID,
-			Title:     tx.Title,
-			Amount:    tx.Amount,
-			Target:    tx.Target,
-			Tags:      to,
-			Group:     grov,
-			CreatedAt: tx.CreatedAt,
-			UpdatedAt: tx.UpdatedAt,
-		}
-		res := resOverview
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.GetTransaction(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *Transaction
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetTransaction(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := modelTransactionResponseToTransaction(tx)
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 }
 
@@ -1017,40 +834,13 @@ func TestHandlers_PutTransaction(t *testing.T) {
 				tx.ID, updated.Title, updated.Amount, updated.Target,
 				updatedTags, nil, nil).
 			Return(updated, nil)
-
-		to := lo.Map(updated.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
-			return &TagOverview{
-				ID:        modelTag.ID,
-				Name:      modelTag.Name,
-				CreatedAt: modelTag.CreatedAt,
-				UpdatedAt: modelTag.UpdatedAt,
-			}
-		})
-		grov := &GroupOverview{
-			ID:          updated.Group.ID,
-			Name:        updated.Group.Name,
-			Description: updated.Group.Description,
-			Budget:      updated.Group.Budget,
-			CreatedAt:   updated.Group.CreatedAt,
-			UpdatedAt:   updated.Group.UpdatedAt,
-		}
-		resOverview := Transaction{
-			ID:        tx.ID,
-			Title:     updated.Title,
-			Amount:    updated.Amount,
-			Target:    updated.Target,
-			Tags:      to,
-			Group:     grov,
-			CreatedAt: updated.CreatedAt,
-			UpdatedAt: updated.UpdatedAt,
-		}
-		res := resOverview
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.PutTransaction(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *Transaction
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutTransaction(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := modelTransactionResponseToTransaction(updated)
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 }
