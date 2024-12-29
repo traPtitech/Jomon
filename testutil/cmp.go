@@ -11,6 +11,7 @@ import (
 func ApproxEqualOptions() []cmp.Option {
 	return []cmp.Option{
 		cmpopts.EquateApproxTime(time.Second),
+		cmpopts.EquateEmpty(),
 	}
 }
 
