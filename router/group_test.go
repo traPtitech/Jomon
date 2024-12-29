@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
@@ -18,6 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 	"go.uber.org/mock/gomock"
 )
@@ -67,7 +67,13 @@ func TestHandlers_GetGroups(t *testing.T) {
 			GetGroups(c.Request().Context()).
 			Return(groups, nil)
 
-		resOverview := lo.Map(groups, func(group *model.Group, _ int) *GroupOverview {
+		assert.NoError(t, h.Handlers.GetGroups(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*GroupOverview
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := lo.Map(groups, func(group *model.Group, _ int) *GroupOverview {
 			return &GroupOverview{
 				ID:          group.ID,
 				Name:        group.Name,
@@ -77,20 +83,14 @@ func TestHandlers_GetGroups(t *testing.T) {
 				UpdatedAt:   group.UpdatedAt,
 			}
 		})
-		resBody, err := json.Marshal(resOverview)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetGroups(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		groups := []*model.Group{}
+		var groups []*model.Group
 
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, "/api/groups", nil)
@@ -106,14 +106,14 @@ func TestHandlers_GetGroups(t *testing.T) {
 			GetGroups(c.Request().Context()).
 			Return(groups, nil)
 
-		resOverview := []*GroupOverview{}
-		resBody, err := json.Marshal(resOverview)
+		assert.NoError(t, h.Handlers.GetGroups(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*GroupOverview
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetGroups(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := []*GroupOverview{}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("FailedToGetGroups", func(t *testing.T) {
@@ -136,9 +136,9 @@ func TestHandlers_GetGroups(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.GetGroups(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 }
 
@@ -162,13 +162,21 @@ func TestHandlers_PostGroup(t *testing.T) {
 		}
 
 		e := echo.New()
-		reqBody := fmt.Sprintf(
-			`{"name":"%s","description":"%s","budget":%d}`,
-			group.Name, group.Description, *group.Budget)
+		// FIXME: #833
+		reqBody, err := json.Marshal(&struct {
+			Name        string `json:"name"`
+			Description string `json:"description"`
+			Budget      int    `json:"budget"`
+		}{
+			Name:        group.Name,
+			Description: group.Description,
+			Budget:      *group.Budget,
+		})
+		require.NoError(t, err)
 		req, err := http.NewRequest(
 			http.MethodPost,
 			"/api/groups",
-			strings.NewReader(reqBody))
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -181,7 +189,13 @@ func TestHandlers_PostGroup(t *testing.T) {
 			CreateGroup(c.Request().Context(), group.Name, group.Description, group.Budget).
 			Return(group, nil)
 
-		res := &GroupOverview{
+		assert.NoError(t, h.Handlers.PostGroup(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got GroupOverview
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := &GroupOverview{
 			ID:          group.ID,
 			Name:        group.Name,
 			Description: group.Description,
@@ -189,14 +203,7 @@ func TestHandlers_PostGroup(t *testing.T) {
 			CreatedAt:   group.CreatedAt,
 			UpdatedAt:   group.UpdatedAt,
 		}
-
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PostGroup(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, &got, opts...)
 	})
 
 	t.Run("FailedWithCreateGroup", func(t *testing.T) {
@@ -206,11 +213,21 @@ func TestHandlers_PostGroup(t *testing.T) {
 		budget := random.Numeric(t, 1000000)
 
 		e := echo.New()
-		reqBody := fmt.Sprintf(`{"name":"test","description":"test","budget":%d}`, budget)
+		// FIXME: #833
+		reqBody, err := json.Marshal(&struct {
+			Name        string `json:"name"`
+			Description string `json:"description"`
+			Budget      int    `json:"budget"`
+		}{
+			Name:        "test",
+			Description: "test",
+			Budget:      budget,
+		})
+		require.NoError(t, err)
 		req, err := http.NewRequest(
 			http.MethodPost,
 			"/api/groups",
-			strings.NewReader(reqBody))
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -225,9 +242,9 @@ func TestHandlers_PostGroup(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PostGroup(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 }
 
@@ -295,6 +312,7 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/groups/%s", group.ID), nil)
 		assert.NoError(t, err)
+		// FIXME: #822
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -317,7 +335,14 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 			GetMembers(c.Request().Context(), group.ID).
 			Return(members, nil)
 
-		res := &GroupDetail{
+		err = h.Handlers.GetGroupDetail(c)
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got GroupDetail
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := &GroupDetail{
 			ID:          group.ID,
 			Name:        group.Name,
 			Description: group.Description,
@@ -327,14 +352,7 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 			CreatedAt:   group.CreatedAt,
 			UpdatedAt:   group.UpdatedAt,
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		err = h.Handlers.GetGroupDetail(c)
-		if assert.NoError(t, err) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, &got, opts...)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -355,6 +373,7 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/groups/%s", group.ID), nil)
 		assert.NoError(t, err)
+		// FIXME: #822
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -377,7 +396,14 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 			GetMembers(c.Request().Context(), group.ID).
 			Return([]*model.Member{}, nil)
 
-		res := &GroupDetail{
+		err = h.Handlers.GetGroupDetail(c)
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got GroupDetail
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := &GroupDetail{
 			ID:          group.ID,
 			Name:        group.Name,
 			Description: group.Description,
@@ -387,14 +413,7 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 			CreatedAt:   group.CreatedAt,
 			UpdatedAt:   group.UpdatedAt,
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		err = h.Handlers.GetGroupDetail(c)
-		if assert.NoError(t, err) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, &got, opts...)
 	})
 
 	t.Run("FailedWithUUID", func(t *testing.T) {
@@ -405,20 +424,23 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 
 		ctrl := gomock.NewController(t)
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/groups/invalid-uuid", nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/groups/%s", invalidUUID),
+			nil)
 		require.NoError(t, err)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("api/groups/:groupID")
 		c.SetParamNames("groupID")
-		c.SetParamValues("invalid-uuid")
+		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		err = h.Handlers.GetGroupDetail(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NilGroupID", func(t *testing.T) {
@@ -444,9 +466,9 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		resErr := errors.New("invalid UUID")
 
 		err = h.Handlers.GetGroupDetail(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("UnknownGroupID", func(t *testing.T) {
@@ -477,9 +499,9 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.GetGroupDetail(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
 	t.Run("FailedToGetGroup", func(t *testing.T) {
@@ -517,9 +539,9 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.GetGroupDetail(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 
 	t.Run("FailedToGetOwners", func(t *testing.T) {
@@ -562,9 +584,9 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.GetGroupDetail(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 
 	t.Run("FailedToGetMembers", func(t *testing.T) {
@@ -623,9 +645,9 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.GetGroupDetail(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 }
 
@@ -660,13 +682,21 @@ func TestHandlers_PutGroup(t *testing.T) {
 		}
 
 		e := echo.New()
-		reqBody := fmt.Sprintf(
-			`{"name":"%s","description":"%s","budget":%d}`,
-			updated.Name, updated.Description, *updated.Budget)
+		// FIXME: #833
+		reqBody, err := json.Marshal(&struct {
+			Name        string `json:"name"`
+			Description string `json:"description"`
+			Budget      int    `json:"budget"`
+		}{
+			Name:        updated.Name,
+			Description: updated.Description,
+			Budget:      *updated.Budget,
+		})
+		require.NoError(t, err)
 		req, err := http.NewRequest(
 			http.MethodPut,
 			fmt.Sprintf("/api/groups/%s", group.ID.String()),
-			strings.NewReader(reqBody))
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -684,8 +714,13 @@ func TestHandlers_PutGroup(t *testing.T) {
 				group.ID, updated.Name,
 				updated.Description, updated.Budget).
 			Return(updated, nil)
-
-		res := &GroupOverview{
+		assert.NoError(t, h.Handlers.PutGroup(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got GroupOverview
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := &GroupOverview{
 			ID:          updated.ID,
 			Name:        updated.Name,
 			Description: updated.Description,
@@ -693,14 +728,7 @@ func TestHandlers_PutGroup(t *testing.T) {
 			CreatedAt:   updated.CreatedAt,
 			UpdatedAt:   updated.UpdatedAt,
 		}
-
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutGroup(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, &got, opts...)
 	})
 
 	t.Run("FailedWithUpdateGroup", func(t *testing.T) {
@@ -731,13 +759,21 @@ func TestHandlers_PutGroup(t *testing.T) {
 		}
 
 		e := echo.New()
-		reqBody := fmt.Sprintf(
-			`{"name":"%s","description":"%s","budget":%d}`,
-			updated.Name, updated.Description, *updated.Budget)
+		// FIXME: #833
+		reqBody, err := json.Marshal(&struct {
+			Name        string `json:"name"`
+			Description string `json:"description"`
+			Budget      int    `json:"budget"`
+		}{
+			Name:        updated.Name,
+			Description: updated.Description,
+			Budget:      *updated.Budget,
+		})
+		require.NoError(t, err)
 		req, err := http.NewRequest(
 			http.MethodPut,
 			fmt.Sprintf("/api/groups/%s", group.ID.String()),
-			strings.NewReader(reqBody))
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -757,37 +793,47 @@ func TestHandlers_PutGroup(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PutGroup(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 
 	t.Run("FailedWithUUID", func(t *testing.T) {
 		t.Parallel()
-
+		ctrl := gomock.NewController(t)
 		invalidUUID := "invalid-uuid"
 		_, resErr := uuid.Parse(invalidUUID)
 
-		ctrl := gomock.NewController(t)
 		e := echo.New()
+		// FIXME: #833
+		reqBody, err := json.Marshal(&struct {
+			Name        string `json:"name"`
+			Description string `json:"description"`
+			Budget      int    `json:"budget"`
+		}{
+			Name:        "test",
+			Description: "test",
+			Budget:      1000000,
+		})
+		require.NoError(t, err)
 		req, err := http.NewRequest(
 			http.MethodPut,
-			"/api/groups/invalid-uuid",
-			strings.NewReader(`{"name":"test","description":"test","budget":1000000}`))
+			fmt.Sprintf("/api/groups/%s", invalidUUID),
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("api/groups/:groupID")
 		c.SetParamNames("groupID")
-		c.SetParamValues("invalid-uuid")
+		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		err = h.Handlers.PutGroup(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 }
 
@@ -829,9 +875,8 @@ func TestHandlers_DeleteGroup(t *testing.T) {
 			DeleteGroup(c.Request().Context(), group.ID).
 			Return(nil)
 
-		if assert.NoError(t, h.Handlers.DeleteGroup(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-		}
+		assert.NoError(t, h.Handlers.DeleteGroup(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("FailedWithDeleteGroup", func(t *testing.T) {
@@ -871,9 +916,9 @@ func TestHandlers_DeleteGroup(t *testing.T) {
 			Return(resErr)
 
 		err = h.Handlers.DeleteGroup(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 
 	t.Run("FailedWithUUID", func(t *testing.T) {
@@ -884,20 +929,23 @@ func TestHandlers_DeleteGroup(t *testing.T) {
 
 		ctrl := gomock.NewController(t)
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, "/api/groups/invalid-uuid", nil)
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/groups/%s", invalidUUID),
+			nil)
 		require.NoError(t, err)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("api/groups/:groupID")
 		c.SetParamNames("groupID")
-		c.SetParamValues("invalid-uuid")
+		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		err = h.Handlers.DeleteGroup(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 }
 
@@ -957,20 +1005,22 @@ func TestHandlers_PostMember(t *testing.T) {
 				modelMember,
 			}, nil)
 
-		res := []uuid.UUID{modelMember.ID}
-		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PostMember(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		assert.NoError(t, h.Handlers.PostMember(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []uuid.UUID
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		exp := []uuid.UUID{user.ID}
+		testutil.RequireEqual(t, exp, got)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
+		invalidUUID := "invalid-uuid"
+		_, resErr := uuid.Parse(invalidUUID)
 		member := []uuid.UUID{uuid.New()}
 		reqBody, err := json.Marshal(member)
 		require.NoError(t, err)
@@ -978,7 +1028,7 @@ func TestHandlers_PostMember(t *testing.T) {
 		e := echo.New()
 		req, err := http.NewRequest(
 			http.MethodPost,
-			"/api/groups/hoge/members",
+			fmt.Sprintf("/api/groups/%s/members", invalidUUID),
 			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -986,17 +1036,15 @@ func TestHandlers_PostMember(t *testing.T) {
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/groups/:groupID/members")
 		c.SetParamNames("groupID")
-		c.SetParamValues("hoge")
+		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		_, resErr := uuid.Parse(c.Param("groupID"))
-
 		err = h.Handlers.PostMember(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -1026,9 +1074,9 @@ func TestHandlers_PostMember(t *testing.T) {
 		resErr := errors.New("invalid UUID")
 
 		err = h.Handlers.PostMember(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("UnknownGroupID", func(t *testing.T) {
@@ -1074,9 +1122,9 @@ func TestHandlers_PostMember(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PostMember(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 
 	t.Run("UnknownUserID", func(t *testing.T) {
@@ -1123,9 +1171,9 @@ func TestHandlers_PostMember(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PostMember(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 }
 
@@ -1180,9 +1228,8 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			DeleteMembers(c.Request().Context(), group.ID, []uuid.UUID{user.ID}).
 			Return(nil)
 
-		if assert.NoError(t, h.Handlers.DeleteMember(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-		}
+		assert.NoError(t, h.Handlers.DeleteMember(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("NilGroupUUID", func(t *testing.T) {
@@ -1222,9 +1269,9 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		resErr := errors.New("invalid UUID")
 
 		err = h.Handlers.DeleteMember(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("UnknownGroupID", func(t *testing.T) {
@@ -1270,9 +1317,9 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			Return(resErr)
 
 		err = h.Handlers.DeleteMember(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 
 	t.Run("UnknownMemberID", func(t *testing.T) {
@@ -1319,18 +1366,17 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			Return(resErr)
 
 		err = h.Handlers.DeleteMember(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 
 	t.Run("InvalidGroupUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		invID := "po"
-
-		_, resErr := uuid.Parse(invID)
+		invalidUUID := "invalid-uuid"
+		_, resErr := uuid.Parse(invalidUUID)
 
 		member := []uuid.UUID{uuid.New()}
 		reqBody, err := json.Marshal(member)
@@ -1339,7 +1385,7 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		e := echo.New()
 		req, err := http.NewRequest(
 			http.MethodDelete,
-			fmt.Sprintf("/api/groups/%s/members", invID),
+			fmt.Sprintf("/api/groups/%s/members", invalidUUID),
 			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -1347,15 +1393,15 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/groups/:groupID/members")
 		c.SetParamNames("groupID")
-		c.SetParamValues(invID)
+		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
 		err = h.Handlers.DeleteMember(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 }
 
@@ -1414,29 +1460,28 @@ func TestHandlers_PostOwner(t *testing.T) {
 			Return([]*model.Owner{
 				modelOwner,
 			}, nil)
-
-		res := owner
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.PostOwner(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []uuid.UUID
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PostOwner(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		exp := []uuid.UUID{user.ID}
+		testutil.RequireEqual(t, exp, got)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		owner := []string{"hoge"}
+		invalidUUID := "invalid-uuid"
+		owner := []string{invalidUUID}
 		reqBody, err := json.Marshal(owner)
 		require.NoError(t, err)
 
 		e := echo.New()
 		req, err := http.NewRequest(
 			http.MethodPost,
-			"/api/groups/hoge/owners",
+			fmt.Sprintf("/api/groups/%s/owners", invalidUUID),
 			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -1444,7 +1489,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/groups/:groupID/owners")
 		c.SetParamNames("groupID")
-		c.SetParamValues("hoge")
+		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1452,9 +1497,9 @@ func TestHandlers_PostOwner(t *testing.T) {
 		_, resErr := uuid.Parse(c.Param("groupID"))
 
 		err = h.Handlers.PostOwner(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -1484,9 +1529,9 @@ func TestHandlers_PostOwner(t *testing.T) {
 		resErr := errors.New("invalid UUID")
 
 		err = h.Handlers.PostOwner(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("UnknownGroupID", func(t *testing.T) {
@@ -1532,9 +1577,9 @@ func TestHandlers_PostOwner(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PostOwner(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("UnknownUserID", func(t *testing.T) {
@@ -1581,9 +1626,9 @@ func TestHandlers_PostOwner(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PostOwner(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 }
 
@@ -1638,9 +1683,8 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 			DeleteOwners(c.Request().Context(), group.ID, []uuid.UUID{user.ID}).
 			Return(nil)
 
-		if assert.NoError(t, h.Handlers.DeleteOwner(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-		}
+		assert.NoError(t, h.Handlers.DeleteOwner(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("NilGroupUUID", func(t *testing.T) {
@@ -1670,9 +1714,9 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		resErr := errors.New("invalid UUID")
 
 		err = h.Handlers.DeleteOwner(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("UnknownGroupID", func(t *testing.T) {
@@ -1718,9 +1762,8 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 			Return(resErr)
 
 		err = h.Handlers.DeleteOwner(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-		}
+		assert.Error(t, err)
+		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
 	t.Run("UnknownOwnerID", func(t *testing.T) {
@@ -1765,9 +1808,9 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 			Return(resErr)
 
 		err = h.Handlers.DeleteOwner(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
 	t.Run("InvalidGroupUUID", func(t *testing.T) {
@@ -1798,8 +1841,8 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		require.NoError(t, err)
 
 		err = h.Handlers.DeleteOwner(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 }
