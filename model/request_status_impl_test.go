@@ -3,10 +3,13 @@ package model
 import (
 	"context"
 	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
@@ -35,7 +38,15 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 		status := Status(random.Numeric(t, 5) + 1)
 		created, err := repo.CreateStatus(ctx, request.ID, user.ID, status)
 		assert.NoError(t, err)
-		assert.Equal(t, created.Status, status)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(RequestStatus{}, "ID"))
+		exp := &RequestStatus{
+			CreatedBy: user.ID,
+			Status:    status,
+			CreatedAt: time.Now(),
+		}
+		testutil.RequireEqual(t, exp, created, opts...)
 	})
 
 	t.Run("InvalidStatus", func(t *testing.T) {

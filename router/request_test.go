@@ -7,23 +7,96 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
-	"github.com/gorilla/sessions"
-
 	"github.com/google/uuid"
+	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 	"go.uber.org/mock/gomock"
 )
+
+func modelTagToTagOverview(t *model.Tag) *TagOverview {
+	return &TagOverview{
+		ID:        t.ID,
+		Name:      t.Name,
+		CreatedAt: t.CreatedAt,
+		UpdatedAt: t.UpdatedAt,
+	}
+}
+
+func modelRequestTargetDetailToTargetOverview(t *model.RequestTargetDetail) *TargetOverview {
+	return &TargetOverview{
+		ID:        t.ID,
+		Target:    t.Target,
+		Amount:    t.Amount,
+		CreatedAt: t.CreatedAt,
+	}
+}
+
+func modelRequestStatusToStatusResponseOverview(s *model.RequestStatus) *StatusResponseOverview {
+	return &StatusResponseOverview{
+		CreatedBy: s.CreatedBy,
+		Status:    s.Status,
+		CreatedAt: s.CreatedAt,
+	}
+}
+
+func modelCommentToCommentDetail(c *model.Comment) *CommentDetail {
+	return &CommentDetail{
+		ID:        c.ID,
+		User:      c.User,
+		Comment:   c.Comment,
+		CreatedAt: c.CreatedAt,
+		UpdatedAt: c.UpdatedAt,
+	}
+}
+
+// FIXME: この処理はrequest.goにも書かれてある
+func modelRequestDetailToRequestResponse(r *model.RequestDetail) *RequestResponse {
+	var group *GroupOverview
+	if r.Group != nil {
+		group = &GroupOverview{
+			ID:          r.Group.ID,
+			Name:        r.Group.Name,
+			Description: r.Group.Description,
+			Budget:      r.Group.Budget,
+			CreatedAt:   r.Group.CreatedAt,
+			UpdatedAt:   r.Group.UpdatedAt,
+		}
+	}
+	return &RequestResponse{
+		ID:        r.ID,
+		Status:    r.Status,
+		CreatedAt: r.CreatedAt,
+		UpdatedAt: r.UpdatedAt,
+		CreatedBy: r.CreatedBy,
+		Title:     r.Title,
+		Content:   r.Content,
+		Group:     group,
+		Tags: lo.Map(r.Tags, func(t *model.Tag, _ int) *TagOverview {
+			return modelTagToTagOverview(t)
+		}),
+		Targets: lo.Map(r.Targets, func(t *model.RequestTargetDetail, _ int) *TargetOverview {
+			return modelRequestTargetDetailToTargetOverview(t)
+		}),
+		Statuses: lo.Map(r.Statuses, func(s *model.RequestStatus, _ int) *StatusResponseOverview {
+			return modelRequestStatusToStatusResponseOverview(s)
+		}),
+		Comments: lo.Map(r.Comments, func(c *model.Comment, _ int) *CommentDetail {
+			return modelCommentToCommentDetail(c)
+		}),
+	}
+}
 
 // To do
 func TestHandlers_GetRequests(t *testing.T) {
@@ -73,7 +146,13 @@ func TestHandlers_GetRequests(t *testing.T) {
 			}).
 			Return(requests, nil)
 
-		res := []*RequestResponse{
+		assert.NoError(t, h.Handlers.GetRequests(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*RequestResponse{
 			{
 				ID:        request2.ID,
 				Status:    request2.Status,
@@ -99,13 +178,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Tags:      []*TagOverview{},
 			},
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetRequests(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -131,14 +204,12 @@ func TestHandlers_GetRequests(t *testing.T) {
 			}).
 			Return(requests, nil)
 
-		res := []*RequestResponse{}
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.GetRequests(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetRequests(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		assert.Empty(t, got)
 	})
 
 	t.Run("Success3", func(t *testing.T) {
@@ -161,7 +232,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 		status := "submitted"
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/requests?status=submitted", nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/requests?status=%s", status),
+			nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -178,7 +252,13 @@ func TestHandlers_GetRequests(t *testing.T) {
 			}).
 			Return(requests, nil)
 
-		res := []*RequestResponse{
+		assert.NoError(t, h.Handlers.GetRequests(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*RequestResponse{
 			{
 				ID:        request1.ID,
 				Status:    request1.Status,
@@ -192,13 +272,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Tags:      []*TagOverview{},
 			},
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetRequests(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("Success4", func(t *testing.T) {
@@ -242,7 +316,13 @@ func TestHandlers_GetRequests(t *testing.T) {
 			}).
 			Return(requests, nil)
 
-		res := []*RequestResponse{
+		assert.NoError(t, h.Handlers.GetRequests(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*RequestResponse{
 			{
 				ID:        request1.ID,
 				Status:    request1.Status,
@@ -256,13 +336,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Tags:      []*TagOverview{},
 			},
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetRequests(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("Success5", func(t *testing.T) {
@@ -305,8 +379,13 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Offset: 0,
 			}).
 			Return(requests, nil)
-
-		res := []*RequestResponse{
+		assert.NoError(t, h.Handlers.GetRequests(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*RequestResponse{
 			{
 				ID:        request1.ID,
 				Status:    request1.Status,
@@ -320,13 +399,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Tags:      []*TagOverview{},
 			},
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetRequests(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("Success6", func(t *testing.T) {
@@ -381,8 +454,13 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Offset: 0,
 			}).
 			Return(requests, nil)
-
-		res := []*RequestResponse{
+		assert.NoError(t, h.Handlers.GetRequests(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := []*RequestResponse{
 			{
 				ID:        request1.ID,
 				Status:    request1.Status,
@@ -396,20 +474,14 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Comments:  []*CommentDetail{},
 			},
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetRequests(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("Success7", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		date := time.Now().Round(time.Second).UTC()
+		date := time.Now()
 		request := &model.RequestResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
@@ -445,10 +517,11 @@ func TestHandlers_GetRequests(t *testing.T) {
 			return
 		}
 		require.Equal(t, http.StatusOK, rec.Code)
-		var res []*RequestResponse
-		err = json.Unmarshal(rec.Body.Bytes(), &res)
+		var got []*RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-		expectedBody := []*RequestResponse{
+		opts := testutil.ApproxEqualOptions()
+		exp := []*RequestResponse{
 			{
 				ID:        request.ID,
 				Status:    request.Status,
@@ -462,7 +535,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Comments:  []*CommentDetail{},
 			},
 		}
-		require.Equal(t, expectedBody, res)
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("InvaildStatus", func(t *testing.T) {
@@ -470,7 +543,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/requests?status=po", nil)
+		req, err := http.NewRequest(http.MethodGet, "/api/requests?status=invalid-status", nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -480,9 +553,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 		require.NoError(t, err)
 
 		err = h.Handlers.GetRequests(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, "invalid status"), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, "invalid status"), err)
 	})
 
 	t.Run("FailedToGetRequests", func(t *testing.T) {
@@ -508,9 +581,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.GetRequests(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 }
 
@@ -527,14 +600,12 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Status:  model.Submitted,
 			Title:   random.AlphaNumeric(t, 20),
 			Content: random.AlphaNumeric(t, 50),
-			Statuses: []*model.RequestStatus{
-				{
-					ID:        uuid.New(),
-					CreatedBy: uuid.New(),
-					Status:    model.Submitted,
-					CreatedAt: date,
-				},
-			},
+			Statuses: []*model.RequestStatus{{
+				ID:        uuid.New(),
+				CreatedBy: uuid.New(),
+				Status:    model.Submitted,
+				CreatedAt: date,
+			}},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -569,31 +640,14 @@ func TestHandlers_PostRequest(t *testing.T) {
 				group, reqRequest.CreatedBy).
 			Return(request, nil)
 
-		res := &RequestResponse{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedAt: request.CreatedAt,
-			UpdatedAt: request.UpdatedAt,
-			CreatedBy: request.CreatedBy,
-			Statuses: []*StatusResponseOverview{
-				{
-					CreatedBy: request.Statuses[0].CreatedBy,
-					Status:    request.Statuses[0].Status,
-					CreatedAt: request.Statuses[0].CreatedAt,
-				},
-			},
-			Title:   request.Title,
-			Content: request.Content,
-			Tags:    []*TagOverview{},
-			Targets: []*TargetOverview{},
-		}
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.PostRequest(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PostRequest(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := modelRequestDetailToRequestResponse(request)
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithTags", func(t *testing.T) {
@@ -614,14 +668,12 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Status:  model.Submitted,
 			Title:   random.AlphaNumeric(t, 20),
 			Content: random.AlphaNumeric(t, 50),
-			Statuses: []*model.RequestStatus{
-				{
-					ID:        uuid.New(),
-					CreatedBy: uuid.New(),
-					Status:    model.Submitted,
-					CreatedAt: date,
-				},
-			},
+			Statuses: []*model.RequestStatus{{
+				ID:        uuid.New(),
+				CreatedBy: uuid.New(),
+				Status:    model.Submitted,
+				CreatedAt: date,
+			}},
 			Tags:      tags,
 			CreatedAt: date,
 			UpdatedAt: date,
@@ -660,37 +712,14 @@ func TestHandlers_PostRequest(t *testing.T) {
 				tags, targets,
 				group, reqRequest.CreatedBy).
 			Return(request, nil)
-
-		res := &RequestResponse{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedAt: request.CreatedAt,
-			UpdatedAt: request.UpdatedAt,
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
-			Statuses: []*StatusResponseOverview{
-				{
-					CreatedBy: request.Statuses[0].CreatedBy,
-					Status:    request.Statuses[0].Status,
-					CreatedAt: request.Statuses[0].CreatedAt,
-				},
-			},
-			Tags: []*TagOverview{{
-				ID:        tag.ID,
-				Name:      tag.Name,
-				CreatedAt: tag.CreatedAt,
-				UpdatedAt: tag.UpdatedAt,
-			}},
-			Targets: []*TargetOverview{},
-		}
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.PostRequest(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PostRequest(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := modelRequestDetailToRequestResponse(request)
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithGroup", func(t *testing.T) {
@@ -712,14 +741,12 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Title:   random.AlphaNumeric(t, 20),
 			Content: random.AlphaNumeric(t, 50),
 			Group:   group,
-			Statuses: []*model.RequestStatus{
-				{
-					ID:        uuid.New(),
-					CreatedBy: uuid.New(),
-					Status:    model.Submitted,
-					CreatedAt: date,
-				},
-			},
+			Statuses: []*model.RequestStatus{{
+				ID:        uuid.New(),
+				CreatedBy: uuid.New(),
+				Status:    model.Submitted,
+				CreatedAt: date,
+			}},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -757,40 +784,14 @@ func TestHandlers_PostRequest(t *testing.T) {
 				tags, targets,
 				group, reqRequest.CreatedBy).
 			Return(request, nil)
-
-		res := &RequestResponse{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedAt: request.CreatedAt,
-			UpdatedAt: request.UpdatedAt,
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
-			Tags:      []*TagOverview{},
-			Targets:   []*TargetOverview{},
-			Statuses: []*StatusResponseOverview{
-				{
-					CreatedBy: request.Statuses[0].CreatedBy,
-					Status:    request.Statuses[0].Status,
-					CreatedAt: request.Statuses[0].CreatedAt,
-				},
-			},
-			Group: &GroupOverview{
-				ID:          group.ID,
-				Name:        group.Name,
-				Description: group.Description,
-				Budget:      group.Budget,
-				CreatedAt:   group.CreatedAt,
-				UpdatedAt:   group.UpdatedAt,
-			},
-		}
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.PostRequest(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PostRequest(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := modelRequestDetailToRequestResponse(request)
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithTarget", func(t *testing.T) {
@@ -816,14 +817,12 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Title:   random.AlphaNumeric(t, 20),
 			Content: random.AlphaNumeric(t, 50),
 			Targets: []*model.RequestTargetDetail{tgd},
-			Statuses: []*model.RequestStatus{
-				{
-					ID:        uuid.New(),
-					CreatedBy: uuid.New(),
-					Status:    model.Submitted,
-					CreatedAt: date,
-				},
-			},
+			Statuses: []*model.RequestStatus{{
+				ID:        uuid.New(),
+				CreatedBy: uuid.New(),
+				Status:    model.Submitted,
+				CreatedAt: date,
+			}},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -862,39 +861,14 @@ func TestHandlers_PostRequest(t *testing.T) {
 				tags, []*model.RequestTarget{target},
 				group, reqRequest.CreatedBy).
 			Return(request, nil)
-
-		tgov := &TargetOverview{
-			ID:        request.Targets[0].ID,
-			Target:    request.Targets[0].Target,
-			Amount:    request.Targets[0].Amount,
-			CreatedAt: request.Targets[0].CreatedAt,
-		}
-
-		res := &RequestResponse{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedAt: request.CreatedAt,
-			UpdatedAt: request.UpdatedAt,
-			CreatedBy: request.CreatedBy,
-			Statuses: []*StatusResponseOverview{
-				{
-					CreatedBy: request.Statuses[0].CreatedBy,
-					Status:    request.Statuses[0].Status,
-					CreatedAt: request.Statuses[0].CreatedAt,
-				},
-			},
-			Title:   request.Title,
-			Content: request.Content,
-			Tags:    []*TagOverview{},
-			Targets: []*TargetOverview{tgov},
-		}
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.PostRequest(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PostRequest(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := modelRequestDetailToRequestResponse(request)
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("UnknownTagID", func(t *testing.T) {
@@ -941,9 +915,9 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PostRequest(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
 	t.Run("UnknownGroupID", func(t *testing.T) {
@@ -990,9 +964,9 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PostRequest(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
 	t.Run("UnknownUserID", func(t *testing.T) {
@@ -1043,9 +1017,9 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PostRequest(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 }
 
@@ -1065,14 +1039,12 @@ func TestHandlers_GetRequest(t *testing.T) {
 			Files:    []*uuid.UUID{},
 			Tags:     []*model.Tag{},
 			Content:  random.AlphaNumeric(t, 50),
-			Statuses: []*model.RequestStatus{
-				{
-					ID:        uuid.New(),
-					Status:    model.Submitted,
-					CreatedAt: date,
-					CreatedBy: uuid.New(),
-				},
-			},
+			Statuses: []*model.RequestStatus{{
+				ID:        uuid.New(),
+				Status:    model.Submitted,
+				CreatedAt: date,
+				CreatedBy: uuid.New(),
+			}},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -1101,33 +1073,14 @@ func TestHandlers_GetRequest(t *testing.T) {
 			EXPECT().
 			GetComments(c.Request().Context(), request.ID).
 			Return(nil, nil)
-
-		res := &RequestResponse{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedAt: request.CreatedAt,
-			UpdatedAt: request.UpdatedAt,
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
-			Statuses: []*StatusResponseOverview{
-				{
-					Status:    request.Statuses[0].Status,
-					CreatedAt: request.Statuses[0].CreatedAt,
-					CreatedBy: request.Statuses[0].CreatedBy,
-				},
-			},
-			Tags:     []*TagOverview{},
-			Comments: []*CommentDetail{},
-			Targets:  []*TargetOverview{},
-		}
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.GetRequest(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetRequest(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := modelRequestDetailToRequestResponse(request)
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithComments", func(t *testing.T) {
@@ -1142,14 +1095,12 @@ func TestHandlers_GetRequest(t *testing.T) {
 			Comments: []*model.Comment{},
 			Files:    []*uuid.UUID{},
 			Tags:     []*model.Tag{},
-			Statuses: []*model.RequestStatus{
-				{
-					ID:        uuid.New(),
-					Status:    model.Submitted,
-					CreatedAt: date,
-					CreatedBy: uuid.New(),
-				},
-			},
+			Statuses: []*model.RequestStatus{{
+				ID:        uuid.New(),
+				Status:    model.Submitted,
+				CreatedAt: date,
+				CreatedBy: uuid.New(),
+			}},
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
@@ -1196,49 +1147,17 @@ func TestHandlers_GetRequest(t *testing.T) {
 			GetComments(c.Request().Context(), request.ID).
 			Return(comments, nil)
 
-		resComments := []*CommentDetail{
-			{
-				ID:        comment1.ID,
-				User:      comment1.User,
-				Comment:   comment1.Comment,
-				CreatedAt: comment1.CreatedAt,
-				UpdatedAt: comment1.UpdatedAt,
-			},
-			{
-				ID:        comment2.ID,
-				User:      comment2.User,
-				Comment:   comment2.Comment,
-				CreatedAt: comment2.CreatedAt,
-				UpdatedAt: comment2.UpdatedAt,
-			},
-		}
-
-		res := &RequestResponse{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedAt: request.CreatedAt,
-			UpdatedAt: request.UpdatedAt,
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
-			Comments:  resComments,
-			Statuses: []*StatusResponseOverview{
-				{
-					Status:    request.Statuses[0].Status,
-					CreatedAt: request.Statuses[0].CreatedAt,
-					CreatedBy: request.Statuses[0].CreatedBy,
-				},
-			},
-			Tags:    []*TagOverview{},
-			Targets: []*TargetOverview{},
-		}
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.GetRequest(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetRequest(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := modelRequestDetailToRequestResponse(request)
+		exp.Comments = lo.Map(comments, func(c *model.Comment, _ int) *CommentDetail {
+			return modelCommentToCommentDetail(c)
+		})
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithTarget", func(t *testing.T) {
@@ -1246,20 +1165,12 @@ func TestHandlers_GetRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		date := time.Now()
 
-		target := &TargetOverview{
+		target := &model.RequestTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 1000000),
 			PaidAt:    nil,
 			CreatedAt: date,
-		}
-
-		modeltarget := &model.RequestTargetDetail{
-			ID:        target.ID,
-			Target:    target.Target,
-			Amount:    target.Amount,
-			PaidAt:    target.PaidAt,
-			CreatedAt: target.CreatedAt,
 		}
 
 		request := &model.RequestDetail{
@@ -1270,15 +1181,13 @@ func TestHandlers_GetRequest(t *testing.T) {
 			Files:    []*uuid.UUID{},
 			Tags:     []*model.Tag{},
 			Content:  random.AlphaNumeric(t, 50),
-			Statuses: []*model.RequestStatus{
-				{
-					ID:        uuid.New(),
-					Status:    model.Submitted,
-					CreatedAt: date,
-					CreatedBy: uuid.New(),
-				},
-			},
-			Targets:   []*model.RequestTargetDetail{modeltarget},
+			Statuses: []*model.RequestStatus{{
+				ID:        uuid.New(),
+				Status:    model.Submitted,
+				CreatedAt: date,
+				CreatedBy: uuid.New(),
+			}},
+			Targets:   []*model.RequestTargetDetail{target},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -1307,59 +1216,45 @@ func TestHandlers_GetRequest(t *testing.T) {
 			EXPECT().
 			GetComments(c.Request().Context(), request.ID).
 			Return(nil, nil)
-
-		res := &RequestResponse{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedAt: request.CreatedAt,
-			UpdatedAt: request.UpdatedAt,
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
-			Statuses: []*StatusResponseOverview{
-				{
-					Status:    request.Statuses[0].Status,
-					CreatedAt: request.Statuses[0].CreatedAt,
-					CreatedBy: request.Statuses[0].CreatedBy,
-				},
-			},
-			Targets:  []*TargetOverview{target},
-			Tags:     []*TagOverview{},
-			Comments: []*CommentDetail{},
-		}
-
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.GetRequest(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetRequest(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
+		opts := testutil.ApproxEqualOptions()
+		exp := modelRequestDetailToRequestResponse(request)
+		exp.Targets = []*TargetOverview{
+			modelRequestTargetDetailToTargetOverview(target),
 		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
+		invalidUUID := "invalid-uuid"
+		_, resErr := uuid.Parse(invalidUUID)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/requests/hoge", nil)
+		req, err := http.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/api/requests/%s", invalidUUID),
+			nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/requests/:requestID")
 		c.SetParamNames("requestID")
-		c.SetParamValues("hoge")
+		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		_, resErr := uuid.Parse(c.Param("requestID"))
-
 		err = h.Handlers.GetRequest(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -1382,9 +1277,9 @@ func TestHandlers_GetRequest(t *testing.T) {
 		resErr := errors.New("invalid UUID")
 
 		err = h.Handlers.GetRequest(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("UnknownID", func(t *testing.T) {
@@ -1417,9 +1312,9 @@ func TestHandlers_GetRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.GetRequest(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 }
 
@@ -1439,13 +1334,11 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
-			Statuses: []*model.RequestStatus{
-				{
-					Status:    model.Submitted,
-					CreatedAt: date,
-					CreatedBy: uuid.New(),
-				},
-			},
+			Statuses: []*model.RequestStatus{{
+				Status:    model.Submitted,
+				CreatedAt: date,
+				CreatedBy: uuid.New(),
+			}},
 			Tags:    []*model.Tag{},
 			Targets: []*model.RequestTargetDetail{},
 		}
@@ -1500,32 +1393,14 @@ func TestHandlers_PutRequest(t *testing.T) {
 			GetComments(c.Request().Context(), request.ID).
 			Return([]*model.Comment{}, nil)
 
-		res := &RequestResponse{
-			ID:        updateRequest.ID,
-			Status:    updateRequest.Status,
-			CreatedAt: updateRequest.CreatedAt,
-			UpdatedAt: updateRequest.UpdatedAt,
-			CreatedBy: updateRequest.CreatedBy,
-			Title:     updateRequest.Title,
-			Statuses: []*StatusResponseOverview{
-				{
-					Status:    updateRequest.Statuses[0].Status,
-					CreatedAt: updateRequest.Statuses[0].CreatedAt,
-					CreatedBy: updateRequest.Statuses[0].CreatedBy,
-				},
-			},
-			Content:  updateRequest.Content,
-			Tags:     []*TagOverview{},
-			Targets:  []*TargetOverview{},
-			Comments: []*CommentDetail{},
-		}
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.PutRequest(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutRequest(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := modelRequestDetailToRequestResponse(updateRequest)
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithTag", func(t *testing.T) {
@@ -1538,14 +1413,12 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Status:  model.Submitted,
 			Title:   random.AlphaNumeric(t, 20),
 			Content: random.AlphaNumeric(t, 50),
-			Statuses: []*model.RequestStatus{
-				{
-					ID:        uuid.New(),
-					Status:    model.Submitted,
-					CreatedAt: date,
-					CreatedBy: uuid.New(),
-				},
-			},
+			Statuses: []*model.RequestStatus{{
+				ID:        uuid.New(),
+				Status:    model.Submitted,
+				CreatedAt: date,
+				CreatedBy: uuid.New(),
+			}},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -1624,46 +1497,14 @@ func TestHandlers_PutRequest(t *testing.T) {
 			EXPECT().
 			GetComments(c.Request().Context(), request.ID).
 			Return([]*model.Comment{}, nil)
-
-		res := &RequestResponse{
-			ID:        updateRequest.ID,
-			Status:    updateRequest.Status,
-			CreatedAt: updateRequest.CreatedAt,
-			UpdatedAt: updateRequest.UpdatedAt,
-			CreatedBy: updateRequest.CreatedBy,
-			Title:     updateRequest.Title,
-			Content:   updateRequest.Content,
-			Statuses: []*StatusResponseOverview{
-				{
-					Status:    updateRequest.Statuses[0].Status,
-					CreatedAt: updateRequest.Statuses[0].CreatedAt,
-					CreatedBy: updateRequest.Statuses[0].CreatedBy,
-				},
-			},
-			Tags: []*TagOverview{
-				{
-					ID:        tag1.ID,
-					Name:      tag1.Name,
-					CreatedAt: tag1.CreatedAt,
-					UpdatedAt: tag1.UpdatedAt,
-				},
-				{
-					ID:        tag2.ID,
-					Name:      tag2.Name,
-					CreatedAt: tag2.CreatedAt,
-					UpdatedAt: tag2.UpdatedAt,
-				},
-			},
-			Targets:  []*TargetOverview{},
-			Comments: []*CommentDetail{},
-		}
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.PutRequest(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutRequest(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := modelRequestDetailToRequestResponse(updateRequest)
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithTarget", func(t *testing.T) {
@@ -1675,14 +1516,12 @@ func TestHandlers_PutRequest(t *testing.T) {
 			ID:     uuid.New(),
 			Status: model.Submitted,
 			Title:  random.AlphaNumeric(t, 20),
-			Statuses: []*model.RequestStatus{
-				{
-					ID:        uuid.New(),
-					Status:    model.Submitted,
-					CreatedAt: date,
-					CreatedBy: uuid.New(),
-				},
-			},
+			Statuses: []*model.RequestStatus{{
+				ID:        uuid.New(),
+				Status:    model.Submitted,
+				CreatedAt: date,
+				CreatedBy: uuid.New(),
+			}},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -1702,14 +1541,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedAt: date,
 		}
 		targets := []*model.RequestTarget{
-			{
-				Target: target1.Target,
-				Amount: target1.Amount,
-			},
-			{
-				Target: target2.Target,
-				Amount: target2.Amount,
-			},
+			{Target: target1.Target, Amount: target1.Amount},
+			{Target: target2.Target, Amount: target2.Amount},
 		}
 		targetDetails := []*model.RequestTargetDetail{target1, target2}
 
@@ -1717,14 +1550,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
 			Targets: []*Target{
-				{
-					Target: target1.Target,
-					Amount: target1.Amount,
-				},
-				{
-					Target: target2.Target,
-					Amount: target2.Amount,
-				},
+				{Target: target1.Target, Amount: target1.Amount},
+				{Target: target2.Target, Amount: target2.Amount},
 			},
 		}
 		reqBody, err := json.Marshal(reqRequest)
@@ -1774,47 +1601,14 @@ func TestHandlers_PutRequest(t *testing.T) {
 			EXPECT().
 			GetComments(c.Request().Context(), request.ID).
 			Return([]*model.Comment{}, nil)
-
-		res := &RequestResponse{
-			ID:        updateRequest.ID,
-			Status:    updateRequest.Status,
-			CreatedAt: updateRequest.CreatedAt,
-			UpdatedAt: updateRequest.UpdatedAt,
-			CreatedBy: updateRequest.CreatedBy,
-			Title:     updateRequest.Title,
-			Statuses: []*StatusResponseOverview{
-				{
-					Status:    updateRequest.Statuses[0].Status,
-					CreatedAt: updateRequest.Statuses[0].CreatedAt,
-					CreatedBy: updateRequest.Statuses[0].CreatedBy,
-				},
-			},
-			Targets: []*TargetOverview{
-				{
-					ID:        target1.ID,
-					Target:    target1.Target,
-					Amount:    target1.Amount,
-					PaidAt:    target1.PaidAt,
-					CreatedAt: target1.CreatedAt,
-				},
-				{
-					ID:        target2.ID,
-					Target:    target2.Target,
-					Amount:    target2.Amount,
-					PaidAt:    target2.PaidAt,
-					CreatedAt: target2.CreatedAt,
-				},
-			},
-			Tags:     []*TagOverview{},
-			Comments: []*CommentDetail{},
-		}
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.PutRequest(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutRequest(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := modelRequestDetailToRequestResponse(updateRequest)
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithGroup", func(t *testing.T) {
@@ -1827,14 +1621,12 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Status:  model.Submitted,
 			Title:   random.AlphaNumeric(t, 20),
 			Content: random.AlphaNumeric(t, 50),
-			Statuses: []*model.RequestStatus{
-				{
-					ID:        uuid.New(),
-					Status:    model.Submitted,
-					CreatedAt: date,
-					CreatedBy: uuid.New(),
-				},
-			},
+			Statuses: []*model.RequestStatus{{
+				ID:        uuid.New(),
+				Status:    model.Submitted,
+				CreatedAt: date,
+				CreatedBy: uuid.New(),
+			}},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -1905,41 +1697,14 @@ func TestHandlers_PutRequest(t *testing.T) {
 			EXPECT().
 			GetComments(c.Request().Context(), request.ID).
 			Return([]*model.Comment{}, nil)
-
-		res := &RequestResponse{
-			ID:        updateRequest.ID,
-			Status:    updateRequest.Status,
-			CreatedAt: updateRequest.CreatedAt,
-			UpdatedAt: updateRequest.UpdatedAt,
-			CreatedBy: updateRequest.CreatedBy,
-			Title:     updateRequest.Title,
-			Content:   updateRequest.Content,
-			Statuses: []*StatusResponseOverview{
-				{
-					Status:    updateRequest.Statuses[0].Status,
-					CreatedAt: updateRequest.Statuses[0].CreatedAt,
-					CreatedBy: updateRequest.Statuses[0].CreatedBy,
-				},
-			},
-			Group: &GroupOverview{
-				ID:          group.ID,
-				Name:        group.Name,
-				Description: group.Description,
-				Budget:      group.Budget,
-				CreatedAt:   group.CreatedAt,
-				UpdatedAt:   group.UpdatedAt,
-			},
-			Tags:     []*TagOverview{},
-			Targets:  []*TargetOverview{},
-			Comments: []*CommentDetail{},
-		}
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.PutRequest(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutRequest(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := modelRequestDetailToRequestResponse(updateRequest)
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithComment", func(t *testing.T) {
@@ -1952,14 +1717,12 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Status:  model.Submitted,
 			Title:   random.AlphaNumeric(t, 20),
 			Content: random.AlphaNumeric(t, 50),
-			Statuses: []*model.RequestStatus{
-				{
-					ID:        uuid.New(),
-					Status:    model.Submitted,
-					CreatedAt: date,
-					CreatedBy: uuid.New(),
-				},
-			},
+			Statuses: []*model.RequestStatus{{
+				ID:        uuid.New(),
+				Status:    model.Submitted,
+				CreatedAt: date,
+				CreatedBy: uuid.New(),
+			}},
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -2030,75 +1793,45 @@ func TestHandlers_PutRequest(t *testing.T) {
 			EXPECT().
 			GetComments(c.Request().Context(), request.ID).
 			Return(comments, nil)
-
-		resComments := []*CommentDetail{
-			{
-				ID:        comment1.ID,
-				User:      comment1.User,
-				Comment:   comment1.Comment,
-				CreatedAt: comment1.CreatedAt,
-				UpdatedAt: comment1.UpdatedAt,
-			},
-			{
-				ID:        comment2.ID,
-				User:      comment2.User,
-				Comment:   comment2.Comment,
-				CreatedAt: comment2.CreatedAt,
-				UpdatedAt: comment2.UpdatedAt,
-			},
-		}
-
-		res := &RequestResponse{
-			ID:        updateRequest.ID,
-			Status:    updateRequest.Status,
-			CreatedAt: updateRequest.CreatedAt,
-			UpdatedAt: updateRequest.UpdatedAt,
-			CreatedBy: updateRequest.CreatedBy,
-			Statuses: []*StatusResponseOverview{
-				{
-					Status:    updateRequest.Statuses[0].Status,
-					CreatedAt: updateRequest.Statuses[0].CreatedAt,
-					CreatedBy: updateRequest.Statuses[0].CreatedBy,
-				},
-			},
-			Title:    updateRequest.Title,
-			Content:  updateRequest.Content,
-			Comments: resComments,
-			Tags:     []*TagOverview{},
-			Targets:  []*TargetOverview{},
-		}
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.PutRequest(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *RequestResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutRequest(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		exp := modelRequestDetailToRequestResponse(updateRequest)
+		exp.Comments = lo.Map(comments, func(c *model.Comment, _ int) *CommentDetail {
+			return modelCommentToCommentDetail(c)
+		})
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
+		invalidUUID := "invalid-uuid"
+		_, resErr := uuid.Parse(invalidUUID)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, "/api/requests/hoge", nil)
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/requests/%s", invalidUUID),
+			nil)
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/requests/:requestID")
 		c.SetParamNames("requestID")
-		c.SetParamValues("hoge")
+		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		_, resErr := uuid.Parse(c.Param("requestID"))
-
 		err = h.Handlers.PutRequest(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -2121,9 +1854,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 		resErr := errors.New("invalid UUID")
 
 		err = h.Handlers.PutRequest(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("UnknownID", func(t *testing.T) {
@@ -2170,9 +1903,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PutRequest(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
 	t.Run("UnknownTagID", func(t *testing.T) {
@@ -2229,9 +1962,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PutRequest(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
 	t.Run("UnknownGroupID", func(t *testing.T) {
@@ -2291,9 +2024,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PutRequest(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 }
 
@@ -2389,8 +2122,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 			EXPECT().
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
-
-		res := &StatusResponse{
+		assert.NoError(t, h.Handlers.PutStatus(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *StatusResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment: CommentDetail{
@@ -2402,13 +2140,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			},
 			CreatedAt: status.CreatedAt,
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutStatus(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessByAdminFromSubmittedToFixRequired", func(t *testing.T) {
@@ -2500,8 +2232,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 			EXPECT().
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
-
-		res := &StatusResponse{
+		assert.NoError(t, h.Handlers.PutStatus(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *StatusResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment: CommentDetail{
@@ -2513,13 +2250,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			},
 			CreatedAt: status.CreatedAt,
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutStatus(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessByAdminFromSubmittedToAccepted", func(t *testing.T) {
@@ -2611,8 +2342,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 			EXPECT().
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
-
-		res := &StatusResponse{
+		assert.NoError(t, h.Handlers.PutStatus(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *StatusResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment: CommentDetail{
@@ -2624,13 +2360,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			},
 			CreatedAt: status.CreatedAt,
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutStatus(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessByAdminFromSubmittedToFixRequired", func(t *testing.T) {
@@ -2722,8 +2452,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 			EXPECT().
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
-
-		res := &StatusResponse{
+		assert.NoError(t, h.Handlers.PutStatus(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *StatusResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment: CommentDetail{
@@ -2735,13 +2470,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			},
 			CreatedAt: status.CreatedAt,
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutStatus(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessByAdminFromFixRequiredToSubmitted", func(t *testing.T) {
@@ -2833,8 +2562,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 			EXPECT().
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
-
-		res := &StatusResponse{
+		assert.NoError(t, h.Handlers.PutStatus(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *StatusResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment: CommentDetail{
@@ -2846,13 +2580,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			},
 			CreatedAt: status.CreatedAt,
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutStatus(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessByAdminFromAcceptedToSubmitted", func(t *testing.T) {
@@ -2955,8 +2683,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 			EXPECT().
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
-
-		res := &StatusResponse{
+		assert.NoError(t, h.Handlers.PutStatus(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got *StatusResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := &StatusResponse{
 			CreatedBy: user.ID,
 			Status:    status.Status,
 			Comment: CommentDetail{
@@ -2968,13 +2701,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			},
 			CreatedAt: status.CreatedAt,
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutStatus(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("InvalidStatus", func(t *testing.T) {
@@ -3000,17 +2727,20 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		invalidStatus := random.AlphaNumeric(t, 20)
-		reqStatus := fmt.Sprintf(`
-		{
-			"status": "%s",
-			"comment": "%s"
-		}`, invalidStatus, random.AlphaNumeric(t, 20))
+		reqBody, err := json.Marshal(&struct {
+			Status  string `json:"status"`
+			Comment string `json:"comment"`
+		}{
+			Status:  invalidStatus,
+			Comment: random.AlphaNumeric(t, 20),
+		})
+		require.NoError(t, err)
 
 		e := echo.New()
 		req, err := http.NewRequest(
 			http.MethodPut,
 			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			strings.NewReader(reqStatus))
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -3044,14 +2774,16 @@ func TestHandlers_PutStatus(t *testing.T) {
 		resErr.Message = resErrMessage
 
 		err = h.Handlers.PutStatus(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, resErr, err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい
+		assert.Equal(t, resErr, err)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
+		invalidUUID := "invalid-uuid"
+		_, resErr := uuid.Parse(invalidUUID)
 		date := time.Now()
 
 		user := &model.User{
@@ -3073,7 +2805,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		e := echo.New()
 		req, err := http.NewRequest(
 			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", "hoge"),
+			fmt.Sprintf("/api/requests/%s/status", invalidUUID),
 			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -3081,7 +2813,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c := e.NewContext(req, rec)
 		c.SetPath("api/requests/:requestID/status")
 		c.SetParamNames("requestID")
-		c.SetParamValues("hoge")
+		c.SetParamValues(invalidUUID)
 		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
@@ -3100,12 +2832,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		_, resErr := uuid.Parse(c.Param("requestID"))
-
 		err = h.Handlers.PutStatus(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NillUUID", func(t *testing.T) {
@@ -3162,12 +2892,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		_, resErr := uuid.Parse(c.Param("requestID"))
 
 		err = h.Handlers.PutStatus(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
-	t.Run("SissionNotFound", func(t *testing.T) {
+	t.Run("SessionNotFound", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 		date := time.Now()
@@ -3221,9 +2951,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		resErr := errors.New("sessionUser not found")
 
 		err = h.Handlers.PutStatus(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusForbidden, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusForbiddenだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusForbidden, resErr), err)
 	})
 
 	t.Run("SameStatusError", func(t *testing.T) {
@@ -3294,9 +3024,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		resErr := errors.New("invalid request: same status")
 
 		err = h.Handlers.PutStatus(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("CommentRequiredErrorFromSubmittedToFixRequired", func(t *testing.T) {
@@ -3369,9 +3099,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("CommentRequiredErrorFromSubmittedToRejected", func(t *testing.T) {
@@ -3444,9 +3174,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("CommentRequiredErrorFromAcceptedToSubmitted", func(t *testing.T) {
@@ -3519,9 +3249,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("UnknownUser", func(t *testing.T) {
@@ -3597,9 +3327,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PutStatus(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
 	t.Run("AdminNoPrivilege", func(t *testing.T) {
@@ -3677,9 +3407,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusForbiddenだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("AlreadyPaid", func(t *testing.T) {
@@ -3765,9 +3495,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		resErr := errors.New("someone already paid")
 
 		err = h.Handlers.PutStatus(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("CreatorNoPrivilege", func(t *testing.T) {
@@ -3844,9 +3574,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			request.Status.String(), reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusForbiddenだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NoPrivilege", func(t *testing.T) {
@@ -3919,9 +3649,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Return(user, nil)
 
 		err = h.Handlers.PutStatus(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusForbidden), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusForbiddenだけ判定したい
+		assert.Equal(t, echo.NewHTTPError(http.StatusForbidden), err)
 	})
 }
 

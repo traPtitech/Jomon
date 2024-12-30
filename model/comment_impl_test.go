@@ -3,10 +3,13 @@ package model
 import (
 	"context"
 	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
@@ -42,21 +45,13 @@ func TestEntRepository_GetComments(t *testing.T) {
 
 		got, err := repo.GetComments(ctx, request.ID)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && got[0].ID == comment1.ID {
-			assert.Equal(t, got[0].ID, comment1.ID)
-			assert.Equal(t, got[0].User, comment1.User)
-			assert.Equal(t, got[0].Comment, comment1.Comment)
-			assert.Equal(t, got[1].ID, comment2.ID)
-			assert.Equal(t, got[1].User, comment2.User)
-			assert.Equal(t, got[1].Comment, comment2.Comment)
-		} else if assert.Len(t, got, 2) {
-			assert.Equal(t, got[0].ID, comment2.ID)
-			assert.Equal(t, got[0].User, comment2.User)
-			assert.Equal(t, got[0].Comment, comment2.Comment)
-			assert.Equal(t, got[1].ID, comment1.ID)
-			assert.Equal(t, got[1].User, comment1.User)
-			assert.Equal(t, got[1].Comment, comment1.Comment)
-		}
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.SortSlices(func(l, r *Comment) bool {
+				return l.ID.ID() < r.ID.ID()
+			}))
+		exp := []*Comment{comment1, comment2}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -77,7 +72,7 @@ func TestEntRepository_GetComments(t *testing.T) {
 
 		got, err := repo2.GetComments(ctx, request.ID)
 		assert.NoError(t, err)
-		assert.Len(t, got, 0)
+		assert.Empty(t, got)
 	})
 
 	t.Run("UnknownRequest", func(t *testing.T) {
@@ -118,8 +113,16 @@ func TestEntRepository_CreateComment(t *testing.T) {
 		require.NoError(t, err)
 		created, err := repo.CreateComment(ctx, comment, request.ID, user2.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, created.User, user2.ID)
-		assert.Equal(t, created.Comment, comment)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(Comment{}, "ID"))
+		exp := &Comment{
+			User:      user2.ID,
+			Comment:   comment,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+		testutil.RequireEqual(t, exp, created, opts...)
 	})
 
 	t.Run("UnknownRequest", func(t *testing.T) {
@@ -155,7 +158,7 @@ func TestEntRepository_CreateComment(t *testing.T) {
 	})
 }
 
-func TestEntREpository_UpdateComment(t *testing.T) {
+func TestEntRepository_UpdateComment(t *testing.T) {
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx, "update_comment")
 	require.NoError(t, err)
@@ -182,9 +185,15 @@ func TestEntREpository_UpdateComment(t *testing.T) {
 		comment := random.AlphaNumeric(t, 30)
 		updated, err := repo.UpdateComment(ctx, comment, request.ID, created.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, updated.ID, created.ID)
-		assert.Equal(t, updated.User, created.User)
-		assert.Equal(t, updated.Comment, comment)
+		opts := testutil.ApproxEqualOptions()
+		exp := &Comment{
+			ID:        created.ID,
+			User:      created.User,
+			Comment:   comment,
+			CreatedAt: created.CreatedAt,
+			UpdatedAt: time.Now(),
+		}
+		testutil.RequireEqual(t, exp, updated, opts...)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -214,15 +223,19 @@ func TestEntREpository_UpdateComment(t *testing.T) {
 		require.NoError(t, err)
 		updated, err := repo.UpdateComment(ctx, comment.Comment, request2.ID, comment.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, updated.ID, comment.ID)
-		assert.Equal(t, updated.User, comment.User)
-		assert.Equal(t, updated.Comment, comment.Comment)
+		opts := testutil.ApproxEqualOptions()
+		exp := &Comment{
+			ID:        comment.ID,
+			User:      comment.User,
+			Comment:   comment.Comment,
+			CreatedAt: comment.CreatedAt,
+			UpdatedAt: time.Now(),
+		}
+		testutil.RequireEqual(t, exp, updated, opts...)
 
 		got, err := repo.GetComments(ctx, request2.ID)
 		require.NoError(t, err)
-		assert.Equal(t, got[0].ID, updated.ID)
-		assert.Equal(t, got[0].User, updated.User)
-		assert.Equal(t, got[0].Comment, updated.Comment)
+		testutil.RequireEqual(t, []*Comment{updated}, got, opts...)
 	})
 
 	t.Run("UnknownComment", func(t *testing.T) {
@@ -297,6 +310,10 @@ func TestEntRepository_DeleteComment(t *testing.T) {
 
 		err = repo.DeleteComment(ctx, request.ID, comment.ID)
 		assert.NoError(t, err)
+
+		comments, err := repo.GetComments(ctx, request.ID)
+		require.NoError(t, err)
+		assert.Empty(t, comments)
 	})
 
 	t.Run("UnknownRequest", func(t *testing.T) {

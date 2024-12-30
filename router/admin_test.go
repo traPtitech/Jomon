@@ -1,11 +1,11 @@
 package router
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/google/uuid"
@@ -46,22 +46,20 @@ func TestHandler_GetAdmins(t *testing.T) {
 			GetAdmins(c.Request().Context()).
 			Return(admins, nil)
 
-		res := []*uuid.UUID{
-			&admin.ID,
-		}
-		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
-		if assert.NoError(t, h.Handlers.GetAdmins(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		assert.NoError(t, h.Handlers.GetAdmins(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var res []uuid.UUID
+		err = json.Unmarshal(rec.Body.Bytes(), &res)
+		require.NoError(t, err)
+		assert.Equal(t, []uuid.UUID{admin.ID}, res)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
-		admins := []*model.Admin{}
+		var admins []*model.Admin
 
 		e := echo.New()
 		req, err := http.NewRequest(http.MethodGet, "/api/admins", nil)
@@ -77,14 +75,14 @@ func TestHandler_GetAdmins(t *testing.T) {
 			GetAdmins(c.Request().Context()).
 			Return(admins, nil)
 
-		res := []*uuid.UUID{}
-		resBody, err := json.Marshal(res)
 		require.NoError(t, err)
 
-		if assert.NoError(t, h.Handlers.GetAdmins(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		assert.NoError(t, h.Handlers.GetAdmins(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var res []uuid.UUID
+		err = json.Unmarshal(rec.Body.Bytes(), &res)
+		require.NoError(t, err)
+		assert.Equal(t, []uuid.UUID{}, res)
 	})
 
 	t.Run("FailedWithError", func(t *testing.T) {
@@ -108,9 +106,8 @@ func TestHandler_GetAdmins(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.GetAdmins(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 }
 
@@ -121,13 +118,16 @@ func TestHandler_PostAdmin(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		admin := []uuid.UUID{uuid.New()}
+		admin := uuid.New()
+		admins := []uuid.UUID{admin}
+		reqBody, err := json.Marshal(admins)
+		require.NoError(t, err)
 
 		e := echo.New()
 		req, err := http.NewRequest(
 			http.MethodPost,
 			"/api/admins",
-			strings.NewReader(`["`+admin[0].String()+`"]`))
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -137,25 +137,27 @@ func TestHandler_PostAdmin(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			AddAdmins(c.Request().Context(), admin).
+			AddAdmins(c.Request().Context(), admins).
 			Return(nil)
 
-		if assert.NoError(t, h.Handlers.PostAdmins(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-		}
+		assert.NoError(t, h.Handlers.PostAdmins(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("FailedWithError", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		adminID := uuid.New()
+		admin := uuid.New()
+		admins := []uuid.UUID{admin}
+		reqBody, err := json.Marshal(admins)
+		require.NoError(t, err)
 
 		e := echo.New()
 		req, err := http.NewRequest(
 			http.MethodPost,
 			"/api/admins",
-			strings.NewReader(`["`+adminID.String()+`"]`))
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -167,26 +169,29 @@ func TestHandler_PostAdmin(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			AddAdmins(c.Request().Context(), []uuid.UUID{adminID}).
+			AddAdmins(c.Request().Context(), admins).
 			Return(resErr)
 
 		err = h.Handlers.PostAdmins(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 
 	t.Run("FailedWithEntConstraintError", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		adminID := uuid.New()
+		admin := uuid.New()
+		admins := []uuid.UUID{admin}
+		reqBody, err := json.Marshal(admins)
+		require.NoError(t, err)
 
 		e := echo.New()
 		req, err := http.NewRequest(
 			http.MethodPost,
 			"/api/admins",
-			strings.NewReader(`["`+adminID.String()+`"]`))
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -199,13 +204,13 @@ func TestHandler_PostAdmin(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			AddAdmins(c.Request().Context(), []uuid.UUID{adminID}).
+			AddAdmins(c.Request().Context(), admins).
 			Return(resErr)
 
 		err = h.Handlers.PostAdmins(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 }
 
@@ -216,13 +221,16 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		admin := []uuid.UUID{uuid.New()}
+		admin := uuid.New()
+		admins := []uuid.UUID{admin}
+		reqBody, err := json.Marshal(admins)
+		require.NoError(t, err)
 
 		e := echo.New()
 		req, err := http.NewRequest(
 			http.MethodDelete,
 			"/api/admins",
-			strings.NewReader(`["`+admin[0].String()+`"]`))
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -232,25 +240,27 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			DeleteAdmins(c.Request().Context(), admin).
+			DeleteAdmins(c.Request().Context(), admins).
 			Return(nil)
 
-		if assert.NoError(t, h.Handlers.DeleteAdmins(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-		}
+		assert.NoError(t, h.Handlers.DeleteAdmins(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("FailedWithError", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		adminID := uuid.New()
+		admin := uuid.New()
+		admins := []uuid.UUID{admin}
+		reqBody, err := json.Marshal(admins)
+		require.NoError(t, err)
 
 		e := echo.New()
 		req, err := http.NewRequest(
 			http.MethodDelete,
 			"/api/admins",
-			strings.NewReader(`["`+adminID.String()+`"]`))
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -262,24 +272,26 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			DeleteAdmins(c.Request().Context(), []uuid.UUID{adminID}).
+			DeleteAdmins(c.Request().Context(), admins).
 			Return(resErr)
 
 		err = h.Handlers.DeleteAdmins(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 
 	t.Run("InvalidAdminID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
+		body := `["invalid"]`
+
 		e := echo.New()
 		req, err := http.NewRequest(
 			http.MethodDelete,
 			"/api/admins",
-			strings.NewReader(`["invalid"]`))
+			bytes.NewReader([]byte(body)))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -290,19 +302,23 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 
 		err = h.Handlers.DeleteAdmins(c)
 		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestの判定をしたい
 	})
 
 	t.Run("FailedWithEntConstraintError", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
 
-		adminID := uuid.New()
+		admin := uuid.New()
+		admins := []uuid.UUID{admin}
+		reqBody, err := json.Marshal(admins)
+		require.NoError(t, err)
 
 		e := echo.New()
 		req, err := http.NewRequest(
 			http.MethodDelete,
 			"/api/admins",
-			strings.NewReader(`["`+adminID.String()+`"]`))
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -315,12 +331,11 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockAdminRepository.
 			EXPECT().
-			DeleteAdmins(c.Request().Context(), []uuid.UUID{adminID}).
+			DeleteAdmins(c.Request().Context(), admins).
 			Return(resErr)
 
 		err = h.Handlers.DeleteAdmins(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-		}
+		assert.Error(t, err)
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 }

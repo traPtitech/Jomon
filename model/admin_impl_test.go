@@ -36,13 +36,11 @@ func TestEntRepository_GetAdmins(t *testing.T) {
 
 		got, err := repo.GetAdmins(ctx)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && got[0].ID == user1.ID {
-			assert.Equal(t, got[0].ID, user1.ID)
-			assert.Equal(t, got[1].ID, user2.ID)
-		} else if assert.Len(t, got, 2) {
-			assert.Equal(t, got[0].ID, user2.ID)
-			assert.Equal(t, got[1].ID, user1.ID)
+		exp := []*Admin{
+			{ID: user1.ID},
+			{ID: user2.ID},
 		}
+		assert.ElementsMatch(t, exp, got)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -50,7 +48,7 @@ func TestEntRepository_GetAdmins(t *testing.T) {
 
 		got, err := repo2.GetAdmins(ctx)
 		assert.NoError(t, err)
-		assert.Len(t, got, 0)
+		assert.Empty(t, got)
 	})
 }
 

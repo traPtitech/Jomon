@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
@@ -17,6 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 	"go.uber.org/mock/gomock"
 )
@@ -58,7 +58,13 @@ func TestHandlers_GetTags(t *testing.T) {
 			GetTags(c.Request().Context()).
 			Return(tags, nil)
 
-		resOverview := lo.Map(tags, func(tag *model.Tag, _ int) *TagOverview {
+		assert.NoError(t, h.Handlers.GetTags(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*TagOverview
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := lo.Map(tags, func(tag *model.Tag, _ int) *TagOverview {
 			return &TagOverview{
 				ID:        tag.ID,
 				Name:      tag.Name,
@@ -66,15 +72,7 @@ func TestHandlers_GetTags(t *testing.T) {
 				UpdatedAt: tag.UpdatedAt,
 			}
 		})
-
-		res := resOverview
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetTags(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -97,15 +95,14 @@ func TestHandlers_GetTags(t *testing.T) {
 			GetTags(c.Request().Context()).
 			Return(tags, nil)
 
-		resOverview := []*TagOverview{}
-		res := resOverview
-		resBody, err := json.Marshal(res)
+		assert.NoError(t, h.Handlers.GetTags(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []*TagOverview
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.GetTags(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		opts := testutil.ApproxEqualOptions()
+		var exp []*TagOverview
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("FailedToGetTags", func(t *testing.T) {
@@ -128,9 +125,9 @@ func TestHandlers_GetTags(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.GetTags(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 }
 
@@ -170,19 +167,19 @@ func TestHandlers_PostTag(t *testing.T) {
 			CreateTag(c.Request().Context(), tag.Name).
 			Return(tag, nil)
 
-		res := TagOverview{
+		assert.NoError(t, h.Handlers.PostTag(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got TagOverview
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := &TagOverview{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
 			UpdatedAt: tag.UpdatedAt,
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PostTag(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, &got, opts...)
 	})
 
 	t.Run("MissingName", func(t *testing.T) {
@@ -220,9 +217,9 @@ func TestHandlers_PostTag(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.PostTag(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 }
 
@@ -276,19 +273,19 @@ func TestHandlers_PutTag(t *testing.T) {
 			UpdateTag(c.Request().Context(), tag.ID, reqTag.Name).
 			Return(updateTag, nil)
 
-		res := TagOverview{
+		assert.NoError(t, h.Handlers.PutTag(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got TagOverview
+		err = json.Unmarshal(rec.Body.Bytes(), &got)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := &TagOverview{
 			ID:        updateTag.ID,
 			Name:      updateTag.Name,
 			CreatedAt: updateTag.CreatedAt,
 			UpdatedAt: updateTag.UpdatedAt,
 		}
-		resBody, err := json.Marshal(res)
-		require.NoError(t, err)
-
-		if assert.NoError(t, h.Handlers.PutTag(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.Equal(t, string(resBody), strings.TrimRight(rec.Body.String(), "\n"))
-		}
+		testutil.RequireEqual(t, exp, &got, opts...)
 	})
 
 	t.Run("MissingName", func(t *testing.T) {
@@ -332,14 +329,16 @@ func TestHandlers_PutTag(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.PutTag(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
+		invalidUUID := "invalid-uuid"
+		_, resErr := uuid.Parse(invalidUUID)
 		date := time.Now()
 
 		tag := &model.Tag{
@@ -357,24 +356,25 @@ func TestHandlers_PutTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, "/api/tags/hoge", bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodPut,
+			fmt.Sprintf("/api/tags/%s", invalidUUID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
 		c.SetParamNames("tagID")
-		c.SetParamValues("hoge")
+		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 
-		_, resErr := uuid.Parse("hoge")
-
 		err = h.Handlers.PutTag(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -412,13 +412,11 @@ func TestHandlers_PutTag(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 
+		resErr := errors.New("invalid tag ID")
 		err = h.Handlers.PutTag(c)
-		if assert.Error(t, err) {
-			assert.Equal(
-				t,
-				echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID")),
-				err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 }
 
@@ -465,9 +463,8 @@ func TestHandlers_DeleteTag(t *testing.T) {
 			DeleteTag(c.Request().Context(), tag.ID).
 			Return(nil)
 
-		if assert.NoError(t, h.Handlers.DeleteTag(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-		}
+		assert.NoError(t, h.Handlers.DeleteTag(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("UnknownID", func(t *testing.T) {
@@ -512,14 +509,16 @@ func TestHandlers_DeleteTag(t *testing.T) {
 			Return(mocErr)
 
 		err = h.Handlers.DeleteTag(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
 		ctrl := gomock.NewController(t)
+		invalidUUID := "invalid-uuid"
+		_, resErr := uuid.Parse(invalidUUID)
 		date := time.Now()
 
 		tag := &model.Tag{
@@ -537,24 +536,25 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, "/api/tags/hoge", bytes.NewReader(reqBody))
+		req, err := http.NewRequest(
+			http.MethodDelete,
+			fmt.Sprintf("/api/tags/%s", invalidUUID),
+			bytes.NewReader(reqBody))
 		assert.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
 		c.SetParamNames("tagID")
-		c.SetParamValues("hoge")
-
-		_, resErr := uuid.Parse("hoge")
+		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 
 		err = h.Handlers.DeleteTag(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -592,12 +592,10 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
 
+		resErr := errors.New("invalid tag ID")
 		err = h.Handlers.DeleteTag(c)
-		if assert.Error(t, err) {
-			assert.Equal(
-				t,
-				echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID")),
-				err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 }

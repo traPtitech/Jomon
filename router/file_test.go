@@ -3,6 +3,7 @@ package router
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -20,6 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 	"go.uber.org/mock/gomock"
 )
@@ -98,9 +100,8 @@ func TestHandlers_PostFile(t *testing.T) {
 			Save(file.ID.String(), gomock.Any()).
 			Return(nil)
 
-		if assert.NoError(t, h.Handlers.PostFile(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-		}
+		assert.NoError(t, h.Handlers.PostFile(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("FailedToRepositoryCreateFile", func(t *testing.T) {
@@ -166,9 +167,9 @@ func TestHandlers_PostFile(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.PostFile(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("FailedToServiceCreateFile", func(t *testing.T) {
@@ -242,9 +243,9 @@ func TestHandlers_PostFile(t *testing.T) {
 			Return(mocErr)
 
 		err = h.Handlers.PostFile(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 }
 
@@ -288,9 +289,8 @@ func TestHandlers_GetFile(t *testing.T) {
 			Open(file.ID.String()).
 			Return(r, nil)
 
-		if assert.NoError(t, h.Handlers.GetFile(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-		}
+		assert.NoError(t, h.Handlers.GetFile(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("FailedToGetFile", func(t *testing.T) {
@@ -324,9 +324,9 @@ func TestHandlers_GetFile(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.GetFile(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("FailedToOpenFile", func(t *testing.T) {
@@ -365,9 +365,9 @@ func TestHandlers_GetFile(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.GetFile(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {
@@ -390,9 +390,9 @@ func TestHandlers_GetFile(t *testing.T) {
 		_, mocErr := uuid.Parse("po")
 
 		err = h.Handlers.GetFile(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
 	})
 }
 
@@ -428,9 +428,19 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 			GetFile(c.Request().Context(), file.ID).
 			Return(file, nil)
 
-		if assert.NoError(t, h.Handlers.GetFileMeta(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
+		assert.NoError(t, h.Handlers.GetFileMeta(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var res *FileMetaResponse
+		err = json.Unmarshal(rec.Body.Bytes(), &res)
+		require.NoError(t, err)
+		exp := &FileMetaResponse{
+			ID:        file.ID,
+			Name:      file.Name,
+			MimeType:  file.MimeType,
+			CreatedBy: file.CreatedBy,
+			CreatedAt: file.CreatedAt,
 		}
+		testutil.RequireEqual(t, exp, res)
 	})
 
 	t.Run("FailedToGetFile", func(t *testing.T) {
@@ -465,9 +475,9 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.GetFileMeta(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {
@@ -490,9 +500,9 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		_, mocErr := uuid.Parse("po")
 
 		err = h.Handlers.GetFileMeta(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
 	})
 }
 
@@ -532,9 +542,8 @@ func TestHandlers_DeleteFile(t *testing.T) {
 			Delete(file.ID.String()).
 			Return(nil)
 
-		if assert.NoError(t, h.Handlers.DeleteFile(c)) {
-			assert.Equal(t, http.StatusOK, rec.Code)
-		}
+		assert.NoError(t, h.Handlers.DeleteFile(c))
+		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("FailedToRepositoryDeleteFile", func(t *testing.T) {
@@ -568,9 +577,9 @@ func TestHandlers_DeleteFile(t *testing.T) {
 			Return(mocErr)
 
 		err = h.Handlers.DeleteFile(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("FailedToServiceDeleteFile", func(t *testing.T) {
@@ -608,9 +617,9 @@ func TestHandlers_DeleteFile(t *testing.T) {
 			Return(mocErr)
 
 		err = h.Handlers.DeleteFile(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {
@@ -633,8 +642,8 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		_, mocErr := uuid.Parse("po")
 
 		err = h.Handlers.DeleteFile(c)
-		if assert.Error(t, err) {
-			assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
-		}
+		assert.Error(t, err)
+		// FIXME: http.StatusBadRequestだけ判定したい; mocErrの内容は関係ない
+		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
 	})
 }

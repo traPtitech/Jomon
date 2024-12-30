@@ -5,11 +5,30 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
+
+func (rd *RequestDetail) toExpectedRequestResponse(t *testing.T) *RequestResponse {
+	t.Helper()
+	return &RequestResponse{
+		ID:        rd.ID,
+		Status:    rd.Status,
+		CreatedAt: rd.CreatedAt,
+		UpdatedAt: rd.UpdatedAt,
+		CreatedBy: rd.CreatedBy,
+		Title:     rd.Title,
+		Content:   rd.Content,
+		Tags:      rd.Tags,
+		//Targets:   rd.Targets,
+		//Statuses:  rd.Statuses,
+		Group: rd.Group,
+	}
+}
 
 func TestEntRepository_GetRequests(t *testing.T) {
 	ctx := context.Background()
@@ -97,20 +116,16 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			Sort: &sort,
 		})
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && assert.Equal(t, got[1].ID, request1.ID) {
-			assert.Equal(t, got[1].ID, request1.ID)
-			assert.Equal(t, got[1].Status, request1.Status)
-			assert.Equal(t, got[1].Title, request1.Title)
-			assert.Equal(t, got[1].Content, request1.Content)
-			assert.Equal(t, got[1].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[1].Tags[0].Name, request1.Tags[0].Name)
-			assert.Equal(t, got[0].ID, request2.ID)
-			assert.Equal(t, got[0].Status, request2.Status)
-			assert.Equal(t, got[0].Title, request2.Title)
-			assert.Equal(t, got[0].Content, request2.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.SortSlices(func(a, b *RequestResponse) bool {
+				return a.ID.ID() < b.ID.ID()
+			}))
+		exp := []*RequestResponse{
+			request1.toExpectedRequestResponse(t),
+			request2.toExpectedRequestResponse(t),
 		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithReverseSortCreatedAt", func(t *testing.T) {
@@ -169,20 +184,16 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			Sort: &sort,
 		})
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && assert.Equal(t, got[0].ID, request1.ID) {
-			assert.Equal(t, got[0].ID, request1.ID)
-			assert.Equal(t, got[0].Status, request1.Status)
-			assert.Equal(t, got[0].Title, request1.Title)
-			assert.Equal(t, got[0].Content, request1.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
-			assert.Equal(t, got[1].ID, request2.ID)
-			assert.Equal(t, got[1].Status, request2.Status)
-			assert.Equal(t, got[1].Title, request2.Title)
-			assert.Equal(t, got[1].Content, request2.Content)
-			assert.Equal(t, got[1].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[1].Tags[0].Name, request1.Tags[0].Name)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.SortSlices(func(a, b *RequestResponse) bool {
+				return a.ID.ID() < b.ID.ID()
+			}))
+		exp := []*RequestResponse{
+			request1.toExpectedRequestResponse(t),
+			request2.toExpectedRequestResponse(t),
 		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithSortTitle", func(t *testing.T) {
@@ -240,20 +251,16 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			Sort: &sort,
 		})
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && assert.Equal(t, got[0].ID, request2.ID) {
-			assert.Equal(t, got[0].ID, request2.ID)
-			assert.Equal(t, got[0].Status, request2.Status)
-			assert.Equal(t, got[0].Title, request2.Title)
-			assert.Equal(t, got[0].Content, request2.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request2.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request2.Tags[0].Name)
-			assert.Equal(t, got[1].ID, request1.ID)
-			assert.Equal(t, got[1].Status, request1.Status)
-			assert.Equal(t, got[1].Title, request1.Title)
-			assert.Equal(t, got[1].Content, request1.Content)
-			assert.Equal(t, got[1].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[1].Tags[0].Name, request1.Tags[0].Name)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.SortSlices(func(a, b *RequestResponse) bool {
+				return a.ID.ID() < b.ID.ID()
+			}))
+		exp := []*RequestResponse{
+			request2.toExpectedRequestResponse(t),
+			request1.toExpectedRequestResponse(t),
 		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithReverseSortTitle", func(t *testing.T) {
@@ -311,20 +318,16 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			Sort: &sort,
 		})
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && assert.Equal(t, got[0].ID, request1.ID) {
-			assert.Equal(t, got[0].ID, request1.ID)
-			assert.Equal(t, got[0].Status, request1.Status)
-			assert.Equal(t, got[0].Title, request1.Title)
-			assert.Equal(t, got[0].Content, request1.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
-			assert.Equal(t, got[1].ID, request2.ID)
-			assert.Equal(t, got[1].Status, request2.Status)
-			assert.Equal(t, got[1].Title, request2.Title)
-			assert.Equal(t, got[1].Content, request2.Content)
-			assert.Equal(t, got[1].Tags[0].ID, request2.Tags[0].ID)
-			assert.Equal(t, got[1].Tags[0].Name, request2.Tags[0].Name)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.SortSlices(func(a, b *RequestResponse) bool {
+				return a.ID.ID() < b.ID.ID()
+			}))
+		exp := []*RequestResponse{
+			request1.toExpectedRequestResponse(t),
+			request2.toExpectedRequestResponse(t),
 		}
+		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
 	t.Run("SuccessWithQueryTarget", func(t *testing.T) {
@@ -386,12 +389,9 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
-			assert.Equal(t, got[0].ID, request1.ID)
-			assert.Equal(t, got[0].Status, request1.Status)
-			assert.Equal(t, got[0].Title, request1.Title)
-			assert.Equal(t, got[0].Content, request1.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+			exp := request1.toExpectedRequestResponse(t)
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got[0], opts...)
 		}
 	})
 
@@ -451,12 +451,9 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
-			assert.Equal(t, got[0].ID, request2.ID)
-			assert.Equal(t, got[0].Status, request2.Status)
-			assert.Equal(t, got[0].Title, request2.Title)
-			assert.Equal(t, got[0].Content, request2.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request2.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request2.Tags[0].Name)
+			exp := request2.toExpectedRequestResponse(t)
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got[0], opts...)
 		}
 	})
 
@@ -516,12 +513,10 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
-			assert.Equal(t, got[0].ID, request1.ID)
-			assert.Equal(t, got[0].Status, request1.Status)
-			assert.Equal(t, got[0].Title, request1.Title)
-			assert.Equal(t, got[0].Content, request1.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+			exp := request1.toExpectedRequestResponse(t)
+			exp.Group.UpdatedAt = request2.Group.UpdatedAt
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got[0], opts...)
 		}
 	})
 
@@ -565,7 +560,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			user1.ID)
 		require.NoError(t, err)
 		time.Sleep(2 * time.Second)
-		_, err = repo8.CreateRequest(
+		request2, err := repo8.CreateRequest(
 			ctx,
 			"a",
 			random.AlphaNumeric(t, 100),
@@ -586,12 +581,11 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		if assert.Len(t, got, 1) {
-			assert.Equal(t, got[0].ID, request1.ID)
-			assert.Equal(t, got[0].Status, Accepted)
-			assert.Equal(t, got[0].Title, request1.Title)
-			assert.Equal(t, got[0].Content, request1.Content)
-			assert.Equal(t, got[0].Tags[0].ID, request1.Tags[0].ID)
-			assert.Equal(t, got[0].Tags[0].Name, request1.Tags[0].Name)
+			exp := request1.toExpectedRequestResponse(t)
+			exp.Status = Accepted
+			exp.Group.UpdatedAt = request2.Group.UpdatedAt
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got[0], opts...)
 		}
 	})
 
@@ -647,30 +641,9 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		})
 		require.NoError(t, err)
 		if assert.Len(t, got, 1) {
-			got := got[0]
-			exp := &RequestResponse{
-				ID:     request1.ID,
-				Status: request1.Status,
-				// FIXME: time.Time の内部表現が異なるため、比較ができない
-				CreatedAt: got.CreatedAt,
-				UpdatedAt: got.UpdatedAt,
-				CreatedBy: request1.CreatedBy,
-				Title:     request1.Title,
-				Content:   request1.Content,
-				Tags:      request1.Tags,
-				// Targets:   request1.Targets,
-				// Statuses:  request1.Statuses,
-				Group: &Group{
-					ID:          request1.Group.ID,
-					Name:        request1.Group.Name,
-					Description: request1.Group.Description,
-					Budget:      request1.Group.Budget,
-					CreatedAt:   got.Group.CreatedAt,
-					UpdatedAt:   got.Group.UpdatedAt,
-					DeletedAt:   request1.Group.DeletedAt,
-				},
-			}
-			require.Equal(t, exp, got)
+			exp := request1.toExpectedRequestResponse(t)
+			opts := testutil.ApproxEqualOptions()
+			testutil.RequireEqual(t, exp, got[0], opts...)
 		}
 	})
 }
@@ -722,12 +695,30 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 			[]*Tag{tag}, []*RequestTarget{target},
 			group, user.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, request.CreatedBy, user.ID)
-		assert.Equal(t, request.Status, Status(1))
-		assert.Equal(t, request.Title, title)
-		assert.Equal(t, request.Content, content)
-		assert.Equal(t, request.Tags, []*Tag{tag})
-		assert.Equal(t, request.Group, group)
+		exp := &RequestDetail{
+			Status:  Submitted,
+			Title:   title,
+			Content: content,
+			Tags:    []*Tag{tag},
+			Targets: []*RequestTargetDetail{{
+				Target: target.Target,
+				Amount: target.Amount,
+			}},
+			Statuses: []*RequestStatus{{
+				CreatedBy: user.ID,
+				Status:    Submitted,
+			}},
+			Group:     group,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			CreatedBy: user.ID,
+		}
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(RequestDetail{}, "ID"),
+			cmpopts.IgnoreFields(RequestTargetDetail{}, "ID", "PaidAt", "CreatedAt"),
+			cmpopts.IgnoreFields(RequestStatus{}, "ID", "CreatedAt"))
+		testutil.AssertEqual(t, exp, request, opts...)
 	})
 
 	t.Run("UnknownUser", func(t *testing.T) {
@@ -865,18 +856,8 @@ func TestEntRepository_GetRequest(t *testing.T) {
 
 		got, err := repo.GetRequest(ctx, request.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, got.CreatedBy, user.ID)
-		assert.Equal(t, got.Status, Status(1))
-		assert.Equal(t, got.Title, request.Title)
-		assert.Equal(t, got.Content, request.Content)
-		assert.Equal(t, got.Tags[0].ID, request.Tags[0].ID)
-		assert.Equal(t, got.Tags[0].Name, request.Tags[0].Name)
-		assert.Equal(t, got.Targets[0].Target, request.Targets[0].Target)
-		assert.Equal(t, got.Targets[0].Amount, request.Targets[0].Amount)
-		assert.Equal(t, got.Group.ID, request.Group.ID)
-		assert.Equal(t, got.Group.Name, request.Group.Name)
-		assert.Equal(t, got.Group.Description, request.Group.Description)
-		assert.Equal(t, got.Group.Budget, request.Group.Budget)
+		opts := testutil.ApproxEqualOptions()
+		testutil.AssertEqual(t, request, got, opts...)
 	})
 
 	t.Run("UnknownRequest", func(t *testing.T) {
@@ -941,16 +922,29 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			[]*Tag{tag}, []*RequestTarget{target},
 			group)
 		assert.NoError(t, err)
-		assert.Equal(t, updatedRequest.ID, request.ID)
-		assert.Equal(t, updatedRequest.Status, request.Status)
-		assert.Equal(t, updatedRequest.Title, request.Title)
-		assert.Equal(t, updatedRequest.Content, request.Content)
-		assert.Equal(t, updatedRequest.Tags[0].ID, tag.ID)
-		assert.Equal(t, updatedRequest.Tags[0].Name, tag.Name)
-		assert.Equal(t, updatedRequest.Group.ID, request.Group.ID)
-		assert.Equal(t, updatedRequest.Group.Name, request.Group.Name)
-		assert.Equal(t, updatedRequest.Group.Description, request.Group.Description)
-		assert.Equal(t, updatedRequest.Group.Budget, request.Group.Budget)
+		exp := &RequestDetail{
+			ID:       request.ID,
+			Status:   request.Status,
+			Title:    request.Title,
+			Content:  request.Content,
+			Comments: request.Comments,
+			Files:    request.Files,
+			Tags:     []*Tag{tag},
+			Targets: []*RequestTargetDetail{{
+				Target:    target.Target,
+				Amount:    target.Amount,
+				CreatedAt: time.Now(),
+			}},
+			Statuses:  request.Statuses,
+			Group:     group,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: time.Now(),
+			CreatedBy: request.CreatedBy,
+		}
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(RequestTargetDetail{}, "ID", "PaidAt"))
+		testutil.AssertEqual(t, exp, updatedRequest, opts...)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -990,16 +984,29 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			[]*Tag{tag}, []*RequestTarget{target},
 			group)
 		assert.NoError(t, err)
-		assert.Equal(t, updatedRequest.ID, request.ID)
-		assert.Equal(t, updatedRequest.Status, request.Status)
-		assert.Equal(t, updatedRequest.Title, title)
-		assert.Equal(t, updatedRequest.Content, request.Content)
-		assert.Equal(t, updatedRequest.Tags[0].ID, tag.ID)
-		assert.Equal(t, updatedRequest.Tags[0].Name, tag.Name)
-		assert.Equal(t, updatedRequest.Group.ID, request.Group.ID)
-		assert.Equal(t, updatedRequest.Group.Name, request.Group.Name)
-		assert.Equal(t, updatedRequest.Group.Description, request.Group.Description)
-		assert.Equal(t, updatedRequest.Group.Budget, request.Group.Budget)
+		exp := &RequestDetail{
+			ID:       request.ID,
+			Status:   request.Status,
+			Title:    title,
+			Content:  request.Content,
+			Comments: request.Comments,
+			Files:    request.Files,
+			Tags:     []*Tag{tag},
+			Targets: []*RequestTargetDetail{{
+				Target:    target.Target,
+				Amount:    target.Amount,
+				CreatedAt: time.Now(),
+			}},
+			Statuses:  request.Statuses,
+			Group:     group,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: time.Now(),
+			CreatedBy: request.CreatedBy,
+		}
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(RequestTargetDetail{}, "ID", "PaidAt"))
+		testutil.AssertEqual(t, exp, updatedRequest, opts...)
 	})
 
 	t.Run("Success3", func(t *testing.T) {
@@ -1038,16 +1045,29 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			[]*Tag{tag}, []*RequestTarget{target},
 			group)
 		assert.NoError(t, err)
-		assert.Equal(t, updatedRequest.ID, request.ID)
-		assert.Equal(t, updatedRequest.Status, request.Status)
-		assert.Equal(t, updatedRequest.Title, request.Title)
-		assert.Equal(t, updatedRequest.Content, content)
-		assert.Equal(t, updatedRequest.Tags[0].ID, tag.ID)
-		assert.Equal(t, updatedRequest.Tags[0].Name, tag.Name)
-		assert.Equal(t, updatedRequest.Group.ID, request.Group.ID)
-		assert.Equal(t, updatedRequest.Group.Name, request.Group.Name)
-		assert.Equal(t, updatedRequest.Group.Description, request.Group.Description)
-		assert.Equal(t, updatedRequest.Group.Budget, request.Group.Budget)
+		exp := &RequestDetail{
+			ID:       request.ID,
+			Status:   request.Status,
+			Title:    request.Title,
+			Content:  content,
+			Comments: request.Comments,
+			Files:    request.Files,
+			Tags:     []*Tag{tag},
+			Targets: []*RequestTargetDetail{{
+				Target:    target.Target,
+				Amount:    target.Amount,
+				CreatedAt: time.Now(),
+			}},
+			Statuses:  request.Statuses,
+			Group:     group,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: time.Now(),
+			CreatedBy: request.CreatedBy,
+		}
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(RequestTargetDetail{}, "ID", "PaidAt"))
+		testutil.AssertEqual(t, exp, updatedRequest, opts...)
 	})
 
 	t.Run("UnknownTag", func(t *testing.T) {

@@ -170,10 +170,11 @@ func (repo *EntRepository) CreateRequest(
 		return nil, err
 	}
 	if group != nil {
-		_, err = tx.Client().Group.
+		g, err := tx.Client().Group.
 			UpdateOneID(group.ID).
 			AddRequest(created).
 			Save(ctx)
+		group = ConvertEntGroupToModelGroup(g)
 		if err != nil {
 			err = RollbackWithError(tx, err)
 			return nil, err
@@ -321,7 +322,6 @@ func (repo *EntRepository) UpdateRequest(
 	}
 
 	entstatuses, err := updated.QueryStatus().
-		Select(requeststatus.FieldStatus).
 		WithUser().
 		Order(ent.Desc(requeststatus.FieldCreatedAt)).
 		All(ctx)

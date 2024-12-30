@@ -3,10 +3,13 @@ package model
 import (
 	"context"
 	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
@@ -31,8 +34,8 @@ func TestEntRepository_GetGroups(t *testing.T) {
 
 		groups, err := repo.GetGroups(ctx)
 		require.NoError(t, err)
-		assert.Equal(t, 1, len(groups))
-		assert.Equal(t, group.ID, groups[0].ID)
+		opts := testutil.ApproxEqualOptions()
+		testutil.RequireEqual(t, []*Group{group}, groups, opts...)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -52,19 +55,17 @@ func TestEntRepository_GetGroup(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(
+		created, err := repo.CreateGroup(
 			ctx,
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 15),
 			&budget)
 		require.NoError(t, err)
 
-		g, err := repo.GetGroup(ctx, group.ID)
+		got, err := repo.GetGroup(ctx, created.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, group.ID, g.ID)
-		assert.Equal(t, group.Name, g.Name)
-		assert.Equal(t, group.Description, g.Description)
-		assert.Equal(t, group.Budget, g.Budget)
+		opts := testutil.ApproxEqualOptions()
+		testutil.RequireEqual(t, created, got, opts...)
 	})
 
 	t.Run("UnknownGroup", func(t *testing.T) {
@@ -85,22 +86,40 @@ func TestEntRepository_CreateGroup(t *testing.T) {
 		budget := random.Numeric(t, 100000)
 		name := random.AlphaNumeric(t, 20)
 		description := random.AlphaNumeric(t, 15)
-		group, err := repo.CreateGroup(ctx, name, description, &budget)
+		created, err := repo.CreateGroup(ctx, name, description, &budget)
 		require.NoError(t, err)
-		assert.Equal(t, name, group.Name)
-		assert.Equal(t, description, group.Description)
-		assert.Equal(t, *group.Budget, budget)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(Group{}, "ID"))
+		exp := &Group{
+			Name:        name,
+			Description: description,
+			Budget:      &budget,
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+			DeletedAt:   nil,
+		}
+		testutil.RequireEqual(t, exp, created, opts...)
 	})
 
 	t.Run("SuccessWithNilBudget", func(t *testing.T) {
 		t.Parallel()
 		name := random.AlphaNumeric(t, 20)
 		description := random.AlphaNumeric(t, 15)
-		group, err := repo.CreateGroup(ctx, name, description, nil)
+		created, err := repo.CreateGroup(ctx, name, description, nil)
 		assert.NoError(t, err)
-		assert.Equal(t, name, group.Name)
-		assert.Equal(t, description, group.Description)
-		assert.Nil(t, group.Budget)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(Group{}, "ID"))
+		exp := &Group{
+			Name:        name,
+			Description: description,
+			Budget:      nil,
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+			DeletedAt:   nil,
+		}
+		testutil.RequireEqual(t, exp, created, opts...)
 	})
 
 	t.Run("FailedWithEmptyName", func(t *testing.T) {
@@ -120,7 +139,7 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(
+		created, err := repo.CreateGroup(
 			ctx,
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 15),
@@ -129,16 +148,24 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 
 		updatedBudget := random.Numeric(t, 10000)
 		ug := Group{
-			ID:          group.ID,
+			ID:          created.ID,
 			Name:        random.AlphaNumeric(t, 20),
 			Description: random.AlphaNumeric(t, 15),
 			Budget:      &updatedBudget,
 		}
-		updated, err := repo.UpdateGroup(ctx, group.ID, ug.Name, ug.Description, ug.Budget)
+		updated, err := repo.UpdateGroup(ctx, created.ID, ug.Name, ug.Description, ug.Budget)
 		assert.NoError(t, err)
-		assert.Equal(t, ug.Name, updated.Name)
-		assert.Equal(t, ug.Description, updated.Description)
-		assert.Equal(t, ug.Budget, updated.Budget)
+		opts := testutil.ApproxEqualOptions()
+		exp := &Group{
+			ID:          created.ID,
+			Name:        ug.Name,
+			Description: ug.Description,
+			Budget:      &updatedBudget,
+			CreatedAt:   created.CreatedAt,
+			UpdatedAt:   time.Now(),
+			DeletedAt:   nil,
+		}
+		testutil.RequireEqual(t, exp, updated, opts...)
 	})
 
 	t.Run("UnknownGroup", func(t *testing.T) {
@@ -156,7 +183,7 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 	t.Run("SuccessWithNilBudget", func(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
-		group, err := repo.CreateGroup(
+		created, err := repo.CreateGroup(
 			ctx,
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 15),
@@ -164,16 +191,24 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 		require.NoError(t, err)
 
 		ug := Group{
-			ID:          group.ID,
+			ID:          created.ID,
 			Name:        random.AlphaNumeric(t, 20),
 			Description: random.AlphaNumeric(t, 15),
 			Budget:      nil,
 		}
-		updated, err := repo.UpdateGroup(ctx, group.ID, ug.Name, ug.Description, ug.Budget)
+		updated, err := repo.UpdateGroup(ctx, created.ID, ug.Name, ug.Description, ug.Budget)
 		assert.NoError(t, err)
-		assert.Equal(t, ug.Name, updated.Name)
-		assert.Equal(t, ug.Description, updated.Description)
-		assert.Nil(t, updated.Budget)
+		opts := testutil.ApproxEqualOptions()
+		exp := &Group{
+			ID:          created.ID,
+			Name:        ug.Name,
+			Description: ug.Description,
+			Budget:      nil,
+			CreatedAt:   created.CreatedAt,
+			UpdatedAt:   time.Now(),
+			DeletedAt:   nil,
+		}
+		testutil.RequireEqual(t, exp, updated, opts...)
 	})
 
 	t.Run("FailedWithEmptyName", func(t *testing.T) {
@@ -209,6 +244,10 @@ func TestEntRepository_DeleteGroup(t *testing.T) {
 
 		err = repo.DeleteGroup(ctx, group.ID)
 		assert.NoError(t, err)
+
+		groups, err := repo.GetGroups(ctx)
+		require.NoError(t, err)
+		assert.Empty(t, groups)
 	})
 
 	t.Run("UnknownGroup", func(t *testing.T) {
@@ -255,13 +294,14 @@ func TestEntRepository_GetMembers(t *testing.T) {
 
 		got, err := repo.GetMembers(ctx, group.ID)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && got[0].ID == user1.ID {
-			assert.Equal(t, got[0].ID, user1.ID)
-			assert.Equal(t, got[1].ID, user2.ID)
-		} else if assert.Len(t, got, 2) {
-			assert.Equal(t, got[0].ID, user2.ID)
-			assert.Equal(t, got[1].ID, user1.ID)
+		sortOpt := cmpopts.SortSlices(func(a, b *Member) bool {
+			return a.ID.ID() < b.ID.ID()
+		})
+		exp := []*Member{
+			{ID: user1.ID},
+			{ID: user2.ID},
 		}
+		testutil.RequireEqual(t, exp, got, sortOpt)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -304,9 +344,10 @@ func TestEntRepository_CreateMember(t *testing.T) {
 			true)
 		require.NoError(t, err)
 
-		member, err := repo.AddMembers(ctx, group.ID, []uuid.UUID{user.ID})
+		got, err := repo.AddMembers(ctx, group.ID, []uuid.UUID{user.ID})
 		assert.NoError(t, err)
-		assert.Equal(t, member[0].ID, user.ID)
+		exp := []*Member{{ID: user.ID}}
+		testutil.RequireEqual(t, exp, got)
 	})
 
 	t.Run("UnknownUser", func(t *testing.T) {
@@ -374,7 +415,8 @@ func TestEntRepository_GetOwners(t *testing.T) {
 		user1, err := repo.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 15), true)
+			random.AlphaNumeric(t, 15),
+			true)
 		require.NoError(t, err)
 		user2, err := repo.CreateUser(
 			ctx,
@@ -388,13 +430,14 @@ func TestEntRepository_GetOwners(t *testing.T) {
 
 		got, err := repo.GetOwners(ctx, group.ID)
 		assert.NoError(t, err)
-		if assert.Len(t, got, 2) && got[0].ID == user1.ID {
-			assert.Equal(t, got[0].ID, user1.ID)
-			assert.Equal(t, got[1].ID, user2.ID)
-		} else if assert.Len(t, got, 2) {
-			assert.Equal(t, got[1].ID, user1.ID)
-			assert.Equal(t, got[0].ID, user2.ID)
+		sortOpt := cmpopts.SortSlices(func(a, b *Owner) bool {
+			return a.ID.ID() < b.ID.ID()
+		})
+		exp := []*Owner{
+			{ID: user1.ID},
+			{ID: user2.ID},
 		}
+		testutil.RequireEqual(t, exp, got, sortOpt)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -410,10 +453,11 @@ func TestEntRepository_GetOwners(t *testing.T) {
 
 		got, err := repo.GetOwners(ctx, group.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, got, []*Owner{})
+		assert.Empty(t, got)
 	})
 }
 
+// FIXME: これAddOwnersでは?
 func TestEntRepository_CreateOwner(t *testing.T) {
 	ctx := context.Background()
 	client, storage, err := setup(t, ctx, "create_owner")
@@ -439,7 +483,8 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 
 		owner, err := repo.AddOwners(ctx, group.ID, []uuid.UUID{user.ID})
 		assert.NoError(t, err)
-		assert.Equal(t, owner[0].ID, user.ID)
+		exp := []*Owner{{ID: user.ID}}
+		testutil.RequireEqual(t, exp, owner)
 	})
 
 	t.Run("UnknownUser", func(t *testing.T) {
