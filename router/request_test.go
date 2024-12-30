@@ -140,7 +140,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), model.RequestQuery{}).
+			GetRequests(c.Request().Context(), model.RequestQuery{
+				Limit:  100,
+				Offset: 0,
+			}).
 			Return(requests, nil)
 
 		assert.NoError(t, h.Handlers.GetRequests(c))
@@ -195,7 +198,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 		assert.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), model.RequestQuery{}).
+			GetRequests(c.Request().Context(), model.RequestQuery{
+				Limit:  100,
+				Offset: 0,
+			}).
 			Return(requests, nil)
 
 		assert.NoError(t, h.Handlers.GetRequests(c))
@@ -241,6 +247,8 @@ func TestHandlers_GetRequests(t *testing.T) {
 			EXPECT().
 			GetRequests(c.Request().Context(), model.RequestQuery{
 				Status: &status,
+				Limit:  100,
+				Offset: 0,
 			}).
 			Return(requests, nil)
 
@@ -302,7 +310,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequests(c.Request().Context(), model.RequestQuery{
-				Until: &date2,
+				Until:  &date2,
+				Limit:  100,
+				Offset: 0,
 			}).
 			Return(requests, nil)
 
@@ -364,7 +374,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequests(c.Request().Context(), model.RequestQuery{
-				Since: &date2,
+				Since:  &date2,
+				Limit:  100,
+				Offset: 0,
 			}).
 			Return(requests, nil)
 		assert.NoError(t, h.Handlers.GetRequests(c))
@@ -437,7 +449,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequests(c.Request().Context(), model.RequestQuery{
-				Tag: &tag1.Name,
+				Tag:    &tag1.Name,
+				Limit:  100,
+				Offset: 0,
 			}).
 			Return(requests, nil)
 		assert.NoError(t, h.Handlers.GetRequests(c))
@@ -492,7 +506,11 @@ func TestHandlers_GetRequests(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), model.RequestQuery{CreatedBy: &request.CreatedBy}).
+			GetRequests(c.Request().Context(), model.RequestQuery{
+				Limit:     100,
+				Offset:    0,
+				CreatedBy: &request.CreatedBy},
+			).
 			Return(modelRequests, nil)
 		err = h.Handlers.GetRequests(c)
 		if !assert.NoError(t, err) {
@@ -556,7 +574,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 		resErr := errors.New("Failed to get requests.")
 		h.Repository.MockRequestRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), model.RequestQuery{}).
+			GetRequests(c.Request().Context(), model.RequestQuery{
+				Limit:  100,
+				Offset: 0,
+			}).
 			Return(nil, resErr)
 
 		err = h.Handlers.GetRequests(c)

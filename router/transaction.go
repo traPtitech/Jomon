@@ -94,7 +94,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 	if offsetQuery := c.QueryParam("offset"); offsetQuery != "" {
 		offsetI, err := strconv.Atoi(offsetQuery)
 		if err != nil {
-			h.Logger.Info("could not parse limit as integer", zap.Error(err))
+			h.Logger.Info("could not parse offset as integer", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		if offsetI < 0 {
