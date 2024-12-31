@@ -42,7 +42,7 @@ func TestEntRepository_GetGroups(t *testing.T) {
 		t.Parallel()
 		groups, err := repo2.GetGroups(ctx)
 		require.NoError(t, err)
-		assert.Equal(t, 0, len(groups))
+		assert.Empty(t, groups)
 	})
 }
 
@@ -317,7 +317,7 @@ func TestEntRepository_GetMembers(t *testing.T) {
 
 		got, err := repo2.GetMembers(ctx, group.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, got, []*Member{})
+		assert.Empty(t, got)
 	})
 }
 

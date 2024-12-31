@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/testutil"
 	"go.uber.org/mock/gomock"
 )
 
@@ -49,11 +50,11 @@ func TestHandler_GetAdmins(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.NoError(t, h.Handlers.GetAdmins(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		testutil.AssertEqual(t, http.StatusOK, rec.Code)
 		var res []uuid.UUID
 		err = json.Unmarshal(rec.Body.Bytes(), &res)
 		require.NoError(t, err)
-		assert.Equal(t, []uuid.UUID{admin.ID}, res)
+		testutil.RequireEqual(t, []uuid.UUID{admin.ID}, res)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -78,11 +79,11 @@ func TestHandler_GetAdmins(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.NoError(t, h.Handlers.GetAdmins(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		testutil.AssertEqual(t, http.StatusOK, rec.Code)
 		var res []uuid.UUID
 		err = json.Unmarshal(rec.Body.Bytes(), &res)
 		require.NoError(t, err)
-		assert.Equal(t, []uuid.UUID{}, res)
+		assert.Empty(t, res)
 	})
 
 	t.Run("FailedWithError", func(t *testing.T) {
