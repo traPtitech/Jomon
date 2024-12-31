@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
@@ -543,14 +542,24 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		group := tx1.Group.ID
 
 		e := echo.New()
-		// FIXME: json.Marshalを使う
-		reqBody := fmt.Sprintf(
-			`{"title": "%s", "amount": %d, "targets": ["%s"], "tags": ["%s"], "group": "%s"}`,
-			tx1.Title, tx1.Amount, tx1.Target, tag.ID, group)
+		reqBody, err := json.Marshal(&struct {
+			Title   string      `json:"title"`
+			Amount  int         `json:"amount"`
+			Targets []string    `json:"targets"`
+			Tags    []uuid.UUID `json:"tags"`
+			Group   *uuid.UUID  `json:"group"`
+		}{
+			Title:   tx1.Title,
+			Amount:  tx1.Amount,
+			Targets: []string{tx1.Target},
+			Tags:    []uuid.UUID{tag.ID},
+			Group:   &group,
+		})
+		require.NoError(t, err)
 		req, err := http.NewRequest(
 			http.MethodPost,
 			"/api/transactions",
-			strings.NewReader(reqBody))
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
@@ -788,6 +797,7 @@ func TestHandlers_PutTransaction(t *testing.T) {
 
 		updated := &model.TransactionResponse{
 			ID:     tx.ID,
+			Title:  random.AlphaNumeric(t, 20),
 			Amount: random.Numeric(t, 1000000),
 			Target: random.AlphaNumeric(t, 20),
 			Tags: []*model.Tag{
@@ -810,13 +820,22 @@ func TestHandlers_PutTransaction(t *testing.T) {
 		})
 
 		e := echo.New()
-		reqBody := fmt.Sprintf(
-			`{"amount": %d, "target": "%s", "tags": ["%s"]}`,
-			updated.Amount, updated.Target, updatedTag.ID)
+		reqBody, err := json.Marshal(&struct {
+			Title  string      `json:"title"`
+			Amount int         `json:"amount"`
+			Target string      `json:"target"`
+			Tags   []uuid.UUID `json:"tags"`
+		}{
+			Title:  updated.Title,
+			Amount: updated.Amount,
+			Target: updated.Target,
+			Tags:   []uuid.UUID{updatedTag.ID},
+		})
+		require.NoError(t, err)
 		req, err := http.NewRequest(
 			http.MethodPut,
 			fmt.Sprintf("/api/transactions/%s", tx.ID),
-			strings.NewReader(reqBody))
+			bytes.NewReader(reqBody))
 		require.NoError(t, err)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
