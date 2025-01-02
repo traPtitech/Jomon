@@ -26,10 +26,10 @@ func TestHandlers_GetTags(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-
 		tag1 := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -45,8 +45,7 @@ func TestHandlers_GetTags(t *testing.T) {
 		tags := []*model.Tag{tag1, tag2}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/tags", nil)
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/tags", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -77,13 +76,13 @@ func TestHandlers_GetTags(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		tags := []*model.Tag{}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/tags", nil)
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/tags", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -107,11 +106,11 @@ func TestHandlers_GetTags(t *testing.T) {
 
 	t.Run("FailedToGetTags", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/tags", nil)
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/tags", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -136,16 +135,16 @@ func TestHandlers_PostTag(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		reqTag := Tag{
 			Name: tag.Name,
 		}
@@ -153,8 +152,8 @@ func TestHandlers_PostTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/tags", bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/tags", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -184,16 +183,16 @@ func TestHandlers_PostTag(t *testing.T) {
 
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      "",
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		reqTag := Tag{
 			Name: "",
 		}
@@ -201,8 +200,8 @@ func TestHandlers_PostTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/tags", bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/tags", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -228,23 +227,22 @@ func TestHandlers_PutTag(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		reqTag := Tag{
 			Name:        tag.Name,
 			Description: random.AlphaNumeric(t, 50),
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
-
 		updateTag := &model.Tag{
 			ID:        tag.ID,
 			Name:      reqTag.Name,
@@ -253,11 +251,8 @@ func TestHandlers_PutTag(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/tags/%s", tag.ID),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/tags/%s", tag.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -290,16 +285,16 @@ func TestHandlers_PutTag(t *testing.T) {
 
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		reqTag := Tag{
 			Name: "",
 		}
@@ -307,11 +302,8 @@ func TestHandlers_PutTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/tags/%s", tag.ID),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/tags/%s", tag.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -336,18 +328,19 @@ func TestHandlers_PutTag(t *testing.T) {
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+
 		invalidUUID := "invalid-uuid"
 		_, resErr := uuid.Parse(invalidUUID)
-		date := time.Now()
 
+		date := time.Now()
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		reqTag := Tag{
 			Name:        tag.Name,
 			Description: random.AlphaNumeric(t, 50),
@@ -356,11 +349,8 @@ func TestHandlers_PutTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/tags/%s", invalidUUID),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/tags/%s", invalidUUID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -379,16 +369,16 @@ func TestHandlers_PutTag(t *testing.T) {
 
 	t.Run("NilUUID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		tag := &model.Tag{
 			ID:        uuid.Nil,
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		reqTag := Tag{
 			Name:        tag.Name,
 			Description: random.AlphaNumeric(t, 50),
@@ -397,11 +387,8 @@ func TestHandlers_PutTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/tags/%s", tag.ID),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/tags/%s", tag.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -425,16 +412,16 @@ func TestHandlers_DeleteTag(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		reqTag := Tag{
 			Name:        tag.Name,
 			Description: random.AlphaNumeric(t, 50),
@@ -443,11 +430,9 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodDelete,
-			fmt.Sprintf("/api/tags/%s", tag.ID),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/tags/%s", tag.ID)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodDelete, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -469,16 +454,16 @@ func TestHandlers_DeleteTag(t *testing.T) {
 
 	t.Run("UnknownID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		reqTag := Tag{
 			Name:        tag.Name,
 			Description: random.AlphaNumeric(t, 50),
@@ -487,11 +472,9 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodDelete,
-			fmt.Sprintf("/api/tags/%s", tag.ID),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/tags/%s", tag.ID)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodDelete, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -516,18 +499,19 @@ func TestHandlers_DeleteTag(t *testing.T) {
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+
 		invalidUUID := "invalid-uuid"
 		_, resErr := uuid.Parse(invalidUUID)
-		date := time.Now()
 
+		date := time.Now()
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		reqTag := Tag{
 			Name:        tag.Name,
 			Description: random.AlphaNumeric(t, 50),
@@ -536,11 +520,9 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodDelete,
-			fmt.Sprintf("/api/tags/%s", invalidUUID),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/tags/%s", invalidUUID)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodDelete, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -559,16 +541,16 @@ func TestHandlers_DeleteTag(t *testing.T) {
 
 	t.Run("NilUUID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		tag := &model.Tag{
 			ID:        uuid.Nil,
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		reqTag := Tag{
 			Name:        tag.Name,
 			Description: random.AlphaNumeric(t, 50),
@@ -577,11 +559,9 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodDelete,
-			fmt.Sprintf("/api/tags/%s", tag.ID),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/tags/%s", tag.ID)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodDelete, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)

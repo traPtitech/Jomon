@@ -57,12 +57,11 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-
 		budget := random.Numeric(t, 1000000)
-
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -88,7 +87,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		tx2 := &model.TransactionResponse{
 			ID:     uuid.New(),
 			Title:  random.AlphaNumeric(t, 20),
@@ -108,12 +106,10 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		txs := []*model.TransactionResponse{tx1, tx2}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/transactions", nil)
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/transactions", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -133,6 +129,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Group:  nil,
 			}).
 			Return(txs, nil)
+
 		assert.NoError(t, h.Handlers.GetTransactions(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got []*Transaction
@@ -147,12 +144,11 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 	t.Run("SuccessWithSort", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-
 		budget := random.Numeric(t, 1000000)
-
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -178,7 +174,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		tx2 := &model.TransactionResponse{
 			ID:     uuid.New(),
 			Title:  random.AlphaNumeric(t, 20),
@@ -199,12 +194,11 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			CreatedAt: date.Add(time.Hour),
 			UpdatedAt: date.Add(time.Hour),
 		}
-
 		txs := []*model.TransactionResponse{tx1, tx2}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/transactions?sort=created_at", nil)
-		require.NoError(t, err)
+		path := "/api/transactions?sort=created_at"
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -221,6 +215,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Offset: 0,
 			}).
 			Return(txs, nil)
+
 		assert.NoError(t, h.Handlers.GetTransactions(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got []*Transaction
@@ -235,12 +230,11 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 	t.Run("SuccessWithAscSort", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-
 		budget := random.Numeric(t, 1000000)
-
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -266,7 +260,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		tx2 := &model.TransactionResponse{
 			ID:     uuid.New(),
 			Title:  random.AlphaNumeric(t, 20),
@@ -287,13 +280,12 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			CreatedAt: date.Add(time.Hour),
 			UpdatedAt: date.Add(time.Hour),
 		}
-
 		// Reverse
 		txs := []*model.TransactionResponse{tx2, tx1}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/transactions?sort=-created_at", nil)
-		require.NoError(t, err)
+		path := "/api/transactions?sort=-created_at"
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -310,6 +302,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Offset: 0,
 			}).
 			Return(txs, nil)
+
 		assert.NoError(t, h.Handlers.GetTransactions(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got []*Transaction
@@ -324,21 +317,18 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 	t.Run("SuccessWithTarget", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-
 		budget := random.Numeric(t, 1000000)
-
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		target1 := random.AlphaNumeric(t, 20)
-
 		tx1 := &model.TransactionResponse{
 			ID:     uuid.New(),
 			Title:  random.AlphaNumeric(t, 20),
@@ -358,7 +348,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		tx2 := &model.TransactionResponse{
 			ID:     uuid.New(),
 			Title:  random.AlphaNumeric(t, 20),
@@ -379,15 +368,11 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			CreatedAt: date.Add(time.Hour),
 			UpdatedAt: date.Add(time.Hour),
 		}
-
 		txs := []*model.TransactionResponse{tx1, tx2}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodGet,
-			fmt.Sprintf("/api/transactions?target=%s", target1),
-			nil)
-		require.NoError(t, err)
+		path := fmt.Sprintf("/api/transactions?target=%s", target1)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -404,6 +389,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Offset: 0,
 			}).
 			Return(txs, nil)
+
 		assert.NoError(t, h.Handlers.GetTransactions(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got []*Transaction
@@ -418,21 +404,18 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 	t.Run("SuccessWithSinceUntil", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-
 		budget := random.Numeric(t, 1000000)
-
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		target1 := random.AlphaNumeric(t, 20)
-
 		tx1 := &model.TransactionResponse{
 			ID:     uuid.New(),
 			Title:  random.AlphaNumeric(t, 20),
@@ -452,7 +435,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		txs := []*model.TransactionResponse{tx1}
 		since, err := service.StrToDate("2020-01-01")
 		require.NoError(t, err)
@@ -460,18 +442,14 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodGet,
-			fmt.Sprintf("/api/transactions?since=%s&until=%s", "2020-01-01", "2020-01-02"),
-			nil)
-		require.NoError(t, err)
+		path := fmt.Sprintf("/api/transactions?since=%s&until=%s", "2020-01-01", "2020-01-02")
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-
 		h.Repository.MockTransactionRepository.
 			EXPECT().
 			GetTransactions(c.Request().Context(), model.TransactionQuery{
@@ -481,6 +459,7 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Offset: 0,
 			}).
 			Return(txs, nil)
+
 		assert.NoError(t, h.Handlers.GetTransactions(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got []*Transaction
@@ -501,21 +480,18 @@ func TestHandlers_PostTransaction(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-
 		budget := random.Numeric(t, 1000000)
-
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		target1 := random.AlphaNumeric(t, 20)
-
 		tx1 := &model.TransactionResponse{
 			ID:     uuid.New(),
 			Title:  random.AlphaNumeric(t, 20),
@@ -535,9 +511,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		txs := []*model.TransactionResponse{tx1}
-
 		tags := []*uuid.UUID{&tag.ID}
 		group := tx1.Group.ID
 
@@ -556,11 +530,8 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Group:   &group,
 		})
 		require.NoError(t, err)
-		req, err := http.NewRequest(
-			http.MethodPost,
-			"/api/transactions",
-			bytes.NewReader(reqBody))
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/transactions", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -574,6 +545,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 				c.Request().Context(),
 				tx1.Title, tx1.Amount, tx1.Target, tags, &group, nil).
 			Return(tx1, nil)
+
 		assert.NoError(t, h.Handlers.PostTransaction(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got []*Transaction
@@ -588,21 +560,18 @@ func TestHandlers_PostTransaction(t *testing.T) {
 
 	t.Run("SuccessWithRequest", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-
 		budget := random.Numeric(t, 1000000)
-
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		target1 := random.AlphaNumeric(t, 20)
-
 		tx := &model.TransactionResponse{
 			ID:     uuid.New(),
 			Title:  random.AlphaNumeric(t, 20),
@@ -622,10 +591,8 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		tags := []*uuid.UUID{&tag.ID}
 		group := tx.Group.ID
-
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
 			Status:    model.Accepted,
@@ -651,11 +618,8 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Request: &request.ID,
 		})
 		require.NoError(t, err)
-		req, err := http.NewRequest(
-			http.MethodPost,
-			"/api/transactions",
-			bytes.NewReader(reqBody))
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/transactions", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -694,17 +658,16 @@ func TestHandlers_GetTransaction(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		budget := random.Numeric(t, 1000000)
-
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
-
 		tx := &model.TransactionResponse{
 			ID:     uuid.New(),
 			Title:  random.AlphaNumeric(t, 20),
@@ -726,8 +689,8 @@ func TestHandlers_GetTransaction(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/transactions/%s", tx.ID), nil)
-		require.NoError(t, err)
+		path := fmt.Sprintf("/api/transactions/%s", tx.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -741,6 +704,7 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			EXPECT().
 			GetTransaction(c.Request().Context(), tx.ID).
 			Return(tx, nil)
+
 		assert.NoError(t, h.Handlers.GetTransaction(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *Transaction
@@ -757,24 +721,22 @@ func TestHandlers_PutTransaction(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		budget := random.Numeric(t, 1000000)
-
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
-
 		updatedTag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
-
 		tx := &model.TransactionResponse{
 			ID:     uuid.New(),
 			Title:  random.AlphaNumeric(t, 20),
@@ -794,7 +756,6 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
-
 		updated := &model.TransactionResponse{
 			ID:     tx.ID,
 			Title:  random.AlphaNumeric(t, 20),
@@ -814,7 +775,6 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
-
 		updatedTags := lo.Map(updated.Tags, func(modelTag *model.Tag, _ int) *uuid.UUID {
 			return &modelTag.ID
 		})
@@ -832,11 +792,8 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			Tags:   []uuid.UUID{updatedTag.ID},
 		})
 		require.NoError(t, err)
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/transactions/%s", tx.ID),
-			bytes.NewReader(reqBody))
-		require.NoError(t, err)
+		path := fmt.Sprintf("/api/transactions/%s", tx.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)

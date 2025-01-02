@@ -34,6 +34,7 @@ func TestHandlers_PostFile(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		request := uuid.New()
@@ -71,8 +72,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/files", pr)
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPost, "/api/files", pr)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -80,7 +80,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
-		err = hn(c)
+		err := hn(c)
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -106,6 +106,7 @@ func TestHandlers_PostFile(t *testing.T) {
 
 	t.Run("FailedToRepositoryCreateFile", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		request := uuid.New()
@@ -139,8 +140,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		}()
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/files", pr)
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPost, "/api/files", pr)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -148,7 +148,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
-		err = hn(c)
+		err := hn(c)
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -174,6 +174,7 @@ func TestHandlers_PostFile(t *testing.T) {
 
 	t.Run("FailedToServiceCreateFile", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		request := uuid.New()
@@ -211,8 +212,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/files", pr)
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPost, "/api/files", pr)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -220,7 +220,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
-		err = hn(c)
+		err := hn(c)
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -254,6 +254,7 @@ func TestHandlers_GetFile(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		file := &model.File{
@@ -268,8 +269,8 @@ func TestHandlers_GetFile(t *testing.T) {
 		r := io.NopCloser(bytes.NewReader(f))
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/files/%s", file.ID), nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/files/%s", file.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -295,6 +296,7 @@ func TestHandlers_GetFile(t *testing.T) {
 
 	t.Run("FailedToGetFile", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		file := &model.File{
@@ -305,8 +307,8 @@ func TestHandlers_GetFile(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/files/%s", file.ID), nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/files/%s", file.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -331,6 +333,7 @@ func TestHandlers_GetFile(t *testing.T) {
 
 	t.Run("FailedToOpenFile", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		file := &model.File{
@@ -341,8 +344,8 @@ func TestHandlers_GetFile(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/files/%s", file.ID), nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/files/%s", file.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -372,11 +375,11 @@ func TestHandlers_GetFile(t *testing.T) {
 
 	t.Run("UnknownFile", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/files/po", nil)
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/files/po", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -401,6 +404,7 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		file := &model.File{
@@ -412,8 +416,8 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/files/%s/meta", file.ID), nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/files/%s/meta", file.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -445,6 +449,7 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 
 	t.Run("FailedToGetFile", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		file := &model.File{
@@ -456,8 +461,8 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/files/%s/meta", file.ID), nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/files/%s/meta", file.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -482,11 +487,11 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 
 	t.Run("UnknownFile", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/files/po/meta", nil)
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/files/po/meta", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -511,6 +516,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		file := &model.File{
@@ -521,8 +527,8 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/files/%s", file.ID), nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/files/%s", file.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodDelete, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -548,6 +554,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 	t.Run("FailedToRepositoryDeleteFile", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		file := &model.File{
@@ -558,8 +565,8 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/files/%s", file.ID), nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/files/%s", file.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodDelete, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -584,6 +591,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 	t.Run("FailedToServiceDeleteFile", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		file := &model.File{
@@ -593,8 +601,8 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/files/%s", file.ID), nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/files/%s", file.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodDelete, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -624,22 +632,24 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 	t.Run("UnknownFile", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		invalidUUID := "invalid-uuid"
+		_, mocErr := uuid.Parse(invalidUUID)
+
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodDelete, "/api/files/po", nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/files/%s", invalidUUID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodDelete, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
 		c.SetParamNames("fileID")
-		c.SetParamValues("po")
+		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		assert.NoError(t, err)
-
-		_, mocErr := uuid.Parse("po")
 
 		err = h.Handlers.DeleteFile(c)
 		assert.Error(t, err)
