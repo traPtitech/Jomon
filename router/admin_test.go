@@ -23,6 +23,7 @@ func TestHandler_GetAdmins(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		admin := &model.Admin{
@@ -34,8 +35,7 @@ func TestHandler_GetAdmins(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/admins", nil)
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/admins", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -59,12 +59,12 @@ func TestHandler_GetAdmins(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 		var admins []*model.Admin
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/admins", nil)
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/admins", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -88,11 +88,11 @@ func TestHandler_GetAdmins(t *testing.T) {
 
 	t.Run("FailedWithError", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/admins", nil)
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/admins", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -117,6 +117,7 @@ func TestHandler_PostAdmin(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		admin := uuid.New()
@@ -125,11 +126,8 @@ func TestHandler_PostAdmin(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPost,
-			"/api/admins",
-			bytes.NewReader(reqBody))
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/admins", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -147,6 +145,7 @@ func TestHandler_PostAdmin(t *testing.T) {
 
 	t.Run("FailedWithError", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		admin := uuid.New()
@@ -155,11 +154,8 @@ func TestHandler_PostAdmin(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPost,
-			"/api/admins",
-			bytes.NewReader(reqBody))
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/admins", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -181,6 +177,7 @@ func TestHandler_PostAdmin(t *testing.T) {
 
 	t.Run("FailedWithEntConstraintError", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		admin := uuid.New()
@@ -189,11 +186,8 @@ func TestHandler_PostAdmin(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPost,
-			"/api/admins",
-			bytes.NewReader(reqBody))
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/admins", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -220,6 +214,7 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		admin := uuid.New()
@@ -228,11 +223,8 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodDelete,
-			"/api/admins",
-			bytes.NewReader(reqBody))
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodDelete, "/api/admins", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -250,6 +242,7 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 
 	t.Run("FailedWithError", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		admin := uuid.New()
@@ -258,11 +251,8 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodDelete,
-			"/api/admins",
-			bytes.NewReader(reqBody))
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodDelete, "/api/admins", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -284,16 +274,16 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 
 	t.Run("InvalidAdminID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		body := `["invalid"]`
+		invalidUUID := "invalid-uuid"
+		reqBody, err := json.Marshal([]string{invalidUUID})
+		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodDelete,
-			"/api/admins",
-			bytes.NewReader([]byte(body)))
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodDelete, "/api/admins", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -308,6 +298,7 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 
 	t.Run("FailedWithEntConstraintError", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		admin := uuid.New()
@@ -316,11 +307,8 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodDelete,
-			"/api/admins",
-			bytes.NewReader(reqBody))
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodDelete, "/api/admins", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)

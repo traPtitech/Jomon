@@ -39,6 +39,7 @@ func TestHandlers_GetUsers(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		user1 := makeUser(t, random.Numeric(t, 2) == 1)
@@ -46,8 +47,7 @@ func TestHandlers_GetUsers(t *testing.T) {
 		users := []*model.User{user1, user2}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/users", nil)
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/users", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -73,12 +73,13 @@ func TestHandlers_GetUsers(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		users := []*model.User{}
 
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/api/users", nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/users", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -104,10 +105,11 @@ func TestHandlers_GetUsers(t *testing.T) {
 
 	t.Run("FailedToGetUsers", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -133,10 +135,10 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		user := makeUser(t, random.Numeric(t, 2) == 1)
-
 		updateUser := &model.User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -155,8 +157,8 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		assert.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, "/api/users", bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPut, "/api/users", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -174,6 +176,7 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 				c.Request().Context(),
 				user.ID, updateUser.Name, updateUser.DisplayName, updateUser.Admin).
 			Return(updateUser, nil)
+
 		assert.NoError(t, h.Handlers.UpdateUserInfo(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got User
@@ -189,10 +192,10 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 
 	t.Run("FailedToUpdateUser", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		user := makeUser(t, random.Numeric(t, 2) == 1)
-
 		updateUser := &model.User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -201,7 +204,6 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 			CreatedAt:   user.CreatedAt,
 			UpdatedAt:   time.Now(),
 		}
-
 		reqUser := PutUserRequest{
 			Name:        updateUser.Name,
 			DisplayName: updateUser.DisplayName,
@@ -211,8 +213,8 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		assert.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, "/api/users", bytes.NewReader(bodyReqUser))
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPut, "/api/users", bytes.NewReader(bodyReqUser))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -239,10 +241,10 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 
 	t.Run("FailedToGetUser", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		user := makeUser(t, random.Numeric(t, 2) == 1)
-
 		updateUser := &model.User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -251,7 +253,6 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 			CreatedAt:   user.CreatedAt,
 			UpdatedAt:   time.Now(),
 		}
-
 		reqUser := PutUserRequest{
 			Name:        updateUser.Name,
 			DisplayName: updateUser.DisplayName,
@@ -261,8 +262,8 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		assert.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, "/api/users", bytes.NewReader(bodyReqUser))
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPut, "/api/users", bytes.NewReader(bodyReqUser))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -287,13 +288,14 @@ func TestHandlers_GetMe(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+
 		accessUser := makeUser(t, random.Numeric(t, 2) == 1)
 		user := modelUserToUser(accessUser)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, "/api/users/me", nil)
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, "/api/users/me", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -301,7 +303,7 @@ func TestHandlers_GetMe(t *testing.T) {
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
-		err = hn(c)
+		err := hn(c)
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -328,11 +330,12 @@ func TestHandlers_GetMe(t *testing.T) {
 
 	t.Run("FailedToGetUser", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+
 		e := echo.New()
 		e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
-		req, err := http.NewRequest(http.MethodPut, "/api/users/me", nil)
-		require.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, "/api/users/me", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -340,7 +343,7 @@ func TestHandlers_GetMe(t *testing.T) {
 		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
 			return c.NoContent(http.StatusOK)
 		}))
-		err = hn(c)
+		err := hn(c)
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)

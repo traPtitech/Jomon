@@ -104,11 +104,11 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date1 := time.Now()
 		date2 := date1.Add(time.Hour)
-
 		request1 := &model.RequestResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
@@ -130,8 +130,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		requests := []*model.RequestResponse{request2, request1}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/requests", nil)
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/requests", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -183,13 +182,13 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		requests := []*model.RequestResponse{}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/requests", nil)
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/requests", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -214,10 +213,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 	t.Run("Success3", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date1 := time.Now()
-
 		request1 := &model.RequestResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
@@ -229,14 +228,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 		}
 		requests := []*model.RequestResponse{request1}
 
-		status := "submitted"
-
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodGet,
-			fmt.Sprintf("/api/requests?status=%s", status),
-			nil)
-		assert.NoError(t, err)
+		status := "submitted"
+		path := fmt.Sprintf("/api/requests?status=%s", status)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -277,13 +272,13 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 	t.Run("Success4", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date1 := time.Now()
 		date2str := date1.Add(time.Hour).Format("2006-01-02")
 		date2, err := service.StrToDate(date2str)
 		require.NoError(t, err)
-
 		request1 := &model.RequestResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
@@ -296,11 +291,8 @@ func TestHandlers_GetRequests(t *testing.T) {
 		requests := []*model.RequestResponse{request1}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodGet,
-			fmt.Sprintf("/api/requests?until=%s", date2str),
-			nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests?until=%s", date2str)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -341,13 +333,13 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 	t.Run("Success5", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date1 := time.Now()
 		date2str := date1.Add(-time.Hour).Format("2006-01-02")
 		date2, err := service.StrToDate(date2str)
 		require.NoError(t, err)
-
 		request1 := &model.RequestResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
@@ -360,11 +352,8 @@ func TestHandlers_GetRequests(t *testing.T) {
 		requests := []*model.RequestResponse{request1}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodGet,
-			fmt.Sprintf("/api/requests?since=%s", date2str),
-			nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests?since=%s", date2str)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -404,24 +393,22 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 	t.Run("Success6", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date1 := time.Now()
-
 		tag1 := model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 10),
 			CreatedAt: date1,
 			UpdatedAt: date1,
 		}
-
 		tag1ov := TagOverview{
 			ID:        tag1.ID,
 			Name:      tag1.Name,
 			CreatedAt: tag1.CreatedAt,
 			UpdatedAt: tag1.UpdatedAt,
 		}
-
 		request1 := &model.RequestResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
@@ -435,11 +422,8 @@ func TestHandlers_GetRequests(t *testing.T) {
 		requests := []*model.RequestResponse{request1}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodGet,
-			fmt.Sprintf("/api/requests?tag=%s", tag1.Name),
-			nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests?tag=%s", tag1.Name)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -479,6 +463,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 	t.Run("Success7", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
@@ -494,11 +479,8 @@ func TestHandlers_GetRequests(t *testing.T) {
 		modelRequests := []*model.RequestResponse{request}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodGet,
-			fmt.Sprintf("/api/requests?created_by=%s", request.CreatedBy.String()),
-			nil)
-		require.NoError(t, err)
+		path := fmt.Sprintf("/api/requests?created_by=%s", request.CreatedBy.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -512,6 +494,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 				CreatedBy: &request.CreatedBy},
 			).
 			Return(modelRequests, nil)
+
 		err = h.Handlers.GetRequests(c)
 		if !assert.NoError(t, err) {
 			return
@@ -540,11 +523,12 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 	t.Run("InvaildStatus", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/requests?status=invalid-status", nil)
-		assert.NoError(t, err)
+		path := "/api/requests?status=invalid-status"
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -560,11 +544,11 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 	t.Run("FailedToGetRequests", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, "/api/requests", nil)
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/requests", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -592,9 +576,10 @@ func TestHandlers_PostRequest(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		request := &model.RequestDetail{
 			ID:      uuid.New(),
 			Status:  model.Submitted,
@@ -610,7 +595,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		reqRequest := Request{
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
@@ -623,8 +607,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 		var group *model.Group
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -652,9 +636,10 @@ func TestHandlers_PostRequest(t *testing.T) {
 
 	t.Run("SuccessWithTags", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -662,7 +647,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 		}
 		tags := []*model.Tag{tag}
-
 		request := &model.RequestDetail{
 			ID:      uuid.New(),
 			Status:  model.Submitted,
@@ -679,7 +663,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		reqRequest := Request{
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
@@ -692,8 +675,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 		var group *model.Group
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -712,6 +695,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 				tags, targets,
 				group, reqRequest.CreatedBy).
 			Return(request, nil)
+
 		assert.NoError(t, h.Handlers.PostRequest(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestResponse
@@ -724,9 +708,10 @@ func TestHandlers_PostRequest(t *testing.T) {
 
 	t.Run("SuccessWithGroup", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		budget := random.Numeric(t, 100000)
 		group := &model.Group{
 			ID:          uuid.New(),
@@ -734,7 +719,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Description: random.AlphaNumeric(t, 50),
 			Budget:      &budget,
 		}
-
 		request := &model.RequestDetail{
 			ID:      uuid.New(),
 			Status:  model.Submitted,
@@ -751,7 +735,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		reqRequest := Request{
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
@@ -764,8 +747,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 		targets := []*model.RequestTarget{}
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -784,6 +767,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 				tags, targets,
 				group, reqRequest.CreatedBy).
 			Return(request, nil)
+
 		assert.NoError(t, h.Handlers.PostRequest(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestResponse
@@ -796,21 +780,20 @@ func TestHandlers_PostRequest(t *testing.T) {
 
 	t.Run("SuccessWithTarget", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		target := &model.RequestTarget{
 			Target: uuid.New(),
 			Amount: random.Numeric(t, 1000000),
 		}
-
 		tgd := &model.RequestTargetDetail{
 			ID:        uuid.New(),
 			Target:    target.Target,
 			Amount:    target.Amount,
 			CreatedAt: date,
 		}
-
 		request := &model.RequestDetail{
 			ID:      uuid.New(),
 			Status:  model.Submitted,
@@ -827,12 +810,10 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		tg := &Target{
 			Target: target.Target,
 			Amount: target.Amount,
 		}
-
 		reqRequest := Request{
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
@@ -845,8 +826,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 		var group *model.Group
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -861,6 +842,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 				tags, []*model.RequestTarget{target},
 				group, reqRequest.CreatedBy).
 			Return(request, nil)
+
 		assert.NoError(t, h.Handlers.PostRequest(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestResponse
@@ -873,9 +855,10 @@ func TestHandlers_PostRequest(t *testing.T) {
 
 	t.Run("UnknownTagID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
@@ -885,9 +868,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		unknownTagID := uuid.New()
-
 		reqRequest := Request{
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
@@ -898,8 +879,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -922,9 +903,10 @@ func TestHandlers_PostRequest(t *testing.T) {
 
 	t.Run("UnknownGroupID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
@@ -934,9 +916,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		unknownGroupID := uuid.New()
-
 		reqRequest := Request{
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
@@ -947,8 +927,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -971,9 +951,10 @@ func TestHandlers_PostRequest(t *testing.T) {
 
 	t.Run("UnknownUserID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
@@ -983,7 +964,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		reqRequest := Request{
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
@@ -996,8 +976,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 		var group *model.Group
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		req := httptest.NewRequestWithContext(
+			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1028,9 +1008,10 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		request := &model.RequestDetail{
 			ID:       uuid.New(),
 			Status:   model.Submitted,
@@ -1051,11 +1032,8 @@ func TestHandlers_GetRequest(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodGet,
-			fmt.Sprintf("/api/requests/%s", request.ID.String()),
-			nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1073,6 +1051,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 			EXPECT().
 			GetComments(c.Request().Context(), request.ID).
 			Return(nil, nil)
+
 		assert.NoError(t, h.Handlers.GetRequest(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestResponse
@@ -1085,6 +1064,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 	t.Run("SuccessWithComments", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 		date := time.Now()
 
@@ -1106,7 +1086,6 @@ func TestHandlers_GetRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		comment1 := &model.Comment{
 			ID:        uuid.New(),
 			User:      request.CreatedBy,
@@ -1124,11 +1103,8 @@ func TestHandlers_GetRequest(t *testing.T) {
 		comments := []*model.Comment{comment1, comment2}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodGet,
-			fmt.Sprintf("/api/requests/%s", request.ID.String()),
-			nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1162,9 +1138,10 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 	t.Run("SuccessWithTarget", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		target := &model.RequestTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
@@ -1172,7 +1149,6 @@ func TestHandlers_GetRequest(t *testing.T) {
 			PaidAt:    nil,
 			CreatedAt: date,
 		}
-
 		request := &model.RequestDetail{
 			ID:       uuid.New(),
 			Status:   model.Submitted,
@@ -1192,12 +1168,10 @@ func TestHandlers_GetRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
+
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodGet,
-			fmt.Sprintf("/api/requests/%s", request.ID.String()),
-			nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1231,16 +1205,15 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+
 		invalidUUID := "invalid-uuid"
 		_, resErr := uuid.Parse(invalidUUID)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodGet,
-			fmt.Sprintf("/api/requests/%s", invalidUUID),
-			nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", invalidUUID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1259,11 +1232,12 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 	t.Run("NilUUID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/requests/%s", uuid.Nil), nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", uuid.Nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1284,16 +1258,14 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 	t.Run("UnknownID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		unknownID := uuid.New()
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodGet,
-			fmt.Sprintf("/api/requests/%s", unknownID.String()),
-			nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", unknownID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1323,9 +1295,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
@@ -1342,7 +1315,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Tags:    []*model.Tag{},
 			Targets: []*model.RequestTargetDetail{},
 		}
-
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
@@ -1352,7 +1324,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 		tags := []*model.Tag{}
 		targets := []*model.RequestTarget{}
 		var group *model.Group
-
 		updateRequest := &model.RequestDetail{
 			ID:        request.ID,
 			Status:    request.Status,
@@ -1365,11 +1336,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s", request.ID),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", request.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1405,9 +1373,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 	t.Run("SuccessWithTag", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		request := &model.RequestDetail{
 			ID:      uuid.New(),
 			Status:  model.Submitted,
@@ -1423,7 +1392,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		tag1 := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -1446,7 +1414,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 		targets := []*model.RequestTarget{}
 		var group *model.Group
-
 		updateRequest := &model.RequestDetail{
 			ID:        request.ID,
 			Status:    request.Status,
@@ -1461,11 +1428,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1509,9 +1473,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 	t.Run("SuccessWithTarget", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		request := &model.RequestDetail{
 			ID:     uuid.New(),
 			Status: model.Submitted,
@@ -1545,7 +1510,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			{Target: target2.Target, Amount: target2.Amount},
 		}
 		targetDetails := []*model.RequestTargetDetail{target1, target2}
-
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
@@ -1558,7 +1522,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 		tags := []*model.Tag{}
 		var group *model.Group
-
 		updateRequest := &model.RequestDetail{
 			ID:        request.ID,
 			Status:    request.Status,
@@ -1573,11 +1536,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1601,6 +1561,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			EXPECT().
 			GetComments(c.Request().Context(), request.ID).
 			Return([]*model.Comment{}, nil)
+
 		assert.NoError(t, h.Handlers.PutRequest(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestResponse
@@ -1613,9 +1574,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 	t.Run("SuccessWithGroup", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		request := &model.RequestDetail{
 			ID:      uuid.New(),
 			Status:  model.Submitted,
@@ -1631,7 +1593,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		budget := random.Numeric(t, 100000)
 		group := &model.Group{
 			ID:          uuid.New(),
@@ -1650,7 +1611,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 		tags := []*model.Tag{}
 		targets := []*model.RequestTarget{}
-
 		updateRequest := &model.RequestDetail{
 			ID:        request.ID,
 			Status:    request.Status,
@@ -1665,11 +1625,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1697,6 +1654,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			EXPECT().
 			GetComments(c.Request().Context(), request.ID).
 			Return([]*model.Comment{}, nil)
+
 		assert.NoError(t, h.Handlers.PutRequest(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestResponse
@@ -1709,9 +1667,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 	t.Run("SuccessWithComment", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		request := &model.RequestDetail{
 			ID:      uuid.New(),
 			Status:  model.Submitted,
@@ -1727,7 +1686,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
@@ -1737,7 +1695,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 		tags := []*model.Tag{}
 		targets := []*model.RequestTarget{}
 		var group *model.Group
-
 		updateRequest := &model.RequestDetail{
 			ID:        request.ID,
 			Status:    request.Status,
@@ -1748,7 +1705,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Title:     reqRequest.Title,
 			Content:   reqRequest.Content,
 		}
-
 		comment1 := &model.Comment{
 			ID:        uuid.New(),
 			User:      request.CreatedBy,
@@ -1766,11 +1722,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 		comments := []*model.Comment{comment1, comment2}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s", request.ID),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", request.ID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1793,6 +1746,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			EXPECT().
 			GetComments(c.Request().Context(), request.ID).
 			Return(comments, nil)
+
 		assert.NoError(t, h.Handlers.PutRequest(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestResponse
@@ -1808,16 +1762,15 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+
 		invalidUUID := "invalid-uuid"
 		_, resErr := uuid.Parse(invalidUUID)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s", invalidUUID),
-			nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", invalidUUID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1836,11 +1789,12 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 	t.Run("NilUUID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("/api/requests/%s", uuid.Nil), nil)
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", uuid.Nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1861,6 +1815,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 	t.Run("UnknownID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		unknownID := uuid.New()
@@ -1875,11 +1830,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 		var group *model.Group
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s", unknownID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", unknownID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1910,9 +1862,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 	t.Run("UnknownTagID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
@@ -1922,14 +1875,12 @@ func TestHandlers_PutRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
@@ -1939,11 +1890,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -1969,9 +1917,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 	t.Run("UnknownGroupID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
@@ -1981,7 +1930,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		budget := random.Numeric(t, 100000)
 		group := &model.Group{
 			ID:          uuid.New(),
@@ -1991,7 +1939,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedAt:   date,
 			UpdatedAt:   date,
 		}
-
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
@@ -2001,11 +1948,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -2035,9 +1979,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("SuccessByCreator", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -2054,14 +1999,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: user.ID,
 		}
-
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
-
 		comment := &model.Comment{
 			ID:        uuid.New(),
 			User:      user.ID,
@@ -2076,11 +2019,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -2105,7 +2045,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2122,6 +2062,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			EXPECT().
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
+
 		assert.NoError(t, h.Handlers.PutStatus(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *StatusResponse
@@ -2145,9 +2086,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("SuccessByAdminFromSubmittedToFixRequired", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -2164,14 +2106,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		reqStatus := PutStatus{
 			Status:  model.FixRequired,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
-
 		comment := &model.Comment{
 			ID:        uuid.New(),
 			User:      user.ID,
@@ -2186,11 +2126,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -2215,7 +2152,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2232,6 +2169,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			EXPECT().
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
+
 		assert.NoError(t, h.Handlers.PutStatus(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *StatusResponse
@@ -2255,9 +2193,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("SuccessByAdminFromSubmittedToAccepted", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -2274,14 +2213,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		reqStatus := PutStatus{
 			Status:  model.Accepted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
-
 		comment := &model.Comment{
 			ID:        uuid.New(),
 			User:      user.ID,
@@ -2296,11 +2233,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -2325,7 +2259,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2342,6 +2276,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			EXPECT().
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
+
 		assert.NoError(t, h.Handlers.PutStatus(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *StatusResponse
@@ -2365,9 +2300,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("SuccessByAdminFromSubmittedToFixRequired", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -2384,14 +2320,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		reqStatus := PutStatus{
 			Status:  model.FixRequired,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
-
 		comment := &model.Comment{
 			ID:        uuid.New(),
 			User:      user.ID,
@@ -2406,11 +2340,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -2435,7 +2366,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2452,6 +2383,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			EXPECT().
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
+
 		assert.NoError(t, h.Handlers.PutStatus(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *StatusResponse
@@ -2475,9 +2407,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("SuccessByAdminFromFixRequiredToSubmitted", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -2494,14 +2427,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
-
 		comment := &model.Comment{
 			ID:        uuid.New(),
 			User:      user.ID,
@@ -2516,11 +2447,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -2545,7 +2473,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2562,6 +2490,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			EXPECT().
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
+
 		assert.NoError(t, h.Handlers.PutStatus(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *StatusResponse
@@ -2585,9 +2514,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("SuccessByAdminFromAcceptedToSubmitted", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -2611,14 +2541,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 		}
 		targets := []*model.RequestTargetDetail{target}
-
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
-
 		comment := &model.Comment{
 			ID:        uuid.New(),
 			User:      user.ID,
@@ -2633,11 +2561,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -2662,7 +2587,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -2683,6 +2608,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			EXPECT().
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
+
 		assert.NoError(t, h.Handlers.PutStatus(c))
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var got *StatusResponse
@@ -2706,9 +2632,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("InvalidStatus", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -2725,7 +2652,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: user.ID,
 		}
-
 		invalidStatus := random.AlphaNumeric(t, 20)
 		reqBody, err := json.Marshal(&struct {
 			Status  string `json:"status"`
@@ -2737,11 +2663,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -2781,11 +2704,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("InvalidUUID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+
 		invalidUUID := "invalid-uuid"
 		_, resErr := uuid.Parse(invalidUUID)
 		date := time.Now()
-
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -2794,7 +2718,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt:   date,
 			UpdatedAt:   date,
 		}
-
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
@@ -2803,11 +2726,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", invalidUUID),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", invalidUUID)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -2840,9 +2760,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("NillUUID", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -2851,7 +2772,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt:   date,
 			UpdatedAt:   date,
 		}
-
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
@@ -2860,11 +2780,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", uuid.Nil),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", uuid.Nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -2899,9 +2816,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("SessionNotFound", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -2918,7 +2836,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: user.ID,
 		}
-
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
@@ -2927,11 +2844,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -2958,9 +2872,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("SameStatusError", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -2977,7 +2892,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: user.ID,
 		}
-
 		reqStatus := PutStatus{
 			Status:  request.Status,
 			Comment: random.AlphaNumeric(t, 20),
@@ -2986,11 +2900,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -3015,7 +2926,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -3031,6 +2942,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("CommentRequiredErrorFromSubmittedToFixRequired", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 		date := time.Now()
 
@@ -3058,11 +2970,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -3087,7 +2996,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -3106,9 +3015,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("CommentRequiredErrorFromSubmittedToRejected", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -3125,7 +3035,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: user.ID,
 		}
-
 		reqStatus := PutStatus{
 			Status: model.Rejected,
 		}
@@ -3133,11 +3042,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -3162,7 +3068,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -3181,9 +3087,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("CommentRequiredErrorFromAcceptedToSubmitted", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -3200,7 +3107,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: user.ID,
 		}
-
 		reqStatus := PutStatus{
 			Status: model.Submitted,
 		}
@@ -3208,11 +3114,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -3237,7 +3140,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -3256,9 +3159,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("UnknownUser", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -3275,7 +3179,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: user.ID,
 		}
-
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
@@ -3284,11 +3187,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -3316,7 +3216,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		var resErr *ent.NotFoundError
 		errors.As(errors.New("unknown id"), &resErr)
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -3334,9 +3234,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("AdminNoPrivilege", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -3353,7 +3254,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		reqStatus := PutStatus{
 			Status:  model.Accepted,
 			Comment: random.AlphaNumeric(t, 20),
@@ -3362,11 +3262,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -3391,7 +3288,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -3414,9 +3311,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("AlreadyPaid", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -3440,7 +3338,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 		}
 		targets := []*model.RequestTargetDetail{target}
-
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
@@ -3449,11 +3346,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -3478,7 +3372,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -3502,9 +3396,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("CreatorNoPrivilege", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -3521,7 +3416,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: user.ID,
 		}
-
 		reqStatus := PutStatus{
 			Status:  model.Accepted,
 			Comment: random.AlphaNumeric(t, 20),
@@ -3530,11 +3424,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -3559,7 +3450,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
@@ -3581,9 +3472,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 	t.Run("NoPrivilege", func(t *testing.T) {
 		t.Parallel()
+		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		date := time.Now()
 
+		date := time.Now()
 		user := &model.User{
 			ID:          uuid.New(),
 			Name:        random.AlphaNumeric(t, 20),
@@ -3600,7 +3492,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
@@ -3609,11 +3500,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		req, err := http.NewRequest(
-			http.MethodPut,
-			fmt.Sprintf("/api/requests/%s/status", request.ID.String()),
-			bytes.NewReader(reqBody))
-		assert.NoError(t, err)
+		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -3638,7 +3526,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Admin:       user.Admin,
 		}
 
-		ctx := c.Request().Context()
+		ctx = c.Request().Context()
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequest(ctx, request.ID).
