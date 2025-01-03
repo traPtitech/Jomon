@@ -23,13 +23,15 @@ const (
 	sessionFileCreatorKey    = "request_creator"
 )
 
-func (h Handlers) setLoggerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		req := c.Request()
-		ctx := req.Context()
-		ctx = logging.SetLogger(ctx, h.Logger)
-		c.SetRequest(req.WithContext(ctx))
-		return next(c)
+func (h Handlers) setLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			req := c.Request()
+			ctx := req.Context()
+			ctx = logging.SetLogger(ctx, logger)
+			c.SetRequest(req.WithContext(ctx))
+			return next(c)
+		}
 	}
 }
 

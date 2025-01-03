@@ -55,11 +55,10 @@ func main() {
 	handlers := router.Handlers{
 		Repository:  repo,
 		Storage:     strg,
-		Logger:      logger,
 		SessionName: "session",
 	}
 
-	server := router.NewServer(handlers)
+	server := handlers.NewServer(logger)
 
 	port := os.Getenv("PORT")
 	if port == "" {

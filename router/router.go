@@ -19,14 +19,13 @@ import (
 type Handlers struct {
 	Repository  model.Repository
 	Storage     storage.Storage
-	Logger      *zap.Logger
 	SessionName string
 }
 
-func NewServer(h Handlers) *echo.Echo {
+func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	e := echo.New()
 	e.Debug = os.Getenv("IS_DEBUG_MODE") != ""
-	e.Use(h.setLoggerMiddleware)
+	e.Use(h.setLoggerMiddleware(logger))
 	e.Use(h.AccessLoggingMiddleware)
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
