@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 )
 
 func TestEntRepository_GetGroups(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_groups")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -47,7 +46,7 @@ func TestEntRepository_GetGroups(t *testing.T) {
 }
 
 func TestEntRepository_GetGroup(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_group")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -76,7 +75,7 @@ func TestEntRepository_GetGroup(t *testing.T) {
 }
 
 func TestEntRepository_CreateGroup(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "create_group")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -131,7 +130,7 @@ func TestEntRepository_CreateGroup(t *testing.T) {
 }
 
 func TestEntRepository_UpdateGroup(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "update_group")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -227,7 +226,7 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 }
 
 func TestEntRepository_DeleteGroup(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "delete_group")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -258,7 +257,7 @@ func TestEntRepository_DeleteGroup(t *testing.T) {
 }
 
 func TestEntRepository_GetMembers(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_members")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -306,7 +305,7 @@ func TestEntRepository_GetMembers(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		budget := random.Numeric(t, 100000)
 		group, err := repo.CreateGroup(
 			ctx,
@@ -322,7 +321,7 @@ func TestEntRepository_GetMembers(t *testing.T) {
 }
 
 func TestEntRepository_CreateMember(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "create_member")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -352,7 +351,7 @@ func TestEntRepository_CreateMember(t *testing.T) {
 
 	t.Run("UnknownUser", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		budget := random.Numeric(t, 100000)
 		group, err := repo.CreateGroup(
 			ctx,
@@ -367,7 +366,7 @@ func TestEntRepository_CreateMember(t *testing.T) {
 }
 
 func TestEntRepository_DeleteMember(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "delete_member")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -397,7 +396,7 @@ func TestEntRepository_DeleteMember(t *testing.T) {
 }
 
 func TestEntRepository_GetOwners(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_owners")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -442,7 +441,7 @@ func TestEntRepository_GetOwners(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		budget := random.Numeric(t, 100000)
 		group, err := repo.CreateGroup(
 			ctx,
@@ -459,7 +458,7 @@ func TestEntRepository_GetOwners(t *testing.T) {
 
 // FIXME: これAddOwnersでは?
 func TestEntRepository_CreateOwner(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "create_owner")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -489,7 +488,7 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 
 	t.Run("UnknownUser", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		budget := random.Numeric(t, 100000)
 		group, err := repo.CreateGroup(
 			ctx,
@@ -504,7 +503,7 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 }
 
 func TestEntRepository_DeleteOwner(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "delete_owner")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)

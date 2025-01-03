@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -31,7 +30,7 @@ func (rd *RequestDetail) toExpectedRequestResponse(t *testing.T) *RequestRespons
 }
 
 func TestEntRepository_GetRequests(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_requests")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -62,7 +61,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 	t.Run("SuccessWithSortCreatedAt", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user1, err := repo.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -130,7 +129,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 	t.Run("SuccessWithReverseSortCreatedAt", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user1, err := repo2.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -198,7 +197,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 	t.Run("SuccessWithSortTitle", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user1, err := repo3.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -265,7 +264,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 	t.Run("SuccessWithReverseSortTitle", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user1, err := repo4.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -332,7 +331,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 	t.Run("SuccessWithQueryTarget", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user1, err := repo5.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -397,7 +396,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 	t.Run("SuccessWithQuerySince", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user1, err := repo6.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -459,7 +458,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 	t.Run("SuccessWithQueryUntil", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user1, err := repo7.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -522,7 +521,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 	t.Run("SuccessWithQueryStatus", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user1, err := repo8.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -591,7 +590,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 	t.Run("SuccessWithQueryCreatedBy", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user1, err := repo9.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -649,7 +648,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 }
 
 func TestEntRepository_CreateRequest(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "create_request")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -665,7 +664,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		title := random.AlphaNumeric(t, 40)
 		content := random.AlphaNumeric(t, 100)
 		user, err := repo.CreateUser(
@@ -723,7 +722,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 
 	t.Run("UnknownUser", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		title := random.AlphaNumeric(t, 40)
 		content := random.AlphaNumeric(t, 100)
 		tag, err := repo2.CreateTag(ctx, random.AlphaNumeric(t, 20))
@@ -747,7 +746,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 
 	t.Run("UnknownTag", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		title := random.AlphaNumeric(t, 40)
 		content := random.AlphaNumeric(t, 100)
 		user, err := repo3.CreateUser(
@@ -783,7 +782,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 
 	t.Run("UnknownGroup", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		title := random.AlphaNumeric(t, 40)
 		content := random.AlphaNumeric(t, 100)
 		user, err := repo4.CreateUser(
@@ -816,7 +815,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 }
 
 func TestEntRepository_GetRequest(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_request")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -826,7 +825,7 @@ func TestEntRepository_GetRequest(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user, err := repo.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -862,14 +861,14 @@ func TestEntRepository_GetRequest(t *testing.T) {
 
 	t.Run("UnknownRequest", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		_, err := repo2.GetRequest(ctx, uuid.New())
 		assert.Error(t, err)
 	})
 }
 
 func TestEntRepository_UpdateRequest(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "update_request")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -888,7 +887,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user, err := repo.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -949,7 +948,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user, err := repo2.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -1011,7 +1010,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 
 	t.Run("Success3", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user, err := repo3.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -1072,7 +1071,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 
 	t.Run("UnknownTag", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user, err := repo4.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -1117,7 +1116,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 
 	t.Run("UnknownGroup", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		user, err := repo5.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),

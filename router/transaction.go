@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
+	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
 	"go.uber.org/zap"
@@ -46,6 +47,8 @@ type TransactionOverviewWithOneTarget struct {
 
 func (h Handlers) GetTransactions(c echo.Context) error {
 	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	var sort *string
 	if c.QueryParam("sort") != "" {
 		s := c.QueryParam("sort")
@@ -61,7 +64,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		var err error
 		s, err := service.StrToDate(c.QueryParam("since"))
 		if err != nil {
-			h.Logger.Info("could not parse since as time.Time", zap.Error(err))
+			logger.Info("could not parse since as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		since = &s
@@ -71,7 +74,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		var err error
 		u, err := service.StrToDate(c.QueryParam("until"))
 		if err != nil {
-			h.Logger.Info("could not parse until as time.Time", zap.Error(err))
+			logger.Info("could not parse until as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		until = &u
@@ -80,11 +83,11 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 	if limitQuery := c.QueryParam("limit"); limitQuery != "" {
 		limitI, err := strconv.Atoi(limitQuery)
 		if err != nil {
-			h.Logger.Info("could not parse limit as integer", zap.Error(err))
+			logger.Info("could not parse limit as integer", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		if limitI < 0 {
-			h.Logger.Info("received negative limit", zap.Int("limit", limitI))
+			logger.Info("received negative limit", zap.Int("limit", limitI))
 			err := fmt.Errorf("negative limit(=%d) is invalid", limitI)
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
@@ -94,11 +97,11 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 	if offsetQuery := c.QueryParam("offset"); offsetQuery != "" {
 		offsetI, err := strconv.Atoi(offsetQuery)
 		if err != nil {
-			h.Logger.Info("could not parse offset as integer", zap.Error(err))
+			logger.Info("could not parse offset as integer", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		if offsetI < 0 {
-			h.Logger.Info("received negative offset", zap.Int("offset", offsetI))
+			logger.Info("received negative offset", zap.Int("offset", offsetI))
 			err := fmt.Errorf("negative offset(=%d) is invalid", offsetI)
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
@@ -119,7 +122,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		var r uuid.UUID
 		r, err := uuid.Parse(c.QueryParam("request"))
 		if err != nil {
-			h.Logger.Info("could not parse request as uuid.UUID", zap.Error(err))
+			logger.Info("could not parse request as uuid.UUID", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		request = &r
@@ -178,25 +181,27 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 }
 
 func (h Handlers) PostTransaction(c echo.Context) error {
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	var tx *TransactionOverview
 	// TODO: validate
 	if err := c.Bind(&tx); err != nil {
-		h.Logger.Info("could not get transaction overview from request", zap.Error(err))
+		logger.Info("could not get transaction overview from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	transactions := []*Transaction{}
-	ctx := c.Request().Context()
 	for _, target := range tx.Targets {
 		if target == nil {
-			h.Logger.Info("target is nil")
+			logger.Info("target is nil")
 			return echo.NewHTTPError(http.StatusBadRequest, "target is nil")
 		}
 		created, err := h.Repository.CreateTransaction(
 			ctx,
 			tx.Title, tx.Amount, *target, tx.Tags, tx.Group, tx.Request)
 		if err != nil {
-			h.Logger.Error("failed to create transaction in repository", zap.Error(err))
+			logger.Error("failed to create transaction in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
@@ -238,16 +243,18 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 }
 
 func (h Handlers) GetTransaction(c echo.Context) error {
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	txID, err := uuid.Parse(c.Param("transactionID"))
 	if err != nil {
-		h.Logger.Info("could not parse query parameter `transactionID` as UUID", zap.Error(err))
+		logger.Info("could not parse query parameter `transactionID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := c.Request().Context()
 	tx, err := h.Repository.GetTransaction(ctx, txID)
 	if err != nil {
-		h.Logger.Error("failed to get transaction from repository", zap.Error(err))
+		logger.Error("failed to get transaction from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -287,27 +294,29 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 }
 
 func (h Handlers) PutTransaction(c echo.Context) error {
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	txID, err := uuid.Parse(c.Param("transactionID"))
 	if err != nil {
-		h.Logger.Info("could not parse query parameter `transactionID` as UUID", zap.Error(err))
+		logger.Info("could not parse query parameter `transactionID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	var tx *TransactionOverviewWithOneTarget
 	// TODO: validate
 	if err := c.Bind(&tx); err != nil {
-		h.Logger.Info(
+		logger.Info(
 			"could not get transaction overview with one target from request",
 			zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := c.Request().Context()
 	updated, err := h.Repository.UpdateTransaction(
 		ctx,
 		txID, tx.Title, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
 	if err != nil {
-		h.Logger.Error("failed to update transaction in repository", zap.Error(err))
+		logger.Error("failed to update transaction in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 

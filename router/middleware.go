@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -22,55 +23,67 @@ const (
 	sessionFileCreatorKey    = "request_creator"
 )
 
-// AccessLoggingMiddleware ですべてのエラーを出力する
-func (h Handlers) AccessLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
+func (h Handlers) setLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			start := time.Now()
-			err := next(c)
-			if err != nil {
-				c.Error(err)
-			}
-			stop := time.Now()
-
 			req := c.Request()
-			res := c.Response()
-			latency := strconv.FormatFloat(stop.Sub(start).Seconds(), 'f', 9, 64) + "s"
-			fields := []zapcore.Field{
-				zap.String("requestMethod", req.Method),
-				zap.Int("status", res.Status),
-				zap.String("userAgent", req.UserAgent()),
-				zap.String("remoteIp", c.RealIP()),
-				zap.String("referer", req.Referer()),
-				zap.String("protocol", req.Proto),
-				zap.String("requestUrl", req.URL.String()),
-				zap.String("requestSize", req.Header.Get(echo.HeaderContentLength)),
-				zap.String("responseSize", strconv.FormatInt(res.Size, 10)),
-				zap.String("latency", latency),
-			}
-			httpCode := res.Status
-			switch {
-			case httpCode >= 500:
-				fields = append(fields, zap.Error(err))
-				logger.Error("server error", fields...)
-			case httpCode >= 400:
-				fields = append(fields, zap.Error(err))
-				logger.Warn("client error", fields...)
-			case httpCode >= 300:
-				logger.Info("redirect", fields...)
-			default:
-				logger.Info("success", fields...)
-			}
-			return nil
+			ctx := req.Context()
+			ctx = logging.SetLogger(ctx, logger)
+			c.SetRequest(req.WithContext(ctx))
+			return next(c)
 		}
+	}
+}
+
+// AccessLoggingMiddleware ですべてのエラーを出力する
+func (h Handlers) AccessLoggingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		start := time.Now()
+		err := next(c)
+		if err != nil {
+			c.Error(err)
+		}
+		stop := time.Now()
+
+		req := c.Request()
+		res := c.Response()
+		logger := logging.GetLogger(req.Context())
+		latency := strconv.FormatFloat(stop.Sub(start).Seconds(), 'f', 9, 64) + "s"
+		fields := []zapcore.Field{
+			zap.String("requestMethod", req.Method),
+			zap.Int("status", res.Status),
+			zap.String("userAgent", req.UserAgent()),
+			zap.String("remoteIp", c.RealIP()),
+			zap.String("referer", req.Referer()),
+			zap.String("protocol", req.Proto),
+			zap.String("requestUrl", req.URL.String()),
+			zap.String("requestSize", req.Header.Get(echo.HeaderContentLength)),
+			zap.String("responseSize", strconv.FormatInt(res.Size, 10)),
+			zap.String("latency", latency),
+		}
+		httpCode := res.Status
+		switch {
+		case httpCode >= 500:
+			fields = append(fields, zap.Error(err))
+			logger.Error("server error", fields...)
+		case httpCode >= 400:
+			fields = append(fields, zap.Error(err))
+			logger.Warn("client error", fields...)
+		case httpCode >= 300:
+			logger.Info("redirect", fields...)
+		default:
+			logger.Info("success", fields...)
+		}
+		return nil
 	}
 }
 
 func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		logger := logging.GetLogger(c.Request().Context())
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
-			h.Logger.Error("failed to get session", zap.Error(err))
+			logger.Error("failed to get session", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
@@ -85,15 +98,16 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 func (h Handlers) CheckAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		logger := logging.GetLogger(c.Request().Context())
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
-			h.Logger.Error("failed to get session", zap.Error(err))
+			logger.Error("failed to get session", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, err := getUserInfo(sess)
 		if err != nil {
-			h.Logger.Error("failed to get user info", zap.Error(err))
+			logger.Error("failed to get user info", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
@@ -107,15 +121,16 @@ func (h Handlers) CheckAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 func (h Handlers) CheckRequestCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		logger := logging.GetLogger(c.Request().Context())
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
-			h.Logger.Error("failed to get session", zap.Error(err))
+			logger.Error("failed to get session", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, err := getUserInfo(sess)
 		if err != nil {
-			h.Logger.Error("failed to get user info", zap.Error(err))
+			logger.Error("failed to get user info", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
@@ -135,15 +150,16 @@ func (h Handlers) CheckRequestCreatorMiddleware(next echo.HandlerFunc) echo.Hand
 
 func (h Handlers) CheckAdminOrRequestCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		logger := logging.GetLogger(c.Request().Context())
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
-			h.Logger.Error("failed to get session", zap.Error(err))
+			logger.Error("failed to get session", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, err := getUserInfo(sess)
 		if err != nil {
-			h.Logger.Error("failed to get user info", zap.Error(err))
+			logger.Error("failed to get user info", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
@@ -163,21 +179,22 @@ func (h Handlers) CheckAdminOrRequestCreatorMiddleware(next echo.HandlerFunc) ec
 
 func (h Handlers) CheckAdminOrGroupOwnerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		logger := logging.GetLogger(c.Request().Context())
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
-			h.Logger.Error("failed to get session", zap.Error(err))
+			logger.Error("failed to get session", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, err := getUserInfo(sess)
 		if err != nil {
-			h.Logger.Error("failed to get user info", zap.Error(err))
+			logger.Error("failed to get user info", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		owners, ok := sess.Values[sessionOwnerKey].([]*model.Owner)
 		if !ok {
-			h.Logger.Error("failed to get group owner", zap.Error(err))
+			logger.Error("failed to get group owner", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, "session owner key is not set")
 		}
 
@@ -197,15 +214,16 @@ func (h Handlers) CheckAdminOrGroupOwnerMiddleware(next echo.HandlerFunc) echo.H
 
 func (h Handlers) CheckFileCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		logger := logging.GetLogger(c.Request().Context())
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
-			h.Logger.Error("failed to get session", zap.Error(err))
+			logger.Error("failed to get session", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
 		user, err := getUserInfo(sess)
 		if err != nil {
-			h.Logger.Error("failed to get user info", zap.Error(err))
+			logger.Error("failed to get user info", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
@@ -252,28 +270,29 @@ func (h Handlers) CheckAdminOrFileCreatorMiddleware(next echo.HandlerFunc) echo.
 func (h Handlers) RetrieveGroupOwner() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			logger := logging.GetLogger(c.Request().Context())
 			sess, err := session.Get(h.SessionName, c)
 			if err != nil {
-				h.Logger.Error("failed to get session", zap.Error(err))
+				logger.Error("failed to get session", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 			id, err := uuid.Parse(c.Param("groupID"))
 			if err != nil {
-				h.Logger.Info("could not parse group_id as UUID", zap.Error(err))
+				logger.Info("could not parse group_id as UUID", zap.Error(err))
 				return echo.NewHTTPError(http.StatusBadRequest, err)
 			}
 
 			ctx := c.Request().Context()
 			owners, err := h.Repository.GetOwners(ctx, id)
 			if err != nil {
-				h.Logger.Error("failed to get owners from repository", zap.Error(err))
+				logger.Error("failed to get owners from repository", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
 			sess.Values[sessionOwnerKey] = owners
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				h.Logger.Error("failed to save session", zap.Error(err))
+				logger.Error("failed to save session", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
@@ -285,28 +304,29 @@ func (h Handlers) RetrieveGroupOwner() echo.MiddlewareFunc {
 func (h Handlers) RetrieveRequestCreator() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			logger := logging.GetLogger(c.Request().Context())
 			sess, err := session.Get(h.SessionName, c)
 			if err != nil {
-				h.Logger.Error("failed to get session", zap.Error(err))
+				logger.Error("failed to get session", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 			id, err := uuid.Parse(c.Param("requestID"))
 			if err != nil {
-				h.Logger.Info("could not parse request_id as UUID", zap.Error(err))
+				logger.Info("could not parse request_id as UUID", zap.Error(err))
 				return echo.NewHTTPError(http.StatusBadRequest, err)
 			}
 
 			ctx := c.Request().Context()
 			request, err := h.Repository.GetRequest(ctx, id)
 			if err != nil {
-				h.Logger.Error("failed to get request from repository", zap.Error(err))
+				logger.Error("failed to get request from repository", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
 			sess.Values[sessionRequestCreatorKey] = request.CreatedBy
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				h.Logger.Error("failed to save session", zap.Error(err))
+				logger.Error("failed to save session", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
@@ -318,28 +338,29 @@ func (h Handlers) RetrieveRequestCreator() echo.MiddlewareFunc {
 func (h Handlers) RetrieveFileCreator() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			logger := logging.GetLogger(c.Request().Context())
 			sess, err := session.Get(h.SessionName, c)
 			if err != nil {
-				h.Logger.Error("failed to get session", zap.Error(err))
+				logger.Error("failed to get session", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 			id, err := uuid.Parse(c.Param("fileID"))
 			if err != nil {
-				h.Logger.Info("could not parse file_id as UUID", zap.Error(err))
+				logger.Info("could not parse file_id as UUID", zap.Error(err))
 				return echo.NewHTTPError(http.StatusBadRequest, err)
 			}
 
 			ctx := c.Request().Context()
 			file, err := h.Repository.GetFile(ctx, id)
 			if err != nil {
-				h.Logger.Error("failed to get file from repository", zap.Error(err))
+				logger.Error("failed to get file from repository", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 
 			sess.Values[sessionFileCreatorKey] = file.CreatedBy
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				h.Logger.Error("failed to save session", zap.Error(err))
+				logger.Error("failed to save session", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 

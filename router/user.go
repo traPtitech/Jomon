@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
 )
@@ -24,9 +25,12 @@ type User struct {
 }
 
 func (h Handlers) GetUsers(c echo.Context) error {
-	users, err := h.Repository.GetUsers(c.Request().Context())
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
+	users, err := h.Repository.GetUsers(ctx)
 	if err != nil {
-		h.Logger.Error("failed to get users from repository", zap.Error(err))
+		logger.Error("failed to get users from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -52,23 +56,25 @@ type PutUserRequest struct {
 }
 
 func (h Handlers) UpdateUserInfo(c echo.Context) error {
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	var newUser PutUserRequest
 	if err := c.Bind(&newUser); err != nil {
-		h.Logger.Info("could not get user info from request", zap.Error(err))
+		logger.Info("could not get user info from request", zap.Error(err))
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	user, err := h.Repository.GetUserByName(c.Request().Context(), newUser.Name)
+	user, err := h.Repository.GetUserByName(ctx, newUser.Name)
 	if err != nil {
-		h.Logger.Error("failed to get user from repository", zap.Error(err))
+		logger.Error("failed to get user from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	updated, err := h.Repository.UpdateUser(
-		c.Request().Context(),
-		user.ID, newUser.Name, newUser.DisplayName, newUser.Admin)
+		ctx, user.ID, newUser.Name, newUser.DisplayName, newUser.Admin)
 	if err != nil {
-		h.Logger.Error("failed to update user in repository", zap.Error(err))
+		logger.Error("failed to update user in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -93,24 +99,27 @@ func userFromModelUser(u model.User) User {
 }
 
 func (h Handlers) GetMe(c echo.Context) error {
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
-		h.Logger.Error("failed to get session", zap.Error(err))
+		logger.Error("failed to get session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	userInSession, ok := sess.Values[sessionUserKey].(User)
 	if !ok {
-		h.Logger.Error("failed to parse stored session as user info")
+		logger.Error("failed to parse stored session as user info")
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user info")
 	}
 
-	modelUser, err := h.Repository.GetUserByID(c.Request().Context(), userInSession.ID)
+	modelUser, err := h.Repository.GetUserByID(ctx, userInSession.ID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			h.Logger.Error("failed to find user from DB by ID")
+			logger.Error("failed to find user from DB by ID")
 			return c.JSON(http.StatusNotFound, err)
 		}
-		h.Logger.Error("failed to get user by ID")
+		logger.Error("failed to get user by ID")
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 	user := userFromModelUser(*modelUser)

@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -13,7 +12,7 @@ import (
 )
 
 func TestEntRepository_GetUsers(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_user")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -23,7 +22,7 @@ func TestEntRepository_GetUsers(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		got, err := repo.GetUsers(ctx)
 		assert.NoError(t, err)
@@ -32,7 +31,7 @@ func TestEntRepository_GetUsers(t *testing.T) {
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		user1, err := repo2.CreateUser(ctx, "user1", "user1", true)
 		assert.NoError(t, err)
@@ -53,14 +52,14 @@ func TestEntRepository_GetUsers(t *testing.T) {
 }
 
 func TestEntRepository_CreateUser(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "create_user")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		name := random.AlphaNumeric(t, 20)
 		dn := random.AlphaNumeric(t, 20)
@@ -83,7 +82,7 @@ func TestEntRepository_CreateUser(t *testing.T) {
 
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		name := ""
 		dn := random.AlphaNumeric(t, 20)
@@ -95,7 +94,7 @@ func TestEntRepository_CreateUser(t *testing.T) {
 }
 
 func TestEntRepository_GetUserByName(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_user_by_name")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -105,7 +104,7 @@ func TestEntRepository_GetUserByName(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		name := random.AlphaNumeric(t, 20)
 		dn := random.AlphaNumeric(t, 20)
 		admin := random.Numeric(t, 2) == 1
@@ -121,14 +120,14 @@ func TestEntRepository_GetUserByName(t *testing.T) {
 
 	t.Run("UnknownName", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		_, err = repo2.GetUserByName(ctx, random.AlphaNumeric(t, 20))
 		assert.Error(t, err)
 	})
 }
 
 func TestEntRepository_GetUserByID(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_user_by_id")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -138,7 +137,7 @@ func TestEntRepository_GetUserByID(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		name := random.AlphaNumeric(t, 20)
 		dn := random.AlphaNumeric(t, 20)
 		admin := random.Numeric(t, 2) == 1
@@ -154,21 +153,21 @@ func TestEntRepository_GetUserByID(t *testing.T) {
 
 	t.Run("UnknownUserID", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		_, err := repo2.GetUserByID(ctx, uuid.New())
 		assert.Error(t, err)
 	})
 }
 
 func TestEntRepository_UpdateUser(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "update_user")
 	assert.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		name := random.AlphaNumeric(t, 20)
 		dn := random.AlphaNumeric(t, 20)
@@ -196,7 +195,7 @@ func TestEntRepository_UpdateUser(t *testing.T) {
 
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		name := random.AlphaNumeric(t, 20)
 		dn := random.AlphaNumeric(t, 20)

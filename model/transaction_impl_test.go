@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 )
 
 func TestEntRepository_GetTransactions(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_transactions")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -177,7 +176,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 	t.Run("SuccessWithSortAmountDesc", func(t *testing.T) {
 		err := dropAll(t, ctx, client)
 		require.NoError(t, err)
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		// Create user
 		// nolint:contextcheck
@@ -501,13 +500,13 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 }
 
 func TestEntRepository_GetTransaction(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_transaction")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		// Create user
 		user, err := repo.CreateUser(
@@ -542,14 +541,14 @@ func TestEntRepository_GetTransaction(t *testing.T) {
 }
 
 func TestEntRepository_CreateTransaction(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "create_transaction")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		amount := random.Numeric(t, 100000)
 
@@ -608,7 +607,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 
 	t.Run("SuccessWithoutTags", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
@@ -660,7 +659,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 
 	t.Run("SuccessWithoutGroup", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)
@@ -711,7 +710,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		// Create Transactions
 		title := random.AlphaNumeric(t, 20)
@@ -739,7 +738,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 
 	t.Run("SuccessWithNegativeAmount", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		// Create Transactions
 		title := random.AlphaNumeric(t, 20)
@@ -766,14 +765,14 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 }
 
 func TestEntRepository_UpdateTransaction(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "update_transaction")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		title := random.AlphaNumeric(t, 20)
 		amount := random.Numeric(t, 100000)

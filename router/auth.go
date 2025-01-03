@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
 	"go.uber.org/zap"
@@ -30,6 +31,9 @@ type AuthResponse struct {
 }
 
 func (h Handlers) AuthCallback(c echo.Context) error {
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	code := c.QueryParam("code")
 	if len(code) == 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, "code is required")
@@ -37,7 +41,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
-		h.Logger.Error("failed to get session", zap.Error(err))
+		logger.Error("failed to get session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -56,28 +60,27 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	res, err := service.RequestAccessToken(code, codeVerifier)
 	if err != nil {
-		h.Logger.Error("failed to get access token", zap.Error(err))
+		logger.Error("failed to get access token", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	u, err := service.FetchTraQUserInfo(res.AccessToken)
 	if err != nil {
-		h.Logger.Error("failed to fetch traQ user info", zap.Error(err))
+		logger.Error("failed to fetch traQ user info", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	var modelUser *model.User
-	modelUser, err = h.Repository.GetUserByName(c.Request().Context(), u.Name)
+	modelUser, err = h.Repository.GetUserByName(ctx, u.Name)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			modelUser, err = h.Repository.CreateUser(
-				c.Request().Context(), u.Name, u.DisplayName, false)
+			modelUser, err = h.Repository.CreateUser(ctx, u.Name, u.DisplayName, false)
 			if err != nil {
-				h.Logger.Error("failed to create user", zap.Error(err))
+				logger.Error("failed to create user", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 		} else {
-			h.Logger.Error("failed to get user by name", zap.Error(err))
+			logger.Error("failed to get user by name", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
@@ -92,7 +95,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	sess.Values[sessionUserKey] = user
 
 	if err = sess.Save(c.Request(), c.Response()); err != nil {
-		h.Logger.Error("failed to save session", zap.Error(err))
+		logger.Error("failed to save session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -100,9 +103,12 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 }
 
 func (h Handlers) GeneratePKCE(c echo.Context) error {
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	sess, err := session.Get(h.SessionName, c)
 	if err != nil {
-		h.Logger.Error("failed to get session", zap.Error(err))
+		logger.Error("failed to get session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -124,7 +130,7 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 
 	err = sess.Save(c.Request(), c.Response())
 	if err != nil {
-		h.Logger.Error("failed to save session", zap.Error(err))
+		logger.Error("failed to save session", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	// nolint:lll

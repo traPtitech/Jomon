@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 )
 
 func TestEntRepository_CreateStatus(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "create_status")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)

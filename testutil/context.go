@@ -3,9 +3,13 @@ package testutil
 import (
 	"context"
 	"testing"
+
+	"github.com/traPtitech/Jomon/logging"
 )
 
 func NewContext(t *testing.T) context.Context {
 	t.Helper()
-	return context.Background()
+	logger := LoadLogger(t)
+	ctx := context.Background()
+	return logging.SetLogger(ctx, logger)
 }

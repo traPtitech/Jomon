@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 )
 
 func TestEntRepository_GetComments(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_comments")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -83,7 +82,7 @@ func TestEntRepository_GetComments(t *testing.T) {
 }
 
 func TestEntRepository_CreateComment(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "create_comment")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -159,7 +158,7 @@ func TestEntRepository_CreateComment(t *testing.T) {
 }
 
 func TestEntRepository_UpdateComment(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "update_comment")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -285,7 +284,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 }
 
 func TestEntRepository_DeleteComment(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "delete_comment")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
