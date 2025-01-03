@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -13,7 +12,7 @@ import (
 )
 
 func TestEntRepository_GetRequestTargets(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_request_targets")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -89,7 +88,7 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 }
 
 func TestEntRepository_createRequestTargets(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "create_request_targets")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -139,7 +138,7 @@ func TestEntRepository_createRequestTargets(t *testing.T) {
 }
 
 func TestEntRepository_deleteRequestTargets(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "delete_request_targets")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)

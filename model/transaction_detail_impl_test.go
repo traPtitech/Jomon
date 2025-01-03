@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -13,14 +12,14 @@ import (
 )
 
 func TestEntRepository_createTransactionDetail(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "create_transaction_detail")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		tx, err := client.Tx(ctx)
 		require.NoError(t, err)
 		defer func() {
@@ -52,14 +51,14 @@ func TestEntRepository_createTransactionDetail(t *testing.T) {
 }
 
 func TestEntRepository_updateTransactionDetail(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "update_transaction_detail")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 		tx, err := client.Tx(ctx)
 		require.NoError(t, err)
 		defer func() {

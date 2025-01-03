@@ -1,17 +1,17 @@
 package model
 
 import (
-	"context"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
 func TestEntRepository_GetAdmins(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_admins")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -53,7 +53,7 @@ func TestEntRepository_GetAdmins(t *testing.T) {
 }
 
 func TestEntRepository_AddAdmins(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "add_admins")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
@@ -77,7 +77,7 @@ func TestEntRepository_AddAdmins(t *testing.T) {
 }
 
 func TestEntRepository_DeleteAdmins(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "delete_admins")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)

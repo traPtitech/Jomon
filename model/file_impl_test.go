@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -14,14 +13,14 @@ import (
 )
 
 func TestEntRepository_CreateFile(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "create_file")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		var tags []*Tag
 		var targets []*RequestTarget
@@ -60,7 +59,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 	t.Run("UnknownRequest", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		user, err := repo.CreateUser(
 			ctx,
@@ -82,7 +81,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		var tags []*Tag
 		var targets []*RequestTarget
@@ -109,14 +108,14 @@ func TestEntRepository_CreateFile(t *testing.T) {
 }
 
 func TestEntRepository_GetFile(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_file")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		var tags []*Tag
 		var targets []*RequestTarget
@@ -156,7 +155,7 @@ func TestEntRepository_GetFile(t *testing.T) {
 
 	t.Run("UnknownFile", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		_, err = repo.GetFile(ctx, uuid.New())
 		assert.Error(t, err)
@@ -164,14 +163,14 @@ func TestEntRepository_GetFile(t *testing.T) {
 }
 
 func TestEntRepository_DeleteFile(t *testing.T) {
-	ctx := context.Background()
+	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "delete_file")
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		var tags []*Tag
 		var targets []*RequestTarget
@@ -207,7 +206,7 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 
 	t.Run("UnknownFile", func(t *testing.T) {
 		t.Parallel()
-		ctx := context.Background()
+		ctx := testutil.NewContext(t)
 
 		err = repo.DeleteFile(ctx, uuid.New())
 		assert.Error(t, err)
