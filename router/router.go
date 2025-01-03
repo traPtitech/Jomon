@@ -26,6 +26,7 @@ type Handlers struct {
 func NewServer(h Handlers) *echo.Echo {
 	e := echo.New()
 	e.Debug = os.Getenv("IS_DEBUG_MODE") != ""
+	e.Use(h.setLoggerMiddleware)
 	e.Use(h.AccessLoggingMiddleware(h.Logger))
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())

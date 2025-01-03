@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -21,6 +22,16 @@ const (
 	sessionRequestCreatorKey = "request_creator"
 	sessionFileCreatorKey    = "request_creator"
 )
+
+func (h Handlers) setLoggerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		req := c.Request()
+		ctx := req.Context()
+		ctx = logging.SetLogger(ctx, h.Logger)
+		c.SetRequest(req.WithContext(ctx))
+		return next(c)
+	}
+}
 
 // AccessLoggingMiddleware ですべてのエラーを出力する
 func (h Handlers) AccessLoggingMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
