@@ -7,15 +7,17 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
 )
 
 func (h Handlers) GetAdmins(c echo.Context) error {
 	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
 	admins, err := h.Repository.GetAdmins(ctx)
 	if err != nil {
-		h.Logger.Error("failed to get admins from repository", zap.Error(err))
+		logger.Error("failed to get admins from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -27,20 +29,22 @@ func (h Handlers) GetAdmins(c echo.Context) error {
 }
 
 func (h Handlers) PostAdmins(c echo.Context) error {
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	var admin []uuid.UUID
 	if err := c.Bind(&admin); err != nil {
-		h.Logger.Info("failed to get admin id from request", zap.Error(err))
+		logger.Info("failed to get admin id from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := c.Request().Context()
 	err := h.Repository.AddAdmins(ctx, admin)
 	if err != nil {
 		if ent.IsConstraintError(err) {
-			h.Logger.Info("constraint error while adding admin in repository", zap.Error(err))
+			logger.Info("constraint error while adding admin in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		h.Logger.Error("failed to add admin in repository", zap.Error(err))
+		logger.Error("failed to add admin in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -48,16 +52,18 @@ func (h Handlers) PostAdmins(c echo.Context) error {
 }
 
 func (h Handlers) DeleteAdmins(c echo.Context) error {
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	var admin []uuid.UUID
 	if err := c.Bind(&admin); err != nil {
-		h.Logger.Info("failed to get admin id from request", zap.Error(err))
+		logger.Info("failed to get admin id from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := c.Request().Context()
 	err := h.Repository.DeleteAdmins(ctx, admin)
 	if err != nil {
-		h.Logger.Error("failed to delete admin from repository", zap.Error(err))
+		logger.Error("failed to delete admin from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 

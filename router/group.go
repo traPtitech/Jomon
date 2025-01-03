@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
 )
@@ -57,9 +58,11 @@ type Member struct {
 // GetGroups GET /groups
 func (h Handlers) GetGroups(c echo.Context) error {
 	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	groups, err := h.Repository.GetGroups(ctx)
 	if err != nil {
-		h.Logger.Error("failed to get groups from repository", zap.Error(err))
+		logger.Error("failed to get groups from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -79,16 +82,18 @@ func (h Handlers) GetGroups(c echo.Context) error {
 
 // PostGroup POST /groups
 func (h Handlers) PostGroup(c echo.Context) error {
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	var group Group
 	if err := c.Bind(&group); err != nil {
-		h.Logger.Info("failed to get group from request", zap.Error(err))
+		logger.Info("failed to get group from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	ctx := c.Request().Context()
 	created, err := h.Repository.CreateGroup(ctx, group.Name, group.Description, group.Budget)
 	if err != nil {
-		h.Logger.Error("failed to create group in repository", zap.Error(err))
+		logger.Error("failed to create group in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -106,27 +111,29 @@ func (h Handlers) PostGroup(c echo.Context) error {
 
 // GetGroupDetail GET /groups/:groupID
 func (h Handlers) GetGroupDetail(c echo.Context) error {
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		h.Logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
+		logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		h.Logger.Info("received invalid UUID")
+		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
-	ctx := c.Request().Context()
 	group, err := h.Repository.GetGroup(ctx, groupID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			h.Logger.Info(
+			logger.Info(
 				"could not fin group in repository",
 				zap.String("ID", groupID.String()),
 				zap.Error(err))
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		h.Logger.Error("failed to get group from repository", zap.Error(err))
+		logger.Error("failed to get group from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	res := GroupDetail{
@@ -141,7 +148,7 @@ func (h Handlers) GetGroupDetail(c echo.Context) error {
 	}
 	owners, err := h.Repository.GetOwners(ctx, groupID)
 	if err != nil {
-		h.Logger.Error("failed to get owners from repository", zap.Error(err))
+		logger.Error("failed to get owners from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	res.Owners = lo.Map(owners, func(owner *model.Owner, _ int) *uuid.UUID {
@@ -149,7 +156,7 @@ func (h Handlers) GetGroupDetail(c echo.Context) error {
 	})
 	members, err := h.Repository.GetMembers(ctx, groupID)
 	if err != nil {
-		h.Logger.Error("failed to get members from repository", zap.Error(err))
+		logger.Error("failed to get members from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	res.Members = lo.Map(members, func(member *model.Member, indec int) *uuid.UUID {
@@ -161,27 +168,29 @@ func (h Handlers) GetGroupDetail(c echo.Context) error {
 
 // PutGroup PUT /groups/:groupID
 func (h Handlers) PutGroup(c echo.Context) error {
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	var group Group
 	if err := c.Bind(&group); err != nil {
-		h.Logger.Info("could not get group from request", zap.Error(err))
+		logger.Info("could not get group from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		h.Logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
+		logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
-	ctx := c.Request().Context()
 	updated, err := h.Repository.UpdateGroup(
 		ctx,
 		groupID, group.Name, group.Description, group.Budget)
 	if err != nil {
-		h.Logger.Error("failed to update group in repository", zap.Error(err))
+		logger.Error("failed to update group in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -199,20 +208,22 @@ func (h Handlers) PutGroup(c echo.Context) error {
 
 // DeleteGroup DELETE /groups/:groupID
 func (h Handlers) DeleteGroup(c echo.Context) error {
+	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		h.Logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
+		logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		h.Logger.Info("received invalid UUID")
+		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
-	ctx := c.Request().Context()
 	err = h.Repository.DeleteGroup(ctx, groupID)
 	if err != nil {
-		h.Logger.Error("failed to delete group from repository", zap.Error(err))
+		logger.Error("failed to delete group from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -222,23 +233,25 @@ func (h Handlers) DeleteGroup(c echo.Context) error {
 // PostMember POST /groups/:groupID/members
 func (h Handlers) PostMember(c echo.Context) error {
 	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		h.Logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
+		logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		h.Logger.Info("received invalid UUID")
+		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 	var member []uuid.UUID
 	if err := c.Bind(&member); err != nil {
-		h.Logger.Info("could not get member id from request", zap.Error(err))
+		logger.Info("could not get member id from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	added, err := h.Repository.AddMembers(ctx, groupID, member)
 	if err != nil {
-		h.Logger.Error("failed to add member in repository", zap.Error(err))
+		logger.Error("failed to add member in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	res := lo.Map(added, func(m *model.Member, _ int) *uuid.UUID {
@@ -250,23 +263,25 @@ func (h Handlers) PostMember(c echo.Context) error {
 // DeleteMember DELETE /groups/:groupID/members
 func (h Handlers) DeleteMember(c echo.Context) error {
 	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		h.Logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
+		logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		h.Logger.Info("received invalid UUID")
+		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 	var member []uuid.UUID
 	if err := c.Bind(&member); err != nil {
-		h.Logger.Info("could not get member id from request", zap.Error(err))
+		logger.Info("could not get member id from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	err = h.Repository.DeleteMembers(ctx, groupID, member)
 	if err != nil {
-		h.Logger.Error("failed to delete member from repository", zap.Error(err))
+		logger.Error("failed to delete member from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	return c.NoContent(http.StatusOK)
@@ -275,27 +290,29 @@ func (h Handlers) DeleteMember(c echo.Context) error {
 // PostOwner POST /groups/:groupID/owners
 func (h Handlers) PostOwner(c echo.Context) error {
 	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	var owners []uuid.UUID
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		h.Logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
+		logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		h.Logger.Info("received invalid UUID")
+		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 	if err := c.Bind(&owners); err != nil {
-		h.Logger.Info("could not get owner id from request", zap.Error(err))
+		logger.Info("could not get owner id from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	added, err := h.Repository.AddOwners(ctx, groupID, owners)
 	if err != nil {
 		if ent.IsConstraintError(err) {
-			h.Logger.Info("constraint error while adding owner in repository", zap.Error(err))
+			logger.Info("constraint error while adding owner in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		h.Logger.Error("failed to add owner in repository", zap.Error(err))
+		logger.Error("failed to add owner in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
@@ -309,28 +326,30 @@ func (h Handlers) PostOwner(c echo.Context) error {
 // DeleteOwner DELETE /groups/:groupID/owners
 func (h Handlers) DeleteOwner(c echo.Context) error {
 	ctx := c.Request().Context()
+	logger := logging.GetLogger(ctx)
+
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
-		h.Logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
+		logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 	if groupID == uuid.Nil {
-		h.Logger.Info("received invalid UUID")
+		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 	var ownerIDs []uuid.UUID
 	if err := c.Bind(&ownerIDs); err != nil {
-		h.Logger.Info("could not get owner id from request", zap.Error(err))
+		logger.Info("could not get owner id from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	err = h.Repository.DeleteOwners(ctx, groupID, ownerIDs)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			h.Logger.Info("could not find owner in repository", zap.Error(err))
+			logger.Info("could not find owner in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
-		h.Logger.Error("failed to delete owner from repository", zap.Error(err))
+		logger.Error("failed to delete owner from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
