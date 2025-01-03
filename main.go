@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/router"
 	"github.com/traPtitech/Jomon/storage"
@@ -41,20 +42,16 @@ func main() {
 	repo := model.NewEntRepository(client, strg)
 
 	// Setup server
-	var logger *zap.Logger
-	if os.Getenv("IS_DEBUG_MODE") != "" {
-		logger, err = zap.NewDevelopment()
-	} else {
-		logger, err = zap.NewProduction()
+	logMode := logging.ModeFromEnv("IS_DEBUG_MODE")
+	logger, err := logging.Load(logMode)
+	if err != nil {
+		panic(err)
 	}
 	defer func() {
 		if err := logger.Sync(); err != nil {
 			panic(err)
 		}
 	}()
-	if err != nil {
-		panic(err)
-	}
 	handlers := router.Handlers{
 		Repository:  repo,
 		Storage:     strg,
