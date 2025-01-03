@@ -12,7 +12,6 @@ import (
 	"github.com/traPtitech/Jomon/model/mock_model"
 	"github.com/traPtitech/Jomon/testutil/random"
 	"go.uber.org/mock/gomock"
-	"go.uber.org/zap"
 )
 
 type MockRepository struct {
@@ -70,10 +69,6 @@ type TestHandlers struct {
 }
 
 func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, error) {
-	logger, err := zap.NewDevelopment()
-	if err != nil {
-		return nil, err
-	}
 	gob.Register(User{})
 	repository := NewMockRepository(ctrl)
 	storage := NewMockStorage(ctrl)
@@ -83,7 +78,6 @@ func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, erro
 		Handlers{
 			Repository:  repository,
 			Storage:     storage,
-			Logger:      logger,
 			SessionName: sessionName,
 		},
 		repository,
