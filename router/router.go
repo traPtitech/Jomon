@@ -27,7 +27,7 @@ func NewServer(h Handlers) *echo.Echo {
 	e := echo.New()
 	e.Debug = os.Getenv("IS_DEBUG_MODE") != ""
 	e.Use(h.setLoggerMiddleware)
-	e.Use(h.AccessLoggingMiddleware(h.Logger))
+	e.Use(h.AccessLoggingMiddleware)
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))))
