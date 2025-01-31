@@ -11,7 +11,7 @@ require (
 	github.com/labstack/echo-contrib v0.17.2
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/ncw/swift v1.0.53
-	github.com/samber/lo v1.47.0
+	github.com/samber/lo v1.49.1
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/mock v0.5.0
 	go.uber.org/zap v1.27.0
