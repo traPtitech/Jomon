@@ -831,9 +831,16 @@ func (h Handlers) PutStatus(c echo.Context) error {
 }
 
 func IsAbleNoCommentChangeStatus(status, latestStatus model.Status) bool {
-	return !(status == model.FixRequired && latestStatus == model.Submitted) &&
-		!(status == model.Rejected && latestStatus == model.Submitted) &&
-		!(status == model.Submitted && latestStatus == model.Accepted)
+	switch latestStatus {
+	case model.Submitted:
+		return status != model.FixRequired && status != model.Rejected
+	case model.Accepted:
+		return status != model.Submitted
+	case model.FixRequired, model.Completed, model.Rejected:
+		return true
+	}
+	// the switch above performs exhaustive check
+	panic("unreachable")
 }
 
 func IsAbleCreatorChangeStatus(status, latestStatus model.Status) bool {
