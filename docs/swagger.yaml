@@ -122,6 +122,7 @@ paths:
         content:
           application/json:
             schema:
+              # FIXME: PutTransactionWithOneTargetにする
               $ref: "#/components/schemas/PostTransactionWithOneTarget"
       responses:
         "200":
@@ -1163,6 +1164,8 @@ components:
         id:
           type: string
           format: uuid
+        title:
+          type: string
         amount:
           type: integer
           example: 1200
@@ -1197,6 +1200,8 @@ components:
     PostTransaction:
       type: object
       properties:
+        title:
+          type: string
         amount:
           type: integer
           example: 1200
@@ -1226,6 +1231,8 @@ components:
     PostTransactionWithOneTarget:
       type: object
       properties:
+        title:
+          type: string
         amount:
           type: integer
           example: 1200
