@@ -80,10 +80,46 @@ type Webhook struct {
 	ID        string
 }
 
-func WebhookRequestsEventHandler(c echo.Context, reqBody, resBody []byte) {
-	webhookSecret := os.Getenv("WEBHOOK_SECRET")
-	webhookChannelId := os.Getenv("WEBHOOK_CHANNEL_ID")
-	webhookId := os.Getenv("WEBHOOK_ID")
+type WebhookService struct {
+	// WEBHOOK_SECRET
+	secret string
+	// WEBHOOK_CHANNEL_ID
+	channelID string
+	// WEBHOOK_ID
+	webhookID string
+}
+
+func LoadWebhookService() (*WebhookService, error) {
+	loadEnv := func(key string) (string, error) {
+		value := os.Getenv(key)
+		if value == "" {
+			return "", fmt.Errorf("%s is not set", key)
+		}
+		return value, nil
+	}
+	secret, err := loadEnv("WEBHOOK_SECRET")
+	if err != nil {
+		return nil, err
+	}
+	// WEBHOOK_CHANNEL_ID can be empty
+	channelID := os.Getenv("WEBHOOK_CHANNEL_ID")
+	webhookID, err := loadEnv("WEBHOOK_ID")
+	if err != nil {
+		return nil, err
+	}
+
+	return NewWebhookService(secret, channelID, webhookID), nil
+}
+
+func NewWebhookService(secret, channelID, webhookID string) *WebhookService {
+	return &WebhookService{
+		secret:    secret,
+		channelID: channelID,
+		webhookID: webhookID,
+	}
+}
+
+func (ws *WebhookService) WebhookRequestsEventHandler(c echo.Context, reqBody, resBody []byte) {
 	var message string
 
 	if strings.Contains(c.Request().URL.Path, "/comments") {
@@ -142,13 +178,10 @@ func WebhookRequestsEventHandler(c echo.Context, reqBody, resBody []byte) {
 		message += "\n\n"
 		message += resApp.Content + "\n"
 	}
-	_ = RequestWebhook(message, webhookSecret, webhookChannelId, webhookId, 1)
+	_ = ws.RequestWebhook(message, 1)
 }
 
-func WebhookTransactionsEventHandler(c echo.Context, reqBody, resBody []byte) {
-	webhookSecret := os.Getenv("WEBHOOK_SECRET")
-	webhookChannelId := os.Getenv("WEBHOOK_CHANNEL_ID")
-	webhookId := os.Getenv("WEBHOOK_ID")
+func (ws *WebhookService) WebhookTransactionsEventHandler(c echo.Context, reqBody, resBody []byte) {
 	var message string
 
 	if c.Request().Method == http.MethodPost {
@@ -218,16 +251,16 @@ func WebhookTransactionsEventHandler(c echo.Context, reqBody, resBody []byte) {
 			message += fmt.Sprintf("- タグ: %s", strings.Join(tags, ", "))
 		}
 	}
-	_ = RequestWebhook(message, webhookSecret, webhookChannelId, webhookId, 1)
+	_ = ws.RequestWebhook(message, 1)
 }
 
-func RequestWebhook(message, secret, channelID, webhookID string, embed int) error {
+func (ws *WebhookService) RequestWebhook(message string, embed int) error {
 	u, err := url.Parse("https://q.trap.jp/api/v3/webhooks")
 	if err != nil {
 		return err
 	}
 
-	u.Path = path.Join(u.Path, webhookID)
+	u.Path = path.Join(u.Path, ws.webhookID)
 	query := u.Query()
 	query.Set("embed", strconv.Itoa(embed))
 	u.RawQuery = query.Encode()
@@ -237,9 +270,9 @@ func RequestWebhook(message, secret, channelID, webhookID string, embed int) err
 		return err
 	}
 	req.Header.Set(echo.HeaderContentType, echo.MIMETextPlain)
-	req.Header.Set("X-TRAQ-Signature", calcSignature(message, secret))
-	if channelID != "" {
-		req.Header.Set("X-TRAQ-Channel-Id", channelID)
+	req.Header.Set("X-TRAQ-Signature", ws.calcSignature(message))
+	if ws.channelID != "" {
+		req.Header.Set("X-TRAQ-Channel-Id", ws.channelID)
 	}
 
 	res, err := http.DefaultClient.Do(req)
@@ -252,8 +285,8 @@ func RequestWebhook(message, secret, channelID, webhookID string, embed int) err
 	return nil
 }
 
-func calcSignature(message, secret string) string {
-	mac := hmac.New(sha1.New, []byte(secret))
+func (ws *WebhookService) calcSignature(message string) string {
+	mac := hmac.New(sha1.New, []byte(ws.secret))
 	mac.Write([]byte(message))
 	return hex.EncodeToString(mac.Sum(nil))
 }

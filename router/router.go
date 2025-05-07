@@ -17,9 +17,10 @@ import (
 )
 
 type Handlers struct {
-	Repository  model.Repository
-	Storage     storage.Storage
-	SessionName string
+	WebhookService *service.WebhookService
+	Repository     model.Repository
+	Storage        storage.Storage
+	SessionName    string
 }
 
 func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
@@ -52,19 +53,19 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 			apiRequests.POST(
 				"",
 				h.PostRequest,
-				middleware.BodyDump(service.WebhookRequestsEventHandler))
+				middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler))
 			apiRequestIDs := apiRequests.Group("/:requestID", retrieveRequestCreator)
 			{
 				apiRequestIDs.GET("", h.GetRequest)
 				apiRequestIDs.PUT(
 					"",
 					h.PutRequest,
-					middleware.BodyDump(service.WebhookRequestsEventHandler),
+					middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler),
 					h.CheckRequestCreatorMiddleware)
 				apiRequestIDs.POST(
 					"/comments",
 					h.PostComment,
-					middleware.BodyDump(service.WebhookRequestsEventHandler))
+					middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler))
 				apiRequestIDs.PUT("/status", h.PutStatus, h.CheckAdminOrRequestCreatorMiddleware)
 			}
 		}
@@ -75,13 +76,13 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 			apiTransactions.POST(
 				"",
 				h.PostTransaction,
-				middleware.BodyDump(service.WebhookTransactionsEventHandler),
+				middleware.BodyDump(h.WebhookService.WebhookTransactionsEventHandler),
 				h.CheckAdminMiddleware)
 			apiTransactions.GET("/:transactionID", h.GetTransaction)
 			apiTransactions.PUT(
 				"/:transactionID",
 				h.PutTransaction,
-				middleware.BodyDump(service.WebhookTransactionsEventHandler),
+				middleware.BodyDump(h.WebhookService.WebhookTransactionsEventHandler),
 				h.CheckAdminMiddleware)
 		}
 
