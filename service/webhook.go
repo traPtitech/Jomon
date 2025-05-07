@@ -80,6 +80,45 @@ type Webhook struct {
 	ID        string
 }
 
+type WebhookService struct {
+	// WEBHOOK_SECRET
+	secret string
+	// WEBHOOK_CHANNEL_ID
+	channelID string
+	// WEBHOOK_ID
+	webhookID string
+}
+
+func LoadWebhookService() (*WebhookService, error) {
+	loadEnv := func(key string) (string, error) {
+		value := os.Getenv(key)
+		if value == "" {
+			return "", fmt.Errorf("%s is not set", key)
+		}
+		return value, nil
+	}
+	secret, err := loadEnv("WEBHOOK_SECRET")
+	if err != nil {
+		return nil, err
+	}
+	// WEBHOOK_CHANNEL_ID can be empty
+	channelID := os.Getenv("WEBHOOK_CHANNEL_ID")
+	webhookID, err := loadEnv("WEBHOOK_ID")
+	if err != nil {
+		return nil, err
+	}
+
+	return NewWebhookService(secret, channelID, webhookID), nil
+}
+
+func NewWebhookService(secret, channelID, webhookID string) *WebhookService {
+	return &WebhookService{
+		secret:    secret,
+		channelID: channelID,
+		webhookID: webhookID,
+	}
+}
+
 func WebhookRequestsEventHandler(c echo.Context, reqBody, resBody []byte) {
 	webhookSecret := os.Getenv("WEBHOOK_SECRET")
 	webhookChannelId := os.Getenv("WEBHOOK_CHANNEL_ID")
