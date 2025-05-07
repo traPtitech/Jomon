@@ -6,6 +6,7 @@ import (
 	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/router"
+	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/storage"
 	"go.uber.org/zap"
 )
@@ -40,6 +41,11 @@ func main() {
 	}
 	// Setup repository
 	repo := model.NewEntRepository(client, strg)
+	// Setup webhook service
+	ws, err := service.LoadWebhookService()
+	if err != nil {
+		panic(err)
+	}
 
 	// Setup server
 	logMode := logging.ModeFromEnv("IS_DEBUG_MODE")
@@ -53,9 +59,10 @@ func main() {
 		}
 	}()
 	handlers := router.Handlers{
-		Repository:  repo,
-		Storage:     strg,
-		SessionName: "session",
+		WebhookService: ws,
+		Repository:     repo,
+		Storage:        strg,
+		SessionName:    "session",
 	}
 
 	server := handlers.NewServer(logger)
