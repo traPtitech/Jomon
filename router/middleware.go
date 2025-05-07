@@ -28,7 +28,9 @@ func (h Handlers) setLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			req := c.Request()
 			ctx := req.Context()
-			ctx = logging.SetLogger(ctx, logger)
+			reqID := req.Header.Get(echo.HeaderXRequestID)
+			l := logger.With(zap.String("requestID", reqID))
+			ctx = logging.SetLogger(ctx, l)
 			c.SetRequest(req.WithContext(ctx))
 			return next(c)
 		}

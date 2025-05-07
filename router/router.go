@@ -26,6 +26,7 @@ type Handlers struct {
 func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	e := echo.New()
 	e.Debug = os.Getenv("IS_DEBUG_MODE") != ""
+	e.Use(middleware.RequestID())
 	e.Use(h.setLoggerMiddleware(logger))
 	e.Use(h.AccessLoggingMiddleware)
 	e.Use(middleware.Recover())
