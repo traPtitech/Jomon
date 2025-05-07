@@ -5,7 +5,7 @@ go 1.24.2
 require (
 	entgo.io/ent v0.14.4
 	github.com/go-sql-driver/mysql v1.9.2
-	github.com/google/go-cmp v0.6.0
+	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/sessions v1.4.0
 	github.com/labstack/echo-contrib v0.17.3
