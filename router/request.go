@@ -71,6 +71,13 @@ type RequestResponse struct {
 	Group     *GroupOverview    `json:"group"`
 }
 
+type RequestDetailResponse struct {
+	RequestResponse
+	Comments []*CommentDetail          `json:"comments"`
+	Statuses []*StatusResponseOverview `json:"statuses"`
+	Files    []uuid.UUID               `json:"files"`
+}
+
 type Comment struct {
 	Comment string `json:"comment"`
 }
@@ -370,6 +377,18 @@ func (h Handlers) PostRequest(c echo.Context) error {
 			UpdatedAt: tag.UpdatedAt,
 		}
 	})
+	comments := lo.Map(
+		request.Comments,
+		func(comment *model.Comment, _ int) *CommentDetail {
+			return &CommentDetail{
+				ID:        comment.ID,
+				User:      comment.User,
+				Comment:   comment.Comment,
+				CreatedAt: comment.CreatedAt,
+				UpdatedAt: comment.UpdatedAt,
+			}
+		},
+	)
 	statuses := lo.Map(
 		request.Statuses,
 		func(status *model.RequestStatus, _ int) *StatusResponseOverview {
@@ -380,18 +399,29 @@ func (h Handlers) PostRequest(c echo.Context) error {
 			}
 		},
 	)
+	files := lo.Map(
+		request.Files,
+		func(file *uuid.UUID, _ int) uuid.UUID {
+			return *file
+		},
+	)
 
-	res := &RequestResponse{
-		ID:        request.ID,
-		Status:    request.Status,
-		CreatedAt: request.CreatedAt,
-		UpdatedAt: request.UpdatedAt,
-		CreatedBy: request.CreatedBy,
-		Title:     request.Title,
-		Content:   request.Content,
-		Tags:      restags,
-		Targets:   reqtargets,
-		Group:     resgroup,
+	res := &RequestDetailResponse{
+		RequestResponse: RequestResponse{
+			ID:        request.ID,
+			Status:    request.Status,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: request.UpdatedAt,
+			CreatedBy: request.CreatedBy,
+			Title:     request.Title,
+			Content:   request.Content,
+			Tags:      restags,
+			Targets:   reqtargets,
+			Group:     resgroup,
+		},
+		Comments: comments,
+		Statuses: statuses,
+		Files:    files,
 	}
 	return c.JSON(http.StatusOK, res)
 }
@@ -427,15 +457,6 @@ func (h Handlers) GetRequest(c echo.Context) error {
 		logger.Error("failed to get comments from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	comments := lo.Map(modelcomments, func(modelcomment *model.Comment, _ int) *CommentDetail {
-		return &CommentDetail{
-			ID:        modelcomment.ID,
-			User:      modelcomment.User,
-			Comment:   modelcomment.Comment,
-			CreatedAt: modelcomment.CreatedAt,
-			UpdatedAt: modelcomment.UpdatedAt,
-		}
-	})
 	var resgroup *GroupOverview
 	if request.Group != nil {
 		resgroup = &GroupOverview{
@@ -468,7 +489,16 @@ func (h Handlers) GetRequest(c echo.Context) error {
 		}
 	})
 
-	resstatuses := lo.Map(
+	comments := lo.Map(modelcomments, func(modelcomment *model.Comment, _ int) *CommentDetail {
+		return &CommentDetail{
+			ID:        modelcomment.ID,
+			User:      modelcomment.User,
+			Comment:   modelcomment.Comment,
+			CreatedAt: modelcomment.CreatedAt,
+			UpdatedAt: modelcomment.UpdatedAt,
+		}
+	})
+	statuses := lo.Map(
 		request.Statuses,
 		func(status *model.RequestStatus, _ int) *StatusResponseOverview {
 			return &StatusResponseOverview{
@@ -478,18 +508,26 @@ func (h Handlers) GetRequest(c echo.Context) error {
 			}
 		},
 	)
+	files := lo.Map(request.Files, func(file *uuid.UUID, _ int) uuid.UUID {
+		return *file
+	})
 
-	res := &RequestResponse{
-		ID:        request.ID,
-		Status:    request.Status,
-		CreatedAt: request.CreatedAt,
-		UpdatedAt: request.UpdatedAt,
-		CreatedBy: request.CreatedBy,
-		Title:     request.Title,
-		Content:   request.Content,
-		Tags:      restags,
-		Targets:   reqtargets,
-		Group:     resgroup,
+	res := &RequestDetailResponse{
+		RequestResponse: RequestResponse{
+			ID:        request.ID,
+			Status:    request.Status,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: request.UpdatedAt,
+			CreatedBy: request.CreatedBy,
+			Title:     request.Title,
+			Content:   request.Content,
+			Tags:      restags,
+			Targets:   reqtargets,
+			Group:     resgroup,
+		},
+		Statuses: statuses,
+		Comments: comments,
+		Files:    files,
 	}
 	return c.JSON(http.StatusOK, res)
 }
@@ -560,20 +598,6 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		logger.Error("failed to update request in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	modelcomments, err := h.Repository.GetComments(ctx, requestID)
-	if err != nil {
-		logger.Error("failed to get comments from repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	comments := lo.Map(modelcomments, func(modelcomment *model.Comment, _ int) *CommentDetail {
-		return &CommentDetail{
-			ID:        modelcomment.ID,
-			User:      modelcomment.User,
-			Comment:   modelcomment.Comment,
-			CreatedAt: modelcomment.CreatedAt,
-			UpdatedAt: modelcomment.UpdatedAt,
-		}
-	})
 
 	var resgroup *GroupOverview
 	if group != nil {
@@ -608,7 +632,16 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		},
 	)
 
-	resstatuses := lo.Map(
+	comments := lo.Map(request.Comments, func(c *model.Comment, _ int) *CommentDetail {
+		return &CommentDetail{
+			ID:        c.ID,
+			User:      c.User,
+			Comment:   c.Comment,
+			CreatedAt: c.CreatedAt,
+			UpdatedAt: c.UpdatedAt,
+		}
+	})
+	statuses := lo.Map(
 		request.Statuses,
 		func(status *model.RequestStatus, _ int) *StatusResponseOverview {
 			return &StatusResponseOverview{
@@ -618,18 +651,26 @@ func (h Handlers) PutRequest(c echo.Context) error {
 			}
 		},
 	)
+	files := lo.Map(request.Files, func(file *uuid.UUID, _ int) uuid.UUID {
+		return *file
+	})
 
-	res := &RequestResponse{
-		ID:        request.ID,
-		Status:    request.Status,
-		CreatedAt: request.CreatedAt,
-		UpdatedAt: request.UpdatedAt,
-		CreatedBy: request.CreatedBy,
-		Title:     request.Title,
-		Content:   request.Content,
-		Tags:      restags,
-		Targets:   restargets,
-		Group:     resgroup,
+	res := &RequestDetailResponse{
+		RequestResponse: RequestResponse{
+			ID:        request.ID,
+			Status:    request.Status,
+			CreatedAt: request.CreatedAt,
+			UpdatedAt: request.UpdatedAt,
+			CreatedBy: request.CreatedBy,
+			Title:     request.Title,
+			Content:   request.Content,
+			Tags:      restags,
+			Targets:   restargets,
+			Group:     resgroup,
+		},
+		Comments: comments,
+		Statuses: statuses,
+		Files:    files,
 	}
 	return c.JSON(http.StatusOK, res)
 }
