@@ -59,18 +59,16 @@ type PutRequest struct {
 }
 
 type RequestResponse struct {
-	ID        uuid.UUID                 `json:"id"`
-	Status    model.Status              `json:"status"`
-	CreatedAt time.Time                 `json:"created_at"`
-	UpdatedAt time.Time                 `json:"updated_at"`
-	CreatedBy uuid.UUID                 `json:"created_by"`
-	Title     string                    `json:"title"`
-	Content   string                    `json:"content"`
-	Tags      []*TagOverview            `json:"tags"`
-	Targets   []*TargetOverview         `json:"targets"`
-	Group     *GroupOverview            `json:"group"`
-	Statuses  []*StatusResponseOverview `json:"statuses"`
-	Comments  []*CommentDetail          `json:"comments"`
+	ID        uuid.UUID         `json:"id"`
+	Status    model.Status      `json:"status"`
+	CreatedAt time.Time         `json:"created_at"`
+	UpdatedAt time.Time         `json:"updated_at"`
+	CreatedBy uuid.UUID         `json:"created_by"`
+	Title     string            `json:"title"`
+	Content   string            `json:"content"`
+	Tags      []*TagOverview    `json:"tags"`
+	Targets   []*TargetOverview `json:"targets"`
+	Group     *GroupOverview    `json:"group"`
 }
 
 type Comment struct {
@@ -279,7 +277,6 @@ func (h Handlers) GetRequests(c echo.Context) error {
 				Targets:   restargets,
 				Tags:      tags,
 				Group:     resgroup,
-				Comments:  []*CommentDetail{},
 			}
 		},
 	)
@@ -394,7 +391,6 @@ func (h Handlers) PostRequest(c echo.Context) error {
 		Content:   request.Content,
 		Tags:      restags,
 		Targets:   reqtargets,
-		Statuses:  statuses,
 		Group:     resgroup,
 	}
 	return c.JSON(http.StatusOK, res)
@@ -493,9 +489,7 @@ func (h Handlers) GetRequest(c echo.Context) error {
 		Content:   request.Content,
 		Tags:      restags,
 		Targets:   reqtargets,
-		Statuses:  resstatuses,
 		Group:     resgroup,
-		Comments:  comments,
 	}
 	return c.JSON(http.StatusOK, res)
 }
@@ -633,11 +627,9 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		CreatedBy: request.CreatedBy,
 		Title:     request.Title,
 		Content:   request.Content,
-		Statuses:  resstatuses,
 		Tags:      restags,
 		Targets:   restargets,
 		Group:     resgroup,
-		Comments:  comments,
 	}
 	return c.JSON(http.StatusOK, res)
 }
