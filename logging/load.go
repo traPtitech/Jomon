@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type Mode string
@@ -17,14 +18,17 @@ const (
 var ErrUnknownMode = errors.New("unknown mode")
 
 func Load(mode Mode) (*zap.Logger, error) {
+	var config zap.Config
 	switch mode {
 	case Development:
-		return zap.NewDevelopment()
+		config = zap.NewDevelopmentConfig()
 	case Production:
-		return zap.NewProduction()
+		config = zap.NewProductionConfig()
 	default:
 		return nil, ErrUnknownMode
 	}
+	config.EncoderConfig.EncodeTime = zapcore.RFC3339NanoTimeEncoder
+	return config.Build()
 }
 
 func ModeFromEnv(varName string) Mode {
