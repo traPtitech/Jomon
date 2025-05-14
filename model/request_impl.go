@@ -218,10 +218,12 @@ func (repo *EntRepository) CreateRequest(
 		Tags:      tags,
 		Targets:   ts,
 		Group:     group,
-		Statuses:  statuses,
 		CreatedAt: created.CreatedAt,
 		UpdatedAt: created.UpdatedAt,
 		CreatedBy: t.ID,
+		Comments:  []*Comment{},
+		Statuses:  statuses,
+		Files:     []*uuid.UUID{},
 	}
 	return reqdetail, nil
 }
@@ -242,6 +244,8 @@ func (repo *EntRepository) GetRequest(
 			q.WithUser()
 		}).
 		WithUser().
+		WithComment().
+		WithFile().
 		Only(ctx)
 	if err != nil {
 		return nil, err
@@ -256,8 +260,14 @@ func (repo *EntRepository) GetRequest(
 		},
 	)
 	modelGroup := ConvertEntGroupToModelGroup(r.Edges.Group)
+	comments := lo.Map(r.Edges.Comment, func(c *ent.Comment, _ int) *Comment {
+		return ConvertEntCommentToModelComment(c, c.Edges.User.ID)
+	})
 	statuses := lo.Map(r.Edges.Status, func(status *ent.RequestStatus, _ int) *RequestStatus {
 		return convertEntRequestStatusToModelRequestStatus(status)
+	})
+	files := lo.Map(r.Edges.File, func(f *ent.File, _ int) *uuid.UUID {
+		return &f.ID
 	})
 	reqdetail := &RequestDetail{
 		ID:        r.ID,
@@ -266,11 +276,13 @@ func (repo *EntRepository) GetRequest(
 		Content:   r.Content,
 		Tags:      tags,
 		Targets:   targets,
-		Statuses:  statuses,
 		Group:     modelGroup,
 		CreatedAt: r.CreatedAt,
 		UpdatedAt: r.UpdatedAt,
 		CreatedBy: r.Edges.User.ID,
+		Comments:  comments,
+		Statuses:  statuses,
+		Files:     files,
 	}
 	return reqdetail, nil
 }
@@ -362,13 +374,29 @@ func (repo *EntRepository) UpdateRequest(
 		err = RollbackWithError(tx, err)
 		return nil, err
 	}
+	entcomments, err := updated.QueryComment().
+		WithUser().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	comments := lo.Map(entcomments, func(c *ent.Comment, _ int) *Comment {
+		return ConvertEntCommentToModelComment(c, c.Edges.User.ID)
+	})
+	statuses := lo.Map(entstatuses, func(s *ent.RequestStatus, _ int) *RequestStatus {
+		return convertEntRequestStatusToModelRequestStatus(s)
+	})
+	entfiles, err := updated.QueryFile().All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	files := lo.Map(entfiles, func(f *ent.File, _ int) *uuid.UUID {
+		return &f.ID
+	})
 	err = tx.Commit()
 	if err != nil {
 		return nil, err
 	}
-	statuses := lo.Map(entstatuses, func(s *ent.RequestStatus, _ int) *RequestStatus {
-		return convertEntRequestStatusToModelRequestStatus(s)
-	})
 
 	modelgroup := ConvertEntGroupToModelGroup(entgroup)
 	reqdetail := &RequestDetail{
@@ -379,10 +407,12 @@ func (repo *EntRepository) UpdateRequest(
 		Tags:      modeltags,
 		Targets:   modeltargets,
 		Group:     modelgroup,
-		Statuses:  statuses,
 		CreatedAt: updated.CreatedAt,
 		UpdatedAt: updated.UpdatedAt,
 		CreatedBy: u.ID,
+		Comments:  comments,
+		Statuses:  statuses,
+		Files:     files,
 	}
 	return reqdetail, nil
 }
