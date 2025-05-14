@@ -896,10 +896,6 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &RequestTarget{
-			Target: user.ID,
-			Amount: random.Numeric(t, 10000),
-		}
 		budget := random.Numeric(t, 10000)
 		group, err := repo.CreateGroup(
 			ctx,
@@ -907,6 +903,10 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			random.AlphaNumeric(t, 30),
 			&budget)
 		require.NoError(t, err)
+		target := &RequestTarget{
+			Target: user.ID,
+			Amount: random.Numeric(t, 10000),
+		}
 		request, err := repo.CreateRequest(
 			ctx,
 			random.AlphaNumeric(t, 40),
@@ -914,6 +914,12 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			[]*Tag{tag}, []*RequestTarget{target},
 			group, user.ID)
 		require.NoError(t, err)
+		// CreatedAt の差を1秒以内に収めるためにここで time.Now を取る
+		expTarget := &RequestTargetDetail{
+			Target:    target.Target,
+			Amount:    target.Amount,
+			CreatedAt: time.Now(),
+		}
 
 		updatedRequest, err := repo.UpdateRequest(
 			ctx,
@@ -922,18 +928,14 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			group)
 		assert.NoError(t, err)
 		exp := &RequestDetail{
-			ID:       request.ID,
-			Status:   request.Status,
-			Title:    request.Title,
-			Content:  request.Content,
-			Comments: request.Comments,
-			Files:    request.Files,
-			Tags:     []*Tag{tag},
-			Targets: []*RequestTargetDetail{{
-				Target:    target.Target,
-				Amount:    target.Amount,
-				CreatedAt: time.Now(),
-			}},
+			ID:        request.ID,
+			Status:    request.Status,
+			Title:     request.Title,
+			Content:   request.Content,
+			Comments:  request.Comments,
+			Files:     request.Files,
+			Tags:      []*Tag{tag},
+			Targets:   []*RequestTargetDetail{expTarget},
 			Statuses:  request.Statuses,
 			Group:     group,
 			CreatedAt: request.CreatedAt,
@@ -975,6 +977,12 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			[]*Tag{tag}, []*RequestTarget{target},
 			group, user.ID)
 		require.NoError(t, err)
+		// CreatedAt の差を1秒以内に収めるためにここで time.Now を取る
+		expTarget := &RequestTargetDetail{
+			Target:    target.Target,
+			Amount:    target.Amount,
+			CreatedAt: time.Now(),
+		}
 
 		title := random.AlphaNumeric(t, 40)
 		updatedRequest, err := repo2.UpdateRequest(
@@ -984,18 +992,14 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			group)
 		assert.NoError(t, err)
 		exp := &RequestDetail{
-			ID:       request.ID,
-			Status:   request.Status,
-			Title:    title,
-			Content:  request.Content,
-			Comments: request.Comments,
-			Files:    request.Files,
-			Tags:     []*Tag{tag},
-			Targets: []*RequestTargetDetail{{
-				Target:    target.Target,
-				Amount:    target.Amount,
-				CreatedAt: time.Now(),
-			}},
+			ID:        request.ID,
+			Status:    request.Status,
+			Title:     title,
+			Content:   request.Content,
+			Comments:  request.Comments,
+			Files:     request.Files,
+			Tags:      []*Tag{tag},
+			Targets:   []*RequestTargetDetail{expTarget},
 			Statuses:  request.Statuses,
 			Group:     group,
 			CreatedAt: request.CreatedAt,
@@ -1037,6 +1041,12 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			[]*Tag{tag}, []*RequestTarget{target},
 			group, user.ID)
 		require.NoError(t, err)
+		// CreatedAt の差を1秒以内に収めるためにここで time.Now を取る
+		expTarget := &RequestTargetDetail{
+			Target:    target.Target,
+			Amount:    target.Amount,
+			CreatedAt: time.Now(),
+		}
 		content := random.AlphaNumeric(t, 100)
 		updatedRequest, err := repo3.UpdateRequest(
 			ctx,
@@ -1045,18 +1055,14 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			group)
 		assert.NoError(t, err)
 		exp := &RequestDetail{
-			ID:       request.ID,
-			Status:   request.Status,
-			Title:    request.Title,
-			Content:  content,
-			Comments: request.Comments,
-			Files:    request.Files,
-			Tags:     []*Tag{tag},
-			Targets: []*RequestTargetDetail{{
-				Target:    target.Target,
-				Amount:    target.Amount,
-				CreatedAt: time.Now(),
-			}},
+			ID:        request.ID,
+			Status:    request.Status,
+			Title:     request.Title,
+			Content:   content,
+			Comments:  request.Comments,
+			Files:     request.Files,
+			Tags:      []*Tag{tag},
+			Targets:   []*RequestTargetDetail{expTarget},
 			Statuses:  request.Statuses,
 			Group:     group,
 			CreatedAt: request.CreatedAt,

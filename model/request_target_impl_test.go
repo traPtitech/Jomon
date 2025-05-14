@@ -50,6 +50,11 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 			nil, []*RequestTarget{target1, target2},
 			nil, user1.ID)
 		require.NoError(t, err)
+		// CreatedAt の差を1秒以内に収めるためにここで time.Now を取る
+		exp := []*RequestTargetDetail{
+			{Target: target1.Target, Amount: target1.Amount, CreatedAt: time.Now()},
+			{Target: target2.Target, Amount: target2.Amount, CreatedAt: time.Now()},
+		}
 		got, err := repo.GetRequestTargets(ctx, request.ID)
 		assert.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
@@ -58,10 +63,6 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 			cmpopts.SortSlices(func(l, r *RequestTargetDetail) bool {
 				return l.Target.ID() < r.Target.ID()
 			}))
-		exp := []*RequestTargetDetail{
-			{Target: target1.Target, Amount: target1.Amount, CreatedAt: time.Now()},
-			{Target: target2.Target, Amount: target2.Amount, CreatedAt: time.Now()},
-		}
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
@@ -123,16 +124,16 @@ func TestEntRepository_createRequestTargets(t *testing.T) {
 			nil, []*RequestTarget{target1, target2},
 			nil, user1.ID)
 		assert.NoError(t, err)
+		exp := []*RequestTargetDetail{
+			{Target: target1.Target, Amount: target1.Amount, CreatedAt: time.Now()},
+			{Target: target2.Target, Amount: target2.Amount, CreatedAt: time.Now()},
+		}
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.IgnoreFields(RequestTargetDetail{}, "ID", "PaidAt"),
 			cmpopts.SortSlices(func(l, r *RequestTargetDetail) bool {
 				return l.Target.ID() < r.Target.ID()
 			}))
-		exp := []*RequestTargetDetail{
-			{Target: target1.Target, Amount: target1.Amount, CreatedAt: time.Now()},
-			{Target: target2.Target, Amount: target2.Amount, CreatedAt: time.Now()},
-		}
 		testutil.RequireEqual(t, exp, got.Targets, opts...)
 	})
 }
