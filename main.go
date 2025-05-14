@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// Setup ent client
-	client, err := model.SetupEntClient()
+	client, err := model.Connect()
 	if err != nil {
 		panic(err)
 	}

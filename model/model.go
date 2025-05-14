@@ -1,50 +1,44 @@
 package model
 
 import (
-	"context"
 	"fmt"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/traPtitech/Jomon/ent"
-	"github.com/traPtitech/Jomon/testutil"
 )
 
-func SetupEntClient() (*ent.Client, error) {
-	// Logging
-	var entOptions []ent.Option
-	if os.Getenv("IS_DEBUG_MODE") != "" {
-		entOptions = []ent.Option{ent.Debug()}
-	} else {
-		entOptions = []ent.Option{}
+func getenvOrDefault(key, fallback string) string {
+	// TODO: これは testutil.GetEnvOrDefault のコピペ
+	//       適切な場所に動かしたい
+	value := os.Getenv(key)
+	if value == "" {
+		return fallback
 	}
-	dbUser := testutil.GetEnvOrDefault("MARIADB_USERNAME", "root")
-	dbPass := testutil.GetEnvOrDefault("MARIADB_PASSWORD", "password")
-	dbHost := testutil.GetEnvOrDefault("MARIADB_HOSTNAME", "db")
-	dbName := testutil.GetEnvOrDefault("MARIADB_DATABASE", "jomon")
-	dbPort := testutil.GetEnvOrDefault("MARIADB_PORT", "3306")
+	return value
+}
 
-	dbDsn := fmt.Sprintf(
+func loadDsn() string {
+	username := getenvOrDefault("MARIADB_USERNAME", "root")
+	password := getenvOrDefault("MARIADB_PASSWORD", "password")
+	host := getenvOrDefault("MARIADB_HOSTNAME", "db")
+	port := getenvOrDefault("MARIADB_PORT", "3306")
+	database := getenvOrDefault("MARIADB_DATABASE", "jomon")
+	return fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		dbUser, dbPass, dbHost, dbPort, dbName)
+		username, password, host, port, database,
+	)
+}
 
-	client, err := ent.Open("mysql", dbDsn, entOptions...)
-	if err != nil {
-		return nil, fmt.Errorf("can't connect to DATABASE: %w", err)
-	}
-
-	ctx := context.Background()
-
+func Connect() (*ent.Client, error) {
+	dsn := loadDsn()
+	entOptions := []ent.Option{}
 	if os.Getenv("IS_DEBUG_MODE") != "" {
-		client = client.Debug()
-		if err := client.Schema.Create(ctx); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := client.Schema.Create(ctx); err != nil {
-			return nil, err
-		}
+		entOptions = append(entOptions, ent.Debug())
 	}
-
+	client, err := ent.Open("mysql", dsn, entOptions...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to database: %w", err)
+	}
 	return client, nil
 }
