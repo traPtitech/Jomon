@@ -1,0 +1,79 @@
+package model
+
+// - https://entgo.io/docs/versioned-migrations/
+
+import (
+	"context"
+
+	atlas "ariga.io/atlas/sql/migrate"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql/schema"
+	"github.com/traPtitech/Jomon/ent"
+)
+
+const MigrationDir string = "migrations"
+
+func defaultMigrateOptions() []schema.MigrateOption {
+	return []schema.MigrateOption{
+		schema.WithMigrationMode(schema.ModeReplay),
+		schema.WithDialect(dialect.MySQL),
+		schema.WithFormatter(atlas.DefaultFormatter),
+	}
+}
+
+// `atlas migrate diff` へのエイリアスです.
+//
+// `migrations` ディレクトリを参照してdiffの計算が行われます.
+// すなわち, このメソッドの実行時に `migrations` ディレクトリが存在している必要があります.
+func MigrateDiff(ctx context.Context, client *ent.Client) error {
+	dir, err := atlas.NewLocalDir(MigrationDir)
+	if err != nil {
+		return err
+	}
+	// atlas migrate diff \
+	//     --dev-url "${connection from ent.Client}" \
+	//     --to "ent://ent/schema" \
+	//     --dir "file://${MigrationDir}"
+	opts := append(defaultMigrateOptions(), schema.WithDir(dir))
+	err = client.Schema.Diff(ctx, opts...)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// `atlas migrate apply` へのエイリアスです.
+//
+// `migrations` ディレクトリを参照してmigrationsが行われます.
+// すなわち, このメソッドの実行時に `migrations` ディレクトリが存在している必要があります.
+func MigrateApply(ctx context.Context, client *ent.Client) error {
+	dir, err := atlas.NewLocalDir(MigrationDir)
+	if err != nil {
+		return err
+	}
+	// atlas migrate apply \
+	//     --url "${connection from ent.Client}" \
+	//     --dir "file://${MigrationDir}"
+	opts := append(defaultMigrateOptions(), schema.WithDir(dir))
+	err = client.Schema.Create(ctx, opts...)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// `atlas migrate diff` へのエイリアスです.
+//
+// `migrations` ディレクトリを参照してdiffの計算が行われます.
+// すなわち, このメソッドの実行時に `migrations` ディレクトリが存在している必要があります.
+func (r *EntRepository) MigrateDiff(ctx context.Context) error {
+	return MigrateDiff(ctx, r.client)
+}
+
+// `atlas migrate apply` へのエイリアスです.
+//
+// `migrations` ディレクトリを参照してmigrationsが行われます.
+// すなわち, このメソッドの実行時に `migrations` ディレクトリが存在している必要があります.
+func (r *EntRepository) MigrateApply(ctx context.Context) error {
+	return MigrateApply(ctx, r.client)
+}
