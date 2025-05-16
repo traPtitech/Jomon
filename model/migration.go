@@ -11,7 +11,28 @@ import (
 	"github.com/traPtitech/Jomon/ent"
 )
 
-const MigrationDir string = "migrations"
+type MigrateConfig struct {
+	// `migrations` ディレクトリへののパス
+	migrationsDir string
+}
+
+type MigrateOption func(*MigrateConfig)
+
+func MigrationsDir(dir string) MigrateOption {
+	return func(c *MigrateConfig) {
+		c.migrationsDir = dir
+	}
+}
+
+func defaultMigrateConfig() *MigrateConfig {
+	return &MigrateConfig{"migrations"}
+}
+
+func (c *MigrateConfig) applyOptions(options ...MigrateOption) {
+	for _, o := range options {
+		o(c)
+	}
+}
 
 func defaultMigrateOptions() []schema.MigrateOption {
 	return []schema.MigrateOption{
@@ -25,15 +46,18 @@ func defaultMigrateOptions() []schema.MigrateOption {
 //
 // `migrations` ディレクトリを参照してdiffの計算が行われます.
 // すなわち, このメソッドの実行時に `migrations` ディレクトリが存在している必要があります.
-func MigrateDiff(ctx context.Context, client *ent.Client) error {
-	dir, err := atlas.NewLocalDir(MigrationDir)
+func MigrateDiff(ctx context.Context, client *ent.Client, options ...MigrateOption) error {
+	config := defaultMigrateConfig()
+	config.applyOptions(options...)
+
+	dir, err := atlas.NewLocalDir(config.migrationsDir)
 	if err != nil {
 		return err
 	}
 	// atlas migrate diff \
 	//     --dev-url "${connection from ent.Client}" \
 	//     --to "ent://ent/schema" \
-	//     --dir "file://${MigrationDir}"
+	//     --dir "file://${config.migrationDir}"
 	opts := append(defaultMigrateOptions(), schema.WithDir(dir))
 	err = client.Schema.Diff(ctx, opts...)
 	if err != nil {
@@ -46,8 +70,11 @@ func MigrateDiff(ctx context.Context, client *ent.Client) error {
 //
 // `migrations` ディレクトリを参照してmigrationsが行われます.
 // すなわち, このメソッドの実行時に `migrations` ディレクトリが存在している必要があります.
-func MigrateApply(ctx context.Context, client *ent.Client) error {
-	dir, err := atlas.NewLocalDir(MigrationDir)
+func MigrateApply(ctx context.Context, client *ent.Client, options ...MigrateOption) error {
+	config := defaultMigrateConfig()
+	config.applyOptions(options...)
+
+	dir, err := atlas.NewLocalDir(config.migrationsDir)
 	if err != nil {
 		return err
 	}
@@ -66,14 +93,14 @@ func MigrateApply(ctx context.Context, client *ent.Client) error {
 //
 // `migrations` ディレクトリを参照してdiffの計算が行われます.
 // すなわち, このメソッドの実行時に `migrations` ディレクトリが存在している必要があります.
-func (r *EntRepository) MigrateDiff(ctx context.Context) error {
-	return MigrateDiff(ctx, r.client)
+func (r *EntRepository) MigrateDiff(ctx context.Context, options ...MigrateOption) error {
+	return MigrateDiff(ctx, r.client, options...)
 }
 
 // `atlas migrate apply` へのエイリアスです.
 //
 // `migrations` ディレクトリを参照してmigrationsが行われます.
 // すなわち, このメソッドの実行時に `migrations` ディレクトリが存在している必要があります.
-func (r *EntRepository) MigrateApply(ctx context.Context) error {
-	return MigrateApply(ctx, r.client)
+func (r *EntRepository) MigrateApply(ctx context.Context, options ...MigrateOption) error {
+	return MigrateApply(ctx, r.client, options...)
 }
