@@ -1,5 +1,5 @@
 ## build backend
-FROM golang:1.24.2-alpine as server-build
+FROM golang:1.24.2-alpine AS server-build
 
 WORKDIR /github.com/traPtitech/Jomon
 COPY go.mod go.sum ./
@@ -22,5 +22,6 @@ RUN apk --update --no-cache add ca-certificates \
 
 WORKDIR /app
 COPY --from=server-build /Jomon ./
+COPY --from=server-build /github.com/traPtitech/Jomon/migrations ./migrations
 
 ENTRYPOINT ./Jomon
