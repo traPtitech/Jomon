@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	"github.com/traPtitech/Jomon/logging"
@@ -41,6 +42,11 @@ func main() {
 	}
 	// Setup repository
 	repo := model.NewEntRepository(client, strg)
+	migrateOptions := []model.MigrateOption{}
+	if migrationsDir := os.Getenv("MIGRATIONS_DIR"); migrationsDir != "" {
+		migrateOptions = append(migrateOptions, model.MigrationsDir(migrationsDir))
+	}
+	repo.MigrateApply(context.Background(), migrateOptions...)
 	// Setup webhook service
 	ws, err := service.LoadWebhookService()
 	if err != nil {
