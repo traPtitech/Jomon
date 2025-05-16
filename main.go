@@ -46,7 +46,9 @@ func main() {
 	if migrationsDir := os.Getenv("MIGRATIONS_DIR"); migrationsDir != "" {
 		migrateOptions = append(migrateOptions, model.MigrationsDir(migrationsDir))
 	}
-	repo.MigrateApply(context.Background(), migrateOptions...)
+	if err := repo.MigrateApply(context.Background(), migrateOptions...); err != nil {
+		panic(err)
+	}
 	// Setup webhook service
 	ws, err := service.LoadWebhookService()
 	if err != nil {
