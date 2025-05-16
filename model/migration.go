@@ -18,6 +18,10 @@ type MigrateConfig struct {
 
 type MigrateOption func(*MigrateConfig)
 
+// `migrations` ディレクトリへのパスを設定します.
+//
+// このオプションを指定しなかった場合, デフォルトでは `migrations` が使われます.
+// `MigrateDiff` ないし `MigrateApply` の実行時にここで指定されたディレクトリが存在している必要があります.
 func MigrationsDir(dir string) MigrateOption {
 	return func(c *MigrateConfig) {
 		c.migrationsDir = dir
@@ -44,8 +48,7 @@ func defaultMigrateOptions() []schema.MigrateOption {
 
 // `atlas migrate diff` へのエイリアスです.
 //
-// `migrations` ディレクトリを参照してdiffの計算が行われます.
-// すなわち, このメソッドの実行時に `migrations` ディレクトリが存在している必要があります.
+// `MigrationsDir` のディレクトリを参照してdiffの計算が行われます.
 func MigrateDiff(ctx context.Context, client *ent.Client, options ...MigrateOption) error {
 	config := defaultMigrateConfig()
 	config.applyOptions(options...)
@@ -68,8 +71,7 @@ func MigrateDiff(ctx context.Context, client *ent.Client, options ...MigrateOpti
 
 // `atlas migrate apply` へのエイリアスです.
 //
-// `migrations` ディレクトリを参照してmigrationsが行われます.
-// すなわち, このメソッドの実行時に `migrations` ディレクトリが存在している必要があります.
+// `MigrationsDir` のディレクトリを参照してdiffの計算が行われます.
 func MigrateApply(ctx context.Context, client *ent.Client, options ...MigrateOption) error {
 	config := defaultMigrateConfig()
 	config.applyOptions(options...)
@@ -91,16 +93,14 @@ func MigrateApply(ctx context.Context, client *ent.Client, options ...MigrateOpt
 
 // `atlas migrate diff` へのエイリアスです.
 //
-// `migrations` ディレクトリを参照してdiffの計算が行われます.
-// すなわち, このメソッドの実行時に `migrations` ディレクトリが存在している必要があります.
+// `MigrationsDir` のディレクトリを参照してdiffの計算が行われます.
 func (r *EntRepository) MigrateDiff(ctx context.Context, options ...MigrateOption) error {
 	return MigrateDiff(ctx, r.client, options...)
 }
 
 // `atlas migrate apply` へのエイリアスです.
 //
-// `migrations` ディレクトリを参照してmigrationsが行われます.
-// すなわち, このメソッドの実行時に `migrations` ディレクトリが存在している必要があります.
+// `MigrationsDir` のディレクトリを参照してdiffの計算が行われます.
 func (r *EntRepository) MigrateApply(ctx context.Context, options ...MigrateOption) error {
 	return MigrateApply(ctx, r.client, options...)
 }
