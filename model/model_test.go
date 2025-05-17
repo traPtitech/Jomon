@@ -1,5 +1,7 @@
 package model
 
+// FIXME: package model_test にする
+
 import (
 	"context"
 	"database/sql"
@@ -17,6 +19,7 @@ func SetupTestEntClient(t *testing.T, ctx context.Context, dbName string) (*ent.
 	entOptions := []enttest.Option{
 		enttest.WithOptions(ent.Log(t.Log)),
 	}
+	// FIXME: model.go にある `Connect` を流用したい
 	dbUser := testutil.GetEnvOrDefault("MARIADB_USERNAME", "root")
 	dbPass := testutil.GetEnvOrDefault("MARIADB_PASSWORD", "password")
 	dbHost := testutil.GetEnvOrDefault("MARIADB_HOSTNAME", "db")
@@ -42,8 +45,9 @@ func SetupTestEntClient(t *testing.T, ctx context.Context, dbName string) (*ent.
 	// nolint:contextcheck
 	client := enttest.Open(t, "mysql", dsn, entOptions...).Debug()
 
-	if err := client.Schema.Create(ctx); err != nil {
-		return nil, err
+	// model/ ディレクトリをPWDとしてテストが実行されるため, migrations ディレクトリのパスを揃える
+	if err := MigrateApply(ctx, client, MigrationsDir("../migrations")); err != nil {
+		return nil, fmt.Errorf("failed to apply migration: %w", err)
 	}
 
 	return client, nil

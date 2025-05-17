@@ -30,7 +30,9 @@ jobs:
       run: go mod download
 
     - name: Build
-      run: go build -v
+      run: |
+        go build -v
+        go build -o ./migration -v cmd/migration/main.go
 
   lint:
     name: Lint
@@ -52,7 +54,7 @@ jobs:
     needs: [build]
     services:
       mariadb:
-        image: mariadb:10.3.29
+        image: mariadb:10.11.4
         ports:
           - 50000:3306
         env:
@@ -92,3 +94,39 @@ jobs:
       with:
         files: ./coverage.out
         token: ${{ secrets.CODECOV_TOKEN }}
+
+  migrations:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    services:
+      mariadb:
+        image: mariadb:10.11.4
+        ports:
+          - 50000:3306
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: jomon
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: ariga/setup-atlas@v0
+      - run: |
+          go run cmd/migration/main.go diff
+          git diff --quiet --exit-code -- migrations || {
+            echo 'ERROR: uncommitted schema changes found' 1>&2
+            echo '       please run cmd/migration/main.go locally' 1>&2
+            echo '       for more information, see commit e45f8ad' 1>&2
+            exit $?
+          }
+        env:
+          MARIADB_HOSTNAME: 'localhost'
+          MARIADB_PORT: '50000'
+          MARIADB_USERNAME: 'root'
+          MARIADB_PASSWORD: 'password'
+          MARIADB_DATABASE: 'jomon'
+      # TODO: atlas migrate lint
+      # NOTE: atlas migrate test, atlas schema test はやらない
+      #       どちらも Atlas Proユーザー向けの機能で使えないため
