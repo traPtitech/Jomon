@@ -14,7 +14,6 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/testutil"
@@ -53,17 +52,17 @@ func TestHandlers_GetUsers(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockUserRepository.
 			EXPECT().
 			GetUsers(c.Request().Context()).
 			Return(users, nil)
 
-		assert.NoError(t, h.Handlers.GetUsers(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetUsers(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*User
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := lo.Map(users, func(u *model.User, _ int) *User {
 			return modelUserToUser(u)
@@ -85,17 +84,17 @@ func TestHandlers_GetUsers(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockUserRepository.
 			EXPECT().
 			GetUsers(c.Request().Context()).
 			Return(users, nil)
 
-		assert.NoError(t, h.Handlers.GetUsers(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetUsers(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*User
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := lo.Map(users, func(u *model.User, _ int) *User {
 			return modelUserToUser(u)
@@ -124,9 +123,9 @@ func TestHandlers_GetUsers(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.GetUsers(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 }
 
@@ -154,7 +153,7 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 			Admin:       updateUser.Admin,
 		}
 		reqBody, err := json.Marshal(reqUser)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -164,7 +163,7 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		h.Repository.MockUserRepository.
 			EXPECT().
@@ -177,11 +176,11 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 				user.ID, updateUser.Name, updateUser.DisplayName, updateUser.Admin).
 			Return(updateUser, nil)
 
-		assert.NoError(t, h.Handlers.UpdateUserInfo(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.UpdateUserInfo(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got User
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		// FIXME: #835
 		opts = append(opts,
@@ -210,7 +209,7 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 			Admin:       updateUser.Admin,
 		}
 		bodyReqUser, err := json.Marshal(reqUser)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -234,9 +233,9 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.UpdateUserInfo(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("FailedToGetUser", func(t *testing.T) {
@@ -259,7 +258,7 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 			Admin:       updateUser.Admin,
 		}
 		bodyReqUser, err := json.Marshal(reqUser)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -277,9 +276,9 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.UpdateUserInfo(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
 	})
 }
 
@@ -318,11 +317,11 @@ func TestHandlers_GetMe(t *testing.T) {
 			GetUserByID(c.Request().Context(), user.ID).
 			Return(accessUser, nil)
 
-		assert.NoError(t, h.Handlers.GetMe(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetMe(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got User
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := modelUserToUser(accessUser)
 		testutil.RequireEqual(t, exp, &got, opts...)
@@ -351,8 +350,8 @@ func TestHandlers_GetMe(t *testing.T) {
 
 		resErr := "failed to get user info"
 		err = h.Handlers.GetMe(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 }

@@ -18,7 +18,6 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/testutil"
@@ -50,21 +49,21 @@ func TestHandlers_PostFile(t *testing.T) {
 		go func() {
 			defer func() {
 				err := writer.Close()
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}()
 			err := writer.WriteField("name", "test")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			err = writer.WriteField("request_id", request.String())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			part := make(textproto.MIMEHeader)
 			part.Set("Content-Type", "image/jpeg")
 			part.Set("Content-Disposition", `form-data; name="file"; filename="test.jpg"`)
 			pw, err := writer.CreatePart(part)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			file, err := base64.RawStdEncoding.DecodeString(testJpeg)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			_, err = pw.Write(file)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		}()
 
 		file := &model.File{
@@ -100,8 +99,8 @@ func TestHandlers_PostFile(t *testing.T) {
 			Save(file.ID.String(), gomock.Any()).
 			Return(nil)
 
-		assert.NoError(t, h.Handlers.PostFile(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PostFile(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("FailedToRepositoryCreateFile", func(t *testing.T) {
@@ -122,21 +121,21 @@ func TestHandlers_PostFile(t *testing.T) {
 		go func() {
 			defer func() {
 				err := writer.Close()
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}()
 			err := writer.WriteField("name", "test")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			err = writer.WriteField("request_id", request.String())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			part := make(textproto.MIMEHeader)
 			part.Set("Content-Type", "image/jpeg")
 			part.Set("Content-Disposition", `form-data; name="file"; filename="test.jpg"`)
 			pw, err := writer.CreatePart(part)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			file, err := base64.RawStdEncoding.DecodeString(testJpeg)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			_, err = pw.Write(file)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		}()
 
 		e := echo.New()
@@ -160,16 +159,16 @@ func TestHandlers_PostFile(t *testing.T) {
 
 		mocErr := errors.New("failed to create file")
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
 			CreateFile(c.Request().Context(), "test", "image/jpeg", request, user.ID).
 			Return(nil, mocErr)
 
 		err = h.Handlers.PostFile(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("FailedToServiceCreateFile", func(t *testing.T) {
@@ -190,21 +189,21 @@ func TestHandlers_PostFile(t *testing.T) {
 		go func() {
 			defer func() {
 				err := writer.Close()
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}()
 			err := writer.WriteField("name", "test")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			err = writer.WriteField("request_id", request.String())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			part := make(textproto.MIMEHeader)
 			part.Set("Content-Type", "image/jpeg")
 			part.Set("Content-Disposition", `form-data; name="file"; filename="test.jpg"`)
 			pw, err := writer.CreatePart(part)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			file, err := base64.RawStdEncoding.DecodeString(testJpeg)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			_, err = pw.Write(file)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		}()
 
 		file := &model.File{
@@ -243,9 +242,9 @@ func TestHandlers_PostFile(t *testing.T) {
 			Return(mocErr)
 
 		err = h.Handlers.PostFile(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 }
 
@@ -279,7 +278,7 @@ func TestHandlers_GetFile(t *testing.T) {
 		c.SetParamValues(file.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
 			GetFile(c.Request().Context(), file.ID).
@@ -290,8 +289,8 @@ func TestHandlers_GetFile(t *testing.T) {
 			Open(file.ID.String()).
 			Return(r, nil)
 
-		assert.NoError(t, h.Handlers.GetFile(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetFile(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("FailedToGetFile", func(t *testing.T) {
@@ -319,16 +318,16 @@ func TestHandlers_GetFile(t *testing.T) {
 		mocErr := errors.New("file not found")
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
 			GetFile(c.Request().Context(), file.ID).
 			Return(nil, mocErr)
 
 		err = h.Handlers.GetFile(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("FailedToOpenFile", func(t *testing.T) {
@@ -354,7 +353,7 @@ func TestHandlers_GetFile(t *testing.T) {
 		c.SetParamValues(file.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
 			GetFile(c.Request().Context(), file.ID).
@@ -368,9 +367,9 @@ func TestHandlers_GetFile(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.GetFile(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {
@@ -388,14 +387,14 @@ func TestHandlers_GetFile(t *testing.T) {
 		c.SetParamValues("po")
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		_, mocErr := uuid.Parse("po")
 
 		err = h.Handlers.GetFile(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
 	})
 }
 
@@ -426,14 +425,14 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		c.SetParamValues(file.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
 			GetFile(c.Request().Context(), file.ID).
 			Return(file, nil)
 
-		assert.NoError(t, h.Handlers.GetFileMeta(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetFileMeta(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var res *FileMetaResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &res)
 		require.NoError(t, err)
@@ -473,16 +472,16 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		mocErr := errors.New("file not found")
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
 			GetFile(c.Request().Context(), file.ID).
 			Return(nil, mocErr)
 
 		err = h.Handlers.GetFileMeta(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {
@@ -500,14 +499,14 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		c.SetParamValues("po")
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		_, mocErr := uuid.Parse("po")
 
 		err = h.Handlers.GetFileMeta(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
 	})
 }
 
@@ -537,7 +536,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		c.SetParamValues(file.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
 			DeleteFile(c.Request().Context(), file.ID).
@@ -548,8 +547,8 @@ func TestHandlers_DeleteFile(t *testing.T) {
 			Delete(file.ID.String()).
 			Return(nil)
 
-		assert.NoError(t, h.Handlers.DeleteFile(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.DeleteFile(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("FailedToRepositoryDeleteFile", func(t *testing.T) {
@@ -577,16 +576,16 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		mocErr := errors.New("file could not be deleted")
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
 			DeleteFile(c.Request().Context(), file.ID).
 			Return(mocErr)
 
 		err = h.Handlers.DeleteFile(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("FailedToServiceDeleteFile", func(t *testing.T) {
@@ -611,7 +610,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		c.SetParamValues(file.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
 			DeleteFile(c.Request().Context(), file.ID).
@@ -625,9 +624,9 @@ func TestHandlers_DeleteFile(t *testing.T) {
 			Return(mocErr)
 
 		err = h.Handlers.DeleteFile(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {
@@ -649,11 +648,11 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		err = h.Handlers.DeleteFile(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
 	})
 }

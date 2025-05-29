@@ -10,7 +10,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
@@ -49,7 +48,7 @@ func TestHandler_GetAdmins(t *testing.T) {
 
 		require.NoError(t, err)
 
-		assert.NoError(t, h.Handlers.GetAdmins(c))
+		require.NoError(t, h.Handlers.GetAdmins(c))
 		testutil.AssertEqual(t, http.StatusOK, rec.Code)
 		var res []uuid.UUID
 		err = json.Unmarshal(rec.Body.Bytes(), &res)
@@ -78,12 +77,12 @@ func TestHandler_GetAdmins(t *testing.T) {
 
 		require.NoError(t, err)
 
-		assert.NoError(t, h.Handlers.GetAdmins(c))
+		require.NoError(t, h.Handlers.GetAdmins(c))
 		testutil.AssertEqual(t, http.StatusOK, rec.Code)
 		var res []uuid.UUID
 		err = json.Unmarshal(rec.Body.Bytes(), &res)
 		require.NoError(t, err)
-		assert.Empty(t, res)
+		require.Empty(t, res)
 	})
 
 	t.Run("FailedWithError", func(t *testing.T) {
@@ -108,7 +107,7 @@ func TestHandler_GetAdmins(t *testing.T) {
 
 		err = h.Handlers.GetAdmins(c)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 }
 
@@ -139,8 +138,8 @@ func TestHandler_PostAdmin(t *testing.T) {
 			AddAdmins(c.Request().Context(), admins).
 			Return(nil)
 
-		assert.NoError(t, h.Handlers.PostAdmins(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PostAdmins(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("FailedWithError", func(t *testing.T) {
@@ -170,9 +169,9 @@ func TestHandler_PostAdmin(t *testing.T) {
 			Return(resErr)
 
 		err = h.Handlers.PostAdmins(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 
 	t.Run("FailedWithEntConstraintError", func(t *testing.T) {
@@ -203,9 +202,9 @@ func TestHandler_PostAdmin(t *testing.T) {
 			Return(resErr)
 
 		err = h.Handlers.PostAdmins(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 }
 
@@ -236,8 +235,8 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 			DeleteAdmins(c.Request().Context(), admins).
 			Return(nil)
 
-		assert.NoError(t, h.Handlers.DeleteAdmins(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.DeleteAdmins(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("FailedWithError", func(t *testing.T) {
@@ -267,9 +266,9 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 			Return(resErr)
 
 		err = h.Handlers.DeleteAdmins(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 
 	t.Run("InvalidAdminID", func(t *testing.T) {
@@ -293,7 +292,7 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 
 		err = h.Handlers.DeleteAdmins(c)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestの判定をしたい
 	})
 
@@ -325,7 +324,7 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 			Return(resErr)
 
 		err = h.Handlers.DeleteAdmins(c)
-		assert.Error(t, err)
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		require.Error(t, err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 }
