@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
@@ -114,7 +113,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		got, err := repo.GetRequests(ctx, RequestQuery{
 			Sort: &sort,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.SortSlices(func(a, b *RequestResponse) bool {
@@ -182,7 +181,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		got, err := repo2.GetRequests(ctx, RequestQuery{
 			Sort: &sort,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.SortSlices(func(a, b *RequestResponse) bool {
@@ -249,7 +248,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		got, err := repo3.GetRequests(ctx, RequestQuery{
 			Sort: &sort,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.SortSlices(func(a, b *RequestResponse) bool {
@@ -316,7 +315,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		got, err := repo4.GetRequests(ctx, RequestQuery{
 			Sort: &sort,
 		})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.SortSlices(func(a, b *RequestResponse) bool {
@@ -386,12 +385,12 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		got, err := repo5.GetRequests(ctx, RequestQuery{
 			Target: &target,
 		})
-		assert.NoError(t, err)
-		if assert.Len(t, got, 1) {
-			exp := request1.toExpectedRequestResponse(t)
-			opts := testutil.ApproxEqualOptions()
-			testutil.RequireEqual(t, exp, got[0], opts...)
-		}
+		require.NoError(t, err)
+		require.Len(t, got, 1)
+		exp := request1.toExpectedRequestResponse(t)
+		opts := testutil.ApproxEqualOptions()
+		testutil.RequireEqual(t, exp, got[0], opts...)
+
 	})
 
 	t.Run("SuccessWithQuerySince", func(t *testing.T) {
@@ -448,12 +447,12 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		got, err := repo6.GetRequests(ctx, RequestQuery{
 			Since: &since,
 		})
-		assert.NoError(t, err)
-		if assert.Len(t, got, 1) {
-			exp := request2.toExpectedRequestResponse(t)
-			opts := testutil.ApproxEqualOptions()
-			testutil.RequireEqual(t, exp, got[0], opts...)
-		}
+		require.NoError(t, err)
+		require.Len(t, got, 1)
+		exp := request2.toExpectedRequestResponse(t)
+		opts := testutil.ApproxEqualOptions()
+		testutil.RequireEqual(t, exp, got[0], opts...)
+
 	})
 
 	t.Run("SuccessWithQueryUntil", func(t *testing.T) {
@@ -510,13 +509,13 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		got, err := repo7.GetRequests(ctx, RequestQuery{
 			Until: &until,
 		})
-		assert.NoError(t, err)
-		if assert.Len(t, got, 1) {
-			exp := request1.toExpectedRequestResponse(t)
-			exp.Group.UpdatedAt = request2.Group.UpdatedAt
-			opts := testutil.ApproxEqualOptions()
-			testutil.RequireEqual(t, exp, got[0], opts...)
-		}
+		require.NoError(t, err)
+		require.Len(t, got, 1)
+		exp := request1.toExpectedRequestResponse(t)
+		exp.Group.UpdatedAt = request2.Group.UpdatedAt
+		opts := testutil.ApproxEqualOptions()
+		testutil.RequireEqual(t, exp, got[0], opts...)
+
 	})
 
 	t.Run("SuccessWithQueryStatus", func(t *testing.T) {
@@ -578,14 +577,14 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		got, err := repo8.GetRequests(ctx, RequestQuery{
 			Status: &status,
 		})
-		assert.NoError(t, err)
-		if assert.Len(t, got, 1) {
-			exp := request1.toExpectedRequestResponse(t)
-			exp.Status = Accepted
-			exp.Group.UpdatedAt = request2.Group.UpdatedAt
-			opts := testutil.ApproxEqualOptions()
-			testutil.RequireEqual(t, exp, got[0], opts...)
-		}
+		require.NoError(t, err)
+		require.Len(t, got, 1)
+		exp := request1.toExpectedRequestResponse(t)
+		exp.Status = Accepted
+		exp.Group.UpdatedAt = request2.Group.UpdatedAt
+		opts := testutil.ApproxEqualOptions()
+		testutil.RequireEqual(t, exp, got[0], opts...)
+
 	})
 
 	t.Run("SuccessWithQueryCreatedBy", func(t *testing.T) {
@@ -639,11 +638,10 @@ func TestEntRepository_GetRequests(t *testing.T) {
 			CreatedBy: &user1.ID,
 		})
 		require.NoError(t, err)
-		if assert.Len(t, got, 1) {
-			exp := request1.toExpectedRequestResponse(t)
-			opts := testutil.ApproxEqualOptions()
-			testutil.RequireEqual(t, exp, got[0], opts...)
-		}
+		require.Len(t, got, 1)
+		exp := request1.toExpectedRequestResponse(t)
+		opts := testutil.ApproxEqualOptions()
+		testutil.RequireEqual(t, exp, got[0], opts...)
 	})
 }
 
@@ -693,7 +691,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 			title, content,
 			[]*Tag{tag}, []*RequestTarget{target},
 			group, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		exp := &RequestDetail{
 			Status:  Submitted,
 			Title:   title,
@@ -741,7 +739,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 			title, content,
 			[]*Tag{tag}, []*RequestTarget{},
 			group, uuid.New())
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("UnknownTag", func(t *testing.T) {
@@ -777,7 +775,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 			title, content,
 			[]*Tag{tag}, []*RequestTarget{},
 			group, user.ID)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("UnknownGroup", func(t *testing.T) {
@@ -810,7 +808,7 @@ func TestEntRepository_CreateRequest(t *testing.T) {
 			title, content,
 			[]*Tag{tag}, []*RequestTarget{},
 			group, user.ID)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -854,7 +852,7 @@ func TestEntRepository_GetRequest(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo.GetRequest(ctx, request.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		testutil.AssertEqual(t, request, got, opts...)
 	})
@@ -863,7 +861,7 @@ func TestEntRepository_GetRequest(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		_, err := repo2.GetRequest(ctx, uuid.New())
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -926,7 +924,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			request.ID, request.Title, request.Content,
 			[]*Tag{tag}, []*RequestTarget{target},
 			group)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		exp := &RequestDetail{
 			ID:        request.ID,
 			Status:    request.Status,
@@ -990,7 +988,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			request.ID, title, request.Content,
 			[]*Tag{tag}, []*RequestTarget{target},
 			group)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		exp := &RequestDetail{
 			ID:        request.ID,
 			Status:    request.Status,
@@ -1053,7 +1051,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			request.ID, request.Title, content,
 			[]*Tag{tag}, []*RequestTarget{target},
 			group)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		exp := &RequestDetail{
 			ID:        request.ID,
 			Status:    request.Status,
@@ -1117,7 +1115,7 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			request.ID, request.Title, request.Content,
 			[]*Tag{unknownTag}, []*RequestTarget{target},
 			group)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("UnknownGroup", func(t *testing.T) {
@@ -1165,6 +1163,6 @@ func TestEntRepository_UpdateRequest(t *testing.T) {
 			request.ID, request.Title, request.Content,
 			[]*Tag{tag}, []*RequestTarget{target},
 			unknownGroup)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }

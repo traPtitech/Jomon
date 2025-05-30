@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
@@ -14,10 +14,10 @@ import (
 func TestEntRepository_GetTags(t *testing.T) {
 	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_tags")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 	client2, storage2, err := setup(t, ctx, "get_tags2")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
@@ -26,7 +26,7 @@ func TestEntRepository_GetTags(t *testing.T) {
 		tag2, _ := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 
 		got, err := repo.GetTags(ctx)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.SortSlices(func(l, r *Tag) bool {
@@ -39,15 +39,15 @@ func TestEntRepository_GetTags(t *testing.T) {
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		got, err := repo2.GetTags(ctx)
-		assert.NoError(t, err)
-		assert.Empty(t, got)
+		require.NoError(t, err)
+		require.Empty(t, got)
 	})
 }
 
 func TestEntRepository_CreateTag(t *testing.T) {
 	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "create_tag")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
@@ -55,7 +55,7 @@ func TestEntRepository_CreateTag(t *testing.T) {
 		name := random.AlphaNumeric(t, 20)
 		tag, err := repo.CreateTag(ctx, name)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.IgnoreFields(Tag{}, "ID"))
@@ -73,26 +73,26 @@ func TestEntRepository_CreateTag(t *testing.T) {
 		name := ""
 		_, err := repo.CreateTag(ctx, name)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
 func TestEntRepository_UpdateTag(t *testing.T) {
 	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "update_tag")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success1", func(t *testing.T) {
 		t.Parallel()
 		created, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		name := random.AlphaNumeric(t, 20)
 
 		updated, err := repo.UpdateTag(ctx, created.ID, name)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := &Tag{
 			ID:        created.ID,
@@ -107,11 +107,11 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		updated, err := repo.UpdateTag(ctx, tag.ID, tag.Name)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, tag, updated, opts...)
 	})
@@ -119,34 +119,34 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 	t.Run("MissingName", func(t *testing.T) {
 		t.Parallel()
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		name := ""
 		_, err = repo.UpdateTag(ctx, tag.ID, name)
 
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
 func TestEntRepository_DeleteTag(t *testing.T) {
 	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "delete_tag")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
 		name := random.AlphaNumeric(t, 20)
 		tag, err := repo.CreateTag(ctx, name)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		err = repo.DeleteTag(ctx, tag.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("UnknownTag", func(t *testing.T) {
 		t.Parallel()
 		err = repo.DeleteTag(ctx, uuid.New())
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }

@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
@@ -14,10 +14,10 @@ import (
 func TestEntRepository_GetUsers(t *testing.T) {
 	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_user")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 	client2, storage2, err := setup(t, ctx, "get_user2")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
@@ -25,8 +25,8 @@ func TestEntRepository_GetUsers(t *testing.T) {
 		ctx := testutil.NewContext(t)
 
 		got, err := repo.GetUsers(ctx)
-		assert.NoError(t, err)
-		assert.Empty(t, got)
+		require.NoError(t, err)
+		require.Empty(t, got)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -34,13 +34,13 @@ func TestEntRepository_GetUsers(t *testing.T) {
 		ctx := testutil.NewContext(t)
 
 		user1, err := repo2.CreateUser(ctx, "user1", "user1", true)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		user2, err := repo2.CreateUser(ctx, "user2", "user2", true)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		got, err := repo2.GetUsers(ctx)
-		assert.NoError(t, err)
-		assert.Len(t, got, 2)
+		require.NoError(t, err)
+		require.Len(t, got, 2)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.SortSlices(func(l, r *User) bool {
@@ -54,7 +54,7 @@ func TestEntRepository_GetUsers(t *testing.T) {
 func TestEntRepository_CreateUser(t *testing.T) {
 	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "create_user")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
@@ -66,7 +66,7 @@ func TestEntRepository_CreateUser(t *testing.T) {
 		admin := random.Numeric(t, 2) == 1
 
 		user, err := repo.CreateUser(ctx, name, dn, admin)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts, cmpopts.IgnoreFields(User{}, "ID"))
 		exp := &User{
@@ -89,17 +89,17 @@ func TestEntRepository_CreateUser(t *testing.T) {
 		admin := random.Numeric(t, 2) == 1
 
 		_, err := repo.CreateUser(ctx, name, dn, admin)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
 func TestEntRepository_GetUserByName(t *testing.T) {
 	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_user_by_name")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 	client2, storage2, err := setup(t, ctx, "get_user_by_name2")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
@@ -110,10 +110,10 @@ func TestEntRepository_GetUserByName(t *testing.T) {
 		admin := random.Numeric(t, 2) == 1
 
 		user, err := repo.CreateUser(ctx, name, dn, admin)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		got, err := repo.GetUserByName(ctx, name)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, user, got, opts...)
 	})
@@ -122,17 +122,17 @@ func TestEntRepository_GetUserByName(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		_, err = repo2.GetUserByName(ctx, random.AlphaNumeric(t, 20))
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
 func TestEntRepository_GetUserByID(t *testing.T) {
 	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "get_user_by_id")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 	client2, storage2, err := setup(t, ctx, "get_user_by_id2")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
@@ -143,10 +143,10 @@ func TestEntRepository_GetUserByID(t *testing.T) {
 		admin := random.Numeric(t, 2) == 1
 
 		user, err := repo.CreateUser(ctx, name, dn, admin)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		got, err := repo.GetUserByID(ctx, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, user, got, opts...)
 	})
@@ -155,14 +155,14 @@ func TestEntRepository_GetUserByID(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		_, err := repo2.GetUserByID(ctx, uuid.New())
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
 func TestEntRepository_UpdateUser(t *testing.T) {
 	ctx := testutil.NewContext(t)
 	client, storage, err := setup(t, ctx, "update_user")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 
 	t.Run("Success", func(t *testing.T) {
@@ -174,13 +174,13 @@ func TestEntRepository_UpdateUser(t *testing.T) {
 		admin := random.Numeric(t, 2) == 1
 
 		user, err := repo.CreateUser(ctx, name, dn, admin)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		uname := random.AlphaNumeric(t, 20)
 		udn := random.AlphaNumeric(t, 20)
 		uadmin := random.Numeric(t, 2) == 1
 		got, err := repo.UpdateUser(ctx, user.ID, uname, udn, uadmin)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := &User{
 			ID:          user.ID,
@@ -202,12 +202,12 @@ func TestEntRepository_UpdateUser(t *testing.T) {
 		admin := random.Numeric(t, 2) == 1
 
 		user, err := repo.CreateUser(ctx, name, dn, admin)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		uname := ""
 		udn := random.AlphaNumeric(t, 20)
 		uadmin := random.Numeric(t, 2) == 1
 		_, err = repo.UpdateUser(ctx, user.ID, uname, udn, uadmin)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }

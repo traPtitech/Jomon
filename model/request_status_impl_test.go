@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
@@ -36,7 +35,7 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 
 		status := Status(random.Numeric(t, 5) + 1)
 		created, err := repo.CreateStatus(ctx, request.ID, user.ID, status)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.IgnoreFields(RequestStatus{}, "ID"))
@@ -66,7 +65,7 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 
 		invalidStatus := Status(6)
 		_, err = repo.CreateStatus(ctx, request.ID, user.ID, invalidStatus)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("UnknownRequestID", func(t *testing.T) {
@@ -80,7 +79,7 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 
 		status := Status(random.Numeric(t, 5) + 1)
 		_, err = repo.CreateStatus(ctx, uuid.New(), user.ID, status)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("UnknownUserID", func(t *testing.T) {
@@ -101,6 +100,6 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 
 		status := Status(random.Numeric(t, 5) + 1)
 		_, err = repo.CreateStatus(ctx, request.ID, uuid.New(), status)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }

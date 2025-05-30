@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
@@ -44,7 +43,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		name := random.AlphaNumeric(t, 20)
 
 		file, err := repo.CreateFile(ctx, name, mimetype, request.ID, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.IgnoreFields(File{}, "ID"))
@@ -76,7 +75,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		name := random.AlphaNumeric(t, 20)
 
 		_, err = repo.CreateFile(ctx, name, mimetype, request.ID, user.ID)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("MissingName", func(t *testing.T) {
@@ -98,12 +97,12 @@ func TestEntRepository_CreateFile(t *testing.T) {
 			random.AlphaNumeric(t, 50),
 			tags, targets,
 			group, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		mimetype := "image/png"
 
 		_, err = repo.CreateFile(ctx, "", mimetype, request.ID, user.ID)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -132,16 +131,16 @@ func TestEntRepository_GetFile(t *testing.T) {
 			random.AlphaNumeric(t, 50),
 			tags, targets,
 			group, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		mimetype := "image/png"
 
 		name := random.AlphaNumeric(t, 20)
 
 		file, err := repo.CreateFile(ctx, name, mimetype, request.ID, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		got, err := repo.GetFile(ctx, file.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := &File{
 			ID:        file.ID,
@@ -158,7 +157,7 @@ func TestEntRepository_GetFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 
 		_, err = repo.GetFile(ctx, uuid.New())
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -187,21 +186,21 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 			random.AlphaNumeric(t, 50),
 			tags, targets,
 			group, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		mimetype := "image/png"
 
 		name := random.AlphaNumeric(t, 20)
 
 		file, err := repo.CreateFile(ctx, name, mimetype, request.ID, user.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		err = repo.DeleteFile(ctx, file.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		r, err := repo.GetRequest(ctx, request.ID)
 		require.NoError(t, err)
-		assert.Empty(t, r.Files)
+		require.Empty(t, r.Files)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {
@@ -209,6 +208,6 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 
 		err = repo.DeleteFile(ctx, uuid.New())
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }

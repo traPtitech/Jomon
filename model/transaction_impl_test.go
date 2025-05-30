@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
@@ -83,8 +82,8 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			Sort: &sort,
 		}
 		got, err := repo.GetTransactions(ctx, query)
-		assert.NoError(t, err)
-		assert.Len(t, got, 2)
+		require.NoError(t, err)
+		require.Len(t, got, 2)
 		opts := testutil.ApproxEqualOptions()
 		exp := []*TransactionResponse{tx2, tx1}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -125,8 +124,8 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			Sort: &sort,
 		}
 		got, err := repo2.GetTransactions(ctx, query)
-		assert.NoError(t, err)
-		assert.Len(t, got, 2)
+		require.NoError(t, err)
+		require.Len(t, got, 2)
 		opts := testutil.ApproxEqualOptions()
 		exp := []*TransactionResponse{tx1, tx2}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -166,8 +165,8 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			Sort: &sort,
 		}
 		got, err := repo3.GetTransactions(ctx, query)
-		assert.NoError(t, err)
-		assert.Len(t, got, 2)
+		require.NoError(t, err)
+		require.Len(t, got, 2)
 		opts := testutil.ApproxEqualOptions()
 		exp := []*TransactionResponse{tx1, tx2}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -214,8 +213,8 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 		// nolint:contextcheck
 		got, err := repo4.GetTransactions(ctx, query)
-		assert.NoError(t, err)
-		assert.Len(t, got, 2)
+		require.NoError(t, err)
+		require.Len(t, got, 2)
 		opts := testutil.ApproxEqualOptions()
 		exp := []*TransactionResponse{tx2, tx1}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -256,8 +255,8 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			Sort: &sort,
 		}
 		got, err := repo5.GetTransactions(ctx, query)
-		assert.NoError(t, err)
-		assert.Len(t, got, 2)
+		require.NoError(t, err)
+		require.Len(t, got, 2)
 		opts := testutil.ApproxEqualOptions()
 		exp := []*TransactionResponse{tx2, tx1}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -297,8 +296,8 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			Target: &target1,
 		}
 		got, err := repo6.GetTransactions(ctx, query)
-		assert.NoError(t, err)
-		assert.Len(t, got, 1)
+		require.NoError(t, err)
+		require.Len(t, got, 1)
 		opts := testutil.ApproxEqualOptions()
 		exp := []*TransactionResponse{tx}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -343,8 +342,8 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo7.GetTransactions(ctx, query)
-		assert.NoError(t, err)
-		assert.Len(t, got, 1)
+		require.NoError(t, err)
+		require.Len(t, got, 1)
 		opts := testutil.ApproxEqualOptions()
 		exp := []*TransactionResponse{tx}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -390,8 +389,8 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo8.GetTransactions(ctx, query)
-		assert.NoError(t, err)
-		assert.Len(t, got, 1)
+		require.NoError(t, err)
+		require.Len(t, got, 1)
 		opts := testutil.ApproxEqualOptions()
 		exp := []*TransactionResponse{tx}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -439,8 +438,8 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo9.GetTransactions(ctx, query)
-		assert.NoError(t, err)
-		assert.Len(t, got, 1)
+		require.NoError(t, err)
+		require.Len(t, got, 1)
 		opts := testutil.ApproxEqualOptions()
 		exp := []*TransactionResponse{tx}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -481,8 +480,8 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo10.GetTransactions(ctx, query)
-		assert.NoError(t, err)
-		assert.Len(t, got, 1)
+		require.NoError(t, err)
+		require.Len(t, got, 1)
 		opts := testutil.ApproxEqualOptions()
 		exp := []*TransactionResponse{tx}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -494,8 +493,8 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		// Get Transactions
 		query := TransactionQuery{}
 		got, err := repo11.GetTransactions(ctx, query)
-		assert.NoError(t, err)
-		assert.Empty(t, got)
+		require.NoError(t, err)
+		require.Empty(t, got)
 	})
 }
 
@@ -533,8 +532,8 @@ func TestEntRepository_GetTransaction(t *testing.T) {
 
 		// Get Transaction
 		got, err := repo.GetTransaction(ctx, tx.ID)
-		assert.NoError(t, err)
-		assert.NotNil(t, got)
+		require.NoError(t, err)
+		require.NotNil(t, got)
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, tx, got, opts...)
 	})
@@ -587,7 +586,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 			ctx,
 			title, amount, target,
 			[]*uuid.UUID{&tag.ID}, &group.ID, &request.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		// FIXME: #831
 		opts = append(opts,
@@ -639,7 +638,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		require.NoError(t, err)
 
 		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, &group.ID, &request.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		// FIXME: #831
 		opts = append(opts,
@@ -690,7 +689,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 			ctx,
 			title, amount, target,
 			[]*uuid.UUID{&tag.ID}, nil, &request.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		// FIXME: #831
 		opts = append(opts,
@@ -718,7 +717,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		target := random.AlphaNumeric(t, 20)
 
 		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, nil, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		// FIXME: #831
 		opts = append(opts,
@@ -746,7 +745,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		target := random.AlphaNumeric(t, 20)
 
 		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, nil, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		// FIXME: #831
 		opts = append(opts,
@@ -843,7 +842,7 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 			ctx,
 			tx.ID, title, amount, target,
 			[]*uuid.UUID{&tag.ID}, &group.ID, &request.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		// FIXME: #831
 		opts = append(opts,
