@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/testutil"
@@ -51,14 +50,14 @@ func TestHandlers_GetTags(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockTagRepository.
 			EXPECT().
 			GetTags(c.Request().Context()).
 			Return(tags, nil)
 
-		assert.NoError(t, h.Handlers.GetTags(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetTags(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*TagOverview
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -88,14 +87,14 @@ func TestHandlers_GetTags(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockTagRepository.
 			EXPECT().
 			GetTags(c.Request().Context()).
 			Return(tags, nil)
 
-		assert.NoError(t, h.Handlers.GetTags(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetTags(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*TagOverview
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -116,7 +115,7 @@ func TestHandlers_GetTags(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		mocErr := errors.New("failed to get tags")
 		h.Repository.MockTagRepository.
 			EXPECT().
@@ -124,9 +123,9 @@ func TestHandlers_GetTags(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.GetTags(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 }
 
@@ -159,15 +158,15 @@ func TestHandlers_PostTag(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		h.Repository.MockTagRepository.
 			EXPECT().
 			CreateTag(c.Request().Context(), tag.Name).
 			Return(tag, nil)
 
-		assert.NoError(t, h.Handlers.PostTag(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PostTag(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got TagOverview
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -207,7 +206,7 @@ func TestHandlers_PostTag(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		mocErr := errors.New("Tag name can't be empty.")
 		h.Repository.MockTagRepository.
@@ -216,9 +215,9 @@ func TestHandlers_PostTag(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.PostTag(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 }
 
@@ -261,15 +260,15 @@ func TestHandlers_PutTag(t *testing.T) {
 		c.SetParamValues(tag.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		h.Repository.MockTagRepository.
 			EXPECT().
 			UpdateTag(c.Request().Context(), tag.ID, reqTag.Name).
 			Return(updateTag, nil)
 
-		assert.NoError(t, h.Handlers.PutTag(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PutTag(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got TagOverview
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -312,7 +311,7 @@ func TestHandlers_PutTag(t *testing.T) {
 		c.SetParamValues(tag.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		mocErr := errors.New("Tag name can't be empty.")
 		h.Repository.MockTagRepository.
@@ -321,9 +320,9 @@ func TestHandlers_PutTag(t *testing.T) {
 			Return(nil, mocErr)
 
 		err = h.Handlers.PutTag(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
@@ -359,12 +358,12 @@ func TestHandlers_PutTag(t *testing.T) {
 		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		err = h.Handlers.PutTag(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -397,13 +396,13 @@ func TestHandlers_PutTag(t *testing.T) {
 		c.SetParamValues(tag.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		resErr := errors.New("invalid tag ID")
 		err = h.Handlers.PutTag(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 }
 
@@ -441,15 +440,15 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		c.SetParamValues(tag.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		h.Repository.MockTagRepository.
 			EXPECT().
 			DeleteTag(c.Request().Context(), tag.ID).
 			Return(nil)
 
-		assert.NoError(t, h.Handlers.DeleteTag(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.DeleteTag(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 	})
 
 	t.Run("UnknownID", func(t *testing.T) {
@@ -483,7 +482,7 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		c.SetParamValues(tag.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		mocErr := errors.New("Unknown Tag ID")
 		h.Repository.MockTagRepository.
@@ -492,9 +491,9 @@ func TestHandlers_DeleteTag(t *testing.T) {
 			Return(mocErr)
 
 		err = h.Handlers.DeleteTag(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
@@ -531,12 +530,12 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		err = h.Handlers.DeleteTag(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -570,12 +569,12 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		c.SetParamValues(tag.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		resErr := errors.New("invalid tag ID")
 		err = h.Handlers.DeleteTag(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 }

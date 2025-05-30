@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
@@ -18,7 +17,7 @@ func TestEntRepository_GetComments(t *testing.T) {
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 	client2, storage2, err := setup(t, ctx, "get_comments2")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
@@ -43,7 +42,7 @@ func TestEntRepository_GetComments(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo.GetComments(ctx, request.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.SortSlices(func(l, r *Comment) bool {
@@ -70,14 +69,14 @@ func TestEntRepository_GetComments(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo2.GetComments(ctx, request.ID)
-		assert.NoError(t, err)
-		assert.Empty(t, got)
+		require.NoError(t, err)
+		require.Empty(t, got)
 	})
 
 	t.Run("UnknownRequest", func(t *testing.T) {
 		t.Parallel()
 		_, err := repo.GetComments(ctx, uuid.New())
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -111,7 +110,7 @@ func TestEntRepository_CreateComment(t *testing.T) {
 			true)
 		require.NoError(t, err)
 		created, err := repo.CreateComment(ctx, comment, request.ID, user2.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.IgnoreFields(Comment{}, "ID"))
@@ -133,7 +132,7 @@ func TestEntRepository_CreateComment(t *testing.T) {
 			true)
 		require.NoError(t, err)
 		_, err = repo.CreateComment(ctx, random.AlphaNumeric(t, 30), uuid.New(), user.ID)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("UnknownUser", func(t *testing.T) {
@@ -153,7 +152,7 @@ func TestEntRepository_CreateComment(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, uuid.New())
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -183,7 +182,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 
 		comment := random.AlphaNumeric(t, 30)
 		updated, err := repo.UpdateComment(ctx, comment, request.ID, created.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := &Comment{
 			ID:        created.ID,
@@ -221,7 +220,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 		updated, err := repo.UpdateComment(ctx, comment.Comment, request2.ID, comment.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := &Comment{
 			ID:        comment.ID,
@@ -257,7 +256,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 30),
 			request.ID, uuid.New())
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("UnknownRequest", func(t *testing.T) {
@@ -279,7 +278,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = repo.UpdateComment(ctx, random.AlphaNumeric(t, 30), uuid.New(), comment.ID)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -308,11 +307,11 @@ func TestEntRepository_DeleteComment(t *testing.T) {
 		require.NoError(t, err)
 
 		err = repo.DeleteComment(ctx, request.ID, comment.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		comments, err := repo.GetComments(ctx, request.ID)
 		require.NoError(t, err)
-		assert.Empty(t, comments)
+		require.Empty(t, comments)
 	})
 
 	t.Run("UnknownRequest", func(t *testing.T) {
@@ -334,7 +333,7 @@ func TestEntRepository_DeleteComment(t *testing.T) {
 		require.NoError(t, err)
 
 		err = repo.DeleteComment(ctx, uuid.New(), comment.ID)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("UnknownComment", func(t *testing.T) {
@@ -354,6 +353,6 @@ func TestEntRepository_DeleteComment(t *testing.T) {
 		require.NoError(t, err)
 
 		err = repo.DeleteComment(ctx, request.ID, uuid.New())
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }

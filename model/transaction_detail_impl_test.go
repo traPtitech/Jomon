@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
@@ -33,9 +32,9 @@ func TestEntRepository_createTransactionDetail(t *testing.T) {
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 10)
 		td, err := repo.createTransactionDetail(ctx, tx, title, amount, target)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		err = tx.Commit()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.IgnoreFields(TransactionDetail{}, "ID"))
@@ -83,9 +82,9 @@ func TestEntRepository_updateTransactionDetail(t *testing.T) {
 		td, err := repo.updateTransactionDetail(
 			ctx, tx, trns.ID,
 			updateTitle, updatedAmount, updatedTarget)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		err = tx.Commit()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := &TransactionDetail{
 			ID:        td.ID,

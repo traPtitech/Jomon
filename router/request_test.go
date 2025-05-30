@@ -15,7 +15,6 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/model"
@@ -157,8 +156,8 @@ func TestHandlers_GetRequests(t *testing.T) {
 			}).
 			Return(requests, nil)
 
-		assert.NoError(t, h.Handlers.GetRequests(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetRequests(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*RequestResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -206,7 +205,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequests(c.Request().Context(), model.RequestQuery{
@@ -215,12 +214,12 @@ func TestHandlers_GetRequests(t *testing.T) {
 			}).
 			Return(requests, nil)
 
-		assert.NoError(t, h.Handlers.GetRequests(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetRequests(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*RequestResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
-		assert.Empty(t, got)
+		require.Empty(t, got)
 	})
 
 	t.Run("Success3", func(t *testing.T) {
@@ -263,8 +262,8 @@ func TestHandlers_GetRequests(t *testing.T) {
 			}).
 			Return(requests, nil)
 
-		assert.NoError(t, h.Handlers.GetRequests(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetRequests(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*RequestResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -328,8 +327,8 @@ func TestHandlers_GetRequests(t *testing.T) {
 			}).
 			Return(requests, nil)
 
-		assert.NoError(t, h.Handlers.GetRequests(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetRequests(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*RequestResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -392,8 +391,8 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Offset: 0,
 			}).
 			Return(requests, nil)
-		assert.NoError(t, h.Handlers.GetRequests(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetRequests(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*RequestResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -465,8 +464,8 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Offset: 0,
 			}).
 			Return(requests, nil)
-		assert.NoError(t, h.Handlers.GetRequests(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetRequests(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*RequestResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -527,9 +526,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Return(modelRequests, nil)
 
 		err = h.Handlers.GetRequests(c)
-		if !assert.NoError(t, err) {
-			return
-		}
+		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*RequestResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
@@ -568,9 +565,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 		require.NoError(t, err)
 
 		err = h.Handlers.GetRequests(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, "invalid status"), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, "invalid status"), err)
 	})
 
 	t.Run("FailedToGetRequests", func(t *testing.T) {
@@ -585,7 +582,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		resErr := errors.New("Failed to get requests.")
 		h.Repository.MockRequestRepository.
 			EXPECT().
@@ -596,9 +593,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.GetRequests(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 }
 
@@ -660,8 +657,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 				group, reqRequest.CreatedBy).
 			Return(request, nil)
 
-		assert.NoError(t, h.Handlers.PostRequest(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PostRequest(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -736,8 +733,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 				group, reqRequest.CreatedBy).
 			Return(request, nil)
 
-		assert.NoError(t, h.Handlers.PostRequest(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PostRequest(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -812,8 +809,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 				group, reqRequest.CreatedBy).
 			Return(request, nil)
 
-		assert.NoError(t, h.Handlers.PostRequest(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PostRequest(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -891,8 +888,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 				group, reqRequest.CreatedBy).
 			Return(request, nil)
 
-		assert.NoError(t, h.Handlers.PostRequest(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PostRequest(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -944,9 +941,9 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PostRequest(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
 	t.Run("UnknownGroupID", func(t *testing.T) {
@@ -992,9 +989,9 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PostRequest(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
 	t.Run("UnknownUserID", func(t *testing.T) {
@@ -1045,9 +1042,9 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PostRequest(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 }
 
@@ -1102,8 +1099,8 @@ func TestHandlers_GetRequest(t *testing.T) {
 			GetComments(c.Request().Context(), request.ID).
 			Return(nil, nil)
 
-		assert.NoError(t, h.Handlers.GetRequest(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetRequest(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -1175,8 +1172,8 @@ func TestHandlers_GetRequest(t *testing.T) {
 			GetComments(c.Request().Context(), request.ID).
 			Return(comments, nil)
 
-		assert.NoError(t, h.Handlers.GetRequest(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetRequest(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -1242,8 +1239,8 @@ func TestHandlers_GetRequest(t *testing.T) {
 			EXPECT().
 			GetComments(c.Request().Context(), request.ID).
 			Return(nil, nil)
-		assert.NoError(t, h.Handlers.GetRequest(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetRequest(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -1277,9 +1274,9 @@ func TestHandlers_GetRequest(t *testing.T) {
 		require.NoError(t, err)
 
 		err = h.Handlers.GetRequest(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -1303,9 +1300,9 @@ func TestHandlers_GetRequest(t *testing.T) {
 		resErr := errors.New("invalid UUID")
 
 		err = h.Handlers.GetRequest(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("UnknownID", func(t *testing.T) {
@@ -1336,9 +1333,9 @@ func TestHandlers_GetRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.GetRequest(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 }
 
@@ -1417,7 +1414,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			},
 		)
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			UpdateRequest(
@@ -1428,8 +1425,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 				group).
 			Return(updateRequest, nil)
 
-		assert.NoError(t, h.Handlers.PutRequest(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PutRequest(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -1523,7 +1520,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		c.SetParamValues(request.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		h.Repository.MockTagRepository.
 			EXPECT().
@@ -1543,8 +1540,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 				group).
 			Return(updateRequest, nil)
 
-		assert.NoError(t, h.Handlers.PutRequest(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PutRequest(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -1644,7 +1641,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 			},
 		)
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
+
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			UpdateRequest(
@@ -1655,8 +1653,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 				group).
 			Return(updateRequest, nil)
 
-		assert.NoError(t, h.Handlers.PutRequest(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PutRequest(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -1746,7 +1744,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 			},
 		)
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
+
 		h.Repository.MockGroupRepository.
 			EXPECT().
 			GetGroup(c.Request().Context(), group.ID).
@@ -1761,8 +1760,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 				group).
 			Return(updateRequest, nil)
 
-		assert.NoError(t, h.Handlers.PutRequest(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PutRequest(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -1859,7 +1858,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			},
 		)
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			UpdateRequest(
@@ -1870,8 +1869,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 				group).
 			Return(updateRequest, nil)
 
-		assert.NoError(t, h.Handlers.PutRequest(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PutRequest(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *RequestDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -1902,9 +1901,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 
 		err = h.Handlers.PutRequest(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -1928,9 +1927,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 		resErr := errors.New("invalid UUID")
 
 		err = h.Handlers.PutRequest(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("UnknownID", func(t *testing.T) {
@@ -1978,9 +1977,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PutRequest(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
 	t.Run("UnknownTagID", func(t *testing.T) {
@@ -2046,9 +2045,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PutRequest(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
 	t.Run("UnknownGroupID", func(t *testing.T) {
@@ -2117,9 +2116,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PutRequest(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 }
 
@@ -2197,9 +2196,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -2225,8 +2224,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		assert.NoError(t, h.Handlers.PutStatus(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PutStatus(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *StatusResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -2317,9 +2316,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -2345,8 +2344,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		assert.NoError(t, h.Handlers.PutStatus(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PutStatus(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *StatusResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -2437,9 +2436,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -2465,8 +2464,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		assert.NoError(t, h.Handlers.PutStatus(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PutStatus(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *StatusResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -2557,9 +2556,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -2585,8 +2584,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		assert.NoError(t, h.Handlers.PutStatus(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PutStatus(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *StatusResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -2677,9 +2676,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -2705,8 +2704,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		assert.NoError(t, h.Handlers.PutStatus(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PutStatus(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *StatusResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -2804,9 +2803,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -2836,8 +2835,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
 			Return(comment, nil)
 
-		assert.NoError(t, h.Handlers.PutStatus(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PutStatus(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *StatusResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -2918,9 +2917,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -2936,9 +2935,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		resErr.Message = resErrMessage
 
 		err = h.Handlers.PutStatus(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい
-		assert.Equal(t, resErr, err)
+		require.Equal(t, resErr, err)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
@@ -2981,9 +2980,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -2992,9 +2991,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		err = h.Handlers.PutStatus(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NillUUID", func(t *testing.T) {
@@ -3035,9 +3034,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -3048,9 +3047,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		_, resErr := uuid.Parse(c.Param("requestID"))
 
 		err = h.Handlers.PutStatus(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("SessionNotFound", func(t *testing.T) {
@@ -3111,14 +3110,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		resErr := errors.New("sessionUser not found")
 
 		err = h.Handlers.PutStatus(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusForbiddenだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusForbidden, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusForbidden, resErr), err)
 	})
 
 	t.Run("SameStatusError", func(t *testing.T) {
@@ -3179,9 +3178,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -3198,9 +3197,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		resErr := errors.New("invalid request: same status")
 
 		err = h.Handlers.PutStatus(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("CommentRequiredErrorFromSubmittedToFixRequired", func(t *testing.T) {
@@ -3261,9 +3260,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -3283,9 +3282,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("CommentRequiredErrorFromSubmittedToRejected", func(t *testing.T) {
@@ -3345,9 +3344,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -3367,9 +3366,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("CommentRequiredErrorFromAcceptedToSubmitted", func(t *testing.T) {
@@ -3429,9 +3428,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -3451,9 +3450,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("UnknownUser", func(t *testing.T) {
@@ -3514,9 +3513,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -3538,9 +3537,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.PutStatus(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
 	t.Run("AdminNoPrivilege", func(t *testing.T) {
@@ -3601,9 +3600,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -3627,9 +3626,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusForbiddenだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("AlreadyPaid", func(t *testing.T) {
@@ -3697,9 +3696,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -3724,9 +3723,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		resErr := errors.New("someone already paid")
 
 		err = h.Handlers.PutStatus(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("CreatorNoPrivilege", func(t *testing.T) {
@@ -3787,9 +3786,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -3812,9 +3811,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			request.Status.String(), reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusForbiddenだけ判定したい; resErrの内容は関係ない
-		assert.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
 	t.Run("NoPrivilege", func(t *testing.T) {
@@ -3875,9 +3874,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		h, err := NewTestHandlers(t, ctrl)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess, err := session.Get(h.Handlers.SessionName, c)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sess.Values[sessionUserKey] = User{
 			ID:          user.ID,
 			Name:        user.Name,
@@ -3896,9 +3895,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Return(user, nil)
 
 		err = h.Handlers.PutStatus(c)
-		assert.Error(t, err)
+		require.Error(t, err)
 		// FIXME: http.StatusForbiddenだけ判定したい
-		assert.Equal(t, echo.NewHTTPError(http.StatusForbidden), err)
+		require.Equal(t, echo.NewHTTPError(http.StatusForbidden), err)
 	})
 }
 

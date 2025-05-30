@@ -12,7 +12,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
 	"github.com/traPtitech/Jomon/service"
@@ -130,8 +129,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		assert.NoError(t, h.Handlers.GetTransactions(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetTransactions(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*Transaction
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -216,8 +215,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		assert.NoError(t, h.Handlers.GetTransactions(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetTransactions(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*Transaction
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -303,8 +302,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		assert.NoError(t, h.Handlers.GetTransactions(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetTransactions(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*Transaction
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -390,8 +389,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		assert.NoError(t, h.Handlers.GetTransactions(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetTransactions(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*Transaction
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -460,8 +459,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			}).
 			Return(txs, nil)
 
-		assert.NoError(t, h.Handlers.GetTransactions(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetTransactions(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*Transaction
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -546,8 +545,8 @@ func TestHandlers_PostTransaction(t *testing.T) {
 				tx1.Title, tx1.Amount, tx1.Target, tags, &group, nil).
 			Return(tx1, nil)
 
-		assert.NoError(t, h.Handlers.PostTransaction(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PostTransaction(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*Transaction
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -635,8 +634,8 @@ func TestHandlers_PostTransaction(t *testing.T) {
 				tags, &group, &request.ID).
 			Return(tx, nil)
 
-		assert.NoError(t, h.Handlers.PostTransaction(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PostTransaction(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got []*Transaction
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -705,8 +704,8 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			GetTransaction(c.Request().Context(), tx.ID).
 			Return(tx, nil)
 
-		assert.NoError(t, h.Handlers.GetTransaction(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.GetTransaction(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *Transaction
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
@@ -810,8 +809,8 @@ func TestHandlers_PutTransaction(t *testing.T) {
 				tx.ID, updated.Title, updated.Amount, updated.Target,
 				updatedTags, nil, nil).
 			Return(updated, nil)
-		assert.NoError(t, h.Handlers.PutTransaction(c))
-		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NoError(t, h.Handlers.PutTransaction(c))
+		require.Equal(t, http.StatusOK, rec.Code)
 		var got *Transaction
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)

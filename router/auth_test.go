@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Sample verifier and challenge comes from Appendix B of RFC7636
@@ -19,5 +19,5 @@ func TestHandler_GetCodeChallenge(t *testing.T) {
 		WithPadding(base64.NoPadding)
 	challenge := encoder.EncodeToString(codeVerifierHash[:])
 
-	assert.Equal(t, "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM", challenge)
+	require.Equal(t, "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM", challenge)
 }

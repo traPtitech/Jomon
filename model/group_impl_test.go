@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
@@ -41,7 +40,7 @@ func TestEntRepository_GetGroups(t *testing.T) {
 		t.Parallel()
 		groups, err := repo2.GetGroups(ctx)
 		require.NoError(t, err)
-		assert.Empty(t, groups)
+		require.Empty(t, groups)
 	})
 }
 
@@ -62,7 +61,7 @@ func TestEntRepository_GetGroup(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo.GetGroup(ctx, created.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, created, got, opts...)
 	})
@@ -70,7 +69,7 @@ func TestEntRepository_GetGroup(t *testing.T) {
 	t.Run("UnknownGroup", func(t *testing.T) {
 		t.Parallel()
 		_, err := repo.GetGroup(ctx, uuid.New())
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -106,7 +105,7 @@ func TestEntRepository_CreateGroup(t *testing.T) {
 		name := random.AlphaNumeric(t, 20)
 		description := random.AlphaNumeric(t, 15)
 		created, err := repo.CreateGroup(ctx, name, description, nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.IgnoreFields(Group{}, "ID"))
@@ -125,7 +124,7 @@ func TestEntRepository_CreateGroup(t *testing.T) {
 		t.Parallel()
 		budget := random.Numeric(t, 100000)
 		_, err := repo.CreateGroup(ctx, "", random.AlphaNumeric(t, 15), &budget)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -153,7 +152,7 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 			Budget:      &updatedBudget,
 		}
 		updated, err := repo.UpdateGroup(ctx, created.ID, ug.Name, ug.Description, ug.Budget)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := &Group{
 			ID:          created.ID,
@@ -176,7 +175,7 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 15),
 			&budget)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("SuccessWithNilBudget", func(t *testing.T) {
@@ -196,7 +195,7 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 			Budget:      nil,
 		}
 		updated, err := repo.UpdateGroup(ctx, created.ID, ug.Name, ug.Description, ug.Budget)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := &Group{
 			ID:          created.ID,
@@ -221,7 +220,7 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = repo.UpdateGroup(ctx, group.ID, "", random.AlphaNumeric(t, 15), &budget)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -242,17 +241,17 @@ func TestEntRepository_DeleteGroup(t *testing.T) {
 		require.NoError(t, err)
 
 		err = repo.DeleteGroup(ctx, group.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		groups, err := repo.GetGroups(ctx)
 		require.NoError(t, err)
-		assert.Empty(t, groups)
+		require.Empty(t, groups)
 	})
 
 	t.Run("UnknownGroup", func(t *testing.T) {
 		t.Parallel()
 		err := repo.DeleteGroup(ctx, uuid.New())
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -262,7 +261,7 @@ func TestEntRepository_GetMembers(t *testing.T) {
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 	client2, storage2, err := setup(t, ctx, "get_members2")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
@@ -292,7 +291,7 @@ func TestEntRepository_GetMembers(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo.GetMembers(ctx, group.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sortOpt := cmpopts.SortSlices(func(a, b *Member) bool {
 			return a.ID.ID() < b.ID.ID()
 		})
@@ -315,8 +314,8 @@ func TestEntRepository_GetMembers(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo2.GetMembers(ctx, group.ID)
-		assert.NoError(t, err)
-		assert.Empty(t, got)
+		require.NoError(t, err)
+		require.Empty(t, got)
 	})
 }
 
@@ -344,7 +343,7 @@ func TestEntRepository_CreateMember(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo.AddMembers(ctx, group.ID, []uuid.UUID{user.ID})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		exp := []*Member{{ID: user.ID}}
 		testutil.RequireEqual(t, exp, got)
 	})
@@ -361,7 +360,7 @@ func TestEntRepository_CreateMember(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = repo.AddMembers(ctx, group.ID, []uuid.UUID{uuid.New()})
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -391,7 +390,7 @@ func TestEntRepository_DeleteMember(t *testing.T) {
 		require.NoError(t, err)
 
 		err = repo.DeleteMembers(ctx, group.ID, []uuid.UUID{member[0].ID})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 }
 
@@ -428,7 +427,7 @@ func TestEntRepository_GetOwners(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo.GetOwners(ctx, group.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sortOpt := cmpopts.SortSlices(func(a, b *Owner) bool {
 			return a.ID.ID() < b.ID.ID()
 		})
@@ -451,8 +450,8 @@ func TestEntRepository_GetOwners(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo.GetOwners(ctx, group.ID)
-		assert.NoError(t, err)
-		assert.Empty(t, got)
+		require.NoError(t, err)
+		require.Empty(t, got)
 	})
 }
 
@@ -481,7 +480,7 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 		require.NoError(t, err)
 
 		owner, err := repo.AddOwners(ctx, group.ID, []uuid.UUID{user.ID})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		exp := []*Owner{{ID: user.ID}}
 		testutil.RequireEqual(t, exp, owner)
 	})
@@ -498,7 +497,7 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = repo.AddOwners(ctx, group.ID, []uuid.UUID{uuid.New()})
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }
 
@@ -528,6 +527,6 @@ func TestEntRepository_DeleteOwner(t *testing.T) {
 		require.NoError(t, err)
 
 		err = repo.DeleteOwners(ctx, group.ID, []uuid.UUID{user.ID})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 }

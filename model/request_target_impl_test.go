@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
@@ -56,7 +55,7 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 			{Target: target2.Target, Amount: target2.Amount, CreatedAt: time.Now()},
 		}
 		got, err := repo.GetRequestTargets(ctx, request.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
 			cmpopts.IgnoreFields(RequestTargetDetail{}, "ID", "PaidAt"),
@@ -83,8 +82,8 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 		got, err := repo2.GetRequestTargets(ctx, request.ID)
-		assert.NoError(t, err)
-		assert.Empty(t, got)
+		require.NoError(t, err)
+		require.Empty(t, got)
 	})
 }
 
@@ -123,7 +122,7 @@ func TestEntRepository_createRequestTargets(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			nil, []*RequestTarget{target1, target2},
 			nil, user1.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		exp := []*RequestTargetDetail{
 			{Target: target1.Target, Amount: target1.Amount, CreatedAt: time.Now()},
 			{Target: target2.Target, Amount: target2.Amount, CreatedAt: time.Now()},
@@ -184,10 +183,10 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			nil, []*RequestTarget{},
 			nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		got, err := repo.GetRequestTargets(ctx, request.ID)
-		assert.NoError(t, err)
-		assert.Empty(t, got)
+		require.NoError(t, err)
+		require.Empty(t, got)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
@@ -227,9 +226,9 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			nil, []*RequestTarget{target1, target2},
 			nil)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		got, err := repo2.GetRequestTargets(ctx, request.ID)
-		assert.NoError(t, err)
-		assert.Len(t, got, 2)
+		require.NoError(t, err)
+		require.Len(t, got, 2)
 	})
 }

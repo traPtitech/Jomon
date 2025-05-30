@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
@@ -16,7 +15,7 @@ func TestEntRepository_GetAdmins(t *testing.T) {
 	require.NoError(t, err)
 	repo := NewEntRepository(client, storage)
 	client2, storage2, err := setup(t, ctx, "get_admins2")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	repo2 := NewEntRepository(client2, storage2)
 
 	t.Run("Success", func(t *testing.T) {
@@ -35,20 +34,20 @@ func TestEntRepository_GetAdmins(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo.GetAdmins(ctx)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		exp := []*Admin{
 			{ID: user1.ID},
 			{ID: user2.ID},
 		}
-		assert.ElementsMatch(t, exp, got)
+		require.ElementsMatch(t, exp, got)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 
 		got, err := repo2.GetAdmins(ctx)
-		assert.NoError(t, err)
-		assert.Empty(t, got)
+		require.NoError(t, err)
+		require.Empty(t, got)
 	})
 }
 
@@ -68,11 +67,11 @@ func TestEntRepository_AddAdmins(t *testing.T) {
 		require.NoError(t, err)
 
 		err = repo.AddAdmins(ctx, []uuid.UUID{user.ID})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		u, err := repo.GetUserByID(ctx, user.ID)
-		assert.NoError(t, err)
-		assert.True(t, u.Admin)
+		require.NoError(t, err)
+		require.True(t, u.Admin)
 	})
 }
 
@@ -92,10 +91,10 @@ func TestEntRepository_DeleteAdmins(t *testing.T) {
 		require.NoError(t, err)
 
 		err = repo.DeleteAdmins(ctx, []uuid.UUID{user.ID})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		u, err := repo.GetUserByID(ctx, user.ID)
-		assert.NoError(t, err)
-		assert.False(t, u.Admin)
+		require.NoError(t, err)
+		require.False(t, u.Admin)
 	})
 }
