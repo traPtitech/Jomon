@@ -390,7 +390,6 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		exp := request1.toExpectedRequestResponse(t)
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, exp, got[0], opts...)
-
 	})
 
 	t.Run("SuccessWithQuerySince", func(t *testing.T) {
@@ -452,7 +451,6 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		exp := request2.toExpectedRequestResponse(t)
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, exp, got[0], opts...)
-
 	})
 
 	t.Run("SuccessWithQueryUntil", func(t *testing.T) {
@@ -515,7 +513,6 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		exp.Group.UpdatedAt = request2.Group.UpdatedAt
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, exp, got[0], opts...)
-
 	})
 
 	t.Run("SuccessWithQueryStatus", func(t *testing.T) {
@@ -584,7 +581,6 @@ func TestEntRepository_GetRequests(t *testing.T) {
 		exp.Group.UpdatedAt = request2.Group.UpdatedAt
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, exp, got[0], opts...)
-
 	})
 
 	t.Run("SuccessWithQueryCreatedBy", func(t *testing.T) {
