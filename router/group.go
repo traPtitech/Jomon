@@ -183,7 +183,7 @@ func (h Handlers) PutGroup(c echo.Context) error {
 	if groupID == uuid.Nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
-	if err := h.filterAdminOrGroupOwner(ctx, loginUser.ID, groupID); err != nil {
+	if err := h.filterAdminOrGroupOwner(ctx, &loginUser, groupID); err != nil {
 		return err
 	}
 
@@ -228,7 +228,7 @@ func (h Handlers) DeleteGroup(c echo.Context) error {
 		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
-	if err := h.filterAdminOrGroupOwner(ctx, loginUser.ID, groupID); err != nil {
+	if err := h.filterAdminOrGroupOwner(ctx, &loginUser, groupID); err != nil {
 		return err
 	}
 
@@ -256,7 +256,7 @@ func (h Handlers) PostMember(c echo.Context) error {
 		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
-	if err := h.filterAdminOrGroupOwner(ctx, loginUser.ID, groupID); err != nil {
+	if err := h.filterAdminOrGroupOwner(ctx, &loginUser, groupID); err != nil {
 		return err
 	}
 	var member []uuid.UUID
@@ -290,7 +290,7 @@ func (h Handlers) DeleteMember(c echo.Context) error {
 		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
-	if err := h.filterAdminOrGroupOwner(ctx, loginUser.ID, groupID); err != nil {
+	if err := h.filterAdminOrGroupOwner(ctx, &loginUser, groupID); err != nil {
 		return err
 	}
 	var member []uuid.UUID
@@ -321,7 +321,7 @@ func (h Handlers) PostOwner(c echo.Context) error {
 		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
-	if err := h.filterAdminOrGroupOwner(ctx, loginUser.ID, groupID); err != nil {
+	if err := h.filterAdminOrGroupOwner(ctx, &loginUser, groupID); err != nil {
 		return err
 	}
 	var owners []uuid.UUID
@@ -361,7 +361,7 @@ func (h Handlers) DeleteOwner(c echo.Context) error {
 		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
-	if err := h.filterAdminOrGroupOwner(ctx, loginUser.ID, groupID); err != nil {
+	if err := h.filterAdminOrGroupOwner(ctx, &loginUser, groupID); err != nil {
 		return err
 	}
 	var ownerIDs []uuid.UUID
@@ -400,19 +400,13 @@ func (h Handlers) isGroupOwner(
 
 // filterAdminOrGroupOwner 与えられたIDのユーザーが管理者またはグループのオーナーであるかを確認します
 func (h Handlers) filterAdminOrGroupOwner(
-	ctx context.Context, userID, groupID uuid.UUID,
+	ctx context.Context, user *User, groupID uuid.UUID,
 ) *echo.HTTPError {
 	logger := logging.GetLogger(ctx)
-	isAdmin, err := h.isAdmin(ctx, userID)
-	if err != nil {
-		// NOTE: ent.IsNotFound(err)は起こり得ないと仮定
-		logger.Error("failed to check if user is admin", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	if isAdmin {
+	if user.Admin {
 		return nil
 	}
-	isOwner, err := h.isGroupOwner(ctx, userID, groupID)
+	isOwner, err := h.isGroupOwner(ctx, user.ID, groupID)
 	if err != nil {
 		// NOTE: ent.IsNotFound(err)は起こり得ないと仮定
 		logger.Error("failed to check if user is group owner", zap.Error(err))

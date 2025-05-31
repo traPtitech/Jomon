@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -69,17 +68,4 @@ func (h Handlers) DeleteAdmins(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
-}
-
-func (h Handlers) isAdmin(ctx context.Context, userID uuid.UUID) (bool, error) {
-	logger := logging.GetLogger(ctx)
-	user, err := h.Repository.GetUserByID(ctx, userID)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return false, nil
-		}
-		logger.Error("failed to get user by id", zap.Error(err))
-		return false, err
-	}
-	return user.Admin, nil
 }

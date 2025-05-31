@@ -758,7 +758,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		logger.Info("invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	if err := h.filterAdminOrRequestCreator(ctx, loginUser, requestID); err != nil {
+	if err := h.filterAdminOrRequestCreator(ctx, &loginUser, requestID); err != nil {
 		return err
 	}
 
@@ -909,7 +909,7 @@ func (h Handlers) isRequestCreator(
 }
 
 func (h Handlers) filterAdminOrRequestCreator(
-	ctx context.Context, user User, requestID uuid.UUID,
+	ctx context.Context, user *User, requestID uuid.UUID,
 ) *echo.HTTPError {
 	logger := logging.GetLogger(ctx)
 	if user.Admin {

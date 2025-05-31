@@ -208,7 +208,7 @@ func (h Handlers) DeleteFile(c echo.Context) error {
 		logger.Info("could not parse query parameter `fileID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	if err := h.filterAdminOrFileCreator(ctx, loginUser.ID, fileID); err != nil {
+	if err := h.filterAdminOrFileCreator(ctx, &loginUser, fileID); err != nil {
 		return err
 	}
 
@@ -241,19 +241,13 @@ func (h Handlers) isFileCreator(ctx context.Context, userID, fileID uuid.UUID) (
 }
 
 func (h Handlers) filterAdminOrFileCreator(
-	ctx context.Context, userID uuid.UUID, fileID uuid.UUID,
+	ctx context.Context, user *User, fileID uuid.UUID,
 ) *echo.HTTPError {
 	logger := logging.GetLogger(ctx)
-	isAdmin, err := h.isAdmin(ctx, userID)
-	if err != nil {
-		// NOTE: end.IsNotFound(err)は起こり得ないと仮定
-		logger.Error("failed to check if user is admin", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	if isAdmin {
+	if user.Admin {
 		return nil
 	}
-	isCreator, err := h.isFileCreator(ctx, userID, fileID)
+	isCreator, err := h.isFileCreator(ctx, user.ID, fileID)
 	if err != nil {
 		logger.Error("failed to check if user is file creator", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
