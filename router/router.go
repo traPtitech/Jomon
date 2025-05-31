@@ -113,12 +113,12 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 			apiGroupIDs := apiGroups.Group("/:groupID", retrieveGroupOwner)
 			{
 				apiGroupIDs.GET("", h.GetGroupDetail)
-				apiGroupIDs.PUT("", h.PutGroup, h.CheckAdminOrGroupOwnerMiddleware)
-				apiGroupIDs.DELETE("", h.DeleteGroup, h.CheckAdminOrGroupOwnerMiddleware)
-				apiGroupIDs.POST("/members", h.PostMember, h.CheckAdminOrGroupOwnerMiddleware)
-				apiGroupIDs.DELETE("/members", h.DeleteMember, h.CheckAdminOrGroupOwnerMiddleware)
-				apiGroupIDs.POST("/owners", h.PostOwner, h.CheckAdminOrGroupOwnerMiddleware)
-				apiGroupIDs.DELETE("/owners", h.DeleteOwner, h.CheckAdminOrGroupOwnerMiddleware)
+				apiGroupIDs.PUT("", h.PutGroup)
+				apiGroupIDs.DELETE("", h.DeleteGroup)
+				apiGroupIDs.POST("/members", h.PostMember)
+				apiGroupIDs.DELETE("/members", h.DeleteMember)
+				apiGroupIDs.POST("/owners", h.PostOwner)
+				apiGroupIDs.DELETE("/owners", h.DeleteOwner)
 			}
 		}
 

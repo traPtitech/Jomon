@@ -12,7 +12,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/logging"
-	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -189,41 +188,6 @@ func (h Handlers) CheckAdminOrRequestCreatorMiddleware(next echo.HandlerFunc) ec
 		}
 
 		return next(c)
-	}
-}
-
-func (h Handlers) CheckAdminOrGroupOwnerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		logger := logging.GetLogger(c.Request().Context())
-		sess, err := session.Get(h.SessionName, c)
-		if err != nil {
-			logger.Error("failed to get session", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		user, err := getUserInfo(sess)
-		if err != nil {
-			logger.Error("failed to get user info", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		owners, ok := sess.Values[sessionOwnerKey].([]*model.Owner)
-		if !ok {
-			logger.Error("failed to get group owner", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, "session owner key is not set")
-		}
-
-		if user.Admin {
-			return next(c)
-		}
-
-		for _, owner := range owners {
-			if owner.ID == user.ID {
-				return next(c)
-			}
-		}
-
-		return echo.ErrForbidden
 	}
 }
 
