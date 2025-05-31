@@ -355,3 +355,44 @@ func (h Handlers) DeleteOwner(c echo.Context) error {
 
 	return c.NoContent(http.StatusOK)
 }
+
+// isGroupOwner checks if the user is an owner of the group.
+func (h Handlers) isGroupOwner(
+	ctx context.Context, userID, groupID uuid.UUID,
+) (bool, error) {
+	owners, err := h.Repository.GetOwners(ctx, groupID)
+	if err != nil {
+		return false, err
+	}
+	isOwner := lo.ContainsBy(owners, func(owner *model.Owner) bool {
+		return owner.ID == userID
+	})
+
+	return isOwner, nil
+}
+
+// filterAdminOrGroupOwner 与えられたIDのユーザーが管理者またはグループのオーナーであるかを確認します
+func (h Handlers) filterAdminOrGroupOwner(
+	ctx context.Context, userID, groupID uuid.UUID,
+) *echo.HTTPError {
+	logger := logging.GetLogger(ctx)
+	isAdmin, err := h.isAdmin(ctx, userID)
+	if err != nil {
+		// NOTE: ent.IsNotFound(err)は起こり得ないと仮定
+		logger.Error("failed to check if user is admin", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if isAdmin {
+		return nil
+	}
+	isOwner, err := h.isGroupOwner(ctx, userID, groupID)
+	if err != nil {
+		// NOTE: ent.IsNotFound(err)は起こり得ないと仮定
+		logger.Error("failed to check if user is group owner", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if isOwner {
+		return nil
+	}
+	return echo.NewHTTPError(http.StatusForbidden, errUserIsNotAdminOrGroupOwner)
+}
