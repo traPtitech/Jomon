@@ -117,11 +117,15 @@ func TestHandlers_GetGroups(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
+
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/groups", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -648,6 +652,8 @@ func TestHandlers_PutGroup(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		date2 := time.Now().Add(time.Hour)
 		budget := random.Numeric(t, 1000000)
@@ -689,9 +695,14 @@ func TestHandlers_PutGroup(t *testing.T) {
 		c.SetPath("api/groups/:groupID")
 		c.SetParamNames("groupID")
 		c.SetParamValues(group.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), group.ID).
+			Return([]*model.Owner{{ID: user.ID}}, nil)
 		h.Repository.MockGroupRepository.
 			EXPECT().
 			UpdateGroup(
@@ -721,6 +732,8 @@ func TestHandlers_PutGroup(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		date2 := time.Now().Add(time.Hour)
 		budget := random.Numeric(t, 1000000)
@@ -742,7 +755,6 @@ func TestHandlers_PutGroup(t *testing.T) {
 			UpdatedAt:   date2,
 		}
 
-		e := echo.New()
 		// FIXME: #833
 		reqBody, err := json.Marshal(&struct {
 			Name        string `json:"name"`
@@ -758,14 +770,20 @@ func TestHandlers_PutGroup(t *testing.T) {
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
+		e := echo.New()
 		c := e.NewContext(req, rec)
 		c.SetPath("api/groups/:groupID")
 		c.SetParamNames("groupID")
 		c.SetParamValues(group.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		resErr := errors.New("Failed to get requests.")
 		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), group.ID).
+			Return([]*model.Owner{{ID: user.ID}}, nil)
 		h.Repository.MockGroupRepository.
 			EXPECT().
 			UpdateGroup(
@@ -825,6 +843,8 @@ func TestHandlers_DeleteGroup(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		budget := random.Numeric(t, 1000000)
 		group := &model.Group{
@@ -844,9 +864,14 @@ func TestHandlers_DeleteGroup(t *testing.T) {
 		c.SetPath("api/groups/:groupID")
 		c.SetParamNames("groupID")
 		c.SetParamValues(group.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), group.ID).
+			Return([]*model.Owner{{ID: user.ID}}, nil)
 		h.Repository.MockGroupRepository.
 			EXPECT().
 			DeleteGroup(c.Request().Context(), group.ID).
@@ -861,6 +886,8 @@ func TestHandlers_DeleteGroup(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		budget := random.Numeric(t, 1000000)
 		group := &model.Group{
@@ -880,10 +907,15 @@ func TestHandlers_DeleteGroup(t *testing.T) {
 		c.SetPath("api/groups/:groupID")
 		c.SetParamNames("groupID")
 		c.SetParamValues(group.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		resErr := errors.New("Failed to get requests.")
 		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), group.ID).
+			Return([]*model.Owner{{ID: user.ID}}, nil)
 		h.Repository.MockGroupRepository.
 			EXPECT().
 			DeleteGroup(c.Request().Context(), group.ID).
@@ -929,6 +961,8 @@ func TestHandlers_PostMember(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		budget := random.Numeric(t, 1000000)
 		group := &model.Group{
@@ -936,14 +970,6 @@ func TestHandlers_PostMember(t *testing.T) {
 			Name:        random.AlphaNumeric(t, 20),
 			Description: random.AlphaNumeric(t, 50),
 			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-		user := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
 			CreatedAt:   date,
 			UpdatedAt:   date,
 		}
@@ -960,9 +986,14 @@ func TestHandlers_PostMember(t *testing.T) {
 		c.SetPath("/api/groups/:groupID/members")
 		c.SetParamNames("groupID")
 		c.SetParamValues(group.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), group.ID).
+			Return([]*model.Owner{{ID: user.ID}}, nil)
 		modelMember := &model.Member{
 			ID: user.ID,
 		}
@@ -1048,15 +1079,8 @@ func TestHandlers_PostMember(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		date := time.Now()
-		user := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
 		unknownGroupID := uuid.New()
 		var resErr *ent.ConstraintError
 		errors.As(errors.New("unknown group id"), &resErr)
@@ -1074,9 +1098,14 @@ func TestHandlers_PostMember(t *testing.T) {
 		c.SetPath("/api/groups/:groupID/members")
 		c.SetParamNames("groupID")
 		c.SetParamValues(unknownGroupID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), unknownGroupID).
+			Return([]*model.Owner{{ID: user.ID}}, nil)
 		h.Repository.MockGroupRepository.
 			EXPECT().
 			AddMembers(c.Request().Context(), unknownGroupID, []uuid.UUID{user.ID}).
@@ -1093,6 +1122,8 @@ func TestHandlers_PostMember(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		budget := random.Numeric(t, 1000000)
 		group := &model.Group{
@@ -1121,9 +1152,14 @@ func TestHandlers_PostMember(t *testing.T) {
 		c.SetPath("/api/groups/:groupID/members")
 		c.SetParamNames("groupID")
 		c.SetParamValues(group.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), group.ID).
+			Return([]*model.Owner{{ID: user.ID}}, nil)
 		h.Repository.MockGroupRepository.
 			EXPECT().
 			AddMembers(c.Request().Context(), group.ID, []uuid.UUID{unknownUserID}).
@@ -1144,6 +1180,8 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, true)
+		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		budget := random.Numeric(t, 1000000)
 		group := &model.Group{
@@ -1151,14 +1189,6 @@ func TestHandlers_DeleteMember(t *testing.T) {
 			Name:        random.AlphaNumeric(t, 20),
 			Description: random.AlphaNumeric(t, 50),
 			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-		user := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
 			CreatedAt:   date,
 			UpdatedAt:   date,
 		}
@@ -1176,6 +1206,7 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		c.SetPath("/api/groups/:groupID/members")
 		c.SetParamNames("groupID")
 		c.SetParamValues(group.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1233,15 +1264,8 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		date := time.Now()
-		user := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
+		accessUser := makeUser(t, true)
+		user := userFromModelUser(*accessUser)
 		unknownGroupID := uuid.New()
 		var resErr *ent.NotFoundError
 		errors.As(errors.New("unknown group id"), &resErr)
@@ -1259,6 +1283,7 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		c.SetPath("/api/groups/:groupID/members")
 		c.SetParamNames("groupID")
 		c.SetParamValues(unknownGroupID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1278,6 +1303,8 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		budget := random.Numeric(t, 1000000)
 		group := &model.Group{
@@ -1305,9 +1332,14 @@ func TestHandlers_DeleteMember(t *testing.T) {
 		c.SetPath("/api/groups/:groupID/members")
 		c.SetParamNames("groupID")
 		c.SetParamValues(group.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), group.ID).
+			Return([]*model.Owner{{ID: user.ID}}, nil)
 		h.Repository.MockGroupRepository.
 			EXPECT().
 			DeleteMembers(c.Request().Context(), group.ID, []uuid.UUID{unknownUserID}).
@@ -1359,6 +1391,8 @@ func TestHandlers_PostOwner(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, true)
+		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		budget := random.Numeric(t, 1000000)
 		group := &model.Group{
@@ -1366,14 +1400,6 @@ func TestHandlers_PostOwner(t *testing.T) {
 			Name:        random.AlphaNumeric(t, 20),
 			Description: random.AlphaNumeric(t, 50),
 			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-		user := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
 			CreatedAt:   date,
 			UpdatedAt:   date,
 		}
@@ -1390,6 +1416,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 		c.SetPath("/api/groups/:groupID/owners")
 		c.SetParamNames("groupID")
 		c.SetParamValues(group.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1477,15 +1504,8 @@ func TestHandlers_PostOwner(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		date := time.Now()
-		user := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
+		accessUser := makeUser(t, true)
+		user := userFromModelUser(*accessUser)
 		unknownGroupID := uuid.New()
 		var resErr *ent.ConstraintError
 		errors.As(errors.New("unknown group id"), &resErr)
@@ -1502,6 +1522,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 		c.SetPath("/api/groups/:groupID/owner")
 		c.SetParamNames("groupID")
 		c.SetParamValues(unknownGroupID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1521,6 +1542,8 @@ func TestHandlers_PostOwner(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, true)
+		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		budget := random.Numeric(t, 1000000)
 		group := &model.Group{
@@ -1547,6 +1570,7 @@ func TestHandlers_PostOwner(t *testing.T) {
 		c.SetPath("/api/groups/:groupID/owners")
 		c.SetParamNames("groupID")
 		c.SetParamValues(group.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1580,14 +1604,8 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 			CreatedAt:   date,
 			UpdatedAt:   date,
 		}
-		user := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
+		accessUser := makeUser(t, true)
+		user := userFromModelUser(*accessUser)
 		owner := []uuid.UUID{user.ID}
 		reqBody, err := json.Marshal(owner)
 		require.NoError(t, err)
@@ -1602,6 +1620,7 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		c.SetPath("/api/groups/:groupID/owners")
 		c.SetParamNames("groupID")
 		c.SetParamValues(group.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1650,15 +1669,8 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		date := time.Now()
-		user := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
+		accessUser := makeUser(t, true)
+		user := userFromModelUser(*accessUser)
 		unknownGroupID := uuid.New()
 		var resErr *ent.NotFoundError
 		errors.As(errors.New("unknown group id"), &resErr)
@@ -1676,6 +1688,7 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		c.SetPath("/api/groups/:groupID/owners")
 		c.SetParamNames("groupID")
 		c.SetParamValues(unknownGroupID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1694,6 +1707,8 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		budget := random.Numeric(t, 1000000)
 		group := &model.Group{
@@ -1720,9 +1735,14 @@ func TestHandlers_DeleteOwner(t *testing.T) {
 		c.SetPath("/api/groups/:groupID/owners")
 		c.SetParamNames("groupID")
 		c.SetParamValues(group.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
+		h.Repository.MockGroupRepository.
+			EXPECT().
+			GetOwners(c.Request().Context(), group.ID).
+			Return([]*model.Owner{{ID: user.ID}}, nil)
 		h.Repository.MockGroupRepository.
 			EXPECT().
 			DeleteOwners(c.Request().Context(), group.ID, []uuid.UUID{unknownUserID}).
