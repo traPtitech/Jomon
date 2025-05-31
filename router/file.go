@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/logging"
@@ -44,6 +43,7 @@ func (h Handlers) PostFile(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
+	loginUser, _ := c.Get(loginUserKey).(User)
 	form, err := c.MultipartForm()
 	if err != nil {
 		logger.Error("failed to parse request as multipart/form-data", zap.Error(err))
@@ -87,20 +87,7 @@ func (h Handlers) PostFile(c echo.Context) error {
 	}
 	defer src.Close()
 
-	// get create user
-	sess, err := session.Get(h.SessionName, c)
-	if err != nil {
-		logger.Error("failed to get session", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-
-	user, ok := sess.Values[sessionUserKey].(User)
-	if !ok {
-		logger.Error("failed to parse stored session as user info")
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("invalid user"))
-	}
-
-	file, err := h.Repository.CreateFile(ctx, name, mimetype, requestID, user.ID)
+	file, err := h.Repository.CreateFile(ctx, name, mimetype, requestID, loginUser.ID)
 	if err != nil {
 		logger.Error("failed to create file in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)

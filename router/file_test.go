@@ -15,8 +15,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
@@ -36,12 +34,15 @@ func TestHandlers_PostFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		request := uuid.New()
-		user := User{
-			ID:          uuid.New(),
-			Name:        "test",
-			DisplayName: "test",
-			Admin:       true,
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
+		requestID := uuid.New()
+		file := &model.File{
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			MimeType:  "image/jpeg",
+			CreatedBy: user.ID,
+			CreatedAt: time.Now(),
 		}
 
 		pr, pw := io.Pipe()
@@ -53,7 +54,7 @@ func TestHandlers_PostFile(t *testing.T) {
 			}()
 			err := writer.WriteField("name", "test")
 			require.NoError(t, err)
-			err = writer.WriteField("request_id", request.String())
+			err = writer.WriteField("request_id", requestID.String())
 			require.NoError(t, err)
 			part := make(textproto.MIMEHeader)
 			part.Set("Content-Type", "image/jpeg")
@@ -66,32 +67,19 @@ func TestHandlers_PostFile(t *testing.T) {
 			require.NoError(t, err)
 		}()
 
-		file := &model.File{
-			ID: uuid.New(),
-		}
-
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodPost, "/api/files", pr)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
-		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
-			return c.NoContent(http.StatusOK)
-		}))
-		err := hn(c)
-		require.NoError(t, err)
+		c.SetPath("/api/files")
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		sess, err := session.Get(h.Handlers.SessionName, c)
-		require.NoError(t, err)
-		sess.Values[sessionUserKey] = user
-		require.NoError(t, sess.Save(c.Request(), c.Response()))
-
 		h.Repository.MockFileRepository.
 			EXPECT().
-			CreateFile(c.Request().Context(), "test", "image/jpeg", request, user.ID).
+			CreateFile(c.Request().Context(), "test", "image/jpeg", requestID, user.ID).
 			Return(file, nil)
 
 		h.Storage.
@@ -108,13 +96,9 @@ func TestHandlers_PostFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		request := uuid.New()
-		user := User{
-			ID:          uuid.New(),
-			Name:        "test",
-			DisplayName: "test",
-			Admin:       true,
-		}
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
+		requestID := uuid.New()
 
 		pr, pw := io.Pipe()
 		writer := multipart.NewWriter(pw)
@@ -125,7 +109,7 @@ func TestHandlers_PostFile(t *testing.T) {
 			}()
 			err := writer.WriteField("name", "test")
 			require.NoError(t, err)
-			err = writer.WriteField("request_id", request.String())
+			err = writer.WriteField("request_id", requestID.String())
 			require.NoError(t, err)
 			part := make(textproto.MIMEHeader)
 			part.Set("Content-Type", "image/jpeg")
@@ -143,26 +127,18 @@ func TestHandlers_PostFile(t *testing.T) {
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
-		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
-			return c.NoContent(http.StatusOK)
-		}))
-		err := hn(c)
-		require.NoError(t, err)
+		c.SetPath("/api/files")
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		sess, err := session.Get(h.Handlers.SessionName, c)
-		require.NoError(t, err)
-		sess.Values[sessionUserKey] = user
-		require.NoError(t, sess.Save(c.Request(), c.Response()))
 
 		mocErr := errors.New("failed to create file")
 
 		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
-			CreateFile(c.Request().Context(), "test", "image/jpeg", request, user.ID).
+			CreateFile(c.Request().Context(), "test", "image/jpeg", requestID, user.ID).
 			Return(nil, mocErr)
 
 		err = h.Handlers.PostFile(c)
@@ -176,12 +152,15 @@ func TestHandlers_PostFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		request := uuid.New()
-		user := User{
-			ID:          uuid.New(),
-			Name:        "test",
-			DisplayName: "test",
-			Admin:       true,
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
+		requestID := uuid.New()
+		file := &model.File{
+			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
+			MimeType:  "image/jpeg",
+			CreatedBy: user.ID,
+			CreatedAt: time.Now(),
 		}
 
 		pr, pw := io.Pipe()
@@ -193,7 +172,7 @@ func TestHandlers_PostFile(t *testing.T) {
 			}()
 			err := writer.WriteField("name", "test")
 			require.NoError(t, err)
-			err = writer.WriteField("request_id", request.String())
+			err = writer.WriteField("request_id", requestID.String())
 			require.NoError(t, err)
 			part := make(textproto.MIMEHeader)
 			part.Set("Content-Type", "image/jpeg")
@@ -206,32 +185,19 @@ func TestHandlers_PostFile(t *testing.T) {
 			require.NoError(t, err)
 		}()
 
-		file := &model.File{
-			ID: uuid.New(),
-		}
-
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodPost, "/api/files", pr)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
-		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
-			return c.NoContent(http.StatusOK)
-		}))
-		err := hn(c)
-		require.NoError(t, err)
+		c.SetPath("/api/files")
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		sess, err := session.Get(h.Handlers.SessionName, c)
-		require.NoError(t, err)
-		sess.Values[sessionUserKey] = user
-		require.NoError(t, sess.Save(c.Request(), c.Response()))
-
 		h.Repository.MockFileRepository.
 			EXPECT().
-			CreateFile(c.Request().Context(), "test", "image/jpeg", request, user.ID).
+			CreateFile(c.Request().Context(), "test", "image/jpeg", requestID, user.ID).
 			Return(file, nil)
 
 		mocErr := errors.New("failed to save file")
