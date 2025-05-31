@@ -221,3 +221,36 @@ func (h Handlers) DeleteFile(c echo.Context) error {
 
 	return c.NoContent(http.StatusOK)
 }
+
+// isFileCreator 与えられたユーザーがファイルの作成者かどうかを確認します
+func (h Handlers) isFileCreator(ctx context.Context, userID, fileID uuid.UUID) (bool, error) {
+	file, err := h.Repository.GetFile(ctx, fileID)
+	if err != nil {
+		return false, err
+	}
+	return file.CreatedBy == userID, nil
+}
+
+func (h Handlers) filterAdminOrFileCreator(
+	ctx context.Context, userID uuid.UUID, fileID uuid.UUID,
+) *echo.HTTPError {
+	logger := logging.GetLogger(ctx)
+	isAdmin, err := h.isAdmin(ctx, userID)
+	if err != nil {
+		// NOTE: end.IsNotFound(err)は起こり得ないと仮定
+		logger.Error("failed to check if user is admin", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if isAdmin {
+		return nil
+	}
+	isCreator, err := h.isFileCreator(ctx, userID, fileID)
+	if err != nil {
+		logger.Error("failed to check if user is file creator", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if isCreator {
+		return nil
+	}
+	return echo.NewHTTPError(http.StatusForbidden, errUserIsNotAdminOrFileCreator)
+}
