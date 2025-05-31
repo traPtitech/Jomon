@@ -1,12 +1,10 @@
 package router
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/ent"
@@ -108,32 +106,10 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 func (h Handlers) CheckAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		logger := logging.GetLogger(c.Request().Context())
-		sess, err := session.Get(h.SessionName, c)
-		if err != nil {
-			logger.Error("failed to get session", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		user, err := getUserInfo(sess)
-		if err != nil {
-			logger.Error("failed to get user info", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		if !user.Admin {
+		loginUser, _ := c.Get(loginUserKey).(User)
+		if !loginUser.Admin {
 			return echo.NewHTTPError(http.StatusForbidden, "you are not admin")
 		}
-
 		return next(c)
 	}
-}
-
-func getUserInfo(sess *sessions.Session) (*User, error) {
-	user, ok := sess.Values[sessionUserKey].(User)
-	if !ok {
-		return nil, errors.New("user not found")
-	}
-
-	return &user, nil
 }
