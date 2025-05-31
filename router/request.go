@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -536,8 +537,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	var req PutRequest
-	var err error
+	loginUser, _ := c.Get(loginUserKey).(User)
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `requestID` as UUID", zap.Error(err))
@@ -547,7 +547,24 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		logger.Info("invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
+	isRequestCreator, err := h.isRequestCreator(ctx, loginUser.ID, requestID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			logger.Info(
+				"could not find request in repository",
+				zap.String("ID", requestID.String()),
+				zap.Error(err))
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
+		logger.Error("failed to check request creator", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if !isRequestCreator {
+		logger.Info("user is not request creator", zap.String("ID", loginUser.ID.String()))
+		return echo.NewHTTPError(http.StatusForbidden, "you are not request creator")
+	}
 
+	var req PutRequest
 	if err = c.Bind(&req); err != nil {
 		logger.Info("failed to get request from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -886,4 +903,14 @@ func IsAbleAdminChangeState(status, latestStatus model.Status) bool {
 		status == model.Accepted && latestStatus == model.Submitted ||
 		status == model.Submitted && latestStatus == model.Accepted ||
 		status == model.FixRequired && latestStatus == model.Submitted
+}
+
+func (h Handlers) isRequestCreator(
+	ctx context.Context, userID, requestID uuid.UUID,
+) (bool, error) {
+	request, err := h.Repository.GetRequest(ctx, requestID)
+	if err != nil {
+		return false, err
+	}
+	return request.CreatedBy == userID, nil
 }

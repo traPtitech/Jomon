@@ -56,11 +56,12 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 			apiRequestIDs := apiRequests.Group("/:requestID", retrieveRequestCreator)
 			{
 				apiRequestIDs.GET("", h.GetRequest)
+				// FIXME: このままでは異常系のrequestでもwebhookが呼ばれる
+				// そのため、webhookの関数呼び出しをPutRequest内に移す
 				apiRequestIDs.PUT(
 					"",
 					h.PutRequest,
-					middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler),
-					h.CheckRequestCreatorMiddleware)
+					middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler))
 				apiRequestIDs.POST(
 					"/comments",
 					h.PostComment,
