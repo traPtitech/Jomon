@@ -748,8 +748,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	var req PutStatus
-	var err error
+	loginUser, _ := c.Get(loginUserKey).(User)
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `requestID` as UUID", zap.Error(err))
@@ -759,17 +758,11 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		logger.Info("invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	sess, err := session.Get(h.SessionName, c)
-	if err != nil {
-		logger.Error("failed to get session", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	user, ok := sess.Values[sessionUserKey].(User)
-	if !ok {
-		logger.Info("could not find use in session")
-		return echo.NewHTTPError(http.StatusForbidden, errors.New("sessionUser not found"))
+	if err := h.filterAdminOrRequestCreator(ctx, loginUser, requestID); err != nil {
+		return err
 	}
 
+	var req PutStatus
 	if err = c.Bind(&req); err != nil {
 		logger.Info("could not get status from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -800,10 +793,10 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		}
 	}
 
-	u, err := h.Repository.GetUserByID(ctx, user.ID)
+	u, err := h.Repository.GetUserByID(ctx, loginUser.ID)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			logger.Info("could not find user in repository", zap.String("ID", user.ID.String()))
+			logger.Info("could not find user in repository", zap.String("ID", loginUser.ID.String()))
 			return echo.NewHTTPError(http.StatusNotFound, err)
 		}
 		logger.Error("failed to get user from repository", zap.Error(err))
@@ -833,7 +826,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		}
 	}
 
-	if !u.Admin && user.ID == request.CreatedBy {
+	if !u.Admin && loginUser.ID == request.CreatedBy {
 		if !IsAbleCreatorChangeStatus(req.Status, request.Status) {
 			logger.Info("creator unable to change status")
 			err := fmt.Errorf(
@@ -843,20 +836,20 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		}
 	}
 
-	if user.ID != request.CreatedBy && !u.Admin {
+	if loginUser.ID != request.CreatedBy && !u.Admin {
 		logger.Info("use is not creator or admin")
 		return echo.NewHTTPError(http.StatusForbidden)
 	}
 
 	// create status and comment: keep the two in this order
-	created, err := h.Repository.CreateStatus(ctx, requestID, user.ID, req.Status)
+	created, err := h.Repository.CreateStatus(ctx, requestID, loginUser.ID, req.Status)
 	if err != nil {
 		logger.Error("failed to create status in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	var resComment CommentDetail
 	if req.Comment != "" {
-		comment, err := h.Repository.CreateComment(ctx, req.Comment, request.ID, user.ID)
+		comment, err := h.Repository.CreateComment(ctx, req.Comment, request.ID, loginUser.ID)
 		if err != nil {
 			logger.Error("failed to create comment in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -871,7 +864,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 	}
 
 	res := &StatusResponse{
-		CreatedBy: user.ID,
+		CreatedBy: loginUser.ID,
 		Status:    created.Status,
 		Comment:   resComment,
 		CreatedAt: created.CreatedAt,
@@ -913,4 +906,29 @@ func (h Handlers) isRequestCreator(
 		return false, err
 	}
 	return request.CreatedBy == userID, nil
+}
+
+func (h Handlers) filterAdminOrRequestCreator(
+	ctx context.Context, user User, requestID uuid.UUID,
+) *echo.HTTPError {
+	logger := logging.GetLogger(ctx)
+	if user.Admin {
+		return nil
+	}
+	request, err := h.Repository.GetRequest(ctx, requestID)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			logger.Info(
+				"could not find request in repository",
+				zap.String("ID", requestID.String()))
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		}
+		logger.Error("failed to get request from repository", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if request.CreatedBy == user.ID {
+		return nil
+	}
+	logger.Info("user is not admin or request creator", zap.String("ID", user.ID.String()))
+	return echo.NewHTTPError(http.StatusForbidden, "you are not request creator")
 }

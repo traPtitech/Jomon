@@ -66,7 +66,7 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 					"/comments",
 					h.PostComment,
 					middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler))
-				apiRequestIDs.PUT("/status", h.PutStatus, h.CheckAdminOrRequestCreatorMiddleware)
+				apiRequestIDs.PUT("/status", h.PutStatus)
 			}
 		}
 
