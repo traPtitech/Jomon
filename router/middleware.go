@@ -190,32 +190,6 @@ func (h Handlers) CheckAdminOrRequestCreatorMiddleware(next echo.HandlerFunc) ec
 	}
 }
 
-func (h Handlers) CheckAdminOrFileCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		sess, err := session.Get(h.SessionName, c)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		user, err := getUserInfo(sess)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		creator, ok := sess.Values[sessionFileCreatorKey].(uuid.UUID)
-		if !ok {
-			return echo.NewHTTPError(
-				http.StatusInternalServerError,
-				"session file creator key is not set")
-		}
-		if creator != user.ID && !user.Admin {
-			return echo.NewHTTPError(http.StatusForbidden, "you are not admin or creator")
-		}
-
-		return next(c)
-	}
-}
-
 func (h Handlers) RetrieveRequestCreator() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {

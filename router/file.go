@@ -1,6 +1,8 @@
 package router
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -25,15 +27,18 @@ type FileMetaResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-var acceptedMimeTypes = map[string]bool{
-	"image/jpeg":         true,
-	"image/png":          true,
-	"image/gif":          true,
-	"image/bmp":          true,
-	"application/pdf":    true,
-	"application/msword": true,
-	"application/zip":    true,
-}
+var (
+	acceptedMimeTypes = map[string]bool{
+		"image/jpeg":         true,
+		"image/png":          true,
+		"image/gif":          true,
+		"image/bmp":          true,
+		"application/pdf":    true,
+		"application/msword": true,
+		"application/zip":    true,
+	}
+	errUserIsNotAdminOrFileCreator = errors.New("user is not admin or file creator")
+)
 
 func (h Handlers) PostFile(c echo.Context) error {
 	ctx := c.Request().Context()
@@ -197,10 +202,14 @@ func (h Handlers) DeleteFile(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
+	loginUser, _ := c.Get(loginUserKey).(User)
 	fileID, err := uuid.Parse(c.Param("fileID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `fileID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if err := h.filterAdminOrFileCreator(ctx, loginUser.ID, fileID); err != nil {
+		return err
 	}
 
 	err = h.Repository.DeleteFile(ctx, fileID)

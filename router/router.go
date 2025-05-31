@@ -92,7 +92,7 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 			apiFileIDs := apiFiles.Group("/:fileID", retrieveFileCreator)
 			{
 				apiFileIDs.GET("", h.GetFile)
-				apiFileIDs.DELETE("", h.DeleteFile, h.CheckAdminOrFileCreatorMiddleware)
+				apiFileIDs.DELETE("", h.DeleteFile)
 				apiFileIDs.GET("/meta", h.GetFileMeta)
 			}
 		}
