@@ -758,9 +758,6 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		logger.Info("invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	if err := h.filterAdminOrRequestCreator(ctx, &loginUser, requestID); err != nil {
-		return err
-	}
 
 	var req PutStatus
 	if err = c.Bind(&req); err != nil {
@@ -779,6 +776,9 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		logger.Error("failed to get request from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
+	if err := h.filterAdminOrRequestCreator(ctx, &loginUser, request); err != nil {
+		return err
+	}
 
 	// judging privilege
 	if req.Status == request.Status {
@@ -793,16 +793,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		}
 	}
 
-	u, err := h.Repository.GetUserByID(ctx, loginUser.ID)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			logger.Info("could not find user in repository", zap.String("ID", loginUser.ID.String()))
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
-		logger.Error("failed to get user from repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	if u.Admin {
+	if loginUser.Admin {
 		if !IsAbleAdminChangeState(req.Status, request.Status) {
 			logger.Info("admin unable to change status")
 			err := fmt.Errorf(
@@ -826,7 +817,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		}
 	}
 
-	if !u.Admin && loginUser.ID == request.CreatedBy {
+	if !loginUser.Admin && loginUser.ID == request.CreatedBy {
 		if !IsAbleCreatorChangeStatus(req.Status, request.Status) {
 			logger.Info("creator unable to change status")
 			err := fmt.Errorf(
@@ -836,7 +827,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		}
 	}
 
-	if loginUser.ID != request.CreatedBy && !u.Admin {
+	if loginUser.ID != request.CreatedBy && !loginUser.Admin {
 		logger.Info("use is not creator or admin")
 		return echo.NewHTTPError(http.StatusForbidden)
 	}
@@ -909,22 +900,11 @@ func (h Handlers) isRequestCreator(
 }
 
 func (h Handlers) filterAdminOrRequestCreator(
-	ctx context.Context, user *User, requestID uuid.UUID,
+	ctx context.Context, user *User, request *model.RequestDetail,
 ) *echo.HTTPError {
 	logger := logging.GetLogger(ctx)
 	if user.Admin {
 		return nil
-	}
-	request, err := h.Repository.GetRequest(ctx, requestID)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			logger.Info(
-				"could not find request in repository",
-				zap.String("ID", requestID.String()))
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
-		logger.Error("failed to get request from repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	if request.CreatedBy == user.ID {
 		return nil
