@@ -36,7 +36,6 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	gob.Register(uuid.UUID{})
 	gob.Register([]*model.Owner{})
 
-	retrieveGroupOwner := h.RetrieveGroupOwner()
 	retrieveRequestCreator := h.RetrieveRequestCreator()
 	retrieveFileCreator := h.RetrieveFileCreator()
 
@@ -110,7 +109,7 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 		{
 			apiGroups.GET("", h.GetGroups)
 			apiGroups.POST("", h.PostGroup, h.CheckAdminMiddleware)
-			apiGroupIDs := apiGroups.Group("/:groupID", retrieveGroupOwner)
+			apiGroupIDs := apiGroups.Group("/:groupID")
 			{
 				apiGroupIDs.GET("", h.GetGroupDetail)
 				apiGroupIDs.PUT("", h.PutGroup)

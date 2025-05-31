@@ -19,7 +19,6 @@ import (
 const (
 	loginUserKey             = "login_user"
 	sessionUserKey           = "user"
-	sessionOwnerKey          = "group_owner"
 	sessionRequestCreatorKey = "request_creator"
 	sessionFileCreatorKey    = "request_creator"
 )
@@ -243,40 +242,6 @@ func (h Handlers) CheckAdminOrFileCreatorMiddleware(next echo.HandlerFunc) echo.
 		}
 
 		return next(c)
-	}
-}
-
-func (h Handlers) RetrieveGroupOwner() echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			logger := logging.GetLogger(c.Request().Context())
-			sess, err := session.Get(h.SessionName, c)
-			if err != nil {
-				logger.Error("failed to get session", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-			id, err := uuid.Parse(c.Param("groupID"))
-			if err != nil {
-				logger.Info("could not parse group_id as UUID", zap.Error(err))
-				return echo.NewHTTPError(http.StatusBadRequest, err)
-			}
-
-			ctx := c.Request().Context()
-			owners, err := h.Repository.GetOwners(ctx, id)
-			if err != nil {
-				logger.Error("failed to get owners from repository", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-
-			sess.Values[sessionOwnerKey] = owners
-
-			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				logger.Error("failed to save session", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-
-			return next(c)
-		}
 	}
 }
 
