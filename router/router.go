@@ -37,7 +37,6 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	gob.Register([]*model.Owner{})
 
 	retrieveRequestCreator := h.RetrieveRequestCreator()
-	retrieveFileCreator := h.RetrieveFileCreator()
 
 	api := e.Group("/api")
 	{
@@ -89,7 +88,7 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 		apiFiles := api.Group("/files", h.CheckLoginMiddleware)
 		{
 			apiFiles.POST("", h.PostFile)
-			apiFileIDs := apiFiles.Group("/:fileID", retrieveFileCreator)
+			apiFileIDs := apiFiles.Group("/:fileID")
 			{
 				apiFileIDs.GET("", h.GetFile)
 				apiFileIDs.DELETE("", h.DeleteFile)

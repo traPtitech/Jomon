@@ -20,7 +20,6 @@ const (
 	loginUserKey             = "login_user"
 	sessionUserKey           = "user"
 	sessionRequestCreatorKey = "request_creator"
-	sessionFileCreatorKey    = "request_creator"
 )
 
 func (h Handlers) setLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
@@ -213,40 +212,6 @@ func (h Handlers) RetrieveRequestCreator() echo.MiddlewareFunc {
 			}
 
 			sess.Values[sessionRequestCreatorKey] = request.CreatedBy
-
-			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				logger.Error("failed to save session", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-
-			return next(c)
-		}
-	}
-}
-
-func (h Handlers) RetrieveFileCreator() echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			logger := logging.GetLogger(c.Request().Context())
-			sess, err := session.Get(h.SessionName, c)
-			if err != nil {
-				logger.Error("failed to get session", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-			id, err := uuid.Parse(c.Param("fileID"))
-			if err != nil {
-				logger.Info("could not parse file_id as UUID", zap.Error(err))
-				return echo.NewHTTPError(http.StatusBadRequest, err)
-			}
-
-			ctx := c.Request().Context()
-			file, err := h.Repository.GetFile(ctx, id)
-			if err != nil {
-				logger.Error("failed to get file from repository", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-
-			sess.Values[sessionFileCreatorKey] = file.CreatedBy
 
 			if err = sess.Save(c.Request(), c.Response()); err != nil {
 				logger.Error("failed to save session", zap.Error(err))
