@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
@@ -17,6 +18,7 @@ import (
 )
 
 const (
+	loginUserKey             = "login_user"
 	sessionUserKey           = "user"
 	sessionOwnerKey          = "group_owner"
 	sessionRequestCreatorKey = "request_creator"
@@ -82,17 +84,28 @@ func (h Handlers) AccessLoggingMiddleware(next echo.HandlerFunc) echo.HandlerFun
 
 func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		logger := logging.GetLogger(c.Request().Context())
+		ctx := c.Request().Context()
+		logger := logging.GetLogger(ctx)
 		sess, err := session.Get(h.SessionName, c)
 		if err != nil {
 			logger.Error("failed to get session", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		_, ok := sess.Values[sessionUserKey].(User)
+		u, ok := sess.Values[sessionUserKey].(User)
 		if !ok {
 			return echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
 		}
+		user, err := h.Repository.GetUserByID(ctx, u.ID)
+		if err != nil {
+			if ent.IsNotFound(err) {
+				logger.Info("user not found in repository", zap.Error(err))
+				return echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
+			}
+			logger.Error("failed to get user from repository", zap.Error(err))
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+		c.Set(loginUserKey, userFromModelUser(*user))
 
 		return next(c)
 	}
