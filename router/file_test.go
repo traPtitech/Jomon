@@ -518,10 +518,13 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
 		file := &model.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
+			CreatedBy: user.ID,
 			CreatedAt: time.Now(),
 		}
 
@@ -534,14 +537,18 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		c.SetPath("/api/files/:fileID")
 		c.SetParamNames("fileID")
 		c.SetParamValues(file.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
+			GetFile(c.Request().Context(), file.ID).
+			Return(file, nil)
+		h.Repository.MockFileRepository.
+			EXPECT().
 			DeleteFile(c.Request().Context(), file.ID).
 			Return(nil)
-
 		h.Storage.
 			EXPECT().
 			Delete(file.ID.String()).
@@ -556,10 +563,13 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
 		file := &model.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
+			CreatedBy: user.ID,
 			CreatedAt: time.Now(),
 		}
 
@@ -572,11 +582,16 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		c.SetPath("/api/files/:fileID")
 		c.SetParamNames("fileID")
 		c.SetParamValues(file.ID.String())
+		c.Set(loginUserKey, user)
 
 		mocErr := errors.New("file could not be deleted")
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
+		h.Repository.MockFileRepository.
+			EXPECT().
+			GetFile(c.Request().Context(), file.ID).
+			Return(file, nil)
 		h.Repository.MockFileRepository.
 			EXPECT().
 			DeleteFile(c.Request().Context(), file.ID).
@@ -593,9 +608,13 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
 		file := &model.File{
 			ID:        uuid.New(),
+			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
+			CreatedBy: user.ID,
 			CreatedAt: time.Now(),
 		}
 
@@ -608,9 +627,14 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		c.SetPath("/api/files/:fileID")
 		c.SetParamNames("fileID")
 		c.SetParamValues(file.ID.String())
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
+		h.Repository.MockFileRepository.
+			EXPECT().
+			GetFile(c.Request().Context(), file.ID).
+			Return(file, nil)
 		h.Repository.MockFileRepository.
 			EXPECT().
 			DeleteFile(c.Request().Context(), file.ID).
@@ -634,6 +658,8 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
+		user := userFromModelUser(*accessUser)
 		invalidUUID := "invalid-uuid"
 		_, mocErr := uuid.Parse(invalidUUID)
 
@@ -646,6 +672,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		c.SetPath("/api/files/:fileID")
 		c.SetParamNames("fileID")
 		c.SetParamValues(invalidUUID)
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
