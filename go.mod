@@ -3,7 +3,7 @@ module github.com/traPtitech/Jomon
 go 1.24.2
 
 require (
-	ariga.io/atlas v0.31.1-0.20250212144724-069be8033e83
+	ariga.io/atlas v0.34.0
 	entgo.io/ent v0.14.4
 	github.com/go-sql-driver/mysql v1.9.2
 	github.com/google/go-cmp v0.7.0
