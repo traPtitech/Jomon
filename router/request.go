@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
@@ -696,6 +695,7 @@ func (h Handlers) PostComment(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
+	loginUser, _ := c.Get(loginUserKey).(User)
 	requestID, err := uuid.Parse(c.Param("requestID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `requestID` as UUID", zap.Error(err))
@@ -712,18 +712,7 @@ func (h Handlers) PostComment(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	sess, err := session.Get(h.SessionName, c)
-	if err != nil {
-		logger.Error("failed to get session", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	user, ok := sess.Values[sessionUserKey].(User)
-	if !ok {
-		logger.Info("could not find use in session")
-		return echo.NewHTTPError(http.StatusUnauthorized, errors.New("sessionUser not found"))
-	}
-
-	comment, err := h.Repository.CreateComment(ctx, req.Comment, requestID, user.ID)
+	comment, err := h.Repository.CreateComment(ctx, req.Comment, requestID, loginUser.ID)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			logger.Info(
