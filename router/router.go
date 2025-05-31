@@ -36,8 +36,6 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	gob.Register(uuid.UUID{})
 	gob.Register([]*model.Owner{})
 
-	retrieveRequestCreator := h.RetrieveRequestCreator()
-
 	api := e.Group("/api")
 	{
 		apiAuth := api.Group("/auth")
@@ -53,7 +51,7 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 				"",
 				h.PostRequest,
 				middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler))
-			apiRequestIDs := apiRequests.Group("/:requestID", retrieveRequestCreator)
+			apiRequestIDs := apiRequests.Group("/:requestID")
 			{
 				apiRequestIDs.GET("", h.GetRequest)
 				// FIXME: このままでは異常系のrequestでもwebhookが呼ばれる

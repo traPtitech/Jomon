@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -17,9 +16,8 @@ import (
 )
 
 const (
-	loginUserKey             = "login_user"
-	sessionUserKey           = "user"
-	sessionRequestCreatorKey = "request_creator"
+	loginUserKey   = "login_user"
+	sessionUserKey = "user"
 )
 
 func (h Handlers) setLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
@@ -128,40 +126,6 @@ func (h Handlers) CheckAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		return next(c)
-	}
-}
-
-func (h Handlers) RetrieveRequestCreator() echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			logger := logging.GetLogger(c.Request().Context())
-			sess, err := session.Get(h.SessionName, c)
-			if err != nil {
-				logger.Error("failed to get session", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-			id, err := uuid.Parse(c.Param("requestID"))
-			if err != nil {
-				logger.Info("could not parse request_id as UUID", zap.Error(err))
-				return echo.NewHTTPError(http.StatusBadRequest, err)
-			}
-
-			ctx := c.Request().Context()
-			request, err := h.Repository.GetRequest(ctx, id)
-			if err != nil {
-				logger.Error("failed to get request from repository", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-
-			sess.Values[sessionRequestCreatorKey] = request.CreatedBy
-
-			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				logger.Error("failed to save session", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-
-			return next(c)
-		}
 	}
 }
 
