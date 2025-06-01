@@ -11,7 +11,9 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
 
+	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/router/wrapsession"
 	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/storage"
 )
@@ -26,6 +28,23 @@ type Handlers struct {
 func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	e := echo.New()
 	e.Debug = os.Getenv("IS_DEBUG_MODE") != ""
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		logger := logging.GetLogger(c.Request().Context())
+		var retErr error
+		switch err := err.(type) {
+		case *wrapsession.GetSessionError:
+			inner := err.Unwrap()
+			logger.Error("failed to get session", zap.Error(inner))
+			retErr = echo.ErrInternalServerError.WithInternal(inner)
+		case *wrapsession.SaveSessionError:
+			inner := err.Unwrap()
+			logger.Error("failed to save session", zap.Error(inner))
+			retErr = echo.ErrInternalServerError.WithInternal(inner)
+		default:
+			retErr = err
+		}
+		c.Echo().DefaultHTTPErrorHandler(retErr, c)
+	}
 	e.Use(middleware.RequestID())
 	e.Use(h.setLoggerMiddleware(logger))
 	e.Use(h.AccessLoggingMiddleware)

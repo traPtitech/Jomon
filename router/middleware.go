@@ -5,10 +5,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/labstack/echo-contrib/session"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/logging"
+	"github.com/traPtitech/Jomon/router/wrapsession"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -79,17 +80,19 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := c.Request().Context()
 		logger := logging.GetLogger(ctx)
-		sess, err := session.Get(h.SessionName, c)
-		if err != nil {
-			logger.Error("failed to get session", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
 
-		u, ok := sess.Values[sessionUserKey].(User)
-		if !ok {
-			return echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
+		id, err := wrapsession.WithSession(c, h.SessionName, func(w *wrapsession.W) (uuid.UUID, error) {
+			v, ok := w.GetUserID()
+			if !ok {
+				err := echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
+				return uuid.Nil, err
+			}
+			return v, nil
+		})
+		if err != nil {
+			return err
 		}
-		user, err := h.Repository.GetUserByID(ctx, u.ID)
+		user, err := h.Repository.GetUserByID(ctx, id)
 		if err != nil {
 			if ent.IsNotFound(err) {
 				logger.Info("user not found in repository", zap.Error(err))

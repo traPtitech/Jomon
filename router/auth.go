@@ -9,12 +9,11 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/router/wrapsession"
 	"github.com/traPtitech/Jomon/service"
 	"go.uber.org/zap"
 )
@@ -39,23 +38,18 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "code is required")
 	}
 
-	sess, err := session.Get(h.SessionName, c)
+	codeVerifier, err := wrapsession.WithSession(c, h.SessionName, func(w *wrapsession.W) (string, error) {
+		v, ok := w.GetCodeVerifier()
+		if !ok {
+			err := echo.NewHTTPError(
+				http.StatusInternalServerError,
+				fmt.Errorf("code_verifier is not found in session"))
+			return "", err
+		}
+		return v, nil
+	})
 	if err != nil {
-		logger.Error("failed to get session", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   sessionDuration,
-		HttpOnly: true,
-	}
-
-	codeVerifier, ok := sess.Values[sessionCodeVerifierKey].(string)
-	if !ok {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			fmt.Errorf("code_verifier is not found in session"))
+		return err
 	}
 
 	res, err := service.RequestAccessToken(code, codeVerifier)
@@ -85,41 +79,27 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		}
 	}
 
-	user := &User{
-		ID:          modelUser.ID,
-		Name:        modelUser.Name,
-		DisplayName: modelUser.DisplayName,
-		Admin:       modelUser.Admin,
-	}
-
-	sess.Values[sessionUserKey] = user
-
-	if err = sess.Save(c.Request(), c.Response()); err != nil {
-		logger.Error("failed to save session", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	_, err = wrapsession.WithSession(c, h.SessionName, func(w *wrapsession.W) (struct{}, error) {
+		w.SetUserID(modelUser.ID)
+		return struct{}{}, nil
+	})
+	if err != nil {
+		return err
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/")
 }
 
 func (h Handlers) GeneratePKCE(c echo.Context) error {
-	ctx := c.Request().Context()
-	logger := logging.GetLogger(ctx)
-
-	sess, err := session.Get(h.SessionName, c)
-	if err != nil {
-		logger.Error("failed to get session", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   sessionDuration,
-		HttpOnly: true,
-	}
-
 	codeVerifier := randAlphabetAndNumberString(43)
-	sess.Values[sessionCodeVerifierKey] = codeVerifier
+
+	_, err := wrapsession.WithSession(c, h.SessionName, func(w *wrapsession.W) (struct{}, error) {
+		w.SetCodeVerifier(codeVerifier)
+		return struct{}{}, nil
+	})
+	if err != nil {
+		return err
+	}
 
 	codeVerifierHash := sha256.Sum256([]byte(codeVerifier))
 	encoder := base64.
@@ -128,11 +108,6 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 
 	codeChallengeMethod := "S256"
 
-	err = sess.Save(c.Request(), c.Response())
-	if err != nil {
-		logger.Error("failed to save session", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
 	// nolint:lll
 	to := fmt.Sprintf(
 		"%s/oauth2/authorize?response_type=code&client_id=%s&code_challenge=%s&code_challenge_method=%s",
