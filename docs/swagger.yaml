@@ -300,6 +300,7 @@ paths:
           type: string
           format: uuid
     get:
+      operationId: getTag
       description: タグの情報を取得する。
       tags:
         - Tags
