@@ -18,11 +18,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	sessionDuration        = 24 * 60 * 60 * 7
-	sessionCodeVerifierKey = "code_verifier"
-)
-
 type AuthResponse struct {
 	AccessToken  string `json:"access_token"`
 	ExpiresIn    int    `json:"expires_in"`
@@ -38,16 +33,17 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "code is required")
 	}
 
-	codeVerifier, err := wrapsession.WithSession(c, h.SessionName, func(w *wrapsession.W) (string, error) {
-		v, ok := w.GetCodeVerifier()
-		if !ok {
-			err := echo.NewHTTPError(
-				http.StatusInternalServerError,
-				fmt.Errorf("code_verifier is not found in session"))
-			return "", err
-		}
-		return v, nil
-	})
+	codeVerifier, err := wrapsession.WithSession(
+		c, h.SessionName, func(w *wrapsession.W) (string, error) {
+			v, ok := w.GetCodeVerifier()
+			if !ok {
+				err := echo.NewHTTPError(
+					http.StatusInternalServerError,
+					fmt.Errorf("code_verifier is not found in session"))
+				return "", err
+			}
+			return v, nil
+		})
 	if err != nil {
 		return err
 	}

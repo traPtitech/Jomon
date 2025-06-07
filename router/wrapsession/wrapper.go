@@ -9,8 +9,8 @@ import (
 // NOTE: ここの値は外から変更する必要がないので非公開にしている
 
 const (
-	userIDKey       string = "user_id"
-	codeVerifierKey        = "code_verifier"
+	userIDKey       = "user_id"
+	codeVerifierKey = "code_verifier"
 )
 
 // TODO: この設定は外から与えられるようにしたい

@@ -15,8 +15,7 @@ import (
 )
 
 const (
-	loginUserKey   = "login_user"
-	sessionUserKey = "user"
+	loginUserKey = "login_user"
 )
 
 func (h Handlers) setLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
@@ -81,14 +80,15 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		ctx := c.Request().Context()
 		logger := logging.GetLogger(ctx)
 
-		id, err := wrapsession.WithSession(c, h.SessionName, func(w *wrapsession.W) (uuid.UUID, error) {
-			v, ok := w.GetUserID()
-			if !ok {
-				err := echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
-				return uuid.Nil, err
-			}
-			return v, nil
-		})
+		id, err := wrapsession.WithSession(
+			c, h.SessionName, func(w *wrapsession.W) (uuid.UUID, error) {
+				v, ok := w.GetUserID()
+				if !ok {
+					err := echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
+					return uuid.Nil, err
+				}
+				return v, nil
+			})
 		if err != nil {
 			return err
 		}

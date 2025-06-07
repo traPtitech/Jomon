@@ -2,6 +2,7 @@ package router
 
 import (
 	"encoding/gob"
+	"errors"
 	"os"
 
 	"github.com/google/uuid"
@@ -30,17 +31,21 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	e.Debug = os.Getenv("IS_DEBUG_MODE") != ""
 	e.HTTPErrorHandler = func(err error, c echo.Context) {
 		logger := logging.GetLogger(c.Request().Context())
+		var httpErr *echo.HTTPError
+		var getSessionErr *wrapsession.GetSessionError
+		var saveSessionErr *wrapsession.SaveSessionError
 		var retErr error
-		switch err := err.(type) {
-		case *wrapsession.GetSessionError:
-			inner := err.Unwrap()
+		if errors.As(err, &httpErr) {
+			retErr = httpErr
+		} else if errors.As(err, &getSessionErr) {
+			inner := getSessionErr.Unwrap()
 			logger.Error("failed to get session", zap.Error(inner))
 			retErr = echo.ErrInternalServerError.WithInternal(inner)
-		case *wrapsession.SaveSessionError:
-			inner := err.Unwrap()
+		} else if errors.As(err, &saveSessionErr) {
+			inner := saveSessionErr.Unwrap()
 			logger.Error("failed to save session", zap.Error(inner))
 			retErr = echo.ErrInternalServerError.WithInternal(inner)
-		default:
+		} else {
 			retErr = err
 		}
 		c.Echo().DefaultHTTPErrorHandler(retErr, c)

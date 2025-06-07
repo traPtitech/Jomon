@@ -17,15 +17,16 @@ import (
 
 // `WithSession` はセッションを使用するスコープを提供します.
 //
-// 例えば, セッションからログインしているユーザーのIDを取り出す操作はこのようになります.
+// 例えば, ログインしているユーザーのIDをセッションから取り出す操作はこのようになります.
 //
-//	userID, err := wrapsession.WithSession(c, sessionName, func(w *wrapsession.W) (uuid.UUID, error) {
-//		id, ok := w.GetUserID()
-//		if !ok || id == uuid.Nil {
-//			return uuid.Nil, errors.New("unauthenticated")
-//		}
-//		return id, nil
-//	})
+//	userID, err := wrapsession.WithSession(
+//		c, sessionName, func(w *wrapsession.W) (uuid.UUID, error) {
+//			id, ok := w.GetUserID()
+//			if !ok || id == uuid.Nil {
+//				return uuid.Nil, errors.New("unauthenticated")
+//			}
+//			return id, nil
+//		})
 //
 // 操作の中で使用する `*W` 型の値は, その `WithSession` 呼び出しで提供されるスコープ内でのみ有効です.
 // スコープの外側で `*W` の値を使用すると, 思わぬバグに繋がる可能性があります.
@@ -41,6 +42,8 @@ import (
 //   - `(*sessions.Session).Save` がエラーを返した場合. エラーの型は *SaveSessionError となります.
 //
 // エラーの型が区別されるため, type switchを用いて詳細なハンドリングが可能です.
+//
+// nolint:ireturn
 func WithSession[T any](c echo.Context, sessionName string, op func(w *W) (T, error)) (T, error) {
 	var res T
 	sess, err := session.Get(sessionName, c)
