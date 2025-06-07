@@ -357,7 +357,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Partition"
+              $ref: "#/components/schemas/PostPartition"
       responses:
         "200":
           description: 追加に成功した場合。
@@ -633,6 +633,23 @@ components:
         - management
         - created_at
         - updated_at
+    PostPartition:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "SysAd"
+        budget:
+          type: integer
+          nullable: true
+          example: 250000
+        management:
+          $ref: "#/components/schemas/PartitionManagement"
+      required:
+        - id
+        - name
+        - budget
+        - management
     PartitionManagement:
       type: object
       required:
