@@ -838,7 +838,7 @@ components:
         - files
         - statuses
         - tags
-        - group
+        - partition
         - targets
         - created_at
         - updated_at
@@ -858,9 +858,8 @@ components:
           items:
             type: string
             format: uuid
-        group:
+        partition:
           type: string
-          nullable: true
           format: uuid
         targets:
           type: array
@@ -873,7 +872,7 @@ components:
         - created_by
         - comments
         - tags
-        - group
+        - partition
         - targets
     Comment:
       type: object
