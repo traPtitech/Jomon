@@ -165,7 +165,7 @@ paths:
   /applications/{applicationID}/status:
     put:
       operationId: putStatus
-      description: 指定した申請のstatusを変更のみ(新規はpost /applications)する。commentは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「change_requestedからsubmitted」をでき、accountManagerは「submittedからrejected」「submittedからrequired」「change_requestedからsubmitted」「submittedからapproved」「approvedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「approvedからfully_repaid」の操作はここでは行えない。accountManager権限または作成者権限が必要。
+      description: 指定した申請のstatusを変更のみ(新規はpost /applications)する。commentは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「change_requestedからsubmitted」をでき、accountManagerは「submittedからrejected」「submittedからchange_requested」「change_requestedからsubmitted」「submittedからapproved」「approvedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「approvedからfully_repaid」の操作はここでは行えない。accountManager権限または作成者権限が必要。
       tags:
         - Applications
       parameters:
