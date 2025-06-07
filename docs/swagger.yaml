@@ -613,7 +613,7 @@ components:
           format: uuid
         name:
           type: string
-          example: "SysAd"
+          example: "SysAd班予算"
         budget:
           type: integer
           nullable: true
@@ -638,7 +638,7 @@ components:
       properties:
         name:
           type: string
-          example: "SysAd"
+          example: "SysAd班予算"
         budget:
           type: integer
           nullable: true
