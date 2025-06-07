@@ -402,7 +402,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Partition"
+              $ref: "#/components/schemas/PostPartition"
       responses:
         "200":
           description: 変更に成功した場合。
