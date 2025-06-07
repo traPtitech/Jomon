@@ -10,8 +10,8 @@ info:
 tags:
   - name: "Auth"
     description: "認証用API"
-  - name: "Requests"
-    description: "リクエストに関するAPI"
+  - name: "Applications"
+    description: "申請に関するAPI"
   - name: "Files"
     description: "ファイルに関するAPI"
   - name: "Tags"
@@ -36,14 +36,14 @@ paths:
         "302":
           description: 取得できた場合｡traQのoauthページにリダイレクトされる。
 
-  /requests:
+  /applications:
     get:
-      operationId: getRequests
-      description: 依頼一覧を取得する。
+      operationId: getApplications
+      description: 申請一覧を取得する。
       tags:
-        - Requests
+        - Applications
       parameters:
-        - $ref: "#/components/parameters/sortRequestQuery"
+        - $ref: "#/components/parameters/sortApplicationQuery"
         - $ref: "#/components/parameters/statusQuery"
         - $ref: "#/components/parameters/targetQuery"
         - $ref: "#/components/parameters/sinceQuery"
@@ -61,70 +61,70 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Request"
+                  $ref: "#/components/schemas/Application"
         "400":
           $ref: "#/components/responses/400"
     post:
-      operationId: postRequest
-      description: 依頼を新規作成する。
+      operationId: postApplication
+      description: 申請を新規作成する。
       tags:
-        - Requests
+        - Applications
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostRequest"
+              $ref: "#/components/schemas/PostApplication"
       responses:
         "201":
-          description: 作成できた場合。作成されたリクエストの詳細を返す。
+          description: 作成できた場合。作成された申請の詳細を返す。
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RequestDetail"
+                $ref: "#/components/schemas/ApplicationDetail"
         "400":
           $ref: "#/components/responses/400"
 
-  /requests/{requestID}:
+  /applications/{applicationID}:
     parameters:
-      - name: requestID
+      - name: applicationID
         in: path
         required: true
         schema:
           type: string
           format: uuid
     get:
-      operationId: getRequestDetail
-      description: 指定した依頼の詳細を取得する。
+      operationId: getApplicationDetail
+      description: 指定した申請の詳細を取得する。
       tags:
-        - Requests
+        - Applications
       responses:
         "200":
           description: あったら返す。
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RequestDetail"
+                $ref: "#/components/schemas/ApplicationDetail"
         "404":
           $ref: "#/components/responses/404"
     put:
-      operationId: putRequestDetail
-      description: 指定した依頼を修正する。作成者権限が必要。
+      operationId: putApplicationDetail
+      description: 指定した申請を修正する。作成者権限が必要。
       tags:
-        - Requests
+        - Applications
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostRequest"
+              $ref: "#/components/schemas/PostApplication"
       responses:
         "200":
           description: 修正できた場合。修正後の詳細を返す。
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RequestDetail"
+                $ref: "#/components/schemas/ApplicationDetail"
         "400":
           $ref: "#/components/responses/400"
         "403":
@@ -132,14 +132,14 @@ paths:
         "404":
           $ref: "#/components/responses/404"
 
-  /requests/{requestID}/comments:
+  /applications/{applicationID}/comments:
     post:
       operationId: postComment
-      description: 指定した依頼にコメントを新規作成する。
+      description: 指定した申請にコメントを新規作成する。
       tags:
-        - Requests
+        - Applications
       parameters:
-        - name: requestID
+        - name: applicationID
           in: path
           required: true
           schema:
@@ -162,14 +162,14 @@ paths:
           $ref: "#/components/responses/400"
         "404":
           $ref: "#/components/responses/404"
-  /requests/{requestID}/status:
+  /applications/{applicationID}/status:
     put:
       operationId: putStatus
-      description: 指定した依頼のstatusを変更のみ(新規はpost /requests)する。commentは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「fix_requiredからsubmitted」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからfully_repaid」の操作はここでは行えない。管理者権限または作成者権限が必要。
+      description: 指定した申請のstatusを変更のみ(新規はpost /applications)する。commentは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「fix_requiredからsubmitted」をでき、adminは「submittedからrejected」「submittedからrequired」「fix_requiredからsubmitted」「submittedからaccepted」「acceptedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「acceptedからfully_repaid」の操作はここでは行えない。管理者権限または作成者権限が必要。
       tags:
-        - Requests
+        - Applications
       parameters:
-        - name: requestID
+        - name: applicationID
           in: path
           required: true
           schema:
@@ -314,7 +314,7 @@ paths:
                   - $ref: "#/components/schemas/Tag"
                   - type: object
                     properties:
-                      requests:
+                      applications:
                         type: array
                         items:
                           type: string
@@ -650,7 +650,7 @@ components:
           enum:
             - "available"
             - "unavailable"
-    RequestFile:
+    ApplicationFile:
       type: object
       properties:
         file:
@@ -671,13 +671,13 @@ components:
         name:
           type: string
           example: "hoge.png"
-        request_id:
+        application_id:
           type: string
           format: uuid
       required:
         - file
         - name
-        - request_id
+        - application_id
     FileMeta:
       type: object
       properties:
@@ -699,7 +699,7 @@ components:
     Target:
       type: string
       example: "hoge株式会社"
-    RequestTarget:
+    ApplicationTarget:
       type: object
       properties:
         amount:
@@ -711,7 +711,7 @@ components:
       required:
         - amount
         - target
-    RequestTargetDetail:
+    ApplicationTargetDetail:
       type: object
       properties:
         id:
@@ -735,7 +735,7 @@ components:
         - target
         - paid_at
         - created_at
-    Request:
+    Application:
       type: object
       properties:
         id:
@@ -761,7 +761,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/RequestTargetDetail"
+            $ref: "#/components/schemas/ApplicationTargetDetail"
         tags:
           type: array
           items:
@@ -780,7 +780,7 @@ components:
         - targets
         - tags
         - partition
-    RequestDetail:
+    ApplicationDetail:
       type: object
       properties:
         id:
@@ -819,7 +819,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/RequestTargetDetail"
+            $ref: "#/components/schemas/ApplicationTargetDetail"
         created_at:
           type: string
           format: date-time
@@ -841,7 +841,7 @@ components:
         - targets
         - created_at
         - updated_at
-    PostRequest:
+    PostApplication:
       type: object
       properties:
         created_by:
@@ -864,7 +864,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/RequestTarget"
+            $ref: "#/components/schemas/ApplicationTarget"
       required:
         - amount
         - title
@@ -1005,7 +1005,7 @@ components:
       description: サーバーエラー。
 
   parameters:
-    sortRequestQuery:
+    sortApplicationQuery:
       name: sort
       description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", タイトルの昇順 "title", タイトルの降順 "-title")
       required: false
@@ -1083,9 +1083,9 @@ components:
       schema:
         type: string
         format: uuid
-    requestQuery:
-      name: request
-      description: 依頼
+    applicationQuery:
+      name: application
+      description: 申請
       required: False
       in: query
       schema:
