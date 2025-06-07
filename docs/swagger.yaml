@@ -775,7 +775,6 @@ components:
         - created_at
         - updated_at
         - created_by
-        - amount
         - title
         - content
         - targets
@@ -830,7 +829,6 @@ components:
       required:
         - id
         - status
-        - amount
         - title
         - content
         - created_by
@@ -870,7 +868,6 @@ components:
         - title
         - content
         - created_by
-        - comments
         - tags
         - partition
         - targets
