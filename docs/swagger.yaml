@@ -696,9 +696,6 @@ components:
         - name
         - mime_type
         - created_at
-    Target:
-      type: string
-      example: "hoge株式会社"
     ApplicationTarget:
       type: object
       properties:
@@ -1075,14 +1072,6 @@ components:
       name: created_by
       description: 作成者
       required: false
-      in: query
-      schema:
-        type: string
-        format: uuid
-    applicationQuery:
-      name: application
-      description: 申請
-      required: False
       in: query
       schema:
         type: string
