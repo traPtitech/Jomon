@@ -864,7 +864,6 @@ components:
           items:
             $ref: "#/components/schemas/ApplicationTarget"
       required:
-        - amount
         - title
         - content
         - created_by
