@@ -20,8 +20,8 @@ tags:
     description: "ユーザーに関するAPI"
   - name: "Partitions"
     description: "パーティションに関するAPI"
-  - name: "Admins"
-    description: "管理者用API"
+  - name: "AccountManagers"
+    description: "accountManager用API"
 
 ##### Paths #####
 
@@ -165,7 +165,7 @@ paths:
   /applications/{applicationID}/status:
     put:
       operationId: putStatus
-      description: 指定した申請のstatusを変更のみ(新規はpost /applications)する。commentは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「change_requestedからsubmitted」をでき、adminは「submittedからrejected」「submittedからrequired」「change_requestedからsubmitted」「submittedからapproved」「approvedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「approvedからfully_repaid」の操作はここでは行えない。管理者権限または作成者権限が必要。
+      description: 指定した申請のstatusを変更のみ(新規はpost /applications)する。commentは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「change_requestedからsubmitted」をでき、accountManagerは「submittedからrejected」「submittedからrequired」「change_requestedからsubmitted」「submittedからapproved」「approvedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「approvedからfully_repaid」の操作はここでは行えない。accountManager権限または作成者権限が必要。
       tags:
         - Applications
       parameters:
@@ -193,12 +193,12 @@ paths:
         "404":
           $ref: "#/components/responses/404"
 
-  /admins:
+  /account-managers:
     get:
-      operationId: getAdmins
-      description: adminユーザーの一覧を返す。管理者権限が必要。
+      operationId: getAccountManagers
+      description: accountManagerユーザーの一覧を返す。accountManager権限が必要。
       tags:
-        - Admins
+        - AccountManagers
       responses:
         "200":
           description: 取得に成功した場合。
@@ -213,10 +213,10 @@ paths:
         "403":
           $ref: "#/components/responses/403"
     post:
-      operationId: postAdmins
-      description: adminユーザーを追加する。管理者権限が必要。
+      operationId: postAccountManagers
+      description: accountManagerユーザーを追加する。accountManager権限が必要。
       tags:
-        - Admins
+        - AccountManagers
       requestBody:
         required: true
         content:
@@ -233,10 +233,10 @@ paths:
         "403":
           $ref: "#/components/responses/403"
     delete:
-      operationId: deleteAdmins
-      description: adminユーザーを削除する。管理者権限が必要。
+      operationId: deleteAccountManagers
+      description: accountManagerユーザーを削除する。accountManager権限が必要。
       tags:
-        - Admins
+        - AccountManagers
       requestBody:
         required: true
         content:
@@ -348,7 +348,7 @@ paths:
                   $ref: "#/components/schemas/Partition"
     post:
       operationId: postPartition
-      description: パーティションを追加する。管理者権限が必要。
+      description: パーティションを追加する。accountManager権限が必要。
       tags:
         - Partitions
       requestBody:
@@ -393,7 +393,7 @@ paths:
           $ref: "#/components/responses/404"
     put:
       operationId: putPartition
-      description: パーティションの情報を変更する。管理者権限が必要。
+      description: パーティションの情報を変更する。accountManager権限が必要。
       tags:
         - Partitions
       requestBody:
@@ -417,7 +417,7 @@ paths:
           $ref: "#/components/responses/404"
     delete:
       operationId: deletePartition
-      description: パーティションを削除する。管理者権限が必要。
+      description: パーティションを削除する。accountManager権限が必要。
       tags:
         - Partitions
       responses:
@@ -484,7 +484,7 @@ paths:
           $ref: "#/components/responses/500"
     delete:
       operationId: deleteFile
-      description: 指定したidのファイルを削除する。管理者権限または作成者権限が必要。
+      description: 指定したidのファイルを削除する。accountManager権限または作成者権限が必要。
       tags:
         - Files
       responses:
@@ -958,7 +958,7 @@ components:
         display_name:
           type: string
           example: "ながてち"
-        admin:
+        account_manager:
           type: boolean
         created_at:
           type: string
@@ -974,7 +974,7 @@ components:
         - id
         - name
         - display_name
-        - admin
+        - account_manager
         - created_at
         - updated_at
         - deleted_at
@@ -987,12 +987,12 @@ components:
         display_name:
           type: "string"
           example: "ながてち"
-        admin:
+        account_manager:
           type: "boolean"
       required:
         - name
         - display_name
-        - admin
+        - account_manager
   responses:
     304:
       description: Not Modified
