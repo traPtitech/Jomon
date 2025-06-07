@@ -10,8 +10,6 @@ info:
 tags:
   - name: "Auth"
     description: "認証用API"
-  - name: "Transactions"
-    description: "トランザクションに関するAPI"
   - name: "Requests"
     description: "リクエストに関するAPI"
   - name: "Files"
@@ -20,8 +18,6 @@ tags:
     description: "タグに関するAPI"
   - name: "Users"
     description: "ユーザーに関するAPI"
-  - name: "Groups"
-    description: "グループに関するAPI"
   - name: "Admins"
     description: "管理者用API"
 
@@ -38,106 +34,6 @@ paths:
         "302":
           description: 取得できた場合｡traQのoauthページにリダイレクトされる。
 
-  /transactions:
-    get:
-      operationId: "getTransactions"
-      description: トランザクション一覧を取得する。
-      tags:
-        - Transactions
-      parameters:
-        - $ref: "#/components/parameters/sortTransactionQuery"
-        - $ref: "#/components/parameters/targetQuery"
-        - $ref: "#/components/parameters/sinceQuery"
-        - $ref: "#/components/parameters/untilQuery"
-        - $ref: "#/components/parameters/limitQuery"
-        - $ref: "#/components/parameters/offsetQuery"
-        - $ref: "#/components/parameters/tagQuery"
-        - $ref: "#/components/parameters/groupQuery"
-        - $ref: "#/components/parameters/requestQuery"
-      responses:
-        "200":
-          description: 該当するものがない場合は空配列を返却。
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Transaction"
-        "400":
-          $ref: "#/components/responses/400"
-    post:
-      operationId: postTransaction
-      description: トランザクションを新規作成する。管理者権限が必要。
-      tags:
-        - Transactions
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PostTransaction"
-      responses:
-        "201":
-          description: 作成に成功。
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Transaction"
-        "400":
-          $ref: "#/components/responses/400"
-        "403":
-          $ref: "#/components/responses/403"
-
-  /transactions/{transactionID}:
-    parameters:
-      - name: transactionID
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-    get:
-      operationId: getTransactionDetail
-      description: 指定したトランザクションの詳細を取得する。
-      tags:
-        - Transactions
-      responses:
-        "200":
-          description: あったら返す。
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Transaction"
-        "404":
-          $ref: "#/components/responses/404"
-    put:
-      operationId: putTransactionDetail
-      description: 指定したTransactionを修正する。管理者権限が必要。requestに紐づいている場合は変更不可。
-      tags:
-        - Transactions
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              # FIXME: PutTransactionWithOneTargetにする
-              $ref: "#/components/schemas/PostTransactionWithOneTarget"
-      responses:
-        "200":
-          description: OK 修正後のトランザクションを返却する。
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Transaction"
-        "400":
-          $ref: "#/components/responses/400"
-        "403":
-          $ref: "#/components/responses/403"
-        "404":
-          $ref: "#/components/responses/404"
-
   /requests:
     get:
       operationId: getRequests
@@ -153,7 +49,6 @@ paths:
         - $ref: "#/components/parameters/limitQuery"
         - $ref: "#/components/parameters/offsetQuery"
         - $ref: "#/components/parameters/tagQuery"
-        - $ref: "#/components/parameters/groupQuery"
         - $ref: "#/components/parameters/createdByQuery"
       responses:
         "200":
@@ -416,11 +311,6 @@ paths:
                   - $ref: "#/components/schemas/Tag"
                   - type: object
                     properties:
-                      transactions:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
                       requests:
                         type: array
                         items:
@@ -435,221 +325,6 @@ paths:
       responses:
         "200":
           description: 削除に成功した場合。
-        "404":
-          $ref: "#/components/responses/404"
-
-  /groups:
-    get:
-      operationId: getGroups
-      description: グループの一覧を返す。
-      tags:
-        - Groups
-      responses:
-        "200":
-          description: 取得に成功した場合。
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Group"
-    post:
-      operationId: postGroup
-      description: グループを追加する。管理者権限が必要。
-      tags:
-        - Groups
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PostGroup"
-      responses:
-        "200":
-          description: 追加に成功した場合。
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Group"
-        "400":
-          $ref: "#/components/responses/400"
-        "403":
-          $ref: "#/components/responses/403"
-
-  /groups/{groupID}:
-    parameters:
-      - name: groupID
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-    get:
-      operationId: getGroupDetail
-      description: グループの情報を返す。
-      tags:
-        - Groups
-      responses:
-        "200":
-          description: 取得に成功した場合。
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GroupDetail"
-        "404":
-          $ref: "#/components/responses/404"
-    put:
-      operationId: putGroupDetail
-      description: グループの情報を変更する。管理者権限またはグループオーナー権限が必要。
-      tags:
-        - Groups
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PutGroup"
-      responses:
-        "200":
-          description: 変更に成功した場合。
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Group"
-        "400":
-          $ref: "#/components/responses/400"
-        "403":
-          $ref: "#/components/responses/403"
-        "404":
-          $ref: "#/components/responses/404"
-    delete:
-      operationId: deleteGroup
-      description: グループを削除する。管理者権限またはグループオーナー権限が必要。
-      tags:
-        - Groups
-      responses:
-        "200":
-          description: 削除に成功した場合
-        "403":
-          $ref: "#/components/responses/403"
-        "404":
-          $ref: "#/components/responses/404"
-
-  /groups/{groupID}/members:
-    parameters:
-      - name: groupID
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-    post:
-      operationId: postGroupMembers
-      description: ユーザーをグループに追加する。管理者権限またはグループオーナー権限が必要。
-      tags:
-        - Groups
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: "#/components/schemas/UserID"
-      responses:
-        "200":
-          description: 追加に成功した場合。
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/UserID"
-        "400":
-          $ref: "#/components/responses/400"
-        "403":
-          $ref: "#/components/responses/403"
-        "404":
-          $ref: "#/components/responses/404"
-    delete:
-      operationId: deleteGroupMembers
-      description: ユーザーをグループのメンバーから外す。管理者権限またはグループオーナー権限が必要。
-      tags:
-        - Groups
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: "#/components/schemas/UserID"
-      responses:
-        "200":
-          description: 削除に成功した場合。
-        "400":
-          $ref: "#/components/responses/400"
-        "403":
-          $ref: "#/components/responses/403"
-        "404":
-          $ref: "#/components/responses/404"
-
-  /groups/{groupID}/owners:
-    parameters:
-      - name: groupID
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-    post:
-      operationId: postGroupOwners
-      description: グループオーナーをグループに追加する。管理者権限またはグループオーナー権限が必要。
-      tags:
-        - Groups
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: "#/components/schemas/UserID"
-      responses:
-        "200":
-          description: 追加に成功した場合。
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/UserID"
-        "400":
-          $ref: "#/components/responses/400"
-        "403":
-          $ref: "#/components/responses/403"
-        "404":
-          $ref: "#/components/responses/404"
-    delete:
-      operationId: deleteGroupOwners
-      description: ユーザーをグループから削除する。管理者権限またはグループオーナー権限が必要。
-      tags:
-        - Groups
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: "#/components/schemas/UserID"
-      responses:
-        "200":
-          description: 削除に成功した場合。
-        "400":
-          $ref: "#/components/responses/400"
-        "403":
-          $ref: "#/components/responses/403"
         "404":
           $ref: "#/components/responses/404"
 
@@ -829,109 +504,6 @@ components:
           example: "2020講習会"
       required:
         - name
-    Group:
-      type: object
-      nullable: true
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: "SysAd"
-        description:
-          type: string
-          example: "SysAd班"
-        budget:
-          type: integer
-          nullable: true
-          example: 250000
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - name
-        - description
-        - budget
-        - created_at
-        - updated_at
-    GroupDetail:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-          example: "SysAd"
-        description:
-          type: string
-          example: "SysAd班"
-        budget:
-          type: integer
-          nullable: true
-          example: 250000
-        members:
-          type: array
-          items:
-            $ref: "#/components/schemas/UserID"
-        owners:
-          type: array
-          items:
-            $ref: "#/components/schemas/UserID"
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - name
-        - description
-        - budget
-        - members
-        - owners
-        - created_at
-        - updated_at
-    PostGroup:
-      type: object
-      properties:
-        name:
-          type: string
-          example: "SysAd"
-        description:
-          type: string
-          example: "SysAd班"
-        budget:
-          type: integer
-          nullable: true
-          example: 250000
-      required:
-        - name
-        - description
-        - budget
-    PutGroup:
-      type: object
-      properties:
-        name:
-          type: string
-          example: "SysAd"
-        description:
-          type: string
-          example: "SysAd班"
-        budget:
-          type: integer
-          nullable: true
-          example: 250000
-      required:
-        - name
-        - description
-        - budget
     RequestFile:
       type: object
       properties:
@@ -1048,9 +620,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Tag"
-        group:
-          nullable: true
-          $ref: "#/components/schemas/Group"
       required:
         - id
         - status
@@ -1062,7 +631,6 @@ components:
         - content
         - targets
         - tags
-        - group
     RequestDetail:
       type: object
       properties:
@@ -1097,9 +665,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Tag"
-        group:
-          nullable: true
-          $ref: "#/components/schemas/Group"
         targets:
           type: array
           items:
@@ -1121,7 +686,6 @@ components:
         - files
         - statuses
         - tags
-        - group
         - targets
         - created_at
         - updated_at
@@ -1141,10 +705,6 @@ components:
           items:
             type: string
             format: uuid
-        group:
-          type: string
-          nullable: true
-          format: uuid
         targets:
           type: array
           items:
@@ -1156,107 +716,7 @@ components:
         - created_by
         - comments
         - tags
-        - group
         - targets
-    Transaction:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        title:
-          type: string
-        amount:
-          type: integer
-          example: 1200
-        target:
-          $ref: "#/components/schemas/Target"
-        request:
-          type: string
-          nullable: true
-          format: uuid
-        tags:
-          type: array
-          items:
-            $ref: "#/components/schemas/Tag"
-        group:
-          nullable: true
-          $ref: "#/components/schemas/Group"
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-      required:
-        - id
-        - amount
-        - target
-        - request
-        - tags
-        - group
-        - created_at
-        - updated_at
-    PostTransaction:
-      type: object
-      properties:
-        title:
-          type: string
-        amount:
-          type: integer
-          example: 1200
-        targets:
-          type: array
-          items:
-            $ref: "#/components/schemas/Target"
-        tags:
-          type: array
-          items:
-            type: string
-            format: uuid
-        group:
-          type: string
-          nullable: true
-          format: uuid
-        request:
-          type: string
-          nullable: true
-          format: uuid
-      required:
-        - amount
-        - targets
-        - request
-        - tags
-        - group
-    PostTransactionWithOneTarget:
-      type: object
-      properties:
-        title:
-          type: string
-        amount:
-          type: integer
-          example: 1200
-        target:
-          $ref: "#/components/schemas/Target"
-        tags:
-          type: array
-          items:
-            type: string
-            format: uuid
-        group:
-          type: string
-          nullable: true
-          format: uuid
-        request:
-          type: string
-          nullable: true
-          format: uuid
-      required:
-        - amount
-        - targets
-        - request
-        - tags
-        - group
     Comment:
       type: object
       properties:
@@ -1402,13 +862,6 @@ components:
       in: query
       schema:
         $ref: "#/components/schemas/StatusEnum"
-    sortTransactionQuery:
-      name: sort
-      description: 並び順 (作成日時が新しい "created_at", 作成日時が古い "-created_at", 金額の昇順 "amount", 金額の降順 "-amount")
-      required: false
-      in: query
-      schema:
-        type: string
     targetQuery:
       name: target
       description: 誰との取引か
@@ -1454,13 +907,6 @@ components:
     tagQuery:
       name: tag
       description: タグ(複数の場合カンマ区切り)
-      required: false
-      in: query
-      schema:
-        type: string
-    groupQuery:
-      name: group
-      description: グループ
       required: false
       in: query
       schema:
