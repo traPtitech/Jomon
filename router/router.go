@@ -2,6 +2,7 @@ package router
 
 import (
 	"encoding/gob"
+	"errors"
 	"os"
 
 	"github.com/google/uuid"
@@ -11,7 +12,9 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
 
+	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/router/wrapsession"
 	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/storage"
 )
@@ -26,6 +29,27 @@ type Handlers struct {
 func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	e := echo.New()
 	e.Debug = os.Getenv("IS_DEBUG_MODE") != ""
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		logger := logging.GetLogger(c.Request().Context())
+		var httpErr *echo.HTTPError
+		var getSessionErr *wrapsession.GetSessionError
+		var saveSessionErr *wrapsession.SaveSessionError
+		var retErr error
+		if errors.As(err, &httpErr) {
+			retErr = httpErr
+		} else if errors.As(err, &getSessionErr) {
+			inner := getSessionErr.Unwrap()
+			logger.Error("failed to get session", zap.Error(inner))
+			retErr = echo.ErrInternalServerError.WithInternal(inner)
+		} else if errors.As(err, &saveSessionErr) {
+			inner := saveSessionErr.Unwrap()
+			logger.Error("failed to save session", zap.Error(inner))
+			retErr = echo.ErrInternalServerError.WithInternal(inner)
+		} else {
+			retErr = err
+		}
+		c.Echo().DefaultHTTPErrorHandler(retErr, c)
+	}
 	e.Use(middleware.RequestID())
 	e.Use(h.setLoggerMiddleware(logger))
 	e.Use(h.AccessLoggingMiddleware)
@@ -35,10 +59,6 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	gob.Register(User{})
 	gob.Register(uuid.UUID{})
 	gob.Register([]*model.Owner{})
-
-	retrieveGroupOwner := h.RetrieveGroupOwner()
-	retrieveRequestCreator := h.RetrieveRequestCreator()
-	retrieveFileCreator := h.RetrieveFileCreator()
 
 	api := e.Group("/api")
 	{
@@ -55,19 +75,20 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 				"",
 				h.PostRequest,
 				middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler))
-			apiRequestIDs := apiRequests.Group("/:requestID", retrieveRequestCreator)
+			apiRequestIDs := apiRequests.Group("/:requestID")
 			{
 				apiRequestIDs.GET("", h.GetRequest)
+				// FIXME: このままでは異常系のrequestでもwebhookが呼ばれる
+				// そのため、webhookの関数呼び出しをPutRequest内に移す
 				apiRequestIDs.PUT(
 					"",
 					h.PutRequest,
-					middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler),
-					h.CheckRequestCreatorMiddleware)
+					middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler))
 				apiRequestIDs.POST(
 					"/comments",
 					h.PostComment,
 					middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler))
-				apiRequestIDs.PUT("/status", h.PutStatus, h.CheckAdminOrRequestCreatorMiddleware)
+				apiRequestIDs.PUT("/status", h.PutStatus)
 			}
 		}
 
@@ -90,10 +111,10 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 		apiFiles := api.Group("/files", h.CheckLoginMiddleware)
 		{
 			apiFiles.POST("", h.PostFile)
-			apiFileIDs := apiFiles.Group("/:fileID", retrieveFileCreator)
+			apiFileIDs := apiFiles.Group("/:fileID")
 			{
 				apiFileIDs.GET("", h.GetFile)
-				apiFileIDs.DELETE("", h.DeleteFile, h.CheckAdminOrFileCreatorMiddleware)
+				apiFileIDs.DELETE("", h.DeleteFile)
 				apiFileIDs.GET("/meta", h.GetFileMeta)
 			}
 		}
@@ -110,15 +131,15 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 		{
 			apiGroups.GET("", h.GetGroups)
 			apiGroups.POST("", h.PostGroup, h.CheckAdminMiddleware)
-			apiGroupIDs := apiGroups.Group("/:groupID", retrieveGroupOwner)
+			apiGroupIDs := apiGroups.Group("/:groupID")
 			{
 				apiGroupIDs.GET("", h.GetGroupDetail)
-				apiGroupIDs.PUT("", h.PutGroup, h.CheckAdminOrGroupOwnerMiddleware)
-				apiGroupIDs.DELETE("", h.DeleteGroup, h.CheckAdminOrGroupOwnerMiddleware)
-				apiGroupIDs.POST("/members", h.PostMember, h.CheckAdminOrGroupOwnerMiddleware)
-				apiGroupIDs.DELETE("/members", h.DeleteMember, h.CheckAdminOrGroupOwnerMiddleware)
-				apiGroupIDs.POST("/owners", h.PostOwner, h.CheckAdminOrGroupOwnerMiddleware)
-				apiGroupIDs.DELETE("/owners", h.DeleteOwner, h.CheckAdminOrGroupOwnerMiddleware)
+				apiGroupIDs.PUT("", h.PutGroup)
+				apiGroupIDs.DELETE("", h.DeleteGroup)
+				apiGroupIDs.POST("/members", h.PostMember)
+				apiGroupIDs.DELETE("/members", h.DeleteMember)
+				apiGroupIDs.POST("/owners", h.PostOwner)
+				apiGroupIDs.DELETE("/owners", h.DeleteOwner)
 			}
 		}
 

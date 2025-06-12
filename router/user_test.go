@@ -10,8 +10,6 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
@@ -21,6 +19,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
+// TODO: これ消す userFromModelUserがある
 func modelUserToUser(user *model.User) *User {
 	return &User{
 		ID:          user.ID,
@@ -291,31 +290,18 @@ func TestHandlers_GetMe(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		accessUser := makeUser(t, random.Numeric(t, 2) == 1)
-		user := modelUserToUser(accessUser)
+		user := userFromModelUser(*accessUser)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, "/api/users/me", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
-		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
-			return c.NoContent(http.StatusOK)
-		}))
-		err := hn(c)
-		require.NoError(t, err)
+		c.SetPath("/api/users/me")
+		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		sess, err := session.Get(h.Handlers.SessionName, c)
-		require.NoError(t, err)
-		sess.Values[sessionUserKey] = *user
-		require.NoError(t, sess.Save(c.Request(), c.Response()))
-
-		h.Repository.MockUserRepository.
-			EXPECT().
-			GetUserByID(c.Request().Context(), user.ID).
-			Return(accessUser, nil)
 
 		require.NoError(t, h.Handlers.GetMe(c))
 		require.Equal(t, http.StatusOK, rec.Code)
@@ -327,31 +313,5 @@ func TestHandlers_GetMe(t *testing.T) {
 		testutil.RequireEqual(t, exp, &got, opts...)
 	})
 
-	t.Run("FailedToGetUser", func(t *testing.T) {
-		t.Parallel()
-		ctx := testutil.NewContext(t)
-		ctrl := gomock.NewController(t)
-
-		e := echo.New()
-		e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
-		req := httptest.NewRequestWithContext(ctx, http.MethodPut, "/api/users/me", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		mw := session.Middleware(sessions.NewCookieStore([]byte("secret")))
-		hn := mw(echo.HandlerFunc(func(c echo.Context) error {
-			return c.NoContent(http.StatusOK)
-		}))
-		err := hn(c)
-		require.NoError(t, err)
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-
-		resErr := "failed to get user info"
-		err = h.Handlers.GetMe(c)
-		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
-	})
+	// TODO: checkLoginMiddlewareのテストを追加する
 }

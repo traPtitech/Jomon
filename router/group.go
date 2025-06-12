@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"time"
@@ -54,6 +55,8 @@ type MemberResponse struct {
 type Member struct {
 	ID uuid.UUID `json:"id"`
 }
+
+var errUserIsNotAdminOrGroupOwner error = errors.New("user is not admin or group owner")
 
 // GetGroups GET /groups
 func (h Handlers) GetGroups(c echo.Context) error {
@@ -171,12 +174,7 @@ func (h Handlers) PutGroup(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	var group Group
-	if err := c.Bind(&group); err != nil {
-		logger.Info("could not get group from request", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
+	loginUser, _ := c.Get(loginUserKey).(User)
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
@@ -184,6 +182,15 @@ func (h Handlers) PutGroup(c echo.Context) error {
 	}
 	if groupID == uuid.Nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+	}
+	if err := h.filterAdminOrGroupOwner(ctx, &loginUser, groupID); err != nil {
+		return err
+	}
+
+	var group Group
+	if err := c.Bind(&group); err != nil {
+		logger.Info("could not get group from request", zap.Error(err))
+		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
 	updated, err := h.Repository.UpdateGroup(
@@ -211,6 +218,7 @@ func (h Handlers) DeleteGroup(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
+	loginUser, _ := c.Get(loginUserKey).(User)
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
@@ -219,6 +227,9 @@ func (h Handlers) DeleteGroup(c echo.Context) error {
 	if groupID == uuid.Nil {
 		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+	}
+	if err := h.filterAdminOrGroupOwner(ctx, &loginUser, groupID); err != nil {
+		return err
 	}
 
 	err = h.Repository.DeleteGroup(ctx, groupID)
@@ -235,6 +246,7 @@ func (h Handlers) PostMember(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
+	loginUser, _ := c.Get(loginUserKey).(User)
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
@@ -243,6 +255,9 @@ func (h Handlers) PostMember(c echo.Context) error {
 	if groupID == uuid.Nil {
 		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+	}
+	if err := h.filterAdminOrGroupOwner(ctx, &loginUser, groupID); err != nil {
+		return err
 	}
 	var member []uuid.UUID
 	if err := c.Bind(&member); err != nil {
@@ -265,6 +280,7 @@ func (h Handlers) DeleteMember(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
+	loginUser, _ := c.Get(loginUserKey).(User)
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
@@ -273,6 +289,9 @@ func (h Handlers) DeleteMember(c echo.Context) error {
 	if groupID == uuid.Nil {
 		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+	}
+	if err := h.filterAdminOrGroupOwner(ctx, &loginUser, groupID); err != nil {
+		return err
 	}
 	var member []uuid.UUID
 	if err := c.Bind(&member); err != nil {
@@ -292,7 +311,7 @@ func (h Handlers) PostOwner(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	var owners []uuid.UUID
+	loginUser, _ := c.Get(loginUserKey).(User)
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
@@ -302,6 +321,10 @@ func (h Handlers) PostOwner(c echo.Context) error {
 		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
+	if err := h.filterAdminOrGroupOwner(ctx, &loginUser, groupID); err != nil {
+		return err
+	}
+	var owners []uuid.UUID
 	if err := c.Bind(&owners); err != nil {
 		logger.Info("could not get owner id from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -328,6 +351,7 @@ func (h Handlers) DeleteOwner(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
+	loginUser, _ := c.Get(loginUserKey).(User)
 	groupID, err := uuid.Parse(c.Param("groupID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `groupID` as UUID", zap.Error(err))
@@ -336,6 +360,9 @@ func (h Handlers) DeleteOwner(c echo.Context) error {
 	if groupID == uuid.Nil {
 		logger.Info("received invalid UUID")
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+	}
+	if err := h.filterAdminOrGroupOwner(ctx, &loginUser, groupID); err != nil {
+		return err
 	}
 	var ownerIDs []uuid.UUID
 	if err := c.Bind(&ownerIDs); err != nil {
@@ -354,4 +381,39 @@ func (h Handlers) DeleteOwner(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
+}
+
+// isGroupOwner checks if the user is an owner of the group.
+func (h Handlers) isGroupOwner(
+	ctx context.Context, userID, groupID uuid.UUID,
+) (bool, error) {
+	owners, err := h.Repository.GetOwners(ctx, groupID)
+	if err != nil {
+		return false, err
+	}
+	isOwner := lo.ContainsBy(owners, func(owner *model.Owner) bool {
+		return owner.ID == userID
+	})
+
+	return isOwner, nil
+}
+
+// filterAdminOrGroupOwner 与えられたIDのユーザーが管理者またはグループのオーナーであるかを確認します
+func (h Handlers) filterAdminOrGroupOwner(
+	ctx context.Context, user *User, groupID uuid.UUID,
+) *echo.HTTPError {
+	logger := logging.GetLogger(ctx)
+	if user.Admin {
+		return nil
+	}
+	isOwner, err := h.isGroupOwner(ctx, user.ID, groupID)
+	if err != nil {
+		// NOTE: ent.IsNotFound(err)は起こり得ないと仮定
+		logger.Error("failed to check if user is group owner", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if isOwner {
+		return nil
+	}
+	return echo.NewHTTPError(http.StatusForbidden, errUserIsNotAdminOrGroupOwner)
 }

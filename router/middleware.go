@@ -1,26 +1,21 @@
 package router
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/logging"
-	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/router/wrapsession"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 const (
-	sessionUserKey           = "user"
-	sessionOwnerKey          = "group_owner"
-	sessionRequestCreatorKey = "request_creator"
-	sessionFileCreatorKey    = "request_creator"
+	loginUserKey = "login_user"
 )
 
 func (h Handlers) setLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
@@ -82,17 +77,31 @@ func (h Handlers) AccessLoggingMiddleware(next echo.HandlerFunc) echo.HandlerFun
 
 func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		logger := logging.GetLogger(c.Request().Context())
-		sess, err := session.Get(h.SessionName, c)
+		ctx := c.Request().Context()
+		logger := logging.GetLogger(ctx)
+
+		id, err := wrapsession.WithSession(
+			c, h.SessionName, func(w *wrapsession.W) (uuid.UUID, error) {
+				v, ok := w.GetUserID()
+				if !ok {
+					err := echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
+					return uuid.Nil, err
+				}
+				return v, nil
+			})
 		if err != nil {
-			logger.Error("failed to get session", zap.Error(err))
+			return err
+		}
+		user, err := h.Repository.GetUserByID(ctx, id)
+		if err != nil {
+			if ent.IsNotFound(err) {
+				logger.Info("user not found in repository", zap.Error(err))
+				return echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
+			}
+			logger.Error("failed to get user from repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
-
-		_, ok := sess.Values[sessionUserKey].(User)
-		if !ok {
-			return echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
-		}
+		c.Set(loginUserKey, userFromModelUser(*user))
 
 		return next(c)
 	}
@@ -100,282 +109,10 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 func (h Handlers) CheckAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		logger := logging.GetLogger(c.Request().Context())
-		sess, err := session.Get(h.SessionName, c)
-		if err != nil {
-			logger.Error("failed to get session", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		user, err := getUserInfo(sess)
-		if err != nil {
-			logger.Error("failed to get user info", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		if !user.Admin {
+		loginUser, _ := c.Get(loginUserKey).(User)
+		if !loginUser.Admin {
 			return echo.NewHTTPError(http.StatusForbidden, "you are not admin")
 		}
-
 		return next(c)
 	}
-}
-
-func (h Handlers) CheckRequestCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		logger := logging.GetLogger(c.Request().Context())
-		sess, err := session.Get(h.SessionName, c)
-		if err != nil {
-			logger.Error("failed to get session", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		user, err := getUserInfo(sess)
-		if err != nil {
-			logger.Error("failed to get user info", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		creator, ok := sess.Values[sessionRequestCreatorKey].(uuid.UUID)
-		if !ok {
-			return echo.NewHTTPError(
-				http.StatusInternalServerError,
-				"session request creator key is not set")
-		}
-		if creator != user.ID {
-			return echo.NewHTTPError(http.StatusForbidden, "you are not creator")
-		}
-
-		return next(c)
-	}
-}
-
-func (h Handlers) CheckAdminOrRequestCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		logger := logging.GetLogger(c.Request().Context())
-		sess, err := session.Get(h.SessionName, c)
-		if err != nil {
-			logger.Error("failed to get session", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		user, err := getUserInfo(sess)
-		if err != nil {
-			logger.Error("failed to get user info", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		creator, ok := sess.Values[sessionRequestCreatorKey].(uuid.UUID)
-		if !ok {
-			return echo.NewHTTPError(
-				http.StatusInternalServerError,
-				"session request creator key is not set")
-		}
-		if creator != user.ID && !user.Admin {
-			return echo.NewHTTPError(http.StatusForbidden, "you are not admin or creator")
-		}
-
-		return next(c)
-	}
-}
-
-func (h Handlers) CheckAdminOrGroupOwnerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		logger := logging.GetLogger(c.Request().Context())
-		sess, err := session.Get(h.SessionName, c)
-		if err != nil {
-			logger.Error("failed to get session", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		user, err := getUserInfo(sess)
-		if err != nil {
-			logger.Error("failed to get user info", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		owners, ok := sess.Values[sessionOwnerKey].([]*model.Owner)
-		if !ok {
-			logger.Error("failed to get group owner", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, "session owner key is not set")
-		}
-
-		if user.Admin {
-			return next(c)
-		}
-
-		for _, owner := range owners {
-			if owner.ID == user.ID {
-				return next(c)
-			}
-		}
-
-		return echo.ErrForbidden
-	}
-}
-
-func (h Handlers) CheckFileCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		logger := logging.GetLogger(c.Request().Context())
-		sess, err := session.Get(h.SessionName, c)
-		if err != nil {
-			logger.Error("failed to get session", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		user, err := getUserInfo(sess)
-		if err != nil {
-			logger.Error("failed to get user info", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		creator, ok := sess.Values[sessionFileCreatorKey].(uuid.UUID)
-		if !ok {
-			return echo.NewHTTPError(
-				http.StatusInternalServerError,
-				"session file creator key is not set")
-		}
-		if creator != user.ID {
-			return echo.NewHTTPError(http.StatusForbidden, "you are not creator")
-		}
-
-		return next(c)
-	}
-}
-
-func (h Handlers) CheckAdminOrFileCreatorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		sess, err := session.Get(h.SessionName, c)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		user, err := getUserInfo(sess)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-
-		creator, ok := sess.Values[sessionFileCreatorKey].(uuid.UUID)
-		if !ok {
-			return echo.NewHTTPError(
-				http.StatusInternalServerError,
-				"session file creator key is not set")
-		}
-		if creator != user.ID && !user.Admin {
-			return echo.NewHTTPError(http.StatusForbidden, "you are not admin or creator")
-		}
-
-		return next(c)
-	}
-}
-
-func (h Handlers) RetrieveGroupOwner() echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			logger := logging.GetLogger(c.Request().Context())
-			sess, err := session.Get(h.SessionName, c)
-			if err != nil {
-				logger.Error("failed to get session", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-			id, err := uuid.Parse(c.Param("groupID"))
-			if err != nil {
-				logger.Info("could not parse group_id as UUID", zap.Error(err))
-				return echo.NewHTTPError(http.StatusBadRequest, err)
-			}
-
-			ctx := c.Request().Context()
-			owners, err := h.Repository.GetOwners(ctx, id)
-			if err != nil {
-				logger.Error("failed to get owners from repository", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-
-			sess.Values[sessionOwnerKey] = owners
-
-			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				logger.Error("failed to save session", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-
-			return next(c)
-		}
-	}
-}
-
-func (h Handlers) RetrieveRequestCreator() echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			logger := logging.GetLogger(c.Request().Context())
-			sess, err := session.Get(h.SessionName, c)
-			if err != nil {
-				logger.Error("failed to get session", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-			id, err := uuid.Parse(c.Param("requestID"))
-			if err != nil {
-				logger.Info("could not parse request_id as UUID", zap.Error(err))
-				return echo.NewHTTPError(http.StatusBadRequest, err)
-			}
-
-			ctx := c.Request().Context()
-			request, err := h.Repository.GetRequest(ctx, id)
-			if err != nil {
-				logger.Error("failed to get request from repository", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-
-			sess.Values[sessionRequestCreatorKey] = request.CreatedBy
-
-			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				logger.Error("failed to save session", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-
-			return next(c)
-		}
-	}
-}
-
-func (h Handlers) RetrieveFileCreator() echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			logger := logging.GetLogger(c.Request().Context())
-			sess, err := session.Get(h.SessionName, c)
-			if err != nil {
-				logger.Error("failed to get session", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-			id, err := uuid.Parse(c.Param("fileID"))
-			if err != nil {
-				logger.Info("could not parse file_id as UUID", zap.Error(err))
-				return echo.NewHTTPError(http.StatusBadRequest, err)
-			}
-
-			ctx := c.Request().Context()
-			file, err := h.Repository.GetFile(ctx, id)
-			if err != nil {
-				logger.Error("failed to get file from repository", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-
-			sess.Values[sessionFileCreatorKey] = file.CreatedBy
-
-			if err = sess.Save(c.Request(), c.Response()); err != nil {
-				logger.Error("failed to save session", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-
-			return next(c)
-		}
-	}
-}
-
-func getUserInfo(sess *sessions.Session) (*User, error) {
-	user, ok := sess.Values[sessionUserKey].(User)
-	if !ok {
-		return nil, errors.New("user not found")
-	}
-
-	return &user, nil
 }
