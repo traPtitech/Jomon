@@ -24,7 +24,7 @@ func NewLocalStorage(dir string) (*Local, error) {
 	return &Local{localDir: dir}, nil
 }
 
-func (l *Local) Save(ctx context.Context, filename string, src io.Reader) error {
+func (l *Local) Save(_ context.Context, filename string, src io.Reader) error {
 	file, err := os.Create(l.getFilePath(filename))
 	if err != nil {
 		return err
@@ -35,7 +35,7 @@ func (l *Local) Save(ctx context.Context, filename string, src io.Reader) error 
 	return err
 }
 
-func (l *Local) Open(ctx context.Context, filename string) (io.ReadCloser, error) {
+func (l *Local) Open(_ context.Context, filename string) (io.ReadCloser, error) {
 	r, err := os.Open(l.getFilePath(filename))
 	if err != nil {
 		return nil, ErrFileNotFound
@@ -43,7 +43,7 @@ func (l *Local) Open(ctx context.Context, filename string) (io.ReadCloser, error
 	return r, nil
 }
 
-func (l *Local) Delete(ctx context.Context, filename string) error {
+func (l *Local) Delete(_ context.Context, filename string) error {
 	path := l.getFilePath(filename)
 	if _, err := os.Stat(path); err != nil {
 		return ErrFileNotFound
