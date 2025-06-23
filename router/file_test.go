@@ -84,7 +84,7 @@ func TestHandlers_PostFile(t *testing.T) {
 
 		h.Storage.
 			EXPECT().
-			Save(file.ID.String(), gomock.Any()).
+			Save(c.Request().Context(), file.ID.String(), gomock.Any()).
 			Return(nil)
 
 		require.NoError(t, h.Handlers.PostFile(c))
@@ -204,7 +204,7 @@ func TestHandlers_PostFile(t *testing.T) {
 
 		h.Storage.
 			EXPECT().
-			Save(file.ID.String(), gomock.Any()).
+			Save(c.Request().Context(), file.ID.String(), gomock.Any()).
 			Return(mocErr)
 
 		err = h.Handlers.PostFile(c)
@@ -252,7 +252,7 @@ func TestHandlers_GetFile(t *testing.T) {
 
 		h.Storage.
 			EXPECT().
-			Open(file.ID.String()).
+			Open(c.Request().Context(), file.ID.String()).
 			Return(r, nil)
 
 		require.NoError(t, h.Handlers.GetFile(c))
@@ -329,7 +329,7 @@ func TestHandlers_GetFile(t *testing.T) {
 
 		h.Storage.
 			EXPECT().
-			Open(file.ID.String()).
+			Open(c.Request().Context(), file.ID.String()).
 			Return(nil, mocErr)
 
 		err = h.Handlers.GetFile(c)
@@ -517,7 +517,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 			Return(nil)
 		h.Storage.
 			EXPECT().
-			Delete(file.ID.String()).
+			Delete(c.Request().Context(), file.ID.String()).
 			Return(nil)
 
 		require.NoError(t, h.Handlers.DeleteFile(c))
@@ -610,7 +610,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 		h.Storage.
 			EXPECT().
-			Delete(file.ID.String()).
+			Delete(c.Request().Context(), file.ID.String()).
 			Return(mocErr)
 
 		err = h.Handlers.DeleteFile(c)

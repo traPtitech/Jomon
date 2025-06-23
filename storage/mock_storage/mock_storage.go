@@ -10,6 +10,7 @@
 package mock_storage
 
 import (
+	context "context"
 	io "io"
 	reflect "reflect"
 
@@ -20,6 +21,7 @@ import (
 type MockStorage struct {
 	ctrl     *gomock.Controller
 	recorder *MockStorageMockRecorder
+	isgomock struct{}
 }
 
 // MockStorageMockRecorder is the mock recorder for MockStorage.
@@ -40,44 +42,44 @@ func (m *MockStorage) EXPECT() *MockStorageMockRecorder {
 }
 
 // Delete mocks base method.
-func (m *MockStorage) Delete(filename string) error {
+func (m *MockStorage) Delete(ctx context.Context, filename string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", filename)
+	ret := m.ctrl.Call(m, "Delete", ctx, filename)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockStorageMockRecorder) Delete(filename any) *gomock.Call {
+func (mr *MockStorageMockRecorder) Delete(ctx, filename any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockStorage)(nil).Delete), filename)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockStorage)(nil).Delete), ctx, filename)
 }
 
 // Open mocks base method.
-func (m *MockStorage) Open(filename string) (io.ReadCloser, error) {
+func (m *MockStorage) Open(ctx context.Context, filename string) (io.ReadCloser, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Open", filename)
+	ret := m.ctrl.Call(m, "Open", ctx, filename)
 	ret0, _ := ret[0].(io.ReadCloser)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Open indicates an expected call of Open.
-func (mr *MockStorageMockRecorder) Open(filename any) *gomock.Call {
+func (mr *MockStorageMockRecorder) Open(ctx, filename any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Open", reflect.TypeOf((*MockStorage)(nil).Open), filename)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Open", reflect.TypeOf((*MockStorage)(nil).Open), ctx, filename)
 }
 
 // Save mocks base method.
-func (m *MockStorage) Save(filename string, src io.Reader) error {
+func (m *MockStorage) Save(ctx context.Context, filename string, src io.Reader) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", filename, src)
+	ret := m.ctrl.Call(m, "Save", ctx, filename, src)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Save indicates an expected call of Save.
-func (mr *MockStorageMockRecorder) Save(filename, src any) *gomock.Call {
+func (mr *MockStorageMockRecorder) Save(ctx, filename, src any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockStorage)(nil).Save), filename, src)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockStorage)(nil).Save), ctx, filename, src)
 }

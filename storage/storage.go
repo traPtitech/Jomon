@@ -2,6 +2,7 @@
 package storage
 
 import (
+	"context"
 	"errors"
 	"io"
 )
@@ -11,7 +12,7 @@ var (
 )
 
 type Storage interface {
-	Save(filename string, src io.Reader) error
-	Open(filename string) (io.ReadCloser, error)
-	Delete(filename string) error
+	Save(ctx context.Context, filename string, src io.Reader) error
+	Open(ctx context.Context, filename string) (io.ReadCloser, error)
+	Delete(ctx context.Context, filename string) error
 }

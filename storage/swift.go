@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"errors"
 	"io"
 
@@ -39,12 +40,12 @@ func NewSwiftStorage(
 	return s, nil
 }
 
-func (s *Swift) Save(filename string, src io.Reader) error {
+func (s *Swift) Save(_ context.Context, filename string, src io.Reader) error {
 	_, err := s.conn.ObjectPut(s.container, filename, src, true, "", "", swift.Headers{})
 	return err
 }
 
-func (s *Swift) Open(filename string) (io.ReadCloser, error) {
+func (s *Swift) Open(_ context.Context, filename string) (io.ReadCloser, error) {
 	file, _, err := s.conn.ObjectOpen(s.container, filename, true, nil)
 	if err != nil {
 		if errors.Is(err, swift.ObjectNotFound) {
@@ -55,7 +56,7 @@ func (s *Swift) Open(filename string) (io.ReadCloser, error) {
 	return file, nil
 }
 
-func (s *Swift) Delete(filename string) error {
+func (s *Swift) Delete(_ context.Context, filename string) error {
 	err := s.conn.ObjectDelete(s.container, filename)
 	if err != nil {
 		if errors.Is(err, swift.ObjectNotFound) {
@@ -65,3 +66,5 @@ func (s *Swift) Delete(filename string) error {
 	}
 	return nil
 }
+
+var _ Storage = (*Swift)(nil)
