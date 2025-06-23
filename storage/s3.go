@@ -17,7 +17,7 @@ type S3Storage struct {
 	client *s3.Client
 }
 
-func NewS3Storage(cfg aws.Config, bucket string) (*S3Storage, error) {
+func NewS3Storage(cfg aws.Config, bucket string) (*S3Storage) {
 	client := s3.NewFromConfig(cfg)
 
 	s := &S3Storage{
@@ -25,7 +25,7 @@ func NewS3Storage(cfg aws.Config, bucket string) (*S3Storage, error) {
 		client: client,
 	}
 
-	return s, nil
+	return s
 }
 
 func (fs *S3Storage) Save(ctx context.Context, filename string, key string, src io.Reader) error {
