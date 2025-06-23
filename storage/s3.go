@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 
-	// "errors"
-	// "io"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -16,16 +14,19 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
-
 type S3FileStorage struct {
 	bucket string
 	client *s3.Client
 }
 
-func NewS3FileStorage(bucket string, region string, apiKey string, apiSecret string) (*S3FileStorage, error) {
+func NewS3FileStorage(
+	bucket string, region string, apiKey string, apiSecret string,
+) (*S3FileStorage, error) {
 	cfg, err := config.LoadDefaultConfig(context.Background(),
 		config.WithRegion(region),
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(apiKey, apiSecret, "")),
+		config.WithCredentialsProvider(
+			credentials.NewStaticCredentialsProvider(apiKey, apiSecret, ""),
+		),
 	)
 
 	if err != nil {
@@ -88,4 +89,3 @@ func (fs *S3FileStorage) Delete(key string) error {
 	}
 	return nil
 }
-
