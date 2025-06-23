@@ -19,7 +19,7 @@ type S3Storage struct {
 
 var _ Storage = (*S3Storage)(nil)
 
-func NewS3Storage(cfg aws.Config, bucket string) (*S3Storage) {
+func NewS3Storage(cfg aws.Config, bucket string) *S3Storage {
 	client := s3.NewFromConfig(cfg)
 
 	s := &S3Storage{
