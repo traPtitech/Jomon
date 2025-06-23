@@ -66,11 +66,16 @@ func main() {
 			panic(err)
 		}
 	}()
+
+	sessionName := os.Getenv("SESSION_NAME")
+	if sessionName == "" {
+		sessionName = "session"
+	}
 	handlers := router.Handlers{
 		WebhookService: ws,
 		Repository:     repo,
 		Storage:        strg,
-		SessionName:    "session",
+		SessionName:    sessionName,
 	}
 
 	server := handlers.NewServer(logger)

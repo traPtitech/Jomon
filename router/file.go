@@ -1,12 +1,13 @@
 package router
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/logging"
@@ -25,20 +26,24 @@ type FileMetaResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-var acceptedMimeTypes = map[string]bool{
-	"image/jpeg":         true,
-	"image/png":          true,
-	"image/gif":          true,
-	"image/bmp":          true,
-	"application/pdf":    true,
-	"application/msword": true,
-	"application/zip":    true,
-}
+var (
+	acceptedMimeTypes = map[string]bool{
+		"image/jpeg":         true,
+		"image/png":          true,
+		"image/gif":          true,
+		"image/bmp":          true,
+		"application/pdf":    true,
+		"application/msword": true,
+		"application/zip":    true,
+	}
+	errUserIsNotAdminOrFileCreator = errors.New("user is not admin or file creator")
+)
 
 func (h Handlers) PostFile(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
+	loginUser, _ := c.Get(loginUserKey).(User)
 	form, err := c.MultipartForm()
 	if err != nil {
 		logger.Error("failed to parse request as multipart/form-data", zap.Error(err))
@@ -82,20 +87,7 @@ func (h Handlers) PostFile(c echo.Context) error {
 	}
 	defer src.Close()
 
-	// get create user
-	sess, err := session.Get(h.SessionName, c)
-	if err != nil {
-		logger.Error("failed to get session", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-
-	user, ok := sess.Values[sessionUserKey].(User)
-	if !ok {
-		logger.Error("failed to parse stored session as user info")
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("invalid user"))
-	}
-
-	file, err := h.Repository.CreateFile(ctx, name, mimetype, requestID, user.ID)
+	file, err := h.Repository.CreateFile(ctx, name, mimetype, requestID, loginUser.ID)
 	if err != nil {
 		logger.Error("failed to create file in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -197,10 +189,14 @@ func (h Handlers) DeleteFile(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
+	loginUser, _ := c.Get(loginUserKey).(User)
 	fileID, err := uuid.Parse(c.Param("fileID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `fileID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	if err := h.filterAdminOrFileCreator(ctx, &loginUser, fileID); err != nil {
+		return err
 	}
 
 	err = h.Repository.DeleteFile(ctx, fileID)
@@ -220,4 +216,31 @@ func (h Handlers) DeleteFile(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
+}
+
+// isFileCreator 与えられたユーザーがファイルの作成者かどうかを確認します
+func (h Handlers) isFileCreator(ctx context.Context, userID, fileID uuid.UUID) (bool, error) {
+	file, err := h.Repository.GetFile(ctx, fileID)
+	if err != nil {
+		return false, err
+	}
+	return file.CreatedBy == userID, nil
+}
+
+func (h Handlers) filterAdminOrFileCreator(
+	ctx context.Context, user *User, fileID uuid.UUID,
+) *echo.HTTPError {
+	logger := logging.GetLogger(ctx)
+	if user.Admin {
+		return nil
+	}
+	isCreator, err := h.isFileCreator(ctx, user.ID, fileID)
+	if err != nil {
+		logger.Error("failed to check if user is file creator", zap.Error(err))
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	if isCreator {
+		return nil
+	}
+	return echo.NewHTTPError(http.StatusForbidden, errUserIsNotAdminOrFileCreator)
 }

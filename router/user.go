@@ -5,10 +5,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
-	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
 	"go.uber.org/zap"
@@ -99,29 +97,6 @@ func userFromModelUser(u model.User) User {
 }
 
 func (h Handlers) GetMe(c echo.Context) error {
-	ctx := c.Request().Context()
-	logger := logging.GetLogger(ctx)
-
-	sess, err := session.Get(h.SessionName, c)
-	if err != nil {
-		logger.Error("failed to get session", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	userInSession, ok := sess.Values[sessionUserKey].(User)
-	if !ok {
-		logger.Error("failed to parse stored session as user info")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get user info")
-	}
-
-	modelUser, err := h.Repository.GetUserByID(ctx, userInSession.ID)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			logger.Error("failed to find user from DB by ID")
-			return c.JSON(http.StatusNotFound, err)
-		}
-		logger.Error("failed to get user by ID")
-		return c.JSON(http.StatusInternalServerError, err)
-	}
-	user := userFromModelUser(*modelUser)
-	return c.JSON(http.StatusOK, user)
+	loginUser, _ := c.Get(loginUserKey).(User)
+	return c.JSON(http.StatusOK, loginUser)
 }
