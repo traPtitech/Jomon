@@ -31,7 +31,7 @@ func NewS3Storage(cfg aws.Config, bucket string) *S3Storage {
 }
 
 // FIXME : 引数に`key string`を受け取り、`Key`フィールドに渡したいがinterfaceの定義上一時的に`filename`で代用してる　あとで分ける
-func (fs *S3Storage) Save(filename string, src io.Reader) error {
+func (fs *S3Storage) Save(ctx context.Context, filename string, src io.Reader) error {
 	input := &s3.PutObjectInput{
 		Bucket: aws.String(fs.bucket),
 		Key:    aws.String(filename),
@@ -41,17 +41,17 @@ func (fs *S3Storage) Save(filename string, src io.Reader) error {
 	}
 
 	uploader := manager.NewUploader(fs.client)
-	_, err := uploader.Upload(context.Background(), input)
+	_, err := uploader.Upload(ctx, input)
 
 	return err
 }
 
-func (fs *S3Storage) Open(key string) (io.ReadCloser, error) {
+func (fs *S3Storage) Open(ctx context.Context, key string) (io.ReadCloser, error) {
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(fs.bucket),
 		Key:    aws.String(key),
 	}
-	file, err := fs.client.GetObject(context.Background(), input)
+	file, err := fs.client.GetObject(ctx, input)
 	if err != nil {
 		var nsk *types.NoSuchKey
 		if errors.As(err, &nsk) {
@@ -62,13 +62,13 @@ func (fs *S3Storage) Open(key string) (io.ReadCloser, error) {
 	return file.Body, nil
 }
 
-func (fs *S3Storage) Delete(key string) error {
+func (fs *S3Storage) Delete(ctx context.Context, key string) error {
 	input := &s3.DeleteObjectInput{
 		Bucket: aws.String(fs.bucket),
 		Key:    aws.String(key),
 	}
 
-	_, err := fs.client.DeleteObject(context.Background(), input)
+	_, err := fs.client.DeleteObject(ctx, input)
 	if err != nil {
 		var nsk *types.NoSuchKey
 		if errors.As(err, &nsk) {

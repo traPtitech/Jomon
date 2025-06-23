@@ -93,7 +93,7 @@ func (h Handlers) PostFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	err = h.Storage.Save(file.ID.String(), src)
+	err = h.Storage.Save(ctx, file.ID.String(), src)
 	if err != nil {
 		logger.Error("failed to save file id in storage", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -140,7 +140,7 @@ func (h Handlers) GetFile(c echo.Context) error {
 		}
 	}
 
-	f, err := h.Storage.Open(fileID.String())
+	f, err := h.Storage.Open(ctx, fileID.String())
 	if err != nil {
 		logger.Error(
 			"failed to open file in storage",
@@ -209,7 +209,7 @@ func (h Handlers) DeleteFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	err = h.Storage.Delete(fileID.String())
+	err = h.Storage.Delete(ctx, fileID.String())
 	if err != nil {
 		logger.Error("failed to delete file in storage", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
