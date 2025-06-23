@@ -12,8 +12,6 @@ type Local struct {
 	localDir string
 }
 
-var _ Storage = (*Local)(nil)
-
 func NewLocalStorage(dir string) (*Local, error) {
 	fi, err := os.Stat(dir)
 	if err != nil {
@@ -56,3 +54,5 @@ func (l *Local) Delete(ctx context.Context, filename string) error {
 func (l *Local) getFilePath(filename string) string {
 	return filepath.Join(l.localDir, filename)
 }
+
+var _ Storage = (*Local)(nil)

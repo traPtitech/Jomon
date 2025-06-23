@@ -17,8 +17,6 @@ type S3Storage struct {
 	client *s3.Client
 }
 
-var _ Storage = (*S3Storage)(nil)
-
 func NewS3Storage(cfg aws.Config, bucket string) *S3Storage {
 	client := s3.NewFromConfig(cfg)
 
@@ -78,3 +76,5 @@ func (fs *S3Storage) Delete(ctx context.Context, key string) error {
 	}
 	return nil
 }
+
+var _ Storage = (*S3Storage)(nil)

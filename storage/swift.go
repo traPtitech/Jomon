@@ -13,8 +13,6 @@ type Swift struct {
 	conn      *swift.Connection
 }
 
-var _ Storage = (*Swift)(nil)
-
 func NewSwiftStorage(
 	container string, userName string, apiKey string,
 	tenant string, tenantID string, authURL string,
@@ -68,3 +66,5 @@ func (s *Swift) Delete(ctx context.Context, filename string) error {
 	}
 	return nil
 }
+
+var _ Storage = (*Swift)(nil)
