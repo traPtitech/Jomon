@@ -7,22 +7,14 @@
       label="管理権限を削除"
       multiple
     ></v-autocomplete>
-    <simple-button
-      :label="'設定'"
-      :variant="'warning'"
-      @click="removeAdmin()"
-    ></simple-button>
+    <simple-button :label="'設定'" :variant="'warning'" @click="removeAdmin()"></simple-button>
     <v-autocomplete
       v-model="addAdminUsers"
       :items="notAdminList"
       label="管理権限を追加"
       multiple
     ></v-autocomplete>
-    <simple-button
-      :label="'設定'"
-      :variant="'warning'"
-      @click="addAdmin()"
-    ></simple-button>
+    <simple-button :label="'設定'" :variant="'warning'" @click="addAdmin()"></simple-button>
   </div>
   <div v-else>権限がありません</div>
 </template>
@@ -44,9 +36,7 @@ export default {
     async addAdmin() {
       if (this.addAdminUsers.length > 0) {
         await this.addAdminUsers.forEach(user => {
-          axios
-            .put("api/users/admins", { trap_id: user, to_admin: true })
-            .catch(e => alert(e));
+          axios.put("api/users/admins", { trap_id: user, to_admin: true }).catch(e => alert(e));
         });
         this.getUserList();
       }
@@ -54,9 +44,7 @@ export default {
     async removeAdmin() {
       if (this.removeAdminUsers.length > 0) {
         await this.removeAdminUsers.forEach(user => {
-          axios
-            .put("api/users/admins", { trap_id: user, to_admin: false })
-            .catch(e => alert(e));
+          axios.put("api/users/admins", { trap_id: user, to_admin: false }).catch(e => alert(e));
         });
       }
       this.getUserList();

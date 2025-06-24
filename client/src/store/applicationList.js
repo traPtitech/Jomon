@@ -36,11 +36,7 @@ export const applicationList = {
   actions: {
     async getApplicationList({ commit }, params) {
       Object.keys(params).forEach(key => {
-        if (
-          params[key] === null ||
-          params[key] === undefined ||
-          params[key] === ""
-        ) {
+        if (params[key] === null || params[key] === undefined || params[key] === "") {
           delete params[key];
         }
       });

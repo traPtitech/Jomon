@@ -14,12 +14,7 @@
               outlined
               label="コメントを書いてください"
             ></v-textarea>
-            <v-btn
-              :disabled="!valid"
-              color="primary"
-              class="mr-4"
-              @click="postcomment"
-            >
+            <v-btn :disabled="!valid" color="primary" class="mr-4" @click="postcomment">
               コメントする
             </v-btn>
           </v-form>
@@ -67,9 +62,7 @@ export default {
             return;
           });
         this.$refs.form.reset();
-        this.getApplicationDetail(
-          this.$store.state.application_detail_paper.core.application_id
-        );
+        this.getApplicationDetail(this.$store.state.application_detail_paper.core.application_id);
       }
     }
   }

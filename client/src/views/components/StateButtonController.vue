@@ -34,16 +34,10 @@ export default {
   computed: {
     ...mapState({ detail: "application_detail_paper" }),
     displayAcceptBottom() {
-      return (
-        this.detail.core.current_state === `submitted` &&
-        this.$store.state.me.is_admin
-      );
+      return this.detail.core.current_state === `submitted` && this.$store.state.me.is_admin;
     },
     displayRepaidBottom() {
-      return (
-        this.detail.core.current_state === `accepted` &&
-        this.$store.state.me.is_admin
-      );
+      return this.detail.core.current_state === `accepted` && this.$store.state.me.is_admin;
     },
     displayFixResubmitBottom() {
       return (
@@ -71,9 +65,7 @@ export default {
           return;
         });
       alert("承認しました");
-      this.getApplicationDetail(
-        this.$store.state.application_detail_paper.core.application_id
-      );
+      this.getApplicationDetail(this.$store.state.application_detail_paper.core.application_id);
     },
     async reSubmit() {
       await axios
@@ -90,9 +82,7 @@ export default {
           return;
         });
       alert("再申請しました");
-      this.getApplicationDetail(
-        this.$store.state.application_detail_paper.core.application_id
-      );
+      this.getApplicationDetail(this.$store.state.application_detail_paper.core.application_id);
     }
   }
 };

@@ -12,8 +12,7 @@
           v-model="traPID"
           :rules="[
             traPID =>
-              traPID.length > 0 ||
-              '払い戻し済みのユーザーが一人以上選ばれている必要があります'
+              traPID.length > 0 || '払い戻し済みのユーザーが一人以上選ばれている必要があります'
           ]"
           :items="repaidToTraPId"
           label="払い戻し済みのユーザーを選択"
@@ -68,22 +67,18 @@ export default {
       ).then(() => {
         this.traPID = [];
         this.dialog = false;
-        this.getApplicationDetail(
-          this.$store.state.application_detail_paper.core.application_id
-        );
+        this.getApplicationDetail(this.$store.state.application_detail_paper.core.application_id);
       });
     }
   },
   computed: {
     repaidToTraPId() {
       let trap_ids = [];
-      this.$store.state.application_detail_paper.core.repayment_logs.forEach(
-        log => {
-          if (log.repaid_at === "" || log.repaid_at === null) {
-            trap_ids.push(log.repaid_to_user.trap_id);
-          }
+      this.$store.state.application_detail_paper.core.repayment_logs.forEach(log => {
+        if (log.repaid_at === "" || log.repaid_at === null) {
+          trap_ids.push(log.repaid_to_user.trap_id);
         }
-      );
+      });
       return trap_ids;
     }
   }

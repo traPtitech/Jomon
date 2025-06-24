@@ -2,10 +2,7 @@
   <v-row>
     <v-col cols="2" class="text-lg-right">
       <div>
-        <state-chip
-          v-if="list.current_state !== ''"
-          :state="list.current_state"
-        ></state-chip>
+        <state-chip v-if="list.current_state !== ''" :state="list.current_state"></state-chip>
       </div>
     </v-col>
     <v-col cols="4">{{ list.current_detail.title }}</v-col>

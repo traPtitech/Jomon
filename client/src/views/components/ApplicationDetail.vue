@@ -40,18 +40,13 @@
 
     <div :class="$style.section">
       <div :class="$style.section_title">支払金額</div>
-      <div :class="$style.section_item">
-        {{ this.detail.core.current_detail.amount }}円
-      </div>
+      <div :class="$style.section_item">{{ this.detail.core.current_detail.amount }}円</div>
     </div>
 
     <div :class="$style.section">
       <div :class="$style.section_title">払い戻し対象者</div>
       <div :class="$style.target_container">
-        <div
-          :key="user.repaid_to_user.trap_id"
-          v-for="user in this.detail.core.repayment_logs"
-        >
+        <div :key="user.repaid_to_user.trap_id" v-for="user in this.detail.core.repayment_logs">
           <Icon :user="user.repaid_to_user.trap_id" :size="24" />
           {{ user.repaid_to_user.trap_id }}
         </div>
@@ -69,11 +64,7 @@
     <div>
       <div :class="$style.section_title">画像</div>
       <div :class="$style.image_container">
-        <img
-          :key="path"
-          v-for="path in this.detail.core.images"
-          :src="`/api/images/${path}`"
-        />
+        <img :key="path" v-for="path in this.detail.core.images" :src="`/api/images/${path}`" />
       </div>
       <div v-if="this.detail.core.images.length === 0">画像はありません</div>
     </div>
@@ -125,7 +116,9 @@ export default {
   height: fit-content;
   margin: 12px;
   padding: 12px;
-  box-shadow: 0 3px 1px -2px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%),
+  box-shadow:
+    0 3px 1px -2px rgb(0 0 0 / 20%),
+    0 2px 2px 0 rgb(0 0 0 / 14%),
     0 1px 5px 0 rgb(0 0 0 / 12%);
 }
 .header {

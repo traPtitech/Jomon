@@ -5,24 +5,16 @@
         <!-- 絞り込み検索欄 -->
         <v-col cols="12" md="3">
           <v-card width="1200px" class="mx-auto mt-5" color="primary">
-            <v-card-title
-              style="color: white; font-weight: bold; font-size: 1.5em"
-            >
+            <v-card-title style="color: white; font-weight: bold; font-size: 1.5em">
               絞り込み
               <v-btn icon @click="show = !show">
-                <v-icon color="white"
-                  >{{ show ? "mdi-chevron-up" : "mdi-chevron-down" }}
-                </v-icon>
+                <v-icon color="white">{{ show ? "mdi-chevron-up" : "mdi-chevron-down" }} </v-icon>
               </v-btn>
             </v-card-title>
             <v-card-text v-show="show" style="background: white" class="pt-4">
               <v-form>
                 <div>
-                  <v-btn
-                    color="primary"
-                    @click="getApplicationList(params)"
-                    class="ma-1"
-                  >
+                  <v-btn color="primary" @click="getApplicationList(params)" class="ma-1">
                     <v-icon>mdi-reload</v-icon>
                   </v-btn>
                   <v-btn color="primary" @click="resetParams()" class="ma-1">
@@ -30,18 +22,10 @@
                   </v-btn>
                 </div>
                 <div>
-                  <v-btn
-                    outlined
-                    color="primary"
-                    @click="sortCreatedAt()"
-                    class="ma-1"
+                  <v-btn outlined color="primary" @click="sortCreatedAt()" class="ma-1"
                     >日付順
                   </v-btn>
-                  <v-btn
-                    outlined
-                    color="primary"
-                    @click="sortTitle()"
-                    class="ma-1"
+                  <v-btn outlined color="primary" @click="sortTitle()" class="ma-1"
                     >タイトル順
                   </v-btn>
                 </div>
@@ -92,16 +76,12 @@
         <!-- 申請一覧 -->
         <v-col cols="12" md="7">
           <v-card width="1200px" class="mx-auto mt-5" color="primary">
-            <v-card-title
-              style="color: white; font-weight: bold; font-size: 1.5em"
+            <v-card-title style="color: white; font-weight: bold; font-size: 1.5em"
               >申請一覧
             </v-card-title>
             <v-card-text class="pl-0 pr-0 pb-0">
               <v-list>
-                <v-list-item-group
-                  v-if="applicationList.length > 0"
-                  color="primary"
-                >
+                <v-list-item-group v-if="applicationList.length > 0" color="primary">
                   <Application :list="header" class="pb-0 pt-0"></Application>
                   <v-list-item
                     v-for="(list, index) in applicationList"
@@ -169,8 +149,7 @@ export default {
      * 作成日でソート
      */
     sortCreatedAt() {
-      if (this.params.sort === sort.created_at)
-        this.params.sort = sort.inv_created_at;
+      if (this.params.sort === sort.created_at) this.params.sort = sort.inv_created_at;
       else this.params.sort = sort.created_at;
       this.getApplicationList(this.params);
     },
@@ -221,10 +200,7 @@ export default {
         submitted_until: ""
       },
       dayRule: [
-        value =>
-          !value ||
-          /^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/.test(value) ||
-          "Invalid Day."
+        value => !value || /^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/.test(value) || "Invalid Day."
       ],
       yearRule: [value => !value || /^[0-9]{4}$/.test(value) || "Invalid Year."]
     };

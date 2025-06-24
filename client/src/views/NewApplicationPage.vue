@@ -92,9 +92,7 @@
           <v-autocomplete
             ref="traPID"
             v-model="traPID"
-            :rules="[
-              () => !(traPID.length === 0) || '返金対象者は一人以上必要です'
-            ]"
+            :rules="[() => !(traPID.length === 0) || '返金対象者は一人以上必要です']"
             label="返金対象者"
             filled
             :items="traPIDs"
@@ -124,9 +122,7 @@
       </v-card>
 
       <!-- todo focusしていないところのvalidateが機能していない -->
-      <v-btn :disabled="!valid" @click.stop="submit" class="ma-3"
-        >作成する
-      </v-btn>
+      <v-btn :disabled="!valid" @click.stop="submit" class="ma-3">作成する </v-btn>
     </v-form>
     <!-- ここ作成したらokを押しても押さなくても自動遷移 -->
     <v-snackbar v-model="snackbar">
@@ -147,11 +143,7 @@ import axios from "axios";
 import Icon from "./shared/Icon";
 import ImageUploader from "./shared/ImageUploader";
 import { mapActions, mapGetters } from "vuex";
-import {
-  titlePlaceholder,
-  remarksPlaceholder,
-  remarksHint
-} from "@/use/inputFormText";
+import { titlePlaceholder, remarksPlaceholder, remarksHint } from "@/use/inputFormText";
 import { remarksTitle, applicationType } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
 

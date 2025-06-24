@@ -1,12 +1,13 @@
+const { defineConfig } = require("@vue/cli-service");
 const https = require("https");
 
 const keepAliveAgent = new https.Agent({ keepAlive: true });
 
-module.exports = {
+module.exports = defineConfig({
   css: {
     loaderOptions: {
       scss: {
-        additionalData: '@import "src/styles/index.scss";'
+        additionalData: '@import "~@/styles/index.scss";'
       }
     }
   },
@@ -21,4 +22,4 @@ module.exports = {
     }
   },
   productionSourceMap: false
-};
+});

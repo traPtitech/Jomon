@@ -3,9 +3,7 @@
     <v-dialog v-model="dialog" max-width="600px">
       <template v-slot:activator="{ on }">
         <simple-button
-          :label="
-            toStateName(to_state) + (to_state === 'submitted' ? 'に戻す' : '')
-          "
+          :label="toStateName(to_state) + (to_state === 'submitted' ? 'に戻す' : '')"
           :variant="to_state === 'submitted' ? 'warning' : 'error'"
           v-on="on"
         />
@@ -38,11 +36,7 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <simple-button
-              :label="'戻る'"
-              :variant="'secondary'"
-              @click="dialog = false"
-            />
+            <simple-button :label="'戻る'" :variant="'secondary'" @click="dialog = false" />
             <simple-button
               :label="this.toStateName(to_state) + 'にする'"
               :variant="'secondary'"
@@ -109,9 +103,7 @@ export default {
           });
         this.$refs.form.reset();
         this.dialog = false;
-        this.getApplicationDetail(
-          this.$store.state.application_detail_paper.core.application_id
-        );
+        this.getApplicationDetail(this.$store.state.application_detail_paper.core.application_id);
       }
     },
     toStateName: function (to_state) {

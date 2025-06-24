@@ -19,12 +19,7 @@
         height="10"
       ></v-text-field>
     </template>
-    <v-date-picker
-      v-model="date"
-      no-title
-      color="primary"
-      @input="menu = false"
-    ></v-date-picker>
+    <v-date-picker v-model="date" no-title color="primary" @input="menu = false"></v-date-picker>
   </v-menu>
 </template>
 

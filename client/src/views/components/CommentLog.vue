@@ -10,12 +10,7 @@
       <v-btn icon color="success" :disabled="!comment_readonly">
         <v-icon @click="commentChange()">mdi-pencil</v-icon>
       </v-btn>
-      <v-btn
-        icon
-        color="error"
-        :disabled="!comment_readonly"
-        @click="deleteComment()"
-      >
+      <v-btn icon color="error" :disabled="!comment_readonly" @click="deleteComment()">
         <v-icon>mdi-delete</v-icon>
       </v-btn>
     </div>
@@ -38,10 +33,7 @@
       </v-textarea>
 
       <div>
-        <v-btn
-          :class="$style.button"
-          @click="cancelChange"
-          v-if="!comment_readonly"
+        <v-btn :class="$style.button" @click="cancelChange" v-if="!comment_readonly"
           >変更を取消
         </v-btn>
         <v-btn
@@ -53,9 +45,7 @@
         </v-btn>
       </div>
 
-      <span
-        :class="grey_text"
-        v-if="log.content.created_at !== log.content.updated_at"
+      <span :class="grey_text" v-if="log.content.created_at !== log.content.updated_at"
         >編集済</span
       >
     </v-form>
@@ -110,9 +100,7 @@ export default {
         )
         .catch(e => alert(e));
       alert("コメントを削除しました。");
-      this.getApplicationDetail(
-        this.$store.state.application_detail_paper.core.application_id
-      );
+      this.getApplicationDetail(this.$store.state.application_detail_paper.core.application_id);
     },
     async putComment() {
       await axios
@@ -131,9 +119,7 @@ export default {
         });
       alert("コメントを変更しました");
       this.comment_readonly = true;
-      this.getApplicationDetail(
-        this.$store.state.application_detail_paper.core.application_id
-      );
+      this.getApplicationDetail(this.$store.state.application_detail_paper.core.application_id);
     },
     cancelChange() {
       this.comment_readonly = true;

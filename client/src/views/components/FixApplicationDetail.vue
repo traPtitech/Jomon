@@ -54,11 +54,7 @@
               v-on="on"
             ></v-text-field>
           </template>
-          <v-date-picker
-            v-model="paid_at_change"
-            no-title
-            @input="menu = false"
-          ></v-date-picker>
+          <v-date-picker v-model="paid_at_change" no-title @input="menu = false"></v-date-picker>
         </v-menu>
 
         <v-text-field
@@ -73,9 +69,7 @@
         <v-autocomplete
           ref="traPID"
           v-model="repaid_to_id_change"
-          :rules="[
-            () => !(repaid_to_id_change === 0) || '返金対象者は一人以上必要です'
-          ]"
+          :rules="[() => !(repaid_to_id_change === 0) || '返金対象者は一人以上必要です']"
           label="返金対象者"
           filled
           :items="traPIDs"
@@ -101,22 +95,12 @@
             <div :key="path" v-for="(path, index) in this.detail.core.images">
               <div v-if="images_change[index]">
                 <img :src="`/api/images/${path}`" />
-                <v-btn
-                  rounded
-                  color="primary"
-                  name="delete"
-                  @click="deleteImage(index)"
-                >
+                <v-btn rounded color="primary" name="delete" @click="deleteImage(index)">
                   delete
                 </v-btn>
               </div>
               <div v-else>
-                <v-btn
-                  rounded
-                  color="primary"
-                  name="cancel"
-                  @click="cancelDeleteImage(index)"
-                >
+                <v-btn rounded color="primary" name="cancel" @click="cancelDeleteImage(index)">
                   cancel
                 </v-btn>
               </div>
@@ -153,11 +137,7 @@ import ImageUploader from "@/views/shared/ImageUploader";
 import SimpleButton from "@/views/shared/SimpleButton";
 import { mapActions } from "vuex";
 import { mapState, mapMutations } from "vuex";
-import {
-  titlePlaceholder,
-  remarksPlaceholder,
-  remarksHint
-} from "@/use/inputFormText";
+import { titlePlaceholder, remarksPlaceholder, remarksHint } from "@/use/inputFormText";
 import { remarksTitle } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
 
@@ -192,10 +172,7 @@ export default {
       snackbar: false,
       menu: false,
       valid: true,
-      amountRules: [
-        v => !!v || "",
-        v => !!String(v).match("^[1-9][0-9]*$") || "金額が不正です"
-      ],
+      amountRules: [v => !!v || "", v => !!String(v).match("^[1-9][0-9]*$") || "金額が不正です"],
       nullRules: [v => !!v || ""],
       type_change: "",
       title_change: "",
@@ -219,9 +196,7 @@ export default {
     this.images_change = new Array(this.detail.core.images.length);
     this.images_change.fill(true);
     await this.getUsers();
-    const trap_ids = this.detail.core.repayment_logs.map(
-      log => log.repaid_to_user.trap_id
-    );
+    const trap_ids = this.detail.core.repayment_logs.map(log => log.repaid_to_user.trap_id);
     this.repaid_to_id_change = trap_ids;
   },
   mounted() {},
@@ -328,7 +303,9 @@ export default {
   height: fit-content;
   margin: 12px;
   padding: 12px;
-  box-shadow: 0 3px 1px -2px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%),
+  box-shadow:
+    0 3px 1px -2px rgb(0 0 0 / 20%),
+    0 2px 2px 0 rgb(0 0 0 / 14%),
     0 1px 5px 0 rgb(0 0 0 / 12%);
 }
 .header {
