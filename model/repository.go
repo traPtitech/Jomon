@@ -25,13 +25,11 @@ type Repository interface {
 
 type EntRepository struct {
 	client  *ent.Client
-	storage storagePkg.Storage
 }
 
 func NewEntRepository(client *ent.Client, storage storagePkg.Storage) *EntRepository {
 	repo := &EntRepository{
 		client:  client,
-		storage: storage,
 	}
 	return repo
 }
