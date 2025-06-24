@@ -6,14 +6,14 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.17.5
-        uses: actions/setup-go@v1
+      - name: Set up Go 1.21
+        uses: actions/setup-go@v4
         with:
-          go-version: 1.17.5
+          go-version: "1.21"
         id: go
 
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
 
       - name: Check cache
         uses: actions/cache@v4
@@ -35,7 +35,7 @@ jobs:
     needs: [build]
     services:
       mariadb:
-        image: mariadb:10.0.19
+        image: mariadb:10.11
         ports:
           - 50000:3306
         env:
@@ -43,14 +43,14 @@ jobs:
           MYSQL_DATABASE: jomon
 
     steps:
-      - name: Set up Go 1.17.5
-        uses: actions/setup-go@v1
+      - name: Set up Go 1.21
+        uses: actions/setup-go@v4
         with:
-          go-version: 1.17.5
+          go-version: "1.21"
         id: go
 
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
 
       - name: Check cache
         uses: actions/cache@v4
