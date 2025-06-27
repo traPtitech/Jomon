@@ -15,11 +15,13 @@ import (
 	"go.uber.org/zap"
 )
 
-type Group struct {
+type PostGroupRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Budget      *int   `json:"budget"`
 }
+
+type PutGroupRequest = PostGroupRequest
 
 type Owner struct {
 	ID uuid.UUID `json:"id"`
@@ -28,7 +30,7 @@ type Owner struct {
 type OwnerResponse struct {
 	Owners []uuid.UUID `json:"owners"`
 }
-type GroupOverview struct {
+type GroupResponse struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
@@ -37,7 +39,7 @@ type GroupOverview struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-type GroupDetail struct {
+type GroupDetailResponse struct {
 	ID          uuid.UUID    `json:"id"`
 	Name        string       `json:"name"`
 	Description string       `json:"description"`
@@ -69,8 +71,8 @@ func (h Handlers) GetGroups(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := lo.Map(groups, func(group *model.Group, _ int) *GroupOverview {
-		return &GroupOverview{
+	res := lo.Map(groups, func(group *model.Group, _ int) *GroupResponse {
+		return &GroupResponse{
 			ID:          group.ID,
 			Name:        group.Name,
 			Description: group.Description,
@@ -88,7 +90,7 @@ func (h Handlers) PostGroup(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	var group Group
+	var group PostGroupRequest
 	if err := c.Bind(&group); err != nil {
 		logger.Info("failed to get group from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -100,7 +102,7 @@ func (h Handlers) PostGroup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := GroupOverview{
+	res := GroupResponse{
 		ID:          created.ID,
 		Name:        created.Name,
 		Description: created.Description,
@@ -139,7 +141,7 @@ func (h Handlers) GetGroupDetail(c echo.Context) error {
 		logger.Error("failed to get group from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	res := GroupDetail{
+	res := GroupDetailResponse{
 		ID:          group.ID,
 		Name:        group.Name,
 		Description: group.Description,
@@ -187,7 +189,7 @@ func (h Handlers) PutGroup(c echo.Context) error {
 		return err
 	}
 
-	var group Group
+	var group PutGroupRequest
 	if err := c.Bind(&group); err != nil {
 		logger.Info("could not get group from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -201,7 +203,7 @@ func (h Handlers) PutGroup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := GroupOverview{
+	res := GroupResponse{
 		ID:          updated.ID,
 		Name:        updated.Name,
 		Description: updated.Description,

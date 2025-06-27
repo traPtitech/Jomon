@@ -31,7 +31,7 @@ func modelTransactionResponseToTransaction(tx *model.TransactionResponse) *Trans
 		}
 	})
 
-	group := &GroupOverview{
+	group := &GroupResponse{
 		ID:          tx.Group.ID,
 		Name:        tx.Group.Name,
 		Description: tx.Group.Description,

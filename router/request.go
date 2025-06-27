@@ -68,7 +68,7 @@ type RequestResponse struct {
 	Content   string            `json:"content"`
 	Tags      []*TagOverview    `json:"tags"`
 	Targets   []*TargetOverview `json:"targets"`
-	Group     *GroupOverview    `json:"group"`
+	Group     *GroupResponse    `json:"group"`
 }
 
 type RequestDetailResponse struct {
@@ -261,9 +261,9 @@ func (h Handlers) GetRequests(c echo.Context) error {
 				},
 			)
 
-			var resgroup *GroupOverview
+			var resgroup *GroupResponse
 			if request.Group != nil {
-				resgroup = &GroupOverview{
+				resgroup = &GroupResponse{
 					ID:          request.Group.ID,
 					Name:        request.Group.Name,
 					Description: request.Group.Description,
@@ -346,9 +346,9 @@ func (h Handlers) PostRequest(c echo.Context) error {
 		logger.Error("failed to create request in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	var resgroup *GroupOverview
+	var resgroup *GroupResponse
 	if group != nil {
-		resgroup = &GroupOverview{
+		resgroup = &GroupResponse{
 			ID:          request.Group.ID,
 			Name:        request.Group.Name,
 			Description: request.Group.Description,
@@ -457,9 +457,9 @@ func (h Handlers) GetRequest(c echo.Context) error {
 		logger.Error("failed to get comments from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	var resgroup *GroupOverview
+	var resgroup *GroupResponse
 	if request.Group != nil {
-		resgroup = &GroupOverview{
+		resgroup = &GroupResponse{
 			ID:          request.Group.ID,
 			Name:        request.Group.Name,
 			Description: request.Group.Description,
@@ -615,9 +615,9 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	var resgroup *GroupOverview
+	var resgroup *GroupResponse
 	if group != nil {
-		resgroup = &GroupOverview{
+		resgroup = &GroupResponse{
 			ID:          request.Group.ID,
 			Name:        request.Group.Name,
 			Description: request.Group.Description,
