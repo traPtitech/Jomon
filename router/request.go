@@ -66,7 +66,7 @@ type RequestResponse struct {
 	CreatedBy uuid.UUID         `json:"created_by"`
 	Title     string            `json:"title"`
 	Content   string            `json:"content"`
-	Tags      []*TagOverview    `json:"tags"`
+	Tags      []*TagResponse    `json:"tags"`
 	Targets   []*TargetOverview `json:"targets"`
 	Group     *GroupOverview    `json:"group"`
 }
@@ -239,8 +239,8 @@ func (h Handlers) GetRequests(c echo.Context) error {
 	requests := lo.Map(
 		modelrequests,
 		func(request *model.RequestResponse, _ int) *RequestResponse {
-			tags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagOverview {
-				return &TagOverview{
+			tags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagResponse {
+				return &TagResponse{
 					ID:        tag.ID,
 					Name:      tag.Name,
 					CreatedAt: tag.CreatedAt,
@@ -369,8 +369,8 @@ func (h Handlers) PostRequest(c echo.Context) error {
 			}
 		},
 	)
-	restags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagOverview {
-		return &TagOverview{
+	restags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagResponse {
+		return &TagResponse{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
@@ -480,8 +480,8 @@ func (h Handlers) GetRequest(c echo.Context) error {
 			}
 		},
 	)
-	restags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagOverview {
-		return &TagOverview{
+	restags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagResponse {
+		return &TagResponse{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
@@ -626,8 +626,8 @@ func (h Handlers) PutRequest(c echo.Context) error {
 			UpdatedAt:   request.Group.UpdatedAt,
 		}
 	}
-	restags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagOverview {
-		return &TagOverview{
+	restags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagResponse {
+		return &TagResponse{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
