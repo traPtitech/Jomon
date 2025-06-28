@@ -22,7 +22,7 @@ type Transaction struct {
 	Target    string         `json:"target"`
 	Request   *uuid.UUID     `json:"request"`
 	Tags      []*TagOverview `json:"tags"`
-	Group     *GroupOverview `json:"group"`
+	Group     *GroupResponse `json:"group"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 }
@@ -153,9 +153,9 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			}
 		})
 
-		var group *GroupOverview
+		var group *GroupResponse
 		if tx.Group != nil {
-			group = &GroupOverview{
+			group = &GroupResponse{
 				ID:          tx.Group.ID,
 				Name:        tx.Group.Name,
 				Description: tx.Group.Description,
@@ -214,9 +214,9 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 			}
 		})
 
-		var group *GroupOverview
+		var group *GroupResponse
 		if created.Group != nil {
-			group = &GroupOverview{
+			group = &GroupResponse{
 				ID:          created.Group.ID,
 				Name:        created.Group.Name,
 				Description: created.Group.Description,
@@ -267,9 +267,9 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 		}
 	})
 
-	var group *GroupOverview
+	var group *GroupResponse
 	if tx.Group != nil {
-		group = &GroupOverview{
+		group = &GroupResponse{
 			ID:          tx.Group.ID,
 			Name:        tx.Group.Name,
 			Description: tx.Group.Description,
@@ -329,9 +329,9 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 		}
 	})
 
-	var group *GroupOverview
+	var group *GroupResponse
 	if updated.Group != nil {
-		group = &GroupOverview{
+		group = &GroupResponse{
 			ID:          updated.Group.ID,
 			Name:        updated.Group.Name,
 			Description: updated.Group.Description,
