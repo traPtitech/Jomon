@@ -120,7 +120,7 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 	codeChallengeMethod := "S256"
 
 	_, err = wrapsession.WithSession(c, h.SessionName, func(w *wrapsession.W) (struct{}, error) {
-		w.SetReferer(c)
+		w.SetReferer(c.Request().Referer())
 		return struct{}{}, nil
 	})
 	if err != nil {

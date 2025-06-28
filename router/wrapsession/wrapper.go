@@ -83,6 +83,6 @@ func (w *W) GetReferer() (string, bool) {
 	return v, ok
 }
 
-func (w *W) SetReferer(c echo.Context) {
-	w.setValue(codeVerifierKey, c.Request().Referer())
+func (w *W) SetReferer(value string) {
+	w.setValue(refererKey, value)
 }
