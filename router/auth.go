@@ -87,15 +87,12 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		c, h.SessionName, func(w *wrapsession.W) (string, error) {
 			v, ok := w.GetReferer()
 			if !ok {
-				err := echo.NewHTTPError(
-					http.StatusInternalServerError,
-					fmt.Errorf("referer is not found in session"))
-				return "/", err
+				return "", &echo.HTTPError{}
 			}
 			return v, nil
 		})
 	if err != nil {
-		return err
+		return c.Redirect(http.StatusInternalServerError, "/")
 	}
 
 	return c.Redirect(http.StatusSeeOther, location)
