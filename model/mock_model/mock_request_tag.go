@@ -17,6 +17,7 @@ import (
 type MockRequestTagRepository struct {
 	ctrl     *gomock.Controller
 	recorder *MockRequestTagRepositoryMockRecorder
+	isgomock struct{}
 }
 
 // MockRequestTagRepositoryMockRecorder is the mock recorder for MockRequestTagRepository.
