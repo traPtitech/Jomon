@@ -297,12 +297,12 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		owner1 := model.Owner{ID: user1.ID}
 		owner2 := model.Owner{ID: user2.ID}
 		owners := []*model.Owner{&owner1, &owner2}
-		ownerIDs := []*uuid.UUID{&user1.ID, &user2.ID}
+		ownerIDs := []uuid.UUID{user1.ID, user2.ID}
 
 		member1 := model.Member{ID: user3.ID}
 		member2 := model.Member{ID: user4.ID}
 		members := []*model.Member{&member1, &member2}
-		memberIDs := []*uuid.UUID{&member1.ID, &member2.ID}
+		memberIDs := []uuid.UUID{member1.ID, member2.ID}
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/groups/%s", group.ID)
@@ -404,8 +404,8 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 			Name:        group.Name,
 			Description: group.Description,
 			Budget:      group.Budget,
-			Owners:      []*uuid.UUID{},
-			Members:     []*uuid.UUID{},
+			Owners:      []uuid.UUID{},
+			Members:     []uuid.UUID{},
 			CreatedAt:   group.CreatedAt,
 			UpdatedAt:   group.UpdatedAt,
 		}

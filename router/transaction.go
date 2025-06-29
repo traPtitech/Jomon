@@ -20,7 +20,7 @@ type Transaction struct {
 	Title     string         `json:"title"`
 	Amount    int            `json:"amount"`
 	Target    string         `json:"target"`
-	Request   *uuid.UUID     `json:"request"`
+	Request   uuid.UUID      `json:"request"`
 	Tags      []*TagOverview `json:"tags"`
 	Group     *GroupOverview `json:"group"`
 	CreatedAt time.Time      `json:"created_at"`
@@ -28,21 +28,21 @@ type Transaction struct {
 }
 
 type TransactionOverview struct {
-	Title   string       `json:"title"`
-	Amount  int          `json:"amount"`
-	Targets []*string    `json:"targets"`
-	Tags    []*uuid.UUID `json:"tags"`
-	Group   *uuid.UUID   `json:"group"`
-	Request *uuid.UUID   `json:"request"`
+	Title   string      `json:"title"`
+	Amount  int         `json:"amount"`
+	Targets []*string   `json:"targets"`
+	Tags    []uuid.UUID `json:"tags"`
+	Group   uuid.UUID   `json:"group"`
+	Request uuid.UUID   `json:"request"`
 }
 
 type TransactionOverviewWithOneTarget struct {
-	Title   string       `json:"title"`
-	Amount  int          `json:"amount"`
-	Target  string       `json:"target"`
-	Tags    []*uuid.UUID `json:"tags"`
-	Group   *uuid.UUID   `json:"group"`
-	Request *uuid.UUID   `json:"request"`
+	Title   string      `json:"title"`
+	Amount  int         `json:"amount"`
+	Target  string      `json:"target"`
+	Tags    []uuid.UUID `json:"tags"`
+	Group   uuid.UUID   `json:"group"`
+	Request uuid.UUID   `json:"request"`
 }
 
 func (h Handlers) GetTransactions(c echo.Context) error {
@@ -117,7 +117,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		g := c.QueryParam("group")
 		group = &g
 	}
-	var request *uuid.UUID
+	var request uuid.UUID
 	if c.QueryParam("request") != "" {
 		var r uuid.UUID
 		r, err := uuid.Parse(c.QueryParam("request"))
@@ -125,7 +125,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			logger.Info("could not parse request as uuid.UUID", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		request = &r
+		request = r
 	}
 	query := model.TransactionQuery{
 		Sort:    sort,

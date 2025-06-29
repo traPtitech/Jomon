@@ -511,7 +511,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			UpdatedAt: date,
 		}
 		txs := []*model.TransactionResponse{tx1}
-		tags := []*uuid.UUID{&tag.ID}
+		tags := []uuid.UUID{tag.ID}
 		group := tx1.Group.ID
 
 		e := echo.New()
@@ -520,13 +520,13 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Amount  int         `json:"amount"`
 			Targets []string    `json:"targets"`
 			Tags    []uuid.UUID `json:"tags"`
-			Group   *uuid.UUID  `json:"group"`
+			Group   uuid.UUID   `json:"group"`
 		}{
 			Title:   tx1.Title,
 			Amount:  tx1.Amount,
 			Targets: []string{tx1.Target},
 			Tags:    []uuid.UUID{tag.ID},
-			Group:   &group,
+			Group:   group,
 		})
 		require.NoError(t, err)
 		req := httptest.NewRequestWithContext(
@@ -590,7 +590,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		tags := []*uuid.UUID{&tag.ID}
+		tags := []uuid.UUID{tag.ID}
 		group := tx.Group.ID
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
@@ -598,7 +598,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			Comments:  []*model.Comment{},
-			Files:     []*uuid.UUID{},
+			Files:     []uuid.UUID{},
 			Statuses:  []*model.RequestStatus{},
 			Tags:      []*model.Tag{},
 			Group:     nil,
@@ -613,8 +613,8 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Amount:  tx.Amount,
 			Targets: []*string{&tx.Target},
 			Tags:    tags,
-			Group:   &group,
-			Request: &request.ID,
+			Group:   group,
+			Request: request.ID,
 		})
 		require.NoError(t, err)
 		req := httptest.NewRequestWithContext(
@@ -774,8 +774,8 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
-		updatedTags := lo.Map(updated.Tags, func(modelTag *model.Tag, _ int) *uuid.UUID {
-			return &modelTag.ID
+		updatedTags := lo.Map(updated.Tags, func(modelTag *model.Tag, _ int) uuid.UUID {
+			return modelTag.ID
 		})
 
 		e := echo.New()

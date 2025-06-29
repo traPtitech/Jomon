@@ -104,10 +104,10 @@ func (repo *EntRepository) GetTransactions(
 			))
 	}
 
-	if query.Request != nil {
+	if query.Request != uuid.Nil {
 		transactionsq = transactionsq.
 			Where(transaction.HasRequestWith(
-				request.IDEQ(*query.Request),
+				request.IDEQ(query.Request),
 			))
 	}
 
@@ -148,7 +148,7 @@ func (repo *EntRepository) GetTransaction(
 
 func (repo *EntRepository) CreateTransaction(
 	ctx context.Context, title string, amount int, target string,
-	tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID,
+	tags []uuid.UUID, groupID uuid.UUID, requestID uuid.UUID,
 ) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
@@ -162,8 +162,8 @@ func (repo *EntRepository) CreateTransaction(
 	}()
 
 	// Get Tags
-	tagIDs := lo.Map(tags, func(t *uuid.UUID, _ int) uuid.UUID {
-		return *t
+	tagIDs := lo.Map(tags, func(t uuid.UUID, _ int) uuid.UUID {
+		return t
 	})
 
 	// Create Transaction Detail
@@ -175,10 +175,10 @@ func (repo *EntRepository) CreateTransaction(
 
 	// Create GroupBudget
 	var gb *ent.GroupBudget
-	if groupID != nil {
+	if groupID != uuid.Nil {
 		gb, err = tx.Client().GroupBudget.
 			Create().
-			SetGroupID(*groupID).
+			SetGroupID(groupID).
 			SetAmount(amount).
 			Save(ctx)
 		if err != nil {
@@ -198,9 +198,9 @@ func (repo *EntRepository) CreateTransaction(
 	}
 
 	// Set Request to the Transaction
-	if requestID != nil {
+	if requestID != uuid.Nil {
 		query.
-			SetRequestID(*requestID)
+			SetRequestID(requestID)
 	}
 
 	// Create transaction
@@ -249,7 +249,7 @@ func (repo *EntRepository) CreateTransaction(
 
 func (repo *EntRepository) UpdateTransaction(
 	ctx context.Context, transactionID uuid.UUID, title string, amount int, target string,
-	tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID,
+	tags []uuid.UUID, groupID uuid.UUID, requestID uuid.UUID,
 ) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
@@ -270,8 +270,8 @@ func (repo *EntRepository) UpdateTransaction(
 	}
 
 	// Get Tags
-	tagIDs := lo.Map(tags, func(t *uuid.UUID, _ int) uuid.UUID {
-		return *t
+	tagIDs := lo.Map(tags, func(t uuid.UUID, _ int) uuid.UUID {
+		return t
 	})
 
 	// Delete Tag Transaction Edge
@@ -287,7 +287,7 @@ func (repo *EntRepository) UpdateTransaction(
 		return nil, err
 	}
 
-	if groupID != nil {
+	if groupID != uuid.Nil {
 		// Delete GroupBudget
 		_, err = tx.Client().GroupBudget.
 			Delete().
@@ -302,7 +302,7 @@ func (repo *EntRepository) UpdateTransaction(
 		// Create GroupBudget
 		_, err = tx.Client().GroupBudget.
 			Create().
-			SetGroupID(*groupID).
+			SetGroupID(groupID).
 			SetAmount(amount).
 			AddTransactionIDs(transactionID).
 			Save(ctx)
@@ -324,10 +324,10 @@ func (repo *EntRepository) UpdateTransaction(
 	}
 
 	// Update Request to the Transaction
-	if requestID != nil {
+	if requestID != uuid.Nil {
 		_, err = tx.Client().Transaction.
 			UpdateOneID(transactionID).
-			SetRequestID(*requestID).
+			SetRequestID(requestID).
 			Save(ctx)
 		if err != nil {
 			err = RollbackWithError(tx, err)
@@ -386,9 +386,9 @@ func ConvertEntTransactionToModelTransactionResponse(
 	if transaction.Edges.GroupBudget != nil {
 		g = ConvertEntGroupToModelGroup(transaction.Edges.GroupBudget.Edges.Group)
 	}
-	var r *uuid.UUID
+	var r uuid.UUID
 	if transaction.Edges.Request != nil {
-		r = &transaction.Edges.Request.ID
+		r = transaction.Edges.Request.ID
 	}
 	return &TransactionResponse{
 		ID:        transaction.ID,

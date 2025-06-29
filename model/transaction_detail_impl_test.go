@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
@@ -72,7 +73,7 @@ func TestEntRepository_updateTransactionDetail(t *testing.T) {
 		target := "hoge"
 
 		// Create Transaction
-		trns, err := repo.CreateTransaction(ctx, title, amount, target, nil, nil, nil)
+		trns, err := repo.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, uuid.Nil)
 		require.NoError(t, err)
 
 		// Update TransactionDetail

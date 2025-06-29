@@ -38,14 +38,14 @@ type GroupOverview struct {
 }
 
 type GroupDetail struct {
-	ID          uuid.UUID    `json:"id"`
-	Name        string       `json:"name"`
-	Description string       `json:"description"`
-	Budget      *int         `json:"budget"`
-	Owners      []*uuid.UUID `json:"owners"`
-	Members     []*uuid.UUID `json:"members"`
-	CreatedAt   time.Time    `json:"created_at"`
-	UpdatedAt   time.Time    `json:"updated_at"`
+	ID          uuid.UUID   `json:"id"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Budget      *int        `json:"budget"`
+	Owners      []uuid.UUID `json:"owners"`
+	Members     []uuid.UUID `json:"members"`
+	CreatedAt   time.Time   `json:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at"`
 }
 
 type MemberResponse struct {
@@ -143,8 +143,8 @@ func (h Handlers) GetGroupDetail(c echo.Context) error {
 		ID:          group.ID,
 		Name:        group.Name,
 		Description: group.Description,
-		Owners:      []*uuid.UUID{},
-		Members:     []*uuid.UUID{},
+		Owners:      []uuid.UUID{},
+		Members:     []uuid.UUID{},
 		Budget:      group.Budget,
 		CreatedAt:   group.CreatedAt,
 		UpdatedAt:   group.UpdatedAt,
@@ -154,16 +154,16 @@ func (h Handlers) GetGroupDetail(c echo.Context) error {
 		logger.Error("failed to get owners from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	res.Owners = lo.Map(owners, func(owner *model.Owner, _ int) *uuid.UUID {
-		return &owner.ID
+	res.Owners = lo.Map(owners, func(owner *model.Owner, _ int) uuid.UUID {
+		return owner.ID
 	})
 	members, err := h.Repository.GetMembers(ctx, groupID)
 	if err != nil {
 		logger.Error("failed to get members from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	res.Members = lo.Map(members, func(member *model.Member, indec int) *uuid.UUID {
-		return &member.ID
+	res.Members = lo.Map(members, func(member *model.Member, indec int) uuid.UUID {
+		return member.ID
 	})
 
 	return c.JSON(http.StatusOK, res)
@@ -269,8 +269,8 @@ func (h Handlers) PostMember(c echo.Context) error {
 		logger.Error("failed to add member in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	res := lo.Map(added, func(m *model.Member, _ int) *uuid.UUID {
-		return &m.ID
+	res := lo.Map(added, func(m *model.Member, _ int) uuid.UUID {
+		return m.ID
 	})
 	return c.JSON(http.StatusOK, res)
 }

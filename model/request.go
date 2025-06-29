@@ -48,7 +48,7 @@ type RequestDetail struct {
 	Title     string
 	Content   string
 	Comments  []*Comment
-	Files     []*uuid.UUID
+	Files     []uuid.UUID
 	Statuses  []*RequestStatus
 	Tags      []*Tag
 	Targets   []*RequestTargetDetail
@@ -60,7 +60,7 @@ type RequestDetail struct {
 
 type RequestQuery struct {
 	Sort      *string
-	Target    *uuid.UUID
+	Target    uuid.UUID
 	Status    *string
 	Since     *time.Time
 	Until     *time.Time
@@ -68,5 +68,5 @@ type RequestQuery struct {
 	Offset    int
 	Tag       *string
 	Group     *string
-	CreatedBy *uuid.UUID
+	CreatedBy uuid.UUID
 }
