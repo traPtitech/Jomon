@@ -3,7 +3,7 @@ module github.com/traPtitech/Jomon
 go 1.24.2
 
 require (
-	ariga.io/atlas v0.34.0
+	ariga.io/atlas v0.35.0
 	entgo.io/ent v0.14.4
 	github.com/aws/aws-sdk-go-v2 v1.36.4
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.79
@@ -56,7 +56,7 @@ require (
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.38.0 // indirect
-	golang.org/x/mod v0.23.0 // indirect
+	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/net v0.40.0 // indirect
 	golang.org/x/sync v0.14.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
