@@ -13,12 +13,12 @@ import (
 
 func TestEntRepository_GetTags(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "get_tags")
+	client, _, err := setup(t, ctx, "get_tags")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx, "get_tags2")
+	repo := NewEntRepository(client)
+	client2, _, err := setup(t, ctx, "get_tags2")
 	require.NoError(t, err)
-	repo2 := NewEntRepository(client2, storage2)
+	repo2 := NewEntRepository(client2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -46,9 +46,9 @@ func TestEntRepository_GetTags(t *testing.T) {
 
 func TestEntRepository_CreateTag(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "create_tag")
+	client, _, err := setup(t, ctx, "create_tag")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -79,9 +79,9 @@ func TestEntRepository_CreateTag(t *testing.T) {
 
 func TestEntRepository_UpdateTag(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "update_tag")
+	client, _, err := setup(t, ctx, "update_tag")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success1", func(t *testing.T) {
 		t.Parallel()
@@ -130,9 +130,9 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 
 func TestEntRepository_DeleteTag(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "delete_tag")
+	client, _, err := setup(t, ctx, "delete_tag")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()

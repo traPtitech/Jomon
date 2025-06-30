@@ -13,12 +13,12 @@ import (
 
 func TestEntRepository_GetUsers(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "get_user")
+	client, _, err := setup(t, ctx, "get_user")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx, "get_user2")
+	repo := NewEntRepository(client)
+	client2, _, err := setup(t, ctx, "get_user2")
 	require.NoError(t, err)
-	repo2 := NewEntRepository(client2, storage2)
+	repo2 := NewEntRepository(client2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -53,9 +53,9 @@ func TestEntRepository_GetUsers(t *testing.T) {
 
 func TestEntRepository_CreateUser(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "create_user")
+	client, _, err := setup(t, ctx, "create_user")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -95,12 +95,12 @@ func TestEntRepository_CreateUser(t *testing.T) {
 
 func TestEntRepository_GetUserByName(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "get_user_by_name")
+	client, _, err := setup(t, ctx, "get_user_by_name")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx, "get_user_by_name2")
+	repo := NewEntRepository(client)
+	client2, _, err := setup(t, ctx, "get_user_by_name2")
 	require.NoError(t, err)
-	repo2 := NewEntRepository(client2, storage2)
+	repo2 := NewEntRepository(client2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -128,12 +128,12 @@ func TestEntRepository_GetUserByName(t *testing.T) {
 
 func TestEntRepository_GetUserByID(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "get_user_by_id")
+	client, _, err := setup(t, ctx, "get_user_by_id")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx, "get_user_by_id2")
+	repo := NewEntRepository(client)
+	client2, _, err := setup(t, ctx, "get_user_by_id2")
 	require.NoError(t, err)
-	repo2 := NewEntRepository(client2, storage2)
+	repo2 := NewEntRepository(client2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -161,9 +161,9 @@ func TestEntRepository_GetUserByID(t *testing.T) {
 
 func TestEntRepository_UpdateUser(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "update_user")
+	client, _, err := setup(t, ctx, "update_user")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()

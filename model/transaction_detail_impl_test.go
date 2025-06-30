@@ -12,9 +12,9 @@ import (
 
 func TestEntRepository_createTransactionDetail(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "create_transaction_detail")
+	client, _, err := setup(t, ctx, "create_transaction_detail")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -51,9 +51,9 @@ func TestEntRepository_createTransactionDetail(t *testing.T) {
 
 func TestEntRepository_updateTransactionDetail(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "update_transaction_detail")
+	client, _, err := setup(t, ctx, "update_transaction_detail")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()

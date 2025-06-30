@@ -13,12 +13,12 @@ import (
 
 func TestEntRepository_GetComments(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "get_comments")
+	client, _, err := setup(t, ctx, "get_comments")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx, "get_comments2")
+	repo := NewEntRepository(client)
+	client2, _, err := setup(t, ctx, "get_comments2")
 	require.NoError(t, err)
-	repo2 := NewEntRepository(client2, storage2)
+	repo2 := NewEntRepository(client2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -82,9 +82,9 @@ func TestEntRepository_GetComments(t *testing.T) {
 
 func TestEntRepository_CreateComment(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "create_comment")
+	client, _, err := setup(t, ctx, "create_comment")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -158,9 +158,9 @@ func TestEntRepository_CreateComment(t *testing.T) {
 
 func TestEntRepository_UpdateComment(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "update_comment")
+	client, _, err := setup(t, ctx, "update_comment")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -284,9 +284,9 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 
 func TestEntRepository_DeleteComment(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "delete_comment")
+	client, _, err := setup(t, ctx, "delete_comment")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()

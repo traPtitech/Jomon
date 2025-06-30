@@ -41,7 +41,7 @@ func main() {
 		}
 	}
 	// Setup repository
-	repo := model.NewEntRepository(client, strg)
+	repo := model.NewEntRepository(client)
 	migrateOptions := []model.MigrateOption{}
 	if migrationsDir := os.Getenv("MIGRATIONS_DIR"); migrationsDir != "" {
 		migrateOptions = append(migrateOptions, model.MigrationsDir(migrationsDir))
