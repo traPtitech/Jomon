@@ -65,12 +65,12 @@ func TestHandlers_GetGroups(t *testing.T) {
 
 		require.NoError(t, h.Handlers.GetGroups(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*GroupOverview
+		var got []*GroupResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := lo.Map(groups, func(group *model.Group, _ int) *GroupOverview {
-			return &GroupOverview{
+		exp := lo.Map(groups, func(group *model.Group, _ int) *GroupResponse {
+			return &GroupResponse{
 				ID:          group.ID,
 				Name:        group.Name,
 				Description: group.Description,
@@ -104,11 +104,11 @@ func TestHandlers_GetGroups(t *testing.T) {
 
 		require.NoError(t, h.Handlers.GetGroups(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*GroupOverview
+		var got []*GroupResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := []*GroupOverview{}
+		exp := []*GroupResponse{}
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
@@ -188,11 +188,11 @@ func TestHandlers_PostGroup(t *testing.T) {
 
 		require.NoError(t, h.Handlers.PostGroup(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got GroupOverview
+		var got GroupResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := &GroupOverview{
+		exp := &GroupResponse{
 			ID:          group.ID,
 			Name:        group.Name,
 			Description: group.Description,
@@ -333,11 +333,11 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		err = h.Handlers.GetGroupDetail(c)
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got GroupDetail
+		var got GroupDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := &GroupDetail{
+		exp := &GroupDetailResponse{
 			ID:          group.ID,
 			Name:        group.Name,
 			Description: group.Description,
@@ -395,11 +395,11 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		err = h.Handlers.GetGroupDetail(c)
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got GroupDetail
+		var got GroupDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := &GroupDetail{
+		exp := &GroupDetailResponse{
 			ID:          group.ID,
 			Name:        group.Name,
 			Description: group.Description,
@@ -712,11 +712,11 @@ func TestHandlers_PutGroup(t *testing.T) {
 			Return(updated, nil)
 		require.NoError(t, h.Handlers.PutGroup(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got GroupOverview
+		var got GroupResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := &GroupOverview{
+		exp := &GroupResponse{
 			ID:          updated.ID,
 			Name:        updated.Name,
 			Description: updated.Description,

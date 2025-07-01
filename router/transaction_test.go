@@ -31,7 +31,7 @@ func modelTransactionResponseToTransaction(tx *model.TransactionResponse) *Trans
 		}
 	})
 
-	group := &GroupOverview{
+	group := &GroupResponse{
 		ID:          tx.Group.ID,
 		Name:        tx.Group.Name,
 		Description: tx.Group.Description,
@@ -39,7 +39,7 @@ func modelTransactionResponseToTransaction(tx *model.TransactionResponse) *Trans
 		CreatedAt:   tx.Group.CreatedAt,
 		UpdatedAt:   tx.Group.UpdatedAt,
 	}
-	return &Transaction{
+	return &TransactionResponse{
 		ID:        tx.ID,
 		Title:     tx.Title,
 		Amount:    tx.Amount,
@@ -131,11 +131,11 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 		require.NoError(t, h.Handlers.GetTransactions(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*Transaction
+		var got []*TransactionResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionResponse {
 			return modelTransactionResponseToTransaction(tx)
 		})
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -217,11 +217,11 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 		require.NoError(t, h.Handlers.GetTransactions(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*Transaction
+		var got []*TransactionResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionResponse {
 			return modelTransactionResponseToTransaction(tx)
 		})
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -304,11 +304,11 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 		require.NoError(t, h.Handlers.GetTransactions(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*Transaction
+		var got []*TransactionResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionResponse {
 			return modelTransactionResponseToTransaction(tx)
 		})
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -391,11 +391,11 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 		require.NoError(t, h.Handlers.GetTransactions(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*Transaction
+		var got []*TransactionResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionResponse {
 			return modelTransactionResponseToTransaction(tx)
 		})
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -461,11 +461,11 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 		require.NoError(t, h.Handlers.GetTransactions(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*Transaction
+		var got []*TransactionResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionResponse {
 			return modelTransactionResponseToTransaction(tx)
 		})
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -547,11 +547,11 @@ func TestHandlers_PostTransaction(t *testing.T) {
 
 		require.NoError(t, h.Handlers.PostTransaction(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*Transaction
+		var got []*TransactionResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+		exp := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionResponse {
 			return modelTransactionResponseToTransaction(tx)
 		})
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -608,7 +608,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		}
 
 		e := echo.New()
-		reqBody, err := json.Marshal(&TransactionOverview{
+		reqBody, err := json.Marshal(&PostTransactionsRequest{
 			Title:   tx.Title,
 			Amount:  tx.Amount,
 			Targets: []*string{&tx.Target},
@@ -636,13 +636,13 @@ func TestHandlers_PostTransaction(t *testing.T) {
 
 		require.NoError(t, h.Handlers.PostTransaction(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*Transaction
+		var got []*TransactionResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := lo.Map(
 			[]*model.TransactionResponse{tx},
-			func(tx *model.TransactionResponse, _ int) *Transaction {
+			func(tx *model.TransactionResponse, _ int) *TransactionResponse {
 				return modelTransactionResponseToTransaction(tx)
 			})
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -706,7 +706,7 @@ func TestHandlers_GetTransaction(t *testing.T) {
 
 		require.NoError(t, h.Handlers.GetTransaction(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got *Transaction
+		var got *TransactionResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
@@ -811,7 +811,7 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			Return(updated, nil)
 		require.NoError(t, h.Handlers.PutTransaction(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got *Transaction
+		var got *TransactionResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()

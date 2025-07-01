@@ -15,19 +15,19 @@ import (
 	"go.uber.org/zap"
 )
 
-type Transaction struct {
+type TransactionResponse struct {
 	ID        uuid.UUID      `json:"id"`
 	Title     string         `json:"title"`
 	Amount    int            `json:"amount"`
 	Target    string         `json:"target"`
 	Request   *uuid.UUID     `json:"request"`
 	Tags      []*TagResponse `json:"tags"`
-	Group     *GroupOverview `json:"group"`
+	Group     *GroupResponse `json:"group"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 }
 
-type TransactionOverview struct {
+type PostTransactionsRequest struct {
 	Title   string       `json:"title"`
 	Amount  int          `json:"amount"`
 	Targets []*string    `json:"targets"`
@@ -36,7 +36,7 @@ type TransactionOverview struct {
 	Request *uuid.UUID   `json:"request"`
 }
 
-type TransactionOverviewWithOneTarget struct {
+type PutTransactionRequest struct {
 	Title   string       `json:"title"`
 	Amount  int          `json:"amount"`
 	Target  string       `json:"target"`
@@ -153,9 +153,9 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			}
 		})
 
-		var group *GroupOverview
+		var group *GroupResponse
 		if tx.Group != nil {
-			group = &GroupOverview{
+			group = &GroupResponse{
 				ID:          tx.Group.ID,
 				Name:        tx.Group.Name,
 				Description: tx.Group.Description,
@@ -164,7 +164,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 				UpdatedAt:   tx.Group.UpdatedAt,
 			}
 		}
-		return &Transaction{
+		return &TransactionResponse{
 			ID:        tx.ID,
 			Title:     tx.Title,
 			Amount:    tx.Amount,
@@ -184,14 +184,14 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	var tx *TransactionOverview
+	var tx *PostTransactionsRequest
 	// TODO: validate
 	if err := c.Bind(&tx); err != nil {
 		logger.Info("could not get transaction overview from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	transactions := []*Transaction{}
+	transactions := []*TransactionResponse{}
 	for _, target := range tx.Targets {
 		if target == nil {
 			logger.Info("target is nil")
@@ -214,9 +214,9 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 			}
 		})
 
-		var group *GroupOverview
+		var group *GroupResponse
 		if created.Group != nil {
-			group = &GroupOverview{
+			group = &GroupResponse{
 				ID:          created.Group.ID,
 				Name:        created.Group.Name,
 				Description: created.Group.Description,
@@ -225,7 +225,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 				UpdatedAt:   created.Group.UpdatedAt,
 			}
 		}
-		res := Transaction{
+		res := TransactionResponse{
 			ID:        created.ID,
 			Title:     created.Title,
 			Amount:    created.Amount,
@@ -267,9 +267,9 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 		}
 	})
 
-	var group *GroupOverview
+	var group *GroupResponse
 	if tx.Group != nil {
-		group = &GroupOverview{
+		group = &GroupResponse{
 			ID:          tx.Group.ID,
 			Name:        tx.Group.Name,
 			Description: tx.Group.Description,
@@ -278,7 +278,7 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 			UpdatedAt:   tx.Group.UpdatedAt,
 		}
 	}
-	res := Transaction{
+	res := TransactionResponse{
 		ID:        tx.ID,
 		Title:     tx.Title,
 		Amount:    tx.Amount,
@@ -303,7 +303,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	var tx *TransactionOverviewWithOneTarget
+	var tx *PutTransactionRequest
 	// TODO: validate
 	if err := c.Bind(&tx); err != nil {
 		logger.Info(
@@ -329,9 +329,9 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 		}
 	})
 
-	var group *GroupOverview
+	var group *GroupResponse
 	if updated.Group != nil {
-		group = &GroupOverview{
+		group = &GroupResponse{
 			ID:          updated.Group.ID,
 			Name:        updated.Group.Name,
 			Description: updated.Group.Description,
@@ -340,7 +340,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 			UpdatedAt:   updated.Group.UpdatedAt,
 		}
 	}
-	res := Transaction{
+	res := TransactionResponse{
 		ID:        updated.ID,
 		Title:     updated.Title,
 		Amount:    updated.Amount,

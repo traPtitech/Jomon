@@ -66,4 +66,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-tool entgo.io/ent/cmd/ent
+tool (
+	entgo.io/ent/cmd/ent
+	go.uber.org/mock/mockgen
+)
