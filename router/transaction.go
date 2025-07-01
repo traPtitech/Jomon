@@ -143,7 +143,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *Transaction {
+	res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionResponse {
 		tags := lo.Map(tx.Tags, func(tag *model.Tag, _ int) *TagResponse {
 			return &TagResponse{
 				ID:        tag.ID,
