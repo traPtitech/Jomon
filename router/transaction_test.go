@@ -613,8 +613,8 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Amount:  tx.Amount,
 			Targets: []*string{&tx.Target},
 			Tags:    tags,
-			Group:   group,
-			Request: request.ID,
+			Group:   uuid.NullUUID{UUID:group,Valid: true},
+			Request: uuid.NullUUID{UUID:request.ID,Valid: true},
 		})
 		require.NoError(t, err)
 		req := httptest.NewRequestWithContext(

@@ -8,6 +8,7 @@ import (
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
+	"github.com/traPtitech/Jomon/service"
 )
 
 func (repo *EntRepository) GetRequestTargets(
@@ -86,7 +87,7 @@ func ConvertEntRequestTargetToModelRequestTargetDetail(t *ent.RequestTarget) *Re
 		ID:        t.ID,
 		Target:    t.Edges.User.ID,
 		Amount:    t.Amount,
-		PaidAt:    t.PaidAt,
+		PaidAt:    service.NullTimeToTime(t.PaidAt),
 		CreatedAt: t.CreatedAt,
 	}
 }

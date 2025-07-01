@@ -776,7 +776,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
 			Content:   request.Content,
-			Group:     group.ID,
+			Group:     uuid.NullUUID{UUID:group.ID,Valid: true},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -962,7 +962,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
 			Content:   request.Content,
-			Group:     unknownGroupID,
+			Group:     uuid.NullUUID{UUID:unknownGroupID,Valid: true},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -1371,7 +1371,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
-			Group:   uuid.Nil,
+			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -1485,7 +1485,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{tag1.ID, tag2.ID},
 			Targets: []*Target{},
-			Group:   uuid.Nil,
+			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -1611,7 +1611,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 				{Target: target1.Target, Amount: target1.Amount},
 				{Target: target2.Target, Amount: target2.Amount},
 			},
-			Group: uuid.Nil,
+			Group: uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -1721,7 +1721,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
-			Group:   group.ID,
+			Group:   uuid.NullUUID{UUID:group.ID,Valid: true},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -1825,7 +1825,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
-			Group:   uuid.Nil,
+			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -1974,7 +1974,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
-			Group:   uuid.Nil,
+			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -2045,7 +2045,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{tag.ID},
 			Targets: []*Target{},
-			Group:   uuid.Nil,
+			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -2123,7 +2123,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
-			Group:   group.ID,
+			Group:   uuid.NullUUID{UUID:group.ID,Valid: true},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)

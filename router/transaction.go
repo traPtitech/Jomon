@@ -169,7 +169,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			Title:     tx.Title,
 			Amount:    tx.Amount,
 			Target:    tx.Target,
-			Request:   tx.Request,
+			Request:   uuid.NullUUID{UUID:tx.Request,Valid: true},
 			Tags:      tags,
 			Group:     group,
 			CreatedAt: tx.CreatedAt,
@@ -199,7 +199,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 		}
 		created, err := h.Repository.CreateTransaction(
 			ctx,
-			tx.Title, tx.Amount, *target, tx.Tags, tx.Group, tx.Request)
+			tx.Title, tx.Amount, *target, tx.Tags, tx.Group.UUID, tx.Request.UUID)
 		if err != nil {
 			logger.Error("failed to create transaction in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -230,7 +230,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 			Title:     created.Title,
 			Amount:    created.Amount,
 			Target:    created.Target,
-			Request:   created.Request,
+			Request:   uuid.NullUUID{UUID:created.Request,Valid: true},
 			Tags:      tags,
 			Group:     group,
 			CreatedAt: created.CreatedAt,
@@ -283,7 +283,7 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 		Title:     tx.Title,
 		Amount:    tx.Amount,
 		Target:    tx.Target,
-		Request:   tx.Request,
+		Request:   uuid.NullUUID{UUID:tx.Request,Valid: true},
 		Tags:      tags,
 		Group:     group,
 		CreatedAt: tx.CreatedAt,
@@ -314,7 +314,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 
 	updated, err := h.Repository.UpdateTransaction(
 		ctx,
-		txID, tx.Title, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
+		txID, tx.Title, tx.Amount, tx.Target, tx.Tags, tx.Group.UUID, tx.Request.UUID)
 	if err != nil {
 		logger.Error("failed to update transaction in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -345,7 +345,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 		Title:     updated.Title,
 		Amount:    updated.Amount,
 		Target:    updated.Target,
-		Request:   updated.Request,
+		Request:   uuid.NullUUID{UUID:updated.Request,Valid: true},
 		Tags:      tags,
 		Group:     group,
 		CreatedAt: updated.CreatedAt,

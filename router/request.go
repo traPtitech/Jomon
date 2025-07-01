@@ -320,13 +320,13 @@ func (h Handlers) PostRequest(c echo.Context) error {
 		}
 	})
 	var group *model.Group
-	if req.Group != uuid.Nil {
-		group, err = h.Repository.GetGroup(ctx, req.Group)
+	if req.Group.Valid {
+		group, err = h.Repository.GetGroup(ctx, req.Group.UUID)
 		if err != nil {
 			if ent.IsNotFound(err) {
 				logger.Info(
 					"could not find group in repository",
-					zap.String("ID", req.Group.String()))
+					zap.String("ID", req.Group.UUID.String()))
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
 			logger.Error("failed to get group from repository", zap.Error(err))
@@ -581,13 +581,13 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		}
 	})
 	var group *model.Group
-	if req.Group != uuid.Nil {
-		group, err = h.Repository.GetGroup(ctx, req.Group)
+	if req.Group.Valid {
+		group, err = h.Repository.GetGroup(ctx, req.Group.UUID)
 		if err != nil {
 			if ent.IsNotFound(err) {
 				logger.Info(
 					"could not find group in repository",
-					zap.String("ID", req.Group.String()))
+					zap.String("ID", req.Group.UUID.String()))
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
 			logger.Error("failed to get group from repository", zap.Error(err))

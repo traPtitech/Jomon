@@ -8,6 +8,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/tag"
+	"github.com/traPtitech/Jomon/service"
 )
 
 func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
@@ -73,6 +74,6 @@ func ConvertEntTagToModelTag(enttag *ent.Tag) *Tag {
 		Name:      enttag.Name,
 		CreatedAt: enttag.CreatedAt,
 		UpdatedAt: enttag.UpdatedAt,
-		DeletedAt: enttag.DeletedAt,
+		DeletedAt: service.NullTimeToTime(enttag.DeletedAt),
 	}
 }

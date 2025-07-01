@@ -8,6 +8,7 @@ import (
 	"github.com/traPtitech/Jomon/ent"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/user"
+	"github.com/traPtitech/Jomon/service"
 )
 
 func (repo *EntRepository) GetGroups(ctx context.Context) ([]*Group, error) {
@@ -186,6 +187,6 @@ func ConvertEntGroupToModelGroup(entgroup *ent.Group) *Group {
 		Budget:      entgroup.Budget,
 		CreatedAt:   entgroup.CreatedAt,
 		UpdatedAt:   entgroup.UpdatedAt,
-		DeletedAt:   entgroup.DeletedAt,
+		DeletedAt:   service.NullTimeToTime(entgroup.DeletedAt),
 	}
 }
