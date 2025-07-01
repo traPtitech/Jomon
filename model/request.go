@@ -62,8 +62,8 @@ type RequestQuery struct {
 	Sort      *string
 	Target    uuid.UUID
 	Status    *string
-	Since     *time.Time
-	Until     *time.Time
+	Since     time.Time
+	Until     time.Time
 	Limit     int
 	Offset    int
 	Tag       *string

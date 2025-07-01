@@ -76,14 +76,14 @@ func (repo *EntRepository) GetTransactions(
 		))
 	}
 
-	if query.Since != nil {
+	if !(query.Since).IsZero() {
 		transactionsq = transactionsq.
-			Where(transaction.CreatedAtGTE(*query.Since))
+			Where(transaction.CreatedAtGTE(query.Since))
 	}
 
-	if query.Until != nil {
+	if !(query.Until).IsZero(){
 		transactionsq = transactionsq.
-			Where(transaction.CreatedAtLT(*query.Until))
+			Where(transaction.CreatedAtLT(query.Until))
 	}
 
 	transactionsq = transactionsq.Limit(query.Limit).Offset(query.Offset)

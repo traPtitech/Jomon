@@ -444,7 +444,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 		since := request1.CreatedAt.Add(10 * time.Millisecond)
 		got, err := repo6.GetRequests(ctx, RequestQuery{
-			Since: &since,
+			Since: since,
 		})
 		require.NoError(t, err)
 		require.Len(t, got, 1)
@@ -505,7 +505,7 @@ func TestEntRepository_GetRequests(t *testing.T) {
 
 		until := request2.CreatedAt.Add(-1 * time.Second)
 		got, err := repo7.GetRequests(ctx, RequestQuery{
-			Until: &until,
+			Until: until,
 		})
 		require.NoError(t, err)
 		require.Len(t, got, 1)

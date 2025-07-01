@@ -47,7 +47,7 @@ type Request struct {
 	Content   string      `json:"content"`
 	Tags      []uuid.UUID `json:"tags"`
 	Targets   []*Target   `json:"targets"`
-	Group     uuid.UUID   `json:"group"`
+	Group     uuid.NullUUID   `json:"group"`
 }
 
 type PutRequest struct {
@@ -55,7 +55,7 @@ type PutRequest struct {
 	Content string      `json:"content"`
 	Tags    []uuid.UUID `json:"tags"`
 	Targets []*Target   `json:"targets"`
-	Group   uuid.UUID   `json:"group"`
+	Group   uuid.NullUUID   `json:"group"`
 }
 
 type RequestResponse struct {
@@ -113,11 +113,11 @@ type Target struct {
 }
 
 type TargetOverview struct {
-	ID        uuid.UUID  `json:"id"`
-	Target    uuid.UUID  `json:"target"`
-	Amount    int        `json:"amount"`
-	PaidAt    *time.Time `json:"paid_at"`
-	CreatedAt time.Time  `json:"created_at"`
+	ID        uuid.UUID `json:"id"`
+	Target    uuid.UUID `json:"target"`
+	Amount    int       `json:"amount"`
+	PaidAt    time.Time `json:"paid_at"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (h Handlers) GetRequests(c echo.Context) error {
@@ -148,23 +148,23 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		}
 		target = t
 	}
-	var since *time.Time
+	var since time.Time
 	if c.QueryParam("since") != "" {
 		s, err := service.StrToDate(c.QueryParam("since"))
 		if err != nil {
 			logger.Info("could not parse query parameter `since` as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		since = &s
+		since = s
 	}
-	var until *time.Time
+	var until time.Time
 	if c.QueryParam("until") != "" {
 		u, err := service.StrToDate(c.QueryParam("until"))
 		if err != nil {
 			logger.Info("could not parse query parameter `until` as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		until = &u
+		until = u
 	}
 	limit := 100
 	if limitQuery := c.QueryParam("limit"); limitQuery != "" {
@@ -399,12 +399,7 @@ func (h Handlers) PostRequest(c echo.Context) error {
 			}
 		},
 	)
-	files := lo.Map(
-		request.Files,
-		func(file uuid.UUID, _ int) uuid.UUID {
-			return file
-		},
-	)
+	files := request.Files
 
 	res := &RequestDetailResponse{
 		RequestResponse: RequestResponse{
@@ -508,9 +503,7 @@ func (h Handlers) GetRequest(c echo.Context) error {
 			}
 		},
 	)
-	files := lo.Map(request.Files, func(file uuid.UUID, _ int) uuid.UUID {
-		return file
-	})
+	files := request.Files
 
 	res := &RequestDetailResponse{
 		RequestResponse: RequestResponse{
@@ -667,9 +660,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 			}
 		},
 	)
-	files := lo.Map(request.Files, func(file uuid.UUID, _ int) uuid.UUID {
-		return file
-	})
+	files := request.Files
 
 	res := &RequestDetailResponse{
 		RequestResponse: RequestResponse{
@@ -797,7 +788,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 			paid := lo.Reduce(targets, func(p bool, target *model.RequestTargetDetail, _ int) bool {
-				return p || target.PaidAt != nil
+				return p || target.PaidAt != time.Time{}
 			}, false)
 			if paid {
 				logger.Info("someone already paid")

@@ -15,7 +15,7 @@ type User struct {
 	Admin       bool
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	DeletedAt   *time.Time
+	DeletedAt   time.Time
 }
 
 type UserRepository interface {

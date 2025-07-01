@@ -41,8 +41,8 @@ type TransactionResponse struct {
 type TransactionQuery struct {
 	Sort    *string
 	Target  *string
-	Since   *time.Time
-	Until   *time.Time
+	Since   time.Time
+	Until   time.Time
 	Limit   int
 	Offset  int
 	Tag     *string

@@ -94,9 +94,7 @@ func modelRequestDetailToRequestResponse(r *model.RequestDetail) *RequestDetailR
 		Comments: lo.Map(r.Comments, func(m *model.Comment, _ int) *CommentDetail {
 			return modelCommentToCommentDetail(m)
 		}),
-		Files: lo.Map(r.Files, func(f uuid.UUID, _ int) uuid.UUID {
-			return f
-		}),
+		Files: r.Files,
 	}
 }
 
@@ -319,7 +317,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequests(c.Request().Context(), model.RequestQuery{
-				Until:  &date2,
+				Until:  date2,
 				Limit:  100,
 				Offset: 0,
 			}).
@@ -384,7 +382,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequests(c.Request().Context(), model.RequestQuery{
-				Since:  &date2,
+				Since:  date2,
 				Limit:  100,
 				Offset: 0,
 			}).
@@ -1193,7 +1191,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 1000000),
-			PaidAt:    nil,
+			PaidAt:    time.Time{},
 			CreatedAt: date,
 		}
 		request := &model.RequestDetail{
@@ -1594,14 +1592,14 @@ func TestHandlers_PutRequest(t *testing.T) {
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 100000),
-			PaidAt:    nil,
+			PaidAt:    time.Time{},
 			CreatedAt: date,
 		}
 		target2 := &model.RequestTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 100000),
-			PaidAt:    nil,
+			PaidAt:    time.Time{},
 			CreatedAt: date,
 		}
 		targetDetails := []*model.RequestTargetDetail{target1, target2}
@@ -2677,7 +2675,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		target := &model.RequestTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
-			PaidAt:    nil,
+			PaidAt:    time.Time{},
 			CreatedAt: date,
 		}
 		targets := []*model.RequestTargetDetail{target}
@@ -3240,7 +3238,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		target := &model.RequestTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
-			PaidAt:    &date,
+			PaidAt:    date,
 			CreatedAt: date,
 		}
 		targets := []*model.RequestTargetDetail{target}

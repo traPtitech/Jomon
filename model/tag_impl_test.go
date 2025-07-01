@@ -63,7 +63,7 @@ func TestEntRepository_CreateTag(t *testing.T) {
 			Name:      name,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
-			DeletedAt: nil,
+			DeletedAt: time.Time{},
 		}
 		testutil.RequireEqual(t, exp, tag, opts...)
 	})
@@ -99,7 +99,7 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 			Name:      name,
 			CreatedAt: created.CreatedAt,
 			UpdatedAt: time.Now(),
-			DeletedAt: nil,
+			DeletedAt: time.Time{},
 		}
 		testutil.RequireEqual(t, exp, updated, opts...)
 	})

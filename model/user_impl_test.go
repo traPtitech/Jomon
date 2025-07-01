@@ -75,7 +75,7 @@ func TestEntRepository_CreateUser(t *testing.T) {
 			Admin:       admin,
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
-			DeletedAt:   nil,
+			DeletedAt:   time.Time{},
 		}
 		testutil.RequireEqual(t, exp, user, opts...)
 	})

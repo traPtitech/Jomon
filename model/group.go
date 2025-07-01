@@ -31,7 +31,7 @@ type Group struct {
 	Budget      *int
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	DeletedAt   *time.Time
+	DeletedAt   time.Time
 }
 
 type Owner struct {

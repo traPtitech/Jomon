@@ -63,7 +63,7 @@ func (repo *EntRepository) GetRequests(
 			Order(ent.Desc(request.FieldTitle))
 	}
 
-	if query.Target != uuid.Nil {
+	if query.Target != uuid.Nil && query.Target != uuid.Nil {
 		requestsq = requestsq.
 			Where(
 				request.HasTargetWith(
@@ -83,14 +83,14 @@ func (repo *EntRepository) GetRequests(
 			)
 	}
 
-	if query.Since != nil && !(*query.Since).IsZero() {
+	if !(query.Since).IsZero() {
 		requestsq = requestsq.
-			Where(request.CreatedAtGTE(*query.Since))
+			Where(request.CreatedAtGTE(query.Since))
 	}
 
-	if query.Until != nil && !(*query.Until).IsZero() {
+	if !(query.Until).IsZero() {
 		requestsq = requestsq.
-			Where(request.CreatedAtLT(*query.Until))
+			Where(request.CreatedAtLT(query.Until))
 	}
 
 	if query.Tag != nil && *query.Tag != "" {
@@ -112,7 +112,7 @@ func (repo *EntRepository) GetRequests(
 				),
 			)
 	}
-	if query.CreatedBy != uuid.Nil && query.CreatedBy != uuid.Nil {
+	if query.CreatedBy != uuid.Nil {
 		requestsq = requestsq.
 			Where(
 				request.HasUserWith(

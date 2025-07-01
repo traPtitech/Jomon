@@ -95,7 +95,7 @@ func TestEntRepository_CreateGroup(t *testing.T) {
 			Budget:      &budget,
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
-			DeletedAt:   nil,
+			DeletedAt:   time.Time{},
 		}
 		testutil.RequireEqual(t, exp, created, opts...)
 	})
@@ -115,7 +115,7 @@ func TestEntRepository_CreateGroup(t *testing.T) {
 			Budget:      nil,
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
-			DeletedAt:   nil,
+			DeletedAt:   time.Time{},
 		}
 		testutil.RequireEqual(t, exp, created, opts...)
 	})
@@ -161,7 +161,7 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 			Budget:      &updatedBudget,
 			CreatedAt:   created.CreatedAt,
 			UpdatedAt:   time.Now(),
-			DeletedAt:   nil,
+			DeletedAt:   time.Time{},
 		}
 		testutil.RequireEqual(t, exp, updated, opts...)
 	})
@@ -204,7 +204,7 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 			Budget:      nil,
 			CreatedAt:   created.CreatedAt,
 			UpdatedAt:   time.Now(),
-			DeletedAt:   nil,
+			DeletedAt:   time.Time{},
 		}
 		testutil.RequireEqual(t, exp, updated, opts...)
 	})

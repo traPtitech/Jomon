@@ -333,8 +333,8 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		since := time.Now()
 		until := time.Now().Add(time.Hour * 24)
 		query := TransactionQuery{
-			Since: &since,
-			Until: &until,
+			Since: since,
+			Until: until,
 		}
 
 		time.Sleep(1 * time.Second)

@@ -20,7 +20,7 @@ type Transaction struct {
 	Title     string         `json:"title"`
 	Amount    int            `json:"amount"`
 	Target    string         `json:"target"`
-	Request   uuid.UUID      `json:"request"`
+	Request   uuid.NullUUID      `json:"request"`
 	Tags      []*TagOverview `json:"tags"`
 	Group     *GroupOverview `json:"group"`
 	CreatedAt time.Time      `json:"created_at"`
@@ -32,8 +32,8 @@ type TransactionOverview struct {
 	Amount  int         `json:"amount"`
 	Targets []*string   `json:"targets"`
 	Tags    []uuid.UUID `json:"tags"`
-	Group   uuid.UUID   `json:"group"`
-	Request uuid.UUID   `json:"request"`
+	Group   uuid.NullUUID   `json:"group"`
+	Request uuid.NullUUID   `json:"request"`
 }
 
 type TransactionOverviewWithOneTarget struct {
@@ -41,8 +41,8 @@ type TransactionOverviewWithOneTarget struct {
 	Amount  int         `json:"amount"`
 	Target  string      `json:"target"`
 	Tags    []uuid.UUID `json:"tags"`
-	Group   uuid.UUID   `json:"group"`
-	Request uuid.UUID   `json:"request"`
+	Group   uuid.NullUUID   `json:"group"`
+	Request uuid.NullUUID   `json:"request"`
 }
 
 func (h Handlers) GetTransactions(c echo.Context) error {
@@ -59,7 +59,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		t := c.QueryParam("target")
 		target = &t
 	}
-	var since *time.Time
+	var since time.Time
 	if c.QueryParam("since") != "" {
 		var err error
 		s, err := service.StrToDate(c.QueryParam("since"))
@@ -67,9 +67,9 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			logger.Info("could not parse since as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		since = &s
+		since = s
 	}
-	var until *time.Time
+	var until time.Time
 	if c.QueryParam("until") != "" {
 		var err error
 		u, err := service.StrToDate(c.QueryParam("until"))
@@ -77,7 +77,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			logger.Info("could not parse until as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		until = &u
+		until = u
 	}
 	limit := 100
 	if limitQuery := c.QueryParam("limit"); limitQuery != "" {

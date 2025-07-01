@@ -120,8 +120,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			GetTransactions(c.Request().Context(), model.TransactionQuery{
 				Sort:   nil,
 				Target: nil,
-				Since:  nil,
-				Until:  nil,
+				Since:  time.Time{},
+				Until:  time.Time{},
 				Limit:  100,
 				Offset: 0,
 				Tag:    nil,
@@ -452,8 +452,8 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		h.Repository.MockTransactionRepository.
 			EXPECT().
 			GetTransactions(c.Request().Context(), model.TransactionQuery{
-				Since:  &since,
-				Until:  &until,
+				Since:  since,
+				Until:  until,
 				Limit:  100,
 				Offset: 0,
 			}).
