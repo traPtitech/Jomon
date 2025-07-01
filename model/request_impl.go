@@ -63,7 +63,7 @@ func (repo *EntRepository) GetRequests(
 			Order(ent.Desc(request.FieldTitle))
 	}
 
-	if query.Target != uuid.Nil && query.Target != uuid.Nil {
+	if query.Target != uuid.Nil {
 		requestsq = requestsq.
 			Where(
 				request.HasTargetWith(
