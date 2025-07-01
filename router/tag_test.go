@@ -490,14 +490,6 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		invalidUUID := "invalid-uuid"
 		_, resErr := uuid.Parse(invalidUUID)
 
-		date := time.Now()
-		tag := &model.Tag{
-			ID:        uuid.New(),
-			Name:      random.AlphaNumeric(t, 20),
-			CreatedAt: date,
-			UpdatedAt: date,
-		}
-
 		e := echo.New()
 		path := fmt.Sprintf("/api/tags/%s", invalidUUID)
 		req := httptest.NewRequestWithContext(
