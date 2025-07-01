@@ -11,10 +11,10 @@ import (
 
 func TestEntRepository_GetAdmins(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "get_admins")
+	client, err := setup(t, ctx, "get_admins")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
-	client2, _, err := setup(t, ctx, "get_admins2")
+	client2, err := setup(t, ctx, "get_admins2")
 	require.NoError(t, err)
 	repo2 := NewEntRepository(client2)
 
@@ -53,7 +53,7 @@ func TestEntRepository_GetAdmins(t *testing.T) {
 
 func TestEntRepository_AddAdmins(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "add_admins")
+	client, err := setup(t, ctx, "add_admins")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -77,7 +77,7 @@ func TestEntRepository_AddAdmins(t *testing.T) {
 
 func TestEntRepository_DeleteAdmins(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "delete_admins")
+	client, err := setup(t, ctx, "delete_admins")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 

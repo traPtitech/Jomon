@@ -13,37 +13,37 @@ import (
 
 func TestEntRepository_GetTransactions(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "get_transactions")
+	client, err := setup(t, ctx, "get_transactions")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
-	client2, _, err := setup(t, ctx, "get_transactions2")
+	client2, err := setup(t, ctx, "get_transactions2")
 	require.NoError(t, err)
 	repo2 := NewEntRepository(client2)
-	client3, _, err := setup(t, ctx, "get_transactions3")
+	client3, err := setup(t, ctx, "get_transactions3")
 	require.NoError(t, err)
 	repo3 := NewEntRepository(client3)
-	client4, _, err := setup(t, ctx, "get_transactions4")
+	client4, err := setup(t, ctx, "get_transactions4")
 	require.NoError(t, err)
 	repo4 := NewEntRepository(client4)
-	client5, _, err := setup(t, ctx, "get_transactions5")
+	client5, err := setup(t, ctx, "get_transactions5")
 	require.NoError(t, err)
 	repo5 := NewEntRepository(client5)
-	client6, _, err := setup(t, ctx, "get_transactions6")
+	client6, err := setup(t, ctx, "get_transactions6")
 	require.NoError(t, err)
 	repo6 := NewEntRepository(client6)
-	client7, _, err := setup(t, ctx, "get_transactions7")
+	client7, err := setup(t, ctx, "get_transactions7")
 	require.NoError(t, err)
 	repo7 := NewEntRepository(client7)
-	client8, _, err := setup(t, ctx, "get_transactions8")
+	client8, err := setup(t, ctx, "get_transactions8")
 	require.NoError(t, err)
 	repo8 := NewEntRepository(client8)
-	client9, _, err := setup(t, ctx, "get_transactions9")
+	client9, err := setup(t, ctx, "get_transactions9")
 	require.NoError(t, err)
 	repo9 := NewEntRepository(client9)
-	client10, _, err := setup(t, ctx, "get_transactions10")
+	client10, err := setup(t, ctx, "get_transactions10")
 	require.NoError(t, err)
 	repo10 := NewEntRepository(client10)
-	client11, _, err := setup(t, ctx, "get_transactions11")
+	client11, err := setup(t, ctx, "get_transactions11")
 	require.NoError(t, err)
 	repo11 := NewEntRepository(client11)
 
@@ -500,7 +500,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 
 func TestEntRepository_GetTransaction(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "get_transaction")
+	client, err := setup(t, ctx, "get_transaction")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -541,7 +541,7 @@ func TestEntRepository_GetTransaction(t *testing.T) {
 
 func TestEntRepository_CreateTransaction(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "create_transaction")
+	client, err := setup(t, ctx, "create_transaction")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -765,7 +765,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 
 func TestEntRepository_UpdateTransaction(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "update_transaction")
+	client, err := setup(t, ctx, "update_transaction")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 

@@ -12,10 +12,10 @@ import (
 
 func TestEntRepository_GetRequestTargets(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "get_request_targets")
+	client, err := setup(t, ctx, "get_request_targets")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
-	client2, _, err := setup(t, ctx, "get_request_targets2")
+	client2, err := setup(t, ctx, "get_request_targets2")
 	require.NoError(t, err)
 	repo2 := NewEntRepository(client2)
 
@@ -89,7 +89,7 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 
 func TestEntRepository_createRequestTargets(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "create_request_targets")
+	client, err := setup(t, ctx, "create_request_targets")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -139,10 +139,10 @@ func TestEntRepository_createRequestTargets(t *testing.T) {
 
 func TestEntRepository_deleteRequestTargets(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "delete_request_targets")
+	client, err := setup(t, ctx, "delete_request_targets")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
-	client2, _, err := setup(t, ctx, "delete_request_targets2")
+	client2, err := setup(t, ctx, "delete_request_targets2")
 	require.NoError(t, err)
 	repo2 := NewEntRepository(client2)
 

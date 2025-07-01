@@ -13,10 +13,10 @@ import (
 
 func TestEntRepository_GetTags(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "get_tags")
+	client, err := setup(t, ctx, "get_tags")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
-	client2, _, err := setup(t, ctx, "get_tags2")
+	client2, err := setup(t, ctx, "get_tags2")
 	require.NoError(t, err)
 	repo2 := NewEntRepository(client2)
 
@@ -46,7 +46,7 @@ func TestEntRepository_GetTags(t *testing.T) {
 
 func TestEntRepository_CreateTag(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "create_tag")
+	client, err := setup(t, ctx, "create_tag")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -79,7 +79,7 @@ func TestEntRepository_CreateTag(t *testing.T) {
 
 func TestEntRepository_UpdateTag(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "update_tag")
+	client, err := setup(t, ctx, "update_tag")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -130,7 +130,7 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 
 func TestEntRepository_DeleteTag(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "delete_tag")
+	client, err := setup(t, ctx, "delete_tag")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 

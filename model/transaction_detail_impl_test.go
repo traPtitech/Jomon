@@ -12,7 +12,7 @@ import (
 
 func TestEntRepository_createTransactionDetail(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "create_transaction_detail")
+	client, err := setup(t, ctx, "create_transaction_detail")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -51,7 +51,7 @@ func TestEntRepository_createTransactionDetail(t *testing.T) {
 
 func TestEntRepository_updateTransactionDetail(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "update_transaction_detail")
+	client, err := setup(t, ctx, "update_transaction_detail")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 

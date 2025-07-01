@@ -13,7 +13,7 @@ import (
 
 func TestEntRepository_CreateStatus(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "create_status")
+	client, err := setup(t, ctx, "create_status")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 

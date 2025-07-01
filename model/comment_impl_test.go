@@ -13,10 +13,10 @@ import (
 
 func TestEntRepository_GetComments(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "get_comments")
+	client, err := setup(t, ctx, "get_comments")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
-	client2, _, err := setup(t, ctx, "get_comments2")
+	client2, err := setup(t, ctx, "get_comments2")
 	require.NoError(t, err)
 	repo2 := NewEntRepository(client2)
 
@@ -82,7 +82,7 @@ func TestEntRepository_GetComments(t *testing.T) {
 
 func TestEntRepository_CreateComment(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "create_comment")
+	client, err := setup(t, ctx, "create_comment")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -158,7 +158,7 @@ func TestEntRepository_CreateComment(t *testing.T) {
 
 func TestEntRepository_UpdateComment(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "update_comment")
+	client, err := setup(t, ctx, "update_comment")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -284,7 +284,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 
 func TestEntRepository_DeleteComment(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "delete_comment")
+	client, err := setup(t, ctx, "delete_comment")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 

@@ -13,10 +13,10 @@ import (
 
 func TestEntRepository_GetUsers(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "get_user")
+	client, err := setup(t, ctx, "get_user")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
-	client2, _, err := setup(t, ctx, "get_user2")
+	client2, err := setup(t, ctx, "get_user2")
 	require.NoError(t, err)
 	repo2 := NewEntRepository(client2)
 
@@ -53,7 +53,7 @@ func TestEntRepository_GetUsers(t *testing.T) {
 
 func TestEntRepository_CreateUser(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "create_user")
+	client, err := setup(t, ctx, "create_user")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -95,10 +95,10 @@ func TestEntRepository_CreateUser(t *testing.T) {
 
 func TestEntRepository_GetUserByName(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "get_user_by_name")
+	client, err := setup(t, ctx, "get_user_by_name")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
-	client2, _, err := setup(t, ctx, "get_user_by_name2")
+	client2, err := setup(t, ctx, "get_user_by_name2")
 	require.NoError(t, err)
 	repo2 := NewEntRepository(client2)
 
@@ -128,10 +128,10 @@ func TestEntRepository_GetUserByName(t *testing.T) {
 
 func TestEntRepository_GetUserByID(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "get_user_by_id")
+	client, err := setup(t, ctx, "get_user_by_id")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
-	client2, _, err := setup(t, ctx, "get_user_by_id2")
+	client2, err := setup(t, ctx, "get_user_by_id2")
 	require.NoError(t, err)
 	repo2 := NewEntRepository(client2)
 
@@ -161,7 +161,7 @@ func TestEntRepository_GetUserByID(t *testing.T) {
 
 func TestEntRepository_UpdateUser(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, _, err := setup(t, ctx, "update_user")
+	client, err := setup(t, ctx, "update_user")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 
