@@ -421,17 +421,10 @@ func TestHandlers_DeleteTag(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqTag := DeleteTagRequest{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
-		}
-		reqBody, err := json.Marshal(reqTag)
-		require.NoError(t, err)
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/tags/%s", tag.ID)
-		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, path, bytes.NewReader(reqBody))
+		req := httptest.NewRequestWithContext(ctx, http.MethodDelete, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -463,17 +456,10 @@ func TestHandlers_DeleteTag(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqTag := DeleteTagRequest{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
-		}
-		reqBody, err := json.Marshal(reqTag)
-		require.NoError(t, err)
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/tags/%s", tag.ID)
-		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, path, bytes.NewReader(reqBody))
+		req := httptest.NewRequestWithContext(ctx, http.MethodDelete, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -511,17 +497,11 @@ func TestHandlers_DeleteTag(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqTag := DeleteTagRequest{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
-		}
-		reqBody, err := json.Marshal(reqTag)
-		require.NoError(t, err)
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/tags/%s", invalidUUID)
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, path, bytes.NewReader(reqBody))
+			ctx, http.MethodDelete, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -550,17 +530,10 @@ func TestHandlers_DeleteTag(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqTag := DeleteTagRequest{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
-		}
-		reqBody, err := json.Marshal(reqTag)
-		require.NoError(t, err)
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/tags/%s", tag.ID)
-		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, path, bytes.NewReader(reqBody))
+		req := httptest.NewRequestWithContext(ctx, http.MethodDelete, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)

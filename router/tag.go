@@ -19,7 +19,6 @@ type PostTagRequest struct {
 }
 
 type PutTagRequest = PostTagRequest
-type DeleteTagRequest = PostTagRequest
 
 type TagResponse struct {
 	ID        uuid.UUID `json:"id"`
