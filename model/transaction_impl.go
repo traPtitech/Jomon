@@ -81,7 +81,7 @@ func (repo *EntRepository) GetTransactions(
 			Where(transaction.CreatedAtGTE(query.Since))
 	}
 
-	if !(query.Until).IsZero(){
+	if !(query.Until).IsZero() {
 		transactionsq = transactionsq.
 			Where(transaction.CreatedAtLT(query.Until))
 	}

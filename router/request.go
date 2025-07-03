@@ -42,20 +42,20 @@ func (s Status) String() string {
 }
 
 type Request struct {
-	CreatedBy uuid.UUID   `json:"created_by"`
-	Title     string      `json:"title"`
-	Content   string      `json:"content"`
-	Tags      []uuid.UUID `json:"tags"`
-	Targets   []*Target   `json:"targets"`
-	Group     uuid.NullUUID   `json:"group"`
+	CreatedBy uuid.UUID     `json:"created_by"`
+	Title     string        `json:"title"`
+	Content   string        `json:"content"`
+	Tags      []uuid.UUID   `json:"tags"`
+	Targets   []*Target     `json:"targets"`
+	Group     uuid.NullUUID `json:"group"`
 }
 
 type PutRequest struct {
-	Title   string      `json:"title"`
-	Content string      `json:"content"`
-	Tags    []uuid.UUID `json:"tags"`
-	Targets []*Target   `json:"targets"`
-	Group   uuid.NullUUID   `json:"group"`
+	Title   string        `json:"title"`
+	Content string        `json:"content"`
+	Tags    []uuid.UUID   `json:"tags"`
+	Targets []*Target     `json:"targets"`
+	Group   uuid.NullUUID `json:"group"`
 }
 
 type RequestResponse struct {
