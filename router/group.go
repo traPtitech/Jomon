@@ -39,7 +39,7 @@ type GroupResponse struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-type GroupDetail struct {
+type GroupDetailResponse struct {
 	ID          uuid.UUID   `json:"id"`
 	Name        string      `json:"name"`
 	Description string      `json:"description"`

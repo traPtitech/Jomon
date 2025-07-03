@@ -20,29 +20,29 @@ type TransactionResponse struct {
 	Title     string         `json:"title"`
 	Amount    int            `json:"amount"`
 	Target    string         `json:"target"`
-	Request   uuid.NullUUID      `json:"request"`
+	Request   uuid.NullUUID  `json:"request"`
 	Tags      []*TagOverview `json:"tags"`
 	Group     *GroupResponse `json:"group"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 }
 
-type TransactionOverview struct {
-	Title   string      `json:"title"`
-	Amount  int         `json:"amount"`
-	Targets []*string   `json:"targets"`
-	Tags    []uuid.UUID `json:"tags"`
-	Group   uuid.NullUUID   `json:"group"`
-	Request uuid.NullUUID   `json:"request"`
+type PostTransactionsRequest struct {
+	Title   string        `json:"title"`
+	Amount  int           `json:"amount"`
+	Targets []*string     `json:"targets"`
+	Tags    []uuid.UUID   `json:"tags"`
+	Group   uuid.NullUUID `json:"group"`
+	Request uuid.NullUUID `json:"request"`
 }
 
-type TransactionOverviewWithOneTarget struct {
-	Title   string      `json:"title"`
-	Amount  int         `json:"amount"`
-	Target  string      `json:"target"`
-	Tags    []uuid.UUID `json:"tags"`
-	Group   uuid.NullUUID   `json:"group"`
-	Request uuid.NullUUID   `json:"request"`
+type PutTransactionRequest struct {
+	Title   string        `json:"title"`
+	Amount  int           `json:"amount"`
+	Target  string        `json:"target"`
+	Tags    []uuid.UUID   `json:"tags"`
+	Group   uuid.NullUUID `json:"group"`
+	Request uuid.NullUUID `json:"request"`
 }
 
 func (h Handlers) GetTransactions(c echo.Context) error {
@@ -169,7 +169,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			Title:     tx.Title,
 			Amount:    tx.Amount,
 			Target:    tx.Target,
-			Request:   uuid.NullUUID{UUID:tx.Request,Valid: true},
+			Request:   uuid.NullUUID{UUID: tx.Request, Valid: true},
 			Tags:      tags,
 			Group:     group,
 			CreatedAt: tx.CreatedAt,
@@ -230,7 +230,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 			Title:     created.Title,
 			Amount:    created.Amount,
 			Target:    created.Target,
-			Request:   uuid.NullUUID{UUID:created.Request,Valid: true},
+			Request:   uuid.NullUUID{UUID: created.Request, Valid: true},
 			Tags:      tags,
 			Group:     group,
 			CreatedAt: created.CreatedAt,
@@ -283,7 +283,7 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 		Title:     tx.Title,
 		Amount:    tx.Amount,
 		Target:    tx.Target,
-		Request:   uuid.NullUUID{UUID:tx.Request,Valid: true},
+		Request:   uuid.NullUUID{UUID: tx.Request, Valid: true},
 		Tags:      tags,
 		Group:     group,
 		CreatedAt: tx.CreatedAt,
@@ -345,7 +345,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 		Title:     updated.Title,
 		Amount:    updated.Amount,
 		Target:    updated.Target,
-		Request:   uuid.NullUUID{UUID:updated.Request,Valid: true},
+		Request:   uuid.NullUUID{UUID: updated.Request, Valid: true},
 		Tags:      tags,
 		Group:     group,
 		CreatedAt: updated.CreatedAt,
