@@ -60,9 +60,9 @@ func modelCommentToCommentDetail(c *model.Comment) *CommentDetail {
 
 // FIXME: この処理はrequest.goにも書かれてある
 func modelRequestDetailToRequestResponse(r *model.RequestDetail) *RequestDetailResponse {
-	var group *GroupOverview
+	var group *GroupResponse
 	if r.Group != nil {
-		group = &GroupOverview{
+		group = &GroupResponse{
 			ID:          r.Group.ID,
 			Name:        r.Group.Name,
 			Description: r.Group.Description,
