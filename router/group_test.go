@@ -304,7 +304,6 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/groups/%s", group.ID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		// FIXME: #822
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/groups/:groupID")
@@ -365,7 +364,6 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/groups/%s", group.ID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		// FIXME: #822
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/groups/:groupID")
