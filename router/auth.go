@@ -83,7 +83,19 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		return err
 	}
 
-	return c.Redirect(http.StatusSeeOther, "/")
+	location, err := wrapsession.WithSession(
+		c, h.SessionName, func(w *wrapsession.W) (string, error) {
+			v, ok := w.GetReferer()
+			if !ok {
+				return "/", nil
+			}
+			return v, nil
+		})
+	if err != nil {
+		return err
+	}
+
+	return c.Redirect(http.StatusSeeOther, location)
 }
 
 func (h Handlers) GeneratePKCE(c echo.Context) error {
@@ -103,6 +115,14 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 		WithPadding(base64.NoPadding)
 
 	codeChallengeMethod := "S256"
+
+	_, err = wrapsession.WithSession(c, h.SessionName, func(w *wrapsession.W) (struct{}, error) {
+		w.SetReferer(c.Request().Referer())
+		return struct{}{}, nil
+	})
+	if err != nil {
+		return err
+	}
 
 	// nolint:lll
 	to := fmt.Sprintf(
