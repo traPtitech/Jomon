@@ -85,16 +85,16 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	location, err := wrapsession.WithSession(
 		c, h.SessionName, func(w *wrapsession.W) (string, error) {
-			v, _ := w.GetReferer()
+			v, ok := w.GetReferer()
+			if !ok {
+				return "/", nil
+			}
 			return v, nil
 		})
 	if err != nil {
 		return err
 	}
 
-	if location == "" {
-		return c.Redirect(http.StatusSeeOther, "/")
-	}
 	return c.Redirect(http.StatusSeeOther, location)
 }
 
