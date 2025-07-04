@@ -22,8 +22,8 @@ import (
 
 // FIXME: 同様の処理がtransaction.goにもある
 func modelTransactionResponseToTransaction(tx *model.TransactionResponse) *TransactionResponse {
-	tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
-		return &TagOverview{
+	tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagResponse {
+		return &TagResponse{
 			ID:        modelTag.ID,
 			Name:      modelTag.Name,
 			CreatedAt: modelTag.CreatedAt,

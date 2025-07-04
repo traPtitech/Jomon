@@ -58,12 +58,12 @@ func TestHandlers_GetTags(t *testing.T) {
 
 		require.NoError(t, h.Handlers.GetTags(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*TagOverview
+		var got []*TagResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := lo.Map(tags, func(tag *model.Tag, _ int) *TagOverview {
-			return &TagOverview{
+		exp := lo.Map(tags, func(tag *model.Tag, _ int) *TagResponse {
+			return &TagResponse{
 				ID:        tag.ID,
 				Name:      tag.Name,
 				CreatedAt: tag.CreatedAt,
@@ -95,11 +95,11 @@ func TestHandlers_GetTags(t *testing.T) {
 
 		require.NoError(t, h.Handlers.GetTags(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*TagOverview
+		var got []*TagResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		var exp []*TagOverview
+		var exp []*TagResponse
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
@@ -144,7 +144,7 @@ func TestHandlers_PostTag(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqTag := Tag{
+		reqTag := PostTagRequest{
 			Name: tag.Name,
 		}
 		reqBody, err := json.Marshal(reqTag)
@@ -167,11 +167,11 @@ func TestHandlers_PostTag(t *testing.T) {
 
 		require.NoError(t, h.Handlers.PostTag(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got TagOverview
+		var got TagResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := &TagOverview{
+		exp := &TagResponse{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
@@ -192,7 +192,7 @@ func TestHandlers_PostTag(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqTag := Tag{
+		reqTag := PostTagRequest{
 			Name: "",
 		}
 		reqBody, err := json.Marshal(reqTag)
@@ -236,7 +236,7 @@ func TestHandlers_PutTag(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqTag := Tag{
+		reqTag := PutTagRequest{
 			Name:        tag.Name,
 			Description: random.AlphaNumeric(t, 50),
 		}
@@ -269,11 +269,11 @@ func TestHandlers_PutTag(t *testing.T) {
 
 		require.NoError(t, h.Handlers.PutTag(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got TagOverview
+		var got TagResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := &TagOverview{
+		exp := &TagResponse{
 			ID:        updateTag.ID,
 			Name:      updateTag.Name,
 			CreatedAt: updateTag.CreatedAt,
@@ -294,7 +294,7 @@ func TestHandlers_PutTag(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqTag := Tag{
+		reqTag := PutTagRequest{
 			Name: "",
 		}
 		reqBody, err := json.Marshal(reqTag)
@@ -340,7 +340,7 @@ func TestHandlers_PutTag(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqTag := Tag{
+		reqTag := PutTagRequest{
 			Name:        tag.Name,
 			Description: random.AlphaNumeric(t, 50),
 		}
@@ -378,7 +378,7 @@ func TestHandlers_PutTag(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqTag := Tag{
+		reqTag := PutTagRequest{
 			Name:        tag.Name,
 			Description: random.AlphaNumeric(t, 50),
 		}
@@ -421,17 +421,10 @@ func TestHandlers_DeleteTag(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqTag := Tag{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
-		}
-		reqBody, err := json.Marshal(reqTag)
-		require.NoError(t, err)
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/tags/%s", tag.ID)
-		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, path, bytes.NewReader(reqBody))
+		req := httptest.NewRequestWithContext(ctx, http.MethodDelete, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -463,17 +456,10 @@ func TestHandlers_DeleteTag(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqTag := Tag{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
-		}
-		reqBody, err := json.Marshal(reqTag)
-		require.NoError(t, err)
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/tags/%s", tag.ID)
-		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, path, bytes.NewReader(reqBody))
+		req := httptest.NewRequestWithContext(ctx, http.MethodDelete, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -504,24 +490,10 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		invalidUUID := "invalid-uuid"
 		_, resErr := uuid.Parse(invalidUUID)
 
-		date := time.Now()
-		tag := &model.Tag{
-			ID:        uuid.New(),
-			Name:      random.AlphaNumeric(t, 20),
-			CreatedAt: date,
-			UpdatedAt: date,
-		}
-		reqTag := Tag{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
-		}
-		reqBody, err := json.Marshal(reqTag)
-		require.NoError(t, err)
-
 		e := echo.New()
 		path := fmt.Sprintf("/api/tags/%s", invalidUUID)
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, path, bytes.NewReader(reqBody))
+			ctx, http.MethodDelete, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -550,17 +522,10 @@ func TestHandlers_DeleteTag(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqTag := Tag{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
-		}
-		reqBody, err := json.Marshal(reqTag)
-		require.NoError(t, err)
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/tags/%s", tag.ID)
-		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, path, bytes.NewReader(reqBody))
+		req := httptest.NewRequestWithContext(ctx, http.MethodDelete, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
