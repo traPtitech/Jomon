@@ -140,7 +140,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/requests", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -198,7 +197,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/requests", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -245,7 +243,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 		status := "submitted"
 		path := fmt.Sprintf("/api/requests?status=%s", status)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -310,7 +307,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/requests?until=%s", date2str)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -375,7 +371,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/requests?since=%s", date2str)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -448,7 +443,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/requests?tag=%s", tag1.Name)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -555,7 +549,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 		e := echo.New()
 		path := "/api/requests?status=invalid-status"
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -575,7 +568,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/requests", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -1079,7 +1071,6 @@ func TestHandlers_GetRequest(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/requests/:requestID")
@@ -1152,7 +1143,6 @@ func TestHandlers_GetRequest(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/requests/:requestID")
@@ -1219,7 +1209,6 @@ func TestHandlers_GetRequest(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/requests/:requestID")
@@ -1261,7 +1250,6 @@ func TestHandlers_GetRequest(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/requests/%s", invalidUUID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/requests/:requestID")
@@ -1285,7 +1273,6 @@ func TestHandlers_GetRequest(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/requests/%s", uuid.Nil)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/requests/:requestID")
@@ -1313,7 +1300,6 @@ func TestHandlers_GetRequest(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/requests/%s", unknownID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/requests/:requestID")
