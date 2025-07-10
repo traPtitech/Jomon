@@ -11,6 +11,7 @@ import (
 const (
 	userIDKey       = "user_id"
 	codeVerifierKey = "code_verifier"
+	refererKey      = "referer"
 )
 
 // TODO: この設定は外から与えられるようにしたい
@@ -75,4 +76,13 @@ func (w *W) GetCodeVerifier() (string, bool) {
 
 func (w *W) SetCodeVerifier(value string) {
 	w.setValue(codeVerifierKey, value)
+}
+
+func (w *W) GetReferer() (string, bool) {
+	v, ok := w.getValue(refererKey).(string)
+	return v, ok
+}
+
+func (w *W) SetReferer(value string) {
+	w.setValue(refererKey, value)
 }

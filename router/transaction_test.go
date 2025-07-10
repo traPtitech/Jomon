@@ -22,8 +22,8 @@ import (
 
 // FIXME: 同様の処理がtransaction.goにもある
 func modelTransactionResponseToTransaction(tx *model.TransactionResponse) *TransactionResponse {
-	tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagOverview {
-		return &TagOverview{
+	tag := lo.Map(tx.Tags, func(modelTag *model.Tag, _ int) *TagResponse {
+		return &TagResponse{
 			ID:        modelTag.ID,
 			Name:      modelTag.Name,
 			CreatedAt: modelTag.CreatedAt,
@@ -109,7 +109,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/transactions", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -198,7 +197,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		e := echo.New()
 		path := "/api/transactions?sort=created_at"
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -285,7 +283,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		e := echo.New()
 		path := "/api/transactions?sort=-created_at"
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -372,7 +369,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/transactions?target=%s", target1)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -443,7 +439,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/transactions?since=%s&until=%s", "2020-01-01", "2020-01-02")
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -690,7 +685,6 @@ func TestHandlers_GetTransaction(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/transactions/%s", tx.ID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetParamNames("transactionID")

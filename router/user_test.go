@@ -46,7 +46,6 @@ func TestHandlers_GetUsers(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/users", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -78,7 +77,6 @@ func TestHandlers_GetUsers(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/users", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -108,7 +106,6 @@ func TestHandlers_GetUsers(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/users")

@@ -35,7 +35,6 @@ func TestHandler_GetAdmins(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/admins", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -64,7 +63,6 @@ func TestHandler_GetAdmins(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/admins", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -92,7 +90,6 @@ func TestHandler_GetAdmins(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/admins", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 

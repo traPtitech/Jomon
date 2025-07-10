@@ -21,7 +21,7 @@ type TransactionResponse struct {
 	Amount    int            `json:"amount"`
 	Target    string         `json:"target"`
 	Request   *uuid.UUID     `json:"request"`
-	Tags      []*TagOverview `json:"tags"`
+	Tags      []*TagResponse `json:"tags"`
 	Group     *GroupResponse `json:"group"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
@@ -144,8 +144,8 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 	}
 
 	res := lo.Map(txs, func(tx *model.TransactionResponse, _ int) *TransactionResponse {
-		tags := lo.Map(tx.Tags, func(tag *model.Tag, _ int) *TagOverview {
-			return &TagOverview{
+		tags := lo.Map(tx.Tags, func(tag *model.Tag, _ int) *TagResponse {
+			return &TagResponse{
 				ID:        tag.ID,
 				Name:      tag.Name,
 				CreatedAt: tag.CreatedAt,
@@ -205,8 +205,8 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		tags := lo.Map(created.Tags, func(tag *model.Tag, _ int) *TagOverview {
-			return &TagOverview{
+		tags := lo.Map(created.Tags, func(tag *model.Tag, _ int) *TagResponse {
+			return &TagResponse{
 				ID:        tag.ID,
 				Name:      tag.Name,
 				CreatedAt: tag.CreatedAt,
@@ -258,8 +258,8 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	tags := lo.Map(tx.Tags, func(tag *model.Tag, _ int) *TagOverview {
-		return &TagOverview{
+	tags := lo.Map(tx.Tags, func(tag *model.Tag, _ int) *TagResponse {
+		return &TagResponse{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
@@ -320,8 +320,8 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	tags := lo.Map(updated.Tags, func(tag *model.Tag, _ int) *TagOverview {
-		return &TagOverview{
+	tags := lo.Map(updated.Tags, func(tag *model.Tag, _ int) *TagResponse {
+		return &TagResponse{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
