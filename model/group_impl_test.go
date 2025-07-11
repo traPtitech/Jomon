@@ -13,12 +13,12 @@ import (
 
 func TestEntRepository_GetGroups(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "get_groups")
+	client, err := setup(t, ctx, "get_groups")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx, "get_groups2")
+	repo := NewEntRepository(client)
+	client2, err := setup(t, ctx, "get_groups2")
 	require.NoError(t, err)
-	repo2 := NewEntRepository(client2, storage2)
+	repo2 := NewEntRepository(client2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -46,9 +46,9 @@ func TestEntRepository_GetGroups(t *testing.T) {
 
 func TestEntRepository_GetGroup(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "get_group")
+	client, err := setup(t, ctx, "get_group")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -75,9 +75,9 @@ func TestEntRepository_GetGroup(t *testing.T) {
 
 func TestEntRepository_CreateGroup(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "create_group")
+	client, err := setup(t, ctx, "create_group")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -130,9 +130,9 @@ func TestEntRepository_CreateGroup(t *testing.T) {
 
 func TestEntRepository_UpdateGroup(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "update_group")
+	client, err := setup(t, ctx, "update_group")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -226,9 +226,9 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 
 func TestEntRepository_DeleteGroup(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "delete_group")
+	client, err := setup(t, ctx, "delete_group")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -257,12 +257,12 @@ func TestEntRepository_DeleteGroup(t *testing.T) {
 
 func TestEntRepository_GetMembers(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "get_members")
+	client, err := setup(t, ctx, "get_members")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx, "get_members2")
+	repo := NewEntRepository(client)
+	client2, err := setup(t, ctx, "get_members2")
 	require.NoError(t, err)
-	repo2 := NewEntRepository(client2, storage2)
+	repo2 := NewEntRepository(client2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -321,9 +321,9 @@ func TestEntRepository_GetMembers(t *testing.T) {
 
 func TestEntRepository_CreateMember(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "create_member")
+	client, err := setup(t, ctx, "create_member")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -366,9 +366,9 @@ func TestEntRepository_CreateMember(t *testing.T) {
 
 func TestEntRepository_DeleteMember(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "delete_member")
+	client, err := setup(t, ctx, "delete_member")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -396,9 +396,9 @@ func TestEntRepository_DeleteMember(t *testing.T) {
 
 func TestEntRepository_GetOwners(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "get_owners")
+	client, err := setup(t, ctx, "get_owners")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -458,9 +458,9 @@ func TestEntRepository_GetOwners(t *testing.T) {
 // FIXME: これAddOwnersでは?
 func TestEntRepository_CreateOwner(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "create_owner")
+	client, err := setup(t, ctx, "create_owner")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -503,9 +503,9 @@ func TestEntRepository_CreateOwner(t *testing.T) {
 
 func TestEntRepository_DeleteOwner(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "delete_owner")
+	client, err := setup(t, ctx, "delete_owner")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
