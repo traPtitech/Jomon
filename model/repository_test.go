@@ -5,8 +5,6 @@ import (
 	"testing"
 
 	"github.com/traPtitech/Jomon/ent"
-	"github.com/traPtitech/Jomon/storage"
-	"github.com/traPtitech/Jomon/testutil"
 )
 
 const (
@@ -21,10 +19,6 @@ func setup(t *testing.T, ctx context.Context, dbName string) (*ent.Client, error
 		return nil, err
 	}
 	err = dropAll(t, ctx, client)
-	if err != nil {
-		return nil, err
-	}
-	_, err = storage.NewLocalStorage(testutil.GetEnvOrDefault("UPLOAD_DIR", "./uploads"))
 	if err != nil {
 		return nil, err
 	}
