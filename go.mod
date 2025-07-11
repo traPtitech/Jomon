@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.36.4
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.79
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.80.2
-	github.com/go-sql-driver/mysql v1.9.2
+	github.com/go-sql-driver/mysql v1.9.3
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/sessions v1.4.0
