@@ -16,11 +16,11 @@ func StrToTime(str string) (time.Time, error) {
 	return time.ParseInLocation("2006-01-02T15:04:05", str, loc)
 }
 
-func NullTimeToTime(t *time.Time) time.Time {
+func NullTimeToTime(t *time.Time) NullTime {
 	if t == nil {
-		return time.Time{}
+		return NullTime{}
 	}
-	return *t
+	return NullTime{Time:*t,Valid: *t!=time.Time{}}
 }
 
 type NullTime struct {
