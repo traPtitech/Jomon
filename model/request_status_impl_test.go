@@ -13,9 +13,9 @@ import (
 
 func TestEntRepository_CreateStatus(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "create_status")
+	client, err := setup(t, ctx, "create_status")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()

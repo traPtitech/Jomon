@@ -13,12 +13,14 @@ import (
 	"go.uber.org/zap"
 )
 
-type Tag struct {
+type PostTagRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
 
-type TagOverview struct {
+type PutTagRequest = PostTagRequest
+
+type TagResponse struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"created_at"`
@@ -35,8 +37,8 @@ func (h Handlers) GetTags(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := lo.Map(tags, func(tag *model.Tag, _ int) *TagOverview {
-		return &TagOverview{
+	res := lo.Map(tags, func(tag *model.Tag, _ int) *TagResponse {
+		return &TagResponse{
 			ID:        tag.ID,
 			Name:      tag.Name,
 			CreatedAt: tag.CreatedAt,
@@ -51,7 +53,7 @@ func (h Handlers) PostTag(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	var tag Tag
+	var tag PostTagRequest
 	if err := c.Bind(&tag); err != nil {
 		logger.Info("could not get tag from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -63,7 +65,7 @@ func (h Handlers) PostTag(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := TagOverview{
+	res := TagResponse{
 		ID:        created.ID,
 		Name:      created.Name,
 		CreatedAt: created.CreatedAt,
@@ -86,7 +88,7 @@ func (h Handlers) PutTag(c echo.Context) error {
 		logger.Info("invalid tag ID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid tag ID"))
 	}
-	var req Tag
+	var req PutTagRequest
 	if err := c.Bind(&req); err != nil {
 		logger.Info("could not get tag from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -98,7 +100,7 @@ func (h Handlers) PutTag(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := &TagOverview{
+	res := &TagResponse{
 		ID:        tag.ID,
 		Name:      tag.Name,
 		CreatedAt: tag.CreatedAt,

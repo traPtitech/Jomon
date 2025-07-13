@@ -12,12 +12,12 @@ import (
 
 func TestEntRepository_GetRequestTargets(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "get_request_targets")
+	client, err := setup(t, ctx, "get_request_targets")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx, "get_request_targets2")
+	repo := NewEntRepository(client)
+	client2, err := setup(t, ctx, "get_request_targets2")
 	require.NoError(t, err)
-	repo2 := NewEntRepository(client2, storage2)
+	repo2 := NewEntRepository(client2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -89,9 +89,9 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 
 func TestEntRepository_createRequestTargets(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "create_request_targets")
+	client, err := setup(t, ctx, "create_request_targets")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
+	repo := NewEntRepository(client)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -139,12 +139,12 @@ func TestEntRepository_createRequestTargets(t *testing.T) {
 
 func TestEntRepository_deleteRequestTargets(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, storage, err := setup(t, ctx, "delete_request_targets")
+	client, err := setup(t, ctx, "delete_request_targets")
 	require.NoError(t, err)
-	repo := NewEntRepository(client, storage)
-	client2, storage2, err := setup(t, ctx, "delete_request_targets2")
+	repo := NewEntRepository(client)
+	client2, err := setup(t, ctx, "delete_request_targets2")
 	require.NoError(t, err)
-	repo2 := NewEntRepository(client2, storage2)
+	repo2 := NewEntRepository(client2)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()

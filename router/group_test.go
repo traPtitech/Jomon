@@ -52,7 +52,6 @@ func TestHandlers_GetGroups(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/groups", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -91,7 +90,6 @@ func TestHandlers_GetGroups(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/groups", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -122,7 +120,6 @@ func TestHandlers_GetGroups(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/groups", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.Set(loginUserKey, user)
@@ -307,8 +304,6 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/groups/%s", group.ID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		// FIXME: #822
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/groups/:groupID")
@@ -369,8 +364,6 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/groups/%s", group.ID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		// FIXME: #822
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/groups/:groupID")
@@ -445,7 +438,6 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/groups/%s", uuid.Nil.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/groups/:groupID")
@@ -474,7 +466,6 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/groups/%s", unknownGroupID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/groups/:groupID")
@@ -515,7 +506,6 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/groups/%s", group.ID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/groups/:groupID")
@@ -556,7 +546,6 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/groups/%s", group.ID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/groups/:groupID")
@@ -613,7 +602,6 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		e := echo.New()
 		path := fmt.Sprintf("/api/groups/%s", group.ID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/groups/:groupID")
