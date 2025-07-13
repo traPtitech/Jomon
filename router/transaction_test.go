@@ -537,7 +537,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			EXPECT().
 			CreateTransaction(
 				c.Request().Context(),
-				tx1.Title, tx1.Amount, tx1.Target, tags, &group, nil).
+				tx1.Title, tx1.Amount, tx1.Target, tags, group, uuid.Nil).
 			Return(tx1, nil)
 
 		require.NoError(t, h.Handlers.PostTransaction(c))
@@ -626,7 +626,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			CreateTransaction(
 				c.Request().Context(),
 				tx.Title, tx.Amount, tx.Target,
-				tags, &group, &request.ID).
+				tags, group, request.ID).
 			Return(tx, nil)
 
 		require.NoError(t, h.Handlers.PostTransaction(c))
@@ -801,7 +801,7 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			UpdateTransaction(
 				c.Request().Context(),
 				tx.ID, updated.Title, updated.Amount, updated.Target,
-				updatedTags, nil, nil).
+				updatedTags, uuid.Nil, uuid.Nil).
 			Return(updated, nil)
 		require.NoError(t, h.Handlers.PutTransaction(c))
 		require.Equal(t, http.StatusOK, rec.Code)
