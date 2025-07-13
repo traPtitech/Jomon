@@ -83,12 +83,12 @@ func (repo *EntRepository) GetRequests(
 			)
 	}
 
-	if !(query.Since).IsZero() {
+	if !query.Since.IsZero() {
 		requestsq = requestsq.
 			Where(request.CreatedAtGTE(query.Since))
 	}
 
-	if !(query.Until).IsZero() {
+	if !query.Until.IsZero() {
 		requestsq = requestsq.
 			Where(request.CreatedAtLT(query.Until))
 	}

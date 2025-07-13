@@ -788,7 +788,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 			paid := lo.Reduce(targets, func(p bool, target *model.RequestTargetDetail, _ int) bool {
-				return p || target.PaidAt != time.Time{}
+				return p || !target.PaidAt.IsZero()
 			}, false)
 			if paid {
 				logger.Info("someone already paid")
