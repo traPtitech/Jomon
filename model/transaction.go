@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/service"
 )
 
 type TransactionRepository interface {
@@ -41,8 +42,8 @@ type TransactionResponse struct {
 type TransactionQuery struct {
 	Sort    *string
 	Target  *string
-	Since   time.Time
-	Until   time.Time
+	Since   service.NullTime
+	Until   service.NullTime
 	Limit   int
 	Offset  int
 	Tag     *string

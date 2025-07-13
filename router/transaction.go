@@ -59,7 +59,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		t := c.QueryParam("target")
 		target = &t
 	}
-	var since time.Time
+	var since service.NullTime
 	if c.QueryParam("since") != "" {
 		var err error
 		s, err := service.StrToDate(c.QueryParam("since"))
@@ -69,7 +69,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		}
 		since = s
 	}
-	var until time.Time
+	var until service.NullTime
 	if c.QueryParam("until") != "" {
 		var err error
 		u, err := service.StrToDate(c.QueryParam("until"))

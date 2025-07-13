@@ -9,17 +9,18 @@ import (
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/logging"
 	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/service"
 	"go.uber.org/zap"
 )
 
 type User struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	DisplayName string    `json:"display_name"`
-	Admin       bool      `json:"admin"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	DeletedAt   time.Time `json:"deleted_at"`
+	ID          uuid.UUID        `json:"id"`
+	Name        string           `json:"name"`
+	DisplayName string           `json:"display_name"`
+	Admin       bool             `json:"admin"`
+	CreatedAt   time.Time        `json:"created_at"`
+	UpdatedAt   time.Time        `json:"updated_at"`
+	DeletedAt   service.NullTime `json:"deleted_at"`
 }
 
 func (h Handlers) GetUsers(c echo.Context) error {

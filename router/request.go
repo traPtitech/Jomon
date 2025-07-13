@@ -116,7 +116,7 @@ type TargetOverview struct {
 	ID        uuid.UUID `json:"id"`
 	Target    uuid.UUID `json:"target"`
 	Amount    int       `json:"amount"`
-	PaidAt    time.Time `json:"paid_at"`
+	PaidAt    service.NullTime `json:"paid_at"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
@@ -148,7 +148,7 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		}
 		target = t
 	}
-	var since time.Time
+	var since service.NullTime
 	if c.QueryParam("since") != "" {
 		s, err := service.StrToDate(c.QueryParam("since"))
 		if err != nil {

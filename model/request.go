@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/service"
 )
 
 type RequestRepository interface {
@@ -62,8 +63,8 @@ type RequestQuery struct {
 	Sort      *string
 	Target    uuid.UUID
 	Status    *string
-	Since     time.Time
-	Until     time.Time
+	Since     service.NullTime
+	Until     service.NullTime
 	Limit     int
 	Offset    int
 	Tag       *string

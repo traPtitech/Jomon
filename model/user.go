@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/service"
 )
 
 type User struct {
@@ -15,7 +16,7 @@ type User struct {
 	Admin       bool
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	DeletedAt   time.Time
+	DeletedAt   service.NullTime
 }
 
 type UserRepository interface {

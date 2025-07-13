@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/service"
 )
 
 type Tag struct {
@@ -13,7 +14,7 @@ type Tag struct {
 	Name      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt time.Time
+	DeletedAt service.NullTime
 }
 
 type TagRepository interface {

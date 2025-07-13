@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/service"
 )
 
 type RequestTargetRepository interface {
@@ -16,7 +17,7 @@ type RequestTargetDetail struct {
 	ID        uuid.UUID
 	Target    uuid.UUID
 	Amount    int
-	PaidAt    time.Time
+	PaidAt    service.NullTime
 	CreatedAt time.Time
 }
 
