@@ -71,7 +71,7 @@ type User struct {
 	ID             uuid.UUID `json:"id"`
 	Name           string    `json:"name"`
 	DisplayName    string    `json:"display_name"`
-	AccountManager bool      `json:"accountManager"`
+	AccountManager bool      `json:"account_manager"`
 }
 
 type Webhook struct {

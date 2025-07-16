@@ -23,7 +23,7 @@ type User struct {
 	// DisplayName holds the value of the "display_name" field.
 	DisplayName string `json:"display_name,omitempty"`
 	// AccountManager holds the value of the "accountManager" field.
-	AccountManager bool `json:"accountManager,omitempty"`
+	AccountManager bool `json:"account_manager,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.

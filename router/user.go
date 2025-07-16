@@ -16,7 +16,7 @@ type User struct {
 	ID             uuid.UUID  `json:"id"`
 	Name           string     `json:"name"`
 	DisplayName    string     `json:"display_name"`
-	AccountManager bool       `json:"accountManager"`
+	AccountManager bool       `json:"account_manager"`
 	CreatedAt      time.Time  `json:"created_at"`
 	UpdatedAt      time.Time  `json:"updated_at"`
 	DeletedAt      *time.Time `json:"deleted_at"`
@@ -50,7 +50,7 @@ func (h Handlers) GetUsers(c echo.Context) error {
 type PutUserRequest struct {
 	Name           string `json:"name"`
 	DisplayName    string `json:"display_name"`
-	AccountManager bool   `json:"accountManager"`
+	AccountManager bool   `json:"account_manager"`
 }
 
 func (h Handlers) UpdateUserInfo(c echo.Context) error {
