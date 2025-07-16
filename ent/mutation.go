@@ -7213,7 +7213,7 @@ type UserMutation struct {
 	id                    *uuid.UUID
 	name                  *string
 	display_name          *string
-	admin                 *bool
+	accountManager        *bool
 	created_at            *time.Time
 	updated_at            *time.Time
 	deleted_at            *time.Time
@@ -7420,40 +7420,40 @@ func (m *UserMutation) ResetDisplayName() {
 	m.display_name = nil
 }
 
-// SetAdmin sets the "admin" field.
-func (m *UserMutation) SetAdmin(b bool) {
-	m.admin = &b
+// SetAccountManager sets the "accountManager" field.
+func (m *UserMutation) SetAccountManager(b bool) {
+	m.accountManager = &b
 }
 
-// Admin returns the value of the "admin" field in the mutation.
-func (m *UserMutation) Admin() (r bool, exists bool) {
-	v := m.admin
+// AccountManager returns the value of the "accountManager" field in the mutation.
+func (m *UserMutation) AccountManager() (r bool, exists bool) {
+	v := m.accountManager
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAdmin returns the old "admin" field's value of the User entity.
+// OldAccountManager returns the old "accountManager" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldAdmin(ctx context.Context) (v bool, err error) {
+func (m *UserMutation) OldAccountManager(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAdmin is only allowed on UpdateOne operations")
+		return v, errors.New("OldAccountManager is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAdmin requires an ID field in the mutation")
+		return v, errors.New("OldAccountManager requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAdmin: %w", err)
+		return v, fmt.Errorf("querying old value for OldAccountManager: %w", err)
 	}
-	return oldValue.Admin, nil
+	return oldValue.AccountManager, nil
 }
 
-// ResetAdmin resets all changes to the "admin" field.
-func (m *UserMutation) ResetAdmin() {
-	m.admin = nil
+// ResetAccountManager resets all changes to the "accountManager" field.
+func (m *UserMutation) ResetAccountManager() {
+	m.accountManager = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -7996,8 +7996,8 @@ func (m *UserMutation) Fields() []string {
 	if m.display_name != nil {
 		fields = append(fields, user.FieldDisplayName)
 	}
-	if m.admin != nil {
-		fields = append(fields, user.FieldAdmin)
+	if m.accountManager != nil {
+		fields = append(fields, user.FieldAccountManager)
 	}
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
@@ -8020,8 +8020,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case user.FieldDisplayName:
 		return m.DisplayName()
-	case user.FieldAdmin:
-		return m.Admin()
+	case user.FieldAccountManager:
+		return m.AccountManager()
 	case user.FieldCreatedAt:
 		return m.CreatedAt()
 	case user.FieldUpdatedAt:
@@ -8041,8 +8041,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldName(ctx)
 	case user.FieldDisplayName:
 		return m.OldDisplayName(ctx)
-	case user.FieldAdmin:
-		return m.OldAdmin(ctx)
+	case user.FieldAccountManager:
+		return m.OldAccountManager(ctx)
 	case user.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case user.FieldUpdatedAt:
@@ -8072,12 +8072,12 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDisplayName(v)
 		return nil
-	case user.FieldAdmin:
+	case user.FieldAccountManager:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetAdmin(v)
+		m.SetAccountManager(v)
 		return nil
 	case user.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -8164,8 +8164,8 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldDisplayName:
 		m.ResetDisplayName()
 		return nil
-	case user.FieldAdmin:
-		m.ResetAdmin()
+	case user.FieldAccountManager:
+		m.ResetAccountManager()
 		return nil
 	case user.FieldCreatedAt:
 		m.ResetCreatedAt()

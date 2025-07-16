@@ -99,13 +99,13 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 				"",
 				h.PostTransaction,
 				middleware.BodyDump(h.WebhookService.WebhookTransactionsEventHandler),
-				h.CheckAdminMiddleware)
+				h.CheckAccountManagerMiddleware)
 			apiTransactions.GET("/:transactionID", h.GetTransaction)
 			apiTransactions.PUT(
 				"/:transactionID",
 				h.PutTransaction,
 				middleware.BodyDump(h.WebhookService.WebhookTransactionsEventHandler),
-				h.CheckAdminMiddleware)
+				h.CheckAccountManagerMiddleware)
 		}
 
 		apiFiles := api.Group("/files", h.CheckLoginMiddleware)
@@ -130,7 +130,7 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 		apiGroups := api.Group("/groups", h.CheckLoginMiddleware)
 		{
 			apiGroups.GET("", h.GetGroups)
-			apiGroups.POST("", h.PostGroup, h.CheckAdminMiddleware)
+			apiGroups.POST("", h.PostGroup, h.CheckAccountManagerMiddleware)
 			apiGroupIDs := apiGroups.Group("/:groupID")
 			{
 				apiGroupIDs.GET("", h.GetGroupDetail)
@@ -146,15 +146,15 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 		apiUsers := api.Group("/users", h.CheckLoginMiddleware)
 		{
 			apiUsers.GET("", h.GetUsers)
-			apiUsers.PUT("", h.UpdateUserInfo, h.CheckAdminMiddleware)
+			apiUsers.PUT("", h.UpdateUserInfo, h.CheckAccountManagerMiddleware)
 			apiUsers.GET("/me", h.GetMe)
 		}
 
-		apiAdmins := api.Group("/admins", h.CheckLoginMiddleware, h.CheckAdminMiddleware)
+		apiAccountManagers := api.Group("/accountManagers", h.CheckLoginMiddleware, h.CheckAccountManagerMiddleware)
 		{
-			apiAdmins.GET("", h.GetAdmins)
-			apiAdmins.POST("", h.PostAdmins)
-			apiAdmins.DELETE("", h.DeleteAdmins)
+			apiAccountManagers.GET("", h.GetAccountManagers)
+			apiAccountManagers.POST("", h.PostAccountManagers)
+			apiAccountManagers.DELETE("", h.DeleteAccountManagers)
 		}
 	}
 

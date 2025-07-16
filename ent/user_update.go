@@ -63,16 +63,16 @@ func (uu *UserUpdate) SetNillableDisplayName(s *string) *UserUpdate {
 	return uu
 }
 
-// SetAdmin sets the "admin" field.
-func (uu *UserUpdate) SetAdmin(b bool) *UserUpdate {
-	uu.mutation.SetAdmin(b)
+// SetAccountManager sets the "accountManager" field.
+func (uu *UserUpdate) SetAccountManager(b bool) *UserUpdate {
+	uu.mutation.SetAccountManager(b)
 	return uu
 }
 
-// SetNillableAdmin sets the "admin" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAdmin(b *bool) *UserUpdate {
+// SetNillableAccountManager sets the "accountManager" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableAccountManager(b *bool) *UserUpdate {
 	if b != nil {
-		uu.SetAdmin(*b)
+		uu.SetAccountManager(*b)
 	}
 	return uu
 }
@@ -438,8 +438,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.DisplayName(); ok {
 		_spec.SetField(user.FieldDisplayName, field.TypeString, value)
 	}
-	if value, ok := uu.mutation.Admin(); ok {
-		_spec.SetField(user.FieldAdmin, field.TypeBool, value)
+	if value, ok := uu.mutation.AccountManager(); ok {
+		_spec.SetField(user.FieldAccountManager, field.TypeBool, value)
 	}
 	if value, ok := uu.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
@@ -816,16 +816,16 @@ func (uuo *UserUpdateOne) SetNillableDisplayName(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// SetAdmin sets the "admin" field.
-func (uuo *UserUpdateOne) SetAdmin(b bool) *UserUpdateOne {
-	uuo.mutation.SetAdmin(b)
+// SetAccountManager sets the "accountManager" field.
+func (uuo *UserUpdateOne) SetAccountManager(b bool) *UserUpdateOne {
+	uuo.mutation.SetAccountManager(b)
 	return uuo
 }
 
-// SetNillableAdmin sets the "admin" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAdmin(b *bool) *UserUpdateOne {
+// SetNillableAccountManager sets the "accountManager" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableAccountManager(b *bool) *UserUpdateOne {
 	if b != nil {
-		uuo.SetAdmin(*b)
+		uuo.SetAccountManager(*b)
 	}
 	return uuo
 }
@@ -1221,8 +1221,8 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if value, ok := uuo.mutation.DisplayName(); ok {
 		_spec.SetField(user.FieldDisplayName, field.TypeString, value)
 	}
-	if value, ok := uuo.mutation.Admin(); ok {
-		_spec.SetField(user.FieldAdmin, field.TypeBool, value)
+	if value, ok := uuo.mutation.AccountManager(); ok {
+		_spec.SetField(user.FieldAccountManager, field.TypeBool, value)
 	}
 	if value, ok := uuo.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)

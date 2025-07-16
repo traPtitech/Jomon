@@ -12,58 +12,58 @@ import (
 	"go.uber.org/zap"
 )
 
-func (h Handlers) GetAdmins(c echo.Context) error {
+func (h Handlers) GetAccountManagers(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
-	admins, err := h.Repository.GetAdmins(ctx)
+	accountManagers, err := h.Repository.GetAccountManagers(ctx)
 	if err != nil {
-		logger.Error("failed to get admins from repository", zap.Error(err))
+		logger.Error("failed to get accountManagers from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	res := lo.Map(admins, func(admin *model.Admin, _ int) *uuid.UUID {
-		return &admin.ID
+	res := lo.Map(accountManagers, func(accountManager *model.AccountManager, _ int) *uuid.UUID {
+		return &accountManager.ID
 	})
 
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h Handlers) PostAdmins(c echo.Context) error {
+func (h Handlers) PostAccountManagers(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	var admin []uuid.UUID
-	if err := c.Bind(&admin); err != nil {
-		logger.Info("failed to get admin id from request", zap.Error(err))
+	var accountManager []uuid.UUID
+	if err := c.Bind(&accountManager); err != nil {
+		logger.Info("failed to get accountManager id from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	err := h.Repository.AddAdmins(ctx, admin)
+	err := h.Repository.AddAccountManagers(ctx, accountManager)
 	if err != nil {
 		if ent.IsConstraintError(err) {
-			logger.Info("constraint error while adding admin in repository", zap.Error(err))
+			logger.Info("constraint error while adding accountManager in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		logger.Error("failed to add admin in repository", zap.Error(err))
+		logger.Error("failed to add accountManager in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.NoContent(http.StatusOK)
 }
 
-func (h Handlers) DeleteAdmins(c echo.Context) error {
+func (h Handlers) DeleteAccountManagers(c echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	var admin []uuid.UUID
-	if err := c.Bind(&admin); err != nil {
-		logger.Info("failed to get admin id from request", zap.Error(err))
+	var accountManager []uuid.UUID
+	if err := c.Bind(&accountManager); err != nil {
+		logger.Info("failed to get accountManager id from request", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	err := h.Repository.DeleteAdmins(ctx, admin)
+	err := h.Repository.DeleteAccountManagers(ctx, accountManager)
 	if err != nil {
-		logger.Error("failed to delete admin from repository", zap.Error(err))
+		logger.Error("failed to delete accountManager from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 

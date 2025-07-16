@@ -7,12 +7,12 @@ import (
 	"github.com/google/uuid"
 )
 
-type Admin struct {
+type AccountManager struct {
 	ID uuid.UUID `json:"id"`
 }
 
-type AdminRepository interface {
-	GetAdmins(ctx context.Context) ([]*Admin, error)
-	AddAdmins(ctx context.Context, userIDs []uuid.UUID) error
-	DeleteAdmins(ctx context.Context, userIDs []uuid.UUID) error
+type AccountManagerRepository interface {
+	GetAccountManagers(ctx context.Context) ([]*AccountManager, error)
+	AddAccountManagers(ctx context.Context, userIDs []uuid.UUID) error
+	DeleteAccountManagers(ctx context.Context, userIDs []uuid.UUID) error
 }

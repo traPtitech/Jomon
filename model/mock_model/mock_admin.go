@@ -18,69 +18,69 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockAdminRepository is a mock of AdminRepository interface.
-type MockAdminRepository struct {
+// MockAccountManagerRepository is a mock of AccountManagerRepository interface.
+type MockAccountManagerRepository struct {
 	ctrl     *gomock.Controller
-	recorder *MockAdminRepositoryMockRecorder
+	recorder *MockAccountManagerRepositoryMockRecorder
 	isgomock struct{}
 }
 
-// MockAdminRepositoryMockRecorder is the mock recorder for MockAdminRepository.
-type MockAdminRepositoryMockRecorder struct {
-	mock *MockAdminRepository
+// MockAccountManagerRepositoryMockRecorder is the mock recorder for MockAccountManagerRepository.
+type MockAccountManagerRepositoryMockRecorder struct {
+	mock *MockAccountManagerRepository
 }
 
-// NewMockAdminRepository creates a new mock instance.
-func NewMockAdminRepository(ctrl *gomock.Controller) *MockAdminRepository {
-	mock := &MockAdminRepository{ctrl: ctrl}
-	mock.recorder = &MockAdminRepositoryMockRecorder{mock}
+// NewMockAccountManagerRepository creates a new mock instance.
+func NewMockAccountManagerRepository(ctrl *gomock.Controller) *MockAccountManagerRepository {
+	mock := &MockAccountManagerRepository{ctrl: ctrl}
+	mock.recorder = &MockAccountManagerRepositoryMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAdminRepository) EXPECT() *MockAdminRepositoryMockRecorder {
+func (m *MockAccountManagerRepository) EXPECT() *MockAccountManagerRepositoryMockRecorder {
 	return m.recorder
 }
 
-// AddAdmins mocks base method.
-func (m *MockAdminRepository) AddAdmins(ctx context.Context, userIDs []uuid.UUID) error {
+// AddAccountManagers mocks base method.
+func (m *MockAccountManagerRepository) AddAccountManagers(ctx context.Context, userIDs []uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddAdmins", ctx, userIDs)
+	ret := m.ctrl.Call(m, "AddAccountManagers", ctx, userIDs)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// AddAdmins indicates an expected call of AddAdmins.
-func (mr *MockAdminRepositoryMockRecorder) AddAdmins(ctx, userIDs any) *gomock.Call {
+// AddAccountManagers indicates an expected call of AddAccountManagers.
+func (mr *MockAccountManagerRepositoryMockRecorder) AddAccountManagers(ctx, userIDs any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAdmins", reflect.TypeOf((*MockAdminRepository)(nil).AddAdmins), ctx, userIDs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAccountManagers", reflect.TypeOf((*MockAccountManagerRepository)(nil).AddAccountManagers), ctx, userIDs)
 }
 
-// DeleteAdmins mocks base method.
-func (m *MockAdminRepository) DeleteAdmins(ctx context.Context, userIDs []uuid.UUID) error {
+// DeleteAccountManagers mocks base method.
+func (m *MockAccountManagerRepository) DeleteAccountManagers(ctx context.Context, userIDs []uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteAdmins", ctx, userIDs)
+	ret := m.ctrl.Call(m, "DeleteAccountManagers", ctx, userIDs)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteAdmins indicates an expected call of DeleteAdmins.
-func (mr *MockAdminRepositoryMockRecorder) DeleteAdmins(ctx, userIDs any) *gomock.Call {
+// DeleteAccountManagers indicates an expected call of DeleteAccountManagers.
+func (mr *MockAccountManagerRepositoryMockRecorder) DeleteAccountManagers(ctx, userIDs any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAdmins", reflect.TypeOf((*MockAdminRepository)(nil).DeleteAdmins), ctx, userIDs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAccountManagers", reflect.TypeOf((*MockAccountManagerRepository)(nil).DeleteAccountManagers), ctx, userIDs)
 }
 
-// GetAdmins mocks base method.
-func (m *MockAdminRepository) GetAdmins(ctx context.Context) ([]*model.Admin, error) {
+// GetAccountManagers mocks base method.
+func (m *MockAccountManagerRepository) GetAccountManagers(ctx context.Context) ([]*model.AccountManager, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAdmins", ctx)
-	ret0, _ := ret[0].([]*model.Admin)
+	ret := m.ctrl.Call(m, "GetAccountManagers", ctx)
+	ret0, _ := ret[0].([]*model.AccountManager)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetAdmins indicates an expected call of GetAdmins.
-func (mr *MockAdminRepositoryMockRecorder) GetAdmins(ctx any) *gomock.Call {
+// GetAccountManagers indicates an expected call of GetAccountManagers.
+func (mr *MockAccountManagerRepositoryMockRecorder) GetAccountManagers(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAdmins", reflect.TypeOf((*MockAdminRepository)(nil).GetAdmins), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountManagers", reflect.TypeOf((*MockAccountManagerRepository)(nil).GetAccountManagers), ctx)
 }

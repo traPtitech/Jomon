@@ -17,7 +17,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func TestHandler_GetAdmins(t *testing.T) {
+func TestHandler_GetAccountManagers(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
@@ -25,57 +25,57 @@ func TestHandler_GetAdmins(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		admin := &model.Admin{
+		accountManager := &model.AccountManager{
 			ID: uuid.New(),
 		}
 
-		admins := []*model.Admin{
-			admin,
+		accountManagers := []*model.AccountManager{
+			accountManager,
 		}
 
 		e := echo.New()
-		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/admins", nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/accountManagers", nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockAdminRepository.
+		h.Repository.MockAccountManagerRepository.
 			EXPECT().
-			GetAdmins(c.Request().Context()).
-			Return(admins, nil)
+			GetAccountManagers(c.Request().Context()).
+			Return(accountManagers, nil)
 
 		require.NoError(t, err)
 
-		require.NoError(t, h.Handlers.GetAdmins(c))
+		require.NoError(t, h.Handlers.GetAccountManagers(c))
 		testutil.AssertEqual(t, http.StatusOK, rec.Code)
 		var res []uuid.UUID
 		err = json.Unmarshal(rec.Body.Bytes(), &res)
 		require.NoError(t, err)
-		testutil.RequireEqual(t, []uuid.UUID{admin.ID}, res)
+		testutil.RequireEqual(t, []uuid.UUID{accountManager.ID}, res)
 	})
 
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		var admins []*model.Admin
+		var accountManagers []*model.AccountManager
 
 		e := echo.New()
-		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/admins", nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/accountManagers", nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockAdminRepository.
+		h.Repository.MockAccountManagerRepository.
 			EXPECT().
-			GetAdmins(c.Request().Context()).
-			Return(admins, nil)
+			GetAccountManagers(c.Request().Context()).
+			Return(accountManagers, nil)
 
 		require.NoError(t, err)
 
-		require.NoError(t, h.Handlers.GetAdmins(c))
+		require.NoError(t, h.Handlers.GetAccountManagers(c))
 		testutil.AssertEqual(t, http.StatusOK, rec.Code)
 		var res []uuid.UUID
 		err = json.Unmarshal(rec.Body.Bytes(), &res)
@@ -89,26 +89,26 @@ func TestHandler_GetAdmins(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/admins", nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/accountManagers", nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		resErr := errors.New("failed to get admins")
+		resErr := errors.New("failed to get accountManagers")
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockAdminRepository.
+		h.Repository.MockAccountManagerRepository.
 			EXPECT().
-			GetAdmins(c.Request().Context()).
+			GetAccountManagers(c.Request().Context()).
 			Return(nil, resErr)
 
-		err = h.Handlers.GetAdmins(c)
+		err = h.Handlers.GetAccountManagers(c)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 }
 
-func TestHandler_PostAdmin(t *testing.T) {
+func TestHandler_PostAccountManager(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
@@ -116,26 +116,26 @@ func TestHandler_PostAdmin(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		admin := uuid.New()
-		admins := []uuid.UUID{admin}
-		reqBody, err := json.Marshal(admins)
+		accountManager := uuid.New()
+		accountManagers := []uuid.UUID{accountManager}
+		reqBody, err := json.Marshal(accountManagers)
 		require.NoError(t, err)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/admins", bytes.NewReader(reqBody))
+			ctx, http.MethodPost, "/api/accountManagers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockAdminRepository.
+		h.Repository.MockAccountManagerRepository.
 			EXPECT().
-			AddAdmins(c.Request().Context(), admins).
+			AddAccountManagers(c.Request().Context(), accountManagers).
 			Return(nil)
 
-		require.NoError(t, h.Handlers.PostAdmins(c))
+		require.NoError(t, h.Handlers.PostAccountManagers(c))
 		require.Equal(t, http.StatusOK, rec.Code)
 	})
 
@@ -144,28 +144,28 @@ func TestHandler_PostAdmin(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		admin := uuid.New()
-		admins := []uuid.UUID{admin}
-		reqBody, err := json.Marshal(admins)
+		accountManager := uuid.New()
+		accountManagers := []uuid.UUID{accountManager}
+		reqBody, err := json.Marshal(accountManagers)
 		require.NoError(t, err)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/admins", bytes.NewReader(reqBody))
+			ctx, http.MethodPost, "/api/accountManagers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		resErr := errors.New("failed to create admin")
+		resErr := errors.New("failed to create accountManager")
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockAdminRepository.
+		h.Repository.MockAccountManagerRepository.
 			EXPECT().
-			AddAdmins(c.Request().Context(), admins).
+			AddAccountManagers(c.Request().Context(), accountManagers).
 			Return(resErr)
 
-		err = h.Handlers.PostAdmins(c)
+		err = h.Handlers.PostAccountManagers(c)
 		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
@@ -176,36 +176,36 @@ func TestHandler_PostAdmin(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		admin := uuid.New()
-		admins := []uuid.UUID{admin}
-		reqBody, err := json.Marshal(admins)
+		accountManager := uuid.New()
+		accountManagers := []uuid.UUID{accountManager}
+		reqBody, err := json.Marshal(accountManagers)
 		require.NoError(t, err)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/admins", bytes.NewReader(reqBody))
+			ctx, http.MethodPost, "/api/accountManagers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
 		var resErr *ent.ConstraintError
-		errors.As(errors.New("failed to create admin"), &resErr)
+		errors.As(errors.New("failed to create accountManager"), &resErr)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockAdminRepository.
+		h.Repository.MockAccountManagerRepository.
 			EXPECT().
-			AddAdmins(c.Request().Context(), admins).
+			AddAccountManagers(c.Request().Context(), accountManagers).
 			Return(resErr)
 
-		err = h.Handlers.PostAdmins(c)
+		err = h.Handlers.PostAccountManagers(c)
 		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 }
 
-func TestHandler_DeleteAdmin(t *testing.T) {
+func TestHandler_DeleteAccountManager(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
@@ -213,26 +213,26 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		admin := uuid.New()
-		admins := []uuid.UUID{admin}
-		reqBody, err := json.Marshal(admins)
+		accountManager := uuid.New()
+		accountManagers := []uuid.UUID{accountManager}
+		reqBody, err := json.Marshal(accountManagers)
 		require.NoError(t, err)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, "/api/admins", bytes.NewReader(reqBody))
+			ctx, http.MethodDelete, "/api/accountManagers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockAdminRepository.
+		h.Repository.MockAccountManagerRepository.
 			EXPECT().
-			DeleteAdmins(c.Request().Context(), admins).
+			DeleteAccountManagers(c.Request().Context(), accountManagers).
 			Return(nil)
 
-		require.NoError(t, h.Handlers.DeleteAdmins(c))
+		require.NoError(t, h.Handlers.DeleteAccountManagers(c))
 		require.Equal(t, http.StatusOK, rec.Code)
 	})
 
@@ -241,34 +241,34 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		admin := uuid.New()
-		admins := []uuid.UUID{admin}
-		reqBody, err := json.Marshal(admins)
+		accountManager := uuid.New()
+		accountManagers := []uuid.UUID{accountManager}
+		reqBody, err := json.Marshal(accountManagers)
 		require.NoError(t, err)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, "/api/admins", bytes.NewReader(reqBody))
+			ctx, http.MethodDelete, "/api/accountManagers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		resErr := errors.New("failed to delete admin")
+		resErr := errors.New("failed to delete accountManager")
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockAdminRepository.
+		h.Repository.MockAccountManagerRepository.
 			EXPECT().
-			DeleteAdmins(c.Request().Context(), admins).
+			DeleteAccountManagers(c.Request().Context(), accountManagers).
 			Return(resErr)
 
-		err = h.Handlers.DeleteAdmins(c)
+		err = h.Handlers.DeleteAccountManagers(c)
 		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 
-	t.Run("InvalidAdminID", func(t *testing.T) {
+	t.Run("InvalidAccountManagerID", func(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
@@ -279,7 +279,7 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, "/api/admins", bytes.NewReader(reqBody))
+			ctx, http.MethodDelete, "/api/accountManagers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -287,7 +287,7 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		err = h.Handlers.DeleteAdmins(c)
+		err = h.Handlers.DeleteAccountManagers(c)
 
 		require.Error(t, err)
 		// FIXME: http.StatusBadRequestの判定をしたい
@@ -298,29 +298,29 @@ func TestHandler_DeleteAdmin(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		admin := uuid.New()
-		admins := []uuid.UUID{admin}
-		reqBody, err := json.Marshal(admins)
+		accountManager := uuid.New()
+		accountManagers := []uuid.UUID{accountManager}
+		reqBody, err := json.Marshal(accountManagers)
 		require.NoError(t, err)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, "/api/admins", bytes.NewReader(reqBody))
+			ctx, http.MethodDelete, "/api/accountManagers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
 		var resErr *ent.ConstraintError
-		errors.As(errors.New("failed to delete admin"), &resErr)
+		errors.As(errors.New("failed to delete accountManager"), &resErr)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockAdminRepository.
+		h.Repository.MockAccountManagerRepository.
 			EXPECT().
-			DeleteAdmins(c.Request().Context(), admins).
+			DeleteAccountManagers(c.Request().Context(), accountManagers).
 			Return(resErr)
 
-		err = h.Handlers.DeleteAdmins(c)
+		err = h.Handlers.DeleteAccountManagers(c)
 		require.Error(t, err)
 		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})

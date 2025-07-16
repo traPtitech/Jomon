@@ -9,39 +9,39 @@ import (
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
-func (repo *EntRepository) GetAdmins(ctx context.Context) ([]*Admin, error) {
+func (repo *EntRepository) GetAccountManagers(ctx context.Context) ([]*AccountManager, error) {
 	users, err := repo.client.User.
 		Query().
-		Where(user.Admin(true)).
+		Where(user.AccountManager(true)).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	admins := lo.Map(users, func(u *ent.User, _ int) *Admin {
-		return &Admin{
+	accountManagers := lo.Map(users, func(u *ent.User, _ int) *AccountManager {
+		return &AccountManager{
 			ID: u.ID,
 		}
 	})
 
-	return admins, nil
+	return accountManagers, nil
 }
 
-func (repo *EntRepository) AddAdmins(ctx context.Context, userIDs []uuid.UUID) error {
+func (repo *EntRepository) AddAccountManagers(ctx context.Context, userIDs []uuid.UUID) error {
 	_, err := repo.client.User.
 		Update().
 		Where(user.IDIn(userIDs...)).
-		SetAdmin(true).
+		SetAccountManager(true).
 		Save(ctx)
 
 	return err
 }
 
-func (repo *EntRepository) DeleteAdmins(ctx context.Context, userIDs []uuid.UUID) error {
+func (repo *EntRepository) DeleteAccountManagers(ctx context.Context, userIDs []uuid.UUID) error {
 	_, err := repo.client.User.
 		Update().
 		Where(user.IDIn(userIDs...)).
-		SetAdmin(false).
+		SetAccountManager(false).
 		Save(ctx)
 
 	return err

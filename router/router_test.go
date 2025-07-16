@@ -15,7 +15,7 @@ import (
 )
 
 type MockRepository struct {
-	*mock_model.MockAdminRepository
+	*mock_model.MockAccountManagerRepository
 	*mock_model.MockCommentRepository
 	*mock_model.MockFileRepository
 	*mock_model.MockGroupBudgetRepository
@@ -38,7 +38,7 @@ type MockStorage struct {
 
 func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 	return &MockRepository{
-		MockAdminRepository:             mock_model.NewMockAdminRepository(ctrl),
+		MockAccountManagerRepository:    mock_model.NewMockAccountManagerRepository(ctrl),
 		MockCommentRepository:           mock_model.NewMockCommentRepository(ctrl),
 		MockFileRepository:              mock_model.NewMockFileRepository(ctrl),
 		MockGroupBudgetRepository:       mock_model.NewMockGroupBudgetRepository(ctrl),
@@ -85,16 +85,16 @@ func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, erro
 	}, nil
 }
 
-func makeUser(t *testing.T, admin bool) *model.User {
+func makeUser(t *testing.T, accountManager bool) *model.User {
 	t.Helper()
 	date := time.Now()
 
 	return &model.User{
-		ID:          uuid.New(),
-		Name:        random.AlphaNumeric(t, 20),
-		DisplayName: random.AlphaNumeric(t, 20),
-		Admin:       admin,
-		CreatedAt:   date,
-		UpdatedAt:   date,
+		ID:             uuid.New(),
+		Name:           random.AlphaNumeric(t, 20),
+		DisplayName:    random.AlphaNumeric(t, 20),
+		AccountManager: accountManager,
+		CreatedAt:      date,
+		UpdatedAt:      date,
 	}
 }
