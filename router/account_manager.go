@@ -41,7 +41,9 @@ func (h Handlers) PostAccountManagers(c echo.Context) error {
 	err := h.Repository.AddAccountManagers(ctx, accountManager)
 	if err != nil {
 		if ent.IsConstraintError(err) {
-			logger.Info("constraint error while adding accountManager in repository", zap.Error(err))
+			logger.Info(
+				"constraint error while adding accountManager in repository",
+				zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		logger.Error("failed to add accountManager in repository", zap.Error(err))

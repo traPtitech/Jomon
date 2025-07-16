@@ -58,7 +58,8 @@ type Member struct {
 	ID uuid.UUID `json:"id"`
 }
 
-var errUserIsNotAccountManagerOrGroupOwner error = errors.New("user is not accountManager or group owner")
+var errUserIsNotAccountManagerOrGroupOwner error = errors.New(
+	"user is not accountManager or group owner")
 
 // GetGroups GET /groups
 func (h Handlers) GetGroups(c echo.Context) error {

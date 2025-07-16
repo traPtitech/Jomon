@@ -36,7 +36,8 @@ var (
 		"application/msword": true,
 		"application/zip":    true,
 	}
-	errUserIsNotAccountManagerOrFileCreator = errors.New("user is not accountManager or file creator")
+	errUserIsNotAccountManagerOrFileCreator = errors.New(
+		"user is not accountManager or file creator")
 )
 
 func (h Handlers) PostFile(c echo.Context) error {
