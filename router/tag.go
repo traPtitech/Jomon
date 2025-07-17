@@ -14,8 +14,7 @@ import (
 )
 
 type PostTagRequest struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name string `json:"name"`
 }
 
 type PutTagRequest = PostTagRequest
