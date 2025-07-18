@@ -234,8 +234,7 @@ func TestHandlers_PutTag(t *testing.T) {
 			UpdatedAt: date,
 		}
 		reqTag := PutTagRequest{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
+			Name: tag.Name,
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
@@ -338,8 +337,7 @@ func TestHandlers_PutTag(t *testing.T) {
 			UpdatedAt: date,
 		}
 		reqTag := PutTagRequest{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
+			Name: tag.Name,
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
@@ -376,8 +374,7 @@ func TestHandlers_PutTag(t *testing.T) {
 			UpdatedAt: date,
 		}
 		reqTag := PutTagRequest{
-			Name:        tag.Name,
-			Description: random.AlphaNumeric(t, 50),
+			Name: tag.Name,
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
