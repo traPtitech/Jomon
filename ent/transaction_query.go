@@ -13,9 +13,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -31,7 +31,7 @@ type TransactionQuery struct {
 	withDetail      *TransactionDetailQuery
 	withTag         *TagQuery
 	withGroupBudget *GroupBudgetQuery
-	withRequest     *RequestQuery
+	withApplication *ApplicationQuery
 	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -135,9 +135,9 @@ func (tq *TransactionQuery) QueryGroupBudget() *GroupBudgetQuery {
 	return query
 }
 
-// QueryRequest chains the current query on the "request" edge.
-func (tq *TransactionQuery) QueryRequest() *RequestQuery {
-	query := (&RequestClient{config: tq.config}).Query()
+// QueryApplication chains the current query on the "application" edge.
+func (tq *TransactionQuery) QueryApplication() *ApplicationQuery {
+	query := (&ApplicationClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -148,8 +148,8 @@ func (tq *TransactionQuery) QueryRequest() *RequestQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
-			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, transaction.RequestTable, transaction.RequestColumn),
+			sqlgraph.To(application.Table, application.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, transaction.ApplicationTable, transaction.ApplicationColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -352,7 +352,7 @@ func (tq *TransactionQuery) Clone() *TransactionQuery {
 		withDetail:      tq.withDetail.Clone(),
 		withTag:         tq.withTag.Clone(),
 		withGroupBudget: tq.withGroupBudget.Clone(),
-		withRequest:     tq.withRequest.Clone(),
+		withApplication: tq.withApplication.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
@@ -392,14 +392,14 @@ func (tq *TransactionQuery) WithGroupBudget(opts ...func(*GroupBudgetQuery)) *Tr
 	return tq
 }
 
-// WithRequest tells the query-builder to eager-load the nodes that are connected to
-// the "request" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TransactionQuery) WithRequest(opts ...func(*RequestQuery)) *TransactionQuery {
-	query := (&RequestClient{config: tq.config}).Query()
+// WithApplication tells the query-builder to eager-load the nodes that are connected to
+// the "application" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TransactionQuery) WithApplication(opts ...func(*ApplicationQuery)) *TransactionQuery {
+	query := (&ApplicationClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tq.withRequest = query
+	tq.withApplication = query
 	return tq
 }
 
@@ -486,10 +486,10 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 			tq.withDetail != nil,
 			tq.withTag != nil,
 			tq.withGroupBudget != nil,
-			tq.withRequest != nil,
+			tq.withApplication != nil,
 		}
 	)
-	if tq.withGroupBudget != nil || tq.withRequest != nil {
+	if tq.withGroupBudget != nil || tq.withApplication != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -532,9 +532,9 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 			return nil, err
 		}
 	}
-	if query := tq.withRequest; query != nil {
-		if err := tq.loadRequest(ctx, query, nodes, nil,
-			func(n *Transaction, e *Request) { n.Edges.Request = e }); err != nil {
+	if query := tq.withApplication; query != nil {
+		if err := tq.loadApplication(ctx, query, nodes, nil,
+			func(n *Transaction, e *Application) { n.Edges.Application = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -662,14 +662,14 @@ func (tq *TransactionQuery) loadGroupBudget(ctx context.Context, query *GroupBud
 	}
 	return nil
 }
-func (tq *TransactionQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes []*Transaction, init func(*Transaction), assign func(*Transaction, *Request)) error {
+func (tq *TransactionQuery) loadApplication(ctx context.Context, query *ApplicationQuery, nodes []*Transaction, init func(*Transaction), assign func(*Transaction, *Application)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*Transaction)
 	for i := range nodes {
-		if nodes[i].request_transaction == nil {
+		if nodes[i].application_transaction == nil {
 			continue
 		}
-		fk := *nodes[i].request_transaction
+		fk := *nodes[i].application_transaction
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -678,7 +678,7 @@ func (tq *TransactionQuery) loadRequest(ctx context.Context, query *RequestQuery
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(request.IDIn(ids...))
+	query.Where(application.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -686,7 +686,7 @@ func (tq *TransactionQuery) loadRequest(ctx context.Context, query *RequestQuery
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "request_transaction" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "application_transaction" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

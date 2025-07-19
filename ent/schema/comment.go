@@ -34,7 +34,7 @@ func (Comment) Fields() []ent.Field {
 // Edges of the Comment.
 func (Comment) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("request", Request.Type).
+		edge.From("application", Application.Type).
 			Ref("comment").
 			Unique().
 			Required(),

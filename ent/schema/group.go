@@ -46,6 +46,6 @@ func (Group) Edges() []ent.Edge {
 			}),
 		edge.To("user", User.Type),
 		edge.To("owner", User.Type),
-		edge.To("request", Request.Type),
+		edge.To("application", Application.Type),
 	}
 }

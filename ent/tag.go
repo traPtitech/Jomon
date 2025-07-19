@@ -34,8 +34,8 @@ type Tag struct {
 
 // TagEdges holds the relations/edges for other nodes in the graph.
 type TagEdges struct {
-	// Request holds the value of the request edge.
-	Request []*Request `json:"request,omitempty"`
+	// Application holds the value of the application edge.
+	Application []*Application `json:"application,omitempty"`
 	// Transaction holds the value of the transaction edge.
 	Transaction []*Transaction `json:"transaction,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -43,13 +43,13 @@ type TagEdges struct {
 	loadedTypes [2]bool
 }
 
-// RequestOrErr returns the Request value or an error if the edge
+// ApplicationOrErr returns the Application value or an error if the edge
 // was not loaded in eager-loading.
-func (e TagEdges) RequestOrErr() ([]*Request, error) {
+func (e TagEdges) ApplicationOrErr() ([]*Application, error) {
 	if e.loadedTypes[0] {
-		return e.Request, nil
+		return e.Application, nil
 	}
-	return nil, &NotLoadedError{edge: "request"}
+	return nil, &NotLoadedError{edge: "application"}
 }
 
 // TransactionOrErr returns the Transaction value or an error if the edge
@@ -131,9 +131,9 @@ func (t *Tag) Value(name string) (ent.Value, error) {
 	return t.selectValues.Get(name)
 }
 
-// QueryRequest queries the "request" edge of the Tag entity.
-func (t *Tag) QueryRequest() *RequestQuery {
-	return NewTagClient(t.config).QueryRequest(t)
+// QueryApplication queries the "application" edge of the Tag entity.
+func (t *Tag) QueryApplication() *ApplicationQuery {
+	return NewTagClient(t.config).QueryApplication(t)
 }
 
 // QueryTransaction queries the "transaction" edge of the Tag entity.

@@ -296,21 +296,21 @@ func DeletedAtNotNil() predicate.File {
 	return predicate.File(sql.FieldNotNull(FieldDeletedAt))
 }
 
-// HasRequest applies the HasEdge predicate on the "request" edge.
-func HasRequest() predicate.File {
+// HasApplication applies the HasEdge predicate on the "application" edge.
+func HasApplication() predicate.File {
 	return predicate.File(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, ApplicationTable, ApplicationColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasRequestWith applies the HasEdge predicate on the "request" edge with a given conditions (other predicates).
-func HasRequestWith(preds ...predicate.Request) predicate.File {
+// HasApplicationWith applies the HasEdge predicate on the "application" edge with a given conditions (other predicates).
+func HasApplicationWith(preds ...predicate.Application) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
-		step := newRequestStep()
+		step := newApplicationStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -22,7 +22,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 
 		var tags []*Tag
-		var targets []*RequestTarget
+		var targets []*ApplicationTarget
 		var group *Group
 		user, err := repo.CreateUser(
 			ctx,
@@ -30,7 +30,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 			random.AlphaNumeric(t, 30),
 			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(
+		application, err := repo.CreateApplication(
 			ctx,
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 50),
@@ -42,7 +42,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 		name := random.AlphaNumeric(t, 20)
 
-		file, err := repo.CreateFile(ctx, name, mimetype, request.ID, user.ID)
+		file, err := repo.CreateFile(ctx, name, mimetype, application.ID, user.ID)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
@@ -56,7 +56,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		testutil.RequireEqual(t, exp, file, opts...)
 	})
 
-	t.Run("UnknownRequest", func(t *testing.T) {
+	t.Run("UnknownApplication", func(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 
@@ -66,7 +66,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 			random.AlphaNumeric(t, 30),
 			true)
 		require.NoError(t, err)
-		request := Request{
+		application := Application{
 			ID: uuid.New(),
 		}
 
@@ -74,7 +74,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 		name := random.AlphaNumeric(t, 20)
 
-		_, err = repo.CreateFile(ctx, name, mimetype, request.ID, user.ID)
+		_, err = repo.CreateFile(ctx, name, mimetype, application.ID, user.ID)
 		require.Error(t, err)
 	})
 
@@ -83,7 +83,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 
 		var tags []*Tag
-		var targets []*RequestTarget
+		var targets []*ApplicationTarget
 		var group *Group
 		user, err := repo.CreateUser(
 			ctx,
@@ -91,7 +91,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 			random.AlphaNumeric(t, 30),
 			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(
+		application, err := repo.CreateApplication(
 			ctx,
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 50),
@@ -101,7 +101,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 
 		mimetype := "image/png"
 
-		_, err = repo.CreateFile(ctx, "", mimetype, request.ID, user.ID)
+		_, err = repo.CreateFile(ctx, "", mimetype, application.ID, user.ID)
 		require.Error(t, err)
 	})
 }
@@ -117,7 +117,7 @@ func TestEntRepository_GetFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 
 		var tags []*Tag
-		var targets []*RequestTarget
+		var targets []*ApplicationTarget
 		var group *Group
 		user, err := repo.CreateUser(
 			ctx,
@@ -125,7 +125,7 @@ func TestEntRepository_GetFile(t *testing.T) {
 			random.AlphaNumeric(t, 30),
 			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(
+		application, err := repo.CreateApplication(
 			ctx,
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 50),
@@ -137,7 +137,7 @@ func TestEntRepository_GetFile(t *testing.T) {
 
 		name := random.AlphaNumeric(t, 20)
 
-		file, err := repo.CreateFile(ctx, name, mimetype, request.ID, user.ID)
+		file, err := repo.CreateFile(ctx, name, mimetype, application.ID, user.ID)
 		require.NoError(t, err)
 		got, err := repo.GetFile(ctx, file.ID)
 		require.NoError(t, err)
@@ -172,7 +172,7 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 
 		var tags []*Tag
-		var targets []*RequestTarget
+		var targets []*ApplicationTarget
 		var group *Group
 		user, err := repo.CreateUser(
 			ctx,
@@ -180,7 +180,7 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 			random.AlphaNumeric(t, 30),
 			true)
 		require.NoError(t, err)
-		request, err := repo.CreateRequest(
+		application, err := repo.CreateApplication(
 			ctx,
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 50),
@@ -192,13 +192,13 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 
 		name := random.AlphaNumeric(t, 20)
 
-		file, err := repo.CreateFile(ctx, name, mimetype, request.ID, user.ID)
+		file, err := repo.CreateFile(ctx, name, mimetype, application.ID, user.ID)
 		require.NoError(t, err)
 
 		err = repo.DeleteFile(ctx, file.ID)
 		require.NoError(t, err)
 
-		r, err := repo.GetRequest(ctx, request.ID)
+		r, err := repo.GetApplication(ctx, application.ID)
 		require.NoError(t, err)
 		require.Empty(t, r.Files)
 	})

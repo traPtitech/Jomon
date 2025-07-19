@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -93,23 +93,23 @@ func (fu *FileUpdate) ClearDeletedAt() *FileUpdate {
 	return fu
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (fu *FileUpdate) SetRequestID(id uuid.UUID) *FileUpdate {
-	fu.mutation.SetRequestID(id)
+// SetApplicationID sets the "application" edge to the Application entity by ID.
+func (fu *FileUpdate) SetApplicationID(id uuid.UUID) *FileUpdate {
+	fu.mutation.SetApplicationID(id)
 	return fu
 }
 
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (fu *FileUpdate) SetNillableRequestID(id *uuid.UUID) *FileUpdate {
+// SetNillableApplicationID sets the "application" edge to the Application entity by ID if the given value is not nil.
+func (fu *FileUpdate) SetNillableApplicationID(id *uuid.UUID) *FileUpdate {
 	if id != nil {
-		fu = fu.SetRequestID(*id)
+		fu = fu.SetApplicationID(*id)
 	}
 	return fu
 }
 
-// SetRequest sets the "request" edge to the Request entity.
-func (fu *FileUpdate) SetRequest(r *Request) *FileUpdate {
-	return fu.SetRequestID(r.ID)
+// SetApplication sets the "application" edge to the Application entity.
+func (fu *FileUpdate) SetApplication(a *Application) *FileUpdate {
+	return fu.SetApplicationID(a.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
@@ -128,9 +128,9 @@ func (fu *FileUpdate) Mutation() *FileMutation {
 	return fu.mutation
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
-func (fu *FileUpdate) ClearRequest() *FileUpdate {
-	fu.mutation.ClearRequest()
+// ClearApplication clears the "application" edge to the Application entity.
+func (fu *FileUpdate) ClearApplication() *FileUpdate {
+	fu.mutation.ClearApplication()
 	return fu
 }
 
@@ -207,28 +207,28 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if fu.mutation.DeletedAtCleared() {
 		_spec.ClearField(file.FieldDeletedAt, field.TypeTime)
 	}
-	if fu.mutation.RequestCleared() {
+	if fu.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.RequestTable,
-			Columns: []string{file.RequestColumn},
+			Table:   file.ApplicationTable,
+			Columns: []string{file.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fu.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := fu.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.RequestTable,
-			Columns: []string{file.RequestColumn},
+			Table:   file.ApplicationTable,
+			Columns: []string{file.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -347,23 +347,23 @@ func (fuo *FileUpdateOne) ClearDeletedAt() *FileUpdateOne {
 	return fuo
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (fuo *FileUpdateOne) SetRequestID(id uuid.UUID) *FileUpdateOne {
-	fuo.mutation.SetRequestID(id)
+// SetApplicationID sets the "application" edge to the Application entity by ID.
+func (fuo *FileUpdateOne) SetApplicationID(id uuid.UUID) *FileUpdateOne {
+	fuo.mutation.SetApplicationID(id)
 	return fuo
 }
 
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableRequestID(id *uuid.UUID) *FileUpdateOne {
+// SetNillableApplicationID sets the "application" edge to the Application entity by ID if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableApplicationID(id *uuid.UUID) *FileUpdateOne {
 	if id != nil {
-		fuo = fuo.SetRequestID(*id)
+		fuo = fuo.SetApplicationID(*id)
 	}
 	return fuo
 }
 
-// SetRequest sets the "request" edge to the Request entity.
-func (fuo *FileUpdateOne) SetRequest(r *Request) *FileUpdateOne {
-	return fuo.SetRequestID(r.ID)
+// SetApplication sets the "application" edge to the Application entity.
+func (fuo *FileUpdateOne) SetApplication(a *Application) *FileUpdateOne {
+	return fuo.SetApplicationID(a.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
@@ -382,9 +382,9 @@ func (fuo *FileUpdateOne) Mutation() *FileMutation {
 	return fuo.mutation
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
-func (fuo *FileUpdateOne) ClearRequest() *FileUpdateOne {
-	fuo.mutation.ClearRequest()
+// ClearApplication clears the "application" edge to the Application entity.
+func (fuo *FileUpdateOne) ClearApplication() *FileUpdateOne {
+	fuo.mutation.ClearApplication()
 	return fuo
 }
 
@@ -491,28 +491,28 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 	if fuo.mutation.DeletedAtCleared() {
 		_spec.ClearField(file.FieldDeletedAt, field.TypeTime)
 	}
-	if fuo.mutation.RequestCleared() {
+	if fuo.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.RequestTable,
-			Columns: []string{file.RequestColumn},
+			Table:   file.ApplicationTable,
+			Columns: []string{file.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fuo.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := fuo.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.RequestTable,
-			Columns: []string{file.RequestColumn},
+			Table:   file.ApplicationTable,
+			Columns: []string{file.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

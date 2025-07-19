@@ -35,7 +35,7 @@ func (Tag) Fields() []ent.Field {
 // Edges of the Tag.
 func (Tag) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("request", Request.Type).
+		edge.From("application", Application.Type).
 			Ref("tag"),
 		edge.From("transaction", Transaction.Type).
 			Ref("tag"),

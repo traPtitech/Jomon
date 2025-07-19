@@ -7,9 +7,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -25,7 +25,7 @@ func (repo *EntRepository) GetTransactions(
 			Query().
 			WithTag().
 			WithDetail().
-			WithRequest().
+			WithApplication().
 			WithGroupBudget(func(q *ent.GroupBudgetQuery) {
 				q.WithGroup()
 			}).
@@ -35,7 +35,7 @@ func (repo *EntRepository) GetTransactions(
 			Query().
 			WithTag().
 			WithDetail().
-			WithRequest().
+			WithApplication().
 			WithGroupBudget(func(q *ent.GroupBudgetQuery) {
 				q.WithGroup()
 			}).
@@ -45,7 +45,7 @@ func (repo *EntRepository) GetTransactions(
 			Query().
 			WithTag().
 			WithDetail().
-			WithRequest().
+			WithApplication().
 			WithGroupBudget(func(q *ent.GroupBudgetQuery) {
 				q.WithGroup()
 			}).
@@ -59,7 +59,7 @@ func (repo *EntRepository) GetTransactions(
 			Query().
 			WithTag().
 			WithDetail().
-			WithRequest().
+			WithApplication().
 			WithGroupBudget(func(q *ent.GroupBudgetQuery) {
 				q.WithGroup()
 			}).
@@ -104,10 +104,10 @@ func (repo *EntRepository) GetTransactions(
 			))
 	}
 
-	if query.Request != nil {
+	if query.Application != nil {
 		transactionsq = transactionsq.
-			Where(transaction.HasRequestWith(
-				request.IDEQ(*query.Request),
+			Where(transaction.HasApplicationWith(
+				application.IDEQ(*query.Application),
 			))
 	}
 
@@ -133,7 +133,7 @@ func (repo *EntRepository) GetTransaction(
 		Where(transaction.ID(transactionID)).
 		WithTag().
 		WithDetail().
-		WithRequest().
+		WithApplication().
 		WithGroupBudget(func(q *ent.GroupBudgetQuery) {
 			q.WithGroup()
 		}).
@@ -148,7 +148,7 @@ func (repo *EntRepository) GetTransaction(
 
 func (repo *EntRepository) CreateTransaction(
 	ctx context.Context, title string, amount int, target string,
-	tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID,
+	tags []*uuid.UUID, groupID *uuid.UUID, applicationID *uuid.UUID,
 ) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
@@ -197,10 +197,10 @@ func (repo *EntRepository) CreateTransaction(
 			SetGroupBudgetID(gb.ID)
 	}
 
-	// Set Request to the Transaction
-	if requestID != nil {
+	// Set Application to the Transaction
+	if applicationID != nil {
 		query.
-			SetRequestID(*requestID)
+			SetApplicationID(*applicationID)
 	}
 
 	// Create transaction
@@ -228,7 +228,7 @@ func (repo *EntRepository) CreateTransaction(
 		Where(transaction.ID(trns.ID)).
 		WithTag().
 		WithDetail().
-		WithRequest().
+		WithApplication().
 		WithGroupBudget(func(q *ent.GroupBudgetQuery) {
 			q.WithGroup()
 		}).
@@ -249,7 +249,7 @@ func (repo *EntRepository) CreateTransaction(
 
 func (repo *EntRepository) UpdateTransaction(
 	ctx context.Context, transactionID uuid.UUID, title string, amount int, target string,
-	tags []*uuid.UUID, groupID *uuid.UUID, requestID *uuid.UUID,
+	tags []*uuid.UUID, groupID *uuid.UUID, applicationID *uuid.UUID,
 ) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
@@ -323,11 +323,11 @@ func (repo *EntRepository) UpdateTransaction(
 		return nil, err
 	}
 
-	// Update Request to the Transaction
-	if requestID != nil {
+	// Update Application to the Transaction
+	if applicationID != nil {
 		_, err = tx.Client().Transaction.
 			UpdateOneID(transactionID).
-			SetRequestID(*requestID).
+			SetApplicationID(*applicationID).
 			Save(ctx)
 		if err != nil {
 			err = RollbackWithError(tx, err)
@@ -336,7 +336,7 @@ func (repo *EntRepository) UpdateTransaction(
 	} else {
 		_, err = tx.Client().Transaction.
 			UpdateOneID(transactionID).
-			ClearRequest().
+			ClearApplication().
 			Save(ctx)
 		if err != nil {
 			err = RollbackWithError(tx, err)
@@ -350,7 +350,7 @@ func (repo *EntRepository) UpdateTransaction(
 		Where(transaction.ID(transactionID)).
 		WithTag().
 		WithDetail().
-		WithRequest().
+		WithApplication().
 		WithGroupBudget(func(q *ent.GroupBudgetQuery) {
 			q.WithGroup()
 		}).
@@ -387,17 +387,17 @@ func ConvertEntTransactionToModelTransactionResponse(
 		g = ConvertEntGroupToModelGroup(transaction.Edges.GroupBudget.Edges.Group)
 	}
 	var r *uuid.UUID
-	if transaction.Edges.Request != nil {
-		r = &transaction.Edges.Request.ID
+	if transaction.Edges.Application != nil {
+		r = &transaction.Edges.Application.ID
 	}
 	return &TransactionResponse{
-		ID:        transaction.ID,
-		Title:     transaction.Edges.Detail.Title,
-		Amount:    transaction.Edges.Detail.Amount,
-		Target:    transaction.Edges.Detail.Target,
-		Request:   r,
-		Tags:      tags,
-		Group:     g,
-		CreatedAt: transaction.CreatedAt,
+		ID:          transaction.ID,
+		Title:       transaction.Edges.Detail.Title,
+		Amount:      transaction.Edges.Detail.Amount,
+		Target:      transaction.Edges.Detail.Target,
+		Application: r,
+		Tags:        tags,
+		Group:       g,
+		CreatedAt:   transaction.CreatedAt,
 	}
 }

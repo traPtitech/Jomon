@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 )
@@ -26,7 +26,7 @@ type TagQuery struct {
 	order           []tag.OrderOption
 	inters          []Interceptor
 	predicates      []predicate.Tag
-	withRequest     *RequestQuery
+	withApplication *ApplicationQuery
 	withTransaction *TransactionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -64,9 +64,9 @@ func (tq *TagQuery) Order(o ...tag.OrderOption) *TagQuery {
 	return tq
 }
 
-// QueryRequest chains the current query on the "request" edge.
-func (tq *TagQuery) QueryRequest() *RequestQuery {
-	query := (&RequestClient{config: tq.config}).Query()
+// QueryApplication chains the current query on the "application" edge.
+func (tq *TagQuery) QueryApplication() *ApplicationQuery {
+	query := (&ApplicationClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -77,8 +77,8 @@ func (tq *TagQuery) QueryRequest() *RequestQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, selector),
-			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, tag.RequestTable, tag.RequestPrimaryKey...),
+			sqlgraph.To(application.Table, application.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, tag.ApplicationTable, tag.ApplicationPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -300,7 +300,7 @@ func (tq *TagQuery) Clone() *TagQuery {
 		order:           append([]tag.OrderOption{}, tq.order...),
 		inters:          append([]Interceptor{}, tq.inters...),
 		predicates:      append([]predicate.Tag{}, tq.predicates...),
-		withRequest:     tq.withRequest.Clone(),
+		withApplication: tq.withApplication.Clone(),
 		withTransaction: tq.withTransaction.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
@@ -308,14 +308,14 @@ func (tq *TagQuery) Clone() *TagQuery {
 	}
 }
 
-// WithRequest tells the query-builder to eager-load the nodes that are connected to
-// the "request" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TagQuery) WithRequest(opts ...func(*RequestQuery)) *TagQuery {
-	query := (&RequestClient{config: tq.config}).Query()
+// WithApplication tells the query-builder to eager-load the nodes that are connected to
+// the "application" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TagQuery) WithApplication(opts ...func(*ApplicationQuery)) *TagQuery {
+	query := (&ApplicationClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tq.withRequest = query
+	tq.withApplication = query
 	return tq
 }
 
@@ -409,7 +409,7 @@ func (tq *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 		nodes       = []*Tag{}
 		_spec       = tq.querySpec()
 		loadedTypes = [2]bool{
-			tq.withRequest != nil,
+			tq.withApplication != nil,
 			tq.withTransaction != nil,
 		}
 	)
@@ -431,10 +431,10 @@ func (tq *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := tq.withRequest; query != nil {
-		if err := tq.loadRequest(ctx, query, nodes,
-			func(n *Tag) { n.Edges.Request = []*Request{} },
-			func(n *Tag, e *Request) { n.Edges.Request = append(n.Edges.Request, e) }); err != nil {
+	if query := tq.withApplication; query != nil {
+		if err := tq.loadApplication(ctx, query, nodes,
+			func(n *Tag) { n.Edges.Application = []*Application{} },
+			func(n *Tag, e *Application) { n.Edges.Application = append(n.Edges.Application, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -448,7 +448,7 @@ func (tq *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 	return nodes, nil
 }
 
-func (tq *TagQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Request)) error {
+func (tq *TagQuery) loadApplication(ctx context.Context, query *ApplicationQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Application)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[uuid.UUID]*Tag)
 	nids := make(map[uuid.UUID]map[*Tag]struct{})
@@ -460,11 +460,11 @@ func (tq *TagQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes 
 		}
 	}
 	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(tag.RequestTable)
-		s.Join(joinT).On(s.C(request.FieldID), joinT.C(tag.RequestPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(tag.RequestPrimaryKey[1]), edgeIDs...))
+		joinT := sql.Table(tag.ApplicationTable)
+		s.Join(joinT).On(s.C(application.FieldID), joinT.C(tag.ApplicationPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(tag.ApplicationPrimaryKey[1]), edgeIDs...))
 		columns := s.SelectedColumns()
-		s.Select(joinT.C(tag.RequestPrimaryKey[1]))
+		s.Select(joinT.C(tag.ApplicationPrimaryKey[1]))
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})
@@ -494,14 +494,14 @@ func (tq *TagQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes 
 			}
 		})
 	})
-	neighbors, err := withInterceptors[[]*Request](ctx, query, qr, query.inters)
+	neighbors, err := withInterceptors[[]*Application](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
 		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "request" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected "application" node returned %v`, n.ID)
 		}
 		for kn := range nodes {
 			assign(kn, n)

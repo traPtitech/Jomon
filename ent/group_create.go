@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -151,19 +151,19 @@ func (gc *GroupCreate) AddOwner(u ...*User) *GroupCreate {
 	return gc.AddOwnerIDs(ids...)
 }
 
-// AddRequestIDs adds the "request" edge to the Request entity by IDs.
-func (gc *GroupCreate) AddRequestIDs(ids ...uuid.UUID) *GroupCreate {
-	gc.mutation.AddRequestIDs(ids...)
+// AddApplicationIDs adds the "application" edge to the Application entity by IDs.
+func (gc *GroupCreate) AddApplicationIDs(ids ...uuid.UUID) *GroupCreate {
+	gc.mutation.AddApplicationIDs(ids...)
 	return gc
 }
 
-// AddRequest adds the "request" edges to the Request entity.
-func (gc *GroupCreate) AddRequest(r ...*Request) *GroupCreate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddApplication adds the "application" edges to the Application entity.
+func (gc *GroupCreate) AddApplication(a ...*Application) *GroupCreate {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return gc.AddRequestIDs(ids...)
+	return gc.AddApplicationIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -341,15 +341,15 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := gc.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := gc.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.RequestTable,
-			Columns: []string{group.RequestColumn},
+			Table:   group.ApplicationTable,
+			Columns: []string{group.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

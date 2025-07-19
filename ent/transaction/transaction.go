@@ -23,8 +23,8 @@ const (
 	EdgeTag = "tag"
 	// EdgeGroupBudget holds the string denoting the group_budget edge name in mutations.
 	EdgeGroupBudget = "group_budget"
-	// EdgeRequest holds the string denoting the request edge name in mutations.
-	EdgeRequest = "request"
+	// EdgeApplication holds the string denoting the application edge name in mutations.
+	EdgeApplication = "application"
 	// Table holds the table name of the transaction in the database.
 	Table = "transactions"
 	// DetailTable is the table that holds the detail relation/edge.
@@ -46,13 +46,13 @@ const (
 	GroupBudgetInverseTable = "group_budgets"
 	// GroupBudgetColumn is the table column denoting the group_budget relation/edge.
 	GroupBudgetColumn = "group_budget_transaction"
-	// RequestTable is the table that holds the request relation/edge.
-	RequestTable = "transactions"
-	// RequestInverseTable is the table name for the Request entity.
-	// It exists in this package in order to avoid circular dependency with the "request" package.
-	RequestInverseTable = "requests"
-	// RequestColumn is the table column denoting the request relation/edge.
-	RequestColumn = "request_transaction"
+	// ApplicationTable is the table that holds the application relation/edge.
+	ApplicationTable = "transactions"
+	// ApplicationInverseTable is the table name for the Application entity.
+	// It exists in this package in order to avoid circular dependency with the "application" package.
+	ApplicationInverseTable = "applications"
+	// ApplicationColumn is the table column denoting the application relation/edge.
+	ApplicationColumn = "application_transaction"
 )
 
 // Columns holds all SQL columns for transaction fields.
@@ -64,8 +64,8 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "transactions"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"application_transaction",
 	"group_budget_transaction",
-	"request_transaction",
 }
 
 var (
@@ -137,10 +137,10 @@ func ByGroupBudgetField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByRequestField orders the results by request field.
-func ByRequestField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByApplicationField orders the results by application field.
+func ByApplicationField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newRequestStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newApplicationStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newDetailStep() *sqlgraph.Step {
@@ -164,10 +164,10 @@ func newGroupBudgetStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, GroupBudgetTable, GroupBudgetColumn),
 	)
 }
-func newRequestStep() *sqlgraph.Step {
+func newApplicationStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(RequestInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
+		sqlgraph.To(ApplicationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ApplicationTable, ApplicationColumn),
 	)
 }

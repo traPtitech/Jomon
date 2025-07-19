@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -92,23 +92,23 @@ func (tu *TransactionUpdate) SetGroupBudget(g *GroupBudget) *TransactionUpdate {
 	return tu.SetGroupBudgetID(g.ID)
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (tu *TransactionUpdate) SetRequestID(id uuid.UUID) *TransactionUpdate {
-	tu.mutation.SetRequestID(id)
+// SetApplicationID sets the "application" edge to the Application entity by ID.
+func (tu *TransactionUpdate) SetApplicationID(id uuid.UUID) *TransactionUpdate {
+	tu.mutation.SetApplicationID(id)
 	return tu
 }
 
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableRequestID(id *uuid.UUID) *TransactionUpdate {
+// SetNillableApplicationID sets the "application" edge to the Application entity by ID if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableApplicationID(id *uuid.UUID) *TransactionUpdate {
 	if id != nil {
-		tu = tu.SetRequestID(*id)
+		tu = tu.SetApplicationID(*id)
 	}
 	return tu
 }
 
-// SetRequest sets the "request" edge to the Request entity.
-func (tu *TransactionUpdate) SetRequest(r *Request) *TransactionUpdate {
-	return tu.SetRequestID(r.ID)
+// SetApplication sets the "application" edge to the Application entity.
+func (tu *TransactionUpdate) SetApplication(a *Application) *TransactionUpdate {
+	return tu.SetApplicationID(a.ID)
 }
 
 // Mutation returns the TransactionMutation object of the builder.
@@ -149,9 +149,9 @@ func (tu *TransactionUpdate) ClearGroupBudget() *TransactionUpdate {
 	return tu
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
-func (tu *TransactionUpdate) ClearRequest() *TransactionUpdate {
-	tu.mutation.ClearRequest()
+// ClearApplication clears the "application" edge to the Application entity.
+func (tu *TransactionUpdate) ClearApplication() *TransactionUpdate {
+	tu.mutation.ClearApplication()
 	return tu
 }
 
@@ -308,28 +308,28 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.RequestCleared() {
+	if tu.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   transaction.RequestTable,
-			Columns: []string{transaction.RequestColumn},
+			Table:   transaction.ApplicationTable,
+			Columns: []string{transaction.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := tu.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   transaction.RequestTable,
-			Columns: []string{transaction.RequestColumn},
+			Table:   transaction.ApplicationTable,
+			Columns: []string{transaction.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -416,23 +416,23 @@ func (tuo *TransactionUpdateOne) SetGroupBudget(g *GroupBudget) *TransactionUpda
 	return tuo.SetGroupBudgetID(g.ID)
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (tuo *TransactionUpdateOne) SetRequestID(id uuid.UUID) *TransactionUpdateOne {
-	tuo.mutation.SetRequestID(id)
+// SetApplicationID sets the "application" edge to the Application entity by ID.
+func (tuo *TransactionUpdateOne) SetApplicationID(id uuid.UUID) *TransactionUpdateOne {
+	tuo.mutation.SetApplicationID(id)
 	return tuo
 }
 
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableRequestID(id *uuid.UUID) *TransactionUpdateOne {
+// SetNillableApplicationID sets the "application" edge to the Application entity by ID if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableApplicationID(id *uuid.UUID) *TransactionUpdateOne {
 	if id != nil {
-		tuo = tuo.SetRequestID(*id)
+		tuo = tuo.SetApplicationID(*id)
 	}
 	return tuo
 }
 
-// SetRequest sets the "request" edge to the Request entity.
-func (tuo *TransactionUpdateOne) SetRequest(r *Request) *TransactionUpdateOne {
-	return tuo.SetRequestID(r.ID)
+// SetApplication sets the "application" edge to the Application entity.
+func (tuo *TransactionUpdateOne) SetApplication(a *Application) *TransactionUpdateOne {
+	return tuo.SetApplicationID(a.ID)
 }
 
 // Mutation returns the TransactionMutation object of the builder.
@@ -473,9 +473,9 @@ func (tuo *TransactionUpdateOne) ClearGroupBudget() *TransactionUpdateOne {
 	return tuo
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
-func (tuo *TransactionUpdateOne) ClearRequest() *TransactionUpdateOne {
-	tuo.mutation.ClearRequest()
+// ClearApplication clears the "application" edge to the Application entity.
+func (tuo *TransactionUpdateOne) ClearApplication() *TransactionUpdateOne {
+	tuo.mutation.ClearApplication()
 	return tuo
 }
 
@@ -662,28 +662,28 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tuo.mutation.RequestCleared() {
+	if tuo.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   transaction.RequestTable,
-			Columns: []string{transaction.RequestColumn},
+			Table:   transaction.ApplicationTable,
+			Columns: []string{transaction.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := tuo.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   transaction.RequestTable,
-			Columns: []string{transaction.RequestColumn},
+			Table:   transaction.ApplicationTable,
+			Columns: []string{transaction.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

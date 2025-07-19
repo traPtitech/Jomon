@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 )
@@ -85,19 +85,19 @@ func (tu *TagUpdate) ClearDeletedAt() *TagUpdate {
 	return tu
 }
 
-// AddRequestIDs adds the "request" edge to the Request entity by IDs.
-func (tu *TagUpdate) AddRequestIDs(ids ...uuid.UUID) *TagUpdate {
-	tu.mutation.AddRequestIDs(ids...)
+// AddApplicationIDs adds the "application" edge to the Application entity by IDs.
+func (tu *TagUpdate) AddApplicationIDs(ids ...uuid.UUID) *TagUpdate {
+	tu.mutation.AddApplicationIDs(ids...)
 	return tu
 }
 
-// AddRequest adds the "request" edges to the Request entity.
-func (tu *TagUpdate) AddRequest(r ...*Request) *TagUpdate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddApplication adds the "application" edges to the Application entity.
+func (tu *TagUpdate) AddApplication(a ...*Application) *TagUpdate {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return tu.AddRequestIDs(ids...)
+	return tu.AddApplicationIDs(ids...)
 }
 
 // AddTransactionIDs adds the "transaction" edge to the Transaction entity by IDs.
@@ -120,25 +120,25 @@ func (tu *TagUpdate) Mutation() *TagMutation {
 	return tu.mutation
 }
 
-// ClearRequest clears all "request" edges to the Request entity.
-func (tu *TagUpdate) ClearRequest() *TagUpdate {
-	tu.mutation.ClearRequest()
+// ClearApplication clears all "application" edges to the Application entity.
+func (tu *TagUpdate) ClearApplication() *TagUpdate {
+	tu.mutation.ClearApplication()
 	return tu
 }
 
-// RemoveRequestIDs removes the "request" edge to Request entities by IDs.
-func (tu *TagUpdate) RemoveRequestIDs(ids ...uuid.UUID) *TagUpdate {
-	tu.mutation.RemoveRequestIDs(ids...)
+// RemoveApplicationIDs removes the "application" edge to Application entities by IDs.
+func (tu *TagUpdate) RemoveApplicationIDs(ids ...uuid.UUID) *TagUpdate {
+	tu.mutation.RemoveApplicationIDs(ids...)
 	return tu
 }
 
-// RemoveRequest removes "request" edges to Request entities.
-func (tu *TagUpdate) RemoveRequest(r ...*Request) *TagUpdate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// RemoveApplication removes "application" edges to Application entities.
+func (tu *TagUpdate) RemoveApplication(a ...*Application) *TagUpdate {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return tu.RemoveRequestIDs(ids...)
+	return tu.RemoveApplicationIDs(ids...)
 }
 
 // ClearTransaction clears all "transaction" edges to the Transaction entity.
@@ -235,28 +235,28 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if tu.mutation.DeletedAtCleared() {
 		_spec.ClearField(tag.FieldDeletedAt, field.TypeTime)
 	}
-	if tu.mutation.RequestCleared() {
+	if tu.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   tag.RequestTable,
-			Columns: tag.RequestPrimaryKey,
+			Table:   tag.ApplicationTable,
+			Columns: tag.ApplicationPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RemovedRequestIDs(); len(nodes) > 0 && !tu.mutation.RequestCleared() {
+	if nodes := tu.mutation.RemovedApplicationIDs(); len(nodes) > 0 && !tu.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   tag.RequestTable,
-			Columns: tag.RequestPrimaryKey,
+			Table:   tag.ApplicationTable,
+			Columns: tag.ApplicationPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -264,15 +264,15 @@ func (tu *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := tu.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   tag.RequestTable,
-			Columns: tag.RequestPrimaryKey,
+			Table:   tag.ApplicationTable,
+			Columns: tag.ApplicationPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -399,19 +399,19 @@ func (tuo *TagUpdateOne) ClearDeletedAt() *TagUpdateOne {
 	return tuo
 }
 
-// AddRequestIDs adds the "request" edge to the Request entity by IDs.
-func (tuo *TagUpdateOne) AddRequestIDs(ids ...uuid.UUID) *TagUpdateOne {
-	tuo.mutation.AddRequestIDs(ids...)
+// AddApplicationIDs adds the "application" edge to the Application entity by IDs.
+func (tuo *TagUpdateOne) AddApplicationIDs(ids ...uuid.UUID) *TagUpdateOne {
+	tuo.mutation.AddApplicationIDs(ids...)
 	return tuo
 }
 
-// AddRequest adds the "request" edges to the Request entity.
-func (tuo *TagUpdateOne) AddRequest(r ...*Request) *TagUpdateOne {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddApplication adds the "application" edges to the Application entity.
+func (tuo *TagUpdateOne) AddApplication(a ...*Application) *TagUpdateOne {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return tuo.AddRequestIDs(ids...)
+	return tuo.AddApplicationIDs(ids...)
 }
 
 // AddTransactionIDs adds the "transaction" edge to the Transaction entity by IDs.
@@ -434,25 +434,25 @@ func (tuo *TagUpdateOne) Mutation() *TagMutation {
 	return tuo.mutation
 }
 
-// ClearRequest clears all "request" edges to the Request entity.
-func (tuo *TagUpdateOne) ClearRequest() *TagUpdateOne {
-	tuo.mutation.ClearRequest()
+// ClearApplication clears all "application" edges to the Application entity.
+func (tuo *TagUpdateOne) ClearApplication() *TagUpdateOne {
+	tuo.mutation.ClearApplication()
 	return tuo
 }
 
-// RemoveRequestIDs removes the "request" edge to Request entities by IDs.
-func (tuo *TagUpdateOne) RemoveRequestIDs(ids ...uuid.UUID) *TagUpdateOne {
-	tuo.mutation.RemoveRequestIDs(ids...)
+// RemoveApplicationIDs removes the "application" edge to Application entities by IDs.
+func (tuo *TagUpdateOne) RemoveApplicationIDs(ids ...uuid.UUID) *TagUpdateOne {
+	tuo.mutation.RemoveApplicationIDs(ids...)
 	return tuo
 }
 
-// RemoveRequest removes "request" edges to Request entities.
-func (tuo *TagUpdateOne) RemoveRequest(r ...*Request) *TagUpdateOne {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// RemoveApplication removes "application" edges to Application entities.
+func (tuo *TagUpdateOne) RemoveApplication(a ...*Application) *TagUpdateOne {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return tuo.RemoveRequestIDs(ids...)
+	return tuo.RemoveApplicationIDs(ids...)
 }
 
 // ClearTransaction clears all "transaction" edges to the Transaction entity.
@@ -579,28 +579,28 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 	if tuo.mutation.DeletedAtCleared() {
 		_spec.ClearField(tag.FieldDeletedAt, field.TypeTime)
 	}
-	if tuo.mutation.RequestCleared() {
+	if tuo.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   tag.RequestTable,
-			Columns: tag.RequestPrimaryKey,
+			Table:   tag.ApplicationTable,
+			Columns: tag.ApplicationPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RemovedRequestIDs(); len(nodes) > 0 && !tuo.mutation.RequestCleared() {
+	if nodes := tuo.mutation.RemovedApplicationIDs(); len(nodes) > 0 && !tuo.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   tag.RequestTable,
-			Columns: tag.RequestPrimaryKey,
+			Table:   tag.ApplicationTable,
+			Columns: tag.ApplicationPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -608,15 +608,15 @@ func (tuo *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := tuo.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   tag.RequestTable,
-			Columns: tag.RequestPrimaryKey,
+			Table:   tag.ApplicationTable,
+			Columns: tag.ApplicationPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

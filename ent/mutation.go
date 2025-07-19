@@ -12,14 +12,14 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
+	"github.com/traPtitech/Jomon/ent/applicationstatus"
+	"github.com/traPtitech/Jomon/ent/applicationtarget"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
-	"github.com/traPtitech/Jomon/ent/requeststatus"
-	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -35,37 +35,2293 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeApplication       = "Application"
+	TypeApplicationStatus = "ApplicationStatus"
+	TypeApplicationTarget = "ApplicationTarget"
 	TypeComment           = "Comment"
 	TypeFile              = "File"
 	TypeGroup             = "Group"
 	TypeGroupBudget       = "GroupBudget"
-	TypeRequest           = "Request"
-	TypeRequestStatus     = "RequestStatus"
-	TypeRequestTarget     = "RequestTarget"
 	TypeTag               = "Tag"
 	TypeTransaction       = "Transaction"
 	TypeTransactionDetail = "TransactionDetail"
 	TypeUser              = "User"
 )
 
+// ApplicationMutation represents an operation that mutates the Application nodes in the graph.
+type ApplicationMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	title              *string
+	content            *string
+	created_at         *time.Time
+	updated_at         *time.Time
+	clearedFields      map[string]struct{}
+	status             map[uuid.UUID]struct{}
+	removedstatus      map[uuid.UUID]struct{}
+	clearedstatus      bool
+	target             map[uuid.UUID]struct{}
+	removedtarget      map[uuid.UUID]struct{}
+	clearedtarget      bool
+	file               map[uuid.UUID]struct{}
+	removedfile        map[uuid.UUID]struct{}
+	clearedfile        bool
+	tag                map[uuid.UUID]struct{}
+	removedtag         map[uuid.UUID]struct{}
+	clearedtag         bool
+	transaction        map[uuid.UUID]struct{}
+	removedtransaction map[uuid.UUID]struct{}
+	clearedtransaction bool
+	comment            map[uuid.UUID]struct{}
+	removedcomment     map[uuid.UUID]struct{}
+	clearedcomment     bool
+	user               *uuid.UUID
+	cleareduser        bool
+	group              *uuid.UUID
+	clearedgroup       bool
+	done               bool
+	oldValue           func(context.Context) (*Application, error)
+	predicates         []predicate.Application
+}
+
+var _ ent.Mutation = (*ApplicationMutation)(nil)
+
+// applicationOption allows management of the mutation configuration using functional options.
+type applicationOption func(*ApplicationMutation)
+
+// newApplicationMutation creates new mutation for the Application entity.
+func newApplicationMutation(c config, op Op, opts ...applicationOption) *ApplicationMutation {
+	m := &ApplicationMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeApplication,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withApplicationID sets the ID field of the mutation.
+func withApplicationID(id uuid.UUID) applicationOption {
+	return func(m *ApplicationMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Application
+		)
+		m.oldValue = func(ctx context.Context) (*Application, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Application.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withApplication sets the old Application of the mutation.
+func withApplication(node *Application) applicationOption {
+	return func(m *ApplicationMutation) {
+		m.oldValue = func(context.Context) (*Application, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ApplicationMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ApplicationMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Application entities.
+func (m *ApplicationMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ApplicationMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ApplicationMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Application.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetTitle sets the "title" field.
+func (m *ApplicationMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *ApplicationMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the Application entity.
+// If the Application object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ApplicationMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *ApplicationMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetContent sets the "content" field.
+func (m *ApplicationMutation) SetContent(s string) {
+	m.content = &s
+}
+
+// Content returns the value of the "content" field in the mutation.
+func (m *ApplicationMutation) Content() (r string, exists bool) {
+	v := m.content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old "content" field's value of the Application entity.
+// If the Application object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ApplicationMutation) OldContent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ResetContent resets all changes to the "content" field.
+func (m *ApplicationMutation) ResetContent() {
+	m.content = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ApplicationMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ApplicationMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Application entity.
+// If the Application object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ApplicationMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ApplicationMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *ApplicationMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *ApplicationMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Application entity.
+// If the Application object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ApplicationMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *ApplicationMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// AddStatuIDs adds the "status" edge to the ApplicationStatus entity by ids.
+func (m *ApplicationMutation) AddStatuIDs(ids ...uuid.UUID) {
+	if m.status == nil {
+		m.status = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.status[ids[i]] = struct{}{}
+	}
+}
+
+// ClearStatus clears the "status" edge to the ApplicationStatus entity.
+func (m *ApplicationMutation) ClearStatus() {
+	m.clearedstatus = true
+}
+
+// StatusCleared reports if the "status" edge to the ApplicationStatus entity was cleared.
+func (m *ApplicationMutation) StatusCleared() bool {
+	return m.clearedstatus
+}
+
+// RemoveStatuIDs removes the "status" edge to the ApplicationStatus entity by IDs.
+func (m *ApplicationMutation) RemoveStatuIDs(ids ...uuid.UUID) {
+	if m.removedstatus == nil {
+		m.removedstatus = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.status, ids[i])
+		m.removedstatus[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedStatus returns the removed IDs of the "status" edge to the ApplicationStatus entity.
+func (m *ApplicationMutation) RemovedStatusIDs() (ids []uuid.UUID) {
+	for id := range m.removedstatus {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// StatusIDs returns the "status" edge IDs in the mutation.
+func (m *ApplicationMutation) StatusIDs() (ids []uuid.UUID) {
+	for id := range m.status {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetStatus resets all changes to the "status" edge.
+func (m *ApplicationMutation) ResetStatus() {
+	m.status = nil
+	m.clearedstatus = false
+	m.removedstatus = nil
+}
+
+// AddTargetIDs adds the "target" edge to the ApplicationTarget entity by ids.
+func (m *ApplicationMutation) AddTargetIDs(ids ...uuid.UUID) {
+	if m.target == nil {
+		m.target = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.target[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTarget clears the "target" edge to the ApplicationTarget entity.
+func (m *ApplicationMutation) ClearTarget() {
+	m.clearedtarget = true
+}
+
+// TargetCleared reports if the "target" edge to the ApplicationTarget entity was cleared.
+func (m *ApplicationMutation) TargetCleared() bool {
+	return m.clearedtarget
+}
+
+// RemoveTargetIDs removes the "target" edge to the ApplicationTarget entity by IDs.
+func (m *ApplicationMutation) RemoveTargetIDs(ids ...uuid.UUID) {
+	if m.removedtarget == nil {
+		m.removedtarget = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.target, ids[i])
+		m.removedtarget[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTarget returns the removed IDs of the "target" edge to the ApplicationTarget entity.
+func (m *ApplicationMutation) RemovedTargetIDs() (ids []uuid.UUID) {
+	for id := range m.removedtarget {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TargetIDs returns the "target" edge IDs in the mutation.
+func (m *ApplicationMutation) TargetIDs() (ids []uuid.UUID) {
+	for id := range m.target {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTarget resets all changes to the "target" edge.
+func (m *ApplicationMutation) ResetTarget() {
+	m.target = nil
+	m.clearedtarget = false
+	m.removedtarget = nil
+}
+
+// AddFileIDs adds the "file" edge to the File entity by ids.
+func (m *ApplicationMutation) AddFileIDs(ids ...uuid.UUID) {
+	if m.file == nil {
+		m.file = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.file[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFile clears the "file" edge to the File entity.
+func (m *ApplicationMutation) ClearFile() {
+	m.clearedfile = true
+}
+
+// FileCleared reports if the "file" edge to the File entity was cleared.
+func (m *ApplicationMutation) FileCleared() bool {
+	return m.clearedfile
+}
+
+// RemoveFileIDs removes the "file" edge to the File entity by IDs.
+func (m *ApplicationMutation) RemoveFileIDs(ids ...uuid.UUID) {
+	if m.removedfile == nil {
+		m.removedfile = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.file, ids[i])
+		m.removedfile[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFile returns the removed IDs of the "file" edge to the File entity.
+func (m *ApplicationMutation) RemovedFileIDs() (ids []uuid.UUID) {
+	for id := range m.removedfile {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FileIDs returns the "file" edge IDs in the mutation.
+func (m *ApplicationMutation) FileIDs() (ids []uuid.UUID) {
+	for id := range m.file {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFile resets all changes to the "file" edge.
+func (m *ApplicationMutation) ResetFile() {
+	m.file = nil
+	m.clearedfile = false
+	m.removedfile = nil
+}
+
+// AddTagIDs adds the "tag" edge to the Tag entity by ids.
+func (m *ApplicationMutation) AddTagIDs(ids ...uuid.UUID) {
+	if m.tag == nil {
+		m.tag = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.tag[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTag clears the "tag" edge to the Tag entity.
+func (m *ApplicationMutation) ClearTag() {
+	m.clearedtag = true
+}
+
+// TagCleared reports if the "tag" edge to the Tag entity was cleared.
+func (m *ApplicationMutation) TagCleared() bool {
+	return m.clearedtag
+}
+
+// RemoveTagIDs removes the "tag" edge to the Tag entity by IDs.
+func (m *ApplicationMutation) RemoveTagIDs(ids ...uuid.UUID) {
+	if m.removedtag == nil {
+		m.removedtag = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.tag, ids[i])
+		m.removedtag[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTag returns the removed IDs of the "tag" edge to the Tag entity.
+func (m *ApplicationMutation) RemovedTagIDs() (ids []uuid.UUID) {
+	for id := range m.removedtag {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TagIDs returns the "tag" edge IDs in the mutation.
+func (m *ApplicationMutation) TagIDs() (ids []uuid.UUID) {
+	for id := range m.tag {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTag resets all changes to the "tag" edge.
+func (m *ApplicationMutation) ResetTag() {
+	m.tag = nil
+	m.clearedtag = false
+	m.removedtag = nil
+}
+
+// AddTransactionIDs adds the "transaction" edge to the Transaction entity by ids.
+func (m *ApplicationMutation) AddTransactionIDs(ids ...uuid.UUID) {
+	if m.transaction == nil {
+		m.transaction = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.transaction[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTransaction clears the "transaction" edge to the Transaction entity.
+func (m *ApplicationMutation) ClearTransaction() {
+	m.clearedtransaction = true
+}
+
+// TransactionCleared reports if the "transaction" edge to the Transaction entity was cleared.
+func (m *ApplicationMutation) TransactionCleared() bool {
+	return m.clearedtransaction
+}
+
+// RemoveTransactionIDs removes the "transaction" edge to the Transaction entity by IDs.
+func (m *ApplicationMutation) RemoveTransactionIDs(ids ...uuid.UUID) {
+	if m.removedtransaction == nil {
+		m.removedtransaction = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.transaction, ids[i])
+		m.removedtransaction[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTransaction returns the removed IDs of the "transaction" edge to the Transaction entity.
+func (m *ApplicationMutation) RemovedTransactionIDs() (ids []uuid.UUID) {
+	for id := range m.removedtransaction {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TransactionIDs returns the "transaction" edge IDs in the mutation.
+func (m *ApplicationMutation) TransactionIDs() (ids []uuid.UUID) {
+	for id := range m.transaction {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTransaction resets all changes to the "transaction" edge.
+func (m *ApplicationMutation) ResetTransaction() {
+	m.transaction = nil
+	m.clearedtransaction = false
+	m.removedtransaction = nil
+}
+
+// AddCommentIDs adds the "comment" edge to the Comment entity by ids.
+func (m *ApplicationMutation) AddCommentIDs(ids ...uuid.UUID) {
+	if m.comment == nil {
+		m.comment = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.comment[ids[i]] = struct{}{}
+	}
+}
+
+// ClearComment clears the "comment" edge to the Comment entity.
+func (m *ApplicationMutation) ClearComment() {
+	m.clearedcomment = true
+}
+
+// CommentCleared reports if the "comment" edge to the Comment entity was cleared.
+func (m *ApplicationMutation) CommentCleared() bool {
+	return m.clearedcomment
+}
+
+// RemoveCommentIDs removes the "comment" edge to the Comment entity by IDs.
+func (m *ApplicationMutation) RemoveCommentIDs(ids ...uuid.UUID) {
+	if m.removedcomment == nil {
+		m.removedcomment = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.comment, ids[i])
+		m.removedcomment[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedComment returns the removed IDs of the "comment" edge to the Comment entity.
+func (m *ApplicationMutation) RemovedCommentIDs() (ids []uuid.UUID) {
+	for id := range m.removedcomment {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// CommentIDs returns the "comment" edge IDs in the mutation.
+func (m *ApplicationMutation) CommentIDs() (ids []uuid.UUID) {
+	for id := range m.comment {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetComment resets all changes to the "comment" edge.
+func (m *ApplicationMutation) ResetComment() {
+	m.comment = nil
+	m.clearedcomment = false
+	m.removedcomment = nil
+}
+
+// SetUserID sets the "user" edge to the User entity by id.
+func (m *ApplicationMutation) SetUserID(id uuid.UUID) {
+	m.user = &id
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *ApplicationMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *ApplicationMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserID returns the "user" edge ID in the mutation.
+func (m *ApplicationMutation) UserID() (id uuid.UUID, exists bool) {
+	if m.user != nil {
+		return *m.user, true
+	}
+	return
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *ApplicationMutation) UserIDs() (ids []uuid.UUID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *ApplicationMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// SetGroupID sets the "group" edge to the Group entity by id.
+func (m *ApplicationMutation) SetGroupID(id uuid.UUID) {
+	m.group = &id
+}
+
+// ClearGroup clears the "group" edge to the Group entity.
+func (m *ApplicationMutation) ClearGroup() {
+	m.clearedgroup = true
+}
+
+// GroupCleared reports if the "group" edge to the Group entity was cleared.
+func (m *ApplicationMutation) GroupCleared() bool {
+	return m.clearedgroup
+}
+
+// GroupID returns the "group" edge ID in the mutation.
+func (m *ApplicationMutation) GroupID() (id uuid.UUID, exists bool) {
+	if m.group != nil {
+		return *m.group, true
+	}
+	return
+}
+
+// GroupIDs returns the "group" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// GroupID instead. It exists only for internal usage by the builders.
+func (m *ApplicationMutation) GroupIDs() (ids []uuid.UUID) {
+	if id := m.group; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetGroup resets all changes to the "group" edge.
+func (m *ApplicationMutation) ResetGroup() {
+	m.group = nil
+	m.clearedgroup = false
+}
+
+// Where appends a list predicates to the ApplicationMutation builder.
+func (m *ApplicationMutation) Where(ps ...predicate.Application) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ApplicationMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ApplicationMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Application, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ApplicationMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ApplicationMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Application).
+func (m *ApplicationMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ApplicationMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.title != nil {
+		fields = append(fields, application.FieldTitle)
+	}
+	if m.content != nil {
+		fields = append(fields, application.FieldContent)
+	}
+	if m.created_at != nil {
+		fields = append(fields, application.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, application.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ApplicationMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case application.FieldTitle:
+		return m.Title()
+	case application.FieldContent:
+		return m.Content()
+	case application.FieldCreatedAt:
+		return m.CreatedAt()
+	case application.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ApplicationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case application.FieldTitle:
+		return m.OldTitle(ctx)
+	case application.FieldContent:
+		return m.OldContent(ctx)
+	case application.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case application.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown Application field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ApplicationMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case application.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case application.FieldContent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
+		return nil
+	case application.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case application.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Application field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ApplicationMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ApplicationMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ApplicationMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Application numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ApplicationMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ApplicationMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ApplicationMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Application nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ApplicationMutation) ResetField(name string) error {
+	switch name {
+	case application.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case application.FieldContent:
+		m.ResetContent()
+		return nil
+	case application.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case application.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Application field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ApplicationMutation) AddedEdges() []string {
+	edges := make([]string, 0, 8)
+	if m.status != nil {
+		edges = append(edges, application.EdgeStatus)
+	}
+	if m.target != nil {
+		edges = append(edges, application.EdgeTarget)
+	}
+	if m.file != nil {
+		edges = append(edges, application.EdgeFile)
+	}
+	if m.tag != nil {
+		edges = append(edges, application.EdgeTag)
+	}
+	if m.transaction != nil {
+		edges = append(edges, application.EdgeTransaction)
+	}
+	if m.comment != nil {
+		edges = append(edges, application.EdgeComment)
+	}
+	if m.user != nil {
+		edges = append(edges, application.EdgeUser)
+	}
+	if m.group != nil {
+		edges = append(edges, application.EdgeGroup)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ApplicationMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case application.EdgeStatus:
+		ids := make([]ent.Value, 0, len(m.status))
+		for id := range m.status {
+			ids = append(ids, id)
+		}
+		return ids
+	case application.EdgeTarget:
+		ids := make([]ent.Value, 0, len(m.target))
+		for id := range m.target {
+			ids = append(ids, id)
+		}
+		return ids
+	case application.EdgeFile:
+		ids := make([]ent.Value, 0, len(m.file))
+		for id := range m.file {
+			ids = append(ids, id)
+		}
+		return ids
+	case application.EdgeTag:
+		ids := make([]ent.Value, 0, len(m.tag))
+		for id := range m.tag {
+			ids = append(ids, id)
+		}
+		return ids
+	case application.EdgeTransaction:
+		ids := make([]ent.Value, 0, len(m.transaction))
+		for id := range m.transaction {
+			ids = append(ids, id)
+		}
+		return ids
+	case application.EdgeComment:
+		ids := make([]ent.Value, 0, len(m.comment))
+		for id := range m.comment {
+			ids = append(ids, id)
+		}
+		return ids
+	case application.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	case application.EdgeGroup:
+		if id := m.group; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ApplicationMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 8)
+	if m.removedstatus != nil {
+		edges = append(edges, application.EdgeStatus)
+	}
+	if m.removedtarget != nil {
+		edges = append(edges, application.EdgeTarget)
+	}
+	if m.removedfile != nil {
+		edges = append(edges, application.EdgeFile)
+	}
+	if m.removedtag != nil {
+		edges = append(edges, application.EdgeTag)
+	}
+	if m.removedtransaction != nil {
+		edges = append(edges, application.EdgeTransaction)
+	}
+	if m.removedcomment != nil {
+		edges = append(edges, application.EdgeComment)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ApplicationMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case application.EdgeStatus:
+		ids := make([]ent.Value, 0, len(m.removedstatus))
+		for id := range m.removedstatus {
+			ids = append(ids, id)
+		}
+		return ids
+	case application.EdgeTarget:
+		ids := make([]ent.Value, 0, len(m.removedtarget))
+		for id := range m.removedtarget {
+			ids = append(ids, id)
+		}
+		return ids
+	case application.EdgeFile:
+		ids := make([]ent.Value, 0, len(m.removedfile))
+		for id := range m.removedfile {
+			ids = append(ids, id)
+		}
+		return ids
+	case application.EdgeTag:
+		ids := make([]ent.Value, 0, len(m.removedtag))
+		for id := range m.removedtag {
+			ids = append(ids, id)
+		}
+		return ids
+	case application.EdgeTransaction:
+		ids := make([]ent.Value, 0, len(m.removedtransaction))
+		for id := range m.removedtransaction {
+			ids = append(ids, id)
+		}
+		return ids
+	case application.EdgeComment:
+		ids := make([]ent.Value, 0, len(m.removedcomment))
+		for id := range m.removedcomment {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ApplicationMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 8)
+	if m.clearedstatus {
+		edges = append(edges, application.EdgeStatus)
+	}
+	if m.clearedtarget {
+		edges = append(edges, application.EdgeTarget)
+	}
+	if m.clearedfile {
+		edges = append(edges, application.EdgeFile)
+	}
+	if m.clearedtag {
+		edges = append(edges, application.EdgeTag)
+	}
+	if m.clearedtransaction {
+		edges = append(edges, application.EdgeTransaction)
+	}
+	if m.clearedcomment {
+		edges = append(edges, application.EdgeComment)
+	}
+	if m.cleareduser {
+		edges = append(edges, application.EdgeUser)
+	}
+	if m.clearedgroup {
+		edges = append(edges, application.EdgeGroup)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ApplicationMutation) EdgeCleared(name string) bool {
+	switch name {
+	case application.EdgeStatus:
+		return m.clearedstatus
+	case application.EdgeTarget:
+		return m.clearedtarget
+	case application.EdgeFile:
+		return m.clearedfile
+	case application.EdgeTag:
+		return m.clearedtag
+	case application.EdgeTransaction:
+		return m.clearedtransaction
+	case application.EdgeComment:
+		return m.clearedcomment
+	case application.EdgeUser:
+		return m.cleareduser
+	case application.EdgeGroup:
+		return m.clearedgroup
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ApplicationMutation) ClearEdge(name string) error {
+	switch name {
+	case application.EdgeUser:
+		m.ClearUser()
+		return nil
+	case application.EdgeGroup:
+		m.ClearGroup()
+		return nil
+	}
+	return fmt.Errorf("unknown Application unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ApplicationMutation) ResetEdge(name string) error {
+	switch name {
+	case application.EdgeStatus:
+		m.ResetStatus()
+		return nil
+	case application.EdgeTarget:
+		m.ResetTarget()
+		return nil
+	case application.EdgeFile:
+		m.ResetFile()
+		return nil
+	case application.EdgeTag:
+		m.ResetTag()
+		return nil
+	case application.EdgeTransaction:
+		m.ResetTransaction()
+		return nil
+	case application.EdgeComment:
+		m.ResetComment()
+		return nil
+	case application.EdgeUser:
+		m.ResetUser()
+		return nil
+	case application.EdgeGroup:
+		m.ResetGroup()
+		return nil
+	}
+	return fmt.Errorf("unknown Application edge %s", name)
+}
+
+// ApplicationStatusMutation represents an operation that mutates the ApplicationStatus nodes in the graph.
+type ApplicationStatusMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	status             *applicationstatus.Status
+	created_at         *time.Time
+	clearedFields      map[string]struct{}
+	application        *uuid.UUID
+	clearedapplication bool
+	user               *uuid.UUID
+	cleareduser        bool
+	done               bool
+	oldValue           func(context.Context) (*ApplicationStatus, error)
+	predicates         []predicate.ApplicationStatus
+}
+
+var _ ent.Mutation = (*ApplicationStatusMutation)(nil)
+
+// applicationstatusOption allows management of the mutation configuration using functional options.
+type applicationstatusOption func(*ApplicationStatusMutation)
+
+// newApplicationStatusMutation creates new mutation for the ApplicationStatus entity.
+func newApplicationStatusMutation(c config, op Op, opts ...applicationstatusOption) *ApplicationStatusMutation {
+	m := &ApplicationStatusMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeApplicationStatus,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withApplicationStatusID sets the ID field of the mutation.
+func withApplicationStatusID(id uuid.UUID) applicationstatusOption {
+	return func(m *ApplicationStatusMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ApplicationStatus
+		)
+		m.oldValue = func(ctx context.Context) (*ApplicationStatus, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ApplicationStatus.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withApplicationStatus sets the old ApplicationStatus of the mutation.
+func withApplicationStatus(node *ApplicationStatus) applicationstatusOption {
+	return func(m *ApplicationStatusMutation) {
+		m.oldValue = func(context.Context) (*ApplicationStatus, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ApplicationStatusMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ApplicationStatusMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of ApplicationStatus entities.
+func (m *ApplicationStatusMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ApplicationStatusMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ApplicationStatusMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ApplicationStatus.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetStatus sets the "status" field.
+func (m *ApplicationStatusMutation) SetStatus(a applicationstatus.Status) {
+	m.status = &a
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *ApplicationStatusMutation) Status() (r applicationstatus.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the ApplicationStatus entity.
+// If the ApplicationStatus object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ApplicationStatusMutation) OldStatus(ctx context.Context) (v applicationstatus.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *ApplicationStatusMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ApplicationStatusMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ApplicationStatusMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the ApplicationStatus entity.
+// If the ApplicationStatus object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ApplicationStatusMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ApplicationStatusMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetApplicationID sets the "application" edge to the Application entity by id.
+func (m *ApplicationStatusMutation) SetApplicationID(id uuid.UUID) {
+	m.application = &id
+}
+
+// ClearApplication clears the "application" edge to the Application entity.
+func (m *ApplicationStatusMutation) ClearApplication() {
+	m.clearedapplication = true
+}
+
+// ApplicationCleared reports if the "application" edge to the Application entity was cleared.
+func (m *ApplicationStatusMutation) ApplicationCleared() bool {
+	return m.clearedapplication
+}
+
+// ApplicationID returns the "application" edge ID in the mutation.
+func (m *ApplicationStatusMutation) ApplicationID() (id uuid.UUID, exists bool) {
+	if m.application != nil {
+		return *m.application, true
+	}
+	return
+}
+
+// ApplicationIDs returns the "application" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ApplicationID instead. It exists only for internal usage by the builders.
+func (m *ApplicationStatusMutation) ApplicationIDs() (ids []uuid.UUID) {
+	if id := m.application; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetApplication resets all changes to the "application" edge.
+func (m *ApplicationStatusMutation) ResetApplication() {
+	m.application = nil
+	m.clearedapplication = false
+}
+
+// SetUserID sets the "user" edge to the User entity by id.
+func (m *ApplicationStatusMutation) SetUserID(id uuid.UUID) {
+	m.user = &id
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *ApplicationStatusMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *ApplicationStatusMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserID returns the "user" edge ID in the mutation.
+func (m *ApplicationStatusMutation) UserID() (id uuid.UUID, exists bool) {
+	if m.user != nil {
+		return *m.user, true
+	}
+	return
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *ApplicationStatusMutation) UserIDs() (ids []uuid.UUID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *ApplicationStatusMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// Where appends a list predicates to the ApplicationStatusMutation builder.
+func (m *ApplicationStatusMutation) Where(ps ...predicate.ApplicationStatus) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ApplicationStatusMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ApplicationStatusMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ApplicationStatus, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ApplicationStatusMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ApplicationStatusMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ApplicationStatus).
+func (m *ApplicationStatusMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ApplicationStatusMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.status != nil {
+		fields = append(fields, applicationstatus.FieldStatus)
+	}
+	if m.created_at != nil {
+		fields = append(fields, applicationstatus.FieldCreatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ApplicationStatusMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case applicationstatus.FieldStatus:
+		return m.Status()
+	case applicationstatus.FieldCreatedAt:
+		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ApplicationStatusMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case applicationstatus.FieldStatus:
+		return m.OldStatus(ctx)
+	case applicationstatus.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown ApplicationStatus field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ApplicationStatusMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case applicationstatus.FieldStatus:
+		v, ok := value.(applicationstatus.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case applicationstatus.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ApplicationStatus field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ApplicationStatusMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ApplicationStatusMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ApplicationStatusMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown ApplicationStatus numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ApplicationStatusMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ApplicationStatusMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ApplicationStatusMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown ApplicationStatus nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ApplicationStatusMutation) ResetField(name string) error {
+	switch name {
+	case applicationstatus.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case applicationstatus.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown ApplicationStatus field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ApplicationStatusMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.application != nil {
+		edges = append(edges, applicationstatus.EdgeApplication)
+	}
+	if m.user != nil {
+		edges = append(edges, applicationstatus.EdgeUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ApplicationStatusMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case applicationstatus.EdgeApplication:
+		if id := m.application; id != nil {
+			return []ent.Value{*id}
+		}
+	case applicationstatus.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ApplicationStatusMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ApplicationStatusMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ApplicationStatusMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedapplication {
+		edges = append(edges, applicationstatus.EdgeApplication)
+	}
+	if m.cleareduser {
+		edges = append(edges, applicationstatus.EdgeUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ApplicationStatusMutation) EdgeCleared(name string) bool {
+	switch name {
+	case applicationstatus.EdgeApplication:
+		return m.clearedapplication
+	case applicationstatus.EdgeUser:
+		return m.cleareduser
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ApplicationStatusMutation) ClearEdge(name string) error {
+	switch name {
+	case applicationstatus.EdgeApplication:
+		m.ClearApplication()
+		return nil
+	case applicationstatus.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown ApplicationStatus unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ApplicationStatusMutation) ResetEdge(name string) error {
+	switch name {
+	case applicationstatus.EdgeApplication:
+		m.ResetApplication()
+		return nil
+	case applicationstatus.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
+	return fmt.Errorf("unknown ApplicationStatus edge %s", name)
+}
+
+// ApplicationTargetMutation represents an operation that mutates the ApplicationTarget nodes in the graph.
+type ApplicationTargetMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	amount             *int
+	addamount          *int
+	paid_at            *time.Time
+	created_at         *time.Time
+	clearedFields      map[string]struct{}
+	application        *uuid.UUID
+	clearedapplication bool
+	user               *uuid.UUID
+	cleareduser        bool
+	done               bool
+	oldValue           func(context.Context) (*ApplicationTarget, error)
+	predicates         []predicate.ApplicationTarget
+}
+
+var _ ent.Mutation = (*ApplicationTargetMutation)(nil)
+
+// applicationtargetOption allows management of the mutation configuration using functional options.
+type applicationtargetOption func(*ApplicationTargetMutation)
+
+// newApplicationTargetMutation creates new mutation for the ApplicationTarget entity.
+func newApplicationTargetMutation(c config, op Op, opts ...applicationtargetOption) *ApplicationTargetMutation {
+	m := &ApplicationTargetMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeApplicationTarget,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withApplicationTargetID sets the ID field of the mutation.
+func withApplicationTargetID(id uuid.UUID) applicationtargetOption {
+	return func(m *ApplicationTargetMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ApplicationTarget
+		)
+		m.oldValue = func(ctx context.Context) (*ApplicationTarget, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ApplicationTarget.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withApplicationTarget sets the old ApplicationTarget of the mutation.
+func withApplicationTarget(node *ApplicationTarget) applicationtargetOption {
+	return func(m *ApplicationTargetMutation) {
+		m.oldValue = func(context.Context) (*ApplicationTarget, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ApplicationTargetMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ApplicationTargetMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of ApplicationTarget entities.
+func (m *ApplicationTargetMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ApplicationTargetMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ApplicationTargetMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ApplicationTarget.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetAmount sets the "amount" field.
+func (m *ApplicationTargetMutation) SetAmount(i int) {
+	m.amount = &i
+	m.addamount = nil
+}
+
+// Amount returns the value of the "amount" field in the mutation.
+func (m *ApplicationTargetMutation) Amount() (r int, exists bool) {
+	v := m.amount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAmount returns the old "amount" field's value of the ApplicationTarget entity.
+// If the ApplicationTarget object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ApplicationTargetMutation) OldAmount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAmount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAmount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAmount: %w", err)
+	}
+	return oldValue.Amount, nil
+}
+
+// AddAmount adds i to the "amount" field.
+func (m *ApplicationTargetMutation) AddAmount(i int) {
+	if m.addamount != nil {
+		*m.addamount += i
+	} else {
+		m.addamount = &i
+	}
+}
+
+// AddedAmount returns the value that was added to the "amount" field in this mutation.
+func (m *ApplicationTargetMutation) AddedAmount() (r int, exists bool) {
+	v := m.addamount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAmount resets all changes to the "amount" field.
+func (m *ApplicationTargetMutation) ResetAmount() {
+	m.amount = nil
+	m.addamount = nil
+}
+
+// SetPaidAt sets the "paid_at" field.
+func (m *ApplicationTargetMutation) SetPaidAt(t time.Time) {
+	m.paid_at = &t
+}
+
+// PaidAt returns the value of the "paid_at" field in the mutation.
+func (m *ApplicationTargetMutation) PaidAt() (r time.Time, exists bool) {
+	v := m.paid_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPaidAt returns the old "paid_at" field's value of the ApplicationTarget entity.
+// If the ApplicationTarget object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ApplicationTargetMutation) OldPaidAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPaidAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPaidAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPaidAt: %w", err)
+	}
+	return oldValue.PaidAt, nil
+}
+
+// ClearPaidAt clears the value of the "paid_at" field.
+func (m *ApplicationTargetMutation) ClearPaidAt() {
+	m.paid_at = nil
+	m.clearedFields[applicationtarget.FieldPaidAt] = struct{}{}
+}
+
+// PaidAtCleared returns if the "paid_at" field was cleared in this mutation.
+func (m *ApplicationTargetMutation) PaidAtCleared() bool {
+	_, ok := m.clearedFields[applicationtarget.FieldPaidAt]
+	return ok
+}
+
+// ResetPaidAt resets all changes to the "paid_at" field.
+func (m *ApplicationTargetMutation) ResetPaidAt() {
+	m.paid_at = nil
+	delete(m.clearedFields, applicationtarget.FieldPaidAt)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *ApplicationTargetMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *ApplicationTargetMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the ApplicationTarget entity.
+// If the ApplicationTarget object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ApplicationTargetMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *ApplicationTargetMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetApplicationID sets the "application" edge to the Application entity by id.
+func (m *ApplicationTargetMutation) SetApplicationID(id uuid.UUID) {
+	m.application = &id
+}
+
+// ClearApplication clears the "application" edge to the Application entity.
+func (m *ApplicationTargetMutation) ClearApplication() {
+	m.clearedapplication = true
+}
+
+// ApplicationCleared reports if the "application" edge to the Application entity was cleared.
+func (m *ApplicationTargetMutation) ApplicationCleared() bool {
+	return m.clearedapplication
+}
+
+// ApplicationID returns the "application" edge ID in the mutation.
+func (m *ApplicationTargetMutation) ApplicationID() (id uuid.UUID, exists bool) {
+	if m.application != nil {
+		return *m.application, true
+	}
+	return
+}
+
+// ApplicationIDs returns the "application" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ApplicationID instead. It exists only for internal usage by the builders.
+func (m *ApplicationTargetMutation) ApplicationIDs() (ids []uuid.UUID) {
+	if id := m.application; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetApplication resets all changes to the "application" edge.
+func (m *ApplicationTargetMutation) ResetApplication() {
+	m.application = nil
+	m.clearedapplication = false
+}
+
+// SetUserID sets the "user" edge to the User entity by id.
+func (m *ApplicationTargetMutation) SetUserID(id uuid.UUID) {
+	m.user = &id
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *ApplicationTargetMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *ApplicationTargetMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserID returns the "user" edge ID in the mutation.
+func (m *ApplicationTargetMutation) UserID() (id uuid.UUID, exists bool) {
+	if m.user != nil {
+		return *m.user, true
+	}
+	return
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *ApplicationTargetMutation) UserIDs() (ids []uuid.UUID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *ApplicationTargetMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// Where appends a list predicates to the ApplicationTargetMutation builder.
+func (m *ApplicationTargetMutation) Where(ps ...predicate.ApplicationTarget) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the ApplicationTargetMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ApplicationTargetMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ApplicationTarget, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *ApplicationTargetMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ApplicationTargetMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (ApplicationTarget).
+func (m *ApplicationTargetMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ApplicationTargetMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.amount != nil {
+		fields = append(fields, applicationtarget.FieldAmount)
+	}
+	if m.paid_at != nil {
+		fields = append(fields, applicationtarget.FieldPaidAt)
+	}
+	if m.created_at != nil {
+		fields = append(fields, applicationtarget.FieldCreatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ApplicationTargetMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case applicationtarget.FieldAmount:
+		return m.Amount()
+	case applicationtarget.FieldPaidAt:
+		return m.PaidAt()
+	case applicationtarget.FieldCreatedAt:
+		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ApplicationTargetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case applicationtarget.FieldAmount:
+		return m.OldAmount(ctx)
+	case applicationtarget.FieldPaidAt:
+		return m.OldPaidAt(ctx)
+	case applicationtarget.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown ApplicationTarget field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ApplicationTargetMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case applicationtarget.FieldAmount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAmount(v)
+		return nil
+	case applicationtarget.FieldPaidAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPaidAt(v)
+		return nil
+	case applicationtarget.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ApplicationTarget field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ApplicationTargetMutation) AddedFields() []string {
+	var fields []string
+	if m.addamount != nil {
+		fields = append(fields, applicationtarget.FieldAmount)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ApplicationTargetMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case applicationtarget.FieldAmount:
+		return m.AddedAmount()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ApplicationTargetMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case applicationtarget.FieldAmount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAmount(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ApplicationTarget numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ApplicationTargetMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(applicationtarget.FieldPaidAt) {
+		fields = append(fields, applicationtarget.FieldPaidAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ApplicationTargetMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ApplicationTargetMutation) ClearField(name string) error {
+	switch name {
+	case applicationtarget.FieldPaidAt:
+		m.ClearPaidAt()
+		return nil
+	}
+	return fmt.Errorf("unknown ApplicationTarget nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ApplicationTargetMutation) ResetField(name string) error {
+	switch name {
+	case applicationtarget.FieldAmount:
+		m.ResetAmount()
+		return nil
+	case applicationtarget.FieldPaidAt:
+		m.ResetPaidAt()
+		return nil
+	case applicationtarget.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown ApplicationTarget field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ApplicationTargetMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.application != nil {
+		edges = append(edges, applicationtarget.EdgeApplication)
+	}
+	if m.user != nil {
+		edges = append(edges, applicationtarget.EdgeUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ApplicationTargetMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case applicationtarget.EdgeApplication:
+		if id := m.application; id != nil {
+			return []ent.Value{*id}
+		}
+	case applicationtarget.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ApplicationTargetMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ApplicationTargetMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ApplicationTargetMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedapplication {
+		edges = append(edges, applicationtarget.EdgeApplication)
+	}
+	if m.cleareduser {
+		edges = append(edges, applicationtarget.EdgeUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ApplicationTargetMutation) EdgeCleared(name string) bool {
+	switch name {
+	case applicationtarget.EdgeApplication:
+		return m.clearedapplication
+	case applicationtarget.EdgeUser:
+		return m.cleareduser
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ApplicationTargetMutation) ClearEdge(name string) error {
+	switch name {
+	case applicationtarget.EdgeApplication:
+		m.ClearApplication()
+		return nil
+	case applicationtarget.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown ApplicationTarget unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ApplicationTargetMutation) ResetEdge(name string) error {
+	switch name {
+	case applicationtarget.EdgeApplication:
+		m.ResetApplication()
+		return nil
+	case applicationtarget.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
+	return fmt.Errorf("unknown ApplicationTarget edge %s", name)
+}
+
 // CommentMutation represents an operation that mutates the Comment nodes in the graph.
 type CommentMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	comment        *string
-	created_at     *time.Time
-	updated_at     *time.Time
-	deleted_at     *time.Time
-	clearedFields  map[string]struct{}
-	request        *uuid.UUID
-	clearedrequest bool
-	user           *uuid.UUID
-	cleareduser    bool
-	done           bool
-	oldValue       func(context.Context) (*Comment, error)
-	predicates     []predicate.Comment
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	comment            *string
+	created_at         *time.Time
+	updated_at         *time.Time
+	deleted_at         *time.Time
+	clearedFields      map[string]struct{}
+	application        *uuid.UUID
+	clearedapplication bool
+	user               *uuid.UUID
+	cleareduser        bool
+	done               bool
+	oldValue           func(context.Context) (*Comment, error)
+	predicates         []predicate.Comment
 }
 
 var _ ent.Mutation = (*CommentMutation)(nil)
@@ -329,43 +2585,43 @@ func (m *CommentMutation) ResetDeletedAt() {
 	delete(m.clearedFields, comment.FieldDeletedAt)
 }
 
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *CommentMutation) SetRequestID(id uuid.UUID) {
-	m.request = &id
+// SetApplicationID sets the "application" edge to the Application entity by id.
+func (m *CommentMutation) SetApplicationID(id uuid.UUID) {
+	m.application = &id
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
-func (m *CommentMutation) ClearRequest() {
-	m.clearedrequest = true
+// ClearApplication clears the "application" edge to the Application entity.
+func (m *CommentMutation) ClearApplication() {
+	m.clearedapplication = true
 }
 
-// RequestCleared reports if the "request" edge to the Request entity was cleared.
-func (m *CommentMutation) RequestCleared() bool {
-	return m.clearedrequest
+// ApplicationCleared reports if the "application" edge to the Application entity was cleared.
+func (m *CommentMutation) ApplicationCleared() bool {
+	return m.clearedapplication
 }
 
-// RequestID returns the "request" edge ID in the mutation.
-func (m *CommentMutation) RequestID() (id uuid.UUID, exists bool) {
-	if m.request != nil {
-		return *m.request, true
+// ApplicationID returns the "application" edge ID in the mutation.
+func (m *CommentMutation) ApplicationID() (id uuid.UUID, exists bool) {
+	if m.application != nil {
+		return *m.application, true
 	}
 	return
 }
 
-// RequestIDs returns the "request" edge IDs in the mutation.
+// ApplicationIDs returns the "application" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// RequestID instead. It exists only for internal usage by the builders.
-func (m *CommentMutation) RequestIDs() (ids []uuid.UUID) {
-	if id := m.request; id != nil {
+// ApplicationID instead. It exists only for internal usage by the builders.
+func (m *CommentMutation) ApplicationIDs() (ids []uuid.UUID) {
+	if id := m.application; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetRequest resets all changes to the "request" edge.
-func (m *CommentMutation) ResetRequest() {
-	m.request = nil
-	m.clearedrequest = false
+// ResetApplication resets all changes to the "application" edge.
+func (m *CommentMutation) ResetApplication() {
+	m.application = nil
+	m.clearedapplication = false
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
@@ -601,8 +2857,8 @@ func (m *CommentMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *CommentMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.request != nil {
-		edges = append(edges, comment.EdgeRequest)
+	if m.application != nil {
+		edges = append(edges, comment.EdgeApplication)
 	}
 	if m.user != nil {
 		edges = append(edges, comment.EdgeUser)
@@ -614,8 +2870,8 @@ func (m *CommentMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *CommentMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case comment.EdgeRequest:
-		if id := m.request; id != nil {
+	case comment.EdgeApplication:
+		if id := m.application; id != nil {
 			return []ent.Value{*id}
 		}
 	case comment.EdgeUser:
@@ -641,8 +2897,8 @@ func (m *CommentMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *CommentMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.clearedrequest {
-		edges = append(edges, comment.EdgeRequest)
+	if m.clearedapplication {
+		edges = append(edges, comment.EdgeApplication)
 	}
 	if m.cleareduser {
 		edges = append(edges, comment.EdgeUser)
@@ -654,8 +2910,8 @@ func (m *CommentMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *CommentMutation) EdgeCleared(name string) bool {
 	switch name {
-	case comment.EdgeRequest:
-		return m.clearedrequest
+	case comment.EdgeApplication:
+		return m.clearedapplication
 	case comment.EdgeUser:
 		return m.cleareduser
 	}
@@ -666,8 +2922,8 @@ func (m *CommentMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *CommentMutation) ClearEdge(name string) error {
 	switch name {
-	case comment.EdgeRequest:
-		m.ClearRequest()
+	case comment.EdgeApplication:
+		m.ClearApplication()
 		return nil
 	case comment.EdgeUser:
 		m.ClearUser()
@@ -680,8 +2936,8 @@ func (m *CommentMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *CommentMutation) ResetEdge(name string) error {
 	switch name {
-	case comment.EdgeRequest:
-		m.ResetRequest()
+	case comment.EdgeApplication:
+		m.ResetApplication()
 		return nil
 	case comment.EdgeUser:
 		m.ResetUser()
@@ -693,21 +2949,21 @@ func (m *CommentMutation) ResetEdge(name string) error {
 // FileMutation represents an operation that mutates the File nodes in the graph.
 type FileMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	name           *string
-	mime_type      *string
-	created_at     *time.Time
-	deleted_at     *time.Time
-	clearedFields  map[string]struct{}
-	request        *uuid.UUID
-	clearedrequest bool
-	user           *uuid.UUID
-	cleareduser    bool
-	done           bool
-	oldValue       func(context.Context) (*File, error)
-	predicates     []predicate.File
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	name               *string
+	mime_type          *string
+	created_at         *time.Time
+	deleted_at         *time.Time
+	clearedFields      map[string]struct{}
+	application        *uuid.UUID
+	clearedapplication bool
+	user               *uuid.UUID
+	cleareduser        bool
+	done               bool
+	oldValue           func(context.Context) (*File, error)
+	predicates         []predicate.File
 }
 
 var _ ent.Mutation = (*FileMutation)(nil)
@@ -971,43 +3227,43 @@ func (m *FileMutation) ResetDeletedAt() {
 	delete(m.clearedFields, file.FieldDeletedAt)
 }
 
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *FileMutation) SetRequestID(id uuid.UUID) {
-	m.request = &id
+// SetApplicationID sets the "application" edge to the Application entity by id.
+func (m *FileMutation) SetApplicationID(id uuid.UUID) {
+	m.application = &id
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
-func (m *FileMutation) ClearRequest() {
-	m.clearedrequest = true
+// ClearApplication clears the "application" edge to the Application entity.
+func (m *FileMutation) ClearApplication() {
+	m.clearedapplication = true
 }
 
-// RequestCleared reports if the "request" edge to the Request entity was cleared.
-func (m *FileMutation) RequestCleared() bool {
-	return m.clearedrequest
+// ApplicationCleared reports if the "application" edge to the Application entity was cleared.
+func (m *FileMutation) ApplicationCleared() bool {
+	return m.clearedapplication
 }
 
-// RequestID returns the "request" edge ID in the mutation.
-func (m *FileMutation) RequestID() (id uuid.UUID, exists bool) {
-	if m.request != nil {
-		return *m.request, true
+// ApplicationID returns the "application" edge ID in the mutation.
+func (m *FileMutation) ApplicationID() (id uuid.UUID, exists bool) {
+	if m.application != nil {
+		return *m.application, true
 	}
 	return
 }
 
-// RequestIDs returns the "request" edge IDs in the mutation.
+// ApplicationIDs returns the "application" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// RequestID instead. It exists only for internal usage by the builders.
-func (m *FileMutation) RequestIDs() (ids []uuid.UUID) {
-	if id := m.request; id != nil {
+// ApplicationID instead. It exists only for internal usage by the builders.
+func (m *FileMutation) ApplicationIDs() (ids []uuid.UUID) {
+	if id := m.application; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetRequest resets all changes to the "request" edge.
-func (m *FileMutation) ResetRequest() {
-	m.request = nil
-	m.clearedrequest = false
+// ResetApplication resets all changes to the "application" edge.
+func (m *FileMutation) ResetApplication() {
+	m.application = nil
+	m.clearedapplication = false
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
@@ -1243,8 +3499,8 @@ func (m *FileMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *FileMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.request != nil {
-		edges = append(edges, file.EdgeRequest)
+	if m.application != nil {
+		edges = append(edges, file.EdgeApplication)
 	}
 	if m.user != nil {
 		edges = append(edges, file.EdgeUser)
@@ -1256,8 +3512,8 @@ func (m *FileMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *FileMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case file.EdgeRequest:
-		if id := m.request; id != nil {
+	case file.EdgeApplication:
+		if id := m.application; id != nil {
 			return []ent.Value{*id}
 		}
 	case file.EdgeUser:
@@ -1283,8 +3539,8 @@ func (m *FileMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *FileMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.clearedrequest {
-		edges = append(edges, file.EdgeRequest)
+	if m.clearedapplication {
+		edges = append(edges, file.EdgeApplication)
 	}
 	if m.cleareduser {
 		edges = append(edges, file.EdgeUser)
@@ -1296,8 +3552,8 @@ func (m *FileMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *FileMutation) EdgeCleared(name string) bool {
 	switch name {
-	case file.EdgeRequest:
-		return m.clearedrequest
+	case file.EdgeApplication:
+		return m.clearedapplication
 	case file.EdgeUser:
 		return m.cleareduser
 	}
@@ -1308,8 +3564,8 @@ func (m *FileMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *FileMutation) ClearEdge(name string) error {
 	switch name {
-	case file.EdgeRequest:
-		m.ClearRequest()
+	case file.EdgeApplication:
+		m.ClearApplication()
 		return nil
 	case file.EdgeUser:
 		m.ClearUser()
@@ -1322,8 +3578,8 @@ func (m *FileMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *FileMutation) ResetEdge(name string) error {
 	switch name {
-	case file.EdgeRequest:
-		m.ResetRequest()
+	case file.EdgeApplication:
+		m.ResetApplication()
 		return nil
 	case file.EdgeUser:
 		m.ResetUser()
@@ -1355,9 +3611,9 @@ type GroupMutation struct {
 	owner               map[uuid.UUID]struct{}
 	removedowner        map[uuid.UUID]struct{}
 	clearedowner        bool
-	request             map[uuid.UUID]struct{}
-	removedrequest      map[uuid.UUID]struct{}
-	clearedrequest      bool
+	application         map[uuid.UUID]struct{}
+	removedapplication  map[uuid.UUID]struct{}
+	clearedapplication  bool
 	done                bool
 	oldValue            func(context.Context) (*Group, error)
 	predicates          []predicate.Group
@@ -1892,58 +4148,58 @@ func (m *GroupMutation) ResetOwner() {
 	m.removedowner = nil
 }
 
-// AddRequestIDs adds the "request" edge to the Request entity by ids.
-func (m *GroupMutation) AddRequestIDs(ids ...uuid.UUID) {
-	if m.request == nil {
-		m.request = make(map[uuid.UUID]struct{})
+// AddApplicationIDs adds the "application" edge to the Application entity by ids.
+func (m *GroupMutation) AddApplicationIDs(ids ...uuid.UUID) {
+	if m.application == nil {
+		m.application = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.request[ids[i]] = struct{}{}
+		m.application[ids[i]] = struct{}{}
 	}
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
-func (m *GroupMutation) ClearRequest() {
-	m.clearedrequest = true
+// ClearApplication clears the "application" edge to the Application entity.
+func (m *GroupMutation) ClearApplication() {
+	m.clearedapplication = true
 }
 
-// RequestCleared reports if the "request" edge to the Request entity was cleared.
-func (m *GroupMutation) RequestCleared() bool {
-	return m.clearedrequest
+// ApplicationCleared reports if the "application" edge to the Application entity was cleared.
+func (m *GroupMutation) ApplicationCleared() bool {
+	return m.clearedapplication
 }
 
-// RemoveRequestIDs removes the "request" edge to the Request entity by IDs.
-func (m *GroupMutation) RemoveRequestIDs(ids ...uuid.UUID) {
-	if m.removedrequest == nil {
-		m.removedrequest = make(map[uuid.UUID]struct{})
+// RemoveApplicationIDs removes the "application" edge to the Application entity by IDs.
+func (m *GroupMutation) RemoveApplicationIDs(ids ...uuid.UUID) {
+	if m.removedapplication == nil {
+		m.removedapplication = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.request, ids[i])
-		m.removedrequest[ids[i]] = struct{}{}
+		delete(m.application, ids[i])
+		m.removedapplication[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedRequest returns the removed IDs of the "request" edge to the Request entity.
-func (m *GroupMutation) RemovedRequestIDs() (ids []uuid.UUID) {
-	for id := range m.removedrequest {
+// RemovedApplication returns the removed IDs of the "application" edge to the Application entity.
+func (m *GroupMutation) RemovedApplicationIDs() (ids []uuid.UUID) {
+	for id := range m.removedapplication {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// RequestIDs returns the "request" edge IDs in the mutation.
-func (m *GroupMutation) RequestIDs() (ids []uuid.UUID) {
-	for id := range m.request {
+// ApplicationIDs returns the "application" edge IDs in the mutation.
+func (m *GroupMutation) ApplicationIDs() (ids []uuid.UUID) {
+	for id := range m.application {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetRequest resets all changes to the "request" edge.
-func (m *GroupMutation) ResetRequest() {
-	m.request = nil
-	m.clearedrequest = false
-	m.removedrequest = nil
+// ResetApplication resets all changes to the "application" edge.
+func (m *GroupMutation) ResetApplication() {
+	m.application = nil
+	m.clearedapplication = false
+	m.removedapplication = nil
 }
 
 // Where appends a list predicates to the GroupMutation builder.
@@ -2204,8 +4460,8 @@ func (m *GroupMutation) AddedEdges() []string {
 	if m.owner != nil {
 		edges = append(edges, group.EdgeOwner)
 	}
-	if m.request != nil {
-		edges = append(edges, group.EdgeRequest)
+	if m.application != nil {
+		edges = append(edges, group.EdgeApplication)
 	}
 	return edges
 }
@@ -2232,9 +4488,9 @@ func (m *GroupMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case group.EdgeRequest:
-		ids := make([]ent.Value, 0, len(m.request))
-		for id := range m.request {
+	case group.EdgeApplication:
+		ids := make([]ent.Value, 0, len(m.application))
+		for id := range m.application {
 			ids = append(ids, id)
 		}
 		return ids
@@ -2254,8 +4510,8 @@ func (m *GroupMutation) RemovedEdges() []string {
 	if m.removedowner != nil {
 		edges = append(edges, group.EdgeOwner)
 	}
-	if m.removedrequest != nil {
-		edges = append(edges, group.EdgeRequest)
+	if m.removedapplication != nil {
+		edges = append(edges, group.EdgeApplication)
 	}
 	return edges
 }
@@ -2282,9 +4538,9 @@ func (m *GroupMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case group.EdgeRequest:
-		ids := make([]ent.Value, 0, len(m.removedrequest))
-		for id := range m.removedrequest {
+	case group.EdgeApplication:
+		ids := make([]ent.Value, 0, len(m.removedapplication))
+		for id := range m.removedapplication {
 			ids = append(ids, id)
 		}
 		return ids
@@ -2304,8 +4560,8 @@ func (m *GroupMutation) ClearedEdges() []string {
 	if m.clearedowner {
 		edges = append(edges, group.EdgeOwner)
 	}
-	if m.clearedrequest {
-		edges = append(edges, group.EdgeRequest)
+	if m.clearedapplication {
+		edges = append(edges, group.EdgeApplication)
 	}
 	return edges
 }
@@ -2320,8 +4576,8 @@ func (m *GroupMutation) EdgeCleared(name string) bool {
 		return m.cleareduser
 	case group.EdgeOwner:
 		return m.clearedowner
-	case group.EdgeRequest:
-		return m.clearedrequest
+	case group.EdgeApplication:
+		return m.clearedapplication
 	}
 	return false
 }
@@ -2347,8 +4603,8 @@ func (m *GroupMutation) ResetEdge(name string) error {
 	case group.EdgeOwner:
 		m.ResetOwner()
 		return nil
-	case group.EdgeRequest:
-		m.ResetRequest()
+	case group.EdgeApplication:
+		m.ResetApplication()
 		return nil
 	}
 	return fmt.Errorf("unknown Group edge %s", name)
@@ -3004,2262 +5260,6 @@ func (m *GroupBudgetMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown GroupBudget edge %s", name)
 }
 
-// RequestMutation represents an operation that mutates the Request nodes in the graph.
-type RequestMutation struct {
-	config
-	op                 Op
-	typ                string
-	id                 *uuid.UUID
-	title              *string
-	content            *string
-	created_at         *time.Time
-	updated_at         *time.Time
-	clearedFields      map[string]struct{}
-	status             map[uuid.UUID]struct{}
-	removedstatus      map[uuid.UUID]struct{}
-	clearedstatus      bool
-	target             map[uuid.UUID]struct{}
-	removedtarget      map[uuid.UUID]struct{}
-	clearedtarget      bool
-	file               map[uuid.UUID]struct{}
-	removedfile        map[uuid.UUID]struct{}
-	clearedfile        bool
-	tag                map[uuid.UUID]struct{}
-	removedtag         map[uuid.UUID]struct{}
-	clearedtag         bool
-	transaction        map[uuid.UUID]struct{}
-	removedtransaction map[uuid.UUID]struct{}
-	clearedtransaction bool
-	comment            map[uuid.UUID]struct{}
-	removedcomment     map[uuid.UUID]struct{}
-	clearedcomment     bool
-	user               *uuid.UUID
-	cleareduser        bool
-	group              *uuid.UUID
-	clearedgroup       bool
-	done               bool
-	oldValue           func(context.Context) (*Request, error)
-	predicates         []predicate.Request
-}
-
-var _ ent.Mutation = (*RequestMutation)(nil)
-
-// requestOption allows management of the mutation configuration using functional options.
-type requestOption func(*RequestMutation)
-
-// newRequestMutation creates new mutation for the Request entity.
-func newRequestMutation(c config, op Op, opts ...requestOption) *RequestMutation {
-	m := &RequestMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeRequest,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withRequestID sets the ID field of the mutation.
-func withRequestID(id uuid.UUID) requestOption {
-	return func(m *RequestMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Request
-		)
-		m.oldValue = func(ctx context.Context) (*Request, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Request.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withRequest sets the old Request of the mutation.
-func withRequest(node *Request) requestOption {
-	return func(m *RequestMutation) {
-		m.oldValue = func(context.Context) (*Request, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m RequestMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m RequestMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Request entities.
-func (m *RequestMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *RequestMutation) ID() (id uuid.UUID, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *RequestMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []uuid.UUID{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Request.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetTitle sets the "title" field.
-func (m *RequestMutation) SetTitle(s string) {
-	m.title = &s
-}
-
-// Title returns the value of the "title" field in the mutation.
-func (m *RequestMutation) Title() (r string, exists bool) {
-	v := m.title
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTitle returns the old "title" field's value of the Request entity.
-// If the Request object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestMutation) OldTitle(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTitle requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
-	}
-	return oldValue.Title, nil
-}
-
-// ResetTitle resets all changes to the "title" field.
-func (m *RequestMutation) ResetTitle() {
-	m.title = nil
-}
-
-// SetContent sets the "content" field.
-func (m *RequestMutation) SetContent(s string) {
-	m.content = &s
-}
-
-// Content returns the value of the "content" field in the mutation.
-func (m *RequestMutation) Content() (r string, exists bool) {
-	v := m.content
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldContent returns the old "content" field's value of the Request entity.
-// If the Request object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestMutation) OldContent(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldContent is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldContent requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldContent: %w", err)
-	}
-	return oldValue.Content, nil
-}
-
-// ResetContent resets all changes to the "content" field.
-func (m *RequestMutation) ResetContent() {
-	m.content = nil
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *RequestMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *RequestMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Request entity.
-// If the Request object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *RequestMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *RequestMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *RequestMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Request entity.
-// If the Request object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *RequestMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// AddStatuIDs adds the "status" edge to the RequestStatus entity by ids.
-func (m *RequestMutation) AddStatuIDs(ids ...uuid.UUID) {
-	if m.status == nil {
-		m.status = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.status[ids[i]] = struct{}{}
-	}
-}
-
-// ClearStatus clears the "status" edge to the RequestStatus entity.
-func (m *RequestMutation) ClearStatus() {
-	m.clearedstatus = true
-}
-
-// StatusCleared reports if the "status" edge to the RequestStatus entity was cleared.
-func (m *RequestMutation) StatusCleared() bool {
-	return m.clearedstatus
-}
-
-// RemoveStatuIDs removes the "status" edge to the RequestStatus entity by IDs.
-func (m *RequestMutation) RemoveStatuIDs(ids ...uuid.UUID) {
-	if m.removedstatus == nil {
-		m.removedstatus = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.status, ids[i])
-		m.removedstatus[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedStatus returns the removed IDs of the "status" edge to the RequestStatus entity.
-func (m *RequestMutation) RemovedStatusIDs() (ids []uuid.UUID) {
-	for id := range m.removedstatus {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// StatusIDs returns the "status" edge IDs in the mutation.
-func (m *RequestMutation) StatusIDs() (ids []uuid.UUID) {
-	for id := range m.status {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetStatus resets all changes to the "status" edge.
-func (m *RequestMutation) ResetStatus() {
-	m.status = nil
-	m.clearedstatus = false
-	m.removedstatus = nil
-}
-
-// AddTargetIDs adds the "target" edge to the RequestTarget entity by ids.
-func (m *RequestMutation) AddTargetIDs(ids ...uuid.UUID) {
-	if m.target == nil {
-		m.target = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.target[ids[i]] = struct{}{}
-	}
-}
-
-// ClearTarget clears the "target" edge to the RequestTarget entity.
-func (m *RequestMutation) ClearTarget() {
-	m.clearedtarget = true
-}
-
-// TargetCleared reports if the "target" edge to the RequestTarget entity was cleared.
-func (m *RequestMutation) TargetCleared() bool {
-	return m.clearedtarget
-}
-
-// RemoveTargetIDs removes the "target" edge to the RequestTarget entity by IDs.
-func (m *RequestMutation) RemoveTargetIDs(ids ...uuid.UUID) {
-	if m.removedtarget == nil {
-		m.removedtarget = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.target, ids[i])
-		m.removedtarget[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedTarget returns the removed IDs of the "target" edge to the RequestTarget entity.
-func (m *RequestMutation) RemovedTargetIDs() (ids []uuid.UUID) {
-	for id := range m.removedtarget {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// TargetIDs returns the "target" edge IDs in the mutation.
-func (m *RequestMutation) TargetIDs() (ids []uuid.UUID) {
-	for id := range m.target {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetTarget resets all changes to the "target" edge.
-func (m *RequestMutation) ResetTarget() {
-	m.target = nil
-	m.clearedtarget = false
-	m.removedtarget = nil
-}
-
-// AddFileIDs adds the "file" edge to the File entity by ids.
-func (m *RequestMutation) AddFileIDs(ids ...uuid.UUID) {
-	if m.file == nil {
-		m.file = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.file[ids[i]] = struct{}{}
-	}
-}
-
-// ClearFile clears the "file" edge to the File entity.
-func (m *RequestMutation) ClearFile() {
-	m.clearedfile = true
-}
-
-// FileCleared reports if the "file" edge to the File entity was cleared.
-func (m *RequestMutation) FileCleared() bool {
-	return m.clearedfile
-}
-
-// RemoveFileIDs removes the "file" edge to the File entity by IDs.
-func (m *RequestMutation) RemoveFileIDs(ids ...uuid.UUID) {
-	if m.removedfile == nil {
-		m.removedfile = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.file, ids[i])
-		m.removedfile[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedFile returns the removed IDs of the "file" edge to the File entity.
-func (m *RequestMutation) RemovedFileIDs() (ids []uuid.UUID) {
-	for id := range m.removedfile {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// FileIDs returns the "file" edge IDs in the mutation.
-func (m *RequestMutation) FileIDs() (ids []uuid.UUID) {
-	for id := range m.file {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetFile resets all changes to the "file" edge.
-func (m *RequestMutation) ResetFile() {
-	m.file = nil
-	m.clearedfile = false
-	m.removedfile = nil
-}
-
-// AddTagIDs adds the "tag" edge to the Tag entity by ids.
-func (m *RequestMutation) AddTagIDs(ids ...uuid.UUID) {
-	if m.tag == nil {
-		m.tag = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.tag[ids[i]] = struct{}{}
-	}
-}
-
-// ClearTag clears the "tag" edge to the Tag entity.
-func (m *RequestMutation) ClearTag() {
-	m.clearedtag = true
-}
-
-// TagCleared reports if the "tag" edge to the Tag entity was cleared.
-func (m *RequestMutation) TagCleared() bool {
-	return m.clearedtag
-}
-
-// RemoveTagIDs removes the "tag" edge to the Tag entity by IDs.
-func (m *RequestMutation) RemoveTagIDs(ids ...uuid.UUID) {
-	if m.removedtag == nil {
-		m.removedtag = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.tag, ids[i])
-		m.removedtag[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedTag returns the removed IDs of the "tag" edge to the Tag entity.
-func (m *RequestMutation) RemovedTagIDs() (ids []uuid.UUID) {
-	for id := range m.removedtag {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// TagIDs returns the "tag" edge IDs in the mutation.
-func (m *RequestMutation) TagIDs() (ids []uuid.UUID) {
-	for id := range m.tag {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetTag resets all changes to the "tag" edge.
-func (m *RequestMutation) ResetTag() {
-	m.tag = nil
-	m.clearedtag = false
-	m.removedtag = nil
-}
-
-// AddTransactionIDs adds the "transaction" edge to the Transaction entity by ids.
-func (m *RequestMutation) AddTransactionIDs(ids ...uuid.UUID) {
-	if m.transaction == nil {
-		m.transaction = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.transaction[ids[i]] = struct{}{}
-	}
-}
-
-// ClearTransaction clears the "transaction" edge to the Transaction entity.
-func (m *RequestMutation) ClearTransaction() {
-	m.clearedtransaction = true
-}
-
-// TransactionCleared reports if the "transaction" edge to the Transaction entity was cleared.
-func (m *RequestMutation) TransactionCleared() bool {
-	return m.clearedtransaction
-}
-
-// RemoveTransactionIDs removes the "transaction" edge to the Transaction entity by IDs.
-func (m *RequestMutation) RemoveTransactionIDs(ids ...uuid.UUID) {
-	if m.removedtransaction == nil {
-		m.removedtransaction = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.transaction, ids[i])
-		m.removedtransaction[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedTransaction returns the removed IDs of the "transaction" edge to the Transaction entity.
-func (m *RequestMutation) RemovedTransactionIDs() (ids []uuid.UUID) {
-	for id := range m.removedtransaction {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// TransactionIDs returns the "transaction" edge IDs in the mutation.
-func (m *RequestMutation) TransactionIDs() (ids []uuid.UUID) {
-	for id := range m.transaction {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetTransaction resets all changes to the "transaction" edge.
-func (m *RequestMutation) ResetTransaction() {
-	m.transaction = nil
-	m.clearedtransaction = false
-	m.removedtransaction = nil
-}
-
-// AddCommentIDs adds the "comment" edge to the Comment entity by ids.
-func (m *RequestMutation) AddCommentIDs(ids ...uuid.UUID) {
-	if m.comment == nil {
-		m.comment = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.comment[ids[i]] = struct{}{}
-	}
-}
-
-// ClearComment clears the "comment" edge to the Comment entity.
-func (m *RequestMutation) ClearComment() {
-	m.clearedcomment = true
-}
-
-// CommentCleared reports if the "comment" edge to the Comment entity was cleared.
-func (m *RequestMutation) CommentCleared() bool {
-	return m.clearedcomment
-}
-
-// RemoveCommentIDs removes the "comment" edge to the Comment entity by IDs.
-func (m *RequestMutation) RemoveCommentIDs(ids ...uuid.UUID) {
-	if m.removedcomment == nil {
-		m.removedcomment = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.comment, ids[i])
-		m.removedcomment[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedComment returns the removed IDs of the "comment" edge to the Comment entity.
-func (m *RequestMutation) RemovedCommentIDs() (ids []uuid.UUID) {
-	for id := range m.removedcomment {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// CommentIDs returns the "comment" edge IDs in the mutation.
-func (m *RequestMutation) CommentIDs() (ids []uuid.UUID) {
-	for id := range m.comment {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetComment resets all changes to the "comment" edge.
-func (m *RequestMutation) ResetComment() {
-	m.comment = nil
-	m.clearedcomment = false
-	m.removedcomment = nil
-}
-
-// SetUserID sets the "user" edge to the User entity by id.
-func (m *RequestMutation) SetUserID(id uuid.UUID) {
-	m.user = &id
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (m *RequestMutation) ClearUser() {
-	m.cleareduser = true
-}
-
-// UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *RequestMutation) UserCleared() bool {
-	return m.cleareduser
-}
-
-// UserID returns the "user" edge ID in the mutation.
-func (m *RequestMutation) UserID() (id uuid.UUID, exists bool) {
-	if m.user != nil {
-		return *m.user, true
-	}
-	return
-}
-
-// UserIDs returns the "user" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserID instead. It exists only for internal usage by the builders.
-func (m *RequestMutation) UserIDs() (ids []uuid.UUID) {
-	if id := m.user; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUser resets all changes to the "user" edge.
-func (m *RequestMutation) ResetUser() {
-	m.user = nil
-	m.cleareduser = false
-}
-
-// SetGroupID sets the "group" edge to the Group entity by id.
-func (m *RequestMutation) SetGroupID(id uuid.UUID) {
-	m.group = &id
-}
-
-// ClearGroup clears the "group" edge to the Group entity.
-func (m *RequestMutation) ClearGroup() {
-	m.clearedgroup = true
-}
-
-// GroupCleared reports if the "group" edge to the Group entity was cleared.
-func (m *RequestMutation) GroupCleared() bool {
-	return m.clearedgroup
-}
-
-// GroupID returns the "group" edge ID in the mutation.
-func (m *RequestMutation) GroupID() (id uuid.UUID, exists bool) {
-	if m.group != nil {
-		return *m.group, true
-	}
-	return
-}
-
-// GroupIDs returns the "group" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// GroupID instead. It exists only for internal usage by the builders.
-func (m *RequestMutation) GroupIDs() (ids []uuid.UUID) {
-	if id := m.group; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetGroup resets all changes to the "group" edge.
-func (m *RequestMutation) ResetGroup() {
-	m.group = nil
-	m.clearedgroup = false
-}
-
-// Where appends a list predicates to the RequestMutation builder.
-func (m *RequestMutation) Where(ps ...predicate.Request) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the RequestMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *RequestMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.Request, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *RequestMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *RequestMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (Request).
-func (m *RequestMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *RequestMutation) Fields() []string {
-	fields := make([]string, 0, 4)
-	if m.title != nil {
-		fields = append(fields, request.FieldTitle)
-	}
-	if m.content != nil {
-		fields = append(fields, request.FieldContent)
-	}
-	if m.created_at != nil {
-		fields = append(fields, request.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, request.FieldUpdatedAt)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *RequestMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case request.FieldTitle:
-		return m.Title()
-	case request.FieldContent:
-		return m.Content()
-	case request.FieldCreatedAt:
-		return m.CreatedAt()
-	case request.FieldUpdatedAt:
-		return m.UpdatedAt()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *RequestMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case request.FieldTitle:
-		return m.OldTitle(ctx)
-	case request.FieldContent:
-		return m.OldContent(ctx)
-	case request.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case request.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	}
-	return nil, fmt.Errorf("unknown Request field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *RequestMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case request.FieldTitle:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTitle(v)
-		return nil
-	case request.FieldContent:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetContent(v)
-		return nil
-	case request.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case request.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Request field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *RequestMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *RequestMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *RequestMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Request numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *RequestMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *RequestMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *RequestMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Request nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *RequestMutation) ResetField(name string) error {
-	switch name {
-	case request.FieldTitle:
-		m.ResetTitle()
-		return nil
-	case request.FieldContent:
-		m.ResetContent()
-		return nil
-	case request.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case request.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown Request field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *RequestMutation) AddedEdges() []string {
-	edges := make([]string, 0, 8)
-	if m.status != nil {
-		edges = append(edges, request.EdgeStatus)
-	}
-	if m.target != nil {
-		edges = append(edges, request.EdgeTarget)
-	}
-	if m.file != nil {
-		edges = append(edges, request.EdgeFile)
-	}
-	if m.tag != nil {
-		edges = append(edges, request.EdgeTag)
-	}
-	if m.transaction != nil {
-		edges = append(edges, request.EdgeTransaction)
-	}
-	if m.comment != nil {
-		edges = append(edges, request.EdgeComment)
-	}
-	if m.user != nil {
-		edges = append(edges, request.EdgeUser)
-	}
-	if m.group != nil {
-		edges = append(edges, request.EdgeGroup)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *RequestMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case request.EdgeStatus:
-		ids := make([]ent.Value, 0, len(m.status))
-		for id := range m.status {
-			ids = append(ids, id)
-		}
-		return ids
-	case request.EdgeTarget:
-		ids := make([]ent.Value, 0, len(m.target))
-		for id := range m.target {
-			ids = append(ids, id)
-		}
-		return ids
-	case request.EdgeFile:
-		ids := make([]ent.Value, 0, len(m.file))
-		for id := range m.file {
-			ids = append(ids, id)
-		}
-		return ids
-	case request.EdgeTag:
-		ids := make([]ent.Value, 0, len(m.tag))
-		for id := range m.tag {
-			ids = append(ids, id)
-		}
-		return ids
-	case request.EdgeTransaction:
-		ids := make([]ent.Value, 0, len(m.transaction))
-		for id := range m.transaction {
-			ids = append(ids, id)
-		}
-		return ids
-	case request.EdgeComment:
-		ids := make([]ent.Value, 0, len(m.comment))
-		for id := range m.comment {
-			ids = append(ids, id)
-		}
-		return ids
-	case request.EdgeUser:
-		if id := m.user; id != nil {
-			return []ent.Value{*id}
-		}
-	case request.EdgeGroup:
-		if id := m.group; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *RequestMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 8)
-	if m.removedstatus != nil {
-		edges = append(edges, request.EdgeStatus)
-	}
-	if m.removedtarget != nil {
-		edges = append(edges, request.EdgeTarget)
-	}
-	if m.removedfile != nil {
-		edges = append(edges, request.EdgeFile)
-	}
-	if m.removedtag != nil {
-		edges = append(edges, request.EdgeTag)
-	}
-	if m.removedtransaction != nil {
-		edges = append(edges, request.EdgeTransaction)
-	}
-	if m.removedcomment != nil {
-		edges = append(edges, request.EdgeComment)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *RequestMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case request.EdgeStatus:
-		ids := make([]ent.Value, 0, len(m.removedstatus))
-		for id := range m.removedstatus {
-			ids = append(ids, id)
-		}
-		return ids
-	case request.EdgeTarget:
-		ids := make([]ent.Value, 0, len(m.removedtarget))
-		for id := range m.removedtarget {
-			ids = append(ids, id)
-		}
-		return ids
-	case request.EdgeFile:
-		ids := make([]ent.Value, 0, len(m.removedfile))
-		for id := range m.removedfile {
-			ids = append(ids, id)
-		}
-		return ids
-	case request.EdgeTag:
-		ids := make([]ent.Value, 0, len(m.removedtag))
-		for id := range m.removedtag {
-			ids = append(ids, id)
-		}
-		return ids
-	case request.EdgeTransaction:
-		ids := make([]ent.Value, 0, len(m.removedtransaction))
-		for id := range m.removedtransaction {
-			ids = append(ids, id)
-		}
-		return ids
-	case request.EdgeComment:
-		ids := make([]ent.Value, 0, len(m.removedcomment))
-		for id := range m.removedcomment {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *RequestMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 8)
-	if m.clearedstatus {
-		edges = append(edges, request.EdgeStatus)
-	}
-	if m.clearedtarget {
-		edges = append(edges, request.EdgeTarget)
-	}
-	if m.clearedfile {
-		edges = append(edges, request.EdgeFile)
-	}
-	if m.clearedtag {
-		edges = append(edges, request.EdgeTag)
-	}
-	if m.clearedtransaction {
-		edges = append(edges, request.EdgeTransaction)
-	}
-	if m.clearedcomment {
-		edges = append(edges, request.EdgeComment)
-	}
-	if m.cleareduser {
-		edges = append(edges, request.EdgeUser)
-	}
-	if m.clearedgroup {
-		edges = append(edges, request.EdgeGroup)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *RequestMutation) EdgeCleared(name string) bool {
-	switch name {
-	case request.EdgeStatus:
-		return m.clearedstatus
-	case request.EdgeTarget:
-		return m.clearedtarget
-	case request.EdgeFile:
-		return m.clearedfile
-	case request.EdgeTag:
-		return m.clearedtag
-	case request.EdgeTransaction:
-		return m.clearedtransaction
-	case request.EdgeComment:
-		return m.clearedcomment
-	case request.EdgeUser:
-		return m.cleareduser
-	case request.EdgeGroup:
-		return m.clearedgroup
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *RequestMutation) ClearEdge(name string) error {
-	switch name {
-	case request.EdgeUser:
-		m.ClearUser()
-		return nil
-	case request.EdgeGroup:
-		m.ClearGroup()
-		return nil
-	}
-	return fmt.Errorf("unknown Request unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *RequestMutation) ResetEdge(name string) error {
-	switch name {
-	case request.EdgeStatus:
-		m.ResetStatus()
-		return nil
-	case request.EdgeTarget:
-		m.ResetTarget()
-		return nil
-	case request.EdgeFile:
-		m.ResetFile()
-		return nil
-	case request.EdgeTag:
-		m.ResetTag()
-		return nil
-	case request.EdgeTransaction:
-		m.ResetTransaction()
-		return nil
-	case request.EdgeComment:
-		m.ResetComment()
-		return nil
-	case request.EdgeUser:
-		m.ResetUser()
-		return nil
-	case request.EdgeGroup:
-		m.ResetGroup()
-		return nil
-	}
-	return fmt.Errorf("unknown Request edge %s", name)
-}
-
-// RequestStatusMutation represents an operation that mutates the RequestStatus nodes in the graph.
-type RequestStatusMutation struct {
-	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	status         *requeststatus.Status
-	created_at     *time.Time
-	clearedFields  map[string]struct{}
-	request        *uuid.UUID
-	clearedrequest bool
-	user           *uuid.UUID
-	cleareduser    bool
-	done           bool
-	oldValue       func(context.Context) (*RequestStatus, error)
-	predicates     []predicate.RequestStatus
-}
-
-var _ ent.Mutation = (*RequestStatusMutation)(nil)
-
-// requeststatusOption allows management of the mutation configuration using functional options.
-type requeststatusOption func(*RequestStatusMutation)
-
-// newRequestStatusMutation creates new mutation for the RequestStatus entity.
-func newRequestStatusMutation(c config, op Op, opts ...requeststatusOption) *RequestStatusMutation {
-	m := &RequestStatusMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeRequestStatus,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withRequestStatusID sets the ID field of the mutation.
-func withRequestStatusID(id uuid.UUID) requeststatusOption {
-	return func(m *RequestStatusMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *RequestStatus
-		)
-		m.oldValue = func(ctx context.Context) (*RequestStatus, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().RequestStatus.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withRequestStatus sets the old RequestStatus of the mutation.
-func withRequestStatus(node *RequestStatus) requeststatusOption {
-	return func(m *RequestStatusMutation) {
-		m.oldValue = func(context.Context) (*RequestStatus, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m RequestStatusMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m RequestStatusMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of RequestStatus entities.
-func (m *RequestStatusMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *RequestStatusMutation) ID() (id uuid.UUID, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *RequestStatusMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []uuid.UUID{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().RequestStatus.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetStatus sets the "status" field.
-func (m *RequestStatusMutation) SetStatus(r requeststatus.Status) {
-	m.status = &r
-}
-
-// Status returns the value of the "status" field in the mutation.
-func (m *RequestStatusMutation) Status() (r requeststatus.Status, exists bool) {
-	v := m.status
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldStatus returns the old "status" field's value of the RequestStatus entity.
-// If the RequestStatus object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestStatusMutation) OldStatus(ctx context.Context) (v requeststatus.Status, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldStatus requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
-	}
-	return oldValue.Status, nil
-}
-
-// ResetStatus resets all changes to the "status" field.
-func (m *RequestStatusMutation) ResetStatus() {
-	m.status = nil
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *RequestStatusMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *RequestStatusMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the RequestStatus entity.
-// If the RequestStatus object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestStatusMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *RequestStatusMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *RequestStatusMutation) SetRequestID(id uuid.UUID) {
-	m.request = &id
-}
-
-// ClearRequest clears the "request" edge to the Request entity.
-func (m *RequestStatusMutation) ClearRequest() {
-	m.clearedrequest = true
-}
-
-// RequestCleared reports if the "request" edge to the Request entity was cleared.
-func (m *RequestStatusMutation) RequestCleared() bool {
-	return m.clearedrequest
-}
-
-// RequestID returns the "request" edge ID in the mutation.
-func (m *RequestStatusMutation) RequestID() (id uuid.UUID, exists bool) {
-	if m.request != nil {
-		return *m.request, true
-	}
-	return
-}
-
-// RequestIDs returns the "request" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// RequestID instead. It exists only for internal usage by the builders.
-func (m *RequestStatusMutation) RequestIDs() (ids []uuid.UUID) {
-	if id := m.request; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetRequest resets all changes to the "request" edge.
-func (m *RequestStatusMutation) ResetRequest() {
-	m.request = nil
-	m.clearedrequest = false
-}
-
-// SetUserID sets the "user" edge to the User entity by id.
-func (m *RequestStatusMutation) SetUserID(id uuid.UUID) {
-	m.user = &id
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (m *RequestStatusMutation) ClearUser() {
-	m.cleareduser = true
-}
-
-// UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *RequestStatusMutation) UserCleared() bool {
-	return m.cleareduser
-}
-
-// UserID returns the "user" edge ID in the mutation.
-func (m *RequestStatusMutation) UserID() (id uuid.UUID, exists bool) {
-	if m.user != nil {
-		return *m.user, true
-	}
-	return
-}
-
-// UserIDs returns the "user" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserID instead. It exists only for internal usage by the builders.
-func (m *RequestStatusMutation) UserIDs() (ids []uuid.UUID) {
-	if id := m.user; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUser resets all changes to the "user" edge.
-func (m *RequestStatusMutation) ResetUser() {
-	m.user = nil
-	m.cleareduser = false
-}
-
-// Where appends a list predicates to the RequestStatusMutation builder.
-func (m *RequestStatusMutation) Where(ps ...predicate.RequestStatus) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the RequestStatusMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *RequestStatusMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.RequestStatus, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *RequestStatusMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *RequestStatusMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (RequestStatus).
-func (m *RequestStatusMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *RequestStatusMutation) Fields() []string {
-	fields := make([]string, 0, 2)
-	if m.status != nil {
-		fields = append(fields, requeststatus.FieldStatus)
-	}
-	if m.created_at != nil {
-		fields = append(fields, requeststatus.FieldCreatedAt)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *RequestStatusMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case requeststatus.FieldStatus:
-		return m.Status()
-	case requeststatus.FieldCreatedAt:
-		return m.CreatedAt()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *RequestStatusMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case requeststatus.FieldStatus:
-		return m.OldStatus(ctx)
-	case requeststatus.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	}
-	return nil, fmt.Errorf("unknown RequestStatus field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *RequestStatusMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case requeststatus.FieldStatus:
-		v, ok := value.(requeststatus.Status)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetStatus(v)
-		return nil
-	case requeststatus.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	}
-	return fmt.Errorf("unknown RequestStatus field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *RequestStatusMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *RequestStatusMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *RequestStatusMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown RequestStatus numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *RequestStatusMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *RequestStatusMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *RequestStatusMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown RequestStatus nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *RequestStatusMutation) ResetField(name string) error {
-	switch name {
-	case requeststatus.FieldStatus:
-		m.ResetStatus()
-		return nil
-	case requeststatus.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown RequestStatus field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *RequestStatusMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.request != nil {
-		edges = append(edges, requeststatus.EdgeRequest)
-	}
-	if m.user != nil {
-		edges = append(edges, requeststatus.EdgeUser)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *RequestStatusMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case requeststatus.EdgeRequest:
-		if id := m.request; id != nil {
-			return []ent.Value{*id}
-		}
-	case requeststatus.EdgeUser:
-		if id := m.user; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *RequestStatusMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *RequestStatusMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *RequestStatusMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedrequest {
-		edges = append(edges, requeststatus.EdgeRequest)
-	}
-	if m.cleareduser {
-		edges = append(edges, requeststatus.EdgeUser)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *RequestStatusMutation) EdgeCleared(name string) bool {
-	switch name {
-	case requeststatus.EdgeRequest:
-		return m.clearedrequest
-	case requeststatus.EdgeUser:
-		return m.cleareduser
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *RequestStatusMutation) ClearEdge(name string) error {
-	switch name {
-	case requeststatus.EdgeRequest:
-		m.ClearRequest()
-		return nil
-	case requeststatus.EdgeUser:
-		m.ClearUser()
-		return nil
-	}
-	return fmt.Errorf("unknown RequestStatus unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *RequestStatusMutation) ResetEdge(name string) error {
-	switch name {
-	case requeststatus.EdgeRequest:
-		m.ResetRequest()
-		return nil
-	case requeststatus.EdgeUser:
-		m.ResetUser()
-		return nil
-	}
-	return fmt.Errorf("unknown RequestStatus edge %s", name)
-}
-
-// RequestTargetMutation represents an operation that mutates the RequestTarget nodes in the graph.
-type RequestTargetMutation struct {
-	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	amount         *int
-	addamount      *int
-	paid_at        *time.Time
-	created_at     *time.Time
-	clearedFields  map[string]struct{}
-	request        *uuid.UUID
-	clearedrequest bool
-	user           *uuid.UUID
-	cleareduser    bool
-	done           bool
-	oldValue       func(context.Context) (*RequestTarget, error)
-	predicates     []predicate.RequestTarget
-}
-
-var _ ent.Mutation = (*RequestTargetMutation)(nil)
-
-// requesttargetOption allows management of the mutation configuration using functional options.
-type requesttargetOption func(*RequestTargetMutation)
-
-// newRequestTargetMutation creates new mutation for the RequestTarget entity.
-func newRequestTargetMutation(c config, op Op, opts ...requesttargetOption) *RequestTargetMutation {
-	m := &RequestTargetMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeRequestTarget,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withRequestTargetID sets the ID field of the mutation.
-func withRequestTargetID(id uuid.UUID) requesttargetOption {
-	return func(m *RequestTargetMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *RequestTarget
-		)
-		m.oldValue = func(ctx context.Context) (*RequestTarget, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().RequestTarget.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withRequestTarget sets the old RequestTarget of the mutation.
-func withRequestTarget(node *RequestTarget) requesttargetOption {
-	return func(m *RequestTargetMutation) {
-		m.oldValue = func(context.Context) (*RequestTarget, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m RequestTargetMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m RequestTargetMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of RequestTarget entities.
-func (m *RequestTargetMutation) SetID(id uuid.UUID) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *RequestTargetMutation) ID() (id uuid.UUID, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *RequestTargetMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []uuid.UUID{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().RequestTarget.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetAmount sets the "amount" field.
-func (m *RequestTargetMutation) SetAmount(i int) {
-	m.amount = &i
-	m.addamount = nil
-}
-
-// Amount returns the value of the "amount" field in the mutation.
-func (m *RequestTargetMutation) Amount() (r int, exists bool) {
-	v := m.amount
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAmount returns the old "amount" field's value of the RequestTarget entity.
-// If the RequestTarget object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestTargetMutation) OldAmount(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAmount is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAmount requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAmount: %w", err)
-	}
-	return oldValue.Amount, nil
-}
-
-// AddAmount adds i to the "amount" field.
-func (m *RequestTargetMutation) AddAmount(i int) {
-	if m.addamount != nil {
-		*m.addamount += i
-	} else {
-		m.addamount = &i
-	}
-}
-
-// AddedAmount returns the value that was added to the "amount" field in this mutation.
-func (m *RequestTargetMutation) AddedAmount() (r int, exists bool) {
-	v := m.addamount
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetAmount resets all changes to the "amount" field.
-func (m *RequestTargetMutation) ResetAmount() {
-	m.amount = nil
-	m.addamount = nil
-}
-
-// SetPaidAt sets the "paid_at" field.
-func (m *RequestTargetMutation) SetPaidAt(t time.Time) {
-	m.paid_at = &t
-}
-
-// PaidAt returns the value of the "paid_at" field in the mutation.
-func (m *RequestTargetMutation) PaidAt() (r time.Time, exists bool) {
-	v := m.paid_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPaidAt returns the old "paid_at" field's value of the RequestTarget entity.
-// If the RequestTarget object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestTargetMutation) OldPaidAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPaidAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPaidAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPaidAt: %w", err)
-	}
-	return oldValue.PaidAt, nil
-}
-
-// ClearPaidAt clears the value of the "paid_at" field.
-func (m *RequestTargetMutation) ClearPaidAt() {
-	m.paid_at = nil
-	m.clearedFields[requesttarget.FieldPaidAt] = struct{}{}
-}
-
-// PaidAtCleared returns if the "paid_at" field was cleared in this mutation.
-func (m *RequestTargetMutation) PaidAtCleared() bool {
-	_, ok := m.clearedFields[requesttarget.FieldPaidAt]
-	return ok
-}
-
-// ResetPaidAt resets all changes to the "paid_at" field.
-func (m *RequestTargetMutation) ResetPaidAt() {
-	m.paid_at = nil
-	delete(m.clearedFields, requesttarget.FieldPaidAt)
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *RequestTargetMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *RequestTargetMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the RequestTarget entity.
-// If the RequestTarget object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestTargetMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *RequestTargetMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *RequestTargetMutation) SetRequestID(id uuid.UUID) {
-	m.request = &id
-}
-
-// ClearRequest clears the "request" edge to the Request entity.
-func (m *RequestTargetMutation) ClearRequest() {
-	m.clearedrequest = true
-}
-
-// RequestCleared reports if the "request" edge to the Request entity was cleared.
-func (m *RequestTargetMutation) RequestCleared() bool {
-	return m.clearedrequest
-}
-
-// RequestID returns the "request" edge ID in the mutation.
-func (m *RequestTargetMutation) RequestID() (id uuid.UUID, exists bool) {
-	if m.request != nil {
-		return *m.request, true
-	}
-	return
-}
-
-// RequestIDs returns the "request" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// RequestID instead. It exists only for internal usage by the builders.
-func (m *RequestTargetMutation) RequestIDs() (ids []uuid.UUID) {
-	if id := m.request; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetRequest resets all changes to the "request" edge.
-func (m *RequestTargetMutation) ResetRequest() {
-	m.request = nil
-	m.clearedrequest = false
-}
-
-// SetUserID sets the "user" edge to the User entity by id.
-func (m *RequestTargetMutation) SetUserID(id uuid.UUID) {
-	m.user = &id
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (m *RequestTargetMutation) ClearUser() {
-	m.cleareduser = true
-}
-
-// UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *RequestTargetMutation) UserCleared() bool {
-	return m.cleareduser
-}
-
-// UserID returns the "user" edge ID in the mutation.
-func (m *RequestTargetMutation) UserID() (id uuid.UUID, exists bool) {
-	if m.user != nil {
-		return *m.user, true
-	}
-	return
-}
-
-// UserIDs returns the "user" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserID instead. It exists only for internal usage by the builders.
-func (m *RequestTargetMutation) UserIDs() (ids []uuid.UUID) {
-	if id := m.user; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUser resets all changes to the "user" edge.
-func (m *RequestTargetMutation) ResetUser() {
-	m.user = nil
-	m.cleareduser = false
-}
-
-// Where appends a list predicates to the RequestTargetMutation builder.
-func (m *RequestTargetMutation) Where(ps ...predicate.RequestTarget) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the RequestTargetMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *RequestTargetMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.RequestTarget, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *RequestTargetMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *RequestTargetMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (RequestTarget).
-func (m *RequestTargetMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *RequestTargetMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.amount != nil {
-		fields = append(fields, requesttarget.FieldAmount)
-	}
-	if m.paid_at != nil {
-		fields = append(fields, requesttarget.FieldPaidAt)
-	}
-	if m.created_at != nil {
-		fields = append(fields, requesttarget.FieldCreatedAt)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *RequestTargetMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case requesttarget.FieldAmount:
-		return m.Amount()
-	case requesttarget.FieldPaidAt:
-		return m.PaidAt()
-	case requesttarget.FieldCreatedAt:
-		return m.CreatedAt()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *RequestTargetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case requesttarget.FieldAmount:
-		return m.OldAmount(ctx)
-	case requesttarget.FieldPaidAt:
-		return m.OldPaidAt(ctx)
-	case requesttarget.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	}
-	return nil, fmt.Errorf("unknown RequestTarget field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *RequestTargetMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case requesttarget.FieldAmount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAmount(v)
-		return nil
-	case requesttarget.FieldPaidAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPaidAt(v)
-		return nil
-	case requesttarget.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	}
-	return fmt.Errorf("unknown RequestTarget field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *RequestTargetMutation) AddedFields() []string {
-	var fields []string
-	if m.addamount != nil {
-		fields = append(fields, requesttarget.FieldAmount)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *RequestTargetMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case requesttarget.FieldAmount:
-		return m.AddedAmount()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *RequestTargetMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case requesttarget.FieldAmount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddAmount(v)
-		return nil
-	}
-	return fmt.Errorf("unknown RequestTarget numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *RequestTargetMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(requesttarget.FieldPaidAt) {
-		fields = append(fields, requesttarget.FieldPaidAt)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *RequestTargetMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *RequestTargetMutation) ClearField(name string) error {
-	switch name {
-	case requesttarget.FieldPaidAt:
-		m.ClearPaidAt()
-		return nil
-	}
-	return fmt.Errorf("unknown RequestTarget nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *RequestTargetMutation) ResetField(name string) error {
-	switch name {
-	case requesttarget.FieldAmount:
-		m.ResetAmount()
-		return nil
-	case requesttarget.FieldPaidAt:
-		m.ResetPaidAt()
-		return nil
-	case requesttarget.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown RequestTarget field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *RequestTargetMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.request != nil {
-		edges = append(edges, requesttarget.EdgeRequest)
-	}
-	if m.user != nil {
-		edges = append(edges, requesttarget.EdgeUser)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *RequestTargetMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case requesttarget.EdgeRequest:
-		if id := m.request; id != nil {
-			return []ent.Value{*id}
-		}
-	case requesttarget.EdgeUser:
-		if id := m.user; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *RequestTargetMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *RequestTargetMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *RequestTargetMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedrequest {
-		edges = append(edges, requesttarget.EdgeRequest)
-	}
-	if m.cleareduser {
-		edges = append(edges, requesttarget.EdgeUser)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *RequestTargetMutation) EdgeCleared(name string) bool {
-	switch name {
-	case requesttarget.EdgeRequest:
-		return m.clearedrequest
-	case requesttarget.EdgeUser:
-		return m.cleareduser
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *RequestTargetMutation) ClearEdge(name string) error {
-	switch name {
-	case requesttarget.EdgeRequest:
-		m.ClearRequest()
-		return nil
-	case requesttarget.EdgeUser:
-		m.ClearUser()
-		return nil
-	}
-	return fmt.Errorf("unknown RequestTarget unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *RequestTargetMutation) ResetEdge(name string) error {
-	switch name {
-	case requesttarget.EdgeRequest:
-		m.ResetRequest()
-		return nil
-	case requesttarget.EdgeUser:
-		m.ResetUser()
-		return nil
-	}
-	return fmt.Errorf("unknown RequestTarget edge %s", name)
-}
-
 // TagMutation represents an operation that mutates the Tag nodes in the graph.
 type TagMutation struct {
 	config
@@ -5271,9 +5271,9 @@ type TagMutation struct {
 	updated_at         *time.Time
 	deleted_at         *time.Time
 	clearedFields      map[string]struct{}
-	request            map[uuid.UUID]struct{}
-	removedrequest     map[uuid.UUID]struct{}
-	clearedrequest     bool
+	application        map[uuid.UUID]struct{}
+	removedapplication map[uuid.UUID]struct{}
+	clearedapplication bool
 	transaction        map[uuid.UUID]struct{}
 	removedtransaction map[uuid.UUID]struct{}
 	clearedtransaction bool
@@ -5543,58 +5543,58 @@ func (m *TagMutation) ResetDeletedAt() {
 	delete(m.clearedFields, tag.FieldDeletedAt)
 }
 
-// AddRequestIDs adds the "request" edge to the Request entity by ids.
-func (m *TagMutation) AddRequestIDs(ids ...uuid.UUID) {
-	if m.request == nil {
-		m.request = make(map[uuid.UUID]struct{})
+// AddApplicationIDs adds the "application" edge to the Application entity by ids.
+func (m *TagMutation) AddApplicationIDs(ids ...uuid.UUID) {
+	if m.application == nil {
+		m.application = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.request[ids[i]] = struct{}{}
+		m.application[ids[i]] = struct{}{}
 	}
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
-func (m *TagMutation) ClearRequest() {
-	m.clearedrequest = true
+// ClearApplication clears the "application" edge to the Application entity.
+func (m *TagMutation) ClearApplication() {
+	m.clearedapplication = true
 }
 
-// RequestCleared reports if the "request" edge to the Request entity was cleared.
-func (m *TagMutation) RequestCleared() bool {
-	return m.clearedrequest
+// ApplicationCleared reports if the "application" edge to the Application entity was cleared.
+func (m *TagMutation) ApplicationCleared() bool {
+	return m.clearedapplication
 }
 
-// RemoveRequestIDs removes the "request" edge to the Request entity by IDs.
-func (m *TagMutation) RemoveRequestIDs(ids ...uuid.UUID) {
-	if m.removedrequest == nil {
-		m.removedrequest = make(map[uuid.UUID]struct{})
+// RemoveApplicationIDs removes the "application" edge to the Application entity by IDs.
+func (m *TagMutation) RemoveApplicationIDs(ids ...uuid.UUID) {
+	if m.removedapplication == nil {
+		m.removedapplication = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.request, ids[i])
-		m.removedrequest[ids[i]] = struct{}{}
+		delete(m.application, ids[i])
+		m.removedapplication[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedRequest returns the removed IDs of the "request" edge to the Request entity.
-func (m *TagMutation) RemovedRequestIDs() (ids []uuid.UUID) {
-	for id := range m.removedrequest {
+// RemovedApplication returns the removed IDs of the "application" edge to the Application entity.
+func (m *TagMutation) RemovedApplicationIDs() (ids []uuid.UUID) {
+	for id := range m.removedapplication {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// RequestIDs returns the "request" edge IDs in the mutation.
-func (m *TagMutation) RequestIDs() (ids []uuid.UUID) {
-	for id := range m.request {
+// ApplicationIDs returns the "application" edge IDs in the mutation.
+func (m *TagMutation) ApplicationIDs() (ids []uuid.UUID) {
+	for id := range m.application {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetRequest resets all changes to the "request" edge.
-func (m *TagMutation) ResetRequest() {
-	m.request = nil
-	m.clearedrequest = false
-	m.removedrequest = nil
+// ResetApplication resets all changes to the "application" edge.
+func (m *TagMutation) ResetApplication() {
+	m.application = nil
+	m.clearedapplication = false
+	m.removedapplication = nil
 }
 
 // AddTransactionIDs adds the "transaction" edge to the Transaction entity by ids.
@@ -5845,8 +5845,8 @@ func (m *TagMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TagMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.request != nil {
-		edges = append(edges, tag.EdgeRequest)
+	if m.application != nil {
+		edges = append(edges, tag.EdgeApplication)
 	}
 	if m.transaction != nil {
 		edges = append(edges, tag.EdgeTransaction)
@@ -5858,9 +5858,9 @@ func (m *TagMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *TagMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case tag.EdgeRequest:
-		ids := make([]ent.Value, 0, len(m.request))
-		for id := range m.request {
+	case tag.EdgeApplication:
+		ids := make([]ent.Value, 0, len(m.application))
+		for id := range m.application {
 			ids = append(ids, id)
 		}
 		return ids
@@ -5877,8 +5877,8 @@ func (m *TagMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TagMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removedrequest != nil {
-		edges = append(edges, tag.EdgeRequest)
+	if m.removedapplication != nil {
+		edges = append(edges, tag.EdgeApplication)
 	}
 	if m.removedtransaction != nil {
 		edges = append(edges, tag.EdgeTransaction)
@@ -5890,9 +5890,9 @@ func (m *TagMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *TagMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case tag.EdgeRequest:
-		ids := make([]ent.Value, 0, len(m.removedrequest))
-		for id := range m.removedrequest {
+	case tag.EdgeApplication:
+		ids := make([]ent.Value, 0, len(m.removedapplication))
+		for id := range m.removedapplication {
 			ids = append(ids, id)
 		}
 		return ids
@@ -5909,8 +5909,8 @@ func (m *TagMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TagMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.clearedrequest {
-		edges = append(edges, tag.EdgeRequest)
+	if m.clearedapplication {
+		edges = append(edges, tag.EdgeApplication)
 	}
 	if m.clearedtransaction {
 		edges = append(edges, tag.EdgeTransaction)
@@ -5922,8 +5922,8 @@ func (m *TagMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *TagMutation) EdgeCleared(name string) bool {
 	switch name {
-	case tag.EdgeRequest:
-		return m.clearedrequest
+	case tag.EdgeApplication:
+		return m.clearedapplication
 	case tag.EdgeTransaction:
 		return m.clearedtransaction
 	}
@@ -5942,8 +5942,8 @@ func (m *TagMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *TagMutation) ResetEdge(name string) error {
 	switch name {
-	case tag.EdgeRequest:
-		m.ResetRequest()
+	case tag.EdgeApplication:
+		m.ResetApplication()
 		return nil
 	case tag.EdgeTransaction:
 		m.ResetTransaction()
@@ -5967,8 +5967,8 @@ type TransactionMutation struct {
 	clearedtag          bool
 	group_budget        *uuid.UUID
 	clearedgroup_budget bool
-	request             *uuid.UUID
-	clearedrequest      bool
+	application         *uuid.UUID
+	clearedapplication  bool
 	done                bool
 	oldValue            func(context.Context) (*Transaction, error)
 	predicates          []predicate.Transaction
@@ -6246,43 +6246,43 @@ func (m *TransactionMutation) ResetGroupBudget() {
 	m.clearedgroup_budget = false
 }
 
-// SetRequestID sets the "request" edge to the Request entity by id.
-func (m *TransactionMutation) SetRequestID(id uuid.UUID) {
-	m.request = &id
+// SetApplicationID sets the "application" edge to the Application entity by id.
+func (m *TransactionMutation) SetApplicationID(id uuid.UUID) {
+	m.application = &id
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
-func (m *TransactionMutation) ClearRequest() {
-	m.clearedrequest = true
+// ClearApplication clears the "application" edge to the Application entity.
+func (m *TransactionMutation) ClearApplication() {
+	m.clearedapplication = true
 }
 
-// RequestCleared reports if the "request" edge to the Request entity was cleared.
-func (m *TransactionMutation) RequestCleared() bool {
-	return m.clearedrequest
+// ApplicationCleared reports if the "application" edge to the Application entity was cleared.
+func (m *TransactionMutation) ApplicationCleared() bool {
+	return m.clearedapplication
 }
 
-// RequestID returns the "request" edge ID in the mutation.
-func (m *TransactionMutation) RequestID() (id uuid.UUID, exists bool) {
-	if m.request != nil {
-		return *m.request, true
+// ApplicationID returns the "application" edge ID in the mutation.
+func (m *TransactionMutation) ApplicationID() (id uuid.UUID, exists bool) {
+	if m.application != nil {
+		return *m.application, true
 	}
 	return
 }
 
-// RequestIDs returns the "request" edge IDs in the mutation.
+// ApplicationIDs returns the "application" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// RequestID instead. It exists only for internal usage by the builders.
-func (m *TransactionMutation) RequestIDs() (ids []uuid.UUID) {
-	if id := m.request; id != nil {
+// ApplicationID instead. It exists only for internal usage by the builders.
+func (m *TransactionMutation) ApplicationIDs() (ids []uuid.UUID) {
+	if id := m.application; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetRequest resets all changes to the "request" edge.
-func (m *TransactionMutation) ResetRequest() {
-	m.request = nil
-	m.clearedrequest = false
+// ResetApplication resets all changes to the "application" edge.
+func (m *TransactionMutation) ResetApplication() {
+	m.application = nil
+	m.clearedapplication = false
 }
 
 // Where appends a list predicates to the TransactionMutation builder.
@@ -6428,8 +6428,8 @@ func (m *TransactionMutation) AddedEdges() []string {
 	if m.group_budget != nil {
 		edges = append(edges, transaction.EdgeGroupBudget)
 	}
-	if m.request != nil {
-		edges = append(edges, transaction.EdgeRequest)
+	if m.application != nil {
+		edges = append(edges, transaction.EdgeApplication)
 	}
 	return edges
 }
@@ -6452,8 +6452,8 @@ func (m *TransactionMutation) AddedIDs(name string) []ent.Value {
 		if id := m.group_budget; id != nil {
 			return []ent.Value{*id}
 		}
-	case transaction.EdgeRequest:
-		if id := m.request; id != nil {
+	case transaction.EdgeApplication:
+		if id := m.application; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -6495,8 +6495,8 @@ func (m *TransactionMutation) ClearedEdges() []string {
 	if m.clearedgroup_budget {
 		edges = append(edges, transaction.EdgeGroupBudget)
 	}
-	if m.clearedrequest {
-		edges = append(edges, transaction.EdgeRequest)
+	if m.clearedapplication {
+		edges = append(edges, transaction.EdgeApplication)
 	}
 	return edges
 }
@@ -6511,8 +6511,8 @@ func (m *TransactionMutation) EdgeCleared(name string) bool {
 		return m.clearedtag
 	case transaction.EdgeGroupBudget:
 		return m.clearedgroup_budget
-	case transaction.EdgeRequest:
-		return m.clearedrequest
+	case transaction.EdgeApplication:
+		return m.clearedapplication
 	}
 	return false
 }
@@ -6527,8 +6527,8 @@ func (m *TransactionMutation) ClearEdge(name string) error {
 	case transaction.EdgeGroupBudget:
 		m.ClearGroupBudget()
 		return nil
-	case transaction.EdgeRequest:
-		m.ClearRequest()
+	case transaction.EdgeApplication:
+		m.ClearApplication()
 		return nil
 	}
 	return fmt.Errorf("unknown Transaction unique edge %s", name)
@@ -6547,8 +6547,8 @@ func (m *TransactionMutation) ResetEdge(name string) error {
 	case transaction.EdgeGroupBudget:
 		m.ResetGroupBudget()
 		return nil
-	case transaction.EdgeRequest:
-		m.ResetRequest()
+	case transaction.EdgeApplication:
+		m.ResetApplication()
 		return nil
 	}
 	return fmt.Errorf("unknown Transaction edge %s", name)
@@ -7208,40 +7208,40 @@ func (m *TransactionDetailMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op                    Op
-	typ                   string
-	id                    *uuid.UUID
-	name                  *string
-	display_name          *string
-	admin                 *bool
-	created_at            *time.Time
-	updated_at            *time.Time
-	deleted_at            *time.Time
-	clearedFields         map[string]struct{}
-	group_user            map[uuid.UUID]struct{}
-	removedgroup_user     map[uuid.UUID]struct{}
-	clearedgroup_user     bool
-	group_owner           map[uuid.UUID]struct{}
-	removedgroup_owner    map[uuid.UUID]struct{}
-	clearedgroup_owner    bool
-	comment               map[uuid.UUID]struct{}
-	removedcomment        map[uuid.UUID]struct{}
-	clearedcomment        bool
-	request_status        map[uuid.UUID]struct{}
-	removedrequest_status map[uuid.UUID]struct{}
-	clearedrequest_status bool
-	request               map[uuid.UUID]struct{}
-	removedrequest        map[uuid.UUID]struct{}
-	clearedrequest        bool
-	file                  map[uuid.UUID]struct{}
-	removedfile           map[uuid.UUID]struct{}
-	clearedfile           bool
-	request_target        map[uuid.UUID]struct{}
-	removedrequest_target map[uuid.UUID]struct{}
-	clearedrequest_target bool
-	done                  bool
-	oldValue              func(context.Context) (*User, error)
-	predicates            []predicate.User
+	op                        Op
+	typ                       string
+	id                        *uuid.UUID
+	name                      *string
+	display_name              *string
+	admin                     *bool
+	created_at                *time.Time
+	updated_at                *time.Time
+	deleted_at                *time.Time
+	clearedFields             map[string]struct{}
+	group_user                map[uuid.UUID]struct{}
+	removedgroup_user         map[uuid.UUID]struct{}
+	clearedgroup_user         bool
+	group_owner               map[uuid.UUID]struct{}
+	removedgroup_owner        map[uuid.UUID]struct{}
+	clearedgroup_owner        bool
+	comment                   map[uuid.UUID]struct{}
+	removedcomment            map[uuid.UUID]struct{}
+	clearedcomment            bool
+	application_status        map[uuid.UUID]struct{}
+	removedapplication_status map[uuid.UUID]struct{}
+	clearedapplication_status bool
+	application               map[uuid.UUID]struct{}
+	removedapplication        map[uuid.UUID]struct{}
+	clearedapplication        bool
+	file                      map[uuid.UUID]struct{}
+	removedfile               map[uuid.UUID]struct{}
+	clearedfile               bool
+	application_target        map[uuid.UUID]struct{}
+	removedapplication_target map[uuid.UUID]struct{}
+	clearedapplication_target bool
+	done                      bool
+	oldValue                  func(context.Context) (*User, error)
+	predicates                []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -7739,112 +7739,112 @@ func (m *UserMutation) ResetComment() {
 	m.removedcomment = nil
 }
 
-// AddRequestStatuIDs adds the "request_status" edge to the RequestStatus entity by ids.
-func (m *UserMutation) AddRequestStatuIDs(ids ...uuid.UUID) {
-	if m.request_status == nil {
-		m.request_status = make(map[uuid.UUID]struct{})
+// AddApplicationStatuIDs adds the "application_status" edge to the ApplicationStatus entity by ids.
+func (m *UserMutation) AddApplicationStatuIDs(ids ...uuid.UUID) {
+	if m.application_status == nil {
+		m.application_status = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.request_status[ids[i]] = struct{}{}
+		m.application_status[ids[i]] = struct{}{}
 	}
 }
 
-// ClearRequestStatus clears the "request_status" edge to the RequestStatus entity.
-func (m *UserMutation) ClearRequestStatus() {
-	m.clearedrequest_status = true
+// ClearApplicationStatus clears the "application_status" edge to the ApplicationStatus entity.
+func (m *UserMutation) ClearApplicationStatus() {
+	m.clearedapplication_status = true
 }
 
-// RequestStatusCleared reports if the "request_status" edge to the RequestStatus entity was cleared.
-func (m *UserMutation) RequestStatusCleared() bool {
-	return m.clearedrequest_status
+// ApplicationStatusCleared reports if the "application_status" edge to the ApplicationStatus entity was cleared.
+func (m *UserMutation) ApplicationStatusCleared() bool {
+	return m.clearedapplication_status
 }
 
-// RemoveRequestStatuIDs removes the "request_status" edge to the RequestStatus entity by IDs.
-func (m *UserMutation) RemoveRequestStatuIDs(ids ...uuid.UUID) {
-	if m.removedrequest_status == nil {
-		m.removedrequest_status = make(map[uuid.UUID]struct{})
+// RemoveApplicationStatuIDs removes the "application_status" edge to the ApplicationStatus entity by IDs.
+func (m *UserMutation) RemoveApplicationStatuIDs(ids ...uuid.UUID) {
+	if m.removedapplication_status == nil {
+		m.removedapplication_status = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.request_status, ids[i])
-		m.removedrequest_status[ids[i]] = struct{}{}
+		delete(m.application_status, ids[i])
+		m.removedapplication_status[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedRequestStatus returns the removed IDs of the "request_status" edge to the RequestStatus entity.
-func (m *UserMutation) RemovedRequestStatusIDs() (ids []uuid.UUID) {
-	for id := range m.removedrequest_status {
+// RemovedApplicationStatus returns the removed IDs of the "application_status" edge to the ApplicationStatus entity.
+func (m *UserMutation) RemovedApplicationStatusIDs() (ids []uuid.UUID) {
+	for id := range m.removedapplication_status {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// RequestStatusIDs returns the "request_status" edge IDs in the mutation.
-func (m *UserMutation) RequestStatusIDs() (ids []uuid.UUID) {
-	for id := range m.request_status {
+// ApplicationStatusIDs returns the "application_status" edge IDs in the mutation.
+func (m *UserMutation) ApplicationStatusIDs() (ids []uuid.UUID) {
+	for id := range m.application_status {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetRequestStatus resets all changes to the "request_status" edge.
-func (m *UserMutation) ResetRequestStatus() {
-	m.request_status = nil
-	m.clearedrequest_status = false
-	m.removedrequest_status = nil
+// ResetApplicationStatus resets all changes to the "application_status" edge.
+func (m *UserMutation) ResetApplicationStatus() {
+	m.application_status = nil
+	m.clearedapplication_status = false
+	m.removedapplication_status = nil
 }
 
-// AddRequestIDs adds the "request" edge to the Request entity by ids.
-func (m *UserMutation) AddRequestIDs(ids ...uuid.UUID) {
-	if m.request == nil {
-		m.request = make(map[uuid.UUID]struct{})
+// AddApplicationIDs adds the "application" edge to the Application entity by ids.
+func (m *UserMutation) AddApplicationIDs(ids ...uuid.UUID) {
+	if m.application == nil {
+		m.application = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.request[ids[i]] = struct{}{}
+		m.application[ids[i]] = struct{}{}
 	}
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
-func (m *UserMutation) ClearRequest() {
-	m.clearedrequest = true
+// ClearApplication clears the "application" edge to the Application entity.
+func (m *UserMutation) ClearApplication() {
+	m.clearedapplication = true
 }
 
-// RequestCleared reports if the "request" edge to the Request entity was cleared.
-func (m *UserMutation) RequestCleared() bool {
-	return m.clearedrequest
+// ApplicationCleared reports if the "application" edge to the Application entity was cleared.
+func (m *UserMutation) ApplicationCleared() bool {
+	return m.clearedapplication
 }
 
-// RemoveRequestIDs removes the "request" edge to the Request entity by IDs.
-func (m *UserMutation) RemoveRequestIDs(ids ...uuid.UUID) {
-	if m.removedrequest == nil {
-		m.removedrequest = make(map[uuid.UUID]struct{})
+// RemoveApplicationIDs removes the "application" edge to the Application entity by IDs.
+func (m *UserMutation) RemoveApplicationIDs(ids ...uuid.UUID) {
+	if m.removedapplication == nil {
+		m.removedapplication = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.request, ids[i])
-		m.removedrequest[ids[i]] = struct{}{}
+		delete(m.application, ids[i])
+		m.removedapplication[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedRequest returns the removed IDs of the "request" edge to the Request entity.
-func (m *UserMutation) RemovedRequestIDs() (ids []uuid.UUID) {
-	for id := range m.removedrequest {
+// RemovedApplication returns the removed IDs of the "application" edge to the Application entity.
+func (m *UserMutation) RemovedApplicationIDs() (ids []uuid.UUID) {
+	for id := range m.removedapplication {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// RequestIDs returns the "request" edge IDs in the mutation.
-func (m *UserMutation) RequestIDs() (ids []uuid.UUID) {
-	for id := range m.request {
+// ApplicationIDs returns the "application" edge IDs in the mutation.
+func (m *UserMutation) ApplicationIDs() (ids []uuid.UUID) {
+	for id := range m.application {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetRequest resets all changes to the "request" edge.
-func (m *UserMutation) ResetRequest() {
-	m.request = nil
-	m.clearedrequest = false
-	m.removedrequest = nil
+// ResetApplication resets all changes to the "application" edge.
+func (m *UserMutation) ResetApplication() {
+	m.application = nil
+	m.clearedapplication = false
+	m.removedapplication = nil
 }
 
 // AddFileIDs adds the "file" edge to the File entity by ids.
@@ -7901,58 +7901,58 @@ func (m *UserMutation) ResetFile() {
 	m.removedfile = nil
 }
 
-// AddRequestTargetIDs adds the "request_target" edge to the RequestTarget entity by ids.
-func (m *UserMutation) AddRequestTargetIDs(ids ...uuid.UUID) {
-	if m.request_target == nil {
-		m.request_target = make(map[uuid.UUID]struct{})
+// AddApplicationTargetIDs adds the "application_target" edge to the ApplicationTarget entity by ids.
+func (m *UserMutation) AddApplicationTargetIDs(ids ...uuid.UUID) {
+	if m.application_target == nil {
+		m.application_target = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		m.request_target[ids[i]] = struct{}{}
+		m.application_target[ids[i]] = struct{}{}
 	}
 }
 
-// ClearRequestTarget clears the "request_target" edge to the RequestTarget entity.
-func (m *UserMutation) ClearRequestTarget() {
-	m.clearedrequest_target = true
+// ClearApplicationTarget clears the "application_target" edge to the ApplicationTarget entity.
+func (m *UserMutation) ClearApplicationTarget() {
+	m.clearedapplication_target = true
 }
 
-// RequestTargetCleared reports if the "request_target" edge to the RequestTarget entity was cleared.
-func (m *UserMutation) RequestTargetCleared() bool {
-	return m.clearedrequest_target
+// ApplicationTargetCleared reports if the "application_target" edge to the ApplicationTarget entity was cleared.
+func (m *UserMutation) ApplicationTargetCleared() bool {
+	return m.clearedapplication_target
 }
 
-// RemoveRequestTargetIDs removes the "request_target" edge to the RequestTarget entity by IDs.
-func (m *UserMutation) RemoveRequestTargetIDs(ids ...uuid.UUID) {
-	if m.removedrequest_target == nil {
-		m.removedrequest_target = make(map[uuid.UUID]struct{})
+// RemoveApplicationTargetIDs removes the "application_target" edge to the ApplicationTarget entity by IDs.
+func (m *UserMutation) RemoveApplicationTargetIDs(ids ...uuid.UUID) {
+	if m.removedapplication_target == nil {
+		m.removedapplication_target = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
-		delete(m.request_target, ids[i])
-		m.removedrequest_target[ids[i]] = struct{}{}
+		delete(m.application_target, ids[i])
+		m.removedapplication_target[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedRequestTarget returns the removed IDs of the "request_target" edge to the RequestTarget entity.
-func (m *UserMutation) RemovedRequestTargetIDs() (ids []uuid.UUID) {
-	for id := range m.removedrequest_target {
+// RemovedApplicationTarget returns the removed IDs of the "application_target" edge to the ApplicationTarget entity.
+func (m *UserMutation) RemovedApplicationTargetIDs() (ids []uuid.UUID) {
+	for id := range m.removedapplication_target {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// RequestTargetIDs returns the "request_target" edge IDs in the mutation.
-func (m *UserMutation) RequestTargetIDs() (ids []uuid.UUID) {
-	for id := range m.request_target {
+// ApplicationTargetIDs returns the "application_target" edge IDs in the mutation.
+func (m *UserMutation) ApplicationTargetIDs() (ids []uuid.UUID) {
+	for id := range m.application_target {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetRequestTarget resets all changes to the "request_target" edge.
-func (m *UserMutation) ResetRequestTarget() {
-	m.request_target = nil
-	m.clearedrequest_target = false
-	m.removedrequest_target = nil
+// ResetApplicationTarget resets all changes to the "application_target" edge.
+func (m *UserMutation) ResetApplicationTarget() {
+	m.application_target = nil
+	m.clearedapplication_target = false
+	m.removedapplication_target = nil
 }
 
 // Where appends a list predicates to the UserMutation builder.
@@ -8192,17 +8192,17 @@ func (m *UserMutation) AddedEdges() []string {
 	if m.comment != nil {
 		edges = append(edges, user.EdgeComment)
 	}
-	if m.request_status != nil {
-		edges = append(edges, user.EdgeRequestStatus)
+	if m.application_status != nil {
+		edges = append(edges, user.EdgeApplicationStatus)
 	}
-	if m.request != nil {
-		edges = append(edges, user.EdgeRequest)
+	if m.application != nil {
+		edges = append(edges, user.EdgeApplication)
 	}
 	if m.file != nil {
 		edges = append(edges, user.EdgeFile)
 	}
-	if m.request_target != nil {
-		edges = append(edges, user.EdgeRequestTarget)
+	if m.application_target != nil {
+		edges = append(edges, user.EdgeApplicationTarget)
 	}
 	return edges
 }
@@ -8229,15 +8229,15 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeRequestStatus:
-		ids := make([]ent.Value, 0, len(m.request_status))
-		for id := range m.request_status {
+	case user.EdgeApplicationStatus:
+		ids := make([]ent.Value, 0, len(m.application_status))
+		for id := range m.application_status {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeRequest:
-		ids := make([]ent.Value, 0, len(m.request))
-		for id := range m.request {
+	case user.EdgeApplication:
+		ids := make([]ent.Value, 0, len(m.application))
+		for id := range m.application {
 			ids = append(ids, id)
 		}
 		return ids
@@ -8247,9 +8247,9 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeRequestTarget:
-		ids := make([]ent.Value, 0, len(m.request_target))
-		for id := range m.request_target {
+	case user.EdgeApplicationTarget:
+		ids := make([]ent.Value, 0, len(m.application_target))
+		for id := range m.application_target {
 			ids = append(ids, id)
 		}
 		return ids
@@ -8269,17 +8269,17 @@ func (m *UserMutation) RemovedEdges() []string {
 	if m.removedcomment != nil {
 		edges = append(edges, user.EdgeComment)
 	}
-	if m.removedrequest_status != nil {
-		edges = append(edges, user.EdgeRequestStatus)
+	if m.removedapplication_status != nil {
+		edges = append(edges, user.EdgeApplicationStatus)
 	}
-	if m.removedrequest != nil {
-		edges = append(edges, user.EdgeRequest)
+	if m.removedapplication != nil {
+		edges = append(edges, user.EdgeApplication)
 	}
 	if m.removedfile != nil {
 		edges = append(edges, user.EdgeFile)
 	}
-	if m.removedrequest_target != nil {
-		edges = append(edges, user.EdgeRequestTarget)
+	if m.removedapplication_target != nil {
+		edges = append(edges, user.EdgeApplicationTarget)
 	}
 	return edges
 }
@@ -8306,15 +8306,15 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeRequestStatus:
-		ids := make([]ent.Value, 0, len(m.removedrequest_status))
-		for id := range m.removedrequest_status {
+	case user.EdgeApplicationStatus:
+		ids := make([]ent.Value, 0, len(m.removedapplication_status))
+		for id := range m.removedapplication_status {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeRequest:
-		ids := make([]ent.Value, 0, len(m.removedrequest))
-		for id := range m.removedrequest {
+	case user.EdgeApplication:
+		ids := make([]ent.Value, 0, len(m.removedapplication))
+		for id := range m.removedapplication {
 			ids = append(ids, id)
 		}
 		return ids
@@ -8324,9 +8324,9 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeRequestTarget:
-		ids := make([]ent.Value, 0, len(m.removedrequest_target))
-		for id := range m.removedrequest_target {
+	case user.EdgeApplicationTarget:
+		ids := make([]ent.Value, 0, len(m.removedapplication_target))
+		for id := range m.removedapplication_target {
 			ids = append(ids, id)
 		}
 		return ids
@@ -8346,17 +8346,17 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedcomment {
 		edges = append(edges, user.EdgeComment)
 	}
-	if m.clearedrequest_status {
-		edges = append(edges, user.EdgeRequestStatus)
+	if m.clearedapplication_status {
+		edges = append(edges, user.EdgeApplicationStatus)
 	}
-	if m.clearedrequest {
-		edges = append(edges, user.EdgeRequest)
+	if m.clearedapplication {
+		edges = append(edges, user.EdgeApplication)
 	}
 	if m.clearedfile {
 		edges = append(edges, user.EdgeFile)
 	}
-	if m.clearedrequest_target {
-		edges = append(edges, user.EdgeRequestTarget)
+	if m.clearedapplication_target {
+		edges = append(edges, user.EdgeApplicationTarget)
 	}
 	return edges
 }
@@ -8371,14 +8371,14 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedgroup_owner
 	case user.EdgeComment:
 		return m.clearedcomment
-	case user.EdgeRequestStatus:
-		return m.clearedrequest_status
-	case user.EdgeRequest:
-		return m.clearedrequest
+	case user.EdgeApplicationStatus:
+		return m.clearedapplication_status
+	case user.EdgeApplication:
+		return m.clearedapplication
 	case user.EdgeFile:
 		return m.clearedfile
-	case user.EdgeRequestTarget:
-		return m.clearedrequest_target
+	case user.EdgeApplicationTarget:
+		return m.clearedapplication_target
 	}
 	return false
 }
@@ -8404,17 +8404,17 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeComment:
 		m.ResetComment()
 		return nil
-	case user.EdgeRequestStatus:
-		m.ResetRequestStatus()
+	case user.EdgeApplicationStatus:
+		m.ResetApplicationStatus()
 		return nil
-	case user.EdgeRequest:
-		m.ResetRequest()
+	case user.EdgeApplication:
+		m.ResetApplication()
 		return nil
 	case user.EdgeFile:
 		m.ResetFile()
 		return nil
-	case user.EdgeRequestTarget:
-		m.ResetRequestTarget()
+	case user.EdgeApplicationTarget:
+		m.ResetApplicationTarget()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -85,15 +85,15 @@ func (cu *CommentUpdate) ClearDeletedAt() *CommentUpdate {
 	return cu
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (cu *CommentUpdate) SetRequestID(id uuid.UUID) *CommentUpdate {
-	cu.mutation.SetRequestID(id)
+// SetApplicationID sets the "application" edge to the Application entity by ID.
+func (cu *CommentUpdate) SetApplicationID(id uuid.UUID) *CommentUpdate {
+	cu.mutation.SetApplicationID(id)
 	return cu
 }
 
-// SetRequest sets the "request" edge to the Request entity.
-func (cu *CommentUpdate) SetRequest(r *Request) *CommentUpdate {
-	return cu.SetRequestID(r.ID)
+// SetApplication sets the "application" edge to the Application entity.
+func (cu *CommentUpdate) SetApplication(a *Application) *CommentUpdate {
+	return cu.SetApplicationID(a.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
@@ -112,9 +112,9 @@ func (cu *CommentUpdate) Mutation() *CommentMutation {
 	return cu.mutation
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
-func (cu *CommentUpdate) ClearRequest() *CommentUpdate {
-	cu.mutation.ClearRequest()
+// ClearApplication clears the "application" edge to the Application entity.
+func (cu *CommentUpdate) ClearApplication() *CommentUpdate {
+	cu.mutation.ClearApplication()
 	return cu
 }
 
@@ -162,8 +162,8 @@ func (cu *CommentUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cu *CommentUpdate) check() error {
-	if cu.mutation.RequestCleared() && len(cu.mutation.RequestIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Comment.request"`)
+	if cu.mutation.ApplicationCleared() && len(cu.mutation.ApplicationIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Comment.application"`)
 	}
 	if cu.mutation.UserCleared() && len(cu.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Comment.user"`)
@@ -198,28 +198,28 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if cu.mutation.DeletedAtCleared() {
 		_spec.ClearField(comment.FieldDeletedAt, field.TypeTime)
 	}
-	if cu.mutation.RequestCleared() {
+	if cu.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   comment.RequestTable,
-			Columns: []string{comment.RequestColumn},
+			Table:   comment.ApplicationTable,
+			Columns: []string{comment.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := cu.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   comment.RequestTable,
-			Columns: []string{comment.RequestColumn},
+			Table:   comment.ApplicationTable,
+			Columns: []string{comment.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -330,15 +330,15 @@ func (cuo *CommentUpdateOne) ClearDeletedAt() *CommentUpdateOne {
 	return cuo
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (cuo *CommentUpdateOne) SetRequestID(id uuid.UUID) *CommentUpdateOne {
-	cuo.mutation.SetRequestID(id)
+// SetApplicationID sets the "application" edge to the Application entity by ID.
+func (cuo *CommentUpdateOne) SetApplicationID(id uuid.UUID) *CommentUpdateOne {
+	cuo.mutation.SetApplicationID(id)
 	return cuo
 }
 
-// SetRequest sets the "request" edge to the Request entity.
-func (cuo *CommentUpdateOne) SetRequest(r *Request) *CommentUpdateOne {
-	return cuo.SetRequestID(r.ID)
+// SetApplication sets the "application" edge to the Application entity.
+func (cuo *CommentUpdateOne) SetApplication(a *Application) *CommentUpdateOne {
+	return cuo.SetApplicationID(a.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
@@ -357,9 +357,9 @@ func (cuo *CommentUpdateOne) Mutation() *CommentMutation {
 	return cuo.mutation
 }
 
-// ClearRequest clears the "request" edge to the Request entity.
-func (cuo *CommentUpdateOne) ClearRequest() *CommentUpdateOne {
-	cuo.mutation.ClearRequest()
+// ClearApplication clears the "application" edge to the Application entity.
+func (cuo *CommentUpdateOne) ClearApplication() *CommentUpdateOne {
+	cuo.mutation.ClearApplication()
 	return cuo
 }
 
@@ -420,8 +420,8 @@ func (cuo *CommentUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (cuo *CommentUpdateOne) check() error {
-	if cuo.mutation.RequestCleared() && len(cuo.mutation.RequestIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Comment.request"`)
+	if cuo.mutation.ApplicationCleared() && len(cuo.mutation.ApplicationIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Comment.application"`)
 	}
 	if cuo.mutation.UserCleared() && len(cuo.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Comment.user"`)
@@ -473,28 +473,28 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 	if cuo.mutation.DeletedAtCleared() {
 		_spec.ClearField(comment.FieldDeletedAt, field.TypeTime)
 	}
-	if cuo.mutation.RequestCleared() {
+	if cuo.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   comment.RequestTable,
-			Columns: []string{comment.RequestColumn},
+			Table:   comment.ApplicationTable,
+			Columns: []string{comment.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := cuo.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   comment.RequestTable,
-			Columns: []string{comment.RequestColumn},
+			Table:   comment.ApplicationTable,
+			Columns: []string{comment.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

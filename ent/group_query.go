@@ -13,10 +13,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -30,7 +30,7 @@ type GroupQuery struct {
 	withGroupBudget *GroupBudgetQuery
 	withUser        *UserQuery
 	withOwner       *UserQuery
-	withRequest     *RequestQuery
+	withApplication *ApplicationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -133,9 +133,9 @@ func (gq *GroupQuery) QueryOwner() *UserQuery {
 	return query
 }
 
-// QueryRequest chains the current query on the "request" edge.
-func (gq *GroupQuery) QueryRequest() *RequestQuery {
-	query := (&RequestClient{config: gq.config}).Query()
+// QueryApplication chains the current query on the "application" edge.
+func (gq *GroupQuery) QueryApplication() *ApplicationQuery {
+	query := (&ApplicationClient{config: gq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -146,8 +146,8 @@ func (gq *GroupQuery) QueryRequest() *RequestQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, selector),
-			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, group.RequestTable, group.RequestColumn),
+			sqlgraph.To(application.Table, application.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.ApplicationTable, group.ApplicationColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
@@ -350,7 +350,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		withGroupBudget: gq.withGroupBudget.Clone(),
 		withUser:        gq.withUser.Clone(),
 		withOwner:       gq.withOwner.Clone(),
-		withRequest:     gq.withRequest.Clone(),
+		withApplication: gq.withApplication.Clone(),
 		// clone intermediate query.
 		sql:  gq.sql.Clone(),
 		path: gq.path,
@@ -390,14 +390,14 @@ func (gq *GroupQuery) WithOwner(opts ...func(*UserQuery)) *GroupQuery {
 	return gq
 }
 
-// WithRequest tells the query-builder to eager-load the nodes that are connected to
-// the "request" edge. The optional arguments are used to configure the query builder of the edge.
-func (gq *GroupQuery) WithRequest(opts ...func(*RequestQuery)) *GroupQuery {
-	query := (&RequestClient{config: gq.config}).Query()
+// WithApplication tells the query-builder to eager-load the nodes that are connected to
+// the "application" edge. The optional arguments are used to configure the query builder of the edge.
+func (gq *GroupQuery) WithApplication(opts ...func(*ApplicationQuery)) *GroupQuery {
+	query := (&ApplicationClient{config: gq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	gq.withRequest = query
+	gq.withApplication = query
 	return gq
 }
 
@@ -483,7 +483,7 @@ func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 			gq.withGroupBudget != nil,
 			gq.withUser != nil,
 			gq.withOwner != nil,
-			gq.withRequest != nil,
+			gq.withApplication != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -525,10 +525,10 @@ func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 			return nil, err
 		}
 	}
-	if query := gq.withRequest; query != nil {
-		if err := gq.loadRequest(ctx, query, nodes,
-			func(n *Group) { n.Edges.Request = []*Request{} },
-			func(n *Group, e *Request) { n.Edges.Request = append(n.Edges.Request, e) }); err != nil {
+	if query := gq.withApplication; query != nil {
+		if err := gq.loadApplication(ctx, query, nodes,
+			func(n *Group) { n.Edges.Application = []*Application{} },
+			func(n *Group, e *Application) { n.Edges.Application = append(n.Edges.Application, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -688,7 +688,7 @@ func (gq *GroupQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*
 	}
 	return nil
 }
-func (gq *GroupQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes []*Group, init func(*Group), assign func(*Group, *Request)) error {
+func (gq *GroupQuery) loadApplication(ctx context.Context, query *ApplicationQuery, nodes []*Group, init func(*Group), assign func(*Group, *Application)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Group)
 	for i := range nodes {
@@ -699,21 +699,21 @@ func (gq *GroupQuery) loadRequest(ctx context.Context, query *RequestQuery, node
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(group.RequestColumn), fks...))
+	query.Where(predicate.Application(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(group.ApplicationColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.group_request
+		fk := n.group_application
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "group_request" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "group_application" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "group_request" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "group_application" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

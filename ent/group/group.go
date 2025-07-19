@@ -33,8 +33,8 @@ const (
 	EdgeUser = "user"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
-	// EdgeRequest holds the string denoting the request edge name in mutations.
-	EdgeRequest = "request"
+	// EdgeApplication holds the string denoting the application edge name in mutations.
+	EdgeApplication = "application"
 	// Table holds the table name of the group in the database.
 	Table = "groups"
 	// GroupBudgetTable is the table that holds the group_budget relation/edge.
@@ -54,13 +54,13 @@ const (
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
-	// RequestTable is the table that holds the request relation/edge.
-	RequestTable = "requests"
-	// RequestInverseTable is the table name for the Request entity.
-	// It exists in this package in order to avoid circular dependency with the "request" package.
-	RequestInverseTable = "requests"
-	// RequestColumn is the table column denoting the request relation/edge.
-	RequestColumn = "group_request"
+	// ApplicationTable is the table that holds the application relation/edge.
+	ApplicationTable = "applications"
+	// ApplicationInverseTable is the table name for the Application entity.
+	// It exists in this package in order to avoid circular dependency with the "application" package.
+	ApplicationInverseTable = "applications"
+	// ApplicationColumn is the table column denoting the application relation/edge.
+	ApplicationColumn = "group_application"
 )
 
 // Columns holds all SQL columns for group fields.
@@ -186,17 +186,17 @@ func ByOwner(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByRequestCount orders the results by request count.
-func ByRequestCount(opts ...sql.OrderTermOption) OrderOption {
+// ByApplicationCount orders the results by application count.
+func ByApplicationCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newRequestStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newApplicationStep(), opts...)
 	}
 }
 
-// ByRequest orders the results by request terms.
-func ByRequest(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByApplication orders the results by application terms.
+func ByApplication(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newRequestStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newApplicationStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newGroupBudgetStep() *sqlgraph.Step {
@@ -220,10 +220,10 @@ func newOwnerStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2M, false, OwnerTable, OwnerPrimaryKey...),
 	)
 }
-func newRequestStep() *sqlgraph.Step {
+func newApplicationStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(RequestInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, RequestTable, RequestColumn),
+		sqlgraph.To(ApplicationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ApplicationTable, ApplicationColumn),
 	)
 }

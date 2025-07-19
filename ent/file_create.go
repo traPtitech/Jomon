@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -77,23 +77,23 @@ func (fc *FileCreate) SetNillableID(u *uuid.UUID) *FileCreate {
 	return fc
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (fc *FileCreate) SetRequestID(id uuid.UUID) *FileCreate {
-	fc.mutation.SetRequestID(id)
+// SetApplicationID sets the "application" edge to the Application entity by ID.
+func (fc *FileCreate) SetApplicationID(id uuid.UUID) *FileCreate {
+	fc.mutation.SetApplicationID(id)
 	return fc
 }
 
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (fc *FileCreate) SetNillableRequestID(id *uuid.UUID) *FileCreate {
+// SetNillableApplicationID sets the "application" edge to the Application entity by ID if the given value is not nil.
+func (fc *FileCreate) SetNillableApplicationID(id *uuid.UUID) *FileCreate {
 	if id != nil {
-		fc = fc.SetRequestID(*id)
+		fc = fc.SetApplicationID(*id)
 	}
 	return fc
 }
 
-// SetRequest sets the "request" edge to the Request entity.
-func (fc *FileCreate) SetRequest(r *Request) *FileCreate {
-	return fc.SetRequestID(r.ID)
+// SetApplication sets the "application" edge to the Application entity.
+func (fc *FileCreate) SetApplication(a *Application) *FileCreate {
+	return fc.SetApplicationID(a.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
@@ -222,21 +222,21 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		_spec.SetField(file.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if nodes := fc.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := fc.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   file.RequestTable,
-			Columns: []string{file.RequestColumn},
+			Table:   file.ApplicationTable,
+			Columns: []string{file.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_file = &nodes[0]
+		_node.application_file = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := fc.mutation.UserIDs(); len(nodes) > 0 {

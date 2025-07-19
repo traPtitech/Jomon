@@ -11,12 +11,12 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
+	"github.com/traPtitech/Jomon/ent/applicationstatus"
+	"github.com/traPtitech/Jomon/ent/applicationtarget"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/group"
-	"github.com/traPtitech/Jomon/ent/request"
-	"github.com/traPtitech/Jomon/ent/requeststatus"
-	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -154,34 +154,34 @@ func (uc *UserCreate) AddComment(c ...*Comment) *UserCreate {
 	return uc.AddCommentIDs(ids...)
 }
 
-// AddRequestStatuIDs adds the "request_status" edge to the RequestStatus entity by IDs.
-func (uc *UserCreate) AddRequestStatuIDs(ids ...uuid.UUID) *UserCreate {
-	uc.mutation.AddRequestStatuIDs(ids...)
+// AddApplicationStatuIDs adds the "application_status" edge to the ApplicationStatus entity by IDs.
+func (uc *UserCreate) AddApplicationStatuIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddApplicationStatuIDs(ids...)
 	return uc
 }
 
-// AddRequestStatus adds the "request_status" edges to the RequestStatus entity.
-func (uc *UserCreate) AddRequestStatus(r ...*RequestStatus) *UserCreate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddApplicationStatus adds the "application_status" edges to the ApplicationStatus entity.
+func (uc *UserCreate) AddApplicationStatus(a ...*ApplicationStatus) *UserCreate {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return uc.AddRequestStatuIDs(ids...)
+	return uc.AddApplicationStatuIDs(ids...)
 }
 
-// AddRequestIDs adds the "request" edge to the Request entity by IDs.
-func (uc *UserCreate) AddRequestIDs(ids ...uuid.UUID) *UserCreate {
-	uc.mutation.AddRequestIDs(ids...)
+// AddApplicationIDs adds the "application" edge to the Application entity by IDs.
+func (uc *UserCreate) AddApplicationIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddApplicationIDs(ids...)
 	return uc
 }
 
-// AddRequest adds the "request" edges to the Request entity.
-func (uc *UserCreate) AddRequest(r ...*Request) *UserCreate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddApplication adds the "application" edges to the Application entity.
+func (uc *UserCreate) AddApplication(a ...*Application) *UserCreate {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return uc.AddRequestIDs(ids...)
+	return uc.AddApplicationIDs(ids...)
 }
 
 // AddFileIDs adds the "file" edge to the File entity by IDs.
@@ -199,19 +199,19 @@ func (uc *UserCreate) AddFile(f ...*File) *UserCreate {
 	return uc.AddFileIDs(ids...)
 }
 
-// AddRequestTargetIDs adds the "request_target" edge to the RequestTarget entity by IDs.
-func (uc *UserCreate) AddRequestTargetIDs(ids ...uuid.UUID) *UserCreate {
-	uc.mutation.AddRequestTargetIDs(ids...)
+// AddApplicationTargetIDs adds the "application_target" edge to the ApplicationTarget entity by IDs.
+func (uc *UserCreate) AddApplicationTargetIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddApplicationTargetIDs(ids...)
 	return uc
 }
 
-// AddRequestTarget adds the "request_target" edges to the RequestTarget entity.
-func (uc *UserCreate) AddRequestTarget(r ...*RequestTarget) *UserCreate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddApplicationTarget adds the "application_target" edges to the ApplicationTarget entity.
+func (uc *UserCreate) AddApplicationTarget(a ...*ApplicationTarget) *UserCreate {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return uc.AddRequestTargetIDs(ids...)
+	return uc.AddApplicationTargetIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -396,15 +396,15 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.RequestStatusIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.ApplicationStatusIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   user.RequestStatusTable,
-			Columns: []string{user.RequestStatusColumn},
+			Table:   user.ApplicationStatusTable,
+			Columns: []string{user.ApplicationStatusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(requeststatus.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(applicationstatus.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -412,15 +412,15 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   user.RequestTable,
-			Columns: []string{user.RequestColumn},
+			Table:   user.ApplicationTable,
+			Columns: []string{user.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -444,15 +444,15 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.RequestTargetIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.ApplicationTargetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   user.RequestTargetTable,
-			Columns: []string{user.RequestTargetColumn},
+			Table:   user.ApplicationTargetTable,
+			Columns: []string{user.ApplicationTargetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(requesttarget.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(applicationtarget.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

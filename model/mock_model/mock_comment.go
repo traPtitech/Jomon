@@ -43,60 +43,60 @@ func (m *MockCommentRepository) EXPECT() *MockCommentRepositoryMockRecorder {
 }
 
 // CreateComment mocks base method.
-func (m *MockCommentRepository) CreateComment(ctx context.Context, comment string, requestID, userID uuid.UUID) (*model.Comment, error) {
+func (m *MockCommentRepository) CreateComment(ctx context.Context, comment string, applicationID, userID uuid.UUID) (*model.Comment, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateComment", ctx, comment, requestID, userID)
+	ret := m.ctrl.Call(m, "CreateComment", ctx, comment, applicationID, userID)
 	ret0, _ := ret[0].(*model.Comment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateComment indicates an expected call of CreateComment.
-func (mr *MockCommentRepositoryMockRecorder) CreateComment(ctx, comment, requestID, userID any) *gomock.Call {
+func (mr *MockCommentRepositoryMockRecorder) CreateComment(ctx, comment, applicationID, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateComment", reflect.TypeOf((*MockCommentRepository)(nil).CreateComment), ctx, comment, requestID, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateComment", reflect.TypeOf((*MockCommentRepository)(nil).CreateComment), ctx, comment, applicationID, userID)
 }
 
 // DeleteComment mocks base method.
-func (m *MockCommentRepository) DeleteComment(ctx context.Context, requestID, commentID uuid.UUID) error {
+func (m *MockCommentRepository) DeleteComment(ctx context.Context, applicationID, commentID uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteComment", ctx, requestID, commentID)
+	ret := m.ctrl.Call(m, "DeleteComment", ctx, applicationID, commentID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteComment indicates an expected call of DeleteComment.
-func (mr *MockCommentRepositoryMockRecorder) DeleteComment(ctx, requestID, commentID any) *gomock.Call {
+func (mr *MockCommentRepositoryMockRecorder) DeleteComment(ctx, applicationID, commentID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteComment", reflect.TypeOf((*MockCommentRepository)(nil).DeleteComment), ctx, requestID, commentID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteComment", reflect.TypeOf((*MockCommentRepository)(nil).DeleteComment), ctx, applicationID, commentID)
 }
 
 // GetComments mocks base method.
-func (m *MockCommentRepository) GetComments(ctx context.Context, requestID uuid.UUID) ([]*model.Comment, error) {
+func (m *MockCommentRepository) GetComments(ctx context.Context, applicationID uuid.UUID) ([]*model.Comment, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetComments", ctx, requestID)
+	ret := m.ctrl.Call(m, "GetComments", ctx, applicationID)
 	ret0, _ := ret[0].([]*model.Comment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetComments indicates an expected call of GetComments.
-func (mr *MockCommentRepositoryMockRecorder) GetComments(ctx, requestID any) *gomock.Call {
+func (mr *MockCommentRepositoryMockRecorder) GetComments(ctx, applicationID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetComments", reflect.TypeOf((*MockCommentRepository)(nil).GetComments), ctx, requestID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetComments", reflect.TypeOf((*MockCommentRepository)(nil).GetComments), ctx, applicationID)
 }
 
 // UpdateComment mocks base method.
-func (m *MockCommentRepository) UpdateComment(ctx context.Context, comment string, requestID, commentID uuid.UUID) (*model.Comment, error) {
+func (m *MockCommentRepository) UpdateComment(ctx context.Context, comment string, applicationID, commentID uuid.UUID) (*model.Comment, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateComment", ctx, comment, requestID, commentID)
+	ret := m.ctrl.Call(m, "UpdateComment", ctx, comment, applicationID, commentID)
 	ret0, _ := ret[0].(*model.Comment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateComment indicates an expected call of UpdateComment.
-func (mr *MockCommentRepositoryMockRecorder) UpdateComment(ctx, comment, requestID, commentID any) *gomock.Call {
+func (mr *MockCommentRepositoryMockRecorder) UpdateComment(ctx, comment, applicationID, commentID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateComment", reflect.TypeOf((*MockCommentRepository)(nil).UpdateComment), ctx, comment, requestID, commentID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateComment", reflect.TypeOf((*MockCommentRepository)(nil).UpdateComment), ctx, comment, applicationID, commentID)
 }

@@ -44,8 +44,8 @@ type GroupEdges struct {
 	User []*User `json:"user,omitempty"`
 	// Owner holds the value of the owner edge.
 	Owner []*User `json:"owner,omitempty"`
-	// Request holds the value of the request edge.
-	Request []*Request `json:"request,omitempty"`
+	// Application holds the value of the application edge.
+	Application []*Application `json:"application,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
@@ -78,13 +78,13 @@ func (e GroupEdges) OwnerOrErr() ([]*User, error) {
 	return nil, &NotLoadedError{edge: "owner"}
 }
 
-// RequestOrErr returns the Request value or an error if the edge
+// ApplicationOrErr returns the Application value or an error if the edge
 // was not loaded in eager-loading.
-func (e GroupEdges) RequestOrErr() ([]*Request, error) {
+func (e GroupEdges) ApplicationOrErr() ([]*Application, error) {
 	if e.loadedTypes[3] {
-		return e.Request, nil
+		return e.Application, nil
 	}
-	return nil, &NotLoadedError{edge: "request"}
+	return nil, &NotLoadedError{edge: "application"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -187,9 +187,9 @@ func (gr *Group) QueryOwner() *UserQuery {
 	return NewGroupClient(gr.config).QueryOwner(gr)
 }
 
-// QueryRequest queries the "request" edge of the Group entity.
-func (gr *Group) QueryRequest() *RequestQuery {
-	return NewGroupClient(gr.config).QueryRequest(gr)
+// QueryApplication queries the "application" edge of the Group entity.
+func (gr *Group) QueryApplication() *ApplicationQuery {
+	return NewGroupClient(gr.config).QueryApplication(gr)
 }
 
 // Update returns a builder for updating this Group.

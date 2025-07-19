@@ -45,13 +45,13 @@ func (User) Edges() []ent.Edge {
 			Ref("owner"),
 		edge.From("comment", Comment.Type).
 			Ref("user"),
-		edge.From("request_status", RequestStatus.Type).
+		edge.From("application_status", ApplicationStatus.Type).
 			Ref("user"),
-		edge.From("request", Request.Type).
+		edge.From("application", Application.Type).
 			Ref("user"),
 		edge.From("file", File.Type).
 			Ref("user"),
-		edge.From("request_target", RequestTarget.Type).
+		edge.From("application_target", ApplicationTarget.Type).
 			Ref("user"),
 	}
 }

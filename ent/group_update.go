@@ -12,10 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -172,19 +172,19 @@ func (gu *GroupUpdate) AddOwner(u ...*User) *GroupUpdate {
 	return gu.AddOwnerIDs(ids...)
 }
 
-// AddRequestIDs adds the "request" edge to the Request entity by IDs.
-func (gu *GroupUpdate) AddRequestIDs(ids ...uuid.UUID) *GroupUpdate {
-	gu.mutation.AddRequestIDs(ids...)
+// AddApplicationIDs adds the "application" edge to the Application entity by IDs.
+func (gu *GroupUpdate) AddApplicationIDs(ids ...uuid.UUID) *GroupUpdate {
+	gu.mutation.AddApplicationIDs(ids...)
 	return gu
 }
 
-// AddRequest adds the "request" edges to the Request entity.
-func (gu *GroupUpdate) AddRequest(r ...*Request) *GroupUpdate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddApplication adds the "application" edges to the Application entity.
+func (gu *GroupUpdate) AddApplication(a ...*Application) *GroupUpdate {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return gu.AddRequestIDs(ids...)
+	return gu.AddApplicationIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -255,25 +255,25 @@ func (gu *GroupUpdate) RemoveOwner(u ...*User) *GroupUpdate {
 	return gu.RemoveOwnerIDs(ids...)
 }
 
-// ClearRequest clears all "request" edges to the Request entity.
-func (gu *GroupUpdate) ClearRequest() *GroupUpdate {
-	gu.mutation.ClearRequest()
+// ClearApplication clears all "application" edges to the Application entity.
+func (gu *GroupUpdate) ClearApplication() *GroupUpdate {
+	gu.mutation.ClearApplication()
 	return gu
 }
 
-// RemoveRequestIDs removes the "request" edge to Request entities by IDs.
-func (gu *GroupUpdate) RemoveRequestIDs(ids ...uuid.UUID) *GroupUpdate {
-	gu.mutation.RemoveRequestIDs(ids...)
+// RemoveApplicationIDs removes the "application" edge to Application entities by IDs.
+func (gu *GroupUpdate) RemoveApplicationIDs(ids ...uuid.UUID) *GroupUpdate {
+	gu.mutation.RemoveApplicationIDs(ids...)
 	return gu
 }
 
-// RemoveRequest removes "request" edges to Request entities.
-func (gu *GroupUpdate) RemoveRequest(r ...*Request) *GroupUpdate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// RemoveApplication removes "application" edges to Application entities.
+func (gu *GroupUpdate) RemoveApplication(a ...*Application) *GroupUpdate {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return gu.RemoveRequestIDs(ids...)
+	return gu.RemoveApplicationIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -496,28 +496,28 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if gu.mutation.RequestCleared() {
+	if gu.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.RequestTable,
-			Columns: []string{group.RequestColumn},
+			Table:   group.ApplicationTable,
+			Columns: []string{group.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.RemovedRequestIDs(); len(nodes) > 0 && !gu.mutation.RequestCleared() {
+	if nodes := gu.mutation.RemovedApplicationIDs(); len(nodes) > 0 && !gu.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.RequestTable,
-			Columns: []string{group.RequestColumn},
+			Table:   group.ApplicationTable,
+			Columns: []string{group.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -525,15 +525,15 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := gu.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.RequestTable,
-			Columns: []string{group.RequestColumn},
+			Table:   group.ApplicationTable,
+			Columns: []string{group.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -701,19 +701,19 @@ func (guo *GroupUpdateOne) AddOwner(u ...*User) *GroupUpdateOne {
 	return guo.AddOwnerIDs(ids...)
 }
 
-// AddRequestIDs adds the "request" edge to the Request entity by IDs.
-func (guo *GroupUpdateOne) AddRequestIDs(ids ...uuid.UUID) *GroupUpdateOne {
-	guo.mutation.AddRequestIDs(ids...)
+// AddApplicationIDs adds the "application" edge to the Application entity by IDs.
+func (guo *GroupUpdateOne) AddApplicationIDs(ids ...uuid.UUID) *GroupUpdateOne {
+	guo.mutation.AddApplicationIDs(ids...)
 	return guo
 }
 
-// AddRequest adds the "request" edges to the Request entity.
-func (guo *GroupUpdateOne) AddRequest(r ...*Request) *GroupUpdateOne {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddApplication adds the "application" edges to the Application entity.
+func (guo *GroupUpdateOne) AddApplication(a ...*Application) *GroupUpdateOne {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return guo.AddRequestIDs(ids...)
+	return guo.AddApplicationIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -784,25 +784,25 @@ func (guo *GroupUpdateOne) RemoveOwner(u ...*User) *GroupUpdateOne {
 	return guo.RemoveOwnerIDs(ids...)
 }
 
-// ClearRequest clears all "request" edges to the Request entity.
-func (guo *GroupUpdateOne) ClearRequest() *GroupUpdateOne {
-	guo.mutation.ClearRequest()
+// ClearApplication clears all "application" edges to the Application entity.
+func (guo *GroupUpdateOne) ClearApplication() *GroupUpdateOne {
+	guo.mutation.ClearApplication()
 	return guo
 }
 
-// RemoveRequestIDs removes the "request" edge to Request entities by IDs.
-func (guo *GroupUpdateOne) RemoveRequestIDs(ids ...uuid.UUID) *GroupUpdateOne {
-	guo.mutation.RemoveRequestIDs(ids...)
+// RemoveApplicationIDs removes the "application" edge to Application entities by IDs.
+func (guo *GroupUpdateOne) RemoveApplicationIDs(ids ...uuid.UUID) *GroupUpdateOne {
+	guo.mutation.RemoveApplicationIDs(ids...)
 	return guo
 }
 
-// RemoveRequest removes "request" edges to Request entities.
-func (guo *GroupUpdateOne) RemoveRequest(r ...*Request) *GroupUpdateOne {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// RemoveApplication removes "application" edges to Application entities.
+func (guo *GroupUpdateOne) RemoveApplication(a ...*Application) *GroupUpdateOne {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return guo.RemoveRequestIDs(ids...)
+	return guo.RemoveApplicationIDs(ids...)
 }
 
 // Where appends a list predicates to the GroupUpdate builder.
@@ -1055,28 +1055,28 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if guo.mutation.RequestCleared() {
+	if guo.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.RequestTable,
-			Columns: []string{group.RequestColumn},
+			Table:   group.ApplicationTable,
+			Columns: []string{group.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.RemovedRequestIDs(); len(nodes) > 0 && !guo.mutation.RequestCleared() {
+	if nodes := guo.mutation.RemovedApplicationIDs(); len(nodes) > 0 && !guo.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.RequestTable,
-			Columns: []string{group.RequestColumn},
+			Table:   group.ApplicationTable,
+			Columns: []string{group.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1084,15 +1084,15 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := guo.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   group.RequestTable,
-			Columns: []string{group.RequestColumn},
+			Table:   group.ApplicationTable,
+			Columns: []string{group.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

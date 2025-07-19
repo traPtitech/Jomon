@@ -10,11 +10,11 @@ type Repository interface {
 	FileRepository
 	GroupBudgetRepository
 	GroupRepository
-	RequestFileRepository
-	RequestStatusRepository
-	RequestTagRepository
-	RequestTargetRepository
-	RequestRepository
+	ApplicationFileRepository
+	ApplicationStatusRepository
+	ApplicationTagRepository
+	ApplicationTargetRepository
+	ApplicationRepository
 	TagRepository
 	TransactionDetailRepository
 	TransactionTagRepository

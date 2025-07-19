@@ -13,30 +13,30 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
+	"github.com/traPtitech/Jomon/ent/applicationstatus"
+	"github.com/traPtitech/Jomon/ent/applicationtarget"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
-	"github.com/traPtitech/Jomon/ent/requeststatus"
-	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx               *QueryContext
-	order             []user.OrderOption
-	inters            []Interceptor
-	predicates        []predicate.User
-	withGroupUser     *GroupQuery
-	withGroupOwner    *GroupQuery
-	withComment       *CommentQuery
-	withRequestStatus *RequestStatusQuery
-	withRequest       *RequestQuery
-	withFile          *FileQuery
-	withRequestTarget *RequestTargetQuery
+	ctx                   *QueryContext
+	order                 []user.OrderOption
+	inters                []Interceptor
+	predicates            []predicate.User
+	withGroupUser         *GroupQuery
+	withGroupOwner        *GroupQuery
+	withComment           *CommentQuery
+	withApplicationStatus *ApplicationStatusQuery
+	withApplication       *ApplicationQuery
+	withFile              *FileQuery
+	withApplicationTarget *ApplicationTargetQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -139,9 +139,9 @@ func (uq *UserQuery) QueryComment() *CommentQuery {
 	return query
 }
 
-// QueryRequestStatus chains the current query on the "request_status" edge.
-func (uq *UserQuery) QueryRequestStatus() *RequestStatusQuery {
-	query := (&RequestStatusClient{config: uq.config}).Query()
+// QueryApplicationStatus chains the current query on the "application_status" edge.
+func (uq *UserQuery) QueryApplicationStatus() *ApplicationStatusQuery {
+	query := (&ApplicationStatusClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -152,8 +152,8 @@ func (uq *UserQuery) QueryRequestStatus() *RequestStatusQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(requeststatus.Table, requeststatus.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.RequestStatusTable, user.RequestStatusColumn),
+			sqlgraph.To(applicationstatus.Table, applicationstatus.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.ApplicationStatusTable, user.ApplicationStatusColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -161,9 +161,9 @@ func (uq *UserQuery) QueryRequestStatus() *RequestStatusQuery {
 	return query
 }
 
-// QueryRequest chains the current query on the "request" edge.
-func (uq *UserQuery) QueryRequest() *RequestQuery {
-	query := (&RequestClient{config: uq.config}).Query()
+// QueryApplication chains the current query on the "application" edge.
+func (uq *UserQuery) QueryApplication() *ApplicationQuery {
+	query := (&ApplicationClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -174,8 +174,8 @@ func (uq *UserQuery) QueryRequest() *RequestQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.RequestTable, user.RequestColumn),
+			sqlgraph.To(application.Table, application.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.ApplicationTable, user.ApplicationColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -205,9 +205,9 @@ func (uq *UserQuery) QueryFile() *FileQuery {
 	return query
 }
 
-// QueryRequestTarget chains the current query on the "request_target" edge.
-func (uq *UserQuery) QueryRequestTarget() *RequestTargetQuery {
-	query := (&RequestTargetClient{config: uq.config}).Query()
+// QueryApplicationTarget chains the current query on the "application_target" edge.
+func (uq *UserQuery) QueryApplicationTarget() *ApplicationTargetQuery {
+	query := (&ApplicationTargetClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -218,8 +218,8 @@ func (uq *UserQuery) QueryRequestTarget() *RequestTargetQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(requesttarget.Table, requesttarget.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.RequestTargetTable, user.RequestTargetColumn),
+			sqlgraph.To(applicationtarget.Table, applicationtarget.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.ApplicationTargetTable, user.ApplicationTargetColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -414,18 +414,18 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:            uq.config,
-		ctx:               uq.ctx.Clone(),
-		order:             append([]user.OrderOption{}, uq.order...),
-		inters:            append([]Interceptor{}, uq.inters...),
-		predicates:        append([]predicate.User{}, uq.predicates...),
-		withGroupUser:     uq.withGroupUser.Clone(),
-		withGroupOwner:    uq.withGroupOwner.Clone(),
-		withComment:       uq.withComment.Clone(),
-		withRequestStatus: uq.withRequestStatus.Clone(),
-		withRequest:       uq.withRequest.Clone(),
-		withFile:          uq.withFile.Clone(),
-		withRequestTarget: uq.withRequestTarget.Clone(),
+		config:                uq.config,
+		ctx:                   uq.ctx.Clone(),
+		order:                 append([]user.OrderOption{}, uq.order...),
+		inters:                append([]Interceptor{}, uq.inters...),
+		predicates:            append([]predicate.User{}, uq.predicates...),
+		withGroupUser:         uq.withGroupUser.Clone(),
+		withGroupOwner:        uq.withGroupOwner.Clone(),
+		withComment:           uq.withComment.Clone(),
+		withApplicationStatus: uq.withApplicationStatus.Clone(),
+		withApplication:       uq.withApplication.Clone(),
+		withFile:              uq.withFile.Clone(),
+		withApplicationTarget: uq.withApplicationTarget.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -465,25 +465,25 @@ func (uq *UserQuery) WithComment(opts ...func(*CommentQuery)) *UserQuery {
 	return uq
 }
 
-// WithRequestStatus tells the query-builder to eager-load the nodes that are connected to
-// the "request_status" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithRequestStatus(opts ...func(*RequestStatusQuery)) *UserQuery {
-	query := (&RequestStatusClient{config: uq.config}).Query()
+// WithApplicationStatus tells the query-builder to eager-load the nodes that are connected to
+// the "application_status" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithApplicationStatus(opts ...func(*ApplicationStatusQuery)) *UserQuery {
+	query := (&ApplicationStatusClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withRequestStatus = query
+	uq.withApplicationStatus = query
 	return uq
 }
 
-// WithRequest tells the query-builder to eager-load the nodes that are connected to
-// the "request" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithRequest(opts ...func(*RequestQuery)) *UserQuery {
-	query := (&RequestClient{config: uq.config}).Query()
+// WithApplication tells the query-builder to eager-load the nodes that are connected to
+// the "application" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithApplication(opts ...func(*ApplicationQuery)) *UserQuery {
+	query := (&ApplicationClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withRequest = query
+	uq.withApplication = query
 	return uq
 }
 
@@ -498,14 +498,14 @@ func (uq *UserQuery) WithFile(opts ...func(*FileQuery)) *UserQuery {
 	return uq
 }
 
-// WithRequestTarget tells the query-builder to eager-load the nodes that are connected to
-// the "request_target" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithRequestTarget(opts ...func(*RequestTargetQuery)) *UserQuery {
-	query := (&RequestTargetClient{config: uq.config}).Query()
+// WithApplicationTarget tells the query-builder to eager-load the nodes that are connected to
+// the "application_target" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithApplicationTarget(opts ...func(*ApplicationTargetQuery)) *UserQuery {
+	query := (&ApplicationTargetClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withRequestTarget = query
+	uq.withApplicationTarget = query
 	return uq
 }
 
@@ -591,10 +591,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			uq.withGroupUser != nil,
 			uq.withGroupOwner != nil,
 			uq.withComment != nil,
-			uq.withRequestStatus != nil,
-			uq.withRequest != nil,
+			uq.withApplicationStatus != nil,
+			uq.withApplication != nil,
 			uq.withFile != nil,
-			uq.withRequestTarget != nil,
+			uq.withApplicationTarget != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -636,17 +636,17 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	if query := uq.withRequestStatus; query != nil {
-		if err := uq.loadRequestStatus(ctx, query, nodes,
-			func(n *User) { n.Edges.RequestStatus = []*RequestStatus{} },
-			func(n *User, e *RequestStatus) { n.Edges.RequestStatus = append(n.Edges.RequestStatus, e) }); err != nil {
+	if query := uq.withApplicationStatus; query != nil {
+		if err := uq.loadApplicationStatus(ctx, query, nodes,
+			func(n *User) { n.Edges.ApplicationStatus = []*ApplicationStatus{} },
+			func(n *User, e *ApplicationStatus) { n.Edges.ApplicationStatus = append(n.Edges.ApplicationStatus, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := uq.withRequest; query != nil {
-		if err := uq.loadRequest(ctx, query, nodes,
-			func(n *User) { n.Edges.Request = []*Request{} },
-			func(n *User, e *Request) { n.Edges.Request = append(n.Edges.Request, e) }); err != nil {
+	if query := uq.withApplication; query != nil {
+		if err := uq.loadApplication(ctx, query, nodes,
+			func(n *User) { n.Edges.Application = []*Application{} },
+			func(n *User, e *Application) { n.Edges.Application = append(n.Edges.Application, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -657,10 +657,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	if query := uq.withRequestTarget; query != nil {
-		if err := uq.loadRequestTarget(ctx, query, nodes,
-			func(n *User) { n.Edges.RequestTarget = []*RequestTarget{} },
-			func(n *User, e *RequestTarget) { n.Edges.RequestTarget = append(n.Edges.RequestTarget, e) }); err != nil {
+	if query := uq.withApplicationTarget; query != nil {
+		if err := uq.loadApplicationTarget(ctx, query, nodes,
+			func(n *User) { n.Edges.ApplicationTarget = []*ApplicationTarget{} },
+			func(n *User, e *ApplicationTarget) { n.Edges.ApplicationTarget = append(n.Edges.ApplicationTarget, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -820,7 +820,7 @@ func (uq *UserQuery) loadComment(ctx context.Context, query *CommentQuery, nodes
 	}
 	return nil
 }
-func (uq *UserQuery) loadRequestStatus(ctx context.Context, query *RequestStatusQuery, nodes []*User, init func(*User), assign func(*User, *RequestStatus)) error {
+func (uq *UserQuery) loadApplicationStatus(ctx context.Context, query *ApplicationStatusQuery, nodes []*User, init func(*User), assign func(*User, *ApplicationStatus)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
 	for i := range nodes {
@@ -831,27 +831,27 @@ func (uq *UserQuery) loadRequestStatus(ctx context.Context, query *RequestStatus
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.RequestStatus(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.RequestStatusColumn), fks...))
+	query.Where(predicate.ApplicationStatus(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ApplicationStatusColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.request_status_user
+		fk := n.application_status_user
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "request_status_user" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "application_status_user" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "request_status_user" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "application_status_user" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
 	return nil
 }
-func (uq *UserQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes []*User, init func(*User), assign func(*User, *Request)) error {
+func (uq *UserQuery) loadApplication(ctx context.Context, query *ApplicationQuery, nodes []*User, init func(*User), assign func(*User, *Application)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
 	for i := range nodes {
@@ -862,21 +862,21 @@ func (uq *UserQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.Request(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.RequestColumn), fks...))
+	query.Where(predicate.Application(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ApplicationColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.request_user
+		fk := n.application_user
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "request_user" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "application_user" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "request_user" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "application_user" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -913,7 +913,7 @@ func (uq *UserQuery) loadFile(ctx context.Context, query *FileQuery, nodes []*Us
 	}
 	return nil
 }
-func (uq *UserQuery) loadRequestTarget(ctx context.Context, query *RequestTargetQuery, nodes []*User, init func(*User), assign func(*User, *RequestTarget)) error {
+func (uq *UserQuery) loadApplicationTarget(ctx context.Context, query *ApplicationTargetQuery, nodes []*User, init func(*User), assign func(*User, *ApplicationTarget)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*User)
 	for i := range nodes {
@@ -924,21 +924,21 @@ func (uq *UserQuery) loadRequestTarget(ctx context.Context, query *RequestTarget
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.RequestTarget(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.RequestTargetColumn), fks...))
+	query.Where(predicate.ApplicationTarget(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ApplicationTargetColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.request_target_user
+		fk := n.application_target_user
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "request_target_user" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "application_target_user" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "request_target_user" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "application_target_user" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

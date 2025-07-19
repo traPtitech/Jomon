@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/ent/request"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 )
@@ -85,19 +85,19 @@ func (tc *TagCreate) SetNillableID(u *uuid.UUID) *TagCreate {
 	return tc
 }
 
-// AddRequestIDs adds the "request" edge to the Request entity by IDs.
-func (tc *TagCreate) AddRequestIDs(ids ...uuid.UUID) *TagCreate {
-	tc.mutation.AddRequestIDs(ids...)
+// AddApplicationIDs adds the "application" edge to the Application entity by IDs.
+func (tc *TagCreate) AddApplicationIDs(ids ...uuid.UUID) *TagCreate {
+	tc.mutation.AddApplicationIDs(ids...)
 	return tc
 }
 
-// AddRequest adds the "request" edges to the Request entity.
-func (tc *TagCreate) AddRequest(r ...*Request) *TagCreate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+// AddApplication adds the "application" edges to the Application entity.
+func (tc *TagCreate) AddApplication(a ...*Application) *TagCreate {
+	ids := make([]uuid.UUID, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return tc.AddRequestIDs(ids...)
+	return tc.AddApplicationIDs(ids...)
 }
 
 // AddTransactionIDs adds the "transaction" edge to the Transaction entity by IDs.
@@ -231,15 +231,15 @@ func (tc *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		_spec.SetField(tag.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if nodes := tc.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   tag.RequestTable,
-			Columns: tag.RequestPrimaryKey,
+			Table:   tag.ApplicationTable,
+			Columns: tag.ApplicationPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

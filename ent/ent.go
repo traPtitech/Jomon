@@ -12,13 +12,13 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/traPtitech/Jomon/ent/application"
+	"github.com/traPtitech/Jomon/ent/applicationstatus"
+	"github.com/traPtitech/Jomon/ent/applicationtarget"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
-	"github.com/traPtitech/Jomon/ent/request"
-	"github.com/traPtitech/Jomon/ent/requeststatus"
-	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -83,13 +83,13 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			application.Table:       application.ValidColumn,
+			applicationstatus.Table: applicationstatus.ValidColumn,
+			applicationtarget.Table: applicationtarget.ValidColumn,
 			comment.Table:           comment.ValidColumn,
 			file.Table:              file.ValidColumn,
 			group.Table:             group.ValidColumn,
 			groupbudget.Table:       groupbudget.ValidColumn,
-			request.Table:           request.ValidColumn,
-			requeststatus.Table:     requeststatus.ValidColumn,
-			requesttarget.Table:     requesttarget.ValidColumn,
 			tag.Table:               tag.ValidColumn,
 			transaction.Table:       transaction.ValidColumn,
 			transactiondetail.Table: transactiondetail.ValidColumn,

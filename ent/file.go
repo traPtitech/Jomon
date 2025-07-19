@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -30,16 +30,16 @@ type File struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
-	Edges        FileEdges `json:"edges"`
-	file_user    *uuid.UUID
-	request_file *uuid.UUID
-	selectValues sql.SelectValues
+	Edges            FileEdges `json:"edges"`
+	application_file *uuid.UUID
+	file_user        *uuid.UUID
+	selectValues     sql.SelectValues
 }
 
 // FileEdges holds the relations/edges for other nodes in the graph.
 type FileEdges struct {
-	// Request holds the value of the request edge.
-	Request *Request `json:"request,omitempty"`
+	// Application holds the value of the application edge.
+	Application *Application `json:"application,omitempty"`
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -47,15 +47,15 @@ type FileEdges struct {
 	loadedTypes [2]bool
 }
 
-// RequestOrErr returns the Request value or an error if the edge
+// ApplicationOrErr returns the Application value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e FileEdges) RequestOrErr() (*Request, error) {
-	if e.Request != nil {
-		return e.Request, nil
+func (e FileEdges) ApplicationOrErr() (*Application, error) {
+	if e.Application != nil {
+		return e.Application, nil
 	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: request.Label}
+		return nil, &NotFoundError{label: application.Label}
 	}
-	return nil, &NotLoadedError{edge: "request"}
+	return nil, &NotLoadedError{edge: "application"}
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -80,9 +80,9 @@ func (*File) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case file.FieldID:
 			values[i] = new(uuid.UUID)
-		case file.ForeignKeys[0]: // file_user
+		case file.ForeignKeys[0]: // application_file
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case file.ForeignKeys[1]: // request_file
+		case file.ForeignKeys[1]: // file_user
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
@@ -132,17 +132,17 @@ func (f *File) assignValues(columns []string, values []any) error {
 			}
 		case file.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field application_file", values[i])
+			} else if value.Valid {
+				f.application_file = new(uuid.UUID)
+				*f.application_file = *value.S.(*uuid.UUID)
+			}
+		case file.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field file_user", values[i])
 			} else if value.Valid {
 				f.file_user = new(uuid.UUID)
 				*f.file_user = *value.S.(*uuid.UUID)
-			}
-		case file.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field request_file", values[i])
-			} else if value.Valid {
-				f.request_file = new(uuid.UUID)
-				*f.request_file = *value.S.(*uuid.UUID)
 			}
 		default:
 			f.selectValues.Set(columns[i], values[i])
@@ -157,9 +157,9 @@ func (f *File) Value(name string) (ent.Value, error) {
 	return f.selectValues.Get(name)
 }
 
-// QueryRequest queries the "request" edge of the File entity.
-func (f *File) QueryRequest() *RequestQuery {
-	return NewFileClient(f.config).QueryRequest(f)
+// QueryApplication queries the "application" edge of the File entity.
+func (f *File) QueryApplication() *ApplicationQuery {
+	return NewFileClient(f.config).QueryApplication(f)
 }
 
 // QueryUser queries the "user" edge of the File entity.

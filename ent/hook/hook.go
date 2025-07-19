@@ -9,6 +9,42 @@ import (
 	"github.com/traPtitech/Jomon/ent"
 )
 
+// The ApplicationFunc type is an adapter to allow the use of ordinary
+// function as Application mutator.
+type ApplicationFunc func(context.Context, *ent.ApplicationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ApplicationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ApplicationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ApplicationMutation", m)
+}
+
+// The ApplicationStatusFunc type is an adapter to allow the use of ordinary
+// function as ApplicationStatus mutator.
+type ApplicationStatusFunc func(context.Context, *ent.ApplicationStatusMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ApplicationStatusFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ApplicationStatusMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ApplicationStatusMutation", m)
+}
+
+// The ApplicationTargetFunc type is an adapter to allow the use of ordinary
+// function as ApplicationTarget mutator.
+type ApplicationTargetFunc func(context.Context, *ent.ApplicationTargetMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ApplicationTargetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ApplicationTargetMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ApplicationTargetMutation", m)
+}
+
 // The CommentFunc type is an adapter to allow the use of ordinary
 // function as Comment mutator.
 type CommentFunc func(context.Context, *ent.CommentMutation) (ent.Value, error)
@@ -55,42 +91,6 @@ func (f GroupBudgetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GroupBudgetMutation", m)
-}
-
-// The RequestFunc type is an adapter to allow the use of ordinary
-// function as Request mutator.
-type RequestFunc func(context.Context, *ent.RequestMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f RequestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.RequestMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RequestMutation", m)
-}
-
-// The RequestStatusFunc type is an adapter to allow the use of ordinary
-// function as RequestStatus mutator.
-type RequestStatusFunc func(context.Context, *ent.RequestStatusMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f RequestStatusFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.RequestStatusMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RequestStatusMutation", m)
-}
-
-// The RequestTargetFunc type is an adapter to allow the use of ordinary
-// function as RequestTarget mutator.
-type RequestTargetFunc func(context.Context, *ent.RequestTargetMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f RequestTargetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.RequestTargetMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RequestTargetMutation", m)
 }
 
 // The TagFunc type is an adapter to allow the use of ordinary

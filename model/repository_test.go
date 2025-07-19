@@ -43,15 +43,15 @@ func dropAll(t *testing.T, ctx context.Context, client *ent.Client) error {
 	if err != nil {
 		return err
 	}
-	_, err = client.Request.Delete().Exec(ctx)
+	_, err = client.Application.Delete().Exec(ctx)
 	if err != nil {
 		return err
 	}
-	_, err = client.RequestStatus.Delete().Exec(ctx)
+	_, err = client.ApplicationStatus.Delete().Exec(ctx)
 	if err != nil {
 		return err
 	}
-	_, err = client.RequestTarget.Delete().Exec(ctx)
+	_, err = client.ApplicationTarget.Delete().Exec(ctx)
 	if err != nil {
 		return err
 	}

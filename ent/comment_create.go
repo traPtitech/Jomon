@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/comment"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -85,15 +85,15 @@ func (cc *CommentCreate) SetNillableID(u *uuid.UUID) *CommentCreate {
 	return cc
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (cc *CommentCreate) SetRequestID(id uuid.UUID) *CommentCreate {
-	cc.mutation.SetRequestID(id)
+// SetApplicationID sets the "application" edge to the Application entity by ID.
+func (cc *CommentCreate) SetApplicationID(id uuid.UUID) *CommentCreate {
+	cc.mutation.SetApplicationID(id)
 	return cc
 }
 
-// SetRequest sets the "request" edge to the Request entity.
-func (cc *CommentCreate) SetRequest(r *Request) *CommentCreate {
-	return cc.SetRequestID(r.ID)
+// SetApplication sets the "application" edge to the Application entity.
+func (cc *CommentCreate) SetApplication(a *Application) *CommentCreate {
+	return cc.SetApplicationID(a.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
@@ -167,8 +167,8 @@ func (cc *CommentCreate) check() error {
 	if _, ok := cc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Comment.updated_at"`)}
 	}
-	if len(cc.mutation.RequestIDs()) == 0 {
-		return &ValidationError{Name: "request", err: errors.New(`ent: missing required edge "Comment.request"`)}
+	if len(cc.mutation.ApplicationIDs()) == 0 {
+		return &ValidationError{Name: "application", err: errors.New(`ent: missing required edge "Comment.application"`)}
 	}
 	if len(cc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Comment.user"`)}
@@ -224,21 +224,21 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		_spec.SetField(comment.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if nodes := cc.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := cc.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   comment.RequestTable,
-			Columns: []string{comment.RequestColumn},
+			Table:   comment.ApplicationTable,
+			Columns: []string{comment.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_comment = &nodes[0]
+		_node.application_comment = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := cc.mutation.UserIDs(); len(nodes) > 0 {

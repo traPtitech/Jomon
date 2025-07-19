@@ -9,7 +9,7 @@ import (
 )
 
 func (repo *EntRepository) CreateFile(
-	ctx context.Context, name string, mimetype string, requestID uuid.UUID, userID uuid.UUID,
+	ctx context.Context, name string, mimetype string, applicationID uuid.UUID, userID uuid.UUID,
 ) (*File, error) {
 	id := uuid.New()
 
@@ -24,8 +24,8 @@ func (repo *EntRepository) CreateFile(
 		return nil, err
 	}
 
-	_, err = repo.client.Request.
-		UpdateOneID(requestID).
+	_, err = repo.client.Application.
+		UpdateOneID(applicationID).
 		AddFile(created).
 		Save(ctx)
 	if err != nil {

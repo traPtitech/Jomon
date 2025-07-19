@@ -465,21 +465,21 @@ func HasOwnerWith(preds ...predicate.User) predicate.Group {
 	})
 }
 
-// HasRequest applies the HasEdge predicate on the "request" edge.
-func HasRequest() predicate.Group {
+// HasApplication applies the HasEdge predicate on the "application" edge.
+func HasApplication() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, RequestTable, RequestColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, ApplicationTable, ApplicationColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasRequestWith applies the HasEdge predicate on the "request" edge with a given conditions (other predicates).
-func HasRequestWith(preds ...predicate.Request) predicate.Group {
+// HasApplicationWith applies the HasEdge predicate on the "application" edge with a given conditions (other predicates).
+func HasApplicationWith(preds ...predicate.Application) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
-		step := newRequestStep()
+		step := newApplicationStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

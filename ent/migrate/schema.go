@@ -8,6 +8,93 @@ import (
 )
 
 var (
+	// ApplicationsColumns holds the columns for the "applications" table.
+	ApplicationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "title", Type: field.TypeString},
+		{Name: "content", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "application_user", Type: field.TypeUUID, Nullable: true},
+		{Name: "group_application", Type: field.TypeUUID, Nullable: true},
+	}
+	// ApplicationsTable holds the schema information for the "applications" table.
+	ApplicationsTable = &schema.Table{
+		Name:       "applications",
+		Columns:    ApplicationsColumns,
+		PrimaryKey: []*schema.Column{ApplicationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "applications_users_user",
+				Columns:    []*schema.Column{ApplicationsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "applications_groups_application",
+				Columns:    []*schema.Column{ApplicationsColumns[6]},
+				RefColumns: []*schema.Column{GroupsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// ApplicationStatusColumns holds the columns for the "application_status" table.
+	ApplicationStatusColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"submitted", "fix_required", "accepted", "completed", "rejected"}, Default: "submitted"},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "application_status", Type: field.TypeUUID},
+		{Name: "application_status_user", Type: field.TypeUUID},
+	}
+	// ApplicationStatusTable holds the schema information for the "application_status" table.
+	ApplicationStatusTable = &schema.Table{
+		Name:       "application_status",
+		Columns:    ApplicationStatusColumns,
+		PrimaryKey: []*schema.Column{ApplicationStatusColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "application_status_applications_status",
+				Columns:    []*schema.Column{ApplicationStatusColumns[3]},
+				RefColumns: []*schema.Column{ApplicationsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "application_status_users_user",
+				Columns:    []*schema.Column{ApplicationStatusColumns[4]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// ApplicationTargetsColumns holds the columns for the "application_targets" table.
+	ApplicationTargetsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "amount", Type: field.TypeInt},
+		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "application_target", Type: field.TypeUUID},
+		{Name: "application_target_user", Type: field.TypeUUID},
+	}
+	// ApplicationTargetsTable holds the schema information for the "application_targets" table.
+	ApplicationTargetsTable = &schema.Table{
+		Name:       "application_targets",
+		Columns:    ApplicationTargetsColumns,
+		PrimaryKey: []*schema.Column{ApplicationTargetsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "application_targets_applications_target",
+				Columns:    []*schema.Column{ApplicationTargetsColumns[4]},
+				RefColumns: []*schema.Column{ApplicationsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "application_targets_users_user",
+				Columns:    []*schema.Column{ApplicationTargetsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// CommentsColumns holds the columns for the "comments" table.
 	CommentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -15,8 +102,8 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "application_comment", Type: field.TypeUUID},
 		{Name: "comment_user", Type: field.TypeUUID},
-		{Name: "request_comment", Type: field.TypeUUID},
 	}
 	// CommentsTable holds the schema information for the "comments" table.
 	CommentsTable = &schema.Table{
@@ -25,16 +112,16 @@ var (
 		PrimaryKey: []*schema.Column{CommentsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "comments_users_user",
+				Symbol:     "comments_applications_comment",
 				Columns:    []*schema.Column{CommentsColumns[5]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				RefColumns: []*schema.Column{ApplicationsColumns[0]},
+				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "comments_requests_comment",
+				Symbol:     "comments_users_user",
 				Columns:    []*schema.Column{CommentsColumns[6]},
-				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.Cascade,
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -45,8 +132,8 @@ var (
 		{Name: "mime_type", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "application_file", Type: field.TypeUUID, Nullable: true},
 		{Name: "file_user", Type: field.TypeUUID},
-		{Name: "request_file", Type: field.TypeUUID, Nullable: true},
 	}
 	// FilesTable holds the schema information for the "files" table.
 	FilesTable = &schema.Table{
@@ -55,16 +142,16 @@ var (
 		PrimaryKey: []*schema.Column{FilesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "files_users_user",
+				Symbol:     "files_applications_file",
 				Columns:    []*schema.Column{FilesColumns[5]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				RefColumns: []*schema.Column{ApplicationsColumns[0]},
+				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "files_requests_file",
+				Symbol:     "files_users_user",
 				Columns:    []*schema.Column{FilesColumns[6]},
-				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.Cascade,
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -106,93 +193,6 @@ var (
 			},
 		},
 	}
-	// RequestsColumns holds the columns for the "requests" table.
-	RequestsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "title", Type: field.TypeString},
-		{Name: "content", Type: field.TypeString},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "group_request", Type: field.TypeUUID, Nullable: true},
-		{Name: "request_user", Type: field.TypeUUID, Nullable: true},
-	}
-	// RequestsTable holds the schema information for the "requests" table.
-	RequestsTable = &schema.Table{
-		Name:       "requests",
-		Columns:    RequestsColumns,
-		PrimaryKey: []*schema.Column{RequestsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "requests_groups_request",
-				Columns:    []*schema.Column{RequestsColumns[5]},
-				RefColumns: []*schema.Column{GroupsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "requests_users_user",
-				Columns:    []*schema.Column{RequestsColumns[6]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// RequestStatusColumns holds the columns for the "request_status" table.
-	RequestStatusColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"submitted", "fix_required", "accepted", "completed", "rejected"}, Default: "submitted"},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "request_status", Type: field.TypeUUID},
-		{Name: "request_status_user", Type: field.TypeUUID},
-	}
-	// RequestStatusTable holds the schema information for the "request_status" table.
-	RequestStatusTable = &schema.Table{
-		Name:       "request_status",
-		Columns:    RequestStatusColumns,
-		PrimaryKey: []*schema.Column{RequestStatusColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "request_status_requests_status",
-				Columns:    []*schema.Column{RequestStatusColumns[3]},
-				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "request_status_users_user",
-				Columns:    []*schema.Column{RequestStatusColumns[4]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-	}
-	// RequestTargetsColumns holds the columns for the "request_targets" table.
-	RequestTargetsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "amount", Type: field.TypeInt},
-		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "request_target", Type: field.TypeUUID},
-		{Name: "request_target_user", Type: field.TypeUUID},
-	}
-	// RequestTargetsTable holds the schema information for the "request_targets" table.
-	RequestTargetsTable = &schema.Table{
-		Name:       "request_targets",
-		Columns:    RequestTargetsColumns,
-		PrimaryKey: []*schema.Column{RequestTargetsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "request_targets_requests_target",
-				Columns:    []*schema.Column{RequestTargetsColumns[4]},
-				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "request_targets_users_user",
-				Columns:    []*schema.Column{RequestTargetsColumns[5]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-	}
 	// TagsColumns holds the columns for the "tags" table.
 	TagsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -211,8 +211,8 @@ var (
 	TransactionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "application_transaction", Type: field.TypeUUID, Nullable: true},
 		{Name: "group_budget_transaction", Type: field.TypeUUID, Nullable: true},
-		{Name: "request_transaction", Type: field.TypeUUID, Nullable: true},
 	}
 	// TransactionsTable holds the schema information for the "transactions" table.
 	TransactionsTable = &schema.Table{
@@ -221,15 +221,15 @@ var (
 		PrimaryKey: []*schema.Column{TransactionsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "transactions_group_budgets_transaction",
+				Symbol:     "transactions_applications_transaction",
 				Columns:    []*schema.Column{TransactionsColumns[2]},
-				RefColumns: []*schema.Column{GroupBudgetsColumns[0]},
+				RefColumns: []*schema.Column{ApplicationsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "transactions_requests_transaction",
+				Symbol:     "transactions_group_budgets_transaction",
 				Columns:    []*schema.Column{TransactionsColumns[3]},
-				RefColumns: []*schema.Column{RequestsColumns[0]},
+				RefColumns: []*schema.Column{GroupBudgetsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -273,6 +273,31 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	}
+	// ApplicationTagColumns holds the columns for the "application_tag" table.
+	ApplicationTagColumns = []*schema.Column{
+		{Name: "application_id", Type: field.TypeUUID},
+		{Name: "tag_id", Type: field.TypeUUID},
+	}
+	// ApplicationTagTable holds the schema information for the "application_tag" table.
+	ApplicationTagTable = &schema.Table{
+		Name:       "application_tag",
+		Columns:    ApplicationTagColumns,
+		PrimaryKey: []*schema.Column{ApplicationTagColumns[0], ApplicationTagColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "application_tag_application_id",
+				Columns:    []*schema.Column{ApplicationTagColumns[0]},
+				RefColumns: []*schema.Column{ApplicationsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "application_tag_tag_id",
+				Columns:    []*schema.Column{ApplicationTagColumns[1]},
+				RefColumns: []*schema.Column{TagsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
 	}
 	// GroupUserColumns holds the columns for the "group_user" table.
 	GroupUserColumns = []*schema.Column{
@@ -324,31 +349,6 @@ var (
 			},
 		},
 	}
-	// RequestTagColumns holds the columns for the "request_tag" table.
-	RequestTagColumns = []*schema.Column{
-		{Name: "request_id", Type: field.TypeUUID},
-		{Name: "tag_id", Type: field.TypeUUID},
-	}
-	// RequestTagTable holds the schema information for the "request_tag" table.
-	RequestTagTable = &schema.Table{
-		Name:       "request_tag",
-		Columns:    RequestTagColumns,
-		PrimaryKey: []*schema.Column{RequestTagColumns[0], RequestTagColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "request_tag_request_id",
-				Columns:    []*schema.Column{RequestTagColumns[0]},
-				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "request_tag_tag_id",
-				Columns:    []*schema.Column{RequestTagColumns[1]},
-				RefColumns: []*schema.Column{TagsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// TransactionTagColumns holds the columns for the "transaction_tag" table.
 	TransactionTagColumns = []*schema.Column{
 		{Name: "transaction_id", Type: field.TypeUUID},
@@ -376,45 +376,45 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ApplicationsTable,
+		ApplicationStatusTable,
+		ApplicationTargetsTable,
 		CommentsTable,
 		FilesTable,
 		GroupsTable,
 		GroupBudgetsTable,
-		RequestsTable,
-		RequestStatusTable,
-		RequestTargetsTable,
 		TagsTable,
 		TransactionsTable,
 		TransactionDetailsTable,
 		UsersTable,
+		ApplicationTagTable,
 		GroupUserTable,
 		GroupOwnerTable,
-		RequestTagTable,
 		TransactionTagTable,
 	}
 )
 
 func init() {
-	CommentsTable.ForeignKeys[0].RefTable = UsersTable
-	CommentsTable.ForeignKeys[1].RefTable = RequestsTable
-	FilesTable.ForeignKeys[0].RefTable = UsersTable
-	FilesTable.ForeignKeys[1].RefTable = RequestsTable
+	ApplicationsTable.ForeignKeys[0].RefTable = UsersTable
+	ApplicationsTable.ForeignKeys[1].RefTable = GroupsTable
+	ApplicationStatusTable.ForeignKeys[0].RefTable = ApplicationsTable
+	ApplicationStatusTable.ForeignKeys[1].RefTable = UsersTable
+	ApplicationTargetsTable.ForeignKeys[0].RefTable = ApplicationsTable
+	ApplicationTargetsTable.ForeignKeys[1].RefTable = UsersTable
+	CommentsTable.ForeignKeys[0].RefTable = ApplicationsTable
+	CommentsTable.ForeignKeys[1].RefTable = UsersTable
+	FilesTable.ForeignKeys[0].RefTable = ApplicationsTable
+	FilesTable.ForeignKeys[1].RefTable = UsersTable
 	GroupBudgetsTable.ForeignKeys[0].RefTable = GroupsTable
-	RequestsTable.ForeignKeys[0].RefTable = GroupsTable
-	RequestsTable.ForeignKeys[1].RefTable = UsersTable
-	RequestStatusTable.ForeignKeys[0].RefTable = RequestsTable
-	RequestStatusTable.ForeignKeys[1].RefTable = UsersTable
-	RequestTargetsTable.ForeignKeys[0].RefTable = RequestsTable
-	RequestTargetsTable.ForeignKeys[1].RefTable = UsersTable
-	TransactionsTable.ForeignKeys[0].RefTable = GroupBudgetsTable
-	TransactionsTable.ForeignKeys[1].RefTable = RequestsTable
+	TransactionsTable.ForeignKeys[0].RefTable = ApplicationsTable
+	TransactionsTable.ForeignKeys[1].RefTable = GroupBudgetsTable
 	TransactionDetailsTable.ForeignKeys[0].RefTable = TransactionsTable
+	ApplicationTagTable.ForeignKeys[0].RefTable = ApplicationsTable
+	ApplicationTagTable.ForeignKeys[1].RefTable = TagsTable
 	GroupUserTable.ForeignKeys[0].RefTable = GroupsTable
 	GroupUserTable.ForeignKeys[1].RefTable = UsersTable
 	GroupOwnerTable.ForeignKeys[0].RefTable = GroupsTable
 	GroupOwnerTable.ForeignKeys[1].RefTable = UsersTable
-	RequestTagTable.ForeignKeys[0].RefTable = RequestsTable
-	RequestTagTable.ForeignKeys[1].RefTable = TagsTable
 	TransactionTagTable.ForeignKeys[0].RefTable = TransactionsTable
 	TransactionTagTable.ForeignKeys[1].RefTable = TagsTable
 }

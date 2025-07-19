@@ -23,17 +23,17 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// EdgeRequest holds the string denoting the request edge name in mutations.
-	EdgeRequest = "request"
+	// EdgeApplication holds the string denoting the application edge name in mutations.
+	EdgeApplication = "application"
 	// EdgeTransaction holds the string denoting the transaction edge name in mutations.
 	EdgeTransaction = "transaction"
 	// Table holds the table name of the tag in the database.
 	Table = "tags"
-	// RequestTable is the table that holds the request relation/edge. The primary key declared below.
-	RequestTable = "request_tag"
-	// RequestInverseTable is the table name for the Request entity.
-	// It exists in this package in order to avoid circular dependency with the "request" package.
-	RequestInverseTable = "requests"
+	// ApplicationTable is the table that holds the application relation/edge. The primary key declared below.
+	ApplicationTable = "application_tag"
+	// ApplicationInverseTable is the table name for the Application entity.
+	// It exists in this package in order to avoid circular dependency with the "application" package.
+	ApplicationInverseTable = "applications"
 	// TransactionTable is the table that holds the transaction relation/edge. The primary key declared below.
 	TransactionTable = "transaction_tag"
 	// TransactionInverseTable is the table name for the Transaction entity.
@@ -51,9 +51,9 @@ var Columns = []string{
 }
 
 var (
-	// RequestPrimaryKey and RequestColumn2 are the table columns denoting the
-	// primary key for the request relation (M2M).
-	RequestPrimaryKey = []string{"request_id", "tag_id"}
+	// ApplicationPrimaryKey and ApplicationColumn2 are the table columns denoting the
+	// primary key for the application relation (M2M).
+	ApplicationPrimaryKey = []string{"application_id", "tag_id"}
 	// TransactionPrimaryKey and TransactionColumn2 are the table columns denoting the
 	// primary key for the transaction relation (M2M).
 	TransactionPrimaryKey = []string{"transaction_id", "tag_id"}
@@ -110,17 +110,17 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
-// ByRequestCount orders the results by request count.
-func ByRequestCount(opts ...sql.OrderTermOption) OrderOption {
+// ByApplicationCount orders the results by application count.
+func ByApplicationCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newRequestStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newApplicationStep(), opts...)
 	}
 }
 
-// ByRequest orders the results by request terms.
-func ByRequest(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByApplication orders the results by application terms.
+func ByApplication(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newRequestStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newApplicationStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -137,11 +137,11 @@ func ByTransaction(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTransactionStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newRequestStep() *sqlgraph.Step {
+func newApplicationStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(RequestInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, RequestTable, RequestPrimaryKey...),
+		sqlgraph.To(ApplicationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, ApplicationTable, ApplicationPrimaryKey...),
 	)
 }
 func newTransactionStep() *sqlgraph.Step {

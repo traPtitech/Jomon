@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
 )
@@ -26,8 +26,8 @@ type Transaction struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TransactionQuery when eager-loading is set.
 	Edges                    TransactionEdges `json:"edges"`
+	application_transaction  *uuid.UUID
 	group_budget_transaction *uuid.UUID
-	request_transaction      *uuid.UUID
 	selectValues             sql.SelectValues
 }
 
@@ -39,8 +39,8 @@ type TransactionEdges struct {
 	Tag []*Tag `json:"tag,omitempty"`
 	// GroupBudget holds the value of the group_budget edge.
 	GroupBudget *GroupBudget `json:"group_budget,omitempty"`
-	// Request holds the value of the request edge.
-	Request *Request `json:"request,omitempty"`
+	// Application holds the value of the application edge.
+	Application *Application `json:"application,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
@@ -77,15 +77,15 @@ func (e TransactionEdges) GroupBudgetOrErr() (*GroupBudget, error) {
 	return nil, &NotLoadedError{edge: "group_budget"}
 }
 
-// RequestOrErr returns the Request value or an error if the edge
+// ApplicationOrErr returns the Application value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e TransactionEdges) RequestOrErr() (*Request, error) {
-	if e.Request != nil {
-		return e.Request, nil
+func (e TransactionEdges) ApplicationOrErr() (*Application, error) {
+	if e.Application != nil {
+		return e.Application, nil
 	} else if e.loadedTypes[3] {
-		return nil, &NotFoundError{label: request.Label}
+		return nil, &NotFoundError{label: application.Label}
 	}
-	return nil, &NotLoadedError{edge: "request"}
+	return nil, &NotLoadedError{edge: "application"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -97,9 +97,9 @@ func (*Transaction) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case transaction.FieldID:
 			values[i] = new(uuid.UUID)
-		case transaction.ForeignKeys[0]: // group_budget_transaction
+		case transaction.ForeignKeys[0]: // application_transaction
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case transaction.ForeignKeys[1]: // request_transaction
+		case transaction.ForeignKeys[1]: // group_budget_transaction
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
@@ -130,17 +130,17 @@ func (t *Transaction) assignValues(columns []string, values []any) error {
 			}
 		case transaction.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field application_transaction", values[i])
+			} else if value.Valid {
+				t.application_transaction = new(uuid.UUID)
+				*t.application_transaction = *value.S.(*uuid.UUID)
+			}
+		case transaction.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field group_budget_transaction", values[i])
 			} else if value.Valid {
 				t.group_budget_transaction = new(uuid.UUID)
 				*t.group_budget_transaction = *value.S.(*uuid.UUID)
-			}
-		case transaction.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field request_transaction", values[i])
-			} else if value.Valid {
-				t.request_transaction = new(uuid.UUID)
-				*t.request_transaction = *value.S.(*uuid.UUID)
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -170,9 +170,9 @@ func (t *Transaction) QueryGroupBudget() *GroupBudgetQuery {
 	return NewTransactionClient(t.config).QueryGroupBudget(t)
 }
 
-// QueryRequest queries the "request" edge of the Transaction entity.
-func (t *Transaction) QueryRequest() *RequestQuery {
-	return NewTransactionClient(t.config).QueryRequest(t)
+// QueryApplication queries the "application" edge of the Transaction entity.
+func (t *Transaction) QueryApplication() *ApplicationQuery {
+	return NewTransactionClient(t.config).QueryApplication(t)
 }
 
 // Update returns a builder for updating this Transaction.

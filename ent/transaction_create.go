@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/groupbudget"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -98,23 +98,23 @@ func (tc *TransactionCreate) SetGroupBudget(g *GroupBudget) *TransactionCreate {
 	return tc.SetGroupBudgetID(g.ID)
 }
 
-// SetRequestID sets the "request" edge to the Request entity by ID.
-func (tc *TransactionCreate) SetRequestID(id uuid.UUID) *TransactionCreate {
-	tc.mutation.SetRequestID(id)
+// SetApplicationID sets the "application" edge to the Application entity by ID.
+func (tc *TransactionCreate) SetApplicationID(id uuid.UUID) *TransactionCreate {
+	tc.mutation.SetApplicationID(id)
 	return tc
 }
 
-// SetNillableRequestID sets the "request" edge to the Request entity by ID if the given value is not nil.
-func (tc *TransactionCreate) SetNillableRequestID(id *uuid.UUID) *TransactionCreate {
+// SetNillableApplicationID sets the "application" edge to the Application entity by ID if the given value is not nil.
+func (tc *TransactionCreate) SetNillableApplicationID(id *uuid.UUID) *TransactionCreate {
 	if id != nil {
-		tc = tc.SetRequestID(*id)
+		tc = tc.SetApplicationID(*id)
 	}
 	return tc
 }
 
-// SetRequest sets the "request" edge to the Request entity.
-func (tc *TransactionCreate) SetRequest(r *Request) *TransactionCreate {
-	return tc.SetRequestID(r.ID)
+// SetApplication sets the "application" edge to the Application entity.
+func (tc *TransactionCreate) SetApplication(a *Application) *TransactionCreate {
+	return tc.SetApplicationID(a.ID)
 }
 
 // Mutation returns the TransactionMutation object of the builder.
@@ -258,21 +258,21 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		_node.group_budget_transaction = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := tc.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   transaction.RequestTable,
-			Columns: []string{transaction.RequestColumn},
+			Table:   transaction.ApplicationTable,
+			Columns: []string{transaction.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.request_transaction = &nodes[0]
+		_node.application_transaction = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

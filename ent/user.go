@@ -44,14 +44,14 @@ type UserEdges struct {
 	GroupOwner []*Group `json:"group_owner,omitempty"`
 	// Comment holds the value of the comment edge.
 	Comment []*Comment `json:"comment,omitempty"`
-	// RequestStatus holds the value of the request_status edge.
-	RequestStatus []*RequestStatus `json:"request_status,omitempty"`
-	// Request holds the value of the request edge.
-	Request []*Request `json:"request,omitempty"`
+	// ApplicationStatus holds the value of the application_status edge.
+	ApplicationStatus []*ApplicationStatus `json:"application_status,omitempty"`
+	// Application holds the value of the application edge.
+	Application []*Application `json:"application,omitempty"`
 	// File holds the value of the file edge.
 	File []*File `json:"file,omitempty"`
-	// RequestTarget holds the value of the request_target edge.
-	RequestTarget []*RequestTarget `json:"request_target,omitempty"`
+	// ApplicationTarget holds the value of the application_target edge.
+	ApplicationTarget []*ApplicationTarget `json:"application_target,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [7]bool
@@ -84,22 +84,22 @@ func (e UserEdges) CommentOrErr() ([]*Comment, error) {
 	return nil, &NotLoadedError{edge: "comment"}
 }
 
-// RequestStatusOrErr returns the RequestStatus value or an error if the edge
+// ApplicationStatusOrErr returns the ApplicationStatus value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) RequestStatusOrErr() ([]*RequestStatus, error) {
+func (e UserEdges) ApplicationStatusOrErr() ([]*ApplicationStatus, error) {
 	if e.loadedTypes[3] {
-		return e.RequestStatus, nil
+		return e.ApplicationStatus, nil
 	}
-	return nil, &NotLoadedError{edge: "request_status"}
+	return nil, &NotLoadedError{edge: "application_status"}
 }
 
-// RequestOrErr returns the Request value or an error if the edge
+// ApplicationOrErr returns the Application value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) RequestOrErr() ([]*Request, error) {
+func (e UserEdges) ApplicationOrErr() ([]*Application, error) {
 	if e.loadedTypes[4] {
-		return e.Request, nil
+		return e.Application, nil
 	}
-	return nil, &NotLoadedError{edge: "request"}
+	return nil, &NotLoadedError{edge: "application"}
 }
 
 // FileOrErr returns the File value or an error if the edge
@@ -111,13 +111,13 @@ func (e UserEdges) FileOrErr() ([]*File, error) {
 	return nil, &NotLoadedError{edge: "file"}
 }
 
-// RequestTargetOrErr returns the RequestTarget value or an error if the edge
+// ApplicationTargetOrErr returns the ApplicationTarget value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) RequestTargetOrErr() ([]*RequestTarget, error) {
+func (e UserEdges) ApplicationTargetOrErr() ([]*ApplicationTarget, error) {
 	if e.loadedTypes[6] {
-		return e.RequestTarget, nil
+		return e.ApplicationTarget, nil
 	}
-	return nil, &NotLoadedError{edge: "request_target"}
+	return nil, &NotLoadedError{edge: "application_target"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -219,14 +219,14 @@ func (u *User) QueryComment() *CommentQuery {
 	return NewUserClient(u.config).QueryComment(u)
 }
 
-// QueryRequestStatus queries the "request_status" edge of the User entity.
-func (u *User) QueryRequestStatus() *RequestStatusQuery {
-	return NewUserClient(u.config).QueryRequestStatus(u)
+// QueryApplicationStatus queries the "application_status" edge of the User entity.
+func (u *User) QueryApplicationStatus() *ApplicationStatusQuery {
+	return NewUserClient(u.config).QueryApplicationStatus(u)
 }
 
-// QueryRequest queries the "request" edge of the User entity.
-func (u *User) QueryRequest() *RequestQuery {
-	return NewUserClient(u.config).QueryRequest(u)
+// QueryApplication queries the "application" edge of the User entity.
+func (u *User) QueryApplication() *ApplicationQuery {
+	return NewUserClient(u.config).QueryApplication(u)
 }
 
 // QueryFile queries the "file" edge of the User entity.
@@ -234,9 +234,9 @@ func (u *User) QueryFile() *FileQuery {
 	return NewUserClient(u.config).QueryFile(u)
 }
 
-// QueryRequestTarget queries the "request_target" edge of the User entity.
-func (u *User) QueryRequestTarget() *RequestTargetQuery {
-	return NewUserClient(u.config).QueryRequestTarget(u)
+// QueryApplicationTarget queries the "application_target" edge of the User entity.
+func (u *User) QueryApplicationTarget() *ApplicationTargetQuery {
+	return NewUserClient(u.config).QueryApplicationTarget(u)
 }
 
 // Update returns a builder for updating this User.
