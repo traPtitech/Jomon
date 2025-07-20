@@ -151,7 +151,7 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 		}
 
 		apiAccountManagers := api.Group(
-			"/accountManagers",
+			"/account-managers",
 			h.CheckLoginMiddleware,
 			h.CheckAccountManagerMiddleware)
 		{
