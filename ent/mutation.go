@@ -7213,7 +7213,7 @@ type UserMutation struct {
 	id                    *uuid.UUID
 	name                  *string
 	display_name          *string
-	accountManager        *bool
+	account_manager       *bool
 	created_at            *time.Time
 	updated_at            *time.Time
 	deleted_at            *time.Time
@@ -7420,21 +7420,21 @@ func (m *UserMutation) ResetDisplayName() {
 	m.display_name = nil
 }
 
-// SetAccountManager sets the "accountManager" field.
+// SetAccountManager sets the "account_manager" field.
 func (m *UserMutation) SetAccountManager(b bool) {
-	m.accountManager = &b
+	m.account_manager = &b
 }
 
-// AccountManager returns the value of the "accountManager" field in the mutation.
+// AccountManager returns the value of the "account_manager" field in the mutation.
 func (m *UserMutation) AccountManager() (r bool, exists bool) {
-	v := m.accountManager
+	v := m.account_manager
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldAccountManager returns the old "accountManager" field's value of the User entity.
+// OldAccountManager returns the old "account_manager" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldAccountManager(ctx context.Context) (v bool, err error) {
@@ -7451,9 +7451,9 @@ func (m *UserMutation) OldAccountManager(ctx context.Context) (v bool, err error
 	return oldValue.AccountManager, nil
 }
 
-// ResetAccountManager resets all changes to the "accountManager" field.
+// ResetAccountManager resets all changes to the "account_manager" field.
 func (m *UserMutation) ResetAccountManager() {
-	m.accountManager = nil
+	m.account_manager = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -7996,7 +7996,7 @@ func (m *UserMutation) Fields() []string {
 	if m.display_name != nil {
 		fields = append(fields, user.FieldDisplayName)
 	}
-	if m.accountManager != nil {
+	if m.account_manager != nil {
 		fields = append(fields, user.FieldAccountManager)
 	}
 	if m.created_at != nil {

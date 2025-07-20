@@ -39,13 +39,13 @@ func (uc *UserCreate) SetDisplayName(s string) *UserCreate {
 	return uc
 }
 
-// SetAccountManager sets the "accountManager" field.
+// SetAccountManager sets the "account_manager" field.
 func (uc *UserCreate) SetAccountManager(b bool) *UserCreate {
 	uc.mutation.SetAccountManager(b)
 	return uc
 }
 
-// SetNillableAccountManager sets the "accountManager" field if the given value is not nil.
+// SetNillableAccountManager sets the "account_manager" field if the given value is not nil.
 func (uc *UserCreate) SetNillableAccountManager(b *bool) *UserCreate {
 	if b != nil {
 		uc.SetAccountManager(*b)
@@ -281,7 +281,7 @@ func (uc *UserCreate) check() error {
 		return &ValidationError{Name: "display_name", err: errors.New(`ent: missing required field "User.display_name"`)}
 	}
 	if _, ok := uc.mutation.AccountManager(); !ok {
-		return &ValidationError{Name: "accountManager", err: errors.New(`ent: missing required field "User.accountManager"`)}
+		return &ValidationError{Name: "account_manager", err: errors.New(`ent: missing required field "User.account_manager"`)}
 	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "User.created_at"`)}

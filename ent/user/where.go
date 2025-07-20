@@ -66,7 +66,7 @@ func DisplayName(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldDisplayName, v))
 }
 
-// AccountManager applies equality check predicate on the "accountManager" field. It's identical to AccountManagerEQ.
+// AccountManager applies equality check predicate on the "account_manager" field. It's identical to AccountManagerEQ.
 func AccountManager(v bool) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldAccountManager, v))
 }
@@ -216,12 +216,12 @@ func DisplayNameContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldDisplayName, v))
 }
 
-// AccountManagerEQ applies the EQ predicate on the "accountManager" field.
+// AccountManagerEQ applies the EQ predicate on the "account_manager" field.
 func AccountManagerEQ(v bool) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldAccountManager, v))
 }
 
-// AccountManagerNEQ applies the NEQ predicate on the "accountManager" field.
+// AccountManagerNEQ applies the NEQ predicate on the "account_manager" field.
 func AccountManagerNEQ(v bool) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldAccountManager, v))
 }

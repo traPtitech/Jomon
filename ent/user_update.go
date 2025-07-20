@@ -63,13 +63,13 @@ func (uu *UserUpdate) SetNillableDisplayName(s *string) *UserUpdate {
 	return uu
 }
 
-// SetAccountManager sets the "accountManager" field.
+// SetAccountManager sets the "account_manager" field.
 func (uu *UserUpdate) SetAccountManager(b bool) *UserUpdate {
 	uu.mutation.SetAccountManager(b)
 	return uu
 }
 
-// SetNillableAccountManager sets the "accountManager" field if the given value is not nil.
+// SetNillableAccountManager sets the "account_manager" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableAccountManager(b *bool) *UserUpdate {
 	if b != nil {
 		uu.SetAccountManager(*b)
@@ -816,13 +816,13 @@ func (uuo *UserUpdateOne) SetNillableDisplayName(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// SetAccountManager sets the "accountManager" field.
+// SetAccountManager sets the "account_manager" field.
 func (uuo *UserUpdateOne) SetAccountManager(b bool) *UserUpdateOne {
 	uuo.mutation.SetAccountManager(b)
 	return uuo
 }
 
-// SetNillableAccountManager sets the "accountManager" field if the given value is not nil.
+// SetNillableAccountManager sets the "account_manager" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableAccountManager(b *bool) *UserUpdateOne {
 	if b != nil {
 		uuo.SetAccountManager(*b)

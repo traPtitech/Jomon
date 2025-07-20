@@ -22,7 +22,7 @@ type User struct {
 	Name string `json:"name,omitempty"`
 	// DisplayName holds the value of the "display_name" field.
 	DisplayName string `json:"display_name,omitempty"`
-	// AccountManager holds the value of the "accountManager" field.
+	// AccountManager holds the value of the "account_manager" field.
 	AccountManager bool `json:"account_manager,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
@@ -168,7 +168,7 @@ func (u *User) assignValues(columns []string, values []any) error {
 			}
 		case user.FieldAccountManager:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field accountManager", values[i])
+				return fmt.Errorf("unexpected type %T for field account_manager", values[i])
 			} else if value.Valid {
 				u.AccountManager = value.Bool
 			}
@@ -268,7 +268,7 @@ func (u *User) String() string {
 	builder.WriteString("display_name=")
 	builder.WriteString(u.DisplayName)
 	builder.WriteString(", ")
-	builder.WriteString("accountManager=")
+	builder.WriteString("account_manager=")
 	builder.WriteString(fmt.Sprintf("%v", u.AccountManager))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")

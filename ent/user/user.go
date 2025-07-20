@@ -19,7 +19,7 @@ const (
 	FieldName = "name"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
-	// FieldAccountManager holds the string denoting the accountmanager field in the database.
+	// FieldAccountManager holds the string denoting the account_manager field in the database.
 	FieldAccountManager = "account_manager"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
@@ -123,7 +123,7 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// DefaultAccountManager holds the default value on creation for the "accountManager" field.
+	// DefaultAccountManager holds the default value on creation for the "account_manager" field.
 	DefaultAccountManager bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
@@ -153,7 +153,7 @@ func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
 }
 
-// ByAccountManager orders the results by the accountManager field.
+// ByAccountManager orders the results by the account_manager field.
 func ByAccountManager(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAccountManager, opts...).ToFunc()
 }
