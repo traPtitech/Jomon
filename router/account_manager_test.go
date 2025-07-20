@@ -34,7 +34,7 @@ func TestHandler_GetAccountManagers(t *testing.T) {
 		}
 
 		e := echo.New()
-		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/accountManagers", nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/account-managers", nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -62,7 +62,7 @@ func TestHandler_GetAccountManagers(t *testing.T) {
 		var accountManagers []*model.AccountManager
 
 		e := echo.New()
-		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/accountManagers", nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/account-managers", nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -89,7 +89,7 @@ func TestHandler_GetAccountManagers(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/accountManagers", nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/account-managers", nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -123,7 +123,7 @@ func TestHandler_PostAccountManager(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/accountManagers", bytes.NewReader(reqBody))
+			ctx, http.MethodPost, "/api/account-managers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -151,7 +151,7 @@ func TestHandler_PostAccountManager(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/accountManagers", bytes.NewReader(reqBody))
+			ctx, http.MethodPost, "/api/account-managers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -183,7 +183,7 @@ func TestHandler_PostAccountManager(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/accountManagers", bytes.NewReader(reqBody))
+			ctx, http.MethodPost, "/api/account-managers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -220,7 +220,7 @@ func TestHandler_DeleteAccountManager(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, "/api/accountManagers", bytes.NewReader(reqBody))
+			ctx, http.MethodDelete, "/api/account-managers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -248,7 +248,7 @@ func TestHandler_DeleteAccountManager(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, "/api/accountManagers", bytes.NewReader(reqBody))
+			ctx, http.MethodDelete, "/api/account-managers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -279,7 +279,7 @@ func TestHandler_DeleteAccountManager(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, "/api/accountManagers", bytes.NewReader(reqBody))
+			ctx, http.MethodDelete, "/api/account-managers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -305,7 +305,7 @@ func TestHandler_DeleteAccountManager(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, "/api/accountManagers", bytes.NewReader(reqBody))
+			ctx, http.MethodDelete, "/api/account-managers", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
