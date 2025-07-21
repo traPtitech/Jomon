@@ -107,11 +107,11 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func (h Handlers) CheckAdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func (h Handlers) CheckAccountManagerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		loginUser, _ := c.Get(loginUserKey).(User)
-		if !loginUser.Admin {
-			return echo.NewHTTPError(http.StatusForbidden, "you are not admin")
+		if !loginUser.AccountManager {
+			return echo.NewHTTPError(http.StatusForbidden, "you are not accountManager")
 		}
 		return next(c)
 	}

@@ -5,7 +5,7 @@ import (
 )
 
 type Repository interface {
-	AdminRepository
+	AccountManagerRepository
 	CommentRepository
 	FileRepository
 	GroupBudgetRepository

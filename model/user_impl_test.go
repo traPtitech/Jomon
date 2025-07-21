@@ -63,19 +63,19 @@ func TestEntRepository_CreateUser(t *testing.T) {
 
 		name := random.AlphaNumeric(t, 20)
 		dn := random.AlphaNumeric(t, 20)
-		admin := random.Numeric(t, 2) == 1
+		accountManager := random.Numeric(t, 2) == 1
 
-		user, err := repo.CreateUser(ctx, name, dn, admin)
+		user, err := repo.CreateUser(ctx, name, dn, accountManager)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts, cmpopts.IgnoreFields(User{}, "ID"))
 		exp := &User{
-			Name:        name,
-			DisplayName: dn,
-			Admin:       admin,
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
-			DeletedAt:   nil,
+			Name:           name,
+			DisplayName:    dn,
+			AccountManager: accountManager,
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+			DeletedAt:      nil,
 		}
 		testutil.RequireEqual(t, exp, user, opts...)
 	})
@@ -86,9 +86,9 @@ func TestEntRepository_CreateUser(t *testing.T) {
 
 		name := ""
 		dn := random.AlphaNumeric(t, 20)
-		admin := random.Numeric(t, 2) == 1
+		accountManager := random.Numeric(t, 2) == 1
 
-		_, err := repo.CreateUser(ctx, name, dn, admin)
+		_, err := repo.CreateUser(ctx, name, dn, accountManager)
 		require.Error(t, err)
 	})
 }
@@ -107,9 +107,9 @@ func TestEntRepository_GetUserByName(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		name := random.AlphaNumeric(t, 20)
 		dn := random.AlphaNumeric(t, 20)
-		admin := random.Numeric(t, 2) == 1
+		accountManager := random.Numeric(t, 2) == 1
 
-		user, err := repo.CreateUser(ctx, name, dn, admin)
+		user, err := repo.CreateUser(ctx, name, dn, accountManager)
 		require.NoError(t, err)
 
 		got, err := repo.GetUserByName(ctx, name)
@@ -140,9 +140,9 @@ func TestEntRepository_GetUserByID(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		name := random.AlphaNumeric(t, 20)
 		dn := random.AlphaNumeric(t, 20)
-		admin := random.Numeric(t, 2) == 1
+		accountManager := random.Numeric(t, 2) == 1
 
-		user, err := repo.CreateUser(ctx, name, dn, admin)
+		user, err := repo.CreateUser(ctx, name, dn, accountManager)
 		require.NoError(t, err)
 
 		got, err := repo.GetUserByID(ctx, user.ID)
@@ -171,24 +171,24 @@ func TestEntRepository_UpdateUser(t *testing.T) {
 
 		name := random.AlphaNumeric(t, 20)
 		dn := random.AlphaNumeric(t, 20)
-		admin := random.Numeric(t, 2) == 1
+		accountManager := random.Numeric(t, 2) == 1
 
-		user, err := repo.CreateUser(ctx, name, dn, admin)
+		user, err := repo.CreateUser(ctx, name, dn, accountManager)
 		require.NoError(t, err)
 
 		uname := random.AlphaNumeric(t, 20)
 		udn := random.AlphaNumeric(t, 20)
-		uadmin := random.Numeric(t, 2) == 1
-		got, err := repo.UpdateUser(ctx, user.ID, uname, udn, uadmin)
+		uaccountManager := random.Numeric(t, 2) == 1
+		got, err := repo.UpdateUser(ctx, user.ID, uname, udn, uaccountManager)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := &User{
-			ID:          user.ID,
-			Name:        uname,
-			DisplayName: udn,
-			Admin:       uadmin,
-			CreatedAt:   user.CreatedAt,
-			UpdatedAt:   time.Now(),
+			ID:             user.ID,
+			Name:           uname,
+			DisplayName:    udn,
+			AccountManager: uaccountManager,
+			CreatedAt:      user.CreatedAt,
+			UpdatedAt:      time.Now(),
 		}
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
@@ -199,15 +199,15 @@ func TestEntRepository_UpdateUser(t *testing.T) {
 
 		name := random.AlphaNumeric(t, 20)
 		dn := random.AlphaNumeric(t, 20)
-		admin := random.Numeric(t, 2) == 1
+		accountManager := random.Numeric(t, 2) == 1
 
-		user, err := repo.CreateUser(ctx, name, dn, admin)
+		user, err := repo.CreateUser(ctx, name, dn, accountManager)
 		require.NoError(t, err)
 
 		uname := ""
 		udn := random.AlphaNumeric(t, 20)
-		uadmin := random.Numeric(t, 2) == 1
-		_, err = repo.UpdateUser(ctx, user.ID, uname, udn, uadmin)
+		uaccountManager := random.Numeric(t, 2) == 1
+		_, err = repo.UpdateUser(ctx, user.ID, uname, udn, uaccountManager)
 		require.Error(t, err)
 	})
 }

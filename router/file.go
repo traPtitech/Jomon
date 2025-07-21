@@ -36,7 +36,8 @@ var (
 		"application/msword": true,
 		"application/zip":    true,
 	}
-	errUserIsNotAdminOrFileCreator = errors.New("user is not admin or file creator")
+	errUserIsNotAccountManagerOrFileCreator = errors.New(
+		"user is not accountManager or file creator")
 )
 
 func (h Handlers) PostFile(c echo.Context) error {
@@ -195,7 +196,7 @@ func (h Handlers) DeleteFile(c echo.Context) error {
 		logger.Info("could not parse query parameter `fileID` as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	if err := h.filterAdminOrFileCreator(ctx, &loginUser, fileID); err != nil {
+	if err := h.filterAccountManagerOrFileCreator(ctx, &loginUser, fileID); err != nil {
 		return err
 	}
 
@@ -227,11 +228,11 @@ func (h Handlers) isFileCreator(ctx context.Context, userID, fileID uuid.UUID) (
 	return file.CreatedBy == userID, nil
 }
 
-func (h Handlers) filterAdminOrFileCreator(
+func (h Handlers) filterAccountManagerOrFileCreator(
 	ctx context.Context, user *User, fileID uuid.UUID,
 ) *echo.HTTPError {
 	logger := logging.GetLogger(ctx)
-	if user.Admin {
+	if user.AccountManager {
 		return nil
 	}
 	isCreator, err := h.isFileCreator(ctx, user.ID, fileID)
@@ -242,5 +243,5 @@ func (h Handlers) filterAdminOrFileCreator(
 	if isCreator {
 		return nil
 	}
-	return echo.NewHTTPError(http.StatusForbidden, errUserIsNotAdminOrFileCreator)
+	return echo.NewHTTPError(http.StatusForbidden, errUserIsNotAccountManagerOrFileCreator)
 }

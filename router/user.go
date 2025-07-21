@@ -13,13 +13,13 @@ import (
 )
 
 type User struct {
-	ID          uuid.UUID  `json:"id"`
-	Name        string     `json:"name"`
-	DisplayName string     `json:"display_name"`
-	Admin       bool       `json:"admin"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	DeletedAt   *time.Time `json:"deleted_at"`
+	ID             uuid.UUID  `json:"id"`
+	Name           string     `json:"name"`
+	DisplayName    string     `json:"display_name"`
+	AccountManager bool       `json:"account_manager"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
+	DeletedAt      *time.Time `json:"deleted_at"`
 }
 
 func (h Handlers) GetUsers(c echo.Context) error {
@@ -34,13 +34,13 @@ func (h Handlers) GetUsers(c echo.Context) error {
 
 	res := lo.Map(users, func(user *model.User, _ int) User {
 		return User{
-			ID:          user.ID,
-			Name:        user.Name,
-			DisplayName: user.DisplayName,
-			Admin:       user.Admin,
-			CreatedAt:   user.CreatedAt,
-			UpdatedAt:   user.UpdatedAt,
-			DeletedAt:   user.DeletedAt,
+			ID:             user.ID,
+			Name:           user.Name,
+			DisplayName:    user.DisplayName,
+			AccountManager: user.AccountManager,
+			CreatedAt:      user.CreatedAt,
+			UpdatedAt:      user.UpdatedAt,
+			DeletedAt:      user.DeletedAt,
 		}
 	})
 
@@ -48,9 +48,9 @@ func (h Handlers) GetUsers(c echo.Context) error {
 }
 
 type PutUserRequest struct {
-	Name        string `json:"name"`
-	DisplayName string `json:"display_name"`
-	Admin       bool   `json:"admin"`
+	Name           string `json:"name"`
+	DisplayName    string `json:"display_name"`
+	AccountManager bool   `json:"account_manager"`
 }
 
 func (h Handlers) UpdateUserInfo(c echo.Context) error {
@@ -70,29 +70,29 @@ func (h Handlers) UpdateUserInfo(c echo.Context) error {
 	}
 
 	updated, err := h.Repository.UpdateUser(
-		ctx, user.ID, newUser.Name, newUser.DisplayName, newUser.Admin)
+		ctx, user.ID, newUser.Name, newUser.DisplayName, newUser.AccountManager)
 	if err != nil {
 		logger.Error("failed to update user in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, User{
-		ID:          user.ID,
-		Name:        updated.Name,
-		DisplayName: updated.DisplayName,
-		Admin:       updated.Admin,
+		ID:             user.ID,
+		Name:           updated.Name,
+		DisplayName:    updated.DisplayName,
+		AccountManager: updated.AccountManager,
 	})
 }
 
 func userFromModelUser(u model.User) User {
 	return User{
-		ID:          u.ID,
-		Name:        u.Name,
-		DisplayName: u.DisplayName,
-		Admin:       u.Admin,
-		CreatedAt:   u.CreatedAt,
-		UpdatedAt:   u.UpdatedAt,
-		DeletedAt:   u.DeletedAt,
+		ID:             u.ID,
+		Name:           u.Name,
+		DisplayName:    u.DisplayName,
+		AccountManager: u.AccountManager,
+		CreatedAt:      u.CreatedAt,
+		UpdatedAt:      u.UpdatedAt,
+		DeletedAt:      u.DeletedAt,
 	}
 }
 
