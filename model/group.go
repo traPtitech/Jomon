@@ -32,7 +32,7 @@ type Group struct {
 	Budget      *int
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	DeletedAt   service.NullTime
+	DeletedAt   time.Time
 }
 
 type Owner struct {

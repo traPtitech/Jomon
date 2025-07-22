@@ -17,7 +17,7 @@ type RequestTargetDetail struct {
 	ID        uuid.UUID
 	Target    uuid.UUID
 	Amount    int
-	PaidAt    service.NullTime
+	PaidAt    time.Time
 	CreatedAt time.Time
 }
 

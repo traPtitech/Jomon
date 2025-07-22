@@ -87,7 +87,7 @@ func ConvertEntRequestTargetToModelRequestTargetDetail(t *ent.RequestTarget) *Re
 		ID:        t.ID,
 		Target:    t.Edges.User.ID,
 		Amount:    t.Amount,
-		PaidAt:    service.NullTimeToTime(t.PaidAt),
+		PaidAt:    service.TimeToNullTime(t.PaidAt),
 		CreatedAt: t.CreatedAt,
 	}
 }

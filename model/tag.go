@@ -14,7 +14,7 @@ type Tag struct {
 	Name      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt service.NullTime
+	DeletedAt time.Time
 }
 
 type TagRepository interface {
