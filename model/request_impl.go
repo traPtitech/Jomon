@@ -63,12 +63,12 @@ func (repo *EntRepository) GetRequests(
 			Order(ent.Desc(request.FieldTitle))
 	}
 
-	if query.Target != nil && *query.Target != uuid.Nil {
+	if query.Target != uuid.Nil {
 		requestsq = requestsq.
 			Where(
 				request.HasTargetWith(
 					requesttarget.HasUserWith(
-						user.IDEQ(*query.Target),
+						user.IDEQ(query.Target),
 					),
 				),
 			)
@@ -83,14 +83,14 @@ func (repo *EntRepository) GetRequests(
 			)
 	}
 
-	if query.Since != nil && !(*query.Since).IsZero() {
+	if !query.Since.IsZero() {
 		requestsq = requestsq.
-			Where(request.CreatedAtGTE(*query.Since))
+			Where(request.CreatedAtGTE(query.Since))
 	}
 
-	if query.Until != nil && !(*query.Until).IsZero() {
+	if !query.Until.IsZero() {
 		requestsq = requestsq.
-			Where(request.CreatedAtLT(*query.Until))
+			Where(request.CreatedAtLT(query.Until))
 	}
 
 	if query.Tag != nil && *query.Tag != "" {
@@ -112,11 +112,11 @@ func (repo *EntRepository) GetRequests(
 				),
 			)
 	}
-	if query.CreatedBy != nil && *query.CreatedBy != uuid.Nil {
+	if query.CreatedBy != uuid.Nil {
 		requestsq = requestsq.
 			Where(
 				request.HasUserWith(
-					user.IDEQ(*query.CreatedBy),
+					user.IDEQ(query.CreatedBy),
 				),
 			)
 	}
@@ -223,7 +223,7 @@ func (repo *EntRepository) CreateRequest(
 		CreatedBy: t.ID,
 		Comments:  []*Comment{},
 		Statuses:  statuses,
-		Files:     []*uuid.UUID{},
+		Files:     []uuid.UUID{},
 	}
 	return reqdetail, nil
 }
@@ -266,8 +266,8 @@ func (repo *EntRepository) GetRequest(
 	statuses := lo.Map(r.Edges.Status, func(status *ent.RequestStatus, _ int) *RequestStatus {
 		return convertEntRequestStatusToModelRequestStatus(status)
 	})
-	files := lo.Map(r.Edges.File, func(f *ent.File, _ int) *uuid.UUID {
-		return &f.ID
+	files := lo.Map(r.Edges.File, func(f *ent.File, _ int) uuid.UUID {
+		return f.ID
 	})
 	reqdetail := &RequestDetail{
 		ID:        r.ID,
@@ -390,8 +390,8 @@ func (repo *EntRepository) UpdateRequest(
 	if err != nil {
 		return nil, err
 	}
-	files := lo.Map(entfiles, func(f *ent.File, _ int) *uuid.UUID {
-		return &f.ID
+	files := lo.Map(entfiles, func(f *ent.File, _ int) uuid.UUID {
+		return f.ID
 	})
 	err = tx.Commit()
 	if err != nil {

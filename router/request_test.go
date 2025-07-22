@@ -94,9 +94,7 @@ func modelRequestDetailToRequestResponse(r *model.RequestDetail) *RequestDetailR
 		Comments: lo.Map(r.Comments, func(m *model.Comment, _ int) *CommentDetail {
 			return modelCommentToCommentDetail(m)
 		}),
-		Files: lo.Map(r.Files, func(f *uuid.UUID, _ int) uuid.UUID {
-			return *f
-		}),
+		Files: r.Files,
 	}
 }
 
@@ -315,7 +313,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequests(c.Request().Context(), model.RequestQuery{
-				Until:  &date2,
+				Until:  date2,
 				Limit:  100,
 				Offset: 0,
 			}).
@@ -379,7 +377,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		h.Repository.MockRequestRepository.
 			EXPECT().
 			GetRequests(c.Request().Context(), model.RequestQuery{
-				Since:  &date2,
+				Since:  date2,
 				Limit:  100,
 				Offset: 0,
 			}).
@@ -513,7 +511,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 			GetRequests(c.Request().Context(), model.RequestQuery{
 				Limit:     100,
 				Offset:    0,
-				CreatedBy: &request.CreatedBy},
+				CreatedBy: request.CreatedBy},
 			).
 			Return(modelRequests, nil)
 
@@ -616,7 +614,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqRequest := Request{
 			CreatedBy: request.CreatedBy,
@@ -688,13 +686,13 @@ func TestHandlers_PostRequest(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqRequest := Request{
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
 			Content:   request.Content,
-			Tags:      []*uuid.UUID{&tag.ID},
+			Tags:      []uuid.UUID{tag.ID},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -764,13 +762,13 @@ func TestHandlers_PostRequest(t *testing.T) {
 			}},
 			Group:    group,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqRequest := Request{
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
 			Content:   request.Content,
-			Group:     &group.ID,
+			Group:     uuid.NullUUID{UUID: group.ID, Valid: true},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -843,7 +841,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		tg := &Target{
 			Target: target.Target,
@@ -908,7 +906,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
 			Content:   request.Content,
-			Tags:      []*uuid.UUID{&unknownTagID},
+			Tags:      []uuid.UUID{unknownTagID},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -956,7 +954,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			CreatedBy: request.CreatedBy,
 			Title:     request.Title,
 			Content:   request.Content,
-			Group:     &unknownGroupID,
+			Group:     uuid.NullUUID{UUID: unknownGroupID, Valid: true},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -1065,7 +1063,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 
 		e := echo.New()
@@ -1122,7 +1120,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		comment1 := &model.Comment{
 			ID:        uuid.New(),
@@ -1183,7 +1181,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 1000000),
-			PaidAt:    nil,
+			PaidAt:    time.Time{},
 			CreatedAt: date,
 		}
 		request := &model.RequestDetail{
@@ -1203,7 +1201,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 				CreatedBy: uuid.New(),
 			}},
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 
 		e := echo.New()
@@ -1352,14 +1350,14 @@ func TestHandlers_PutRequest(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
-			Tags:    []*uuid.UUID{},
+			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
-			Group:   nil,
+			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -1453,7 +1451,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		tag1 := &model.Tag{
 			ID:        uuid.New(),
@@ -1471,9 +1469,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
-			Tags:    []*uuid.UUID{&tag1.ID, &tag2.ID},
+			Tags:    []uuid.UUID{tag1.ID, tag2.ID},
 			Targets: []*Target{},
-			Group:   nil,
+			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -1574,32 +1572,32 @@ func TestHandlers_PutRequest(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		target1 := &model.RequestTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 100000),
-			PaidAt:    nil,
+			PaidAt:    time.Time{},
 			CreatedAt: date,
 		}
 		target2 := &model.RequestTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 100000),
-			PaidAt:    nil,
+			PaidAt:    time.Time{},
 			CreatedAt: date,
 		}
 		targetDetails := []*model.RequestTargetDetail{target1, target2}
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
-			Tags:    []*uuid.UUID{},
+			Tags:    []uuid.UUID{},
 			Targets: []*Target{
 				{Target: target1.Target, Amount: target1.Amount},
 				{Target: target2.Target, Amount: target2.Amount},
 			},
-			Group: nil,
+			Group: uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -1693,7 +1691,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		budget := random.Numeric(t, 100000)
 		group := &model.Group{
@@ -1707,9 +1705,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
-			Tags:    []*uuid.UUID{},
+			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
-			Group:   &group.ID,
+			Group:   uuid.NullUUID{UUID: group.ID, Valid: true},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -1806,14 +1804,14 @@ func TestHandlers_PutRequest(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
-			Tags:    []*uuid.UUID{},
+			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
-			Group:   nil,
+			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -1960,9 +1958,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
-			Tags:    []*uuid.UUID{},
+			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
-			Group:   nil,
+			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -2020,7 +2018,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		tag := &model.Tag{
 			ID:        uuid.New(),
@@ -2031,9 +2029,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
-			Tags:    []*uuid.UUID{&tag.ID},
+			Tags:    []uuid.UUID{tag.ID},
 			Targets: []*Target{},
-			Group:   nil,
+			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -2095,7 +2093,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		budget := random.Numeric(t, 100000)
 		group := &model.Group{
@@ -2109,9 +2107,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
-			Tags:    []*uuid.UUID{},
+			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
-			Group:   &group.ID,
+			Group:   uuid.NullUUID{UUID: group.ID, Valid: true},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -2177,7 +2175,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
@@ -2273,7 +2271,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
 			Status:  model.FixRequired,
@@ -2369,7 +2367,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
 			Status:  model.Accepted,
@@ -2465,7 +2463,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
 			Status:  model.FixRequired,
@@ -2562,7 +2560,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
@@ -2658,12 +2656,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		target := &model.RequestTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
-			PaidAt:    nil,
+			PaidAt:    time.Time{},
 			CreatedAt: date,
 		}
 		targets := []*model.RequestTargetDetail{target}
@@ -2765,7 +2763,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		invalidStatus := random.AlphaNumeric(t, 20)
 		reqBody, err := json.Marshal(&struct {
@@ -2901,7 +2899,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
 			Status:  request.Status,
@@ -2963,7 +2961,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 
 		reqStatus := PutStatus{
@@ -3028,7 +3026,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
 			Status: model.Rejected,
@@ -3092,7 +3090,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
 			Status: model.Submitted,
@@ -3156,7 +3154,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
 			Status:  model.Accepted,
@@ -3221,12 +3219,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		target := &model.RequestTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
-			PaidAt:    &date,
+			PaidAt:    date,
 			CreatedAt: date,
 		}
 		targets := []*model.RequestTargetDetail{target}
@@ -3295,7 +3293,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
 			Status:  model.Accepted,
@@ -3359,7 +3357,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			}},
 			Group:    nil,
 			Comments: []*model.Comment{},
-			Files:    []*uuid.UUID{},
+			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
