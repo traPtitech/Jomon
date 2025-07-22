@@ -88,6 +88,6 @@ func convertEntUserToModelUser(user *ent.User) *User {
 		AccountManager: user.AccountManager,
 		CreatedAt:      user.CreatedAt,
 		UpdatedAt:      user.UpdatedAt,
-		DeletedAt:      user.DeletedAt,
+		DeletedAt:      service.TimeToNullTime(user.DeletedAt).Time,
 	}
 }

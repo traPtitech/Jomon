@@ -187,6 +187,6 @@ func ConvertEntGroupToModelGroup(entgroup *ent.Group) *Group {
 		Budget:      entgroup.Budget,
 		CreatedAt:   entgroup.CreatedAt,
 		UpdatedAt:   entgroup.UpdatedAt,
-		DeletedAt:   service.TimeToNullTime(entgroup.DeletedAt),
+		DeletedAt:   service.TimeToNullTime(entgroup.DeletedAt).Time,
 	}
 }

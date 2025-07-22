@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/service"
 )
 
 type GroupRepository interface {

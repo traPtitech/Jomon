@@ -7,7 +7,6 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 )
@@ -96,7 +95,7 @@ func TestEntRepository_CreateGroup(t *testing.T) {
 			Budget:      &budget,
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
-			DeletedAt:   service.NullTime{},
+			DeletedAt:   time.Time{},
 		}
 		testutil.RequireEqual(t, exp, created, opts...)
 	})
@@ -116,7 +115,7 @@ func TestEntRepository_CreateGroup(t *testing.T) {
 			Budget:      nil,
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
-			DeletedAt:   service.NullTime{},
+			DeletedAt:   time.Time{},
 		}
 		testutil.RequireEqual(t, exp, created, opts...)
 	})
@@ -162,7 +161,7 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 			Budget:      &updatedBudget,
 			CreatedAt:   created.CreatedAt,
 			UpdatedAt:   time.Now(),
-			DeletedAt:   service.NullTime{},
+			DeletedAt:   time.Time{},
 		}
 		testutil.RequireEqual(t, exp, updated, opts...)
 	})
@@ -205,7 +204,7 @@ func TestEntRepository_UpdateGroup(t *testing.T) {
 			Budget:      nil,
 			CreatedAt:   created.CreatedAt,
 			UpdatedAt:   time.Now(),
-			DeletedAt:   service.NullTime{},
+			DeletedAt:   time.Time{},
 		}
 		testutil.RequireEqual(t, exp, updated, opts...)
 	})
