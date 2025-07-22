@@ -14,6 +14,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 	"go.uber.org/mock/gomock"
@@ -28,7 +29,7 @@ func modelUserToUser(user *model.User) *User {
 		AccountManager: user.AccountManager,
 		CreatedAt:      user.CreatedAt,
 		UpdatedAt:      user.UpdatedAt,
-		DeletedAt:      user.DeletedAt,
+		DeletedAt:      service.TimeToNullTime(&user.DeletedAt),
 	}
 }
 

@@ -113,11 +113,11 @@ type Target struct {
 }
 
 type TargetOverview struct {
-	ID        uuid.UUID `json:"id"`
-	Target    uuid.UUID `json:"target"`
-	Amount    int       `json:"amount"`
+	ID        uuid.UUID        `json:"id"`
+	Target    uuid.UUID        `json:"target"`
+	Amount    int              `json:"amount"`
 	PaidAt    service.NullTime `json:"paid_at"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time        `json:"created_at"`
 }
 
 func (h Handlers) GetRequests(c echo.Context) error {
@@ -148,7 +148,7 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		}
 		target = t
 	}
-	var since service.NullTime
+	var since time.Time
 	if c.QueryParam("since") != "" {
 		s, err := service.StrToDate(c.QueryParam("since"))
 		if err != nil {
@@ -255,7 +255,7 @@ func (h Handlers) GetRequests(c echo.Context) error {
 						ID:        target.ID,
 						Target:    target.Target,
 						Amount:    target.Amount,
-						PaidAt:    target.PaidAt,
+						PaidAt:    service.TimeToNullTime(&target.PaidAt),
 						CreatedAt: target.CreatedAt,
 					}
 				},
@@ -364,7 +364,7 @@ func (h Handlers) PostRequest(c echo.Context) error {
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    target.PaidAt,
+				PaidAt:    service.TimeToNullTime(&target.PaidAt),
 				CreatedAt: target.CreatedAt,
 			}
 		},
@@ -470,7 +470,7 @@ func (h Handlers) GetRequest(c echo.Context) error {
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    target.PaidAt,
+				PaidAt:    service.TimeToNullTime(&target.PaidAt),
 				CreatedAt: target.CreatedAt,
 			}
 		},
@@ -635,7 +635,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    target.PaidAt,
+				PaidAt:    service.TimeToNullTime(&target.PaidAt),
 				CreatedAt: target.CreatedAt,
 			}
 		},
