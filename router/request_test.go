@@ -2245,7 +2245,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
-	t.Run("SuccessByAdminFromSubmittedToFixRequired", func(t *testing.T) {
+	t.Run("SuccessByAccountManagerFromSubmittedToFixRequired", func(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
@@ -2341,7 +2341,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
-	t.Run("SuccessByAdminFromSubmittedToAccepted", func(t *testing.T) {
+	t.Run("SuccessByAccountManagerFromSubmittedToAccepted", func(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
@@ -2437,7 +2437,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
-	t.Run("SuccessByAdminFromSubmittedToFixRequired", func(t *testing.T) {
+	t.Run("SuccessByAccountManagerFromSubmittedToFixRequired", func(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
@@ -2534,7 +2534,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
-	t.Run("SuccessByAdminFromFixRequiredToSubmitted", func(t *testing.T) {
+	t.Run("SuccessByAccountManagerFromFixRequiredToSubmitted", func(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
@@ -2630,7 +2630,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
-	t.Run("SuccessByAdminFromAcceptedToSubmitted", func(t *testing.T) {
+	t.Run("SuccessByAccountManagerFromAcceptedToSubmitted", func(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
@@ -3128,7 +3128,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
 	})
 
-	t.Run("AdminNoPrivilege", func(t *testing.T) {
+	t.Run("AccountManagerNoPrivilege", func(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
@@ -3183,7 +3183,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Return(request, nil)
 
 		resErr := fmt.Errorf(
-			"admin unable to change %v to %v",
+			"accountManager unable to change %v to %v",
 			request.Status.String(),
 			reqStatus.Status.String())
 

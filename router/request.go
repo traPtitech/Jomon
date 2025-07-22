@@ -756,7 +756,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		logger.Error("failed to get request from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	if err := h.filterAdminOrRequestCreator(ctx, &loginUser, request); err != nil {
+	if err := h.filterAccountManagerOrRequestCreator(ctx, &loginUser, request); err != nil {
 		return err
 	}
 
@@ -773,11 +773,11 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		}
 	}
 
-	if loginUser.Admin {
-		if !IsAbleAdminChangeState(req.Status, request.Status) {
-			logger.Info("admin unable to change status")
+	if loginUser.AccountManager {
+		if !IsAbleAccountManagerChangeState(req.Status, request.Status) {
+			logger.Info("accountManager unable to change status")
 			err := fmt.Errorf(
-				"admin unable to change %v to %v",
+				"accountManager unable to change %v to %v",
 				request.Status.String(), req.Status.String())
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
@@ -797,7 +797,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		}
 	}
 
-	if !loginUser.Admin && loginUser.ID == request.CreatedBy {
+	if !loginUser.AccountManager && loginUser.ID == request.CreatedBy {
 		if !IsAbleCreatorChangeStatus(req.Status, request.Status) {
 			logger.Info("creator unable to change status")
 			err := fmt.Errorf(
@@ -807,8 +807,8 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		}
 	}
 
-	if loginUser.ID != request.CreatedBy && !loginUser.Admin {
-		logger.Info("use is not creator or admin")
+	if loginUser.ID != request.CreatedBy && !loginUser.AccountManager {
+		logger.Info("use is not creator or accountManager")
 		return echo.NewHTTPError(http.StatusForbidden)
 	}
 
@@ -861,7 +861,7 @@ func IsAbleCreatorChangeStatus(status, latestStatus model.Status) bool {
 	return status == model.Submitted && latestStatus == model.FixRequired
 }
 
-func IsAbleAdminChangeState(status, latestStatus model.Status) bool {
+func IsAbleAccountManagerChangeState(status, latestStatus model.Status) bool {
 	return status == model.Rejected && latestStatus == model.Submitted ||
 		status == model.Submitted && latestStatus == model.FixRequired ||
 		status == model.Accepted && latestStatus == model.Submitted ||
@@ -879,16 +879,16 @@ func (h Handlers) isRequestCreator(
 	return request.CreatedBy == userID, nil
 }
 
-func (h Handlers) filterAdminOrRequestCreator(
+func (h Handlers) filterAccountManagerOrRequestCreator(
 	ctx context.Context, user *User, request *model.RequestDetail,
 ) *echo.HTTPError {
 	logger := logging.GetLogger(ctx)
-	if user.Admin {
+	if user.AccountManager {
 		return nil
 	}
 	if request.CreatedBy == user.ID {
 		return nil
 	}
-	logger.Info("user is not admin or request creator", zap.String("ID", user.ID.String()))
+	logger.Info("user is not accountManager or request creator", zap.String("ID", user.ID.String()))
 	return echo.NewHTTPError(http.StatusForbidden, "you are not request creator")
 }

@@ -23,7 +23,7 @@ func (User) Fields() []ent.Field {
 			Unique().
 			NotEmpty(),
 		field.String("display_name"),
-		field.Bool("admin").
+		field.Bool("account_manager").
 			Default(false),
 		field.Time("created_at").
 			Default(time.Now),

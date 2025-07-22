@@ -22,8 +22,8 @@ type User struct {
 	Name string `json:"name,omitempty"`
 	// DisplayName holds the value of the "display_name" field.
 	DisplayName string `json:"display_name,omitempty"`
-	// Admin holds the value of the "admin" field.
-	Admin bool `json:"admin,omitempty"`
+	// AccountManager holds the value of the "account_manager" field.
+	AccountManager bool `json:"account_manager,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -125,7 +125,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldAdmin:
+		case user.FieldAccountManager:
 			values[i] = new(sql.NullBool)
 		case user.FieldName, user.FieldDisplayName:
 			values[i] = new(sql.NullString)
@@ -166,11 +166,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.DisplayName = value.String
 			}
-		case user.FieldAdmin:
+		case user.FieldAccountManager:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field admin", values[i])
+				return fmt.Errorf("unexpected type %T for field account_manager", values[i])
 			} else if value.Valid {
-				u.Admin = value.Bool
+				u.AccountManager = value.Bool
 			}
 		case user.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -268,8 +268,8 @@ func (u *User) String() string {
 	builder.WriteString("display_name=")
 	builder.WriteString(u.DisplayName)
 	builder.WriteString(", ")
-	builder.WriteString("admin=")
-	builder.WriteString(fmt.Sprintf("%v", u.Admin))
+	builder.WriteString("account_manager=")
+	builder.WriteString(fmt.Sprintf("%v", u.AccountManager))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(u.CreatedAt.Format(time.ANSIC))

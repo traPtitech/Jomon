@@ -12,13 +12,13 @@ import (
 )
 
 func (repo *EntRepository) CreateUser(
-	ctx context.Context, name string, dn string, admin bool,
+	ctx context.Context, name string, dn string, accountManager bool,
 ) (*User, error) {
 	u, err := repo.client.User.
 		Create().
 		SetName(name).
 		SetDisplayName(dn).
-		SetAdmin(admin).
+		SetAccountManager(accountManager).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -62,13 +62,13 @@ func (repo *EntRepository) GetUsers(ctx context.Context) ([]*User, error) {
 }
 
 func (repo *EntRepository) UpdateUser(
-	ctx context.Context, userID uuid.UUID, name string, dn string, admin bool,
+	ctx context.Context, userID uuid.UUID, name string, dn string, accountManager bool,
 ) (*User, error) {
 	u, err := repo.client.User.
 		UpdateOneID(userID).
 		SetName(name).
 		SetDisplayName(dn).
-		SetAdmin(admin).
+		SetAccountManager(accountManager).
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
@@ -82,12 +82,12 @@ func convertEntUserToModelUser(user *ent.User) *User {
 		return nil
 	}
 	return &User{
-		ID:          user.ID,
-		Name:        user.Name,
-		DisplayName: user.DisplayName,
-		Admin:       user.Admin,
-		CreatedAt:   user.CreatedAt,
-		UpdatedAt:   user.UpdatedAt,
-		DeletedAt:   service.TimeToNullTime(user.DeletedAt),
+		ID:             user.ID,
+		Name:           user.Name,
+		DisplayName:    user.DisplayName,
+		AccountManager: user.AccountManager,
+		CreatedAt:      user.CreatedAt,
+		UpdatedAt:      user.UpdatedAt,
+		DeletedAt:      user.DeletedAt,
 	}
 }

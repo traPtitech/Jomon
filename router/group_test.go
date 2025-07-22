@@ -259,36 +259,36 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 			UpdatedAt:   date,
 		}
 		user1 := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:             uuid.New(),
+			Name:           random.AlphaNumeric(t, 20),
+			DisplayName:    random.AlphaNumeric(t, 50),
+			AccountManager: true,
+			CreatedAt:      date,
+			UpdatedAt:      date,
 		}
 		user2 := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:             uuid.New(),
+			Name:           random.AlphaNumeric(t, 20),
+			DisplayName:    random.AlphaNumeric(t, 50),
+			AccountManager: true,
+			CreatedAt:      date,
+			UpdatedAt:      date,
 		}
 		user3 := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       false,
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:             uuid.New(),
+			Name:           random.AlphaNumeric(t, 20),
+			DisplayName:    random.AlphaNumeric(t, 50),
+			AccountManager: false,
+			CreatedAt:      date,
+			UpdatedAt:      date,
 		}
 		user4 := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       false,
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:             uuid.New(),
+			Name:           random.AlphaNumeric(t, 20),
+			DisplayName:    random.AlphaNumeric(t, 50),
+			AccountManager: false,
+			CreatedAt:      date,
+			UpdatedAt:      date,
 		}
 
 		owner1 := model.Owner{ID: user1.ID}
@@ -589,12 +589,12 @@ func TestHandlers_GetGroupDetail(t *testing.T) {
 		}
 
 		user := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:             uuid.New(),
+			Name:           random.AlphaNumeric(t, 20),
+			DisplayName:    random.AlphaNumeric(t, 50),
+			AccountManager: true,
+			CreatedAt:      date,
+			UpdatedAt:      date,
 		}
 		owner := model.Owner{ID: user.ID}
 		owners := []*model.Owner{&owner}
@@ -1214,12 +1214,12 @@ func TestHandlers_DeleteMember(t *testing.T) {
 
 		date := time.Now()
 		user := &model.User{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			DisplayName: random.AlphaNumeric(t, 50),
-			Admin:       true,
-			CreatedAt:   date,
-			UpdatedAt:   date,
+			ID:             uuid.New(),
+			Name:           random.AlphaNumeric(t, 20),
+			DisplayName:    random.AlphaNumeric(t, 50),
+			AccountManager: true,
+			CreatedAt:      date,
+			UpdatedAt:      date,
 		}
 		member := []uuid.UUID{user.ID}
 		reqBody, err := json.Marshal(member)
