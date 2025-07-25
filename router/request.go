@@ -217,7 +217,7 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		}
 		cratedBy = &u
 	}
-	query := model.RequestQuery{
+	query := model.ApplicationQuery{
 		Sort:      sort,
 		Target:    target,
 		Status:    ss,
@@ -230,7 +230,7 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		CreatedBy: cratedBy,
 	}
 
-	modelrequests, err := h.Repository.GetRequests(ctx, query)
+	modelrequests, err := h.Repository.GetApplications(ctx, query)
 	if err != nil {
 		logger.Error("failed to get requests from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -238,7 +238,7 @@ func (h Handlers) GetRequests(c echo.Context) error {
 
 	requests := lo.Map(
 		modelrequests,
-		func(request *model.RequestResponse, _ int) *RequestResponse {
+		func(request *model.ApplicationResponse, _ int) *RequestResponse {
 			tags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagResponse {
 				return &TagResponse{
 					ID:        tag.ID,
@@ -250,7 +250,7 @@ func (h Handlers) GetRequests(c echo.Context) error {
 
 			restargets := lo.Map(
 				request.Targets,
-				func(target *model.RequestTargetDetail, _ int) *TargetOverview {
+				func(target *model.ApplicationTargetDetail, _ int) *TargetOverview {
 					return &TargetOverview{
 						ID:        target.ID,
 						Target:    target.Target,
@@ -313,8 +313,8 @@ func (h Handlers) PostRequest(c echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
-	targets := lo.Map(req.Targets, func(target *Target, _ int) *model.RequestTarget {
-		return &model.RequestTarget{
+	targets := lo.Map(req.Targets, func(target *Target, _ int) *model.ApplicationTarget {
+		return &model.ApplicationTarget{
 			Target: target.Target,
 			Amount: target.Amount,
 		}
@@ -333,7 +333,7 @@ func (h Handlers) PostRequest(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
-	request, err := h.Repository.CreateRequest(
+	request, err := h.Repository.CreateApplication(
 		ctx,
 		req.Title, req.Content, tags, targets, group, req.CreatedBy)
 	if err != nil {
@@ -359,7 +359,7 @@ func (h Handlers) PostRequest(c echo.Context) error {
 	}
 	reqtargets := lo.Map(
 		request.Targets,
-		func(target *model.RequestTargetDetail, _ int) *TargetOverview {
+		func(target *model.ApplicationTargetDetail, _ int) *TargetOverview {
 			return &TargetOverview{
 				ID:        target.ID,
 				Target:    target.Target,
@@ -391,7 +391,7 @@ func (h Handlers) PostRequest(c echo.Context) error {
 	)
 	statuses := lo.Map(
 		request.Statuses,
-		func(status *model.RequestStatus, _ int) *StatusResponseOverview {
+		func(status *model.ApplicationStatus, _ int) *StatusResponseOverview {
 			return &StatusResponseOverview{
 				Status:    status.Status,
 				CreatedAt: status.CreatedAt,
@@ -440,7 +440,7 @@ func (h Handlers) GetRequest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
 	}
 
-	request, err := h.Repository.GetRequest(ctx, requestID)
+	request, err := h.Repository.GetApplication(ctx, requestID)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			logger.Info(
@@ -470,7 +470,7 @@ func (h Handlers) GetRequest(c echo.Context) error {
 	}
 	reqtargets := lo.Map(
 		request.Targets,
-		func(target *model.RequestTargetDetail, _ int) *TargetOverview {
+		func(target *model.ApplicationTargetDetail, _ int) *TargetOverview {
 			return &TargetOverview{
 				ID:        target.ID,
 				Target:    target.Target,
@@ -500,7 +500,7 @@ func (h Handlers) GetRequest(c echo.Context) error {
 	})
 	statuses := lo.Map(
 		request.Statuses,
-		func(status *model.RequestStatus, _ int) *StatusResponseOverview {
+		func(status *model.ApplicationStatus, _ int) *StatusResponseOverview {
 			return &StatusResponseOverview{
 				CreatedBy: status.CreatedBy,
 				Status:    status.Status,
@@ -581,8 +581,8 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
-	targets := lo.Map(req.Targets, func(target *Target, _ int) *model.RequestTarget {
-		return &model.RequestTarget{
+	targets := lo.Map(req.Targets, func(target *Target, _ int) *model.ApplicationTarget {
+		return &model.ApplicationTarget{
 			Target: target.Target,
 			Amount: target.Amount,
 		}
@@ -601,7 +601,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 	}
-	request, err := h.Repository.UpdateRequest(
+	request, err := h.Repository.UpdateApplication(
 		ctx,
 		requestID, req.Title, req.Content, tags, targets, group)
 	if err != nil {
@@ -637,7 +637,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 
 	restargets := lo.Map(
 		request.Targets,
-		func(target *model.RequestTargetDetail, _ int) *TargetOverview {
+		func(target *model.ApplicationTargetDetail, _ int) *TargetOverview {
 			return &TargetOverview{
 				ID:        target.ID,
 				Target:    target.Target,
@@ -659,7 +659,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 	})
 	statuses := lo.Map(
 		request.Statuses,
-		func(status *model.RequestStatus, _ int) *StatusResponseOverview {
+		func(status *model.ApplicationStatus, _ int) *StatusResponseOverview {
 			return &StatusResponseOverview{
 				CreatedBy: status.CreatedBy,
 				Status:    status.Status,
@@ -754,7 +754,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	request, err := h.Repository.GetRequest(ctx, requestID)
+	request, err := h.Repository.GetApplication(ctx, requestID)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			logger.Info(
@@ -791,12 +791,12 @@ func (h Handlers) PutStatus(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		if req.Status == model.Submitted && request.Status == model.Accepted {
-			targets, err := h.Repository.GetRequestTargets(ctx, requestID)
+			targets, err := h.Repository.GetApplicationTargets(ctx, requestID)
 			if err != nil {
 				logger.Error("failed to get request targets from repository", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
-			paid := lo.Reduce(targets, func(p bool, target *model.RequestTargetDetail, _ int) bool {
+			paid := lo.Reduce(targets, func(p bool, target *model.ApplicationTargetDetail, _ int) bool {
 				return p || target.PaidAt != nil
 			}, false)
 			if paid {
@@ -881,7 +881,7 @@ func IsAbleAdminChangeState(status, latestStatus model.Status) bool {
 func (h Handlers) isRequestCreator(
 	ctx context.Context, userID, requestID uuid.UUID,
 ) (bool, error) {
-	request, err := h.Repository.GetRequest(ctx, requestID)
+	request, err := h.Repository.GetApplication(ctx, requestID)
 	if err != nil {
 		return false, err
 	}
@@ -889,7 +889,7 @@ func (h Handlers) isRequestCreator(
 }
 
 func (h Handlers) filterAdminOrRequestCreator(
-	ctx context.Context, user *User, request *model.RequestDetail,
+	ctx context.Context, user *User, request *model.ApplicationDetail,
 ) *echo.HTTPError {
 	logger := logging.GetLogger(ctx)
 	if user.Admin {
