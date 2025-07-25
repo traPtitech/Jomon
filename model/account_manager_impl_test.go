@@ -9,12 +9,12 @@ import (
 	"github.com/traPtitech/Jomon/testutil/random"
 )
 
-func TestEntRepository_GetAdmins(t *testing.T) {
+func TestEntRepository_GetAccountManagers(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, err := setup(t, ctx, "get_admins")
+	client, err := setup(t, ctx, "get_accountManagers")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
-	client2, err := setup(t, ctx, "get_admins2")
+	client2, err := setup(t, ctx, "get_accountManagers2")
 	require.NoError(t, err)
 	repo2 := NewEntRepository(client2)
 
@@ -33,9 +33,9 @@ func TestEntRepository_GetAdmins(t *testing.T) {
 			true)
 		require.NoError(t, err)
 
-		got, err := repo.GetAdmins(ctx)
+		got, err := repo.GetAccountManagers(ctx)
 		require.NoError(t, err)
-		exp := []*Admin{
+		exp := []*AccountManager{
 			{ID: user1.ID},
 			{ID: user2.ID},
 		}
@@ -45,15 +45,15 @@ func TestEntRepository_GetAdmins(t *testing.T) {
 	t.Run("Success2", func(t *testing.T) {
 		t.Parallel()
 
-		got, err := repo2.GetAdmins(ctx)
+		got, err := repo2.GetAccountManagers(ctx)
 		require.NoError(t, err)
 		require.Empty(t, got)
 	})
 }
 
-func TestEntRepository_AddAdmins(t *testing.T) {
+func TestEntRepository_AddAccountManagers(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, err := setup(t, ctx, "add_admins")
+	client, err := setup(t, ctx, "add_accountManagers")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -66,18 +66,18 @@ func TestEntRepository_AddAdmins(t *testing.T) {
 			false)
 		require.NoError(t, err)
 
-		err = repo.AddAdmins(ctx, []uuid.UUID{user.ID})
+		err = repo.AddAccountManagers(ctx, []uuid.UUID{user.ID})
 		require.NoError(t, err)
 
 		u, err := repo.GetUserByID(ctx, user.ID)
 		require.NoError(t, err)
-		require.True(t, u.Admin)
+		require.True(t, u.AccountManager)
 	})
 }
 
-func TestEntRepository_DeleteAdmins(t *testing.T) {
+func TestEntRepository_DeleteAccountManagers(t *testing.T) {
 	ctx := testutil.NewContext(t)
-	client, err := setup(t, ctx, "delete_admins")
+	client, err := setup(t, ctx, "delete_accountManagers")
 	require.NoError(t, err)
 	repo := NewEntRepository(client)
 
@@ -90,11 +90,11 @@ func TestEntRepository_DeleteAdmins(t *testing.T) {
 			true)
 		require.NoError(t, err)
 
-		err = repo.DeleteAdmins(ctx, []uuid.UUID{user.ID})
+		err = repo.DeleteAccountManagers(ctx, []uuid.UUID{user.ID})
 		require.NoError(t, err)
 
 		u, err := repo.GetUserByID(ctx, user.ID)
 		require.NoError(t, err)
-		require.False(t, u.Admin)
+		require.False(t, u.AccountManager)
 	})
 }

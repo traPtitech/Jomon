@@ -383,7 +383,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 
 		target := target1.Target
 		got, err := repo5.GetApplications(ctx, ApplicationQuery{
-			Target: &target,
+			Target: target,
 		})
 		require.NoError(t, err)
 		require.Len(t, got, 1)
@@ -444,7 +444,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 
 		since := application1.CreatedAt.Add(10 * time.Millisecond)
 		got, err := repo6.GetApplications(ctx, ApplicationQuery{
-			Since: &since,
+			Since: since,
 		})
 		require.NoError(t, err)
 		require.Len(t, got, 1)
@@ -505,7 +505,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 
 		until := application2.CreatedAt.Add(-1 * time.Second)
 		got, err := repo7.GetApplications(ctx, ApplicationQuery{
-			Until: &until,
+			Until: until,
 		})
 		require.NoError(t, err)
 		require.Len(t, got, 1)
@@ -631,7 +631,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 
 		got, err := repo9.GetApplications(ctx, ApplicationQuery{
-			CreatedBy: &user1.ID,
+			CreatedBy: user1.ID,
 		})
 		require.NoError(t, err)
 		require.Len(t, got, 1)

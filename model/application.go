@@ -48,7 +48,7 @@ type ApplicationDetail struct {
 	Title     string
 	Content   string
 	Comments  []*Comment
-	Files     []*uuid.UUID
+	Files     []uuid.UUID
 	Statuses  []*ApplicationStatus
 	Tags      []*Tag
 	Targets   []*ApplicationTargetDetail
@@ -60,13 +60,13 @@ type ApplicationDetail struct {
 
 type ApplicationQuery struct {
 	Sort      *string
-	Target    *uuid.UUID
+	Target    uuid.UUID
 	Status    *string
-	Since     *time.Time
-	Until     *time.Time
+	Since     time.Time
+	Until     time.Time
 	Limit     int
 	Offset    int
 	Tag       *string
 	Group     *string
-	CreatedBy *uuid.UUID
+	CreatedBy uuid.UUID
 }

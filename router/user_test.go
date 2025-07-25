@@ -14,6 +14,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/service"
 	"github.com/traPtitech/Jomon/testutil"
 	"github.com/traPtitech/Jomon/testutil/random"
 	"go.uber.org/mock/gomock"
@@ -22,13 +23,13 @@ import (
 // TODO: これ消す userFromModelUserがある
 func modelUserToUser(user *model.User) *User {
 	return &User{
-		ID:          user.ID,
-		Name:        user.Name,
-		DisplayName: user.DisplayName,
-		Admin:       user.Admin,
-		CreatedAt:   user.CreatedAt,
-		UpdatedAt:   user.UpdatedAt,
-		DeletedAt:   user.DeletedAt,
+		ID:             user.ID,
+		Name:           user.Name,
+		DisplayName:    user.DisplayName,
+		AccountManager: user.AccountManager,
+		CreatedAt:      user.CreatedAt,
+		UpdatedAt:      user.UpdatedAt,
+		DeletedAt:      service.TimeToNullTime(&user.DeletedAt),
 	}
 }
 
@@ -135,18 +136,18 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 
 		user := makeUser(t, random.Numeric(t, 2) == 1)
 		updateUser := &model.User{
-			ID:          user.ID,
-			Name:        user.Name,
-			DisplayName: user.DisplayName,
-			Admin:       !user.Admin,
-			CreatedAt:   user.CreatedAt,
-			UpdatedAt:   time.Now(),
+			ID:             user.ID,
+			Name:           user.Name,
+			DisplayName:    user.DisplayName,
+			AccountManager: !user.AccountManager,
+			CreatedAt:      user.CreatedAt,
+			UpdatedAt:      time.Now(),
 		}
 
 		reqUser := PutUserRequest{
-			Name:        updateUser.Name,
-			DisplayName: updateUser.DisplayName,
-			Admin:       updateUser.Admin,
+			Name:           updateUser.Name,
+			DisplayName:    updateUser.DisplayName,
+			AccountManager: updateUser.AccountManager,
 		}
 		reqBody, err := json.Marshal(reqUser)
 		require.NoError(t, err)
@@ -169,7 +170,7 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 			EXPECT().
 			UpdateUser(
 				c.Request().Context(),
-				user.ID, updateUser.Name, updateUser.DisplayName, updateUser.Admin).
+				user.ID, updateUser.Name, updateUser.DisplayName, updateUser.AccountManager).
 			Return(updateUser, nil)
 
 		require.NoError(t, h.Handlers.UpdateUserInfo(c))
@@ -192,17 +193,17 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 
 		user := makeUser(t, random.Numeric(t, 2) == 1)
 		updateUser := &model.User{
-			ID:          user.ID,
-			Name:        user.Name,
-			DisplayName: user.DisplayName,
-			Admin:       !user.Admin,
-			CreatedAt:   user.CreatedAt,
-			UpdatedAt:   time.Now(),
+			ID:             user.ID,
+			Name:           user.Name,
+			DisplayName:    user.DisplayName,
+			AccountManager: !user.AccountManager,
+			CreatedAt:      user.CreatedAt,
+			UpdatedAt:      time.Now(),
 		}
 		reqUser := PutUserRequest{
-			Name:        updateUser.Name,
-			DisplayName: updateUser.DisplayName,
-			Admin:       updateUser.Admin,
+			Name:           updateUser.Name,
+			DisplayName:    updateUser.DisplayName,
+			AccountManager: updateUser.AccountManager,
 		}
 		bodyReqUser, err := json.Marshal(reqUser)
 		require.NoError(t, err)
@@ -225,7 +226,7 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 			EXPECT().
 			UpdateUser(
 				c.Request().Context(),
-				user.ID, updateUser.Name, updateUser.DisplayName, updateUser.Admin).
+				user.ID, updateUser.Name, updateUser.DisplayName, updateUser.AccountManager).
 			Return(nil, mocErr)
 
 		err = h.Handlers.UpdateUserInfo(c)
@@ -241,17 +242,17 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 
 		user := makeUser(t, random.Numeric(t, 2) == 1)
 		updateUser := &model.User{
-			ID:          user.ID,
-			Name:        user.Name,
-			DisplayName: user.DisplayName,
-			Admin:       !user.Admin,
-			CreatedAt:   user.CreatedAt,
-			UpdatedAt:   time.Now(),
+			ID:             user.ID,
+			Name:           user.Name,
+			DisplayName:    user.DisplayName,
+			AccountManager: !user.AccountManager,
+			CreatedAt:      user.CreatedAt,
+			UpdatedAt:      time.Now(),
 		}
 		reqUser := PutUserRequest{
-			Name:        updateUser.Name,
-			DisplayName: updateUser.DisplayName,
-			Admin:       updateUser.Admin,
+			Name:           updateUser.Name,
+			DisplayName:    updateUser.DisplayName,
+			AccountManager: updateUser.AccountManager,
 		}
 		bodyReqUser, err := json.Marshal(reqUser)
 		require.NoError(t, err)

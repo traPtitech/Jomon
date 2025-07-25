@@ -1,7 +1,7 @@
 -- Create "groups" table
 CREATE TABLE `groups` (`id` uuid NOT NULL, `name` varchar(255) NOT NULL, `description` varchar(255) NOT NULL, `budget` bigint NULL, `created_at` timestamp NULL, `updated_at` timestamp NULL, `deleted_at` timestamp NULL, PRIMARY KEY (`id`)) CHARSET utf8mb4 COLLATE utf8mb4_bin;
 -- Create "users" table
-CREATE TABLE `users` (`id` uuid NOT NULL, `name` varchar(255) NOT NULL, `display_name` varchar(255) NOT NULL, `admin` bool NOT NULL DEFAULT 0, `created_at` timestamp NULL, `updated_at` timestamp NULL, `deleted_at` timestamp NULL, PRIMARY KEY (`id`), UNIQUE INDEX `name` (`name`)) CHARSET utf8mb4 COLLATE utf8mb4_bin;
+CREATE TABLE `users` (`id` uuid NOT NULL, `name` varchar(255) NOT NULL, `display_name` varchar(255) NOT NULL, `account_manager` bool NOT NULL DEFAULT 0, `created_at` timestamp NULL, `updated_at` timestamp NULL, `deleted_at` timestamp NULL, PRIMARY KEY (`id`), UNIQUE INDEX `name` (`name`)) CHARSET utf8mb4 COLLATE utf8mb4_bin;
 -- Create "applications" table
 CREATE TABLE `applications` (`id` uuid NOT NULL, `title` varchar(255) NOT NULL, `content` varchar(255) NOT NULL, `created_at` timestamp NULL, `updated_at` timestamp NULL, `application_user` uuid NULL, `group_application` uuid NULL, PRIMARY KEY (`id`), INDEX `applications_groups_application` (`group_application`), INDEX `applications_users_user` (`application_user`), CONSTRAINT `applications_groups_application` FOREIGN KEY (`group_application`) REFERENCES `groups` (`id`) ON UPDATE RESTRICT ON DELETE SET NULL, CONSTRAINT `applications_users_user` FOREIGN KEY (`application_user`) REFERENCES `users` (`id`) ON UPDATE RESTRICT ON DELETE SET NULL) CHARSET utf8mb4 COLLATE utf8mb4_bin;
 -- Create "application_status" table

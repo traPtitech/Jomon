@@ -20,7 +20,7 @@ type TransactionResponse struct {
 	Title     string         `json:"title"`
 	Amount    int            `json:"amount"`
 	Target    string         `json:"target"`
-	Request   *uuid.UUID     `json:"request"`
+	Request   uuid.NullUUID  `json:"request"`
 	Tags      []*TagResponse `json:"tags"`
 	Group     *GroupResponse `json:"group"`
 	CreatedAt time.Time      `json:"created_at"`
@@ -28,21 +28,21 @@ type TransactionResponse struct {
 }
 
 type PostTransactionsRequest struct {
-	Title   string       `json:"title"`
-	Amount  int          `json:"amount"`
-	Targets []*string    `json:"targets"`
-	Tags    []*uuid.UUID `json:"tags"`
-	Group   *uuid.UUID   `json:"group"`
-	Request *uuid.UUID   `json:"request"`
+	Title   string        `json:"title"`
+	Amount  int           `json:"amount"`
+	Targets []*string     `json:"targets"`
+	Tags    []uuid.UUID   `json:"tags"`
+	Group   uuid.NullUUID `json:"group"`
+	Request uuid.NullUUID `json:"request"`
 }
 
 type PutTransactionRequest struct {
-	Title   string       `json:"title"`
-	Amount  int          `json:"amount"`
-	Target  string       `json:"target"`
-	Tags    []*uuid.UUID `json:"tags"`
-	Group   *uuid.UUID   `json:"group"`
-	Request *uuid.UUID   `json:"request"`
+	Title   string        `json:"title"`
+	Amount  int           `json:"amount"`
+	Target  string        `json:"target"`
+	Tags    []uuid.UUID   `json:"tags"`
+	Group   uuid.NullUUID `json:"group"`
+	Request uuid.NullUUID `json:"request"`
 }
 
 func (h Handlers) GetTransactions(c echo.Context) error {
@@ -59,7 +59,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		t := c.QueryParam("target")
 		target = &t
 	}
-	var since *time.Time
+	var since time.Time
 	if c.QueryParam("since") != "" {
 		var err error
 		s, err := service.StrToDate(c.QueryParam("since"))
@@ -67,9 +67,9 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			logger.Info("could not parse since as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		since = &s
+		since = s
 	}
-	var until *time.Time
+	var until time.Time
 	if c.QueryParam("until") != "" {
 		var err error
 		u, err := service.StrToDate(c.QueryParam("until"))
@@ -77,7 +77,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			logger.Info("could not parse until as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		until = &u
+		until = u
 	}
 	limit := 100
 	if limitQuery := c.QueryParam("limit"); limitQuery != "" {
@@ -117,7 +117,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		g := c.QueryParam("group")
 		group = &g
 	}
-	var request *uuid.UUID
+	var request uuid.UUID
 	if c.QueryParam("request") != "" {
 		var r uuid.UUID
 		r, err := uuid.Parse(c.QueryParam("request"))
@@ -125,7 +125,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			logger.Info("could not parse request as uuid.UUID", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		request = &r
+		request = r
 	}
 	query := model.TransactionQuery{
 		Sort:        sort,
@@ -169,7 +169,7 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			Title:     tx.Title,
 			Amount:    tx.Amount,
 			Target:    tx.Target,
-			Request:   tx.Application,
+			Request:   uuid.NullUUID{UUID: tx.Application, Valid: tx.Application != uuid.Nil},
 			Tags:      tags,
 			Group:     group,
 			CreatedAt: tx.CreatedAt,
@@ -199,7 +199,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 		}
 		created, err := h.Repository.CreateTransaction(
 			ctx,
-			tx.Title, tx.Amount, *target, tx.Tags, tx.Group, tx.Request)
+			tx.Title, tx.Amount, *target, tx.Tags, tx.Group.UUID, tx.Request.UUID)
 		if err != nil {
 			logger.Error("failed to create transaction in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -230,7 +230,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 			Title:     created.Title,
 			Amount:    created.Amount,
 			Target:    created.Target,
-			Request:   created.Application,
+			Request:   uuid.NullUUID{UUID: created.Application, Valid: created.Application != uuid.Nil},
 			Tags:      tags,
 			Group:     group,
 			CreatedAt: created.CreatedAt,
@@ -283,7 +283,7 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 		Title:     tx.Title,
 		Amount:    tx.Amount,
 		Target:    tx.Target,
-		Request:   tx.Application,
+		Request:   uuid.NullUUID{UUID: tx.Application, Valid: tx.Application != uuid.Nil},
 		Tags:      tags,
 		Group:     group,
 		CreatedAt: tx.CreatedAt,
@@ -314,7 +314,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 
 	updated, err := h.Repository.UpdateTransaction(
 		ctx,
-		txID, tx.Title, tx.Amount, tx.Target, tx.Tags, tx.Group, tx.Request)
+		txID, tx.Title, tx.Amount, tx.Target, tx.Tags, tx.Group.UUID, tx.Request.UUID)
 	if err != nil {
 		logger.Error("failed to update transaction in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -345,7 +345,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 		Title:     updated.Title,
 		Amount:    updated.Amount,
 		Target:    updated.Target,
-		Request:   updated.Application,
+		Request:   uuid.NullUUID{UUID: updated.Application, Valid: updated.Application != uuid.Nil},
 		Tags:      tags,
 		Group:     group,
 		CreatedAt: updated.CreatedAt,

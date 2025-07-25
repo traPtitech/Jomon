@@ -63,12 +63,12 @@ func (repo *EntRepository) GetApplications(
 			Order(ent.Desc(application.FieldTitle))
 	}
 
-	if query.Target != nil && *query.Target != uuid.Nil {
+	if query.Target != uuid.Nil {
 		applicationsq = applicationsq.
 			Where(
 				application.HasTargetWith(
 					applicationtarget.HasUserWith(
-						user.IDEQ(*query.Target),
+						user.IDEQ(query.Target),
 					),
 				),
 			)
@@ -83,14 +83,14 @@ func (repo *EntRepository) GetApplications(
 			)
 	}
 
-	if query.Since != nil && !(*query.Since).IsZero() {
+	if !query.Since.IsZero() {
 		applicationsq = applicationsq.
-			Where(application.CreatedAtGTE(*query.Since))
+			Where(application.CreatedAtGTE(query.Since))
 	}
 
-	if query.Until != nil && !(*query.Until).IsZero() {
+	if !query.Until.IsZero() {
 		applicationsq = applicationsq.
-			Where(application.CreatedAtLT(*query.Until))
+			Where(application.CreatedAtLT(query.Until))
 	}
 
 	if query.Tag != nil && *query.Tag != "" {
@@ -112,11 +112,11 @@ func (repo *EntRepository) GetApplications(
 				),
 			)
 	}
-	if query.CreatedBy != nil && *query.CreatedBy != uuid.Nil {
+	if query.CreatedBy != uuid.Nil {
 		applicationsq = applicationsq.
 			Where(
 				application.HasUserWith(
-					user.IDEQ(*query.CreatedBy),
+					user.IDEQ(query.CreatedBy),
 				),
 			)
 	}
@@ -223,7 +223,7 @@ func (repo *EntRepository) CreateApplication(
 		CreatedBy: t.ID,
 		Comments:  []*Comment{},
 		Statuses:  statuses,
-		Files:     []*uuid.UUID{},
+		Files:     []uuid.UUID{},
 	}
 	return reqdetail, nil
 }
@@ -266,8 +266,8 @@ func (repo *EntRepository) GetApplication(
 	statuses := lo.Map(r.Edges.Status, func(status *ent.ApplicationStatus, _ int) *ApplicationStatus {
 		return convertEntApplicationStatusToModelApplicationStatus(status)
 	})
-	files := lo.Map(r.Edges.File, func(f *ent.File, _ int) *uuid.UUID {
-		return &f.ID
+	files := lo.Map(r.Edges.File, func(f *ent.File, _ int) uuid.UUID {
+		return f.ID
 	})
 	reqdetail := &ApplicationDetail{
 		ID:        r.ID,
@@ -390,8 +390,8 @@ func (repo *EntRepository) UpdateApplication(
 	if err != nil {
 		return nil, err
 	}
-	files := lo.Map(entfiles, func(f *ent.File, _ int) *uuid.UUID {
-		return &f.ID
+	files := lo.Map(entfiles, func(f *ent.File, _ int) uuid.UUID {
+		return f.ID
 	})
 	err = tx.Commit()
 	if err != nil {

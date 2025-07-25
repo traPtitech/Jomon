@@ -76,14 +76,14 @@ func (repo *EntRepository) GetTransactions(
 		))
 	}
 
-	if query.Since != nil {
+	if !query.Since.IsZero() {
 		transactionsq = transactionsq.
-			Where(transaction.CreatedAtGTE(*query.Since))
+			Where(transaction.CreatedAtGTE(query.Since))
 	}
 
-	if query.Until != nil {
+	if !query.Until.IsZero() {
 		transactionsq = transactionsq.
-			Where(transaction.CreatedAtLT(*query.Until))
+			Where(transaction.CreatedAtLT(query.Until))
 	}
 
 	transactionsq = transactionsq.Limit(query.Limit).Offset(query.Offset)
@@ -104,10 +104,10 @@ func (repo *EntRepository) GetTransactions(
 			))
 	}
 
-	if query.Application != nil {
+	if query.Application != uuid.Nil {
 		transactionsq = transactionsq.
 			Where(transaction.HasApplicationWith(
-				application.IDEQ(*query.Application),
+				application.IDEQ(query.Application),
 			))
 	}
 
@@ -148,7 +148,7 @@ func (repo *EntRepository) GetTransaction(
 
 func (repo *EntRepository) CreateTransaction(
 	ctx context.Context, title string, amount int, target string,
-	tags []*uuid.UUID, groupID *uuid.UUID, applicationID *uuid.UUID,
+	tags []uuid.UUID, groupID uuid.UUID, applicationID uuid.UUID,
 ) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
@@ -162,8 +162,8 @@ func (repo *EntRepository) CreateTransaction(
 	}()
 
 	// Get Tags
-	tagIDs := lo.Map(tags, func(t *uuid.UUID, _ int) uuid.UUID {
-		return *t
+	tagIDs := lo.Map(tags, func(t uuid.UUID, _ int) uuid.UUID {
+		return t
 	})
 
 	// Create Transaction Detail
@@ -175,10 +175,10 @@ func (repo *EntRepository) CreateTransaction(
 
 	// Create GroupBudget
 	var gb *ent.GroupBudget
-	if groupID != nil {
+	if groupID != uuid.Nil {
 		gb, err = tx.Client().GroupBudget.
 			Create().
-			SetGroupID(*groupID).
+			SetGroupID(groupID).
 			SetAmount(amount).
 			Save(ctx)
 		if err != nil {
@@ -198,9 +198,9 @@ func (repo *EntRepository) CreateTransaction(
 	}
 
 	// Set Application to the Transaction
-	if applicationID != nil {
+	if applicationID != uuid.Nil {
 		query.
-			SetApplicationID(*applicationID)
+			SetApplicationID(applicationID)
 	}
 
 	// Create transaction
@@ -249,7 +249,7 @@ func (repo *EntRepository) CreateTransaction(
 
 func (repo *EntRepository) UpdateTransaction(
 	ctx context.Context, transactionID uuid.UUID, title string, amount int, target string,
-	tags []*uuid.UUID, groupID *uuid.UUID, applicationID *uuid.UUID,
+	tags []uuid.UUID, groupID uuid.UUID, applicationID uuid.UUID,
 ) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
@@ -270,8 +270,8 @@ func (repo *EntRepository) UpdateTransaction(
 	}
 
 	// Get Tags
-	tagIDs := lo.Map(tags, func(t *uuid.UUID, _ int) uuid.UUID {
-		return *t
+	tagIDs := lo.Map(tags, func(t uuid.UUID, _ int) uuid.UUID {
+		return t
 	})
 
 	// Delete Tag Transaction Edge
@@ -287,7 +287,7 @@ func (repo *EntRepository) UpdateTransaction(
 		return nil, err
 	}
 
-	if groupID != nil {
+	if groupID != uuid.Nil {
 		// Delete GroupBudget
 		_, err = tx.Client().GroupBudget.
 			Delete().
@@ -302,7 +302,7 @@ func (repo *EntRepository) UpdateTransaction(
 		// Create GroupBudget
 		_, err = tx.Client().GroupBudget.
 			Create().
-			SetGroupID(*groupID).
+			SetGroupID(groupID).
 			SetAmount(amount).
 			AddTransactionIDs(transactionID).
 			Save(ctx)
@@ -323,11 +323,11 @@ func (repo *EntRepository) UpdateTransaction(
 		return nil, err
 	}
 
-	// Update Application to the Transaction
-	if applicationID != nil {
+	// Update Request to the Transaction
+	if applicationID != uuid.Nil {
 		_, err = tx.Client().Transaction.
 			UpdateOneID(transactionID).
-			SetApplicationID(*applicationID).
+			SetApplicationID(applicationID).
 			Save(ctx)
 		if err != nil {
 			err = RollbackWithError(tx, err)
@@ -386,9 +386,9 @@ func ConvertEntTransactionToModelTransactionResponse(
 	if transaction.Edges.GroupBudget != nil {
 		g = ConvertEntGroupToModelGroup(transaction.Edges.GroupBudget.Edges.Group)
 	}
-	var r *uuid.UUID
+	var r uuid.UUID
 	if transaction.Edges.Application != nil {
-		r = &transaction.Edges.Application.ID
+		r = transaction.Edges.Application.ID
 	}
 	return &TransactionResponse{
 		ID:          transaction.ID,

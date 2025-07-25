@@ -39,16 +39,16 @@ func (uc *UserCreate) SetDisplayName(s string) *UserCreate {
 	return uc
 }
 
-// SetAdmin sets the "admin" field.
-func (uc *UserCreate) SetAdmin(b bool) *UserCreate {
-	uc.mutation.SetAdmin(b)
+// SetAccountManager sets the "account_manager" field.
+func (uc *UserCreate) SetAccountManager(b bool) *UserCreate {
+	uc.mutation.SetAccountManager(b)
 	return uc
 }
 
-// SetNillableAdmin sets the "admin" field if the given value is not nil.
-func (uc *UserCreate) SetNillableAdmin(b *bool) *UserCreate {
+// SetNillableAccountManager sets the "account_manager" field if the given value is not nil.
+func (uc *UserCreate) SetNillableAccountManager(b *bool) *UserCreate {
 	if b != nil {
-		uc.SetAdmin(*b)
+		uc.SetAccountManager(*b)
 	}
 	return uc
 }
@@ -249,9 +249,9 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uc *UserCreate) defaults() {
-	if _, ok := uc.mutation.Admin(); !ok {
-		v := user.DefaultAdmin
-		uc.mutation.SetAdmin(v)
+	if _, ok := uc.mutation.AccountManager(); !ok {
+		v := user.DefaultAccountManager
+		uc.mutation.SetAccountManager(v)
 	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		v := user.DefaultCreatedAt()
@@ -280,8 +280,8 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.DisplayName(); !ok {
 		return &ValidationError{Name: "display_name", err: errors.New(`ent: missing required field "User.display_name"`)}
 	}
-	if _, ok := uc.mutation.Admin(); !ok {
-		return &ValidationError{Name: "admin", err: errors.New(`ent: missing required field "User.admin"`)}
+	if _, ok := uc.mutation.AccountManager(); !ok {
+		return &ValidationError{Name: "account_manager", err: errors.New(`ent: missing required field "User.account_manager"`)}
 	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "User.created_at"`)}
@@ -332,9 +332,9 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldDisplayName, field.TypeString, value)
 		_node.DisplayName = value
 	}
-	if value, ok := uc.mutation.Admin(); ok {
-		_spec.SetField(user.FieldAdmin, field.TypeBool, value)
-		_node.Admin = value
+	if value, ok := uc.mutation.AccountManager(); ok {
+		_spec.SetField(user.FieldAccountManager, field.TypeBool, value)
+		_node.AccountManager = value
 	}
 	if value, ok := uc.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)

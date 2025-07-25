@@ -66,9 +66,9 @@ func DisplayName(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldDisplayName, v))
 }
 
-// Admin applies equality check predicate on the "admin" field. It's identical to AdminEQ.
-func Admin(v bool) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAdmin, v))
+// AccountManager applies equality check predicate on the "account_manager" field. It's identical to AccountManagerEQ.
+func AccountManager(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAccountManager, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -216,14 +216,14 @@ func DisplayNameContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldDisplayName, v))
 }
 
-// AdminEQ applies the EQ predicate on the "admin" field.
-func AdminEQ(v bool) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAdmin, v))
+// AccountManagerEQ applies the EQ predicate on the "account_manager" field.
+func AccountManagerEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAccountManager, v))
 }
 
-// AdminNEQ applies the NEQ predicate on the "admin" field.
-func AdminNEQ(v bool) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldAdmin, v))
+// AccountManagerNEQ applies the NEQ predicate on the "account_manager" field.
+func AccountManagerNEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldAccountManager, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

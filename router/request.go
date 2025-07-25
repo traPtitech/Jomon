@@ -42,20 +42,20 @@ func (s Status) String() string {
 }
 
 type Request struct {
-	CreatedBy uuid.UUID    `json:"created_by"`
-	Title     string       `json:"title"`
-	Content   string       `json:"content"`
-	Tags      []*uuid.UUID `json:"tags"`
-	Targets   []*Target    `json:"targets"`
-	Group     *uuid.UUID   `json:"group"`
+	CreatedBy uuid.UUID     `json:"created_by"`
+	Title     string        `json:"title"`
+	Content   string        `json:"content"`
+	Tags      []uuid.UUID   `json:"tags"`
+	Targets   []*Target     `json:"targets"`
+	Group     uuid.NullUUID `json:"group"`
 }
 
 type PutRequest struct {
-	Title   string       `json:"title"`
-	Content string       `json:"content"`
-	Tags    []*uuid.UUID `json:"tags"`
-	Targets []*Target    `json:"targets"`
-	Group   *uuid.UUID   `json:"group"`
+	Title   string        `json:"title"`
+	Content string        `json:"content"`
+	Tags    []uuid.UUID   `json:"tags"`
+	Targets []*Target     `json:"targets"`
+	Group   uuid.NullUUID `json:"group"`
 }
 
 type RequestResponse struct {
@@ -113,11 +113,11 @@ type Target struct {
 }
 
 type TargetOverview struct {
-	ID        uuid.UUID  `json:"id"`
-	Target    uuid.UUID  `json:"target"`
-	Amount    int        `json:"amount"`
-	PaidAt    *time.Time `json:"paid_at"`
-	CreatedAt time.Time  `json:"created_at"`
+	ID        uuid.UUID        `json:"id"`
+	Target    uuid.UUID        `json:"target"`
+	Amount    int              `json:"amount"`
+	PaidAt    service.NullTime `json:"paid_at"`
+	CreatedAt time.Time        `json:"created_at"`
 }
 
 func (h Handlers) GetRequests(c echo.Context) error {
@@ -139,32 +139,32 @@ func (h Handlers) GetRequests(c echo.Context) error {
 	if s := status.String(); s != "" {
 		ss = &s
 	}
-	var target *uuid.UUID
+	var target uuid.UUID
 	if c.QueryParam("target") != "" {
 		t, err := uuid.Parse(c.QueryParam("target"))
 		if err != nil {
 			logger.Info("could not parse query parameter `target` as UUID", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		target = &t
+		target = t
 	}
-	var since *time.Time
+	var since time.Time
 	if c.QueryParam("since") != "" {
 		s, err := service.StrToDate(c.QueryParam("since"))
 		if err != nil {
 			logger.Info("could not parse query parameter `since` as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		since = &s
+		since = s
 	}
-	var until *time.Time
+	var until time.Time
 	if c.QueryParam("until") != "" {
 		u, err := service.StrToDate(c.QueryParam("until"))
 		if err != nil {
 			logger.Info("could not parse query parameter `until` as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		until = &u
+		until = u
 	}
 	limit := 100
 	if limitQuery := c.QueryParam("limit"); limitQuery != "" {
@@ -208,14 +208,14 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		g := c.QueryParam("group")
 		group = &g
 	}
-	var cratedBy *uuid.UUID
+	var cratedBy uuid.UUID
 	if c.QueryParam("created_by") != "" {
 		u, err := uuid.Parse(c.QueryParam("created_by"))
 		if err != nil {
 			logger.Info("could not parse query parameter `created_by` as UUID", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
-		cratedBy = &u
+		cratedBy = u
 	}
 	query := model.ApplicationQuery{
 		Sort:      sort,
@@ -255,7 +255,7 @@ func (h Handlers) GetRequests(c echo.Context) error {
 						ID:        target.ID,
 						Target:    target.Target,
 						Amount:    target.Amount,
-						PaidAt:    target.PaidAt,
+						PaidAt:    service.TimeToNullTime(&target.PaidAt),
 						CreatedAt: target.CreatedAt,
 					}
 				},
@@ -302,7 +302,7 @@ func (h Handlers) PostRequest(c echo.Context) error {
 
 	tags := []*model.Tag{}
 	for _, tagID := range req.Tags {
-		tag, err := h.Repository.GetTag(ctx, *tagID)
+		tag, err := h.Repository.GetTag(ctx, tagID)
 		if err != nil {
 			if ent.IsNotFound(err) {
 				logger.Info("could not find tag in repository", zap.String("ID", tagID.String()))
@@ -320,13 +320,13 @@ func (h Handlers) PostRequest(c echo.Context) error {
 		}
 	})
 	var group *model.Group
-	if req.Group != nil {
-		group, err = h.Repository.GetGroup(ctx, *req.Group)
+	if req.Group.Valid {
+		group, err = h.Repository.GetGroup(ctx, req.Group.UUID)
 		if err != nil {
 			if ent.IsNotFound(err) {
 				logger.Info(
 					"could not find group in repository",
-					zap.String("ID", req.Group.String()))
+					zap.String("ID", req.Group.UUID.String()))
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
 			logger.Error("failed to get group from repository", zap.Error(err))
@@ -364,7 +364,7 @@ func (h Handlers) PostRequest(c echo.Context) error {
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    target.PaidAt,
+				PaidAt:    service.TimeToNullTime(&target.PaidAt),
 				CreatedAt: target.CreatedAt,
 			}
 		},
@@ -399,12 +399,7 @@ func (h Handlers) PostRequest(c echo.Context) error {
 			}
 		},
 	)
-	files := lo.Map(
-		request.Files,
-		func(file *uuid.UUID, _ int) uuid.UUID {
-			return *file
-		},
-	)
+	files := request.Files
 
 	res := &RequestDetailResponse{
 		RequestResponse: RequestResponse{
@@ -475,7 +470,7 @@ func (h Handlers) GetRequest(c echo.Context) error {
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    target.PaidAt,
+				PaidAt:    service.TimeToNullTime(&target.PaidAt),
 				CreatedAt: target.CreatedAt,
 			}
 		},
@@ -508,9 +503,7 @@ func (h Handlers) GetRequest(c echo.Context) error {
 			}
 		},
 	)
-	files := lo.Map(request.Files, func(file *uuid.UUID, _ int) uuid.UUID {
-		return *file
-	})
+	files := request.Files
 
 	res := &RequestDetailResponse{
 		RequestResponse: RequestResponse{
@@ -570,7 +563,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 	}
 	tags := []*model.Tag{}
 	for _, tagID := range req.Tags {
-		tag, err := h.Repository.GetTag(ctx, *tagID)
+		tag, err := h.Repository.GetTag(ctx, tagID)
 		if err != nil {
 			if ent.IsNotFound(err) {
 				logger.Info("could not find tag in repository", zap.String("ID", tagID.String()))
@@ -588,13 +581,13 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		}
 	})
 	var group *model.Group
-	if req.Group != nil {
-		group, err = h.Repository.GetGroup(ctx, *req.Group)
+	if req.Group.Valid {
+		group, err = h.Repository.GetGroup(ctx, req.Group.UUID)
 		if err != nil {
 			if ent.IsNotFound(err) {
 				logger.Info(
 					"could not find group in repository",
-					zap.String("ID", req.Group.String()))
+					zap.String("ID", req.Group.UUID.String()))
 				return echo.NewHTTPError(http.StatusNotFound, err)
 			}
 			logger.Error("failed to get group from repository", zap.Error(err))
@@ -642,7 +635,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    target.PaidAt,
+				PaidAt:    service.TimeToNullTime(&target.PaidAt),
 				CreatedAt: target.CreatedAt,
 			}
 		},
@@ -667,9 +660,7 @@ func (h Handlers) PutRequest(c echo.Context) error {
 			}
 		},
 	)
-	files := lo.Map(request.Files, func(file *uuid.UUID, _ int) uuid.UUID {
-		return *file
-	})
+	files := request.Files
 
 	res := &RequestDetailResponse{
 		RequestResponse: RequestResponse{
@@ -765,7 +756,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		logger.Error("failed to get request from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
-	if err := h.filterAdminOrRequestCreator(ctx, &loginUser, request); err != nil {
+	if err := h.filterAccountManagerOrRequestCreator(ctx, &loginUser, request); err != nil {
 		return err
 	}
 
@@ -782,11 +773,11 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		}
 	}
 
-	if loginUser.Admin {
-		if !IsAbleAdminChangeState(req.Status, request.Status) {
-			logger.Info("admin unable to change status")
+	if loginUser.AccountManager {
+		if !IsAbleAccountManagerChangeState(req.Status, request.Status) {
+			logger.Info("accountManager unable to change status")
 			err := fmt.Errorf(
-				"admin unable to change %v to %v",
+				"accountManager unable to change %v to %v",
 				request.Status.String(), req.Status.String())
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
@@ -797,7 +788,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
 			paid := lo.Reduce(targets, func(p bool, target *model.ApplicationTargetDetail, _ int) bool {
-				return p || target.PaidAt != nil
+				return p || !target.PaidAt.IsZero()
 			}, false)
 			if paid {
 				logger.Info("someone already paid")
@@ -806,7 +797,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		}
 	}
 
-	if !loginUser.Admin && loginUser.ID == request.CreatedBy {
+	if !loginUser.AccountManager && loginUser.ID == request.CreatedBy {
 		if !IsAbleCreatorChangeStatus(req.Status, request.Status) {
 			logger.Info("creator unable to change status")
 			err := fmt.Errorf(
@@ -816,8 +807,8 @@ func (h Handlers) PutStatus(c echo.Context) error {
 		}
 	}
 
-	if loginUser.ID != request.CreatedBy && !loginUser.Admin {
-		logger.Info("use is not creator or admin")
+	if loginUser.ID != request.CreatedBy && !loginUser.AccountManager {
+		logger.Info("use is not creator or accountManager")
 		return echo.NewHTTPError(http.StatusForbidden)
 	}
 
@@ -870,7 +861,7 @@ func IsAbleCreatorChangeStatus(status, latestStatus model.Status) bool {
 	return status == model.Submitted && latestStatus == model.FixRequired
 }
 
-func IsAbleAdminChangeState(status, latestStatus model.Status) bool {
+func IsAbleAccountManagerChangeState(status, latestStatus model.Status) bool {
 	return status == model.Rejected && latestStatus == model.Submitted ||
 		status == model.Submitted && latestStatus == model.FixRequired ||
 		status == model.Accepted && latestStatus == model.Submitted ||
@@ -888,16 +879,16 @@ func (h Handlers) isRequestCreator(
 	return request.CreatedBy == userID, nil
 }
 
-func (h Handlers) filterAdminOrRequestCreator(
+func (h Handlers) filterAccountManagerOrRequestCreator(
 	ctx context.Context, user *User, request *model.ApplicationDetail,
 ) *echo.HTTPError {
 	logger := logging.GetLogger(ctx)
-	if user.Admin {
+	if user.AccountManager {
 		return nil
 	}
 	if request.CreatedBy == user.ID {
 		return nil
 	}
-	logger.Info("user is not admin or request creator", zap.String("ID", user.ID.String()))
+	logger.Info("user is not accountManager or request creator", zap.String("ID", user.ID.String()))
 	return echo.NewHTTPError(http.StatusForbidden, "you are not request creator")
 }

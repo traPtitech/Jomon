@@ -19,8 +19,8 @@ const (
 	FieldName = "name"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
-	// FieldAdmin holds the string denoting the admin field in the database.
-	FieldAdmin = "admin"
+	// FieldAccountManager holds the string denoting the account_manager field in the database.
+	FieldAccountManager = "account_manager"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -95,7 +95,7 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 	FieldDisplayName,
-	FieldAdmin,
+	FieldAccountManager,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
@@ -123,8 +123,8 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// DefaultAdmin holds the default value on creation for the "admin" field.
-	DefaultAdmin bool
+	// DefaultAccountManager holds the default value on creation for the "account_manager" field.
+	DefaultAccountManager bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -153,9 +153,9 @@ func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
 }
 
-// ByAdmin orders the results by the admin field.
-func ByAdmin(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAdmin, opts...).ToFunc()
+// ByAccountManager orders the results by the account_manager field.
+func ByAccountManager(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAccountManager, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

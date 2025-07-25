@@ -16,7 +16,7 @@ type ApplicationTargetDetail struct {
 	ID        uuid.UUID
 	Target    uuid.UUID
 	Amount    int
-	PaidAt    *time.Time
+	PaidAt    time.Time
 	CreatedAt time.Time
 }
 

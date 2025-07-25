@@ -86,7 +86,7 @@ func ConvertEntApplicationTargetToModelApplicationTargetDetail(t *ent.Applicatio
 		ID:        t.ID,
 		Target:    t.Edges.User.ID,
 		Amount:    t.Amount,
-		PaidAt:    t.PaidAt,
+		PaidAt:    *t.PaidAt,
 		CreatedAt: t.CreatedAt,
 	}
 }
