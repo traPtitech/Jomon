@@ -757,8 +757,7 @@ components:
           type: string
           format: uuid
         status:
-          type: string
-          enum: [submitted, change_requested, approved, rejected]
+          $ref: "#/components/schemas/StatusEnum"
         created_at:
           type: string
           format: date-time
