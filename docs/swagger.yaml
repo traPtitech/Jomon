@@ -299,6 +299,30 @@ paths:
         schema:
           type: string
           format: uuid
+    put:
+      operationId: putTag
+      description: タグの情報を変更する。accountManager権限が必要。
+      tags:
+        - Tags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostTag"
+      responses:
+        "200":
+          description: 変更に成功した場合。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tag"
+        "400":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
     delete:
       description: タグを削除する
       tags:
