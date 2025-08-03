@@ -299,29 +299,6 @@ paths:
         schema:
           type: string
           format: uuid
-    get:
-      operationId: getTag
-      description: タグの情報を取得する。
-      tags:
-        - Tags
-      responses:
-        "200":
-          description: 取得に成功した場合。
-          content:
-            application/json:
-              schema:
-                # なにこれ
-                allOf:
-                  - $ref: "#/components/schemas/Tag"
-                  - type: object
-                    properties:
-                      applications:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
-        "404":
-          $ref: "#/components/responses/404"
     delete:
       description: タグを削除する
       tags:
