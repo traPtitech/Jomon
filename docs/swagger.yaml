@@ -430,6 +430,103 @@ paths:
         "404":
           $ref: "#/components/responses/404"
 
+  /partition-groups:
+    get:
+      operationId: getPartitionGroups
+      description: パーティショングループの一覧を返す。
+      tags:
+        - Partitions
+      responses:
+        "200":
+          description: 取得に成功した場合。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PartitionGroup"
+    post:
+      operationId: postPartitionGroup
+      description: パーティショングループを追加する。accountManager権限が必要。
+      tags:
+        - Partitions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostPartitionGroup"
+      responses:
+        "200":
+          description: 追加に成功した場合。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartitionGroup"
+        "400":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/403"
+
+  /partition-groups/{partitionGroupID}:
+    parameters:
+      - name: partitionGroupID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getPartitionGroup
+      description: パーティショングループの情報を返す。
+      tags:
+        - Partitions
+      responses:
+        "200":
+          description: 取得に成功した場合。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartitionGroup"
+        "404":
+          $ref: "#/components/responses/404"
+    put:
+      operationId: putPartitionGroup
+      description: パーティショングループの情報を変更する。accountManager権限が必要。
+      tags:
+        - Partitions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostPartitionGroup"
+      responses:
+        "200":
+          description: 変更に成功した場合。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartitionGroup"
+        "400":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+    delete:
+      operationId: deletePartitionGroup
+      description: パーティショングループを削除する。accountManager権限が必要。
+      tags:
+        - Partitions
+      responses:
+        "200":
+          description: 削除に成功した場合
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+
   /files:
     post:
       operationId: postFile
@@ -651,6 +748,56 @@ components:
         - name
         - budget
         - management
+    PartitionGroup:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "イベント運営経費"
+        child_partitions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Partition"
+        child_partition_groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/PartitionGroup"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - child_partitions
+        - child_partition_groups
+        - created_at
+        - updated_at
+    PostPartitionGroup:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "イベント運営経費"
+        child_partitions:
+          type: array
+          items:
+            type: string
+            format: uuid
+        child_partition_groups:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+        - name
+        - child_partitions
+        - child_partition_groups
     PartitionManagement:
       type: object
       required:
