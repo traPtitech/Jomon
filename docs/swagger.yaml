@@ -744,7 +744,6 @@ components:
         management:
           $ref: "#/components/schemas/PartitionManagement"
       required:
-        - id
         - name
         - budget
         - management
@@ -1134,21 +1133,6 @@ components:
         - created_at
         - updated_at
         - deleted_at
-    PutUser:
-      type: "object"
-      properties:
-        name:
-          type: "string"
-          example: "nagatech"
-        display_name:
-          type: "string"
-          example: "ながてち"
-        account_manager:
-          type: "boolean"
-      required:
-        - name
-        - display_name
-        - account_manager
   responses:
     304:
       description: Not Modified
