@@ -74,7 +74,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostApplication"
+              $ref: "#/components/schemas/ApplicationRequest"
       responses:
         "201":
           description: 作成できた場合。作成された申請の詳細を返す。
@@ -117,7 +117,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostApplication"
+              $ref: "#/components/schemas/ApplicationRequest"
       responses:
         "200":
           description: 修正できた場合。修正後の詳細を返す。
@@ -150,7 +150,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostComment"
+              $ref: "#/components/schemas/CommentRequest"
       responses:
         "201":
           description: OK
@@ -180,7 +180,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PutStatus"
+              $ref: "#/components/schemas/StatusRequest"
       responses:
         "200":
           description: OK
@@ -280,7 +280,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostTag"
+              $ref: "#/components/schemas/TagRequest"
       responses:
         "200":
           description: 追加に成功した場合。追加されたタグの情報を返す。
@@ -309,7 +309,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostTag"
+              $ref: "#/components/schemas/TagRequest"
       responses:
         "200":
           description: 変更に成功した場合。
@@ -358,7 +358,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostPartition"
+              $ref: "#/components/schemas/PartitionRequest"
       responses:
         "200":
           description: 追加に成功した場合。
@@ -403,7 +403,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostPartition"
+              $ref: "#/components/schemas/PartitionRequest"
       responses:
         "200":
           description: 変更に成功した場合。
@@ -455,7 +455,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostPartitionGroup"
+              $ref: "#/components/schemas/PartitionGroupRequest"
       responses:
         "200":
           description: 追加に成功した場合。
@@ -500,7 +500,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostPartitionGroup"
+              $ref: "#/components/schemas/PartitionGroupRequest"
       responses:
         "200":
           description: 変更に成功した場合。
@@ -538,7 +538,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/PostFile"
+              $ref: "#/components/schemas/FileRequest"
       responses:
         "200":
           description: 変更に成功した場合。
@@ -695,7 +695,7 @@ components:
         - name
         - created_at
         - updated_at
-    PostTag:
+    TagRequest:
       type: object
       properties:
         name:
@@ -731,7 +731,7 @@ components:
         - management
         - created_at
         - updated_at
-    PostPartition:
+    PartitionRequest:
       type: object
       properties:
         name:
@@ -777,7 +777,7 @@ components:
         - child_partition_groups
         - created_at
         - updated_at
-    PostPartitionGroup:
+    PartitionGroupRequest:
       type: object
       properties:
         name:
@@ -827,7 +827,7 @@ components:
       required:
         - file
         - name
-    PostFile:
+    FileRequest:
       type: object
       properties:
         file:
@@ -1000,7 +1000,7 @@ components:
         - targets
         - created_at
         - updated_at
-    PostApplication:
+    ApplicationRequest:
       type: object
       properties:
         created_by:
@@ -1053,7 +1053,7 @@ components:
         - comment
         - created_at
         - updated_at
-    PostComment:
+    CommentRequest:
       type: object
       properties:
         comment:
@@ -1091,7 +1091,7 @@ components:
         - created_by
         - status
         - created_at
-    PutStatus:
+    StatusRequest:
       type: object
       properties:
         status:
