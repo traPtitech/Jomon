@@ -165,7 +165,7 @@ paths:
   /applications/{applicationID}/status:
     put:
       operationId: putStatus
-      description: 指定した申請のstatusを変更のみ(新規はpost /applications)する。commentは常に必須(ないときは空文字列)。statusの変更は、作成者は"change_requested -> submitted"のみが可能、accountManagerは任意の状態間で可能。ただしapprovedからの変更は、すでに支払われている人がいた場合不可。
+      description: 指定した申請のstatusを変更のみ(新規はpost /applications)する。commentは常に必須(ないときは空文字列)。statusの変更は、作成者は"change_requested -> submitted"のみが可能、accountManagerはpayment_finishedを除く任意の状態間で可能。ただしapprovedからの変更は、すでに支払われている人がいた場合不可。payment_finishedへの変更は全ての支払い対象者への支払いが完了した場合に自動で行われる。
       tags:
         - Applications
       parameters:
@@ -671,7 +671,7 @@ components:
           type: string
     StatusEnum:
       type: string
-      enum: [submitted, change_requested, approved, rejected]
+      enum: [submitted, change_requested, approved, payment_finished, rejected]
     UserID:
       type: string
       format: uuid
