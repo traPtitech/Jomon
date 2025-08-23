@@ -74,7 +74,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApplicationRequest"
+              $ref: "#/components/schemas/ApplicationInput"
       responses:
         "201":
           description: 作成できた場合。作成された申請の詳細を返す。
@@ -117,7 +117,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApplicationRequest"
+              $ref: "#/components/schemas/ApplicationInput"
       responses:
         "200":
           description: 修正できた場合。修正後の詳細を返す。
@@ -150,7 +150,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CommentRequest"
+              $ref: "#/components/schemas/CommentInput"
       responses:
         "201":
           description: OK
@@ -180,7 +180,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/StatusRequest"
+              $ref: "#/components/schemas/StatusInput"
       responses:
         "200":
           description: OK
@@ -280,7 +280,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TagRequest"
+              $ref: "#/components/schemas/TagInput"
       responses:
         "200":
           description: 追加に成功した場合。追加されたタグの情報を返す。
@@ -309,7 +309,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TagRequest"
+              $ref: "#/components/schemas/TagInput"
       responses:
         "200":
           description: 変更に成功した場合。
@@ -358,7 +358,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PartitionRequest"
+              $ref: "#/components/schemas/PartitionInput"
       responses:
         "200":
           description: 追加に成功した場合。
@@ -403,7 +403,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PartitionRequest"
+              $ref: "#/components/schemas/PartitionInput"
       responses:
         "200":
           description: 変更に成功した場合。
@@ -455,7 +455,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PartitionGroupRequest"
+              $ref: "#/components/schemas/PartitionGroupInput"
       responses:
         "200":
           description: 追加に成功した場合。
@@ -500,7 +500,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PartitionGroupRequest"
+              $ref: "#/components/schemas/PartitionGroupInput"
       responses:
         "200":
           description: 変更に成功した場合。
@@ -538,7 +538,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/FileRequest"
+              $ref: "#/components/schemas/FileInput"
       responses:
         "200":
           description: 変更に成功した場合。
@@ -696,7 +696,7 @@ components:
         - name
         - created_at
         - updated_at
-    TagRequest:
+    TagInput:
       type: object
       properties:
         name:
@@ -732,7 +732,7 @@ components:
         - management
         - created_at
         - updated_at
-    PartitionRequest:
+    PartitionInput:
       type: object
       properties:
         name:
@@ -778,7 +778,7 @@ components:
         - child_partition_groups
         - created_at
         - updated_at
-    PartitionGroupRequest:
+    PartitionGroupInput:
       type: object
       properties:
         name:
@@ -828,7 +828,7 @@ components:
       required:
         - file
         - name
-    FileRequest:
+    FileInput:
       type: object
       properties:
         file:
@@ -862,7 +862,7 @@ components:
         - name
         - mime_type
         - created_at
-    ApplicationTargetRequest:
+    ApplicationTargetInput:
       type: object
       properties:
         amount:
@@ -1001,7 +1001,7 @@ components:
         - targets
         - created_at
         - updated_at
-    ApplicationRequest:
+    ApplicationInput:
       type: object
       properties:
         created_by:
@@ -1023,7 +1023,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/ApplicationTargetRequest"
+            $ref: "#/components/schemas/ApplicationTargetInput"
       required:
         - title
         - content
@@ -1054,7 +1054,7 @@ components:
         - comment
         - created_at
         - updated_at
-    CommentRequest:
+    CommentInput:
       type: object
       properties:
         comment:
@@ -1092,7 +1092,7 @@ components:
         - created_by
         - status
         - created_at
-    StatusRequest:
+    StatusInput:
       type: object
       properties:
         status:
