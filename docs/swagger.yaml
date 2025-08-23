@@ -861,7 +861,7 @@ components:
         - name
         - mime_type
         - created_at
-    ApplicationTarget:
+    ApplicationTargetRequest:
       type: object
       properties:
         amount:
@@ -873,7 +873,7 @@ components:
       required:
         - amount
         - target
-    ApplicationTargetDetail:
+    ApplicationTarget:
       type: object
       properties:
         id:
@@ -922,7 +922,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/ApplicationTargetDetail"
+            $ref: "#/components/schemas/ApplicationTarget"
         tags:
           type: array
           items:
@@ -979,7 +979,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/ApplicationTargetDetail"
+            $ref: "#/components/schemas/ApplicationTarget"
         created_at:
           type: string
           format: date-time
@@ -1022,7 +1022,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/ApplicationTarget"
+            $ref: "#/components/schemas/ApplicationTargetRequest"
       required:
         - title
         - content
