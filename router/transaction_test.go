@@ -587,14 +587,14 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		}
 		tags := []uuid.UUID{tag.ID}
 		group := tx.Group.ID
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Accepted,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			Comments:  []*model.Comment{},
 			Files:     []uuid.UUID{},
-			Statuses:  []*model.RequestStatus{},
+			Statuses:  []*model.ApplicationStatus{},
 			Tags:      []*model.Tag{},
 			Group:     nil,
 			CreatedAt: date,
