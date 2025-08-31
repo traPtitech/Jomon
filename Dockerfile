@@ -1,5 +1,5 @@
 ## build backend
-FROM golang:1.24.5-alpine AS server-build
+FROM golang:1.25.0-alpine AS server-build
 
 WORKDIR /github.com/traPtitech/Jomon
 COPY go.mod go.sum ./
