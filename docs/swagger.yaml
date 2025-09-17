@@ -74,7 +74,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostApplication"
+              $ref: "#/components/schemas/ApplicationInput"
       responses:
         "201":
           description: 作成できた場合。作成された申請の詳細を返す。
@@ -117,7 +117,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostApplication"
+              $ref: "#/components/schemas/ApplicationInput"
       responses:
         "200":
           description: 修正できた場合。修正後の詳細を返す。
@@ -150,7 +150,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostComment"
+              $ref: "#/components/schemas/CommentInput"
       responses:
         "201":
           description: OK
@@ -165,7 +165,7 @@ paths:
   /applications/{applicationID}/status:
     put:
       operationId: putStatus
-      description: 指定した申請のstatusを変更のみ(新規はpost /applications)する。commentは常に必須(ないときは空文字列)。statusの行き来の定義は作成者は「change_requestedからsubmitted」をでき、accountManagerは「submittedからrejected」「submittedからchange_requested」「change_requestedからsubmitted」「submittedからapproved」「approvedからsubmitted（ただしすでに支払われている人がいた場合、この操作は不可)」の操作のみ可。ただし、「approvedからfully_repaid」の操作はここでは行えない。accountManager権限または作成者権限が必要。
+      description: 指定した申請のstatusを変更のみ(新規はpost /applications)する。commentは常に必須(ないときは空文字列)。statusの変更は、作成者は"change_requested -> pending_review"のみが可能、accountManagerはpayment_finishedを除く任意の状態間で可能。ただしapprovedからの変更は、すでに支払われている人がいた場合不可。payment_finishedへの変更は全ての支払い対象者への支払いが完了した場合に自動で行われる。
       tags:
         - Applications
       parameters:
@@ -180,7 +180,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PutStatus"
+              $ref: "#/components/schemas/StatusInput"
       responses:
         "200":
           description: OK
@@ -280,7 +280,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostTag"
+              $ref: "#/components/schemas/TagInput"
       responses:
         "200":
           description: 追加に成功した場合。追加されたタグの情報を返す。
@@ -299,27 +299,28 @@ paths:
         schema:
           type: string
           format: uuid
-    get:
-      operationId: getTag
-      description: タグの情報を取得する。
+    put:
+      operationId: putTag
+      description: タグの情報を変更する。accountManager権限が必要。
       tags:
         - Tags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TagInput"
       responses:
         "200":
-          description: 取得に成功した場合。
+          description: 変更に成功した場合。
           content:
             application/json:
               schema:
-                # なにこれ
-                allOf:
-                  - $ref: "#/components/schemas/Tag"
-                  - type: object
-                    properties:
-                      applications:
-                        type: array
-                        items:
-                          type: string
-                          format: uuid
+                $ref: "#/components/schemas/Tag"
+        "400":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/403"
         "404":
           $ref: "#/components/responses/404"
     delete:
@@ -357,7 +358,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostPartition"
+              $ref: "#/components/schemas/PartitionInput"
       responses:
         "200":
           description: 追加に成功した場合。
@@ -402,7 +403,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PostPartition"
+              $ref: "#/components/schemas/PartitionInput"
       responses:
         "200":
           description: 変更に成功した場合。
@@ -429,6 +430,103 @@ paths:
         "404":
           $ref: "#/components/responses/404"
 
+  /partition-groups:
+    get:
+      operationId: getPartitionGroups
+      description: パーティショングループの一覧を返す。
+      tags:
+        - Partitions
+      responses:
+        "200":
+          description: 取得に成功した場合。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PartitionGroup"
+    post:
+      operationId: postPartitionGroup
+      description: パーティショングループを追加する。accountManager権限が必要。
+      tags:
+        - Partitions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PartitionGroupInput"
+      responses:
+        "200":
+          description: 追加に成功した場合。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartitionGroup"
+        "400":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/403"
+
+  /partition-groups/{partitionGroupID}:
+    parameters:
+      - name: partitionGroupID
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getPartitionGroup
+      description: パーティショングループの情報を返す。
+      tags:
+        - Partitions
+      responses:
+        "200":
+          description: 取得に成功した場合。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartitionGroup"
+        "404":
+          $ref: "#/components/responses/404"
+    put:
+      operationId: putPartitionGroup
+      description: パーティショングループの情報を変更する。accountManager権限が必要。
+      tags:
+        - Partitions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PartitionGroupInput"
+      responses:
+        "200":
+          description: 変更に成功した場合。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartitionGroup"
+        "400":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+    delete:
+      operationId: deletePartitionGroup
+      description: パーティショングループを削除する。accountManager権限が必要。
+      tags:
+        - Partitions
+      responses:
+        "200":
+          description: 削除に成功した場合
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+
   /files:
     post:
       operationId: postFile
@@ -440,7 +538,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/PostFile"
+              $ref: "#/components/schemas/FileInput"
       responses:
         "200":
           description: 変更に成功した場合。
@@ -573,7 +671,8 @@ components:
           type: string
     StatusEnum:
       type: string
-      enum: [submitted, change_requested, approved, payment_finished, rejected]
+      enum:
+        [pending_review, change_requested, approved, payment_finished, rejected]
     UserID:
       type: string
       format: uuid
@@ -597,7 +696,7 @@ components:
         - name
         - created_at
         - updated_at
-    PostTag:
+    TagInput:
       type: object
       properties:
         name:
@@ -633,7 +732,7 @@ components:
         - management
         - created_at
         - updated_at
-    PostPartition:
+    PartitionInput:
       type: object
       properties:
         name:
@@ -646,10 +745,59 @@ components:
         management:
           $ref: "#/components/schemas/PartitionManagement"
       required:
-        - id
         - name
         - budget
         - management
+    PartitionGroup:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "イベント運営経費"
+        child_partitions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Partition"
+        child_partition_groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/PartitionGroup"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - child_partitions
+        - child_partition_groups
+        - created_at
+        - updated_at
+    PartitionGroupInput:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "イベント運営経費"
+        child_partitions:
+          type: array
+          items:
+            type: string
+            format: uuid
+        child_partition_groups:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+        - name
+        - child_partitions
+        - child_partition_groups
     PartitionManagement:
       type: object
       required:
@@ -680,7 +828,7 @@ components:
       required:
         - file
         - name
-    PostFile:
+    FileInput:
       type: object
       properties:
         file:
@@ -714,7 +862,7 @@ components:
         - name
         - mime_type
         - created_at
-    ApplicationTarget:
+    ApplicationTargetInput:
       type: object
       properties:
         amount:
@@ -726,7 +874,7 @@ components:
       required:
         - amount
         - target
-    ApplicationTargetDetail:
+    ApplicationTarget:
       type: object
       properties:
         id:
@@ -757,9 +905,7 @@ components:
           type: string
           format: uuid
         status:
-          type: string
-          enum:
-            [submitted, change_requested, approved, payment_finished, rejected]
+          $ref: "#/components/schemas/StatusEnum"
         created_at:
           type: string
           format: date-time
@@ -777,7 +923,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/ApplicationTargetDetail"
+            $ref: "#/components/schemas/ApplicationTarget"
         tags:
           type: array
           items:
@@ -834,7 +980,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/ApplicationTargetDetail"
+            $ref: "#/components/schemas/ApplicationTarget"
         created_at:
           type: string
           format: date-time
@@ -855,7 +1001,7 @@ components:
         - targets
         - created_at
         - updated_at
-    PostApplication:
+    ApplicationInput:
       type: object
       properties:
         created_by:
@@ -877,7 +1023,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/ApplicationTarget"
+            $ref: "#/components/schemas/ApplicationTargetInput"
       required:
         - title
         - content
@@ -908,7 +1054,7 @@ components:
         - comment
         - created_at
         - updated_at
-    PostComment:
+    CommentInput:
       type: object
       properties:
         comment:
@@ -946,7 +1092,7 @@ components:
         - created_by
         - status
         - created_at
-    PutStatus:
+    StatusInput:
       type: object
       properties:
         status:
@@ -988,21 +1134,6 @@ components:
         - created_at
         - updated_at
         - deleted_at
-    PutUser:
-      type: "object"
-      properties:
-        name:
-          type: "string"
-          example: "nagatech"
-        display_name:
-          type: "string"
-          example: "ながてち"
-        account_manager:
-          type: "boolean"
-      required:
-        - name
-        - display_name
-        - account_manager
   responses:
     304:
       description: Not Modified
