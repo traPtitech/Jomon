@@ -770,6 +770,7 @@ components:
           type: string
           nullable: true
           format: uuid
+          description: "現時点の仕様では常にnullとする"
         depth:
           type: integer
           minimum: 1
@@ -795,6 +796,7 @@ components:
           type: string
           nullable: true
           format: uuid
+          description: "現時点の仕様では常にnullとする"
         depth:
           type: integer
           minimum: 1
