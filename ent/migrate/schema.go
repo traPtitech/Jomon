@@ -68,44 +68,6 @@ var (
 			},
 		},
 	}
-	// GroupsColumns holds the columns for the "groups" table.
-	GroupsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "name", Type: field.TypeString},
-		{Name: "description", Type: field.TypeString},
-		{Name: "budget", Type: field.TypeInt, Nullable: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-	}
-	// GroupsTable holds the schema information for the "groups" table.
-	GroupsTable = &schema.Table{
-		Name:       "groups",
-		Columns:    GroupsColumns,
-		PrimaryKey: []*schema.Column{GroupsColumns[0]},
-	}
-	// GroupBudgetsColumns holds the columns for the "group_budgets" table.
-	GroupBudgetsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "amount", Type: field.TypeInt},
-		{Name: "comment", Type: field.TypeString, Nullable: true, Size: 2147483647},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "group_group_budget", Type: field.TypeUUID},
-	}
-	// GroupBudgetsTable holds the schema information for the "group_budgets" table.
-	GroupBudgetsTable = &schema.Table{
-		Name:       "group_budgets",
-		Columns:    GroupBudgetsColumns,
-		PrimaryKey: []*schema.Column{GroupBudgetsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "group_budgets_groups_group_budget",
-				Columns:    []*schema.Column{GroupBudgetsColumns[4]},
-				RefColumns: []*schema.Column{GroupsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// RequestsColumns holds the columns for the "requests" table.
 	RequestsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -113,7 +75,6 @@ var (
 		{Name: "content", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "group_request", Type: field.TypeUUID, Nullable: true},
 		{Name: "request_user", Type: field.TypeUUID, Nullable: true},
 	}
 	// RequestsTable holds the schema information for the "requests" table.
@@ -123,14 +84,8 @@ var (
 		PrimaryKey: []*schema.Column{RequestsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "requests_groups_request",
-				Columns:    []*schema.Column{RequestsColumns[5]},
-				RefColumns: []*schema.Column{GroupsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
 				Symbol:     "requests_users_user",
-				Columns:    []*schema.Column{RequestsColumns[6]},
+				Columns:    []*schema.Column{RequestsColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -211,7 +166,6 @@ var (
 	TransactionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "group_budget_transaction", Type: field.TypeUUID, Nullable: true},
 		{Name: "request_transaction", Type: field.TypeUUID, Nullable: true},
 	}
 	// TransactionsTable holds the schema information for the "transactions" table.
@@ -221,14 +175,8 @@ var (
 		PrimaryKey: []*schema.Column{TransactionsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "transactions_group_budgets_transaction",
-				Columns:    []*schema.Column{TransactionsColumns[2]},
-				RefColumns: []*schema.Column{GroupBudgetsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
 				Symbol:     "transactions_requests_transaction",
-				Columns:    []*schema.Column{TransactionsColumns[3]},
+				Columns:    []*schema.Column{TransactionsColumns[2]},
 				RefColumns: []*schema.Column{RequestsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -273,56 +221,6 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
-	}
-	// GroupUserColumns holds the columns for the "group_user" table.
-	GroupUserColumns = []*schema.Column{
-		{Name: "group_id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
-	}
-	// GroupUserTable holds the schema information for the "group_user" table.
-	GroupUserTable = &schema.Table{
-		Name:       "group_user",
-		Columns:    GroupUserColumns,
-		PrimaryKey: []*schema.Column{GroupUserColumns[0], GroupUserColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "group_user_group_id",
-				Columns:    []*schema.Column{GroupUserColumns[0]},
-				RefColumns: []*schema.Column{GroupsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "group_user_user_id",
-				Columns:    []*schema.Column{GroupUserColumns[1]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
-	// GroupOwnerColumns holds the columns for the "group_owner" table.
-	GroupOwnerColumns = []*schema.Column{
-		{Name: "group_id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
-	}
-	// GroupOwnerTable holds the schema information for the "group_owner" table.
-	GroupOwnerTable = &schema.Table{
-		Name:       "group_owner",
-		Columns:    GroupOwnerColumns,
-		PrimaryKey: []*schema.Column{GroupOwnerColumns[0], GroupOwnerColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "group_owner_group_id",
-				Columns:    []*schema.Column{GroupOwnerColumns[0]},
-				RefColumns: []*schema.Column{GroupsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "group_owner_user_id",
-				Columns:    []*schema.Column{GroupOwnerColumns[1]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
 	}
 	// RequestTagColumns holds the columns for the "request_tag" table.
 	RequestTagColumns = []*schema.Column{
@@ -378,8 +276,6 @@ var (
 	Tables = []*schema.Table{
 		CommentsTable,
 		FilesTable,
-		GroupsTable,
-		GroupBudgetsTable,
 		RequestsTable,
 		RequestStatusTable,
 		RequestTargetsTable,
@@ -387,8 +283,6 @@ var (
 		TransactionsTable,
 		TransactionDetailsTable,
 		UsersTable,
-		GroupUserTable,
-		GroupOwnerTable,
 		RequestTagTable,
 		TransactionTagTable,
 	}
@@ -399,20 +293,13 @@ func init() {
 	CommentsTable.ForeignKeys[1].RefTable = RequestsTable
 	FilesTable.ForeignKeys[0].RefTable = UsersTable
 	FilesTable.ForeignKeys[1].RefTable = RequestsTable
-	GroupBudgetsTable.ForeignKeys[0].RefTable = GroupsTable
-	RequestsTable.ForeignKeys[0].RefTable = GroupsTable
-	RequestsTable.ForeignKeys[1].RefTable = UsersTable
+	RequestsTable.ForeignKeys[0].RefTable = UsersTable
 	RequestStatusTable.ForeignKeys[0].RefTable = RequestsTable
 	RequestStatusTable.ForeignKeys[1].RefTable = UsersTable
 	RequestTargetsTable.ForeignKeys[0].RefTable = RequestsTable
 	RequestTargetsTable.ForeignKeys[1].RefTable = UsersTable
-	TransactionsTable.ForeignKeys[0].RefTable = GroupBudgetsTable
-	TransactionsTable.ForeignKeys[1].RefTable = RequestsTable
+	TransactionsTable.ForeignKeys[0].RefTable = RequestsTable
 	TransactionDetailsTable.ForeignKeys[0].RefTable = TransactionsTable
-	GroupUserTable.ForeignKeys[0].RefTable = GroupsTable
-	GroupUserTable.ForeignKeys[1].RefTable = UsersTable
-	GroupOwnerTable.ForeignKeys[0].RefTable = GroupsTable
-	GroupOwnerTable.ForeignKeys[1].RefTable = UsersTable
 	RequestTagTable.ForeignKeys[0].RefTable = RequestsTable
 	RequestTagTable.ForeignKeys[1].RefTable = TagsTable
 	TransactionTagTable.ForeignKeys[0].RefTable = TransactionsTable

@@ -47,7 +47,7 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
 			nil, []*RequestTarget{target1, target2},
-			nil, user1.ID)
+			user1.ID)
 		require.NoError(t, err)
 		// CreatedAt の差を1秒以内に収めるためにここで time.Now を取る
 		exp := []*RequestTargetDetail{
@@ -79,7 +79,7 @@ func TestEntRepository_GetRequestTargets(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 		got, err := repo2.GetRequestTargets(ctx, request.ID)
 		require.NoError(t, err)
@@ -121,7 +121,7 @@ func TestEntRepository_createRequestTargets(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
 			nil, []*RequestTarget{target1, target2},
-			nil, user1.ID)
+			user1.ID)
 		require.NoError(t, err)
 		exp := []*RequestTargetDetail{
 			{Target: target1.Target, Amount: target1.Amount, CreatedAt: time.Now()},
@@ -174,15 +174,14 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
 			nil, []*RequestTarget{target1, target2},
-			nil, user1.ID)
+			user1.ID)
 		require.NoError(t, err)
 		_, err = repo.UpdateRequest(
 			ctx,
 			request.ID,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
-			nil, []*RequestTarget{},
-			nil)
+			nil, []*RequestTarget{})
 		require.NoError(t, err)
 		got, err := repo.GetRequestTargets(ctx, request.ID)
 		require.NoError(t, err)
@@ -217,15 +216,14 @@ func TestEntRepository_deleteRequestTargets(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
 			nil, nil,
-			nil, user1.ID)
+			user1.ID)
 		require.NoError(t, err)
 		_, err = repo2.UpdateRequest(
 			ctx,
 			request.ID,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
-			nil, []*RequestTarget{target1, target2},
-			nil)
+			nil, []*RequestTarget{target1, target2})
 		require.NoError(t, err)
 		got, err := repo2.GetRequestTargets(ctx, request.ID)
 		require.NoError(t, err)

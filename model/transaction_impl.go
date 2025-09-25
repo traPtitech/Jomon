@@ -7,8 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
-	"github.com/traPtitech/Jomon/ent/group"
-	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/transaction"
@@ -26,9 +24,6 @@ func (repo *EntRepository) GetTransactions(
 			WithTag().
 			WithDetail().
 			WithRequest().
-			WithGroupBudget(func(q *ent.GroupBudgetQuery) {
-				q.WithGroup()
-			}).
 			Order(ent.Desc(transaction.FieldCreatedAt))
 	} else if *query.Sort == "-created_at" {
 		transactionsq = repo.client.Transaction.
@@ -36,9 +31,6 @@ func (repo *EntRepository) GetTransactions(
 			WithTag().
 			WithDetail().
 			WithRequest().
-			WithGroupBudget(func(q *ent.GroupBudgetQuery) {
-				q.WithGroup()
-			}).
 			Order(ent.Asc(transaction.FieldCreatedAt))
 	} else if *query.Sort == "amount" {
 		transactionsq = repo.client.Transaction.
@@ -46,9 +38,6 @@ func (repo *EntRepository) GetTransactions(
 			WithTag().
 			WithDetail().
 			WithRequest().
-			WithGroupBudget(func(q *ent.GroupBudgetQuery) {
-				q.WithGroup()
-			}).
 			Order(func(s *sql.Selector) {
 				t := sql.Table(transactiondetail.Table)
 				s.Join(t).On(s.C(transaction.FieldID), t.C(transactiondetail.TransactionColumn))
@@ -60,9 +49,6 @@ func (repo *EntRepository) GetTransactions(
 			WithTag().
 			WithDetail().
 			WithRequest().
-			WithGroupBudget(func(q *ent.GroupBudgetQuery) {
-				q.WithGroup()
-			}).
 			Order(func(s *sql.Selector) {
 				t := sql.Table(transactiondetail.Table)
 				s.Join(t).On(s.C(transaction.FieldID), t.C(transactiondetail.TransactionColumn))
@@ -92,15 +78,6 @@ func (repo *EntRepository) GetTransactions(
 		transactionsq = transactionsq.
 			Where(transaction.HasTagWith(
 				tag.NameEQ(*query.Tag),
-			))
-	}
-
-	if query.Group != nil {
-		transactionsq = transactionsq.
-			Where(transaction.HasGroupBudgetWith(
-				groupbudget.HasGroupWith(
-					group.NameEQ(*query.Group),
-				),
 			))
 	}
 
@@ -134,9 +111,6 @@ func (repo *EntRepository) GetTransaction(
 		WithTag().
 		WithDetail().
 		WithRequest().
-		WithGroupBudget(func(q *ent.GroupBudgetQuery) {
-			q.WithGroup()
-		}).
 		Only(ctx)
 	if err != nil {
 		return nil, err
@@ -148,7 +122,7 @@ func (repo *EntRepository) GetTransaction(
 
 func (repo *EntRepository) CreateTransaction(
 	ctx context.Context, title string, amount int, target string,
-	tags []uuid.UUID, groupID uuid.UUID, requestID uuid.UUID,
+	tags []uuid.UUID, requestID uuid.UUID,
 ) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
@@ -173,29 +147,10 @@ func (repo *EntRepository) CreateTransaction(
 		return nil, err
 	}
 
-	// Create GroupBudget
-	var gb *ent.GroupBudget
-	if groupID != uuid.Nil {
-		gb, err = tx.Client().GroupBudget.
-			Create().
-			SetGroupID(groupID).
-			SetAmount(amount).
-			Save(ctx)
-		if err != nil {
-			err = RollbackWithError(tx, err)
-			return nil, err
-		}
-	}
 	// Create transaction query
 	query := tx.Client().Transaction.
 		Create().
 		SetDetailID(detail.ID)
-
-	// Set Query of GroupBudget if exists
-	if gb != nil {
-		query.
-			SetGroupBudgetID(gb.ID)
-	}
 
 	// Set Request to the Transaction
 	if requestID != uuid.Nil {
@@ -229,9 +184,6 @@ func (repo *EntRepository) CreateTransaction(
 		WithTag().
 		WithDetail().
 		WithRequest().
-		WithGroupBudget(func(q *ent.GroupBudgetQuery) {
-			q.WithGroup()
-		}).
 		Only(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
@@ -249,7 +201,7 @@ func (repo *EntRepository) CreateTransaction(
 
 func (repo *EntRepository) UpdateTransaction(
 	ctx context.Context, transactionID uuid.UUID, title string, amount int, target string,
-	tags []uuid.UUID, groupID uuid.UUID, requestID uuid.UUID,
+	tags []uuid.UUID, requestID uuid.UUID,
 ) (*TransactionResponse, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
@@ -285,31 +237,6 @@ func (repo *EntRepository) UpdateTransaction(
 	if err != nil {
 		err = RollbackWithError(tx, err)
 		return nil, err
-	}
-
-	if groupID != uuid.Nil {
-		// Delete GroupBudget
-		_, err = tx.Client().GroupBudget.
-			Delete().
-			Where(groupbudget.HasTransactionWith(
-				transaction.IDEQ(transactionID),
-			)).
-			Exec(ctx)
-		if err != nil {
-			err = RollbackWithError(tx, err)
-			return nil, err
-		}
-		// Create GroupBudget
-		_, err = tx.Client().GroupBudget.
-			Create().
-			SetGroupID(groupID).
-			SetAmount(amount).
-			AddTransactionIDs(transactionID).
-			Save(ctx)
-		if err != nil {
-			err = RollbackWithError(tx, err)
-			return nil, err
-		}
 	}
 
 	// Update Tag to set transaction
@@ -351,9 +278,6 @@ func (repo *EntRepository) UpdateTransaction(
 		WithTag().
 		WithDetail().
 		WithRequest().
-		WithGroupBudget(func(q *ent.GroupBudgetQuery) {
-			q.WithGroup()
-		}).
 		Only(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
@@ -382,10 +306,6 @@ func ConvertEntTransactionToModelTransactionResponse(
 	tags := lo.Map(transaction.Edges.Tag, func(t *ent.Tag, _ int) *Tag {
 		return ConvertEntTagToModelTag(t)
 	})
-	var g *Group
-	if transaction.Edges.GroupBudget != nil {
-		g = ConvertEntGroupToModelGroup(transaction.Edges.GroupBudget.Edges.Group)
-	}
 	var r uuid.UUID
 	if transaction.Edges.Request != nil {
 		r = transaction.Edges.Request.ID
@@ -397,7 +317,6 @@ func ConvertEntTransactionToModelTransactionResponse(
 		Target:    transaction.Edges.Detail.Target,
 		Request:   r,
 		Tags:      tags,
-		Group:     g,
 		CreatedAt: transaction.CreatedAt,
 	}
 }

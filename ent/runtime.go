@@ -8,8 +8,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/group"
-	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
@@ -54,36 +52,6 @@ func init() {
 	fileDescID := fileFields[0].Descriptor()
 	// file.DefaultID holds the default value on creation for the id field.
 	file.DefaultID = fileDescID.Default.(func() uuid.UUID)
-	groupFields := schema.Group{}.Fields()
-	_ = groupFields
-	// groupDescName is the schema descriptor for name field.
-	groupDescName := groupFields[1].Descriptor()
-	// group.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	group.NameValidator = groupDescName.Validators[0].(func(string) error)
-	// groupDescCreatedAt is the schema descriptor for created_at field.
-	groupDescCreatedAt := groupFields[4].Descriptor()
-	// group.DefaultCreatedAt holds the default value on creation for the created_at field.
-	group.DefaultCreatedAt = groupDescCreatedAt.Default.(func() time.Time)
-	// groupDescUpdatedAt is the schema descriptor for updated_at field.
-	groupDescUpdatedAt := groupFields[5].Descriptor()
-	// group.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	group.DefaultUpdatedAt = groupDescUpdatedAt.Default.(func() time.Time)
-	// group.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	group.UpdateDefaultUpdatedAt = groupDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// groupDescID is the schema descriptor for id field.
-	groupDescID := groupFields[0].Descriptor()
-	// group.DefaultID holds the default value on creation for the id field.
-	group.DefaultID = groupDescID.Default.(func() uuid.UUID)
-	groupbudgetFields := schema.GroupBudget{}.Fields()
-	_ = groupbudgetFields
-	// groupbudgetDescCreatedAt is the schema descriptor for created_at field.
-	groupbudgetDescCreatedAt := groupbudgetFields[3].Descriptor()
-	// groupbudget.DefaultCreatedAt holds the default value on creation for the created_at field.
-	groupbudget.DefaultCreatedAt = groupbudgetDescCreatedAt.Default.(func() time.Time)
-	// groupbudgetDescID is the schema descriptor for id field.
-	groupbudgetDescID := groupbudgetFields[0].Descriptor()
-	// groupbudget.DefaultID holds the default value on creation for the id field.
-	groupbudget.DefaultID = groupbudgetDescID.Default.(func() uuid.UUID)
 	requestFields := schema.Request{}.Fields()
 	_ = requestFields
 	// requestDescCreatedAt is the schema descriptor for created_at field.

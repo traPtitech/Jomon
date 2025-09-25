@@ -356,52 +356,6 @@ func DeletedAtNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldDeletedAt))
 }
 
-// HasGroupUser applies the HasEdge predicate on the "group_user" edge.
-func HasGroupUser() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, GroupUserTable, GroupUserPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasGroupUserWith applies the HasEdge predicate on the "group_user" edge with a given conditions (other predicates).
-func HasGroupUserWith(preds ...predicate.Group) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newGroupUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasGroupOwner applies the HasEdge predicate on the "group_owner" edge.
-func HasGroupOwner() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, GroupOwnerTable, GroupOwnerPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasGroupOwnerWith applies the HasEdge predicate on the "group_owner" edge with a given conditions (other predicates).
-func HasGroupOwnerWith(preds ...predicate.Group) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newGroupOwnerStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasComment applies the HasEdge predicate on the "comment" edge.
 func HasComment() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

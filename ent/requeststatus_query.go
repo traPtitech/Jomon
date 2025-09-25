@@ -34,44 +34,44 @@ type RequestStatusQuery struct {
 }
 
 // Where adds a new predicate for the RequestStatusQuery builder.
-func (rsq *RequestStatusQuery) Where(ps ...predicate.RequestStatus) *RequestStatusQuery {
-	rsq.predicates = append(rsq.predicates, ps...)
-	return rsq
+func (_q *RequestStatusQuery) Where(ps ...predicate.RequestStatus) *RequestStatusQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (rsq *RequestStatusQuery) Limit(limit int) *RequestStatusQuery {
-	rsq.ctx.Limit = &limit
-	return rsq
+func (_q *RequestStatusQuery) Limit(limit int) *RequestStatusQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (rsq *RequestStatusQuery) Offset(offset int) *RequestStatusQuery {
-	rsq.ctx.Offset = &offset
-	return rsq
+func (_q *RequestStatusQuery) Offset(offset int) *RequestStatusQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (rsq *RequestStatusQuery) Unique(unique bool) *RequestStatusQuery {
-	rsq.ctx.Unique = &unique
-	return rsq
+func (_q *RequestStatusQuery) Unique(unique bool) *RequestStatusQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (rsq *RequestStatusQuery) Order(o ...requeststatus.OrderOption) *RequestStatusQuery {
-	rsq.order = append(rsq.order, o...)
-	return rsq
+func (_q *RequestStatusQuery) Order(o ...requeststatus.OrderOption) *RequestStatusQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryRequest chains the current query on the "request" edge.
-func (rsq *RequestStatusQuery) QueryRequest() *RequestQuery {
-	query := (&RequestClient{config: rsq.config}).Query()
+func (_q *RequestStatusQuery) QueryRequest() *RequestQuery {
+	query := (&RequestClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := rsq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := rsq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -80,20 +80,20 @@ func (rsq *RequestStatusQuery) QueryRequest() *RequestQuery {
 			sqlgraph.To(request.Table, request.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, requeststatus.RequestTable, requeststatus.RequestColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(rsq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryUser chains the current query on the "user" edge.
-func (rsq *RequestStatusQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: rsq.config}).Query()
+func (_q *RequestStatusQuery) QueryUser() *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := rsq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := rsq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -102,7 +102,7 @@ func (rsq *RequestStatusQuery) QueryUser() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, requeststatus.UserTable, requeststatus.UserColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(rsq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -110,8 +110,8 @@ func (rsq *RequestStatusQuery) QueryUser() *UserQuery {
 
 // First returns the first RequestStatus entity from the query.
 // Returns a *NotFoundError when no RequestStatus was found.
-func (rsq *RequestStatusQuery) First(ctx context.Context) (*RequestStatus, error) {
-	nodes, err := rsq.Limit(1).All(setContextOp(ctx, rsq.ctx, ent.OpQueryFirst))
+func (_q *RequestStatusQuery) First(ctx context.Context) (*RequestStatus, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +122,8 @@ func (rsq *RequestStatusQuery) First(ctx context.Context) (*RequestStatus, error
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (rsq *RequestStatusQuery) FirstX(ctx context.Context) *RequestStatus {
-	node, err := rsq.First(ctx)
+func (_q *RequestStatusQuery) FirstX(ctx context.Context) *RequestStatus {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -132,9 +132,9 @@ func (rsq *RequestStatusQuery) FirstX(ctx context.Context) *RequestStatus {
 
 // FirstID returns the first RequestStatus ID from the query.
 // Returns a *NotFoundError when no RequestStatus ID was found.
-func (rsq *RequestStatusQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *RequestStatusQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = rsq.Limit(1).IDs(setContextOp(ctx, rsq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -145,8 +145,8 @@ func (rsq *RequestStatusQuery) FirstID(ctx context.Context) (id uuid.UUID, err e
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (rsq *RequestStatusQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := rsq.FirstID(ctx)
+func (_q *RequestStatusQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -156,8 +156,8 @@ func (rsq *RequestStatusQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single RequestStatus entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one RequestStatus entity is found.
 // Returns a *NotFoundError when no RequestStatus entities are found.
-func (rsq *RequestStatusQuery) Only(ctx context.Context) (*RequestStatus, error) {
-	nodes, err := rsq.Limit(2).All(setContextOp(ctx, rsq.ctx, ent.OpQueryOnly))
+func (_q *RequestStatusQuery) Only(ctx context.Context) (*RequestStatus, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -172,8 +172,8 @@ func (rsq *RequestStatusQuery) Only(ctx context.Context) (*RequestStatus, error)
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (rsq *RequestStatusQuery) OnlyX(ctx context.Context) *RequestStatus {
-	node, err := rsq.Only(ctx)
+func (_q *RequestStatusQuery) OnlyX(ctx context.Context) *RequestStatus {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -183,9 +183,9 @@ func (rsq *RequestStatusQuery) OnlyX(ctx context.Context) *RequestStatus {
 // OnlyID is like Only, but returns the only RequestStatus ID in the query.
 // Returns a *NotSingularError when more than one RequestStatus ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (rsq *RequestStatusQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *RequestStatusQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = rsq.Limit(2).IDs(setContextOp(ctx, rsq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -200,8 +200,8 @@ func (rsq *RequestStatusQuery) OnlyID(ctx context.Context) (id uuid.UUID, err er
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (rsq *RequestStatusQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := rsq.OnlyID(ctx)
+func (_q *RequestStatusQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -209,18 +209,18 @@ func (rsq *RequestStatusQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of RequestStatusSlice.
-func (rsq *RequestStatusQuery) All(ctx context.Context) ([]*RequestStatus, error) {
-	ctx = setContextOp(ctx, rsq.ctx, ent.OpQueryAll)
-	if err := rsq.prepareQuery(ctx); err != nil {
+func (_q *RequestStatusQuery) All(ctx context.Context) ([]*RequestStatus, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*RequestStatus, *RequestStatusQuery]()
-	return withInterceptors[[]*RequestStatus](ctx, rsq, qr, rsq.inters)
+	return withInterceptors[[]*RequestStatus](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (rsq *RequestStatusQuery) AllX(ctx context.Context) []*RequestStatus {
-	nodes, err := rsq.All(ctx)
+func (_q *RequestStatusQuery) AllX(ctx context.Context) []*RequestStatus {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -228,20 +228,20 @@ func (rsq *RequestStatusQuery) AllX(ctx context.Context) []*RequestStatus {
 }
 
 // IDs executes the query and returns a list of RequestStatus IDs.
-func (rsq *RequestStatusQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if rsq.ctx.Unique == nil && rsq.path != nil {
-		rsq.Unique(true)
+func (_q *RequestStatusQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, rsq.ctx, ent.OpQueryIDs)
-	if err = rsq.Select(requeststatus.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(requeststatus.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (rsq *RequestStatusQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := rsq.IDs(ctx)
+func (_q *RequestStatusQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -249,17 +249,17 @@ func (rsq *RequestStatusQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (rsq *RequestStatusQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, rsq.ctx, ent.OpQueryCount)
-	if err := rsq.prepareQuery(ctx); err != nil {
+func (_q *RequestStatusQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, rsq, querierCount[*RequestStatusQuery](), rsq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*RequestStatusQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (rsq *RequestStatusQuery) CountX(ctx context.Context) int {
-	count, err := rsq.Count(ctx)
+func (_q *RequestStatusQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -267,9 +267,9 @@ func (rsq *RequestStatusQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (rsq *RequestStatusQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, rsq.ctx, ent.OpQueryExist)
-	switch _, err := rsq.FirstID(ctx); {
+func (_q *RequestStatusQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -280,8 +280,8 @@ func (rsq *RequestStatusQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (rsq *RequestStatusQuery) ExistX(ctx context.Context) bool {
-	exist, err := rsq.Exist(ctx)
+func (_q *RequestStatusQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -290,44 +290,44 @@ func (rsq *RequestStatusQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the RequestStatusQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (rsq *RequestStatusQuery) Clone() *RequestStatusQuery {
-	if rsq == nil {
+func (_q *RequestStatusQuery) Clone() *RequestStatusQuery {
+	if _q == nil {
 		return nil
 	}
 	return &RequestStatusQuery{
-		config:      rsq.config,
-		ctx:         rsq.ctx.Clone(),
-		order:       append([]requeststatus.OrderOption{}, rsq.order...),
-		inters:      append([]Interceptor{}, rsq.inters...),
-		predicates:  append([]predicate.RequestStatus{}, rsq.predicates...),
-		withRequest: rsq.withRequest.Clone(),
-		withUser:    rsq.withUser.Clone(),
+		config:      _q.config,
+		ctx:         _q.ctx.Clone(),
+		order:       append([]requeststatus.OrderOption{}, _q.order...),
+		inters:      append([]Interceptor{}, _q.inters...),
+		predicates:  append([]predicate.RequestStatus{}, _q.predicates...),
+		withRequest: _q.withRequest.Clone(),
+		withUser:    _q.withUser.Clone(),
 		// clone intermediate query.
-		sql:  rsq.sql.Clone(),
-		path: rsq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithRequest tells the query-builder to eager-load the nodes that are connected to
 // the "request" edge. The optional arguments are used to configure the query builder of the edge.
-func (rsq *RequestStatusQuery) WithRequest(opts ...func(*RequestQuery)) *RequestStatusQuery {
-	query := (&RequestClient{config: rsq.config}).Query()
+func (_q *RequestStatusQuery) WithRequest(opts ...func(*RequestQuery)) *RequestStatusQuery {
+	query := (&RequestClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	rsq.withRequest = query
-	return rsq
+	_q.withRequest = query
+	return _q
 }
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (rsq *RequestStatusQuery) WithUser(opts ...func(*UserQuery)) *RequestStatusQuery {
-	query := (&UserClient{config: rsq.config}).Query()
+func (_q *RequestStatusQuery) WithUser(opts ...func(*UserQuery)) *RequestStatusQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	rsq.withUser = query
-	return rsq
+	_q.withUser = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -344,10 +344,10 @@ func (rsq *RequestStatusQuery) WithUser(opts ...func(*UserQuery)) *RequestStatus
 //		GroupBy(requeststatus.FieldStatus).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (rsq *RequestStatusQuery) GroupBy(field string, fields ...string) *RequestStatusGroupBy {
-	rsq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &RequestStatusGroupBy{build: rsq}
-	grbuild.flds = &rsq.ctx.Fields
+func (_q *RequestStatusQuery) GroupBy(field string, fields ...string) *RequestStatusGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &RequestStatusGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = requeststatus.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -365,56 +365,56 @@ func (rsq *RequestStatusQuery) GroupBy(field string, fields ...string) *RequestS
 //	client.RequestStatus.Query().
 //		Select(requeststatus.FieldStatus).
 //		Scan(ctx, &v)
-func (rsq *RequestStatusQuery) Select(fields ...string) *RequestStatusSelect {
-	rsq.ctx.Fields = append(rsq.ctx.Fields, fields...)
-	sbuild := &RequestStatusSelect{RequestStatusQuery: rsq}
+func (_q *RequestStatusQuery) Select(fields ...string) *RequestStatusSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &RequestStatusSelect{RequestStatusQuery: _q}
 	sbuild.label = requeststatus.Label
-	sbuild.flds, sbuild.scan = &rsq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a RequestStatusSelect configured with the given aggregations.
-func (rsq *RequestStatusQuery) Aggregate(fns ...AggregateFunc) *RequestStatusSelect {
-	return rsq.Select().Aggregate(fns...)
+func (_q *RequestStatusQuery) Aggregate(fns ...AggregateFunc) *RequestStatusSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (rsq *RequestStatusQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range rsq.inters {
+func (_q *RequestStatusQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, rsq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range rsq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !requeststatus.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if rsq.path != nil {
-		prev, err := rsq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		rsq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (rsq *RequestStatusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*RequestStatus, error) {
+func (_q *RequestStatusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*RequestStatus, error) {
 	var (
 		nodes       = []*RequestStatus{}
-		withFKs     = rsq.withFKs
-		_spec       = rsq.querySpec()
+		withFKs     = _q.withFKs
+		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			rsq.withRequest != nil,
-			rsq.withUser != nil,
+			_q.withRequest != nil,
+			_q.withUser != nil,
 		}
 	)
-	if rsq.withRequest != nil || rsq.withUser != nil {
+	if _q.withRequest != nil || _q.withUser != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -424,7 +424,7 @@ func (rsq *RequestStatusQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 		return (*RequestStatus).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &RequestStatus{config: rsq.config}
+		node := &RequestStatus{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -432,20 +432,20 @@ func (rsq *RequestStatusQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, rsq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := rsq.withRequest; query != nil {
-		if err := rsq.loadRequest(ctx, query, nodes, nil,
+	if query := _q.withRequest; query != nil {
+		if err := _q.loadRequest(ctx, query, nodes, nil,
 			func(n *RequestStatus, e *Request) { n.Edges.Request = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := rsq.withUser; query != nil {
-		if err := rsq.loadUser(ctx, query, nodes, nil,
+	if query := _q.withUser; query != nil {
+		if err := _q.loadUser(ctx, query, nodes, nil,
 			func(n *RequestStatus, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
@@ -453,7 +453,7 @@ func (rsq *RequestStatusQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	return nodes, nil
 }
 
-func (rsq *RequestStatusQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes []*RequestStatus, init func(*RequestStatus), assign func(*RequestStatus, *Request)) error {
+func (_q *RequestStatusQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes []*RequestStatus, init func(*RequestStatus), assign func(*RequestStatus, *Request)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*RequestStatus)
 	for i := range nodes {
@@ -485,7 +485,7 @@ func (rsq *RequestStatusQuery) loadRequest(ctx context.Context, query *RequestQu
 	}
 	return nil
 }
-func (rsq *RequestStatusQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*RequestStatus, init func(*RequestStatus), assign func(*RequestStatus, *User)) error {
+func (_q *RequestStatusQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*RequestStatus, init func(*RequestStatus), assign func(*RequestStatus, *User)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*RequestStatus)
 	for i := range nodes {
@@ -518,24 +518,24 @@ func (rsq *RequestStatusQuery) loadUser(ctx context.Context, query *UserQuery, n
 	return nil
 }
 
-func (rsq *RequestStatusQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := rsq.querySpec()
-	_spec.Node.Columns = rsq.ctx.Fields
-	if len(rsq.ctx.Fields) > 0 {
-		_spec.Unique = rsq.ctx.Unique != nil && *rsq.ctx.Unique
+func (_q *RequestStatusQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, rsq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (rsq *RequestStatusQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *RequestStatusQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(requeststatus.Table, requeststatus.Columns, sqlgraph.NewFieldSpec(requeststatus.FieldID, field.TypeUUID))
-	_spec.From = rsq.sql
-	if unique := rsq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if rsq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := rsq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, requeststatus.FieldID)
 		for i := range fields {
@@ -544,20 +544,20 @@ func (rsq *RequestStatusQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := rsq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := rsq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := rsq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := rsq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -567,33 +567,33 @@ func (rsq *RequestStatusQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (rsq *RequestStatusQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(rsq.driver.Dialect())
+func (_q *RequestStatusQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(requeststatus.Table)
-	columns := rsq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = requeststatus.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if rsq.sql != nil {
-		selector = rsq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if rsq.ctx.Unique != nil && *rsq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range rsq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range rsq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := rsq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := rsq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -606,41 +606,41 @@ type RequestStatusGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (rsgb *RequestStatusGroupBy) Aggregate(fns ...AggregateFunc) *RequestStatusGroupBy {
-	rsgb.fns = append(rsgb.fns, fns...)
-	return rsgb
+func (_g *RequestStatusGroupBy) Aggregate(fns ...AggregateFunc) *RequestStatusGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rsgb *RequestStatusGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rsgb.build.ctx, ent.OpQueryGroupBy)
-	if err := rsgb.build.prepareQuery(ctx); err != nil {
+func (_g *RequestStatusGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RequestStatusQuery, *RequestStatusGroupBy](ctx, rsgb.build, rsgb, rsgb.build.inters, v)
+	return scanWithInterceptors[*RequestStatusQuery, *RequestStatusGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (rsgb *RequestStatusGroupBy) sqlScan(ctx context.Context, root *RequestStatusQuery, v any) error {
+func (_g *RequestStatusGroupBy) sqlScan(ctx context.Context, root *RequestStatusQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(rsgb.fns))
-	for _, fn := range rsgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*rsgb.flds)+len(rsgb.fns))
-		for _, f := range *rsgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*rsgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := rsgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -654,27 +654,27 @@ type RequestStatusSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (rss *RequestStatusSelect) Aggregate(fns ...AggregateFunc) *RequestStatusSelect {
-	rss.fns = append(rss.fns, fns...)
-	return rss
+func (_s *RequestStatusSelect) Aggregate(fns ...AggregateFunc) *RequestStatusSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rss *RequestStatusSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rss.ctx, ent.OpQuerySelect)
-	if err := rss.prepareQuery(ctx); err != nil {
+func (_s *RequestStatusSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RequestStatusQuery, *RequestStatusSelect](ctx, rss.RequestStatusQuery, rss, rss.inters, v)
+	return scanWithInterceptors[*RequestStatusQuery, *RequestStatusSelect](ctx, _s.RequestStatusQuery, _s, _s.inters, v)
 }
 
-func (rss *RequestStatusSelect) sqlScan(ctx context.Context, root *RequestStatusQuery, v any) error {
+func (_s *RequestStatusSelect) sqlScan(ctx context.Context, root *RequestStatusQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(rss.fns))
-	for _, fn := range rss.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*rss.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -682,7 +682,7 @@ func (rss *RequestStatusSelect) sqlScan(ctx context.Context, root *RequestStatus
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := rss.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

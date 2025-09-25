@@ -24,89 +24,89 @@ type RequestTargetCreate struct {
 }
 
 // SetAmount sets the "amount" field.
-func (rtc *RequestTargetCreate) SetAmount(i int) *RequestTargetCreate {
-	rtc.mutation.SetAmount(i)
-	return rtc
+func (_c *RequestTargetCreate) SetAmount(v int) *RequestTargetCreate {
+	_c.mutation.SetAmount(v)
+	return _c
 }
 
 // SetPaidAt sets the "paid_at" field.
-func (rtc *RequestTargetCreate) SetPaidAt(t time.Time) *RequestTargetCreate {
-	rtc.mutation.SetPaidAt(t)
-	return rtc
+func (_c *RequestTargetCreate) SetPaidAt(v time.Time) *RequestTargetCreate {
+	_c.mutation.SetPaidAt(v)
+	return _c
 }
 
 // SetNillablePaidAt sets the "paid_at" field if the given value is not nil.
-func (rtc *RequestTargetCreate) SetNillablePaidAt(t *time.Time) *RequestTargetCreate {
-	if t != nil {
-		rtc.SetPaidAt(*t)
+func (_c *RequestTargetCreate) SetNillablePaidAt(v *time.Time) *RequestTargetCreate {
+	if v != nil {
+		_c.SetPaidAt(*v)
 	}
-	return rtc
+	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (rtc *RequestTargetCreate) SetCreatedAt(t time.Time) *RequestTargetCreate {
-	rtc.mutation.SetCreatedAt(t)
-	return rtc
+func (_c *RequestTargetCreate) SetCreatedAt(v time.Time) *RequestTargetCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (rtc *RequestTargetCreate) SetNillableCreatedAt(t *time.Time) *RequestTargetCreate {
-	if t != nil {
-		rtc.SetCreatedAt(*t)
+func (_c *RequestTargetCreate) SetNillableCreatedAt(v *time.Time) *RequestTargetCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return rtc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (rtc *RequestTargetCreate) SetID(u uuid.UUID) *RequestTargetCreate {
-	rtc.mutation.SetID(u)
-	return rtc
+func (_c *RequestTargetCreate) SetID(v uuid.UUID) *RequestTargetCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (rtc *RequestTargetCreate) SetNillableID(u *uuid.UUID) *RequestTargetCreate {
-	if u != nil {
-		rtc.SetID(*u)
+func (_c *RequestTargetCreate) SetNillableID(v *uuid.UUID) *RequestTargetCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return rtc
+	return _c
 }
 
 // SetRequestID sets the "request" edge to the Request entity by ID.
-func (rtc *RequestTargetCreate) SetRequestID(id uuid.UUID) *RequestTargetCreate {
-	rtc.mutation.SetRequestID(id)
-	return rtc
+func (_c *RequestTargetCreate) SetRequestID(id uuid.UUID) *RequestTargetCreate {
+	_c.mutation.SetRequestID(id)
+	return _c
 }
 
 // SetRequest sets the "request" edge to the Request entity.
-func (rtc *RequestTargetCreate) SetRequest(r *Request) *RequestTargetCreate {
-	return rtc.SetRequestID(r.ID)
+func (_c *RequestTargetCreate) SetRequest(v *Request) *RequestTargetCreate {
+	return _c.SetRequestID(v.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (rtc *RequestTargetCreate) SetUserID(id uuid.UUID) *RequestTargetCreate {
-	rtc.mutation.SetUserID(id)
-	return rtc
+func (_c *RequestTargetCreate) SetUserID(id uuid.UUID) *RequestTargetCreate {
+	_c.mutation.SetUserID(id)
+	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (rtc *RequestTargetCreate) SetUser(u *User) *RequestTargetCreate {
-	return rtc.SetUserID(u.ID)
+func (_c *RequestTargetCreate) SetUser(v *User) *RequestTargetCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // Mutation returns the RequestTargetMutation object of the builder.
-func (rtc *RequestTargetCreate) Mutation() *RequestTargetMutation {
-	return rtc.mutation
+func (_c *RequestTargetCreate) Mutation() *RequestTargetMutation {
+	return _c.mutation
 }
 
 // Save creates the RequestTarget in the database.
-func (rtc *RequestTargetCreate) Save(ctx context.Context) (*RequestTarget, error) {
-	rtc.defaults()
-	return withHooks(ctx, rtc.sqlSave, rtc.mutation, rtc.hooks)
+func (_c *RequestTargetCreate) Save(ctx context.Context) (*RequestTarget, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (rtc *RequestTargetCreate) SaveX(ctx context.Context) *RequestTarget {
-	v, err := rtc.Save(ctx)
+func (_c *RequestTargetCreate) SaveX(ctx context.Context) *RequestTarget {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -114,53 +114,53 @@ func (rtc *RequestTargetCreate) SaveX(ctx context.Context) *RequestTarget {
 }
 
 // Exec executes the query.
-func (rtc *RequestTargetCreate) Exec(ctx context.Context) error {
-	_, err := rtc.Save(ctx)
+func (_c *RequestTargetCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rtc *RequestTargetCreate) ExecX(ctx context.Context) {
-	if err := rtc.Exec(ctx); err != nil {
+func (_c *RequestTargetCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (rtc *RequestTargetCreate) defaults() {
-	if _, ok := rtc.mutation.CreatedAt(); !ok {
+func (_c *RequestTargetCreate) defaults() {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := requesttarget.DefaultCreatedAt()
-		rtc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := rtc.mutation.ID(); !ok {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := requesttarget.DefaultID()
-		rtc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (rtc *RequestTargetCreate) check() error {
-	if _, ok := rtc.mutation.Amount(); !ok {
+func (_c *RequestTargetCreate) check() error {
+	if _, ok := _c.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "RequestTarget.amount"`)}
 	}
-	if _, ok := rtc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "RequestTarget.created_at"`)}
 	}
-	if len(rtc.mutation.RequestIDs()) == 0 {
+	if len(_c.mutation.RequestIDs()) == 0 {
 		return &ValidationError{Name: "request", err: errors.New(`ent: missing required edge "RequestTarget.request"`)}
 	}
-	if len(rtc.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "RequestTarget.user"`)}
 	}
 	return nil
 }
 
-func (rtc *RequestTargetCreate) sqlSave(ctx context.Context) (*RequestTarget, error) {
-	if err := rtc.check(); err != nil {
+func (_c *RequestTargetCreate) sqlSave(ctx context.Context) (*RequestTarget, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := rtc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, rtc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -173,33 +173,33 @@ func (rtc *RequestTargetCreate) sqlSave(ctx context.Context) (*RequestTarget, er
 			return nil, err
 		}
 	}
-	rtc.mutation.id = &_node.ID
-	rtc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSpec) {
+func (_c *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSpec) {
 	var (
-		_node = &RequestTarget{config: rtc.config}
+		_node = &RequestTarget{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(requesttarget.Table, sqlgraph.NewFieldSpec(requesttarget.FieldID, field.TypeUUID))
 	)
-	if id, ok := rtc.mutation.ID(); ok {
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := rtc.mutation.Amount(); ok {
+	if value, ok := _c.mutation.Amount(); ok {
 		_spec.SetField(requesttarget.FieldAmount, field.TypeInt, value)
 		_node.Amount = value
 	}
-	if value, ok := rtc.mutation.PaidAt(); ok {
+	if value, ok := _c.mutation.PaidAt(); ok {
 		_spec.SetField(requesttarget.FieldPaidAt, field.TypeTime, value)
 		_node.PaidAt = &value
 	}
-	if value, ok := rtc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(requesttarget.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := rtc.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -216,7 +216,7 @@ func (rtc *RequestTargetCreate) createSpec() (*RequestTarget, *sqlgraph.CreateSp
 		_node.request_target = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := rtc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -244,16 +244,16 @@ type RequestTargetCreateBulk struct {
 }
 
 // Save creates the RequestTarget entities in the database.
-func (rtcb *RequestTargetCreateBulk) Save(ctx context.Context) ([]*RequestTarget, error) {
-	if rtcb.err != nil {
-		return nil, rtcb.err
+func (_c *RequestTargetCreateBulk) Save(ctx context.Context) ([]*RequestTarget, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(rtcb.builders))
-	nodes := make([]*RequestTarget, len(rtcb.builders))
-	mutators := make([]Mutator, len(rtcb.builders))
-	for i := range rtcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*RequestTarget, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := rtcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RequestTargetMutation)
@@ -267,11 +267,11 @@ func (rtcb *RequestTargetCreateBulk) Save(ctx context.Context) ([]*RequestTarget
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, rtcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, rtcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -291,7 +291,7 @@ func (rtcb *RequestTargetCreateBulk) Save(ctx context.Context) ([]*RequestTarget
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, rtcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -299,8 +299,8 @@ func (rtcb *RequestTargetCreateBulk) Save(ctx context.Context) ([]*RequestTarget
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (rtcb *RequestTargetCreateBulk) SaveX(ctx context.Context) []*RequestTarget {
-	v, err := rtcb.Save(ctx)
+func (_c *RequestTargetCreateBulk) SaveX(ctx context.Context) []*RequestTarget {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -308,14 +308,14 @@ func (rtcb *RequestTargetCreateBulk) SaveX(ctx context.Context) []*RequestTarget
 }
 
 // Exec executes the query.
-func (rtcb *RequestTargetCreateBulk) Exec(ctx context.Context) error {
-	_, err := rtcb.Save(ctx)
+func (_c *RequestTargetCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rtcb *RequestTargetCreateBulk) ExecX(ctx context.Context) {
-	if err := rtcb.Exec(ctx); err != nil {
+func (_c *RequestTargetCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

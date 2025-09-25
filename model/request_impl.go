@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
-	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
@@ -25,7 +24,6 @@ func (repo *EntRepository) GetRequests(
 		requestsq = repo.client.Request.
 			Query().
 			WithTag().
-			WithGroup().
 			WithStatus(func(q *ent.RequestStatusQuery) {
 				q.Order(ent.Desc(requeststatus.FieldCreatedAt))
 			}).
@@ -35,7 +33,6 @@ func (repo *EntRepository) GetRequests(
 		requestsq = repo.client.Request.
 			Query().
 			WithTag().
-			WithGroup().
 			WithStatus(func(q *ent.RequestStatusQuery) {
 				q.Order(ent.Desc(requeststatus.FieldCreatedAt))
 			}).
@@ -45,7 +42,6 @@ func (repo *EntRepository) GetRequests(
 		requestsq = repo.client.Request.
 			Query().
 			WithTag().
-			WithGroup().
 			WithStatus(func(q *ent.RequestStatusQuery) {
 				q.Order(ent.Desc(requeststatus.FieldCreatedAt))
 			}).
@@ -55,7 +51,6 @@ func (repo *EntRepository) GetRequests(
 		requestsq = repo.client.Request.
 			Query().
 			WithTag().
-			WithGroup().
 			WithStatus(func(q *ent.RequestStatusQuery) {
 				q.Order(ent.Desc(requeststatus.FieldCreatedAt))
 			}).
@@ -104,14 +99,6 @@ func (repo *EntRepository) GetRequests(
 
 	requestsq = requestsq.Limit(query.Limit).Offset(query.Offset)
 
-	if query.Group != nil && *query.Group != "" {
-		requestsq = requestsq.
-			Where(
-				request.HasGroupWith(
-					group.NameEQ(*query.Group),
-				),
-			)
-	}
 	if query.CreatedBy != uuid.Nil {
 		requestsq = requestsq.
 			Where(
@@ -128,7 +115,7 @@ func (repo *EntRepository) GetRequests(
 
 	reqres := lo.Map(requests, func(r *ent.Request, _ int) *RequestResponse {
 		return convertEntRequestResponseToModelRequestResponse(
-			r, r.Edges.Tag, r.Edges.Group, r.Edges.Status[0], r.Edges.User)
+			r, r.Edges.Tag, r.Edges.Status[0], r.Edges.User)
 	})
 
 	return reqres, nil
@@ -136,7 +123,7 @@ func (repo *EntRepository) GetRequests(
 
 func (repo *EntRepository) CreateRequest(
 	ctx context.Context, title string, content string,
-	tags []*Tag, targets []*RequestTarget, group *Group, userID uuid.UUID,
+	tags []*Tag, targets []*RequestTarget, userID uuid.UUID,
 ) (*RequestDetail, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
@@ -168,17 +155,6 @@ func (repo *EntRepository) CreateRequest(
 	if err != nil {
 		err = RollbackWithError(tx, err)
 		return nil, err
-	}
-	if group != nil {
-		g, err := tx.Client().Group.
-			UpdateOneID(group.ID).
-			AddRequest(created).
-			Save(ctx)
-		group = ConvertEntGroupToModelGroup(g)
-		if err != nil {
-			err = RollbackWithError(tx, err)
-			return nil, err
-		}
 	}
 	s, err := tx.Client().RequestStatus.
 		Create().
@@ -217,7 +193,6 @@ func (repo *EntRepository) CreateRequest(
 		Content:   created.Content,
 		Tags:      tags,
 		Targets:   ts,
-		Group:     group,
 		CreatedAt: created.CreatedAt,
 		UpdatedAt: created.UpdatedAt,
 		CreatedBy: t.ID,
@@ -238,7 +213,6 @@ func (repo *EntRepository) GetRequest(
 		WithTarget(func(q *ent.RequestTargetQuery) {
 			q.WithUser()
 		}).
-		WithGroup().
 		WithStatus(func(q *ent.RequestStatusQuery) {
 			q.Order(ent.Desc(requeststatus.FieldCreatedAt))
 			q.WithUser()
@@ -259,7 +233,6 @@ func (repo *EntRepository) GetRequest(
 			return ConvertEntRequestTargetToModelRequestTargetDetail(target)
 		},
 	)
-	modelGroup := ConvertEntGroupToModelGroup(r.Edges.Group)
 	comments := lo.Map(r.Edges.Comment, func(c *ent.Comment, _ int) *Comment {
 		return ConvertEntCommentToModelComment(c, c.Edges.User.ID)
 	})
@@ -276,7 +249,6 @@ func (repo *EntRepository) GetRequest(
 		Content:   r.Content,
 		Tags:      tags,
 		Targets:   targets,
-		Group:     modelGroup,
 		CreatedAt: r.CreatedAt,
 		UpdatedAt: r.UpdatedAt,
 		CreatedBy: r.Edges.User.ID,
@@ -289,7 +261,7 @@ func (repo *EntRepository) GetRequest(
 
 func (repo *EntRepository) UpdateRequest(
 	ctx context.Context, requestID uuid.UUID, title string, content string,
-	tags []*Tag, targets []*RequestTarget, group *Group,
+	tags []*Tag, targets []*RequestTarget,
 ) (*RequestDetail, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
@@ -316,18 +288,9 @@ func (repo *EntRepository) UpdateRequest(
 		return nil, err
 	}
 
-	if group != nil {
-		_, err = tx.Client().Request.
-			UpdateOneID(requestID).
-			ClearGroup().
-			SetGroupID(group.ID).
-			Save(ctx)
-	} else {
-		_, err = tx.Client().Request.
-			UpdateOneID(requestID).
-			ClearGroup().
-			Save(ctx)
-	}
+	_, err = tx.Client().Request.
+		UpdateOneID(requestID).
+		Save(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
 		return nil, err
@@ -355,14 +318,6 @@ func (repo *EntRepository) UpdateRequest(
 	modeltags := lo.Map(enttags, func(enttag *ent.Tag, _ int) *Tag {
 		return ConvertEntTagToModelTag(enttag)
 	})
-	var entgroup *ent.Group
-	if group != nil {
-		entgroup, err = updated.QueryGroup().Only(ctx)
-		if err != nil {
-			err = RollbackWithError(tx, err)
-			return nil, err
-		}
-	}
 
 	err = repo.deleteRequestTargets(ctx, tx, requestID)
 	if err != nil {
@@ -398,7 +353,6 @@ func (repo *EntRepository) UpdateRequest(
 		return nil, err
 	}
 
-	modelgroup := ConvertEntGroupToModelGroup(entgroup)
 	reqdetail := &RequestDetail{
 		ID:        updated.ID,
 		Status:    convertEntRequestStatusToModelStatus(&status.Status),
@@ -406,7 +360,6 @@ func (repo *EntRepository) UpdateRequest(
 		Content:   updated.Content,
 		Tags:      modeltags,
 		Targets:   modeltargets,
-		Group:     modelgroup,
 		CreatedAt: updated.CreatedAt,
 		UpdatedAt: updated.UpdatedAt,
 		CreatedBy: u.ID,
@@ -419,7 +372,7 @@ func (repo *EntRepository) UpdateRequest(
 
 func convertEntRequestResponseToModelRequestResponse(
 	request *ent.Request, tags []*ent.Tag,
-	group *ent.Group, status *ent.RequestStatus, user *ent.User,
+	status *ent.RequestStatus, user *ent.User,
 ) *RequestResponse {
 	if request == nil {
 		return nil
@@ -436,6 +389,5 @@ func convertEntRequestResponseToModelRequestResponse(
 		Title:     request.Title,
 		Content:   request.Content,
 		Tags:      modeltags,
-		Group:     ConvertEntGroupToModelGroup(group),
 	}
 }

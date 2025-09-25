@@ -24,83 +24,83 @@ type RequestStatusCreate struct {
 }
 
 // SetStatus sets the "status" field.
-func (rsc *RequestStatusCreate) SetStatus(r requeststatus.Status) *RequestStatusCreate {
-	rsc.mutation.SetStatus(r)
-	return rsc
+func (_c *RequestStatusCreate) SetStatus(v requeststatus.Status) *RequestStatusCreate {
+	_c.mutation.SetStatus(v)
+	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (rsc *RequestStatusCreate) SetNillableStatus(r *requeststatus.Status) *RequestStatusCreate {
-	if r != nil {
-		rsc.SetStatus(*r)
+func (_c *RequestStatusCreate) SetNillableStatus(v *requeststatus.Status) *RequestStatusCreate {
+	if v != nil {
+		_c.SetStatus(*v)
 	}
-	return rsc
+	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (rsc *RequestStatusCreate) SetCreatedAt(t time.Time) *RequestStatusCreate {
-	rsc.mutation.SetCreatedAt(t)
-	return rsc
+func (_c *RequestStatusCreate) SetCreatedAt(v time.Time) *RequestStatusCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (rsc *RequestStatusCreate) SetNillableCreatedAt(t *time.Time) *RequestStatusCreate {
-	if t != nil {
-		rsc.SetCreatedAt(*t)
+func (_c *RequestStatusCreate) SetNillableCreatedAt(v *time.Time) *RequestStatusCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return rsc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (rsc *RequestStatusCreate) SetID(u uuid.UUID) *RequestStatusCreate {
-	rsc.mutation.SetID(u)
-	return rsc
+func (_c *RequestStatusCreate) SetID(v uuid.UUID) *RequestStatusCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (rsc *RequestStatusCreate) SetNillableID(u *uuid.UUID) *RequestStatusCreate {
-	if u != nil {
-		rsc.SetID(*u)
+func (_c *RequestStatusCreate) SetNillableID(v *uuid.UUID) *RequestStatusCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return rsc
+	return _c
 }
 
 // SetRequestID sets the "request" edge to the Request entity by ID.
-func (rsc *RequestStatusCreate) SetRequestID(id uuid.UUID) *RequestStatusCreate {
-	rsc.mutation.SetRequestID(id)
-	return rsc
+func (_c *RequestStatusCreate) SetRequestID(id uuid.UUID) *RequestStatusCreate {
+	_c.mutation.SetRequestID(id)
+	return _c
 }
 
 // SetRequest sets the "request" edge to the Request entity.
-func (rsc *RequestStatusCreate) SetRequest(r *Request) *RequestStatusCreate {
-	return rsc.SetRequestID(r.ID)
+func (_c *RequestStatusCreate) SetRequest(v *Request) *RequestStatusCreate {
+	return _c.SetRequestID(v.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (rsc *RequestStatusCreate) SetUserID(id uuid.UUID) *RequestStatusCreate {
-	rsc.mutation.SetUserID(id)
-	return rsc
+func (_c *RequestStatusCreate) SetUserID(id uuid.UUID) *RequestStatusCreate {
+	_c.mutation.SetUserID(id)
+	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (rsc *RequestStatusCreate) SetUser(u *User) *RequestStatusCreate {
-	return rsc.SetUserID(u.ID)
+func (_c *RequestStatusCreate) SetUser(v *User) *RequestStatusCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // Mutation returns the RequestStatusMutation object of the builder.
-func (rsc *RequestStatusCreate) Mutation() *RequestStatusMutation {
-	return rsc.mutation
+func (_c *RequestStatusCreate) Mutation() *RequestStatusMutation {
+	return _c.mutation
 }
 
 // Save creates the RequestStatus in the database.
-func (rsc *RequestStatusCreate) Save(ctx context.Context) (*RequestStatus, error) {
-	rsc.defaults()
-	return withHooks(ctx, rsc.sqlSave, rsc.mutation, rsc.hooks)
+func (_c *RequestStatusCreate) Save(ctx context.Context) (*RequestStatus, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (rsc *RequestStatusCreate) SaveX(ctx context.Context) *RequestStatus {
-	v, err := rsc.Save(ctx)
+func (_c *RequestStatusCreate) SaveX(ctx context.Context) *RequestStatus {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -108,62 +108,62 @@ func (rsc *RequestStatusCreate) SaveX(ctx context.Context) *RequestStatus {
 }
 
 // Exec executes the query.
-func (rsc *RequestStatusCreate) Exec(ctx context.Context) error {
-	_, err := rsc.Save(ctx)
+func (_c *RequestStatusCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rsc *RequestStatusCreate) ExecX(ctx context.Context) {
-	if err := rsc.Exec(ctx); err != nil {
+func (_c *RequestStatusCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (rsc *RequestStatusCreate) defaults() {
-	if _, ok := rsc.mutation.Status(); !ok {
+func (_c *RequestStatusCreate) defaults() {
+	if _, ok := _c.mutation.Status(); !ok {
 		v := requeststatus.DefaultStatus
-		rsc.mutation.SetStatus(v)
+		_c.mutation.SetStatus(v)
 	}
-	if _, ok := rsc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := requeststatus.DefaultCreatedAt()
-		rsc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := rsc.mutation.ID(); !ok {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := requeststatus.DefaultID()
-		rsc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (rsc *RequestStatusCreate) check() error {
-	if _, ok := rsc.mutation.Status(); !ok {
+func (_c *RequestStatusCreate) check() error {
+	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "RequestStatus.status"`)}
 	}
-	if v, ok := rsc.mutation.Status(); ok {
+	if v, ok := _c.mutation.Status(); ok {
 		if err := requeststatus.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "RequestStatus.status": %w`, err)}
 		}
 	}
-	if _, ok := rsc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "RequestStatus.created_at"`)}
 	}
-	if len(rsc.mutation.RequestIDs()) == 0 {
+	if len(_c.mutation.RequestIDs()) == 0 {
 		return &ValidationError{Name: "request", err: errors.New(`ent: missing required edge "RequestStatus.request"`)}
 	}
-	if len(rsc.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "RequestStatus.user"`)}
 	}
 	return nil
 }
 
-func (rsc *RequestStatusCreate) sqlSave(ctx context.Context) (*RequestStatus, error) {
-	if err := rsc.check(); err != nil {
+func (_c *RequestStatusCreate) sqlSave(ctx context.Context) (*RequestStatus, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := rsc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, rsc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -176,29 +176,29 @@ func (rsc *RequestStatusCreate) sqlSave(ctx context.Context) (*RequestStatus, er
 			return nil, err
 		}
 	}
-	rsc.mutation.id = &_node.ID
-	rsc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (rsc *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSpec) {
+func (_c *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSpec) {
 	var (
-		_node = &RequestStatus{config: rsc.config}
+		_node = &RequestStatus{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(requeststatus.Table, sqlgraph.NewFieldSpec(requeststatus.FieldID, field.TypeUUID))
 	)
-	if id, ok := rsc.mutation.ID(); ok {
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := rsc.mutation.Status(); ok {
+	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(requeststatus.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
-	if value, ok := rsc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(requeststatus.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := rsc.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -215,7 +215,7 @@ func (rsc *RequestStatusCreate) createSpec() (*RequestStatus, *sqlgraph.CreateSp
 		_node.request_status = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := rsc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -243,16 +243,16 @@ type RequestStatusCreateBulk struct {
 }
 
 // Save creates the RequestStatus entities in the database.
-func (rscb *RequestStatusCreateBulk) Save(ctx context.Context) ([]*RequestStatus, error) {
-	if rscb.err != nil {
-		return nil, rscb.err
+func (_c *RequestStatusCreateBulk) Save(ctx context.Context) ([]*RequestStatus, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(rscb.builders))
-	nodes := make([]*RequestStatus, len(rscb.builders))
-	mutators := make([]Mutator, len(rscb.builders))
-	for i := range rscb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*RequestStatus, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := rscb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RequestStatusMutation)
@@ -266,11 +266,11 @@ func (rscb *RequestStatusCreateBulk) Save(ctx context.Context) ([]*RequestStatus
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, rscb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, rscb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -290,7 +290,7 @@ func (rscb *RequestStatusCreateBulk) Save(ctx context.Context) ([]*RequestStatus
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, rscb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -298,8 +298,8 @@ func (rscb *RequestStatusCreateBulk) Save(ctx context.Context) ([]*RequestStatus
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (rscb *RequestStatusCreateBulk) SaveX(ctx context.Context) []*RequestStatus {
-	v, err := rscb.Save(ctx)
+func (_c *RequestStatusCreateBulk) SaveX(ctx context.Context) []*RequestStatus {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -307,14 +307,14 @@ func (rscb *RequestStatusCreateBulk) SaveX(ctx context.Context) []*RequestStatus
 }
 
 // Exec executes the query.
-func (rscb *RequestStatusCreateBulk) Exec(ctx context.Context) error {
-	_, err := rscb.Save(ctx)
+func (_c *RequestStatusCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rscb *RequestStatusCreateBulk) ExecX(ctx context.Context) {
-	if err := rscb.Exec(ctx); err != nil {
+func (_c *RequestStatusCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

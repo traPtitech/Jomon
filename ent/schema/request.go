@@ -53,8 +53,5 @@ func (Request) Edges() []ent.Edge {
 			}),
 		edge.To("user", User.Type).
 			Unique(),
-		edge.From("group", Group.Type).
-			Ref("request").
-			Unique(),
 	}
 }

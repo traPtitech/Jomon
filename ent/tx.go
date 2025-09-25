@@ -16,10 +16,6 @@ type Tx struct {
 	Comment *CommentClient
 	// File is the client for interacting with the File builders.
 	File *FileClient
-	// Group is the client for interacting with the Group builders.
-	Group *GroupClient
-	// GroupBudget is the client for interacting with the GroupBudget builders.
-	GroupBudget *GroupBudgetClient
 	// Request is the client for interacting with the Request builders.
 	Request *RequestClient
 	// RequestStatus is the client for interacting with the RequestStatus builders.
@@ -167,8 +163,6 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Comment = NewCommentClient(tx.config)
 	tx.File = NewFileClient(tx.config)
-	tx.Group = NewGroupClient(tx.config)
-	tx.GroupBudget = NewGroupBudgetClient(tx.config)
 	tx.Request = NewRequestClient(tx.config)
 	tx.RequestStatus = NewRequestStatusClient(tx.config)
 	tx.RequestTarget = NewRequestTargetClient(tx.config)

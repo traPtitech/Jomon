@@ -33,7 +33,7 @@ func TestEntRepository_GetComments(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{}, []*RequestTarget{},
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		comment1, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, user.ID)
@@ -65,7 +65,7 @@ func TestEntRepository_GetComments(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{}, []*RequestTarget{},
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		got, err := repo2.GetComments(ctx, request.ID)
@@ -99,7 +99,7 @@ func TestEntRepository_CreateComment(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{}, []*RequestTarget{},
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		comment := random.AlphaNumeric(t, 30)
@@ -148,7 +148,7 @@ func TestEntRepository_CreateComment(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{}, []*RequestTarget{},
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		_, err = repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, uuid.New())
@@ -175,7 +175,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{}, []*RequestTarget{},
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 		created, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, user.ID)
 		require.NoError(t, err)
@@ -207,7 +207,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{}, []*RequestTarget{},
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 		comment, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request1.ID, user.ID)
 		require.NoError(t, err)
@@ -217,7 +217,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{}, []*RequestTarget{},
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 		updated, err := repo.UpdateComment(ctx, comment.Comment, request2.ID, comment.ID)
 		require.NoError(t, err)
@@ -249,7 +249,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{}, []*RequestTarget{},
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		_, err = repo.UpdateComment(
@@ -272,7 +272,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{}, []*RequestTarget{},
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 		comment, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, user.ID)
 		require.NoError(t, err)
@@ -301,7 +301,7 @@ func TestEntRepository_DeleteComment(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{}, []*RequestTarget{},
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 		comment, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, user.ID)
 		require.NoError(t, err)
@@ -327,7 +327,7 @@ func TestEntRepository_DeleteComment(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{}, []*RequestTarget{},
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 		comment, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), request.ID, user.ID)
 		require.NoError(t, err)
@@ -349,7 +349,7 @@ func TestEntRepository_DeleteComment(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{}, []*RequestTarget{},
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		err = repo.DeleteComment(ctx, request.ID, uuid.New())

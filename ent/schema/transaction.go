@@ -35,9 +35,6 @@ func (Transaction) Edges() []ent.Edge {
 				OnDelete: entsql.Cascade,
 			}),
 		edge.To("tag", Tag.Type),
-		edge.From("group_budget", GroupBudget.Type).
-			Ref("transaction").
-			Unique(),
 		edge.From("request", Request.Type).
 			Ref("transaction").
 			Unique(),

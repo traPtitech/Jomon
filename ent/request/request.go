@@ -37,8 +37,6 @@ const (
 	EdgeComment = "comment"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
-	// EdgeGroup holds the string denoting the group edge name in mutations.
-	EdgeGroup = "group"
 	// Table holds the table name of the request in the database.
 	Table = "requests"
 	// StatusTable is the table that holds the status relation/edge.
@@ -88,13 +86,6 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "request_user"
-	// GroupTable is the table that holds the group relation/edge.
-	GroupTable = "requests"
-	// GroupInverseTable is the table name for the Group entity.
-	// It exists in this package in order to avoid circular dependency with the "group" package.
-	GroupInverseTable = "groups"
-	// GroupColumn is the table column denoting the group relation/edge.
-	GroupColumn = "group_request"
 )
 
 // Columns holds all SQL columns for request fields.
@@ -109,7 +100,6 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "requests"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"group_request",
 	"request_user",
 }
 
@@ -263,13 +253,6 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
-
-// ByGroupField orders the results by group field.
-func ByGroupField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newGroupStep(), sql.OrderByField(field, opts...))
-	}
-}
 func newStatusStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -317,12 +300,5 @@ func newUserStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
-	)
-}
-func newGroupStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(GroupInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
 	)
 }

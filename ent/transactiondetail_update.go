@@ -25,119 +25,119 @@ type TransactionDetailUpdate struct {
 }
 
 // Where appends a list predicates to the TransactionDetailUpdate builder.
-func (tdu *TransactionDetailUpdate) Where(ps ...predicate.TransactionDetail) *TransactionDetailUpdate {
-	tdu.mutation.Where(ps...)
-	return tdu
+func (_u *TransactionDetailUpdate) Where(ps ...predicate.TransactionDetail) *TransactionDetailUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetTitle sets the "title" field.
-func (tdu *TransactionDetailUpdate) SetTitle(s string) *TransactionDetailUpdate {
-	tdu.mutation.SetTitle(s)
-	return tdu
+func (_u *TransactionDetailUpdate) SetTitle(v string) *TransactionDetailUpdate {
+	_u.mutation.SetTitle(v)
+	return _u
 }
 
 // SetNillableTitle sets the "title" field if the given value is not nil.
-func (tdu *TransactionDetailUpdate) SetNillableTitle(s *string) *TransactionDetailUpdate {
-	if s != nil {
-		tdu.SetTitle(*s)
+func (_u *TransactionDetailUpdate) SetNillableTitle(v *string) *TransactionDetailUpdate {
+	if v != nil {
+		_u.SetTitle(*v)
 	}
-	return tdu
+	return _u
 }
 
 // SetAmount sets the "amount" field.
-func (tdu *TransactionDetailUpdate) SetAmount(i int) *TransactionDetailUpdate {
-	tdu.mutation.ResetAmount()
-	tdu.mutation.SetAmount(i)
-	return tdu
+func (_u *TransactionDetailUpdate) SetAmount(v int) *TransactionDetailUpdate {
+	_u.mutation.ResetAmount()
+	_u.mutation.SetAmount(v)
+	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (tdu *TransactionDetailUpdate) SetNillableAmount(i *int) *TransactionDetailUpdate {
-	if i != nil {
-		tdu.SetAmount(*i)
+func (_u *TransactionDetailUpdate) SetNillableAmount(v *int) *TransactionDetailUpdate {
+	if v != nil {
+		_u.SetAmount(*v)
 	}
-	return tdu
+	return _u
 }
 
-// AddAmount adds i to the "amount" field.
-func (tdu *TransactionDetailUpdate) AddAmount(i int) *TransactionDetailUpdate {
-	tdu.mutation.AddAmount(i)
-	return tdu
+// AddAmount adds value to the "amount" field.
+func (_u *TransactionDetailUpdate) AddAmount(v int) *TransactionDetailUpdate {
+	_u.mutation.AddAmount(v)
+	return _u
 }
 
 // SetTarget sets the "target" field.
-func (tdu *TransactionDetailUpdate) SetTarget(s string) *TransactionDetailUpdate {
-	tdu.mutation.SetTarget(s)
-	return tdu
+func (_u *TransactionDetailUpdate) SetTarget(v string) *TransactionDetailUpdate {
+	_u.mutation.SetTarget(v)
+	return _u
 }
 
 // SetNillableTarget sets the "target" field if the given value is not nil.
-func (tdu *TransactionDetailUpdate) SetNillableTarget(s *string) *TransactionDetailUpdate {
-	if s != nil {
-		tdu.SetTarget(*s)
+func (_u *TransactionDetailUpdate) SetNillableTarget(v *string) *TransactionDetailUpdate {
+	if v != nil {
+		_u.SetTarget(*v)
 	}
-	return tdu
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (tdu *TransactionDetailUpdate) SetCreatedAt(t time.Time) *TransactionDetailUpdate {
-	tdu.mutation.SetCreatedAt(t)
-	return tdu
+func (_u *TransactionDetailUpdate) SetCreatedAt(v time.Time) *TransactionDetailUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (tdu *TransactionDetailUpdate) SetNillableCreatedAt(t *time.Time) *TransactionDetailUpdate {
-	if t != nil {
-		tdu.SetCreatedAt(*t)
+func (_u *TransactionDetailUpdate) SetNillableCreatedAt(v *time.Time) *TransactionDetailUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return tdu
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (tdu *TransactionDetailUpdate) SetUpdatedAt(t time.Time) *TransactionDetailUpdate {
-	tdu.mutation.SetUpdatedAt(t)
-	return tdu
+func (_u *TransactionDetailUpdate) SetUpdatedAt(v time.Time) *TransactionDetailUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (tdu *TransactionDetailUpdate) SetTransactionID(id uuid.UUID) *TransactionDetailUpdate {
-	tdu.mutation.SetTransactionID(id)
-	return tdu
+func (_u *TransactionDetailUpdate) SetTransactionID(id uuid.UUID) *TransactionDetailUpdate {
+	_u.mutation.SetTransactionID(id)
+	return _u
 }
 
 // SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
-func (tdu *TransactionDetailUpdate) SetNillableTransactionID(id *uuid.UUID) *TransactionDetailUpdate {
+func (_u *TransactionDetailUpdate) SetNillableTransactionID(id *uuid.UUID) *TransactionDetailUpdate {
 	if id != nil {
-		tdu = tdu.SetTransactionID(*id)
+		_u = _u.SetTransactionID(*id)
 	}
-	return tdu
+	return _u
 }
 
 // SetTransaction sets the "transaction" edge to the Transaction entity.
-func (tdu *TransactionDetailUpdate) SetTransaction(t *Transaction) *TransactionDetailUpdate {
-	return tdu.SetTransactionID(t.ID)
+func (_u *TransactionDetailUpdate) SetTransaction(v *Transaction) *TransactionDetailUpdate {
+	return _u.SetTransactionID(v.ID)
 }
 
 // Mutation returns the TransactionDetailMutation object of the builder.
-func (tdu *TransactionDetailUpdate) Mutation() *TransactionDetailMutation {
-	return tdu.mutation
+func (_u *TransactionDetailUpdate) Mutation() *TransactionDetailMutation {
+	return _u.mutation
 }
 
 // ClearTransaction clears the "transaction" edge to the Transaction entity.
-func (tdu *TransactionDetailUpdate) ClearTransaction() *TransactionDetailUpdate {
-	tdu.mutation.ClearTransaction()
-	return tdu
+func (_u *TransactionDetailUpdate) ClearTransaction() *TransactionDetailUpdate {
+	_u.mutation.ClearTransaction()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (tdu *TransactionDetailUpdate) Save(ctx context.Context) (int, error) {
-	tdu.defaults()
-	return withHooks(ctx, tdu.sqlSave, tdu.mutation, tdu.hooks)
+func (_u *TransactionDetailUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tdu *TransactionDetailUpdate) SaveX(ctx context.Context) int {
-	affected, err := tdu.Save(ctx)
+func (_u *TransactionDetailUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -145,29 +145,29 @@ func (tdu *TransactionDetailUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (tdu *TransactionDetailUpdate) Exec(ctx context.Context) error {
-	_, err := tdu.Save(ctx)
+func (_u *TransactionDetailUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tdu *TransactionDetailUpdate) ExecX(ctx context.Context) {
-	if err := tdu.Exec(ctx); err != nil {
+func (_u *TransactionDetailUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (tdu *TransactionDetailUpdate) defaults() {
-	if _, ok := tdu.mutation.UpdatedAt(); !ok {
+func (_u *TransactionDetailUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := transactiondetail.UpdateDefaultUpdatedAt()
-		tdu.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tdu *TransactionDetailUpdate) check() error {
-	if v, ok := tdu.mutation.Title(); ok {
+func (_u *TransactionDetailUpdate) check() error {
+	if v, ok := _u.mutation.Title(); ok {
 		if err := transactiondetail.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "TransactionDetail.title": %w`, err)}
 		}
@@ -175,37 +175,37 @@ func (tdu *TransactionDetailUpdate) check() error {
 	return nil
 }
 
-func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := tdu.check(); err != nil {
-		return n, err
+func (_u *TransactionDetailUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(transactiondetail.Table, transactiondetail.Columns, sqlgraph.NewFieldSpec(transactiondetail.FieldID, field.TypeUUID))
-	if ps := tdu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := tdu.mutation.Title(); ok {
+	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(transactiondetail.FieldTitle, field.TypeString, value)
 	}
-	if value, ok := tdu.mutation.Amount(); ok {
+	if value, ok := _u.mutation.Amount(); ok {
 		_spec.SetField(transactiondetail.FieldAmount, field.TypeInt, value)
 	}
-	if value, ok := tdu.mutation.AddedAmount(); ok {
+	if value, ok := _u.mutation.AddedAmount(); ok {
 		_spec.AddField(transactiondetail.FieldAmount, field.TypeInt, value)
 	}
-	if value, ok := tdu.mutation.Target(); ok {
+	if value, ok := _u.mutation.Target(); ok {
 		_spec.SetField(transactiondetail.FieldTarget, field.TypeString, value)
 	}
-	if value, ok := tdu.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(transactiondetail.FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := tdu.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(transactiondetail.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if tdu.mutation.TransactionCleared() {
+	if _u.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -218,7 +218,7 @@ func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tdu.mutation.TransactionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -234,7 +234,7 @@ func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, tdu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{transactiondetail.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -242,8 +242,8 @@ func (tdu *TransactionDetailUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		return 0, err
 	}
-	tdu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // TransactionDetailUpdateOne is the builder for updating a single TransactionDetail entity.
@@ -255,126 +255,126 @@ type TransactionDetailUpdateOne struct {
 }
 
 // SetTitle sets the "title" field.
-func (tduo *TransactionDetailUpdateOne) SetTitle(s string) *TransactionDetailUpdateOne {
-	tduo.mutation.SetTitle(s)
-	return tduo
+func (_u *TransactionDetailUpdateOne) SetTitle(v string) *TransactionDetailUpdateOne {
+	_u.mutation.SetTitle(v)
+	return _u
 }
 
 // SetNillableTitle sets the "title" field if the given value is not nil.
-func (tduo *TransactionDetailUpdateOne) SetNillableTitle(s *string) *TransactionDetailUpdateOne {
-	if s != nil {
-		tduo.SetTitle(*s)
+func (_u *TransactionDetailUpdateOne) SetNillableTitle(v *string) *TransactionDetailUpdateOne {
+	if v != nil {
+		_u.SetTitle(*v)
 	}
-	return tduo
+	return _u
 }
 
 // SetAmount sets the "amount" field.
-func (tduo *TransactionDetailUpdateOne) SetAmount(i int) *TransactionDetailUpdateOne {
-	tduo.mutation.ResetAmount()
-	tduo.mutation.SetAmount(i)
-	return tduo
+func (_u *TransactionDetailUpdateOne) SetAmount(v int) *TransactionDetailUpdateOne {
+	_u.mutation.ResetAmount()
+	_u.mutation.SetAmount(v)
+	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (tduo *TransactionDetailUpdateOne) SetNillableAmount(i *int) *TransactionDetailUpdateOne {
-	if i != nil {
-		tduo.SetAmount(*i)
+func (_u *TransactionDetailUpdateOne) SetNillableAmount(v *int) *TransactionDetailUpdateOne {
+	if v != nil {
+		_u.SetAmount(*v)
 	}
-	return tduo
+	return _u
 }
 
-// AddAmount adds i to the "amount" field.
-func (tduo *TransactionDetailUpdateOne) AddAmount(i int) *TransactionDetailUpdateOne {
-	tduo.mutation.AddAmount(i)
-	return tduo
+// AddAmount adds value to the "amount" field.
+func (_u *TransactionDetailUpdateOne) AddAmount(v int) *TransactionDetailUpdateOne {
+	_u.mutation.AddAmount(v)
+	return _u
 }
 
 // SetTarget sets the "target" field.
-func (tduo *TransactionDetailUpdateOne) SetTarget(s string) *TransactionDetailUpdateOne {
-	tduo.mutation.SetTarget(s)
-	return tduo
+func (_u *TransactionDetailUpdateOne) SetTarget(v string) *TransactionDetailUpdateOne {
+	_u.mutation.SetTarget(v)
+	return _u
 }
 
 // SetNillableTarget sets the "target" field if the given value is not nil.
-func (tduo *TransactionDetailUpdateOne) SetNillableTarget(s *string) *TransactionDetailUpdateOne {
-	if s != nil {
-		tduo.SetTarget(*s)
+func (_u *TransactionDetailUpdateOne) SetNillableTarget(v *string) *TransactionDetailUpdateOne {
+	if v != nil {
+		_u.SetTarget(*v)
 	}
-	return tduo
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (tduo *TransactionDetailUpdateOne) SetCreatedAt(t time.Time) *TransactionDetailUpdateOne {
-	tduo.mutation.SetCreatedAt(t)
-	return tduo
+func (_u *TransactionDetailUpdateOne) SetCreatedAt(v time.Time) *TransactionDetailUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (tduo *TransactionDetailUpdateOne) SetNillableCreatedAt(t *time.Time) *TransactionDetailUpdateOne {
-	if t != nil {
-		tduo.SetCreatedAt(*t)
+func (_u *TransactionDetailUpdateOne) SetNillableCreatedAt(v *time.Time) *TransactionDetailUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return tduo
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (tduo *TransactionDetailUpdateOne) SetUpdatedAt(t time.Time) *TransactionDetailUpdateOne {
-	tduo.mutation.SetUpdatedAt(t)
-	return tduo
+func (_u *TransactionDetailUpdateOne) SetUpdatedAt(v time.Time) *TransactionDetailUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (tduo *TransactionDetailUpdateOne) SetTransactionID(id uuid.UUID) *TransactionDetailUpdateOne {
-	tduo.mutation.SetTransactionID(id)
-	return tduo
+func (_u *TransactionDetailUpdateOne) SetTransactionID(id uuid.UUID) *TransactionDetailUpdateOne {
+	_u.mutation.SetTransactionID(id)
+	return _u
 }
 
 // SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
-func (tduo *TransactionDetailUpdateOne) SetNillableTransactionID(id *uuid.UUID) *TransactionDetailUpdateOne {
+func (_u *TransactionDetailUpdateOne) SetNillableTransactionID(id *uuid.UUID) *TransactionDetailUpdateOne {
 	if id != nil {
-		tduo = tduo.SetTransactionID(*id)
+		_u = _u.SetTransactionID(*id)
 	}
-	return tduo
+	return _u
 }
 
 // SetTransaction sets the "transaction" edge to the Transaction entity.
-func (tduo *TransactionDetailUpdateOne) SetTransaction(t *Transaction) *TransactionDetailUpdateOne {
-	return tduo.SetTransactionID(t.ID)
+func (_u *TransactionDetailUpdateOne) SetTransaction(v *Transaction) *TransactionDetailUpdateOne {
+	return _u.SetTransactionID(v.ID)
 }
 
 // Mutation returns the TransactionDetailMutation object of the builder.
-func (tduo *TransactionDetailUpdateOne) Mutation() *TransactionDetailMutation {
-	return tduo.mutation
+func (_u *TransactionDetailUpdateOne) Mutation() *TransactionDetailMutation {
+	return _u.mutation
 }
 
 // ClearTransaction clears the "transaction" edge to the Transaction entity.
-func (tduo *TransactionDetailUpdateOne) ClearTransaction() *TransactionDetailUpdateOne {
-	tduo.mutation.ClearTransaction()
-	return tduo
+func (_u *TransactionDetailUpdateOne) ClearTransaction() *TransactionDetailUpdateOne {
+	_u.mutation.ClearTransaction()
+	return _u
 }
 
 // Where appends a list predicates to the TransactionDetailUpdate builder.
-func (tduo *TransactionDetailUpdateOne) Where(ps ...predicate.TransactionDetail) *TransactionDetailUpdateOne {
-	tduo.mutation.Where(ps...)
-	return tduo
+func (_u *TransactionDetailUpdateOne) Where(ps ...predicate.TransactionDetail) *TransactionDetailUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (tduo *TransactionDetailUpdateOne) Select(field string, fields ...string) *TransactionDetailUpdateOne {
-	tduo.fields = append([]string{field}, fields...)
-	return tduo
+func (_u *TransactionDetailUpdateOne) Select(field string, fields ...string) *TransactionDetailUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated TransactionDetail entity.
-func (tduo *TransactionDetailUpdateOne) Save(ctx context.Context) (*TransactionDetail, error) {
-	tduo.defaults()
-	return withHooks(ctx, tduo.sqlSave, tduo.mutation, tduo.hooks)
+func (_u *TransactionDetailUpdateOne) Save(ctx context.Context) (*TransactionDetail, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tduo *TransactionDetailUpdateOne) SaveX(ctx context.Context) *TransactionDetail {
-	node, err := tduo.Save(ctx)
+func (_u *TransactionDetailUpdateOne) SaveX(ctx context.Context) *TransactionDetail {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -382,29 +382,29 @@ func (tduo *TransactionDetailUpdateOne) SaveX(ctx context.Context) *TransactionD
 }
 
 // Exec executes the query on the entity.
-func (tduo *TransactionDetailUpdateOne) Exec(ctx context.Context) error {
-	_, err := tduo.Save(ctx)
+func (_u *TransactionDetailUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tduo *TransactionDetailUpdateOne) ExecX(ctx context.Context) {
-	if err := tduo.Exec(ctx); err != nil {
+func (_u *TransactionDetailUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (tduo *TransactionDetailUpdateOne) defaults() {
-	if _, ok := tduo.mutation.UpdatedAt(); !ok {
+func (_u *TransactionDetailUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := transactiondetail.UpdateDefaultUpdatedAt()
-		tduo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tduo *TransactionDetailUpdateOne) check() error {
-	if v, ok := tduo.mutation.Title(); ok {
+func (_u *TransactionDetailUpdateOne) check() error {
+	if v, ok := _u.mutation.Title(); ok {
 		if err := transactiondetail.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "TransactionDetail.title": %w`, err)}
 		}
@@ -412,17 +412,17 @@ func (tduo *TransactionDetailUpdateOne) check() error {
 	return nil
 }
 
-func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *TransactionDetail, err error) {
-	if err := tduo.check(); err != nil {
+func (_u *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *TransactionDetail, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(transactiondetail.Table, transactiondetail.Columns, sqlgraph.NewFieldSpec(transactiondetail.FieldID, field.TypeUUID))
-	id, ok := tduo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "TransactionDetail.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := tduo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, transactiondetail.FieldID)
 		for _, f := range fields {
@@ -434,32 +434,32 @@ func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *Tra
 			}
 		}
 	}
-	if ps := tduo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := tduo.mutation.Title(); ok {
+	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(transactiondetail.FieldTitle, field.TypeString, value)
 	}
-	if value, ok := tduo.mutation.Amount(); ok {
+	if value, ok := _u.mutation.Amount(); ok {
 		_spec.SetField(transactiondetail.FieldAmount, field.TypeInt, value)
 	}
-	if value, ok := tduo.mutation.AddedAmount(); ok {
+	if value, ok := _u.mutation.AddedAmount(); ok {
 		_spec.AddField(transactiondetail.FieldAmount, field.TypeInt, value)
 	}
-	if value, ok := tduo.mutation.Target(); ok {
+	if value, ok := _u.mutation.Target(); ok {
 		_spec.SetField(transactiondetail.FieldTarget, field.TypeString, value)
 	}
-	if value, ok := tduo.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(transactiondetail.FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := tduo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(transactiondetail.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if tduo.mutation.TransactionCleared() {
+	if _u.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -472,7 +472,7 @@ func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *Tra
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tduo.mutation.TransactionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -488,10 +488,10 @@ func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *Tra
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &TransactionDetail{config: tduo.config}
+	_node = &TransactionDetail{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, tduo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{transactiondetail.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -499,6 +499,6 @@ func (tduo *TransactionDetailUpdateOne) sqlSave(ctx context.Context) (_node *Tra
 		}
 		return nil, err
 	}
-	tduo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

@@ -20,56 +20,56 @@ type RequestStatusDelete struct {
 }
 
 // Where appends a list predicates to the RequestStatusDelete builder.
-func (rsd *RequestStatusDelete) Where(ps ...predicate.RequestStatus) *RequestStatusDelete {
-	rsd.mutation.Where(ps...)
-	return rsd
+func (_d *RequestStatusDelete) Where(ps ...predicate.RequestStatus) *RequestStatusDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (rsd *RequestStatusDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, rsd.sqlExec, rsd.mutation, rsd.hooks)
+func (_d *RequestStatusDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rsd *RequestStatusDelete) ExecX(ctx context.Context) int {
-	n, err := rsd.Exec(ctx)
+func (_d *RequestStatusDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (rsd *RequestStatusDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *RequestStatusDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(requeststatus.Table, sqlgraph.NewFieldSpec(requeststatus.FieldID, field.TypeUUID))
-	if ps := rsd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, rsd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	rsd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // RequestStatusDeleteOne is the builder for deleting a single RequestStatus entity.
 type RequestStatusDeleteOne struct {
-	rsd *RequestStatusDelete
+	_d *RequestStatusDelete
 }
 
 // Where appends a list predicates to the RequestStatusDelete builder.
-func (rsdo *RequestStatusDeleteOne) Where(ps ...predicate.RequestStatus) *RequestStatusDeleteOne {
-	rsdo.rsd.mutation.Where(ps...)
-	return rsdo
+func (_d *RequestStatusDeleteOne) Where(ps ...predicate.RequestStatus) *RequestStatusDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (rsdo *RequestStatusDeleteOne) Exec(ctx context.Context) error {
-	n, err := rsdo.rsd.Exec(ctx)
+func (_d *RequestStatusDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (rsdo *RequestStatusDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rsdo *RequestStatusDeleteOne) ExecX(ctx context.Context) {
-	if err := rsdo.Exec(ctx); err != nil {
+func (_d *RequestStatusDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

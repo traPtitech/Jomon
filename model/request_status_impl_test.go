@@ -30,7 +30,7 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		status := Status(random.Numeric(t, 5) + 1)
@@ -60,7 +60,7 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		invalidStatus := Status(6)
@@ -95,7 +95,7 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		status := Status(random.Numeric(t, 5) + 1)
