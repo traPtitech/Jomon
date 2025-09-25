@@ -718,6 +718,9 @@ components:
           type: integer
           nullable: true
           example: 250000
+        parent_partition_group:
+          type: string
+          format: uuid
         management:
           $ref: "#/components/schemas/PartitionManagement"
         created_at:
@@ -730,6 +733,7 @@ components:
         - id
         - name
         - budget
+        - parent_partition_group
         - management
         - created_at
         - updated_at
@@ -743,11 +747,15 @@ components:
           type: integer
           nullable: true
           example: 250000
+        parent_partition_group:
+          type: string
+          format: uuid
         management:
           $ref: "#/components/schemas/PartitionManagement"
       required:
         - name
         - budget
+        - parent_partition_group
         - management
     PartitionGroup:
       type: object
@@ -758,14 +766,10 @@ components:
         name:
           type: string
           example: "イベント運営経費"
-        child_partitions:
-          type: array
-          items:
-            $ref: "#/components/schemas/Partition"
-        child_partition_groups:
-          type: array
-          items:
-            $ref: "#/components/schemas/PartitionGroup"
+        parent_partition_group:
+          type: string
+          nullable: true
+          format: uuid
         created_at:
           type: string
           format: date-time
@@ -775,8 +779,7 @@ components:
       required:
         - id
         - name
-        - child_partitions
-        - child_partition_groups
+        - parent_partition_group
         - created_at
         - updated_at
     PartitionGroupInput:
@@ -785,20 +788,13 @@ components:
         name:
           type: string
           example: "イベント運営経費"
-        child_partitions:
-          type: array
-          items:
-            type: string
-            format: uuid
-        child_partition_groups:
-          type: array
-          items:
-            type: string
-            format: uuid
+        parent_partition_group:
+          type: string
+          nullable: true
+          format: uuid
       required:
         - name
-        - child_partitions
-        - child_partition_groups
+        - parent_partition_group
     PartitionManagement:
       type: object
       required:
