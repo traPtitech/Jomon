@@ -784,6 +784,7 @@ components:
         - id
         - name
         - parent_partition_group
+        - depth
         - created_at
         - updated_at
     PartitionGroupInput:
@@ -803,6 +804,7 @@ components:
       required:
         - name
         - parent_partition_group
+        - depth
     PartitionManagement:
       type: object
       required:
