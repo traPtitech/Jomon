@@ -26,113 +26,113 @@ type RequestTargetUpdate struct {
 }
 
 // Where appends a list predicates to the RequestTargetUpdate builder.
-func (rtu *RequestTargetUpdate) Where(ps ...predicate.RequestTarget) *RequestTargetUpdate {
-	rtu.mutation.Where(ps...)
-	return rtu
+func (_u *RequestTargetUpdate) Where(ps ...predicate.RequestTarget) *RequestTargetUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetAmount sets the "amount" field.
-func (rtu *RequestTargetUpdate) SetAmount(i int) *RequestTargetUpdate {
-	rtu.mutation.ResetAmount()
-	rtu.mutation.SetAmount(i)
-	return rtu
+func (_u *RequestTargetUpdate) SetAmount(v int) *RequestTargetUpdate {
+	_u.mutation.ResetAmount()
+	_u.mutation.SetAmount(v)
+	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (rtu *RequestTargetUpdate) SetNillableAmount(i *int) *RequestTargetUpdate {
-	if i != nil {
-		rtu.SetAmount(*i)
+func (_u *RequestTargetUpdate) SetNillableAmount(v *int) *RequestTargetUpdate {
+	if v != nil {
+		_u.SetAmount(*v)
 	}
-	return rtu
+	return _u
 }
 
-// AddAmount adds i to the "amount" field.
-func (rtu *RequestTargetUpdate) AddAmount(i int) *RequestTargetUpdate {
-	rtu.mutation.AddAmount(i)
-	return rtu
+// AddAmount adds value to the "amount" field.
+func (_u *RequestTargetUpdate) AddAmount(v int) *RequestTargetUpdate {
+	_u.mutation.AddAmount(v)
+	return _u
 }
 
 // SetPaidAt sets the "paid_at" field.
-func (rtu *RequestTargetUpdate) SetPaidAt(t time.Time) *RequestTargetUpdate {
-	rtu.mutation.SetPaidAt(t)
-	return rtu
+func (_u *RequestTargetUpdate) SetPaidAt(v time.Time) *RequestTargetUpdate {
+	_u.mutation.SetPaidAt(v)
+	return _u
 }
 
 // SetNillablePaidAt sets the "paid_at" field if the given value is not nil.
-func (rtu *RequestTargetUpdate) SetNillablePaidAt(t *time.Time) *RequestTargetUpdate {
-	if t != nil {
-		rtu.SetPaidAt(*t)
+func (_u *RequestTargetUpdate) SetNillablePaidAt(v *time.Time) *RequestTargetUpdate {
+	if v != nil {
+		_u.SetPaidAt(*v)
 	}
-	return rtu
+	return _u
 }
 
 // ClearPaidAt clears the value of the "paid_at" field.
-func (rtu *RequestTargetUpdate) ClearPaidAt() *RequestTargetUpdate {
-	rtu.mutation.ClearPaidAt()
-	return rtu
+func (_u *RequestTargetUpdate) ClearPaidAt() *RequestTargetUpdate {
+	_u.mutation.ClearPaidAt()
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (rtu *RequestTargetUpdate) SetCreatedAt(t time.Time) *RequestTargetUpdate {
-	rtu.mutation.SetCreatedAt(t)
-	return rtu
+func (_u *RequestTargetUpdate) SetCreatedAt(v time.Time) *RequestTargetUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (rtu *RequestTargetUpdate) SetNillableCreatedAt(t *time.Time) *RequestTargetUpdate {
-	if t != nil {
-		rtu.SetCreatedAt(*t)
+func (_u *RequestTargetUpdate) SetNillableCreatedAt(v *time.Time) *RequestTargetUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return rtu
+	return _u
 }
 
 // SetRequestID sets the "request" edge to the Request entity by ID.
-func (rtu *RequestTargetUpdate) SetRequestID(id uuid.UUID) *RequestTargetUpdate {
-	rtu.mutation.SetRequestID(id)
-	return rtu
+func (_u *RequestTargetUpdate) SetRequestID(id uuid.UUID) *RequestTargetUpdate {
+	_u.mutation.SetRequestID(id)
+	return _u
 }
 
 // SetRequest sets the "request" edge to the Request entity.
-func (rtu *RequestTargetUpdate) SetRequest(r *Request) *RequestTargetUpdate {
-	return rtu.SetRequestID(r.ID)
+func (_u *RequestTargetUpdate) SetRequest(v *Request) *RequestTargetUpdate {
+	return _u.SetRequestID(v.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (rtu *RequestTargetUpdate) SetUserID(id uuid.UUID) *RequestTargetUpdate {
-	rtu.mutation.SetUserID(id)
-	return rtu
+func (_u *RequestTargetUpdate) SetUserID(id uuid.UUID) *RequestTargetUpdate {
+	_u.mutation.SetUserID(id)
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (rtu *RequestTargetUpdate) SetUser(u *User) *RequestTargetUpdate {
-	return rtu.SetUserID(u.ID)
+func (_u *RequestTargetUpdate) SetUser(v *User) *RequestTargetUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the RequestTargetMutation object of the builder.
-func (rtu *RequestTargetUpdate) Mutation() *RequestTargetMutation {
-	return rtu.mutation
+func (_u *RequestTargetUpdate) Mutation() *RequestTargetMutation {
+	return _u.mutation
 }
 
 // ClearRequest clears the "request" edge to the Request entity.
-func (rtu *RequestTargetUpdate) ClearRequest() *RequestTargetUpdate {
-	rtu.mutation.ClearRequest()
-	return rtu
+func (_u *RequestTargetUpdate) ClearRequest() *RequestTargetUpdate {
+	_u.mutation.ClearRequest()
+	return _u
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (rtu *RequestTargetUpdate) ClearUser() *RequestTargetUpdate {
-	rtu.mutation.ClearUser()
-	return rtu
+func (_u *RequestTargetUpdate) ClearUser() *RequestTargetUpdate {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (rtu *RequestTargetUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, rtu.sqlSave, rtu.mutation, rtu.hooks)
+func (_u *RequestTargetUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (rtu *RequestTargetUpdate) SaveX(ctx context.Context) int {
-	affected, err := rtu.Save(ctx)
+func (_u *RequestTargetUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -140,57 +140,57 @@ func (rtu *RequestTargetUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (rtu *RequestTargetUpdate) Exec(ctx context.Context) error {
-	_, err := rtu.Save(ctx)
+func (_u *RequestTargetUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rtu *RequestTargetUpdate) ExecX(ctx context.Context) {
-	if err := rtu.Exec(ctx); err != nil {
+func (_u *RequestTargetUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (rtu *RequestTargetUpdate) check() error {
-	if rtu.mutation.RequestCleared() && len(rtu.mutation.RequestIDs()) > 0 {
+func (_u *RequestTargetUpdate) check() error {
+	if _u.mutation.RequestCleared() && len(_u.mutation.RequestIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RequestTarget.request"`)
 	}
-	if rtu.mutation.UserCleared() && len(rtu.mutation.UserIDs()) > 0 {
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RequestTarget.user"`)
 	}
 	return nil
 }
 
-func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := rtu.check(); err != nil {
-		return n, err
+func (_u *RequestTargetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(requesttarget.Table, requesttarget.Columns, sqlgraph.NewFieldSpec(requesttarget.FieldID, field.TypeUUID))
-	if ps := rtu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := rtu.mutation.Amount(); ok {
+	if value, ok := _u.mutation.Amount(); ok {
 		_spec.SetField(requesttarget.FieldAmount, field.TypeInt, value)
 	}
-	if value, ok := rtu.mutation.AddedAmount(); ok {
+	if value, ok := _u.mutation.AddedAmount(); ok {
 		_spec.AddField(requesttarget.FieldAmount, field.TypeInt, value)
 	}
-	if value, ok := rtu.mutation.PaidAt(); ok {
+	if value, ok := _u.mutation.PaidAt(); ok {
 		_spec.SetField(requesttarget.FieldPaidAt, field.TypeTime, value)
 	}
-	if rtu.mutation.PaidAtCleared() {
+	if _u.mutation.PaidAtCleared() {
 		_spec.ClearField(requesttarget.FieldPaidAt, field.TypeTime)
 	}
-	if value, ok := rtu.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(requesttarget.FieldCreatedAt, field.TypeTime, value)
 	}
-	if rtu.mutation.RequestCleared() {
+	if _u.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -203,7 +203,7 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := rtu.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -219,7 +219,7 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if rtu.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -232,7 +232,7 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := rtu.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -248,7 +248,7 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, rtu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{requesttarget.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -256,8 +256,8 @@ func (rtu *RequestTargetUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		return 0, err
 	}
-	rtu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // RequestTargetUpdateOne is the builder for updating a single RequestTarget entity.
@@ -269,120 +269,120 @@ type RequestTargetUpdateOne struct {
 }
 
 // SetAmount sets the "amount" field.
-func (rtuo *RequestTargetUpdateOne) SetAmount(i int) *RequestTargetUpdateOne {
-	rtuo.mutation.ResetAmount()
-	rtuo.mutation.SetAmount(i)
-	return rtuo
+func (_u *RequestTargetUpdateOne) SetAmount(v int) *RequestTargetUpdateOne {
+	_u.mutation.ResetAmount()
+	_u.mutation.SetAmount(v)
+	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (rtuo *RequestTargetUpdateOne) SetNillableAmount(i *int) *RequestTargetUpdateOne {
-	if i != nil {
-		rtuo.SetAmount(*i)
+func (_u *RequestTargetUpdateOne) SetNillableAmount(v *int) *RequestTargetUpdateOne {
+	if v != nil {
+		_u.SetAmount(*v)
 	}
-	return rtuo
+	return _u
 }
 
-// AddAmount adds i to the "amount" field.
-func (rtuo *RequestTargetUpdateOne) AddAmount(i int) *RequestTargetUpdateOne {
-	rtuo.mutation.AddAmount(i)
-	return rtuo
+// AddAmount adds value to the "amount" field.
+func (_u *RequestTargetUpdateOne) AddAmount(v int) *RequestTargetUpdateOne {
+	_u.mutation.AddAmount(v)
+	return _u
 }
 
 // SetPaidAt sets the "paid_at" field.
-func (rtuo *RequestTargetUpdateOne) SetPaidAt(t time.Time) *RequestTargetUpdateOne {
-	rtuo.mutation.SetPaidAt(t)
-	return rtuo
+func (_u *RequestTargetUpdateOne) SetPaidAt(v time.Time) *RequestTargetUpdateOne {
+	_u.mutation.SetPaidAt(v)
+	return _u
 }
 
 // SetNillablePaidAt sets the "paid_at" field if the given value is not nil.
-func (rtuo *RequestTargetUpdateOne) SetNillablePaidAt(t *time.Time) *RequestTargetUpdateOne {
-	if t != nil {
-		rtuo.SetPaidAt(*t)
+func (_u *RequestTargetUpdateOne) SetNillablePaidAt(v *time.Time) *RequestTargetUpdateOne {
+	if v != nil {
+		_u.SetPaidAt(*v)
 	}
-	return rtuo
+	return _u
 }
 
 // ClearPaidAt clears the value of the "paid_at" field.
-func (rtuo *RequestTargetUpdateOne) ClearPaidAt() *RequestTargetUpdateOne {
-	rtuo.mutation.ClearPaidAt()
-	return rtuo
+func (_u *RequestTargetUpdateOne) ClearPaidAt() *RequestTargetUpdateOne {
+	_u.mutation.ClearPaidAt()
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (rtuo *RequestTargetUpdateOne) SetCreatedAt(t time.Time) *RequestTargetUpdateOne {
-	rtuo.mutation.SetCreatedAt(t)
-	return rtuo
+func (_u *RequestTargetUpdateOne) SetCreatedAt(v time.Time) *RequestTargetUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (rtuo *RequestTargetUpdateOne) SetNillableCreatedAt(t *time.Time) *RequestTargetUpdateOne {
-	if t != nil {
-		rtuo.SetCreatedAt(*t)
+func (_u *RequestTargetUpdateOne) SetNillableCreatedAt(v *time.Time) *RequestTargetUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return rtuo
+	return _u
 }
 
 // SetRequestID sets the "request" edge to the Request entity by ID.
-func (rtuo *RequestTargetUpdateOne) SetRequestID(id uuid.UUID) *RequestTargetUpdateOne {
-	rtuo.mutation.SetRequestID(id)
-	return rtuo
+func (_u *RequestTargetUpdateOne) SetRequestID(id uuid.UUID) *RequestTargetUpdateOne {
+	_u.mutation.SetRequestID(id)
+	return _u
 }
 
 // SetRequest sets the "request" edge to the Request entity.
-func (rtuo *RequestTargetUpdateOne) SetRequest(r *Request) *RequestTargetUpdateOne {
-	return rtuo.SetRequestID(r.ID)
+func (_u *RequestTargetUpdateOne) SetRequest(v *Request) *RequestTargetUpdateOne {
+	return _u.SetRequestID(v.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (rtuo *RequestTargetUpdateOne) SetUserID(id uuid.UUID) *RequestTargetUpdateOne {
-	rtuo.mutation.SetUserID(id)
-	return rtuo
+func (_u *RequestTargetUpdateOne) SetUserID(id uuid.UUID) *RequestTargetUpdateOne {
+	_u.mutation.SetUserID(id)
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (rtuo *RequestTargetUpdateOne) SetUser(u *User) *RequestTargetUpdateOne {
-	return rtuo.SetUserID(u.ID)
+func (_u *RequestTargetUpdateOne) SetUser(v *User) *RequestTargetUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the RequestTargetMutation object of the builder.
-func (rtuo *RequestTargetUpdateOne) Mutation() *RequestTargetMutation {
-	return rtuo.mutation
+func (_u *RequestTargetUpdateOne) Mutation() *RequestTargetMutation {
+	return _u.mutation
 }
 
 // ClearRequest clears the "request" edge to the Request entity.
-func (rtuo *RequestTargetUpdateOne) ClearRequest() *RequestTargetUpdateOne {
-	rtuo.mutation.ClearRequest()
-	return rtuo
+func (_u *RequestTargetUpdateOne) ClearRequest() *RequestTargetUpdateOne {
+	_u.mutation.ClearRequest()
+	return _u
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (rtuo *RequestTargetUpdateOne) ClearUser() *RequestTargetUpdateOne {
-	rtuo.mutation.ClearUser()
-	return rtuo
+func (_u *RequestTargetUpdateOne) ClearUser() *RequestTargetUpdateOne {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // Where appends a list predicates to the RequestTargetUpdate builder.
-func (rtuo *RequestTargetUpdateOne) Where(ps ...predicate.RequestTarget) *RequestTargetUpdateOne {
-	rtuo.mutation.Where(ps...)
-	return rtuo
+func (_u *RequestTargetUpdateOne) Where(ps ...predicate.RequestTarget) *RequestTargetUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (rtuo *RequestTargetUpdateOne) Select(field string, fields ...string) *RequestTargetUpdateOne {
-	rtuo.fields = append([]string{field}, fields...)
-	return rtuo
+func (_u *RequestTargetUpdateOne) Select(field string, fields ...string) *RequestTargetUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated RequestTarget entity.
-func (rtuo *RequestTargetUpdateOne) Save(ctx context.Context) (*RequestTarget, error) {
-	return withHooks(ctx, rtuo.sqlSave, rtuo.mutation, rtuo.hooks)
+func (_u *RequestTargetUpdateOne) Save(ctx context.Context) (*RequestTarget, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (rtuo *RequestTargetUpdateOne) SaveX(ctx context.Context) *RequestTarget {
-	node, err := rtuo.Save(ctx)
+func (_u *RequestTargetUpdateOne) SaveX(ctx context.Context) *RequestTarget {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -390,40 +390,40 @@ func (rtuo *RequestTargetUpdateOne) SaveX(ctx context.Context) *RequestTarget {
 }
 
 // Exec executes the query on the entity.
-func (rtuo *RequestTargetUpdateOne) Exec(ctx context.Context) error {
-	_, err := rtuo.Save(ctx)
+func (_u *RequestTargetUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rtuo *RequestTargetUpdateOne) ExecX(ctx context.Context) {
-	if err := rtuo.Exec(ctx); err != nil {
+func (_u *RequestTargetUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (rtuo *RequestTargetUpdateOne) check() error {
-	if rtuo.mutation.RequestCleared() && len(rtuo.mutation.RequestIDs()) > 0 {
+func (_u *RequestTargetUpdateOne) check() error {
+	if _u.mutation.RequestCleared() && len(_u.mutation.RequestIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RequestTarget.request"`)
 	}
-	if rtuo.mutation.UserCleared() && len(rtuo.mutation.UserIDs()) > 0 {
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RequestTarget.user"`)
 	}
 	return nil
 }
 
-func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *RequestTarget, err error) {
-	if err := rtuo.check(); err != nil {
+func (_u *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *RequestTarget, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(requesttarget.Table, requesttarget.Columns, sqlgraph.NewFieldSpec(requesttarget.FieldID, field.TypeUUID))
-	id, ok := rtuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "RequestTarget.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := rtuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, requesttarget.FieldID)
 		for _, f := range fields {
@@ -435,29 +435,29 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 			}
 		}
 	}
-	if ps := rtuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := rtuo.mutation.Amount(); ok {
+	if value, ok := _u.mutation.Amount(); ok {
 		_spec.SetField(requesttarget.FieldAmount, field.TypeInt, value)
 	}
-	if value, ok := rtuo.mutation.AddedAmount(); ok {
+	if value, ok := _u.mutation.AddedAmount(); ok {
 		_spec.AddField(requesttarget.FieldAmount, field.TypeInt, value)
 	}
-	if value, ok := rtuo.mutation.PaidAt(); ok {
+	if value, ok := _u.mutation.PaidAt(); ok {
 		_spec.SetField(requesttarget.FieldPaidAt, field.TypeTime, value)
 	}
-	if rtuo.mutation.PaidAtCleared() {
+	if _u.mutation.PaidAtCleared() {
 		_spec.ClearField(requesttarget.FieldPaidAt, field.TypeTime)
 	}
-	if value, ok := rtuo.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(requesttarget.FieldCreatedAt, field.TypeTime, value)
 	}
-	if rtuo.mutation.RequestCleared() {
+	if _u.mutation.RequestCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -470,7 +470,7 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := rtuo.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RequestIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -486,7 +486,7 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if rtuo.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -499,7 +499,7 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := rtuo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -515,10 +515,10 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &RequestTarget{config: rtuo.config}
+	_node = &RequestTarget{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, rtuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{requesttarget.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -526,6 +526,6 @@ func (rtuo *RequestTargetUpdateOne) sqlSave(ctx context.Context) (_node *Request
 		}
 		return nil, err
 	}
-	rtuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
@@ -30,10 +29,9 @@ type Request struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RequestQuery when eager-loading is set.
-	Edges         RequestEdges `json:"edges"`
-	group_request *uuid.UUID
-	request_user  *uuid.UUID
-	selectValues  sql.SelectValues
+	Edges        RequestEdges `json:"edges"`
+	request_user *uuid.UUID
+	selectValues sql.SelectValues
 }
 
 // RequestEdges holds the relations/edges for other nodes in the graph.
@@ -52,11 +50,9 @@ type RequestEdges struct {
 	Comment []*Comment `json:"comment,omitempty"`
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
-	// Group holds the value of the group edge.
-	Group *Group `json:"group,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [7]bool
 }
 
 // StatusOrErr returns the Status value or an error if the edge
@@ -124,17 +120,6 @@ func (e RequestEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
-// GroupOrErr returns the Group value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e RequestEdges) GroupOrErr() (*Group, error) {
-	if e.Group != nil {
-		return e.Group, nil
-	} else if e.loadedTypes[7] {
-		return nil, &NotFoundError{label: group.Label}
-	}
-	return nil, &NotLoadedError{edge: "group"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Request) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -146,9 +131,7 @@ func (*Request) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case request.FieldID:
 			values[i] = new(uuid.UUID)
-		case request.ForeignKeys[0]: // group_request
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case request.ForeignKeys[1]: // request_user
+		case request.ForeignKeys[0]: // request_user
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
@@ -159,7 +142,7 @@ func (*Request) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Request fields.
-func (r *Request) assignValues(columns []string, values []any) error {
+func (_m *Request) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -169,48 +152,41 @@ func (r *Request) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				r.ID = *value
+				_m.ID = *value
 			}
 		case request.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
 			} else if value.Valid {
-				r.Title = value.String
+				_m.Title = value.String
 			}
 		case request.FieldContent:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field content", values[i])
 			} else if value.Valid {
-				r.Content = value.String
+				_m.Content = value.String
 			}
 		case request.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				r.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case request.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				r.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		case request.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field group_request", values[i])
-			} else if value.Valid {
-				r.group_request = new(uuid.UUID)
-				*r.group_request = *value.S.(*uuid.UUID)
-			}
-		case request.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field request_user", values[i])
 			} else if value.Valid {
-				r.request_user = new(uuid.UUID)
-				*r.request_user = *value.S.(*uuid.UUID)
+				_m.request_user = new(uuid.UUID)
+				*_m.request_user = *value.S.(*uuid.UUID)
 			}
 		default:
-			r.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -218,84 +194,79 @@ func (r *Request) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Request.
 // This includes values selected through modifiers, order, etc.
-func (r *Request) Value(name string) (ent.Value, error) {
-	return r.selectValues.Get(name)
+func (_m *Request) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryStatus queries the "status" edge of the Request entity.
-func (r *Request) QueryStatus() *RequestStatusQuery {
-	return NewRequestClient(r.config).QueryStatus(r)
+func (_m *Request) QueryStatus() *RequestStatusQuery {
+	return NewRequestClient(_m.config).QueryStatus(_m)
 }
 
 // QueryTarget queries the "target" edge of the Request entity.
-func (r *Request) QueryTarget() *RequestTargetQuery {
-	return NewRequestClient(r.config).QueryTarget(r)
+func (_m *Request) QueryTarget() *RequestTargetQuery {
+	return NewRequestClient(_m.config).QueryTarget(_m)
 }
 
 // QueryFile queries the "file" edge of the Request entity.
-func (r *Request) QueryFile() *FileQuery {
-	return NewRequestClient(r.config).QueryFile(r)
+func (_m *Request) QueryFile() *FileQuery {
+	return NewRequestClient(_m.config).QueryFile(_m)
 }
 
 // QueryTag queries the "tag" edge of the Request entity.
-func (r *Request) QueryTag() *TagQuery {
-	return NewRequestClient(r.config).QueryTag(r)
+func (_m *Request) QueryTag() *TagQuery {
+	return NewRequestClient(_m.config).QueryTag(_m)
 }
 
 // QueryTransaction queries the "transaction" edge of the Request entity.
-func (r *Request) QueryTransaction() *TransactionQuery {
-	return NewRequestClient(r.config).QueryTransaction(r)
+func (_m *Request) QueryTransaction() *TransactionQuery {
+	return NewRequestClient(_m.config).QueryTransaction(_m)
 }
 
 // QueryComment queries the "comment" edge of the Request entity.
-func (r *Request) QueryComment() *CommentQuery {
-	return NewRequestClient(r.config).QueryComment(r)
+func (_m *Request) QueryComment() *CommentQuery {
+	return NewRequestClient(_m.config).QueryComment(_m)
 }
 
 // QueryUser queries the "user" edge of the Request entity.
-func (r *Request) QueryUser() *UserQuery {
-	return NewRequestClient(r.config).QueryUser(r)
-}
-
-// QueryGroup queries the "group" edge of the Request entity.
-func (r *Request) QueryGroup() *GroupQuery {
-	return NewRequestClient(r.config).QueryGroup(r)
+func (_m *Request) QueryUser() *UserQuery {
+	return NewRequestClient(_m.config).QueryUser(_m)
 }
 
 // Update returns a builder for updating this Request.
 // Note that you need to call Request.Unwrap() before calling this method if this Request
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (r *Request) Update() *RequestUpdateOne {
-	return NewRequestClient(r.config).UpdateOne(r)
+func (_m *Request) Update() *RequestUpdateOne {
+	return NewRequestClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Request entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (r *Request) Unwrap() *Request {
-	_tx, ok := r.config.driver.(*txDriver)
+func (_m *Request) Unwrap() *Request {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Request is not a transactional entity")
 	}
-	r.config.driver = _tx.drv
-	return r
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (r *Request) String() string {
+func (_m *Request) String() string {
 	var builder strings.Builder
 	builder.WriteString("Request(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", r.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("title=")
-	builder.WriteString(r.Title)
+	builder.WriteString(_m.Title)
 	builder.WriteString(", ")
 	builder.WriteString("content=")
-	builder.WriteString(r.Content)
+	builder.WriteString(_m.Content)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(r.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(r.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

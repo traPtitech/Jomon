@@ -21,8 +21,6 @@ const (
 	EdgeDetail = "detail"
 	// EdgeTag holds the string denoting the tag edge name in mutations.
 	EdgeTag = "tag"
-	// EdgeGroupBudget holds the string denoting the group_budget edge name in mutations.
-	EdgeGroupBudget = "group_budget"
 	// EdgeRequest holds the string denoting the request edge name in mutations.
 	EdgeRequest = "request"
 	// Table holds the table name of the transaction in the database.
@@ -39,13 +37,6 @@ const (
 	// TagInverseTable is the table name for the Tag entity.
 	// It exists in this package in order to avoid circular dependency with the "tag" package.
 	TagInverseTable = "tags"
-	// GroupBudgetTable is the table that holds the group_budget relation/edge.
-	GroupBudgetTable = "transactions"
-	// GroupBudgetInverseTable is the table name for the GroupBudget entity.
-	// It exists in this package in order to avoid circular dependency with the "groupbudget" package.
-	GroupBudgetInverseTable = "group_budgets"
-	// GroupBudgetColumn is the table column denoting the group_budget relation/edge.
-	GroupBudgetColumn = "group_budget_transaction"
 	// RequestTable is the table that holds the request relation/edge.
 	RequestTable = "transactions"
 	// RequestInverseTable is the table name for the Request entity.
@@ -64,7 +55,6 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "transactions"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"group_budget_transaction",
 	"request_transaction",
 }
 
@@ -130,13 +120,6 @@ func ByTag(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByGroupBudgetField orders the results by group_budget field.
-func ByGroupBudgetField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newGroupBudgetStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByRequestField orders the results by request field.
 func ByRequestField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -155,13 +138,6 @@ func newTagStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TagInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, false, TagTable, TagPrimaryKey...),
-	)
-}
-func newGroupBudgetStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(GroupBudgetInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, GroupBudgetTable, GroupBudgetColumn),
 	)
 }
 func newRequestStep() *sqlgraph.Step {

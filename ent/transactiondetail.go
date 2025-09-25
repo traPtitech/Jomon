@@ -80,7 +80,7 @@ func (*TransactionDetail) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the TransactionDetail fields.
-func (td *TransactionDetail) assignValues(columns []string, values []any) error {
+func (_m *TransactionDetail) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -90,47 +90,47 @@ func (td *TransactionDetail) assignValues(columns []string, values []any) error 
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				td.ID = *value
+				_m.ID = *value
 			}
 		case transactiondetail.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
 			} else if value.Valid {
-				td.Title = value.String
+				_m.Title = value.String
 			}
 		case transactiondetail.FieldAmount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field amount", values[i])
 			} else if value.Valid {
-				td.Amount = int(value.Int64)
+				_m.Amount = int(value.Int64)
 			}
 		case transactiondetail.FieldTarget:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field target", values[i])
 			} else if value.Valid {
-				td.Target = value.String
+				_m.Target = value.String
 			}
 		case transactiondetail.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				td.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case transactiondetail.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				td.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		case transactiondetail.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field transaction_detail", values[i])
 			} else if value.Valid {
-				td.transaction_detail = new(uuid.UUID)
-				*td.transaction_detail = *value.S.(*uuid.UUID)
+				_m.transaction_detail = new(uuid.UUID)
+				*_m.transaction_detail = *value.S.(*uuid.UUID)
 			}
 		default:
-			td.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -138,52 +138,52 @@ func (td *TransactionDetail) assignValues(columns []string, values []any) error 
 
 // Value returns the ent.Value that was dynamically selected and assigned to the TransactionDetail.
 // This includes values selected through modifiers, order, etc.
-func (td *TransactionDetail) Value(name string) (ent.Value, error) {
-	return td.selectValues.Get(name)
+func (_m *TransactionDetail) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryTransaction queries the "transaction" edge of the TransactionDetail entity.
-func (td *TransactionDetail) QueryTransaction() *TransactionQuery {
-	return NewTransactionDetailClient(td.config).QueryTransaction(td)
+func (_m *TransactionDetail) QueryTransaction() *TransactionQuery {
+	return NewTransactionDetailClient(_m.config).QueryTransaction(_m)
 }
 
 // Update returns a builder for updating this TransactionDetail.
 // Note that you need to call TransactionDetail.Unwrap() before calling this method if this TransactionDetail
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (td *TransactionDetail) Update() *TransactionDetailUpdateOne {
-	return NewTransactionDetailClient(td.config).UpdateOne(td)
+func (_m *TransactionDetail) Update() *TransactionDetailUpdateOne {
+	return NewTransactionDetailClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the TransactionDetail entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (td *TransactionDetail) Unwrap() *TransactionDetail {
-	_tx, ok := td.config.driver.(*txDriver)
+func (_m *TransactionDetail) Unwrap() *TransactionDetail {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: TransactionDetail is not a transactional entity")
 	}
-	td.config.driver = _tx.drv
-	return td
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (td *TransactionDetail) String() string {
+func (_m *TransactionDetail) String() string {
 	var builder strings.Builder
 	builder.WriteString("TransactionDetail(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", td.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("title=")
-	builder.WriteString(td.Title)
+	builder.WriteString(_m.Title)
 	builder.WriteString(", ")
 	builder.WriteString("amount=")
-	builder.WriteString(fmt.Sprintf("%v", td.Amount))
+	builder.WriteString(fmt.Sprintf("%v", _m.Amount))
 	builder.WriteString(", ")
 	builder.WriteString("target=")
-	builder.WriteString(td.Target)
+	builder.WriteString(_m.Target)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(td.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(td.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

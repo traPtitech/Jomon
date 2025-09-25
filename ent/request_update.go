@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
@@ -32,339 +31,314 @@ type RequestUpdate struct {
 }
 
 // Where appends a list predicates to the RequestUpdate builder.
-func (ru *RequestUpdate) Where(ps ...predicate.Request) *RequestUpdate {
-	ru.mutation.Where(ps...)
-	return ru
+func (_u *RequestUpdate) Where(ps ...predicate.Request) *RequestUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetTitle sets the "title" field.
-func (ru *RequestUpdate) SetTitle(s string) *RequestUpdate {
-	ru.mutation.SetTitle(s)
-	return ru
+func (_u *RequestUpdate) SetTitle(v string) *RequestUpdate {
+	_u.mutation.SetTitle(v)
+	return _u
 }
 
 // SetNillableTitle sets the "title" field if the given value is not nil.
-func (ru *RequestUpdate) SetNillableTitle(s *string) *RequestUpdate {
-	if s != nil {
-		ru.SetTitle(*s)
+func (_u *RequestUpdate) SetNillableTitle(v *string) *RequestUpdate {
+	if v != nil {
+		_u.SetTitle(*v)
 	}
-	return ru
+	return _u
 }
 
 // SetContent sets the "content" field.
-func (ru *RequestUpdate) SetContent(s string) *RequestUpdate {
-	ru.mutation.SetContent(s)
-	return ru
+func (_u *RequestUpdate) SetContent(v string) *RequestUpdate {
+	_u.mutation.SetContent(v)
+	return _u
 }
 
 // SetNillableContent sets the "content" field if the given value is not nil.
-func (ru *RequestUpdate) SetNillableContent(s *string) *RequestUpdate {
-	if s != nil {
-		ru.SetContent(*s)
+func (_u *RequestUpdate) SetNillableContent(v *string) *RequestUpdate {
+	if v != nil {
+		_u.SetContent(*v)
 	}
-	return ru
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (ru *RequestUpdate) SetCreatedAt(t time.Time) *RequestUpdate {
-	ru.mutation.SetCreatedAt(t)
-	return ru
+func (_u *RequestUpdate) SetCreatedAt(v time.Time) *RequestUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ru *RequestUpdate) SetNillableCreatedAt(t *time.Time) *RequestUpdate {
-	if t != nil {
-		ru.SetCreatedAt(*t)
+func (_u *RequestUpdate) SetNillableCreatedAt(v *time.Time) *RequestUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return ru
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ru *RequestUpdate) SetUpdatedAt(t time.Time) *RequestUpdate {
-	ru.mutation.SetUpdatedAt(t)
-	return ru
+func (_u *RequestUpdate) SetUpdatedAt(v time.Time) *RequestUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // AddStatuIDs adds the "status" edge to the RequestStatus entity by IDs.
-func (ru *RequestUpdate) AddStatuIDs(ids ...uuid.UUID) *RequestUpdate {
-	ru.mutation.AddStatuIDs(ids...)
-	return ru
+func (_u *RequestUpdate) AddStatuIDs(ids ...uuid.UUID) *RequestUpdate {
+	_u.mutation.AddStatuIDs(ids...)
+	return _u
 }
 
 // AddStatus adds the "status" edges to the RequestStatus entity.
-func (ru *RequestUpdate) AddStatus(r ...*RequestStatus) *RequestUpdate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *RequestUpdate) AddStatus(v ...*RequestStatus) *RequestUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ru.AddStatuIDs(ids...)
+	return _u.AddStatuIDs(ids...)
 }
 
 // AddTargetIDs adds the "target" edge to the RequestTarget entity by IDs.
-func (ru *RequestUpdate) AddTargetIDs(ids ...uuid.UUID) *RequestUpdate {
-	ru.mutation.AddTargetIDs(ids...)
-	return ru
+func (_u *RequestUpdate) AddTargetIDs(ids ...uuid.UUID) *RequestUpdate {
+	_u.mutation.AddTargetIDs(ids...)
+	return _u
 }
 
 // AddTarget adds the "target" edges to the RequestTarget entity.
-func (ru *RequestUpdate) AddTarget(r ...*RequestTarget) *RequestUpdate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *RequestUpdate) AddTarget(v ...*RequestTarget) *RequestUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ru.AddTargetIDs(ids...)
+	return _u.AddTargetIDs(ids...)
 }
 
 // AddFileIDs adds the "file" edge to the File entity by IDs.
-func (ru *RequestUpdate) AddFileIDs(ids ...uuid.UUID) *RequestUpdate {
-	ru.mutation.AddFileIDs(ids...)
-	return ru
+func (_u *RequestUpdate) AddFileIDs(ids ...uuid.UUID) *RequestUpdate {
+	_u.mutation.AddFileIDs(ids...)
+	return _u
 }
 
 // AddFile adds the "file" edges to the File entity.
-func (ru *RequestUpdate) AddFile(f ...*File) *RequestUpdate {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *RequestUpdate) AddFile(v ...*File) *RequestUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ru.AddFileIDs(ids...)
+	return _u.AddFileIDs(ids...)
 }
 
 // AddTagIDs adds the "tag" edge to the Tag entity by IDs.
-func (ru *RequestUpdate) AddTagIDs(ids ...uuid.UUID) *RequestUpdate {
-	ru.mutation.AddTagIDs(ids...)
-	return ru
+func (_u *RequestUpdate) AddTagIDs(ids ...uuid.UUID) *RequestUpdate {
+	_u.mutation.AddTagIDs(ids...)
+	return _u
 }
 
 // AddTag adds the "tag" edges to the Tag entity.
-func (ru *RequestUpdate) AddTag(t ...*Tag) *RequestUpdate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *RequestUpdate) AddTag(v ...*Tag) *RequestUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ru.AddTagIDs(ids...)
+	return _u.AddTagIDs(ids...)
 }
 
 // AddTransactionIDs adds the "transaction" edge to the Transaction entity by IDs.
-func (ru *RequestUpdate) AddTransactionIDs(ids ...uuid.UUID) *RequestUpdate {
-	ru.mutation.AddTransactionIDs(ids...)
-	return ru
+func (_u *RequestUpdate) AddTransactionIDs(ids ...uuid.UUID) *RequestUpdate {
+	_u.mutation.AddTransactionIDs(ids...)
+	return _u
 }
 
 // AddTransaction adds the "transaction" edges to the Transaction entity.
-func (ru *RequestUpdate) AddTransaction(t ...*Transaction) *RequestUpdate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *RequestUpdate) AddTransaction(v ...*Transaction) *RequestUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ru.AddTransactionIDs(ids...)
+	return _u.AddTransactionIDs(ids...)
 }
 
 // AddCommentIDs adds the "comment" edge to the Comment entity by IDs.
-func (ru *RequestUpdate) AddCommentIDs(ids ...uuid.UUID) *RequestUpdate {
-	ru.mutation.AddCommentIDs(ids...)
-	return ru
+func (_u *RequestUpdate) AddCommentIDs(ids ...uuid.UUID) *RequestUpdate {
+	_u.mutation.AddCommentIDs(ids...)
+	return _u
 }
 
 // AddComment adds the "comment" edges to the Comment entity.
-func (ru *RequestUpdate) AddComment(c ...*Comment) *RequestUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *RequestUpdate) AddComment(v ...*Comment) *RequestUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ru.AddCommentIDs(ids...)
+	return _u.AddCommentIDs(ids...)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (ru *RequestUpdate) SetUserID(id uuid.UUID) *RequestUpdate {
-	ru.mutation.SetUserID(id)
-	return ru
+func (_u *RequestUpdate) SetUserID(id uuid.UUID) *RequestUpdate {
+	_u.mutation.SetUserID(id)
+	return _u
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (ru *RequestUpdate) SetNillableUserID(id *uuid.UUID) *RequestUpdate {
+func (_u *RequestUpdate) SetNillableUserID(id *uuid.UUID) *RequestUpdate {
 	if id != nil {
-		ru = ru.SetUserID(*id)
+		_u = _u.SetUserID(*id)
 	}
-	return ru
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (ru *RequestUpdate) SetUser(u *User) *RequestUpdate {
-	return ru.SetUserID(u.ID)
-}
-
-// SetGroupID sets the "group" edge to the Group entity by ID.
-func (ru *RequestUpdate) SetGroupID(id uuid.UUID) *RequestUpdate {
-	ru.mutation.SetGroupID(id)
-	return ru
-}
-
-// SetNillableGroupID sets the "group" edge to the Group entity by ID if the given value is not nil.
-func (ru *RequestUpdate) SetNillableGroupID(id *uuid.UUID) *RequestUpdate {
-	if id != nil {
-		ru = ru.SetGroupID(*id)
-	}
-	return ru
-}
-
-// SetGroup sets the "group" edge to the Group entity.
-func (ru *RequestUpdate) SetGroup(g *Group) *RequestUpdate {
-	return ru.SetGroupID(g.ID)
+func (_u *RequestUpdate) SetUser(v *User) *RequestUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the RequestMutation object of the builder.
-func (ru *RequestUpdate) Mutation() *RequestMutation {
-	return ru.mutation
+func (_u *RequestUpdate) Mutation() *RequestMutation {
+	return _u.mutation
 }
 
 // ClearStatus clears all "status" edges to the RequestStatus entity.
-func (ru *RequestUpdate) ClearStatus() *RequestUpdate {
-	ru.mutation.ClearStatus()
-	return ru
+func (_u *RequestUpdate) ClearStatus() *RequestUpdate {
+	_u.mutation.ClearStatus()
+	return _u
 }
 
 // RemoveStatuIDs removes the "status" edge to RequestStatus entities by IDs.
-func (ru *RequestUpdate) RemoveStatuIDs(ids ...uuid.UUID) *RequestUpdate {
-	ru.mutation.RemoveStatuIDs(ids...)
-	return ru
+func (_u *RequestUpdate) RemoveStatuIDs(ids ...uuid.UUID) *RequestUpdate {
+	_u.mutation.RemoveStatuIDs(ids...)
+	return _u
 }
 
 // RemoveStatus removes "status" edges to RequestStatus entities.
-func (ru *RequestUpdate) RemoveStatus(r ...*RequestStatus) *RequestUpdate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *RequestUpdate) RemoveStatus(v ...*RequestStatus) *RequestUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ru.RemoveStatuIDs(ids...)
+	return _u.RemoveStatuIDs(ids...)
 }
 
 // ClearTarget clears all "target" edges to the RequestTarget entity.
-func (ru *RequestUpdate) ClearTarget() *RequestUpdate {
-	ru.mutation.ClearTarget()
-	return ru
+func (_u *RequestUpdate) ClearTarget() *RequestUpdate {
+	_u.mutation.ClearTarget()
+	return _u
 }
 
 // RemoveTargetIDs removes the "target" edge to RequestTarget entities by IDs.
-func (ru *RequestUpdate) RemoveTargetIDs(ids ...uuid.UUID) *RequestUpdate {
-	ru.mutation.RemoveTargetIDs(ids...)
-	return ru
+func (_u *RequestUpdate) RemoveTargetIDs(ids ...uuid.UUID) *RequestUpdate {
+	_u.mutation.RemoveTargetIDs(ids...)
+	return _u
 }
 
 // RemoveTarget removes "target" edges to RequestTarget entities.
-func (ru *RequestUpdate) RemoveTarget(r ...*RequestTarget) *RequestUpdate {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *RequestUpdate) RemoveTarget(v ...*RequestTarget) *RequestUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ru.RemoveTargetIDs(ids...)
+	return _u.RemoveTargetIDs(ids...)
 }
 
 // ClearFile clears all "file" edges to the File entity.
-func (ru *RequestUpdate) ClearFile() *RequestUpdate {
-	ru.mutation.ClearFile()
-	return ru
+func (_u *RequestUpdate) ClearFile() *RequestUpdate {
+	_u.mutation.ClearFile()
+	return _u
 }
 
 // RemoveFileIDs removes the "file" edge to File entities by IDs.
-func (ru *RequestUpdate) RemoveFileIDs(ids ...uuid.UUID) *RequestUpdate {
-	ru.mutation.RemoveFileIDs(ids...)
-	return ru
+func (_u *RequestUpdate) RemoveFileIDs(ids ...uuid.UUID) *RequestUpdate {
+	_u.mutation.RemoveFileIDs(ids...)
+	return _u
 }
 
 // RemoveFile removes "file" edges to File entities.
-func (ru *RequestUpdate) RemoveFile(f ...*File) *RequestUpdate {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *RequestUpdate) RemoveFile(v ...*File) *RequestUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ru.RemoveFileIDs(ids...)
+	return _u.RemoveFileIDs(ids...)
 }
 
 // ClearTag clears all "tag" edges to the Tag entity.
-func (ru *RequestUpdate) ClearTag() *RequestUpdate {
-	ru.mutation.ClearTag()
-	return ru
+func (_u *RequestUpdate) ClearTag() *RequestUpdate {
+	_u.mutation.ClearTag()
+	return _u
 }
 
 // RemoveTagIDs removes the "tag" edge to Tag entities by IDs.
-func (ru *RequestUpdate) RemoveTagIDs(ids ...uuid.UUID) *RequestUpdate {
-	ru.mutation.RemoveTagIDs(ids...)
-	return ru
+func (_u *RequestUpdate) RemoveTagIDs(ids ...uuid.UUID) *RequestUpdate {
+	_u.mutation.RemoveTagIDs(ids...)
+	return _u
 }
 
 // RemoveTag removes "tag" edges to Tag entities.
-func (ru *RequestUpdate) RemoveTag(t ...*Tag) *RequestUpdate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *RequestUpdate) RemoveTag(v ...*Tag) *RequestUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ru.RemoveTagIDs(ids...)
+	return _u.RemoveTagIDs(ids...)
 }
 
 // ClearTransaction clears all "transaction" edges to the Transaction entity.
-func (ru *RequestUpdate) ClearTransaction() *RequestUpdate {
-	ru.mutation.ClearTransaction()
-	return ru
+func (_u *RequestUpdate) ClearTransaction() *RequestUpdate {
+	_u.mutation.ClearTransaction()
+	return _u
 }
 
 // RemoveTransactionIDs removes the "transaction" edge to Transaction entities by IDs.
-func (ru *RequestUpdate) RemoveTransactionIDs(ids ...uuid.UUID) *RequestUpdate {
-	ru.mutation.RemoveTransactionIDs(ids...)
-	return ru
+func (_u *RequestUpdate) RemoveTransactionIDs(ids ...uuid.UUID) *RequestUpdate {
+	_u.mutation.RemoveTransactionIDs(ids...)
+	return _u
 }
 
 // RemoveTransaction removes "transaction" edges to Transaction entities.
-func (ru *RequestUpdate) RemoveTransaction(t ...*Transaction) *RequestUpdate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *RequestUpdate) RemoveTransaction(v ...*Transaction) *RequestUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ru.RemoveTransactionIDs(ids...)
+	return _u.RemoveTransactionIDs(ids...)
 }
 
 // ClearComment clears all "comment" edges to the Comment entity.
-func (ru *RequestUpdate) ClearComment() *RequestUpdate {
-	ru.mutation.ClearComment()
-	return ru
+func (_u *RequestUpdate) ClearComment() *RequestUpdate {
+	_u.mutation.ClearComment()
+	return _u
 }
 
 // RemoveCommentIDs removes the "comment" edge to Comment entities by IDs.
-func (ru *RequestUpdate) RemoveCommentIDs(ids ...uuid.UUID) *RequestUpdate {
-	ru.mutation.RemoveCommentIDs(ids...)
-	return ru
+func (_u *RequestUpdate) RemoveCommentIDs(ids ...uuid.UUID) *RequestUpdate {
+	_u.mutation.RemoveCommentIDs(ids...)
+	return _u
 }
 
 // RemoveComment removes "comment" edges to Comment entities.
-func (ru *RequestUpdate) RemoveComment(c ...*Comment) *RequestUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *RequestUpdate) RemoveComment(v ...*Comment) *RequestUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ru.RemoveCommentIDs(ids...)
+	return _u.RemoveCommentIDs(ids...)
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (ru *RequestUpdate) ClearUser() *RequestUpdate {
-	ru.mutation.ClearUser()
-	return ru
-}
-
-// ClearGroup clears the "group" edge to the Group entity.
-func (ru *RequestUpdate) ClearGroup() *RequestUpdate {
-	ru.mutation.ClearGroup()
-	return ru
+func (_u *RequestUpdate) ClearUser() *RequestUpdate {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (ru *RequestUpdate) Save(ctx context.Context) (int, error) {
-	ru.defaults()
-	return withHooks(ctx, ru.sqlSave, ru.mutation, ru.hooks)
+func (_u *RequestUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ru *RequestUpdate) SaveX(ctx context.Context) int {
-	affected, err := ru.Save(ctx)
+func (_u *RequestUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -372,48 +346,48 @@ func (ru *RequestUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (ru *RequestUpdate) Exec(ctx context.Context) error {
-	_, err := ru.Save(ctx)
+func (_u *RequestUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ru *RequestUpdate) ExecX(ctx context.Context) {
-	if err := ru.Exec(ctx); err != nil {
+func (_u *RequestUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (ru *RequestUpdate) defaults() {
-	if _, ok := ru.mutation.UpdatedAt(); !ok {
+func (_u *RequestUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := request.UpdateDefaultUpdatedAt()
-		ru.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *RequestUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(request.Table, request.Columns, sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID))
-	if ps := ru.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ru.mutation.Title(); ok {
+	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(request.FieldTitle, field.TypeString, value)
 	}
-	if value, ok := ru.mutation.Content(); ok {
+	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(request.FieldContent, field.TypeString, value)
 	}
-	if value, ok := ru.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(request.FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := ru.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(request.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if ru.mutation.StatusCleared() {
+	if _u.mutation.StatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -426,23 +400,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.RemovedStatusIDs(); len(nodes) > 0 && !ru.mutation.StatusCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   request.StatusTable,
-			Columns: []string{request.StatusColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(requeststatus.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ru.mutation.StatusIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedStatusIDs(); len(nodes) > 0 && !_u.mutation.StatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -456,9 +414,25 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.StatusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   request.StatusTable,
+			Columns: []string{request.StatusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requeststatus.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ru.mutation.TargetCleared() {
+	if _u.mutation.TargetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -471,7 +445,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.RemovedTargetIDs(); len(nodes) > 0 && !ru.mutation.TargetCleared() {
+	if nodes := _u.mutation.RemovedTargetIDs(); len(nodes) > 0 && !_u.mutation.TargetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -487,7 +461,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.TargetIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TargetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -503,7 +477,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ru.mutation.FileCleared() {
+	if _u.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -516,23 +490,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.RemovedFileIDs(); len(nodes) > 0 && !ru.mutation.FileCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   request.FileTable,
-			Columns: []string{request.FileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ru.mutation.FileIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedFileIDs(); len(nodes) > 0 && !_u.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -546,9 +504,25 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.FileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   request.FileTable,
+			Columns: []string{request.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ru.mutation.TagCleared() {
+	if _u.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -561,7 +535,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.RemovedTagIDs(); len(nodes) > 0 && !ru.mutation.TagCleared() {
+	if nodes := _u.mutation.RemovedTagIDs(); len(nodes) > 0 && !_u.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -577,7 +551,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.TagIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -593,7 +567,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ru.mutation.TransactionCleared() {
+	if _u.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -606,7 +580,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.RemovedTransactionIDs(); len(nodes) > 0 && !ru.mutation.TransactionCleared() {
+	if nodes := _u.mutation.RemovedTransactionIDs(); len(nodes) > 0 && !_u.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -622,7 +596,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.TransactionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -638,7 +612,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ru.mutation.CommentCleared() {
+	if _u.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -651,7 +625,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.RemovedCommentIDs(); len(nodes) > 0 && !ru.mutation.CommentCleared() {
+	if nodes := _u.mutation.RemovedCommentIDs(); len(nodes) > 0 && !_u.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -667,7 +641,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.CommentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CommentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -683,7 +657,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ru.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -696,7 +670,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -712,36 +686,7 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ru.mutation.GroupCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   request.GroupTable,
-			Columns: []string{request.GroupColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ru.mutation.GroupIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   request.GroupTable,
-			Columns: []string{request.GroupColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{request.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -749,8 +694,8 @@ func (ru *RequestUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	ru.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // RequestUpdateOne is the builder for updating a single Request entity.
@@ -762,346 +707,321 @@ type RequestUpdateOne struct {
 }
 
 // SetTitle sets the "title" field.
-func (ruo *RequestUpdateOne) SetTitle(s string) *RequestUpdateOne {
-	ruo.mutation.SetTitle(s)
-	return ruo
+func (_u *RequestUpdateOne) SetTitle(v string) *RequestUpdateOne {
+	_u.mutation.SetTitle(v)
+	return _u
 }
 
 // SetNillableTitle sets the "title" field if the given value is not nil.
-func (ruo *RequestUpdateOne) SetNillableTitle(s *string) *RequestUpdateOne {
-	if s != nil {
-		ruo.SetTitle(*s)
+func (_u *RequestUpdateOne) SetNillableTitle(v *string) *RequestUpdateOne {
+	if v != nil {
+		_u.SetTitle(*v)
 	}
-	return ruo
+	return _u
 }
 
 // SetContent sets the "content" field.
-func (ruo *RequestUpdateOne) SetContent(s string) *RequestUpdateOne {
-	ruo.mutation.SetContent(s)
-	return ruo
+func (_u *RequestUpdateOne) SetContent(v string) *RequestUpdateOne {
+	_u.mutation.SetContent(v)
+	return _u
 }
 
 // SetNillableContent sets the "content" field if the given value is not nil.
-func (ruo *RequestUpdateOne) SetNillableContent(s *string) *RequestUpdateOne {
-	if s != nil {
-		ruo.SetContent(*s)
+func (_u *RequestUpdateOne) SetNillableContent(v *string) *RequestUpdateOne {
+	if v != nil {
+		_u.SetContent(*v)
 	}
-	return ruo
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (ruo *RequestUpdateOne) SetCreatedAt(t time.Time) *RequestUpdateOne {
-	ruo.mutation.SetCreatedAt(t)
-	return ruo
+func (_u *RequestUpdateOne) SetCreatedAt(v time.Time) *RequestUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ruo *RequestUpdateOne) SetNillableCreatedAt(t *time.Time) *RequestUpdateOne {
-	if t != nil {
-		ruo.SetCreatedAt(*t)
+func (_u *RequestUpdateOne) SetNillableCreatedAt(v *time.Time) *RequestUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return ruo
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ruo *RequestUpdateOne) SetUpdatedAt(t time.Time) *RequestUpdateOne {
-	ruo.mutation.SetUpdatedAt(t)
-	return ruo
+func (_u *RequestUpdateOne) SetUpdatedAt(v time.Time) *RequestUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // AddStatuIDs adds the "status" edge to the RequestStatus entity by IDs.
-func (ruo *RequestUpdateOne) AddStatuIDs(ids ...uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.AddStatuIDs(ids...)
-	return ruo
+func (_u *RequestUpdateOne) AddStatuIDs(ids ...uuid.UUID) *RequestUpdateOne {
+	_u.mutation.AddStatuIDs(ids...)
+	return _u
 }
 
 // AddStatus adds the "status" edges to the RequestStatus entity.
-func (ruo *RequestUpdateOne) AddStatus(r ...*RequestStatus) *RequestUpdateOne {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *RequestUpdateOne) AddStatus(v ...*RequestStatus) *RequestUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ruo.AddStatuIDs(ids...)
+	return _u.AddStatuIDs(ids...)
 }
 
 // AddTargetIDs adds the "target" edge to the RequestTarget entity by IDs.
-func (ruo *RequestUpdateOne) AddTargetIDs(ids ...uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.AddTargetIDs(ids...)
-	return ruo
+func (_u *RequestUpdateOne) AddTargetIDs(ids ...uuid.UUID) *RequestUpdateOne {
+	_u.mutation.AddTargetIDs(ids...)
+	return _u
 }
 
 // AddTarget adds the "target" edges to the RequestTarget entity.
-func (ruo *RequestUpdateOne) AddTarget(r ...*RequestTarget) *RequestUpdateOne {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *RequestUpdateOne) AddTarget(v ...*RequestTarget) *RequestUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ruo.AddTargetIDs(ids...)
+	return _u.AddTargetIDs(ids...)
 }
 
 // AddFileIDs adds the "file" edge to the File entity by IDs.
-func (ruo *RequestUpdateOne) AddFileIDs(ids ...uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.AddFileIDs(ids...)
-	return ruo
+func (_u *RequestUpdateOne) AddFileIDs(ids ...uuid.UUID) *RequestUpdateOne {
+	_u.mutation.AddFileIDs(ids...)
+	return _u
 }
 
 // AddFile adds the "file" edges to the File entity.
-func (ruo *RequestUpdateOne) AddFile(f ...*File) *RequestUpdateOne {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *RequestUpdateOne) AddFile(v ...*File) *RequestUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ruo.AddFileIDs(ids...)
+	return _u.AddFileIDs(ids...)
 }
 
 // AddTagIDs adds the "tag" edge to the Tag entity by IDs.
-func (ruo *RequestUpdateOne) AddTagIDs(ids ...uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.AddTagIDs(ids...)
-	return ruo
+func (_u *RequestUpdateOne) AddTagIDs(ids ...uuid.UUID) *RequestUpdateOne {
+	_u.mutation.AddTagIDs(ids...)
+	return _u
 }
 
 // AddTag adds the "tag" edges to the Tag entity.
-func (ruo *RequestUpdateOne) AddTag(t ...*Tag) *RequestUpdateOne {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *RequestUpdateOne) AddTag(v ...*Tag) *RequestUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ruo.AddTagIDs(ids...)
+	return _u.AddTagIDs(ids...)
 }
 
 // AddTransactionIDs adds the "transaction" edge to the Transaction entity by IDs.
-func (ruo *RequestUpdateOne) AddTransactionIDs(ids ...uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.AddTransactionIDs(ids...)
-	return ruo
+func (_u *RequestUpdateOne) AddTransactionIDs(ids ...uuid.UUID) *RequestUpdateOne {
+	_u.mutation.AddTransactionIDs(ids...)
+	return _u
 }
 
 // AddTransaction adds the "transaction" edges to the Transaction entity.
-func (ruo *RequestUpdateOne) AddTransaction(t ...*Transaction) *RequestUpdateOne {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *RequestUpdateOne) AddTransaction(v ...*Transaction) *RequestUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ruo.AddTransactionIDs(ids...)
+	return _u.AddTransactionIDs(ids...)
 }
 
 // AddCommentIDs adds the "comment" edge to the Comment entity by IDs.
-func (ruo *RequestUpdateOne) AddCommentIDs(ids ...uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.AddCommentIDs(ids...)
-	return ruo
+func (_u *RequestUpdateOne) AddCommentIDs(ids ...uuid.UUID) *RequestUpdateOne {
+	_u.mutation.AddCommentIDs(ids...)
+	return _u
 }
 
 // AddComment adds the "comment" edges to the Comment entity.
-func (ruo *RequestUpdateOne) AddComment(c ...*Comment) *RequestUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *RequestUpdateOne) AddComment(v ...*Comment) *RequestUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ruo.AddCommentIDs(ids...)
+	return _u.AddCommentIDs(ids...)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (ruo *RequestUpdateOne) SetUserID(id uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.SetUserID(id)
-	return ruo
+func (_u *RequestUpdateOne) SetUserID(id uuid.UUID) *RequestUpdateOne {
+	_u.mutation.SetUserID(id)
+	return _u
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (ruo *RequestUpdateOne) SetNillableUserID(id *uuid.UUID) *RequestUpdateOne {
+func (_u *RequestUpdateOne) SetNillableUserID(id *uuid.UUID) *RequestUpdateOne {
 	if id != nil {
-		ruo = ruo.SetUserID(*id)
+		_u = _u.SetUserID(*id)
 	}
-	return ruo
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (ruo *RequestUpdateOne) SetUser(u *User) *RequestUpdateOne {
-	return ruo.SetUserID(u.ID)
-}
-
-// SetGroupID sets the "group" edge to the Group entity by ID.
-func (ruo *RequestUpdateOne) SetGroupID(id uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.SetGroupID(id)
-	return ruo
-}
-
-// SetNillableGroupID sets the "group" edge to the Group entity by ID if the given value is not nil.
-func (ruo *RequestUpdateOne) SetNillableGroupID(id *uuid.UUID) *RequestUpdateOne {
-	if id != nil {
-		ruo = ruo.SetGroupID(*id)
-	}
-	return ruo
-}
-
-// SetGroup sets the "group" edge to the Group entity.
-func (ruo *RequestUpdateOne) SetGroup(g *Group) *RequestUpdateOne {
-	return ruo.SetGroupID(g.ID)
+func (_u *RequestUpdateOne) SetUser(v *User) *RequestUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the RequestMutation object of the builder.
-func (ruo *RequestUpdateOne) Mutation() *RequestMutation {
-	return ruo.mutation
+func (_u *RequestUpdateOne) Mutation() *RequestMutation {
+	return _u.mutation
 }
 
 // ClearStatus clears all "status" edges to the RequestStatus entity.
-func (ruo *RequestUpdateOne) ClearStatus() *RequestUpdateOne {
-	ruo.mutation.ClearStatus()
-	return ruo
+func (_u *RequestUpdateOne) ClearStatus() *RequestUpdateOne {
+	_u.mutation.ClearStatus()
+	return _u
 }
 
 // RemoveStatuIDs removes the "status" edge to RequestStatus entities by IDs.
-func (ruo *RequestUpdateOne) RemoveStatuIDs(ids ...uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.RemoveStatuIDs(ids...)
-	return ruo
+func (_u *RequestUpdateOne) RemoveStatuIDs(ids ...uuid.UUID) *RequestUpdateOne {
+	_u.mutation.RemoveStatuIDs(ids...)
+	return _u
 }
 
 // RemoveStatus removes "status" edges to RequestStatus entities.
-func (ruo *RequestUpdateOne) RemoveStatus(r ...*RequestStatus) *RequestUpdateOne {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *RequestUpdateOne) RemoveStatus(v ...*RequestStatus) *RequestUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ruo.RemoveStatuIDs(ids...)
+	return _u.RemoveStatuIDs(ids...)
 }
 
 // ClearTarget clears all "target" edges to the RequestTarget entity.
-func (ruo *RequestUpdateOne) ClearTarget() *RequestUpdateOne {
-	ruo.mutation.ClearTarget()
-	return ruo
+func (_u *RequestUpdateOne) ClearTarget() *RequestUpdateOne {
+	_u.mutation.ClearTarget()
+	return _u
 }
 
 // RemoveTargetIDs removes the "target" edge to RequestTarget entities by IDs.
-func (ruo *RequestUpdateOne) RemoveTargetIDs(ids ...uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.RemoveTargetIDs(ids...)
-	return ruo
+func (_u *RequestUpdateOne) RemoveTargetIDs(ids ...uuid.UUID) *RequestUpdateOne {
+	_u.mutation.RemoveTargetIDs(ids...)
+	return _u
 }
 
 // RemoveTarget removes "target" edges to RequestTarget entities.
-func (ruo *RequestUpdateOne) RemoveTarget(r ...*RequestTarget) *RequestUpdateOne {
-	ids := make([]uuid.UUID, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *RequestUpdateOne) RemoveTarget(v ...*RequestTarget) *RequestUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ruo.RemoveTargetIDs(ids...)
+	return _u.RemoveTargetIDs(ids...)
 }
 
 // ClearFile clears all "file" edges to the File entity.
-func (ruo *RequestUpdateOne) ClearFile() *RequestUpdateOne {
-	ruo.mutation.ClearFile()
-	return ruo
+func (_u *RequestUpdateOne) ClearFile() *RequestUpdateOne {
+	_u.mutation.ClearFile()
+	return _u
 }
 
 // RemoveFileIDs removes the "file" edge to File entities by IDs.
-func (ruo *RequestUpdateOne) RemoveFileIDs(ids ...uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.RemoveFileIDs(ids...)
-	return ruo
+func (_u *RequestUpdateOne) RemoveFileIDs(ids ...uuid.UUID) *RequestUpdateOne {
+	_u.mutation.RemoveFileIDs(ids...)
+	return _u
 }
 
 // RemoveFile removes "file" edges to File entities.
-func (ruo *RequestUpdateOne) RemoveFile(f ...*File) *RequestUpdateOne {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *RequestUpdateOne) RemoveFile(v ...*File) *RequestUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ruo.RemoveFileIDs(ids...)
+	return _u.RemoveFileIDs(ids...)
 }
 
 // ClearTag clears all "tag" edges to the Tag entity.
-func (ruo *RequestUpdateOne) ClearTag() *RequestUpdateOne {
-	ruo.mutation.ClearTag()
-	return ruo
+func (_u *RequestUpdateOne) ClearTag() *RequestUpdateOne {
+	_u.mutation.ClearTag()
+	return _u
 }
 
 // RemoveTagIDs removes the "tag" edge to Tag entities by IDs.
-func (ruo *RequestUpdateOne) RemoveTagIDs(ids ...uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.RemoveTagIDs(ids...)
-	return ruo
+func (_u *RequestUpdateOne) RemoveTagIDs(ids ...uuid.UUID) *RequestUpdateOne {
+	_u.mutation.RemoveTagIDs(ids...)
+	return _u
 }
 
 // RemoveTag removes "tag" edges to Tag entities.
-func (ruo *RequestUpdateOne) RemoveTag(t ...*Tag) *RequestUpdateOne {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *RequestUpdateOne) RemoveTag(v ...*Tag) *RequestUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ruo.RemoveTagIDs(ids...)
+	return _u.RemoveTagIDs(ids...)
 }
 
 // ClearTransaction clears all "transaction" edges to the Transaction entity.
-func (ruo *RequestUpdateOne) ClearTransaction() *RequestUpdateOne {
-	ruo.mutation.ClearTransaction()
-	return ruo
+func (_u *RequestUpdateOne) ClearTransaction() *RequestUpdateOne {
+	_u.mutation.ClearTransaction()
+	return _u
 }
 
 // RemoveTransactionIDs removes the "transaction" edge to Transaction entities by IDs.
-func (ruo *RequestUpdateOne) RemoveTransactionIDs(ids ...uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.RemoveTransactionIDs(ids...)
-	return ruo
+func (_u *RequestUpdateOne) RemoveTransactionIDs(ids ...uuid.UUID) *RequestUpdateOne {
+	_u.mutation.RemoveTransactionIDs(ids...)
+	return _u
 }
 
 // RemoveTransaction removes "transaction" edges to Transaction entities.
-func (ruo *RequestUpdateOne) RemoveTransaction(t ...*Transaction) *RequestUpdateOne {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *RequestUpdateOne) RemoveTransaction(v ...*Transaction) *RequestUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ruo.RemoveTransactionIDs(ids...)
+	return _u.RemoveTransactionIDs(ids...)
 }
 
 // ClearComment clears all "comment" edges to the Comment entity.
-func (ruo *RequestUpdateOne) ClearComment() *RequestUpdateOne {
-	ruo.mutation.ClearComment()
-	return ruo
+func (_u *RequestUpdateOne) ClearComment() *RequestUpdateOne {
+	_u.mutation.ClearComment()
+	return _u
 }
 
 // RemoveCommentIDs removes the "comment" edge to Comment entities by IDs.
-func (ruo *RequestUpdateOne) RemoveCommentIDs(ids ...uuid.UUID) *RequestUpdateOne {
-	ruo.mutation.RemoveCommentIDs(ids...)
-	return ruo
+func (_u *RequestUpdateOne) RemoveCommentIDs(ids ...uuid.UUID) *RequestUpdateOne {
+	_u.mutation.RemoveCommentIDs(ids...)
+	return _u
 }
 
 // RemoveComment removes "comment" edges to Comment entities.
-func (ruo *RequestUpdateOne) RemoveComment(c ...*Comment) *RequestUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *RequestUpdateOne) RemoveComment(v ...*Comment) *RequestUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ruo.RemoveCommentIDs(ids...)
+	return _u.RemoveCommentIDs(ids...)
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (ruo *RequestUpdateOne) ClearUser() *RequestUpdateOne {
-	ruo.mutation.ClearUser()
-	return ruo
-}
-
-// ClearGroup clears the "group" edge to the Group entity.
-func (ruo *RequestUpdateOne) ClearGroup() *RequestUpdateOne {
-	ruo.mutation.ClearGroup()
-	return ruo
+func (_u *RequestUpdateOne) ClearUser() *RequestUpdateOne {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // Where appends a list predicates to the RequestUpdate builder.
-func (ruo *RequestUpdateOne) Where(ps ...predicate.Request) *RequestUpdateOne {
-	ruo.mutation.Where(ps...)
-	return ruo
+func (_u *RequestUpdateOne) Where(ps ...predicate.Request) *RequestUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (ruo *RequestUpdateOne) Select(field string, fields ...string) *RequestUpdateOne {
-	ruo.fields = append([]string{field}, fields...)
-	return ruo
+func (_u *RequestUpdateOne) Select(field string, fields ...string) *RequestUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Request entity.
-func (ruo *RequestUpdateOne) Save(ctx context.Context) (*Request, error) {
-	ruo.defaults()
-	return withHooks(ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
+func (_u *RequestUpdateOne) Save(ctx context.Context) (*Request, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ruo *RequestUpdateOne) SaveX(ctx context.Context) *Request {
-	node, err := ruo.Save(ctx)
+func (_u *RequestUpdateOne) SaveX(ctx context.Context) *Request {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -1109,34 +1029,34 @@ func (ruo *RequestUpdateOne) SaveX(ctx context.Context) *Request {
 }
 
 // Exec executes the query on the entity.
-func (ruo *RequestUpdateOne) Exec(ctx context.Context) error {
-	_, err := ruo.Save(ctx)
+func (_u *RequestUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ruo *RequestUpdateOne) ExecX(ctx context.Context) {
-	if err := ruo.Exec(ctx); err != nil {
+func (_u *RequestUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (ruo *RequestUpdateOne) defaults() {
-	if _, ok := ruo.mutation.UpdatedAt(); !ok {
+func (_u *RequestUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := request.UpdateDefaultUpdatedAt()
-		ruo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err error) {
+func (_u *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err error) {
 	_spec := sqlgraph.NewUpdateSpec(request.Table, request.Columns, sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID))
-	id, ok := ruo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Request.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := ruo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, request.FieldID)
 		for _, f := range fields {
@@ -1148,26 +1068,26 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 			}
 		}
 	}
-	if ps := ruo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ruo.mutation.Title(); ok {
+	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(request.FieldTitle, field.TypeString, value)
 	}
-	if value, ok := ruo.mutation.Content(); ok {
+	if value, ok := _u.mutation.Content(); ok {
 		_spec.SetField(request.FieldContent, field.TypeString, value)
 	}
-	if value, ok := ruo.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(request.FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := ruo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(request.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if ruo.mutation.StatusCleared() {
+	if _u.mutation.StatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1180,23 +1100,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.RemovedStatusIDs(); len(nodes) > 0 && !ruo.mutation.StatusCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   request.StatusTable,
-			Columns: []string{request.StatusColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(requeststatus.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ruo.mutation.StatusIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedStatusIDs(); len(nodes) > 0 && !_u.mutation.StatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1210,9 +1114,25 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.StatusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   request.StatusTable,
+			Columns: []string{request.StatusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requeststatus.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ruo.mutation.TargetCleared() {
+	if _u.mutation.TargetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1225,7 +1145,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.RemovedTargetIDs(); len(nodes) > 0 && !ruo.mutation.TargetCleared() {
+	if nodes := _u.mutation.RemovedTargetIDs(); len(nodes) > 0 && !_u.mutation.TargetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1241,7 +1161,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.TargetIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TargetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1257,7 +1177,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ruo.mutation.FileCleared() {
+	if _u.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1270,23 +1190,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.RemovedFileIDs(); len(nodes) > 0 && !ruo.mutation.FileCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   request.FileTable,
-			Columns: []string{request.FileColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ruo.mutation.FileIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedFileIDs(); len(nodes) > 0 && !_u.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1300,9 +1204,25 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.FileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   request.FileTable,
+			Columns: []string{request.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ruo.mutation.TagCleared() {
+	if _u.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1315,7 +1235,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.RemovedTagIDs(); len(nodes) > 0 && !ruo.mutation.TagCleared() {
+	if nodes := _u.mutation.RemovedTagIDs(); len(nodes) > 0 && !_u.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1331,7 +1251,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.TagIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1347,7 +1267,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ruo.mutation.TransactionCleared() {
+	if _u.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1360,7 +1280,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.RemovedTransactionIDs(); len(nodes) > 0 && !ruo.mutation.TransactionCleared() {
+	if nodes := _u.mutation.RemovedTransactionIDs(); len(nodes) > 0 && !_u.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1376,7 +1296,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.TransactionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1392,7 +1312,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ruo.mutation.CommentCleared() {
+	if _u.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1405,7 +1325,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.RemovedCommentIDs(); len(nodes) > 0 && !ruo.mutation.CommentCleared() {
+	if nodes := _u.mutation.RemovedCommentIDs(); len(nodes) > 0 && !_u.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1421,7 +1341,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.CommentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CommentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1437,7 +1357,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ruo.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -1450,7 +1370,7 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -1466,39 +1386,10 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ruo.mutation.GroupCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   request.GroupTable,
-			Columns: []string{request.GroupColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ruo.mutation.GroupIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   request.GroupTable,
-			Columns: []string{request.GroupColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	_node = &Request{config: ruo.config}
+	_node = &Request{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, ruo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{request.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -1506,6 +1397,6 @@ func (ruo *RequestUpdateOne) sqlSave(ctx context.Context) (_node *Request, err e
 		}
 		return nil, err
 	}
-	ruo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

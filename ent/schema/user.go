@@ -39,10 +39,6 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("group_user", Group.Type).
-			Ref("user"),
-		edge.From("group_owner", Group.Type).
-			Ref("owner"),
 		edge.From("comment", Comment.Type).
 			Ref("user"),
 		edge.From("request_status", RequestStatus.Type).

@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/transactiondetail"
@@ -25,10 +24,9 @@ type Transaction struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TransactionQuery when eager-loading is set.
-	Edges                    TransactionEdges `json:"edges"`
-	group_budget_transaction *uuid.UUID
-	request_transaction      *uuid.UUID
-	selectValues             sql.SelectValues
+	Edges               TransactionEdges `json:"edges"`
+	request_transaction *uuid.UUID
+	selectValues        sql.SelectValues
 }
 
 // TransactionEdges holds the relations/edges for other nodes in the graph.
@@ -37,13 +35,11 @@ type TransactionEdges struct {
 	Detail *TransactionDetail `json:"detail,omitempty"`
 	// Tag holds the value of the tag edge.
 	Tag []*Tag `json:"tag,omitempty"`
-	// GroupBudget holds the value of the group_budget edge.
-	GroupBudget *GroupBudget `json:"group_budget,omitempty"`
 	// Request holds the value of the request edge.
 	Request *Request `json:"request,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [3]bool
 }
 
 // DetailOrErr returns the Detail value or an error if the edge
@@ -66,23 +62,12 @@ func (e TransactionEdges) TagOrErr() ([]*Tag, error) {
 	return nil, &NotLoadedError{edge: "tag"}
 }
 
-// GroupBudgetOrErr returns the GroupBudget value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TransactionEdges) GroupBudgetOrErr() (*GroupBudget, error) {
-	if e.GroupBudget != nil {
-		return e.GroupBudget, nil
-	} else if e.loadedTypes[2] {
-		return nil, &NotFoundError{label: groupbudget.Label}
-	}
-	return nil, &NotLoadedError{edge: "group_budget"}
-}
-
 // RequestOrErr returns the Request value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TransactionEdges) RequestOrErr() (*Request, error) {
 	if e.Request != nil {
 		return e.Request, nil
-	} else if e.loadedTypes[3] {
+	} else if e.loadedTypes[2] {
 		return nil, &NotFoundError{label: request.Label}
 	}
 	return nil, &NotLoadedError{edge: "request"}
@@ -97,9 +82,7 @@ func (*Transaction) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case transaction.FieldID:
 			values[i] = new(uuid.UUID)
-		case transaction.ForeignKeys[0]: // group_budget_transaction
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case transaction.ForeignKeys[1]: // request_transaction
+		case transaction.ForeignKeys[0]: // request_transaction
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
@@ -110,7 +93,7 @@ func (*Transaction) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Transaction fields.
-func (t *Transaction) assignValues(columns []string, values []any) error {
+func (_m *Transaction) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -120,30 +103,23 @@ func (t *Transaction) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				t.ID = *value
+				_m.ID = *value
 			}
 		case transaction.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				t.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case transaction.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field group_budget_transaction", values[i])
-			} else if value.Valid {
-				t.group_budget_transaction = new(uuid.UUID)
-				*t.group_budget_transaction = *value.S.(*uuid.UUID)
-			}
-		case transaction.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field request_transaction", values[i])
 			} else if value.Valid {
-				t.request_transaction = new(uuid.UUID)
-				*t.request_transaction = *value.S.(*uuid.UUID)
+				_m.request_transaction = new(uuid.UUID)
+				*_m.request_transaction = *value.S.(*uuid.UUID)
 			}
 		default:
-			t.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -151,55 +127,50 @@ func (t *Transaction) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Transaction.
 // This includes values selected through modifiers, order, etc.
-func (t *Transaction) Value(name string) (ent.Value, error) {
-	return t.selectValues.Get(name)
+func (_m *Transaction) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryDetail queries the "detail" edge of the Transaction entity.
-func (t *Transaction) QueryDetail() *TransactionDetailQuery {
-	return NewTransactionClient(t.config).QueryDetail(t)
+func (_m *Transaction) QueryDetail() *TransactionDetailQuery {
+	return NewTransactionClient(_m.config).QueryDetail(_m)
 }
 
 // QueryTag queries the "tag" edge of the Transaction entity.
-func (t *Transaction) QueryTag() *TagQuery {
-	return NewTransactionClient(t.config).QueryTag(t)
-}
-
-// QueryGroupBudget queries the "group_budget" edge of the Transaction entity.
-func (t *Transaction) QueryGroupBudget() *GroupBudgetQuery {
-	return NewTransactionClient(t.config).QueryGroupBudget(t)
+func (_m *Transaction) QueryTag() *TagQuery {
+	return NewTransactionClient(_m.config).QueryTag(_m)
 }
 
 // QueryRequest queries the "request" edge of the Transaction entity.
-func (t *Transaction) QueryRequest() *RequestQuery {
-	return NewTransactionClient(t.config).QueryRequest(t)
+func (_m *Transaction) QueryRequest() *RequestQuery {
+	return NewTransactionClient(_m.config).QueryRequest(_m)
 }
 
 // Update returns a builder for updating this Transaction.
 // Note that you need to call Transaction.Unwrap() before calling this method if this Transaction
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (t *Transaction) Update() *TransactionUpdateOne {
-	return NewTransactionClient(t.config).UpdateOne(t)
+func (_m *Transaction) Update() *TransactionUpdateOne {
+	return NewTransactionClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Transaction entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (t *Transaction) Unwrap() *Transaction {
-	_tx, ok := t.config.driver.(*txDriver)
+func (_m *Transaction) Unwrap() *Transaction {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Transaction is not a transactional entity")
 	}
-	t.config.driver = _tx.drv
-	return t
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (t *Transaction) String() string {
+func (_m *Transaction) String() string {
 	var builder strings.Builder
 	builder.WriteString("Transaction(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(t.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

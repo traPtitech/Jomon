@@ -14,8 +14,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/group"
-	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
@@ -80,13 +78,11 @@ var (
 )
 
 // checkColumn checks if the column exists in the given table.
-func checkColumn(table, column string) error {
+func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			comment.Table:           comment.ValidColumn,
 			file.Table:              file.ValidColumn,
-			group.Table:             group.ValidColumn,
-			groupbudget.Table:       groupbudget.ValidColumn,
 			request.Table:           request.ValidColumn,
 			requeststatus.Table:     requeststatus.ValidColumn,
 			requesttarget.Table:     requesttarget.ValidColumn,
@@ -96,7 +92,7 @@ func checkColumn(table, column string) error {
 			user.Table:              user.ValidColumn,
 		})
 	})
-	return columnCheck(table, column)
+	return columnCheck(t, c)
 }
 
 // Asc applies the given fields in ASC order.

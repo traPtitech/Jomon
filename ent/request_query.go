@@ -15,7 +15,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/requeststatus"
@@ -39,7 +38,6 @@ type RequestQuery struct {
 	withTransaction *TransactionQuery
 	withComment     *CommentQuery
 	withUser        *UserQuery
-	withGroup       *GroupQuery
 	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -47,44 +45,44 @@ type RequestQuery struct {
 }
 
 // Where adds a new predicate for the RequestQuery builder.
-func (rq *RequestQuery) Where(ps ...predicate.Request) *RequestQuery {
-	rq.predicates = append(rq.predicates, ps...)
-	return rq
+func (_q *RequestQuery) Where(ps ...predicate.Request) *RequestQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (rq *RequestQuery) Limit(limit int) *RequestQuery {
-	rq.ctx.Limit = &limit
-	return rq
+func (_q *RequestQuery) Limit(limit int) *RequestQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (rq *RequestQuery) Offset(offset int) *RequestQuery {
-	rq.ctx.Offset = &offset
-	return rq
+func (_q *RequestQuery) Offset(offset int) *RequestQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (rq *RequestQuery) Unique(unique bool) *RequestQuery {
-	rq.ctx.Unique = &unique
-	return rq
+func (_q *RequestQuery) Unique(unique bool) *RequestQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (rq *RequestQuery) Order(o ...request.OrderOption) *RequestQuery {
-	rq.order = append(rq.order, o...)
-	return rq
+func (_q *RequestQuery) Order(o ...request.OrderOption) *RequestQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryStatus chains the current query on the "status" edge.
-func (rq *RequestQuery) QueryStatus() *RequestStatusQuery {
-	query := (&RequestStatusClient{config: rq.config}).Query()
+func (_q *RequestQuery) QueryStatus() *RequestStatusQuery {
+	query := (&RequestStatusClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := rq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := rq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -93,20 +91,20 @@ func (rq *RequestQuery) QueryStatus() *RequestStatusQuery {
 			sqlgraph.To(requeststatus.Table, requeststatus.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, request.StatusTable, request.StatusColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryTarget chains the current query on the "target" edge.
-func (rq *RequestQuery) QueryTarget() *RequestTargetQuery {
-	query := (&RequestTargetClient{config: rq.config}).Query()
+func (_q *RequestQuery) QueryTarget() *RequestTargetQuery {
+	query := (&RequestTargetClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := rq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := rq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -115,20 +113,20 @@ func (rq *RequestQuery) QueryTarget() *RequestTargetQuery {
 			sqlgraph.To(requesttarget.Table, requesttarget.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, request.TargetTable, request.TargetColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryFile chains the current query on the "file" edge.
-func (rq *RequestQuery) QueryFile() *FileQuery {
-	query := (&FileClient{config: rq.config}).Query()
+func (_q *RequestQuery) QueryFile() *FileQuery {
+	query := (&FileClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := rq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := rq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -137,20 +135,20 @@ func (rq *RequestQuery) QueryFile() *FileQuery {
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, request.FileTable, request.FileColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryTag chains the current query on the "tag" edge.
-func (rq *RequestQuery) QueryTag() *TagQuery {
-	query := (&TagClient{config: rq.config}).Query()
+func (_q *RequestQuery) QueryTag() *TagQuery {
+	query := (&TagClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := rq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := rq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -159,20 +157,20 @@ func (rq *RequestQuery) QueryTag() *TagQuery {
 			sqlgraph.To(tag.Table, tag.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, request.TagTable, request.TagPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryTransaction chains the current query on the "transaction" edge.
-func (rq *RequestQuery) QueryTransaction() *TransactionQuery {
-	query := (&TransactionClient{config: rq.config}).Query()
+func (_q *RequestQuery) QueryTransaction() *TransactionQuery {
+	query := (&TransactionClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := rq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := rq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -181,20 +179,20 @@ func (rq *RequestQuery) QueryTransaction() *TransactionQuery {
 			sqlgraph.To(transaction.Table, transaction.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, request.TransactionTable, request.TransactionColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryComment chains the current query on the "comment" edge.
-func (rq *RequestQuery) QueryComment() *CommentQuery {
-	query := (&CommentClient{config: rq.config}).Query()
+func (_q *RequestQuery) QueryComment() *CommentQuery {
+	query := (&CommentClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := rq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := rq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -203,20 +201,20 @@ func (rq *RequestQuery) QueryComment() *CommentQuery {
 			sqlgraph.To(comment.Table, comment.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, request.CommentTable, request.CommentColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryUser chains the current query on the "user" edge.
-func (rq *RequestQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: rq.config}).Query()
+func (_q *RequestQuery) QueryUser() *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := rq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := rq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -225,29 +223,7 @@ func (rq *RequestQuery) QueryUser() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, request.UserTable, request.UserColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryGroup chains the current query on the "group" edge.
-func (rq *RequestQuery) QueryGroup() *GroupQuery {
-	query := (&GroupClient{config: rq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := rq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := rq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(request.Table, request.FieldID, selector),
-			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, request.GroupTable, request.GroupColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(rq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -255,8 +231,8 @@ func (rq *RequestQuery) QueryGroup() *GroupQuery {
 
 // First returns the first Request entity from the query.
 // Returns a *NotFoundError when no Request was found.
-func (rq *RequestQuery) First(ctx context.Context) (*Request, error) {
-	nodes, err := rq.Limit(1).All(setContextOp(ctx, rq.ctx, ent.OpQueryFirst))
+func (_q *RequestQuery) First(ctx context.Context) (*Request, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -267,8 +243,8 @@ func (rq *RequestQuery) First(ctx context.Context) (*Request, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (rq *RequestQuery) FirstX(ctx context.Context) *Request {
-	node, err := rq.First(ctx)
+func (_q *RequestQuery) FirstX(ctx context.Context) *Request {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -277,9 +253,9 @@ func (rq *RequestQuery) FirstX(ctx context.Context) *Request {
 
 // FirstID returns the first Request ID from the query.
 // Returns a *NotFoundError when no Request ID was found.
-func (rq *RequestQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *RequestQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = rq.Limit(1).IDs(setContextOp(ctx, rq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -290,8 +266,8 @@ func (rq *RequestQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (rq *RequestQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := rq.FirstID(ctx)
+func (_q *RequestQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -301,8 +277,8 @@ func (rq *RequestQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single Request entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Request entity is found.
 // Returns a *NotFoundError when no Request entities are found.
-func (rq *RequestQuery) Only(ctx context.Context) (*Request, error) {
-	nodes, err := rq.Limit(2).All(setContextOp(ctx, rq.ctx, ent.OpQueryOnly))
+func (_q *RequestQuery) Only(ctx context.Context) (*Request, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -317,8 +293,8 @@ func (rq *RequestQuery) Only(ctx context.Context) (*Request, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (rq *RequestQuery) OnlyX(ctx context.Context) *Request {
-	node, err := rq.Only(ctx)
+func (_q *RequestQuery) OnlyX(ctx context.Context) *Request {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -328,9 +304,9 @@ func (rq *RequestQuery) OnlyX(ctx context.Context) *Request {
 // OnlyID is like Only, but returns the only Request ID in the query.
 // Returns a *NotSingularError when more than one Request ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (rq *RequestQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *RequestQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = rq.Limit(2).IDs(setContextOp(ctx, rq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -345,8 +321,8 @@ func (rq *RequestQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (rq *RequestQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := rq.OnlyID(ctx)
+func (_q *RequestQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -354,18 +330,18 @@ func (rq *RequestQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of Requests.
-func (rq *RequestQuery) All(ctx context.Context) ([]*Request, error) {
-	ctx = setContextOp(ctx, rq.ctx, ent.OpQueryAll)
-	if err := rq.prepareQuery(ctx); err != nil {
+func (_q *RequestQuery) All(ctx context.Context) ([]*Request, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Request, *RequestQuery]()
-	return withInterceptors[[]*Request](ctx, rq, qr, rq.inters)
+	return withInterceptors[[]*Request](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (rq *RequestQuery) AllX(ctx context.Context) []*Request {
-	nodes, err := rq.All(ctx)
+func (_q *RequestQuery) AllX(ctx context.Context) []*Request {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -373,20 +349,20 @@ func (rq *RequestQuery) AllX(ctx context.Context) []*Request {
 }
 
 // IDs executes the query and returns a list of Request IDs.
-func (rq *RequestQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if rq.ctx.Unique == nil && rq.path != nil {
-		rq.Unique(true)
+func (_q *RequestQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, rq.ctx, ent.OpQueryIDs)
-	if err = rq.Select(request.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(request.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (rq *RequestQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := rq.IDs(ctx)
+func (_q *RequestQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -394,17 +370,17 @@ func (rq *RequestQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (rq *RequestQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, rq.ctx, ent.OpQueryCount)
-	if err := rq.prepareQuery(ctx); err != nil {
+func (_q *RequestQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, rq, querierCount[*RequestQuery](), rq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*RequestQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (rq *RequestQuery) CountX(ctx context.Context) int {
-	count, err := rq.Count(ctx)
+func (_q *RequestQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -412,9 +388,9 @@ func (rq *RequestQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (rq *RequestQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, rq.ctx, ent.OpQueryExist)
-	switch _, err := rq.FirstID(ctx); {
+func (_q *RequestQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -425,8 +401,8 @@ func (rq *RequestQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (rq *RequestQuery) ExistX(ctx context.Context) bool {
-	exist, err := rq.Exist(ctx)
+func (_q *RequestQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -435,116 +411,104 @@ func (rq *RequestQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the RequestQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (rq *RequestQuery) Clone() *RequestQuery {
-	if rq == nil {
+func (_q *RequestQuery) Clone() *RequestQuery {
+	if _q == nil {
 		return nil
 	}
 	return &RequestQuery{
-		config:          rq.config,
-		ctx:             rq.ctx.Clone(),
-		order:           append([]request.OrderOption{}, rq.order...),
-		inters:          append([]Interceptor{}, rq.inters...),
-		predicates:      append([]predicate.Request{}, rq.predicates...),
-		withStatus:      rq.withStatus.Clone(),
-		withTarget:      rq.withTarget.Clone(),
-		withFile:        rq.withFile.Clone(),
-		withTag:         rq.withTag.Clone(),
-		withTransaction: rq.withTransaction.Clone(),
-		withComment:     rq.withComment.Clone(),
-		withUser:        rq.withUser.Clone(),
-		withGroup:       rq.withGroup.Clone(),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]request.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.Request{}, _q.predicates...),
+		withStatus:      _q.withStatus.Clone(),
+		withTarget:      _q.withTarget.Clone(),
+		withFile:        _q.withFile.Clone(),
+		withTag:         _q.withTag.Clone(),
+		withTransaction: _q.withTransaction.Clone(),
+		withComment:     _q.withComment.Clone(),
+		withUser:        _q.withUser.Clone(),
 		// clone intermediate query.
-		sql:  rq.sql.Clone(),
-		path: rq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithStatus tells the query-builder to eager-load the nodes that are connected to
 // the "status" edge. The optional arguments are used to configure the query builder of the edge.
-func (rq *RequestQuery) WithStatus(opts ...func(*RequestStatusQuery)) *RequestQuery {
-	query := (&RequestStatusClient{config: rq.config}).Query()
+func (_q *RequestQuery) WithStatus(opts ...func(*RequestStatusQuery)) *RequestQuery {
+	query := (&RequestStatusClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	rq.withStatus = query
-	return rq
+	_q.withStatus = query
+	return _q
 }
 
 // WithTarget tells the query-builder to eager-load the nodes that are connected to
 // the "target" edge. The optional arguments are used to configure the query builder of the edge.
-func (rq *RequestQuery) WithTarget(opts ...func(*RequestTargetQuery)) *RequestQuery {
-	query := (&RequestTargetClient{config: rq.config}).Query()
+func (_q *RequestQuery) WithTarget(opts ...func(*RequestTargetQuery)) *RequestQuery {
+	query := (&RequestTargetClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	rq.withTarget = query
-	return rq
+	_q.withTarget = query
+	return _q
 }
 
 // WithFile tells the query-builder to eager-load the nodes that are connected to
 // the "file" edge. The optional arguments are used to configure the query builder of the edge.
-func (rq *RequestQuery) WithFile(opts ...func(*FileQuery)) *RequestQuery {
-	query := (&FileClient{config: rq.config}).Query()
+func (_q *RequestQuery) WithFile(opts ...func(*FileQuery)) *RequestQuery {
+	query := (&FileClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	rq.withFile = query
-	return rq
+	_q.withFile = query
+	return _q
 }
 
 // WithTag tells the query-builder to eager-load the nodes that are connected to
 // the "tag" edge. The optional arguments are used to configure the query builder of the edge.
-func (rq *RequestQuery) WithTag(opts ...func(*TagQuery)) *RequestQuery {
-	query := (&TagClient{config: rq.config}).Query()
+func (_q *RequestQuery) WithTag(opts ...func(*TagQuery)) *RequestQuery {
+	query := (&TagClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	rq.withTag = query
-	return rq
+	_q.withTag = query
+	return _q
 }
 
 // WithTransaction tells the query-builder to eager-load the nodes that are connected to
 // the "transaction" edge. The optional arguments are used to configure the query builder of the edge.
-func (rq *RequestQuery) WithTransaction(opts ...func(*TransactionQuery)) *RequestQuery {
-	query := (&TransactionClient{config: rq.config}).Query()
+func (_q *RequestQuery) WithTransaction(opts ...func(*TransactionQuery)) *RequestQuery {
+	query := (&TransactionClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	rq.withTransaction = query
-	return rq
+	_q.withTransaction = query
+	return _q
 }
 
 // WithComment tells the query-builder to eager-load the nodes that are connected to
 // the "comment" edge. The optional arguments are used to configure the query builder of the edge.
-func (rq *RequestQuery) WithComment(opts ...func(*CommentQuery)) *RequestQuery {
-	query := (&CommentClient{config: rq.config}).Query()
+func (_q *RequestQuery) WithComment(opts ...func(*CommentQuery)) *RequestQuery {
+	query := (&CommentClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	rq.withComment = query
-	return rq
+	_q.withComment = query
+	return _q
 }
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (rq *RequestQuery) WithUser(opts ...func(*UserQuery)) *RequestQuery {
-	query := (&UserClient{config: rq.config}).Query()
+func (_q *RequestQuery) WithUser(opts ...func(*UserQuery)) *RequestQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	rq.withUser = query
-	return rq
-}
-
-// WithGroup tells the query-builder to eager-load the nodes that are connected to
-// the "group" edge. The optional arguments are used to configure the query builder of the edge.
-func (rq *RequestQuery) WithGroup(opts ...func(*GroupQuery)) *RequestQuery {
-	query := (&GroupClient{config: rq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	rq.withGroup = query
-	return rq
+	_q.withUser = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -561,10 +525,10 @@ func (rq *RequestQuery) WithGroup(opts ...func(*GroupQuery)) *RequestQuery {
 //		GroupBy(request.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (rq *RequestQuery) GroupBy(field string, fields ...string) *RequestGroupBy {
-	rq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &RequestGroupBy{build: rq}
-	grbuild.flds = &rq.ctx.Fields
+func (_q *RequestQuery) GroupBy(field string, fields ...string) *RequestGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &RequestGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = request.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -582,62 +546,61 @@ func (rq *RequestQuery) GroupBy(field string, fields ...string) *RequestGroupBy 
 //	client.Request.Query().
 //		Select(request.FieldTitle).
 //		Scan(ctx, &v)
-func (rq *RequestQuery) Select(fields ...string) *RequestSelect {
-	rq.ctx.Fields = append(rq.ctx.Fields, fields...)
-	sbuild := &RequestSelect{RequestQuery: rq}
+func (_q *RequestQuery) Select(fields ...string) *RequestSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &RequestSelect{RequestQuery: _q}
 	sbuild.label = request.Label
-	sbuild.flds, sbuild.scan = &rq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a RequestSelect configured with the given aggregations.
-func (rq *RequestQuery) Aggregate(fns ...AggregateFunc) *RequestSelect {
-	return rq.Select().Aggregate(fns...)
+func (_q *RequestQuery) Aggregate(fns ...AggregateFunc) *RequestSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (rq *RequestQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range rq.inters {
+func (_q *RequestQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, rq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range rq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !request.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if rq.path != nil {
-		prev, err := rq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		rq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (rq *RequestQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Request, error) {
+func (_q *RequestQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Request, error) {
 	var (
 		nodes       = []*Request{}
-		withFKs     = rq.withFKs
-		_spec       = rq.querySpec()
-		loadedTypes = [8]bool{
-			rq.withStatus != nil,
-			rq.withTarget != nil,
-			rq.withFile != nil,
-			rq.withTag != nil,
-			rq.withTransaction != nil,
-			rq.withComment != nil,
-			rq.withUser != nil,
-			rq.withGroup != nil,
+		withFKs     = _q.withFKs
+		_spec       = _q.querySpec()
+		loadedTypes = [7]bool{
+			_q.withStatus != nil,
+			_q.withTarget != nil,
+			_q.withFile != nil,
+			_q.withTag != nil,
+			_q.withTransaction != nil,
+			_q.withComment != nil,
+			_q.withUser != nil,
 		}
 	)
-	if rq.withUser != nil || rq.withGroup != nil {
+	if _q.withUser != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -647,7 +610,7 @@ func (rq *RequestQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Requ
 		return (*Request).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Request{config: rq.config}
+		node := &Request{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -655,70 +618,64 @@ func (rq *RequestQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Requ
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, rq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := rq.withStatus; query != nil {
-		if err := rq.loadStatus(ctx, query, nodes,
+	if query := _q.withStatus; query != nil {
+		if err := _q.loadStatus(ctx, query, nodes,
 			func(n *Request) { n.Edges.Status = []*RequestStatus{} },
 			func(n *Request, e *RequestStatus) { n.Edges.Status = append(n.Edges.Status, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := rq.withTarget; query != nil {
-		if err := rq.loadTarget(ctx, query, nodes,
+	if query := _q.withTarget; query != nil {
+		if err := _q.loadTarget(ctx, query, nodes,
 			func(n *Request) { n.Edges.Target = []*RequestTarget{} },
 			func(n *Request, e *RequestTarget) { n.Edges.Target = append(n.Edges.Target, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := rq.withFile; query != nil {
-		if err := rq.loadFile(ctx, query, nodes,
+	if query := _q.withFile; query != nil {
+		if err := _q.loadFile(ctx, query, nodes,
 			func(n *Request) { n.Edges.File = []*File{} },
 			func(n *Request, e *File) { n.Edges.File = append(n.Edges.File, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := rq.withTag; query != nil {
-		if err := rq.loadTag(ctx, query, nodes,
+	if query := _q.withTag; query != nil {
+		if err := _q.loadTag(ctx, query, nodes,
 			func(n *Request) { n.Edges.Tag = []*Tag{} },
 			func(n *Request, e *Tag) { n.Edges.Tag = append(n.Edges.Tag, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := rq.withTransaction; query != nil {
-		if err := rq.loadTransaction(ctx, query, nodes,
+	if query := _q.withTransaction; query != nil {
+		if err := _q.loadTransaction(ctx, query, nodes,
 			func(n *Request) { n.Edges.Transaction = []*Transaction{} },
 			func(n *Request, e *Transaction) { n.Edges.Transaction = append(n.Edges.Transaction, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := rq.withComment; query != nil {
-		if err := rq.loadComment(ctx, query, nodes,
+	if query := _q.withComment; query != nil {
+		if err := _q.loadComment(ctx, query, nodes,
 			func(n *Request) { n.Edges.Comment = []*Comment{} },
 			func(n *Request, e *Comment) { n.Edges.Comment = append(n.Edges.Comment, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := rq.withUser; query != nil {
-		if err := rq.loadUser(ctx, query, nodes, nil,
+	if query := _q.withUser; query != nil {
+		if err := _q.loadUser(ctx, query, nodes, nil,
 			func(n *Request, e *User) { n.Edges.User = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := rq.withGroup; query != nil {
-		if err := rq.loadGroup(ctx, query, nodes, nil,
-			func(n *Request, e *Group) { n.Edges.Group = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (rq *RequestQuery) loadStatus(ctx context.Context, query *RequestStatusQuery, nodes []*Request, init func(*Request), assign func(*Request, *RequestStatus)) error {
+func (_q *RequestQuery) loadStatus(ctx context.Context, query *RequestStatusQuery, nodes []*Request, init func(*Request), assign func(*Request, *RequestStatus)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Request)
 	for i := range nodes {
@@ -749,7 +706,7 @@ func (rq *RequestQuery) loadStatus(ctx context.Context, query *RequestStatusQuer
 	}
 	return nil
 }
-func (rq *RequestQuery) loadTarget(ctx context.Context, query *RequestTargetQuery, nodes []*Request, init func(*Request), assign func(*Request, *RequestTarget)) error {
+func (_q *RequestQuery) loadTarget(ctx context.Context, query *RequestTargetQuery, nodes []*Request, init func(*Request), assign func(*Request, *RequestTarget)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Request)
 	for i := range nodes {
@@ -780,7 +737,7 @@ func (rq *RequestQuery) loadTarget(ctx context.Context, query *RequestTargetQuer
 	}
 	return nil
 }
-func (rq *RequestQuery) loadFile(ctx context.Context, query *FileQuery, nodes []*Request, init func(*Request), assign func(*Request, *File)) error {
+func (_q *RequestQuery) loadFile(ctx context.Context, query *FileQuery, nodes []*Request, init func(*Request), assign func(*Request, *File)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Request)
 	for i := range nodes {
@@ -811,7 +768,7 @@ func (rq *RequestQuery) loadFile(ctx context.Context, query *FileQuery, nodes []
 	}
 	return nil
 }
-func (rq *RequestQuery) loadTag(ctx context.Context, query *TagQuery, nodes []*Request, init func(*Request), assign func(*Request, *Tag)) error {
+func (_q *RequestQuery) loadTag(ctx context.Context, query *TagQuery, nodes []*Request, init func(*Request), assign func(*Request, *Tag)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[uuid.UUID]*Request)
 	nids := make(map[uuid.UUID]map[*Request]struct{})
@@ -872,7 +829,7 @@ func (rq *RequestQuery) loadTag(ctx context.Context, query *TagQuery, nodes []*R
 	}
 	return nil
 }
-func (rq *RequestQuery) loadTransaction(ctx context.Context, query *TransactionQuery, nodes []*Request, init func(*Request), assign func(*Request, *Transaction)) error {
+func (_q *RequestQuery) loadTransaction(ctx context.Context, query *TransactionQuery, nodes []*Request, init func(*Request), assign func(*Request, *Transaction)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Request)
 	for i := range nodes {
@@ -903,7 +860,7 @@ func (rq *RequestQuery) loadTransaction(ctx context.Context, query *TransactionQ
 	}
 	return nil
 }
-func (rq *RequestQuery) loadComment(ctx context.Context, query *CommentQuery, nodes []*Request, init func(*Request), assign func(*Request, *Comment)) error {
+func (_q *RequestQuery) loadComment(ctx context.Context, query *CommentQuery, nodes []*Request, init func(*Request), assign func(*Request, *Comment)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Request)
 	for i := range nodes {
@@ -934,7 +891,7 @@ func (rq *RequestQuery) loadComment(ctx context.Context, query *CommentQuery, no
 	}
 	return nil
 }
-func (rq *RequestQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Request, init func(*Request), assign func(*Request, *User)) error {
+func (_q *RequestQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Request, init func(*Request), assign func(*Request, *User)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*Request)
 	for i := range nodes {
@@ -966,57 +923,25 @@ func (rq *RequestQuery) loadUser(ctx context.Context, query *UserQuery, nodes []
 	}
 	return nil
 }
-func (rq *RequestQuery) loadGroup(ctx context.Context, query *GroupQuery, nodes []*Request, init func(*Request), assign func(*Request, *Group)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Request)
-	for i := range nodes {
-		if nodes[i].group_request == nil {
-			continue
-		}
-		fk := *nodes[i].group_request
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
+
+func (_q *RequestQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(group.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "group_request" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (rq *RequestQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := rq.querySpec()
-	_spec.Node.Columns = rq.ctx.Fields
-	if len(rq.ctx.Fields) > 0 {
-		_spec.Unique = rq.ctx.Unique != nil && *rq.ctx.Unique
-	}
-	return sqlgraph.CountNodes(ctx, rq.driver, _spec)
-}
-
-func (rq *RequestQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *RequestQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(request.Table, request.Columns, sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID))
-	_spec.From = rq.sql
-	if unique := rq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if rq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := rq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, request.FieldID)
 		for i := range fields {
@@ -1025,20 +950,20 @@ func (rq *RequestQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := rq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := rq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := rq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := rq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -1048,33 +973,33 @@ func (rq *RequestQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (rq *RequestQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(rq.driver.Dialect())
+func (_q *RequestQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(request.Table)
-	columns := rq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = request.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if rq.sql != nil {
-		selector = rq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if rq.ctx.Unique != nil && *rq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range rq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range rq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := rq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := rq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -1087,41 +1012,41 @@ type RequestGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (rgb *RequestGroupBy) Aggregate(fns ...AggregateFunc) *RequestGroupBy {
-	rgb.fns = append(rgb.fns, fns...)
-	return rgb
+func (_g *RequestGroupBy) Aggregate(fns ...AggregateFunc) *RequestGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rgb *RequestGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rgb.build.ctx, ent.OpQueryGroupBy)
-	if err := rgb.build.prepareQuery(ctx); err != nil {
+func (_g *RequestGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RequestQuery, *RequestGroupBy](ctx, rgb.build, rgb, rgb.build.inters, v)
+	return scanWithInterceptors[*RequestQuery, *RequestGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (rgb *RequestGroupBy) sqlScan(ctx context.Context, root *RequestQuery, v any) error {
+func (_g *RequestGroupBy) sqlScan(ctx context.Context, root *RequestQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(rgb.fns))
-	for _, fn := range rgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*rgb.flds)+len(rgb.fns))
-		for _, f := range *rgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*rgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := rgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -1135,27 +1060,27 @@ type RequestSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (rs *RequestSelect) Aggregate(fns ...AggregateFunc) *RequestSelect {
-	rs.fns = append(rs.fns, fns...)
-	return rs
+func (_s *RequestSelect) Aggregate(fns ...AggregateFunc) *RequestSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rs *RequestSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rs.ctx, ent.OpQuerySelect)
-	if err := rs.prepareQuery(ctx); err != nil {
+func (_s *RequestSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RequestQuery, *RequestSelect](ctx, rs.RequestQuery, rs, rs.inters, v)
+	return scanWithInterceptors[*RequestQuery, *RequestSelect](ctx, _s.RequestQuery, _s, _s.inters, v)
 }
 
-func (rs *RequestSelect) sqlScan(ctx context.Context, root *RequestQuery, v any) error {
+func (_s *RequestSelect) sqlScan(ctx context.Context, root *RequestQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(rs.fns))
-	for _, fn := range rs.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*rs.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -1163,7 +1088,7 @@ func (rs *RequestSelect) sqlScan(ctx context.Context, root *RequestQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := rs.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

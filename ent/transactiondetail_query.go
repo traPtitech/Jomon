@@ -32,44 +32,44 @@ type TransactionDetailQuery struct {
 }
 
 // Where adds a new predicate for the TransactionDetailQuery builder.
-func (tdq *TransactionDetailQuery) Where(ps ...predicate.TransactionDetail) *TransactionDetailQuery {
-	tdq.predicates = append(tdq.predicates, ps...)
-	return tdq
+func (_q *TransactionDetailQuery) Where(ps ...predicate.TransactionDetail) *TransactionDetailQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (tdq *TransactionDetailQuery) Limit(limit int) *TransactionDetailQuery {
-	tdq.ctx.Limit = &limit
-	return tdq
+func (_q *TransactionDetailQuery) Limit(limit int) *TransactionDetailQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (tdq *TransactionDetailQuery) Offset(offset int) *TransactionDetailQuery {
-	tdq.ctx.Offset = &offset
-	return tdq
+func (_q *TransactionDetailQuery) Offset(offset int) *TransactionDetailQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (tdq *TransactionDetailQuery) Unique(unique bool) *TransactionDetailQuery {
-	tdq.ctx.Unique = &unique
-	return tdq
+func (_q *TransactionDetailQuery) Unique(unique bool) *TransactionDetailQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (tdq *TransactionDetailQuery) Order(o ...transactiondetail.OrderOption) *TransactionDetailQuery {
-	tdq.order = append(tdq.order, o...)
-	return tdq
+func (_q *TransactionDetailQuery) Order(o ...transactiondetail.OrderOption) *TransactionDetailQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryTransaction chains the current query on the "transaction" edge.
-func (tdq *TransactionDetailQuery) QueryTransaction() *TransactionQuery {
-	query := (&TransactionClient{config: tdq.config}).Query()
+func (_q *TransactionDetailQuery) QueryTransaction() *TransactionQuery {
+	query := (&TransactionClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tdq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := tdq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -78,7 +78,7 @@ func (tdq *TransactionDetailQuery) QueryTransaction() *TransactionQuery {
 			sqlgraph.To(transaction.Table, transaction.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, transactiondetail.TransactionTable, transactiondetail.TransactionColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(tdq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -86,8 +86,8 @@ func (tdq *TransactionDetailQuery) QueryTransaction() *TransactionQuery {
 
 // First returns the first TransactionDetail entity from the query.
 // Returns a *NotFoundError when no TransactionDetail was found.
-func (tdq *TransactionDetailQuery) First(ctx context.Context) (*TransactionDetail, error) {
-	nodes, err := tdq.Limit(1).All(setContextOp(ctx, tdq.ctx, ent.OpQueryFirst))
+func (_q *TransactionDetailQuery) First(ctx context.Context) (*TransactionDetail, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -98,8 +98,8 @@ func (tdq *TransactionDetailQuery) First(ctx context.Context) (*TransactionDetai
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (tdq *TransactionDetailQuery) FirstX(ctx context.Context) *TransactionDetail {
-	node, err := tdq.First(ctx)
+func (_q *TransactionDetailQuery) FirstX(ctx context.Context) *TransactionDetail {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -108,9 +108,9 @@ func (tdq *TransactionDetailQuery) FirstX(ctx context.Context) *TransactionDetai
 
 // FirstID returns the first TransactionDetail ID from the query.
 // Returns a *NotFoundError when no TransactionDetail ID was found.
-func (tdq *TransactionDetailQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *TransactionDetailQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = tdq.Limit(1).IDs(setContextOp(ctx, tdq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -121,8 +121,8 @@ func (tdq *TransactionDetailQuery) FirstID(ctx context.Context) (id uuid.UUID, e
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (tdq *TransactionDetailQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := tdq.FirstID(ctx)
+func (_q *TransactionDetailQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -132,8 +132,8 @@ func (tdq *TransactionDetailQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single TransactionDetail entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one TransactionDetail entity is found.
 // Returns a *NotFoundError when no TransactionDetail entities are found.
-func (tdq *TransactionDetailQuery) Only(ctx context.Context) (*TransactionDetail, error) {
-	nodes, err := tdq.Limit(2).All(setContextOp(ctx, tdq.ctx, ent.OpQueryOnly))
+func (_q *TransactionDetailQuery) Only(ctx context.Context) (*TransactionDetail, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -148,8 +148,8 @@ func (tdq *TransactionDetailQuery) Only(ctx context.Context) (*TransactionDetail
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (tdq *TransactionDetailQuery) OnlyX(ctx context.Context) *TransactionDetail {
-	node, err := tdq.Only(ctx)
+func (_q *TransactionDetailQuery) OnlyX(ctx context.Context) *TransactionDetail {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -159,9 +159,9 @@ func (tdq *TransactionDetailQuery) OnlyX(ctx context.Context) *TransactionDetail
 // OnlyID is like Only, but returns the only TransactionDetail ID in the query.
 // Returns a *NotSingularError when more than one TransactionDetail ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (tdq *TransactionDetailQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *TransactionDetailQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = tdq.Limit(2).IDs(setContextOp(ctx, tdq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -176,8 +176,8 @@ func (tdq *TransactionDetailQuery) OnlyID(ctx context.Context) (id uuid.UUID, er
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (tdq *TransactionDetailQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := tdq.OnlyID(ctx)
+func (_q *TransactionDetailQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -185,18 +185,18 @@ func (tdq *TransactionDetailQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of TransactionDetails.
-func (tdq *TransactionDetailQuery) All(ctx context.Context) ([]*TransactionDetail, error) {
-	ctx = setContextOp(ctx, tdq.ctx, ent.OpQueryAll)
-	if err := tdq.prepareQuery(ctx); err != nil {
+func (_q *TransactionDetailQuery) All(ctx context.Context) ([]*TransactionDetail, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*TransactionDetail, *TransactionDetailQuery]()
-	return withInterceptors[[]*TransactionDetail](ctx, tdq, qr, tdq.inters)
+	return withInterceptors[[]*TransactionDetail](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (tdq *TransactionDetailQuery) AllX(ctx context.Context) []*TransactionDetail {
-	nodes, err := tdq.All(ctx)
+func (_q *TransactionDetailQuery) AllX(ctx context.Context) []*TransactionDetail {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -204,20 +204,20 @@ func (tdq *TransactionDetailQuery) AllX(ctx context.Context) []*TransactionDetai
 }
 
 // IDs executes the query and returns a list of TransactionDetail IDs.
-func (tdq *TransactionDetailQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if tdq.ctx.Unique == nil && tdq.path != nil {
-		tdq.Unique(true)
+func (_q *TransactionDetailQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, tdq.ctx, ent.OpQueryIDs)
-	if err = tdq.Select(transactiondetail.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(transactiondetail.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (tdq *TransactionDetailQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := tdq.IDs(ctx)
+func (_q *TransactionDetailQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -225,17 +225,17 @@ func (tdq *TransactionDetailQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (tdq *TransactionDetailQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, tdq.ctx, ent.OpQueryCount)
-	if err := tdq.prepareQuery(ctx); err != nil {
+func (_q *TransactionDetailQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, tdq, querierCount[*TransactionDetailQuery](), tdq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*TransactionDetailQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (tdq *TransactionDetailQuery) CountX(ctx context.Context) int {
-	count, err := tdq.Count(ctx)
+func (_q *TransactionDetailQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -243,9 +243,9 @@ func (tdq *TransactionDetailQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (tdq *TransactionDetailQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, tdq.ctx, ent.OpQueryExist)
-	switch _, err := tdq.FirstID(ctx); {
+func (_q *TransactionDetailQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -256,8 +256,8 @@ func (tdq *TransactionDetailQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (tdq *TransactionDetailQuery) ExistX(ctx context.Context) bool {
-	exist, err := tdq.Exist(ctx)
+func (_q *TransactionDetailQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -266,32 +266,32 @@ func (tdq *TransactionDetailQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the TransactionDetailQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (tdq *TransactionDetailQuery) Clone() *TransactionDetailQuery {
-	if tdq == nil {
+func (_q *TransactionDetailQuery) Clone() *TransactionDetailQuery {
+	if _q == nil {
 		return nil
 	}
 	return &TransactionDetailQuery{
-		config:          tdq.config,
-		ctx:             tdq.ctx.Clone(),
-		order:           append([]transactiondetail.OrderOption{}, tdq.order...),
-		inters:          append([]Interceptor{}, tdq.inters...),
-		predicates:      append([]predicate.TransactionDetail{}, tdq.predicates...),
-		withTransaction: tdq.withTransaction.Clone(),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]transactiondetail.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.TransactionDetail{}, _q.predicates...),
+		withTransaction: _q.withTransaction.Clone(),
 		// clone intermediate query.
-		sql:  tdq.sql.Clone(),
-		path: tdq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithTransaction tells the query-builder to eager-load the nodes that are connected to
 // the "transaction" edge. The optional arguments are used to configure the query builder of the edge.
-func (tdq *TransactionDetailQuery) WithTransaction(opts ...func(*TransactionQuery)) *TransactionDetailQuery {
-	query := (&TransactionClient{config: tdq.config}).Query()
+func (_q *TransactionDetailQuery) WithTransaction(opts ...func(*TransactionQuery)) *TransactionDetailQuery {
+	query := (&TransactionClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tdq.withTransaction = query
-	return tdq
+	_q.withTransaction = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -308,10 +308,10 @@ func (tdq *TransactionDetailQuery) WithTransaction(opts ...func(*TransactionQuer
 //		GroupBy(transactiondetail.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (tdq *TransactionDetailQuery) GroupBy(field string, fields ...string) *TransactionDetailGroupBy {
-	tdq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &TransactionDetailGroupBy{build: tdq}
-	grbuild.flds = &tdq.ctx.Fields
+func (_q *TransactionDetailQuery) GroupBy(field string, fields ...string) *TransactionDetailGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &TransactionDetailGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = transactiondetail.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -329,55 +329,55 @@ func (tdq *TransactionDetailQuery) GroupBy(field string, fields ...string) *Tran
 //	client.TransactionDetail.Query().
 //		Select(transactiondetail.FieldTitle).
 //		Scan(ctx, &v)
-func (tdq *TransactionDetailQuery) Select(fields ...string) *TransactionDetailSelect {
-	tdq.ctx.Fields = append(tdq.ctx.Fields, fields...)
-	sbuild := &TransactionDetailSelect{TransactionDetailQuery: tdq}
+func (_q *TransactionDetailQuery) Select(fields ...string) *TransactionDetailSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &TransactionDetailSelect{TransactionDetailQuery: _q}
 	sbuild.label = transactiondetail.Label
-	sbuild.flds, sbuild.scan = &tdq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a TransactionDetailSelect configured with the given aggregations.
-func (tdq *TransactionDetailQuery) Aggregate(fns ...AggregateFunc) *TransactionDetailSelect {
-	return tdq.Select().Aggregate(fns...)
+func (_q *TransactionDetailQuery) Aggregate(fns ...AggregateFunc) *TransactionDetailSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (tdq *TransactionDetailQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range tdq.inters {
+func (_q *TransactionDetailQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, tdq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range tdq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !transactiondetail.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if tdq.path != nil {
-		prev, err := tdq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		tdq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (tdq *TransactionDetailQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TransactionDetail, error) {
+func (_q *TransactionDetailQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TransactionDetail, error) {
 	var (
 		nodes       = []*TransactionDetail{}
-		withFKs     = tdq.withFKs
-		_spec       = tdq.querySpec()
+		withFKs     = _q.withFKs
+		_spec       = _q.querySpec()
 		loadedTypes = [1]bool{
-			tdq.withTransaction != nil,
+			_q.withTransaction != nil,
 		}
 	)
-	if tdq.withTransaction != nil {
+	if _q.withTransaction != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -387,7 +387,7 @@ func (tdq *TransactionDetailQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 		return (*TransactionDetail).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &TransactionDetail{config: tdq.config}
+		node := &TransactionDetail{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -395,14 +395,14 @@ func (tdq *TransactionDetailQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, tdq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := tdq.withTransaction; query != nil {
-		if err := tdq.loadTransaction(ctx, query, nodes, nil,
+	if query := _q.withTransaction; query != nil {
+		if err := _q.loadTransaction(ctx, query, nodes, nil,
 			func(n *TransactionDetail, e *Transaction) { n.Edges.Transaction = e }); err != nil {
 			return nil, err
 		}
@@ -410,7 +410,7 @@ func (tdq *TransactionDetailQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 	return nodes, nil
 }
 
-func (tdq *TransactionDetailQuery) loadTransaction(ctx context.Context, query *TransactionQuery, nodes []*TransactionDetail, init func(*TransactionDetail), assign func(*TransactionDetail, *Transaction)) error {
+func (_q *TransactionDetailQuery) loadTransaction(ctx context.Context, query *TransactionQuery, nodes []*TransactionDetail, init func(*TransactionDetail), assign func(*TransactionDetail, *Transaction)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*TransactionDetail)
 	for i := range nodes {
@@ -443,24 +443,24 @@ func (tdq *TransactionDetailQuery) loadTransaction(ctx context.Context, query *T
 	return nil
 }
 
-func (tdq *TransactionDetailQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := tdq.querySpec()
-	_spec.Node.Columns = tdq.ctx.Fields
-	if len(tdq.ctx.Fields) > 0 {
-		_spec.Unique = tdq.ctx.Unique != nil && *tdq.ctx.Unique
+func (_q *TransactionDetailQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, tdq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (tdq *TransactionDetailQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *TransactionDetailQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(transactiondetail.Table, transactiondetail.Columns, sqlgraph.NewFieldSpec(transactiondetail.FieldID, field.TypeUUID))
-	_spec.From = tdq.sql
-	if unique := tdq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if tdq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := tdq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, transactiondetail.FieldID)
 		for i := range fields {
@@ -469,20 +469,20 @@ func (tdq *TransactionDetailQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := tdq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := tdq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := tdq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := tdq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -492,33 +492,33 @@ func (tdq *TransactionDetailQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (tdq *TransactionDetailQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(tdq.driver.Dialect())
+func (_q *TransactionDetailQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(transactiondetail.Table)
-	columns := tdq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = transactiondetail.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if tdq.sql != nil {
-		selector = tdq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if tdq.ctx.Unique != nil && *tdq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range tdq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range tdq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := tdq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := tdq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -531,41 +531,41 @@ type TransactionDetailGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (tdgb *TransactionDetailGroupBy) Aggregate(fns ...AggregateFunc) *TransactionDetailGroupBy {
-	tdgb.fns = append(tdgb.fns, fns...)
-	return tdgb
+func (_g *TransactionDetailGroupBy) Aggregate(fns ...AggregateFunc) *TransactionDetailGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (tdgb *TransactionDetailGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, tdgb.build.ctx, ent.OpQueryGroupBy)
-	if err := tdgb.build.prepareQuery(ctx); err != nil {
+func (_g *TransactionDetailGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*TransactionDetailQuery, *TransactionDetailGroupBy](ctx, tdgb.build, tdgb, tdgb.build.inters, v)
+	return scanWithInterceptors[*TransactionDetailQuery, *TransactionDetailGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (tdgb *TransactionDetailGroupBy) sqlScan(ctx context.Context, root *TransactionDetailQuery, v any) error {
+func (_g *TransactionDetailGroupBy) sqlScan(ctx context.Context, root *TransactionDetailQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(tdgb.fns))
-	for _, fn := range tdgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*tdgb.flds)+len(tdgb.fns))
-		for _, f := range *tdgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*tdgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := tdgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -579,27 +579,27 @@ type TransactionDetailSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (tds *TransactionDetailSelect) Aggregate(fns ...AggregateFunc) *TransactionDetailSelect {
-	tds.fns = append(tds.fns, fns...)
-	return tds
+func (_s *TransactionDetailSelect) Aggregate(fns ...AggregateFunc) *TransactionDetailSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (tds *TransactionDetailSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, tds.ctx, ent.OpQuerySelect)
-	if err := tds.prepareQuery(ctx); err != nil {
+func (_s *TransactionDetailSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*TransactionDetailQuery, *TransactionDetailSelect](ctx, tds.TransactionDetailQuery, tds, tds.inters, v)
+	return scanWithInterceptors[*TransactionDetailQuery, *TransactionDetailSelect](ctx, _s.TransactionDetailQuery, _s, _s.inters, v)
 }
 
-func (tds *TransactionDetailSelect) sqlScan(ctx context.Context, root *TransactionDetailQuery, v any) error {
+func (_s *TransactionDetailSelect) sqlScan(ctx context.Context, root *TransactionDetailQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(tds.fns))
-	for _, fn := range tds.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*tds.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -607,7 +607,7 @@ func (tds *TransactionDetailSelect) sqlScan(ctx context.Context, root *Transacti
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := tds.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

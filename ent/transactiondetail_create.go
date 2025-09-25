@@ -23,114 +23,114 @@ type TransactionDetailCreate struct {
 }
 
 // SetTitle sets the "title" field.
-func (tdc *TransactionDetailCreate) SetTitle(s string) *TransactionDetailCreate {
-	tdc.mutation.SetTitle(s)
-	return tdc
+func (_c *TransactionDetailCreate) SetTitle(v string) *TransactionDetailCreate {
+	_c.mutation.SetTitle(v)
+	return _c
 }
 
 // SetAmount sets the "amount" field.
-func (tdc *TransactionDetailCreate) SetAmount(i int) *TransactionDetailCreate {
-	tdc.mutation.SetAmount(i)
-	return tdc
+func (_c *TransactionDetailCreate) SetAmount(v int) *TransactionDetailCreate {
+	_c.mutation.SetAmount(v)
+	return _c
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (tdc *TransactionDetailCreate) SetNillableAmount(i *int) *TransactionDetailCreate {
-	if i != nil {
-		tdc.SetAmount(*i)
+func (_c *TransactionDetailCreate) SetNillableAmount(v *int) *TransactionDetailCreate {
+	if v != nil {
+		_c.SetAmount(*v)
 	}
-	return tdc
+	return _c
 }
 
 // SetTarget sets the "target" field.
-func (tdc *TransactionDetailCreate) SetTarget(s string) *TransactionDetailCreate {
-	tdc.mutation.SetTarget(s)
-	return tdc
+func (_c *TransactionDetailCreate) SetTarget(v string) *TransactionDetailCreate {
+	_c.mutation.SetTarget(v)
+	return _c
 }
 
 // SetNillableTarget sets the "target" field if the given value is not nil.
-func (tdc *TransactionDetailCreate) SetNillableTarget(s *string) *TransactionDetailCreate {
-	if s != nil {
-		tdc.SetTarget(*s)
+func (_c *TransactionDetailCreate) SetNillableTarget(v *string) *TransactionDetailCreate {
+	if v != nil {
+		_c.SetTarget(*v)
 	}
-	return tdc
+	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (tdc *TransactionDetailCreate) SetCreatedAt(t time.Time) *TransactionDetailCreate {
-	tdc.mutation.SetCreatedAt(t)
-	return tdc
+func (_c *TransactionDetailCreate) SetCreatedAt(v time.Time) *TransactionDetailCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (tdc *TransactionDetailCreate) SetNillableCreatedAt(t *time.Time) *TransactionDetailCreate {
-	if t != nil {
-		tdc.SetCreatedAt(*t)
+func (_c *TransactionDetailCreate) SetNillableCreatedAt(v *time.Time) *TransactionDetailCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return tdc
+	return _c
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (tdc *TransactionDetailCreate) SetUpdatedAt(t time.Time) *TransactionDetailCreate {
-	tdc.mutation.SetUpdatedAt(t)
-	return tdc
+func (_c *TransactionDetailCreate) SetUpdatedAt(v time.Time) *TransactionDetailCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (tdc *TransactionDetailCreate) SetNillableUpdatedAt(t *time.Time) *TransactionDetailCreate {
-	if t != nil {
-		tdc.SetUpdatedAt(*t)
+func (_c *TransactionDetailCreate) SetNillableUpdatedAt(v *time.Time) *TransactionDetailCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
 	}
-	return tdc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (tdc *TransactionDetailCreate) SetID(u uuid.UUID) *TransactionDetailCreate {
-	tdc.mutation.SetID(u)
-	return tdc
+func (_c *TransactionDetailCreate) SetID(v uuid.UUID) *TransactionDetailCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (tdc *TransactionDetailCreate) SetNillableID(u *uuid.UUID) *TransactionDetailCreate {
-	if u != nil {
-		tdc.SetID(*u)
+func (_c *TransactionDetailCreate) SetNillableID(v *uuid.UUID) *TransactionDetailCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return tdc
+	return _c
 }
 
 // SetTransactionID sets the "transaction" edge to the Transaction entity by ID.
-func (tdc *TransactionDetailCreate) SetTransactionID(id uuid.UUID) *TransactionDetailCreate {
-	tdc.mutation.SetTransactionID(id)
-	return tdc
+func (_c *TransactionDetailCreate) SetTransactionID(id uuid.UUID) *TransactionDetailCreate {
+	_c.mutation.SetTransactionID(id)
+	return _c
 }
 
 // SetNillableTransactionID sets the "transaction" edge to the Transaction entity by ID if the given value is not nil.
-func (tdc *TransactionDetailCreate) SetNillableTransactionID(id *uuid.UUID) *TransactionDetailCreate {
+func (_c *TransactionDetailCreate) SetNillableTransactionID(id *uuid.UUID) *TransactionDetailCreate {
 	if id != nil {
-		tdc = tdc.SetTransactionID(*id)
+		_c = _c.SetTransactionID(*id)
 	}
-	return tdc
+	return _c
 }
 
 // SetTransaction sets the "transaction" edge to the Transaction entity.
-func (tdc *TransactionDetailCreate) SetTransaction(t *Transaction) *TransactionDetailCreate {
-	return tdc.SetTransactionID(t.ID)
+func (_c *TransactionDetailCreate) SetTransaction(v *Transaction) *TransactionDetailCreate {
+	return _c.SetTransactionID(v.ID)
 }
 
 // Mutation returns the TransactionDetailMutation object of the builder.
-func (tdc *TransactionDetailCreate) Mutation() *TransactionDetailMutation {
-	return tdc.mutation
+func (_c *TransactionDetailCreate) Mutation() *TransactionDetailMutation {
+	return _c.mutation
 }
 
 // Save creates the TransactionDetail in the database.
-func (tdc *TransactionDetailCreate) Save(ctx context.Context) (*TransactionDetail, error) {
-	tdc.defaults()
-	return withHooks(ctx, tdc.sqlSave, tdc.mutation, tdc.hooks)
+func (_c *TransactionDetailCreate) Save(ctx context.Context) (*TransactionDetail, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (tdc *TransactionDetailCreate) SaveX(ctx context.Context) *TransactionDetail {
-	v, err := tdc.Save(ctx)
+func (_c *TransactionDetailCreate) SaveX(ctx context.Context) *TransactionDetail {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -138,73 +138,73 @@ func (tdc *TransactionDetailCreate) SaveX(ctx context.Context) *TransactionDetai
 }
 
 // Exec executes the query.
-func (tdc *TransactionDetailCreate) Exec(ctx context.Context) error {
-	_, err := tdc.Save(ctx)
+func (_c *TransactionDetailCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tdc *TransactionDetailCreate) ExecX(ctx context.Context) {
-	if err := tdc.Exec(ctx); err != nil {
+func (_c *TransactionDetailCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (tdc *TransactionDetailCreate) defaults() {
-	if _, ok := tdc.mutation.Amount(); !ok {
+func (_c *TransactionDetailCreate) defaults() {
+	if _, ok := _c.mutation.Amount(); !ok {
 		v := transactiondetail.DefaultAmount
-		tdc.mutation.SetAmount(v)
+		_c.mutation.SetAmount(v)
 	}
-	if _, ok := tdc.mutation.Target(); !ok {
+	if _, ok := _c.mutation.Target(); !ok {
 		v := transactiondetail.DefaultTarget
-		tdc.mutation.SetTarget(v)
+		_c.mutation.SetTarget(v)
 	}
-	if _, ok := tdc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := transactiondetail.DefaultCreatedAt()
-		tdc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := tdc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := transactiondetail.DefaultUpdatedAt()
-		tdc.mutation.SetUpdatedAt(v)
+		_c.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := tdc.mutation.ID(); !ok {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := transactiondetail.DefaultID()
-		tdc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tdc *TransactionDetailCreate) check() error {
-	if _, ok := tdc.mutation.Title(); !ok {
+func (_c *TransactionDetailCreate) check() error {
+	if _, ok := _c.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "TransactionDetail.title"`)}
 	}
-	if v, ok := tdc.mutation.Title(); ok {
+	if v, ok := _c.mutation.Title(); ok {
 		if err := transactiondetail.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "TransactionDetail.title": %w`, err)}
 		}
 	}
-	if _, ok := tdc.mutation.Amount(); !ok {
+	if _, ok := _c.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "TransactionDetail.amount"`)}
 	}
-	if _, ok := tdc.mutation.Target(); !ok {
+	if _, ok := _c.mutation.Target(); !ok {
 		return &ValidationError{Name: "target", err: errors.New(`ent: missing required field "TransactionDetail.target"`)}
 	}
-	if _, ok := tdc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "TransactionDetail.created_at"`)}
 	}
-	if _, ok := tdc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "TransactionDetail.updated_at"`)}
 	}
 	return nil
 }
 
-func (tdc *TransactionDetailCreate) sqlSave(ctx context.Context) (*TransactionDetail, error) {
-	if err := tdc.check(); err != nil {
+func (_c *TransactionDetailCreate) sqlSave(ctx context.Context) (*TransactionDetail, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := tdc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, tdc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -217,41 +217,41 @@ func (tdc *TransactionDetailCreate) sqlSave(ctx context.Context) (*TransactionDe
 			return nil, err
 		}
 	}
-	tdc.mutation.id = &_node.ID
-	tdc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (tdc *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.CreateSpec) {
+func (_c *TransactionDetailCreate) createSpec() (*TransactionDetail, *sqlgraph.CreateSpec) {
 	var (
-		_node = &TransactionDetail{config: tdc.config}
+		_node = &TransactionDetail{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(transactiondetail.Table, sqlgraph.NewFieldSpec(transactiondetail.FieldID, field.TypeUUID))
 	)
-	if id, ok := tdc.mutation.ID(); ok {
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := tdc.mutation.Title(); ok {
+	if value, ok := _c.mutation.Title(); ok {
 		_spec.SetField(transactiondetail.FieldTitle, field.TypeString, value)
 		_node.Title = value
 	}
-	if value, ok := tdc.mutation.Amount(); ok {
+	if value, ok := _c.mutation.Amount(); ok {
 		_spec.SetField(transactiondetail.FieldAmount, field.TypeInt, value)
 		_node.Amount = value
 	}
-	if value, ok := tdc.mutation.Target(); ok {
+	if value, ok := _c.mutation.Target(); ok {
 		_spec.SetField(transactiondetail.FieldTarget, field.TypeString, value)
 		_node.Target = value
 	}
-	if value, ok := tdc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(transactiondetail.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := tdc.mutation.UpdatedAt(); ok {
+	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(transactiondetail.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := tdc.mutation.TransactionIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -279,16 +279,16 @@ type TransactionDetailCreateBulk struct {
 }
 
 // Save creates the TransactionDetail entities in the database.
-func (tdcb *TransactionDetailCreateBulk) Save(ctx context.Context) ([]*TransactionDetail, error) {
-	if tdcb.err != nil {
-		return nil, tdcb.err
+func (_c *TransactionDetailCreateBulk) Save(ctx context.Context) ([]*TransactionDetail, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(tdcb.builders))
-	nodes := make([]*TransactionDetail, len(tdcb.builders))
-	mutators := make([]Mutator, len(tdcb.builders))
-	for i := range tdcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*TransactionDetail, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := tdcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TransactionDetailMutation)
@@ -302,11 +302,11 @@ func (tdcb *TransactionDetailCreateBulk) Save(ctx context.Context) ([]*Transacti
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, tdcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, tdcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -326,7 +326,7 @@ func (tdcb *TransactionDetailCreateBulk) Save(ctx context.Context) ([]*Transacti
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, tdcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -334,8 +334,8 @@ func (tdcb *TransactionDetailCreateBulk) Save(ctx context.Context) ([]*Transacti
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tdcb *TransactionDetailCreateBulk) SaveX(ctx context.Context) []*TransactionDetail {
-	v, err := tdcb.Save(ctx)
+func (_c *TransactionDetailCreateBulk) SaveX(ctx context.Context) []*TransactionDetail {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -343,14 +343,14 @@ func (tdcb *TransactionDetailCreateBulk) SaveX(ctx context.Context) []*Transacti
 }
 
 // Exec executes the query.
-func (tdcb *TransactionDetailCreateBulk) Exec(ctx context.Context) error {
-	_, err := tdcb.Save(ctx)
+func (_c *TransactionDetailCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tdcb *TransactionDetailCreateBulk) ExecX(ctx context.Context) {
-	if err := tdcb.Exec(ctx); err != nil {
+func (_c *TransactionDetailCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

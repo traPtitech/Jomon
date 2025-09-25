@@ -89,7 +89,7 @@ func (*RequestStatus) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the RequestStatus fields.
-func (rs *RequestStatus) assignValues(columns []string, values []any) error {
+func (_m *RequestStatus) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -99,36 +99,36 @@ func (rs *RequestStatus) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				rs.ID = *value
+				_m.ID = *value
 			}
 		case requeststatus.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				rs.Status = requeststatus.Status(value.String)
+				_m.Status = requeststatus.Status(value.String)
 			}
 		case requeststatus.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				rs.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case requeststatus.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field request_status", values[i])
 			} else if value.Valid {
-				rs.request_status = new(uuid.UUID)
-				*rs.request_status = *value.S.(*uuid.UUID)
+				_m.request_status = new(uuid.UUID)
+				*_m.request_status = *value.S.(*uuid.UUID)
 			}
 		case requeststatus.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field request_status_user", values[i])
 			} else if value.Valid {
-				rs.request_status_user = new(uuid.UUID)
-				*rs.request_status_user = *value.S.(*uuid.UUID)
+				_m.request_status_user = new(uuid.UUID)
+				*_m.request_status_user = *value.S.(*uuid.UUID)
 			}
 		default:
-			rs.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -136,48 +136,48 @@ func (rs *RequestStatus) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the RequestStatus.
 // This includes values selected through modifiers, order, etc.
-func (rs *RequestStatus) Value(name string) (ent.Value, error) {
-	return rs.selectValues.Get(name)
+func (_m *RequestStatus) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryRequest queries the "request" edge of the RequestStatus entity.
-func (rs *RequestStatus) QueryRequest() *RequestQuery {
-	return NewRequestStatusClient(rs.config).QueryRequest(rs)
+func (_m *RequestStatus) QueryRequest() *RequestQuery {
+	return NewRequestStatusClient(_m.config).QueryRequest(_m)
 }
 
 // QueryUser queries the "user" edge of the RequestStatus entity.
-func (rs *RequestStatus) QueryUser() *UserQuery {
-	return NewRequestStatusClient(rs.config).QueryUser(rs)
+func (_m *RequestStatus) QueryUser() *UserQuery {
+	return NewRequestStatusClient(_m.config).QueryUser(_m)
 }
 
 // Update returns a builder for updating this RequestStatus.
 // Note that you need to call RequestStatus.Unwrap() before calling this method if this RequestStatus
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (rs *RequestStatus) Update() *RequestStatusUpdateOne {
-	return NewRequestStatusClient(rs.config).UpdateOne(rs)
+func (_m *RequestStatus) Update() *RequestStatusUpdateOne {
+	return NewRequestStatusClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the RequestStatus entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (rs *RequestStatus) Unwrap() *RequestStatus {
-	_tx, ok := rs.config.driver.(*txDriver)
+func (_m *RequestStatus) Unwrap() *RequestStatus {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: RequestStatus is not a transactional entity")
 	}
-	rs.config.driver = _tx.drv
-	return rs
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (rs *RequestStatus) String() string {
+func (_m *RequestStatus) String() string {
 	var builder strings.Builder
 	builder.WriteString("RequestStatus(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", rs.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("status=")
-	builder.WriteString(fmt.Sprintf("%v", rs.Status))
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(rs.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
