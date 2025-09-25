@@ -73,7 +73,7 @@ func TestEntRepository_updateTransactionDetail(t *testing.T) {
 		target := "hoge"
 
 		// Create Transaction
-		trns, err := repo.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, uuid.Nil)
+		trns, err := repo.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil)
 		require.NoError(t, err)
 
 		// Update TransactionDetail

@@ -8,8 +8,6 @@ type Repository interface {
 	AccountManagerRepository
 	CommentRepository
 	FileRepository
-	GroupBudgetRepository
-	GroupRepository
 	RequestFileRepository
 	RequestStatusRepository
 	RequestTagRepository

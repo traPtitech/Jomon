@@ -37,9 +37,6 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 	client8, err := setup(t, ctx, "get_transactions8")
 	require.NoError(t, err)
 	repo8 := NewEntRepository(client8)
-	client9, err := setup(t, ctx, "get_transactions9")
-	require.NoError(t, err)
-	repo9 := NewEntRepository(client9)
 	client10, err := setup(t, ctx, "get_transactions10")
 	require.NoError(t, err)
 	repo10 := NewEntRepository(client10)
@@ -67,13 +64,13 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 20),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, request.ID)
+		tx1, err := repo.CreateTransaction(ctx, title, amount, target, nil, request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, request.ID)
+		tx2, err := repo.CreateTransaction(ctx, title, amount, target, nil, request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -109,13 +106,13 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 30),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo2.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, request.ID)
+		tx1, err := repo2.CreateTransaction(ctx, title, amount, target, nil, request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo2.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, request.ID)
+		tx2, err := repo2.CreateTransaction(ctx, title, amount, target, nil, request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -150,13 +147,13 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 20),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo3.CreateTransaction(ctx, title, 100, target, nil, uuid.Nil, request.ID)
+		tx1, err := repo3.CreateTransaction(ctx, title, 100, target, nil, request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo3.CreateTransaction(ctx, title, 10000, target, nil, uuid.Nil, request.ID)
+		tx2, err := repo3.CreateTransaction(ctx, title, 10000, target, nil, request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -195,15 +192,15 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 20),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		// nolint:contextcheck
-		tx1, err := repo4.CreateTransaction(ctx, title, 100, target, nil, uuid.Nil, request.ID)
+		tx1, err := repo4.CreateTransaction(ctx, title, 100, target, nil, request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
 		// nolint:contextcheck
-		tx2, err := repo4.CreateTransaction(ctx, title, 10000, target, nil, uuid.Nil, request.ID)
+		tx2, err := repo4.CreateTransaction(ctx, title, 10000, target, nil, request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -240,13 +237,13 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 30),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo5.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, request.ID)
+		tx1, err := repo5.CreateTransaction(ctx, title, amount, target, nil, request.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo5.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, request.ID)
+		tx2, err := repo5.CreateTransaction(ctx, title, amount, target, nil, request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -283,12 +280,12 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 30),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
-		tx, err := repo6.CreateTransaction(ctx, title, amount, target1, nil, uuid.Nil, request.ID)
+		tx, err := repo6.CreateTransaction(ctx, title, amount, target1, nil, request.ID)
 		require.NoError(t, err)
-		_, err = repo6.CreateTransaction(ctx, title, amount, target2, nil, uuid.Nil, request.ID)
+		_, err = repo6.CreateTransaction(ctx, title, amount, target2, nil, request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -323,10 +320,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 30),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
-		_, err = repo7.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, request.ID)
+		_, err = repo7.CreateTransaction(ctx, title, amount, target, nil, request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -338,7 +335,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 
 		time.Sleep(1 * time.Second)
-		tx, err := repo7.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, request.ID)
+		tx, err := repo7.CreateTransaction(ctx, title, amount, target, nil, request.ID)
 		require.NoError(t, err)
 
 		got, err := repo7.GetTransactions(ctx, query)
@@ -371,10 +368,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 30),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
-		_, err = repo8.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, request.ID)
+		_, err = repo8.CreateTransaction(ctx, title, amount, target, nil, request.ID)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -385,59 +382,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		tx, err := repo8.CreateTransaction(
 			ctx,
 			title, amount, target,
-			[]uuid.UUID{tag.ID}, uuid.Nil, request.ID)
+			[]uuid.UUID{tag.ID}, request.ID)
 		require.NoError(t, err)
 
 		got, err := repo8.GetTransactions(ctx, query)
-		require.NoError(t, err)
-		require.Len(t, got, 1)
-		opts := testutil.ApproxEqualOptions()
-		exp := []*TransactionResponse{tx}
-		testutil.RequireEqual(t, exp, got, opts...)
-	})
-
-	t.Run("SuccessWithGroup", func(t *testing.T) {
-		t.Parallel()
-
-		// Create user
-		user, err := repo9.CreateUser(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 20),
-			random.Numeric(t, 1) == 0)
-		require.NoError(t, err)
-
-		// Create Transactions
-		title := random.AlphaNumeric(t, 20)
-		amount := random.Numeric(t, 100000)
-		target := random.AlphaNumeric(t, 20)
-		budget := random.Numeric(t, 100000)
-		group, err := repo9.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-		request, err := repo9.CreateRequest(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			nil, nil,
-			nil, user.ID)
-		require.NoError(t, err)
-
-		_, err = repo9.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, request.ID)
-		require.NoError(t, err)
-
-		// Get Transactions
-		query := TransactionQuery{
-			Group: &group.Name,
-		}
-
-		tx, err := repo9.CreateTransaction(ctx, title, amount, target, nil, group.ID, request.ID)
-		require.NoError(t, err)
-
-		got, err := repo9.GetTransactions(ctx, query)
 		require.NoError(t, err)
 		require.Len(t, got, 1)
 		opts := testutil.ApproxEqualOptions()
@@ -465,10 +413,10 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 30),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
-		_, err = repo10.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, uuid.Nil)
+		_, err = repo10.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -476,7 +424,7 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			Request: request.ID,
 		}
 
-		tx, err := repo10.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, request.ID)
+		tx, err := repo10.CreateTransaction(ctx, title, amount, target, nil, request.ID)
 		require.NoError(t, err)
 
 		got, err := repo10.GetTransactions(ctx, query)
@@ -524,10 +472,10 @@ func TestEntRepository_GetTransaction(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 30),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
-		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, uuid.Nil)
+		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil)
 		require.NoError(t, err)
 
 		// Get Transaction
@@ -563,14 +511,6 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 
-		// Create group
-		group, err := repo.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&amount)
-		require.NoError(t, err)
-
 		// Create Transactions
 		title := random.AlphaNumeric(t, 20)
 		target := random.AlphaNumeric(t, 20)
@@ -579,13 +519,13 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 30),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		tx, err := repo.CreateTransaction(
 			ctx,
 			title, amount, target,
-			[]uuid.UUID{tag.ID}, group.ID, request.ID)
+			[]uuid.UUID{tag.ID}, request.ID)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		// FIXME: #831
@@ -599,7 +539,6 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 			UpdatedAt: time.Now(),
 			Request:   request.ID,
 			Tags:      []*Tag{tag},
-			Group:     group,
 		}
 		testutil.RequireEqual(t, exp, tx, opts...)
 	})
@@ -619,14 +558,6 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 			random.Numeric(t, 1) == 0)
 		require.NoError(t, err)
 
-		// Create group
-		group, err := repo.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&amount)
-		require.NoError(t, err)
-
 		// Create Transactions
 		target := random.AlphaNumeric(t, 20)
 		request, err := repo.CreateRequest(
@@ -634,10 +565,10 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 30),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
-		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, group.ID, request.ID)
+		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, request.ID)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		// FIXME: #831
@@ -651,58 +582,6 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 			UpdatedAt: time.Now(),
 			Request:   request.ID,
 			Tags:      []*Tag{},
-			Group:     group,
-		}
-		testutil.RequireEqual(t, exp, tx, opts...)
-	})
-
-	t.Run("SuccessWithoutGroup", func(t *testing.T) {
-		t.Parallel()
-		ctx := testutil.NewContext(t)
-
-		title := random.AlphaNumeric(t, 20)
-		amount := random.Numeric(t, 100000)
-
-		// Create user
-		user, err := repo.CreateUser(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 20),
-			random.Numeric(t, 1) == 0)
-		require.NoError(t, err)
-
-		// Create tag
-		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
-		require.NoError(t, err)
-
-		// Create Transactions
-		target := random.AlphaNumeric(t, 20)
-		request, err := repo.CreateRequest(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			nil, nil,
-			nil, user.ID)
-		require.NoError(t, err)
-
-		tx, err := repo.CreateTransaction(
-			ctx,
-			title, amount, target,
-			[]uuid.UUID{tag.ID}, uuid.Nil, request.ID)
-		require.NoError(t, err)
-		opts := testutil.ApproxEqualOptions()
-		// FIXME: #831
-		opts = append(opts,
-			cmpopts.IgnoreFields(TransactionResponse{}, "ID", "UpdatedAt"))
-		exp := &TransactionResponse{
-			Title:     title,
-			Amount:    amount,
-			Target:    target,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			Request:   request.ID,
-			Tags:      []*Tag{tag},
-			Group:     nil,
 		}
 		testutil.RequireEqual(t, exp, tx, opts...)
 	})
@@ -716,7 +595,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		amount := random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
 
-		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, uuid.Nil)
+		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		// FIXME: #831
@@ -730,7 +609,6 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 			UpdatedAt: time.Now(),
 			Request:   uuid.Nil,
 			Tags:      []*Tag{},
-			Group:     nil,
 		}
 		testutil.RequireEqual(t, exp, tx, opts...)
 	})
@@ -744,7 +622,7 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 		amount := -1 * random.Numeric(t, 100000)
 		target := random.AlphaNumeric(t, 20)
 
-		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, uuid.Nil)
+		tx, err := repo.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		// FIXME: #831
@@ -757,7 +635,6 @@ func TestEntRepository_CreateTransaction(t *testing.T) {
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 			Tags:      []*Tag{},
-			Group:     nil,
 		}
 		testutil.RequireEqual(t, exp, tx, opts...)
 	})
@@ -788,14 +665,6 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 
-		// Create group
-		group, err := repo.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&amount)
-		require.NoError(t, err)
-
 		// Create Transactions
 		target := random.AlphaNumeric(t, 20)
 		request, err := repo.CreateRequest(
@@ -803,13 +672,13 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 30),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		tx, err := repo.CreateTransaction(
 			ctx,
 			title, amount, target,
-			[]uuid.UUID{tag.ID}, group.ID, request.ID)
+			[]uuid.UUID{tag.ID}, request.ID)
 		require.NoError(t, err)
 
 		// Update Transactions
@@ -820,14 +689,6 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 		tag, err = repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 
-		// Create group
-		group, err = repo.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&amount)
-		require.NoError(t, err)
-
 		// Create Transactions
 		target = random.AlphaNumeric(t, 20)
 		request, err = repo.CreateRequest(
@@ -835,13 +696,13 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 			random.AlphaNumeric(t, 20),
 			random.AlphaNumeric(t, 30),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		updated, err := repo.UpdateTransaction(
 			ctx,
 			tx.ID, title, amount, target,
-			[]uuid.UUID{tag.ID}, group.ID, request.ID)
+			[]uuid.UUID{tag.ID}, request.ID)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		// FIXME: #831
@@ -856,7 +717,6 @@ func TestEntRepository_UpdateTransaction(t *testing.T) {
 			UpdatedAt: time.Now(),
 			Request:   request.ID,
 			Tags:      []*Tag{tag},
-			Group:     group,
 		}
 		testutil.RequireEqual(t, exp, updated, opts...)
 	})

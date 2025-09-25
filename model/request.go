@@ -12,12 +12,12 @@ type RequestRepository interface {
 	GetRequests(ctx context.Context, query RequestQuery) ([]*RequestResponse, error)
 	CreateRequest(
 		ctx context.Context, title string, content string,
-		tags []*Tag, targets []*RequestTarget, group *Group, userID uuid.UUID,
+		tags []*Tag, targets []*RequestTarget, userID uuid.UUID,
 	) (*RequestDetail, error)
 	GetRequest(ctx context.Context, requestID uuid.UUID) (*RequestDetail, error)
 	UpdateRequest(
 		ctx context.Context, requestID uuid.UUID, title string, content string,
-		tags []*Tag, targets []*RequestTarget, group *Group,
+		tags []*Tag, targets []*RequestTarget,
 	) (*RequestDetail, error)
 }
 
@@ -39,7 +39,6 @@ type RequestResponse struct {
 	Tags      []*Tag
 	Targets   []*RequestTargetDetail
 	Statuses  []*RequestStatus
-	Group     *Group
 }
 
 type RequestDetail struct {
@@ -52,7 +51,6 @@ type RequestDetail struct {
 	Statuses  []*RequestStatus
 	Tags      []*Tag
 	Targets   []*RequestTargetDetail
-	Group     *Group
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	CreatedBy uuid.UUID
@@ -67,6 +65,5 @@ type RequestQuery struct {
 	Limit     int
 	Offset    int
 	Tag       *string
-	Group     *string
 	CreatedBy uuid.UUID
 }

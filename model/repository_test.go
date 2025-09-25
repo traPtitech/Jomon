@@ -35,14 +35,6 @@ func dropAll(t *testing.T, ctx context.Context, client *ent.Client) error {
 	if err != nil {
 		return err
 	}
-	_, err = client.Group.Delete().Exec(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = client.GroupBudget.Delete().Exec(ctx)
-	if err != nil {
-		return err
-	}
 	_, err = client.Request.Delete().Exec(ctx)
 	if err != nil {
 		return err
