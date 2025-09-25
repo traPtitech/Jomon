@@ -27,7 +27,6 @@ type RequestApplication struct {
 	Content   string    `json:"content"`
 	Tags      []*Tag    `json:"tags"`
 	Targets   []*Target `json:"targets"`
-	Group     *Group    `json:"group"`
 }
 
 type CommentApplication struct {
@@ -41,7 +40,6 @@ type TransactionPostRequestApplication struct {
 	Amount int       `json:"amount"`
 	Target string    `json:"target"`
 	Tags   []*Tag    `json:"tags"`
-	Group  *Group    `json:"group"`
 }
 
 type TransactionPutRequestApplication struct {
@@ -49,7 +47,6 @@ type TransactionPutRequestApplication struct {
 	Amount int       `json:"amount"`
 	Target string    `json:"target"`
 	Tags   []*Tag    `json:"tags"`
-	Group  *Group    `json:"group"`
 }
 
 type Tag struct {
@@ -61,10 +58,6 @@ type Target struct {
 	Target    uuid.UUID `json:"target"`
 	Amount    int       `json:"amount"`
 	CreatedAt time.Time `json:"created_at"`
-}
-
-type Group struct {
-	Name string `json:"name"`
 }
 
 type User struct {
@@ -165,10 +158,6 @@ func (ws *WebhookService) WebhookRequestsEventHandler(c echo.Context, reqBody, r
 		}, 0)
 		message += fmt.Sprintf("- 支払金額: %d円\n", amount)
 
-		if resApp.Group != nil {
-			message += fmt.Sprintf("- 請求先グループ: %s\n", resApp.Group.Name)
-		}
-
 		if len(resApp.Tags) != 0 {
 			tags := lo.Map(resApp.Tags, func(tag *Tag, _ int) string {
 				return tag.Name
@@ -211,9 +200,6 @@ func (ws *WebhookService) WebhookTransactionsEventHandler(c echo.Context, reqBod
 				len(resApps)*resApps[0].Amount,
 				resApps[0].Amount)
 		}
-		if resApps[0].Group != nil {
-			message += fmt.Sprintf("- 関連するグループ: %s\n", resApps[0].Group.Name)
-		}
 		if len(resApps[0].Tags) != 0 {
 			tags := lo.Map(resApps[0].Tags, func(tag *Tag, _ int) string {
 				return tag.Name
@@ -240,9 +226,6 @@ func (ws *WebhookService) WebhookTransactionsEventHandler(c echo.Context, reqBod
 				"- `%s`からの振込\n    - 受け取り金額: %d円\n",
 				resApp.Target,
 				resApp.Amount)
-		}
-		if resApp.Group != nil {
-			message += fmt.Sprintf("- 関連するグループ: %s\n", resApp.Group.Name)
 		}
 		if len(resApp.Tags) != 0 {
 			tags := lo.Map(resApp.Tags, func(tag *Tag, _ int) string {
