@@ -22,7 +22,6 @@ type TransactionResponse struct {
 	Target    string         `json:"target"`
 	Request   uuid.NullUUID  `json:"request"`
 	Tags      []*TagResponse `json:"tags"`
-	Group     *GroupResponse `json:"group"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 }
@@ -32,7 +31,6 @@ type PostTransactionsRequest struct {
 	Amount  int           `json:"amount"`
 	Targets []*string     `json:"targets"`
 	Tags    []uuid.UUID   `json:"tags"`
-	Group   uuid.NullUUID `json:"group"`
 	Request uuid.NullUUID `json:"request"`
 }
 
@@ -41,7 +39,6 @@ type PutTransactionRequest struct {
 	Amount  int           `json:"amount"`
 	Target  string        `json:"target"`
 	Tags    []uuid.UUID   `json:"tags"`
-	Group   uuid.NullUUID `json:"group"`
 	Request uuid.NullUUID `json:"request"`
 }
 
@@ -112,11 +109,6 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		t := c.QueryParam("tag")
 		tag = &t
 	}
-	var group *string
-	if c.QueryParam("group") != "" {
-		g := c.QueryParam("group")
-		group = &g
-	}
 	var request uuid.UUID
 	if c.QueryParam("request") != "" {
 		var r uuid.UUID
@@ -135,7 +127,6 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 		Limit:   limit,
 		Offset:  offset,
 		Tag:     tag,
-		Group:   group,
 		Request: request,
 	}
 	txs, err := h.Repository.GetTransactions(ctx, query)
@@ -153,17 +144,6 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			}
 		})
 
-		var group *GroupResponse
-		if tx.Group != nil {
-			group = &GroupResponse{
-				ID:          tx.Group.ID,
-				Name:        tx.Group.Name,
-				Description: tx.Group.Description,
-				Budget:      tx.Group.Budget,
-				CreatedAt:   tx.Group.CreatedAt,
-				UpdatedAt:   tx.Group.UpdatedAt,
-			}
-		}
 		return &TransactionResponse{
 			ID:        tx.ID,
 			Title:     tx.Title,
@@ -171,7 +151,6 @@ func (h Handlers) GetTransactions(c echo.Context) error {
 			Target:    tx.Target,
 			Request:   uuid.NullUUID{UUID: tx.Request, Valid: tx.Request != uuid.Nil},
 			Tags:      tags,
-			Group:     group,
 			CreatedAt: tx.CreatedAt,
 			UpdatedAt: tx.UpdatedAt,
 		}
@@ -199,7 +178,7 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 		}
 		created, err := h.Repository.CreateTransaction(
 			ctx,
-			tx.Title, tx.Amount, *target, tx.Tags, tx.Group.UUID, tx.Request.UUID)
+			tx.Title, tx.Amount, *target, tx.Tags, tx.Request.UUID)
 		if err != nil {
 			logger.Error("failed to create transaction in repository", zap.Error(err))
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -214,17 +193,6 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 			}
 		})
 
-		var group *GroupResponse
-		if created.Group != nil {
-			group = &GroupResponse{
-				ID:          created.Group.ID,
-				Name:        created.Group.Name,
-				Description: created.Group.Description,
-				Budget:      created.Group.Budget,
-				CreatedAt:   created.Group.CreatedAt,
-				UpdatedAt:   created.Group.UpdatedAt,
-			}
-		}
 		res := TransactionResponse{
 			ID:        created.ID,
 			Title:     created.Title,
@@ -232,7 +200,6 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 			Target:    created.Target,
 			Request:   uuid.NullUUID{UUID: created.Request, Valid: created.Request != uuid.Nil},
 			Tags:      tags,
-			Group:     group,
 			CreatedAt: created.CreatedAt,
 			UpdatedAt: created.UpdatedAt,
 		}
@@ -267,17 +234,6 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 		}
 	})
 
-	var group *GroupResponse
-	if tx.Group != nil {
-		group = &GroupResponse{
-			ID:          tx.Group.ID,
-			Name:        tx.Group.Name,
-			Description: tx.Group.Description,
-			Budget:      tx.Group.Budget,
-			CreatedAt:   tx.Group.CreatedAt,
-			UpdatedAt:   tx.Group.UpdatedAt,
-		}
-	}
 	res := TransactionResponse{
 		ID:        tx.ID,
 		Title:     tx.Title,
@@ -285,7 +241,6 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 		Target:    tx.Target,
 		Request:   uuid.NullUUID{UUID: tx.Request, Valid: tx.Request != uuid.Nil},
 		Tags:      tags,
-		Group:     group,
 		CreatedAt: tx.CreatedAt,
 		UpdatedAt: tx.UpdatedAt,
 	}
@@ -314,7 +269,7 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 
 	updated, err := h.Repository.UpdateTransaction(
 		ctx,
-		txID, tx.Title, tx.Amount, tx.Target, tx.Tags, tx.Group.UUID, tx.Request.UUID)
+		txID, tx.Title, tx.Amount, tx.Target, tx.Tags, tx.Request.UUID)
 	if err != nil {
 		logger.Error("failed to update transaction in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -329,17 +284,6 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 		}
 	})
 
-	var group *GroupResponse
-	if updated.Group != nil {
-		group = &GroupResponse{
-			ID:          updated.Group.ID,
-			Name:        updated.Group.Name,
-			Description: updated.Group.Description,
-			Budget:      updated.Group.Budget,
-			CreatedAt:   updated.Group.CreatedAt,
-			UpdatedAt:   updated.Group.UpdatedAt,
-		}
-	}
 	res := TransactionResponse{
 		ID:        updated.ID,
 		Title:     updated.Title,
@@ -347,7 +291,6 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 		Target:    updated.Target,
 		Request:   uuid.NullUUID{UUID: updated.Request, Valid: updated.Request != uuid.Nil},
 		Tags:      tags,
-		Group:     group,
 		CreatedAt: updated.CreatedAt,
 		UpdatedAt: updated.UpdatedAt,
 	}

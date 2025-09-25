@@ -18,8 +18,6 @@ type MockRepository struct {
 	*mock_model.MockAccountManagerRepository
 	*mock_model.MockCommentRepository
 	*mock_model.MockFileRepository
-	*mock_model.MockGroupBudgetRepository
-	*mock_model.MockGroupRepository
 	*mock_model.MockRequestRepository
 	*mock_model.MockRequestStatusRepository
 	*mock_model.MockRequestFileRepository
@@ -41,8 +39,6 @@ func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 		MockAccountManagerRepository:    mock_model.NewMockAccountManagerRepository(ctrl),
 		MockCommentRepository:           mock_model.NewMockCommentRepository(ctrl),
 		MockFileRepository:              mock_model.NewMockFileRepository(ctrl),
-		MockGroupBudgetRepository:       mock_model.NewMockGroupBudgetRepository(ctrl),
-		MockGroupRepository:             mock_model.NewMockGroupRepository(ctrl),
 		MockRequestRepository:           mock_model.NewMockRequestRepository(ctrl),
 		MockRequestStatusRepository:     mock_model.NewMockRequestStatusRepository(ctrl),
 		MockRequestFileRepository:       mock_model.NewMockRequestFileRepository(ctrl),

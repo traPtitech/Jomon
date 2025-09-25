@@ -42,20 +42,18 @@ func (s Status) String() string {
 }
 
 type Request struct {
-	CreatedBy uuid.UUID     `json:"created_by"`
-	Title     string        `json:"title"`
-	Content   string        `json:"content"`
-	Tags      []uuid.UUID   `json:"tags"`
-	Targets   []*Target     `json:"targets"`
-	Group     uuid.NullUUID `json:"group"`
+	CreatedBy uuid.UUID   `json:"created_by"`
+	Title     string      `json:"title"`
+	Content   string      `json:"content"`
+	Tags      []uuid.UUID `json:"tags"`
+	Targets   []*Target   `json:"targets"`
 }
 
 type PutRequest struct {
-	Title   string        `json:"title"`
-	Content string        `json:"content"`
-	Tags    []uuid.UUID   `json:"tags"`
-	Targets []*Target     `json:"targets"`
-	Group   uuid.NullUUID `json:"group"`
+	Title   string      `json:"title"`
+	Content string      `json:"content"`
+	Tags    []uuid.UUID `json:"tags"`
+	Targets []*Target   `json:"targets"`
 }
 
 type RequestResponse struct {
@@ -68,7 +66,6 @@ type RequestResponse struct {
 	Content   string            `json:"content"`
 	Tags      []*TagResponse    `json:"tags"`
 	Targets   []*TargetOverview `json:"targets"`
-	Group     *GroupResponse    `json:"group"`
 }
 
 type RequestDetailResponse struct {
@@ -203,11 +200,6 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		t := c.QueryParam("tag")
 		tag = &t
 	}
-	var group *string
-	if c.QueryParam("group") != "" {
-		g := c.QueryParam("group")
-		group = &g
-	}
 	var cratedBy uuid.UUID
 	if c.QueryParam("created_by") != "" {
 		u, err := uuid.Parse(c.QueryParam("created_by"))
@@ -226,7 +218,6 @@ func (h Handlers) GetRequests(c echo.Context) error {
 		Limit:     limit,
 		Offset:    offset,
 		Tag:       tag,
-		Group:     group,
 		CreatedBy: cratedBy,
 	}
 
@@ -261,18 +252,6 @@ func (h Handlers) GetRequests(c echo.Context) error {
 				},
 			)
 
-			var resgroup *GroupResponse
-			if request.Group != nil {
-				resgroup = &GroupResponse{
-					ID:          request.Group.ID,
-					Name:        request.Group.Name,
-					Description: request.Group.Description,
-					Budget:      request.Group.Budget,
-					CreatedAt:   request.Group.CreatedAt,
-					UpdatedAt:   request.Group.UpdatedAt,
-				}
-			}
-
 			return &RequestResponse{
 				ID:        request.ID,
 				Status:    request.Status,
@@ -283,7 +262,6 @@ func (h Handlers) GetRequests(c echo.Context) error {
 				Content:   request.Content,
 				Targets:   restargets,
 				Tags:      tags,
-				Group:     resgroup,
 			}
 		},
 	)
@@ -319,23 +297,9 @@ func (h Handlers) PostRequest(c echo.Context) error {
 			Amount: target.Amount,
 		}
 	})
-	var group *model.Group
-	if req.Group.Valid {
-		group, err = h.Repository.GetGroup(ctx, req.Group.UUID)
-		if err != nil {
-			if ent.IsNotFound(err) {
-				logger.Info(
-					"could not find group in repository",
-					zap.String("ID", req.Group.UUID.String()))
-				return echo.NewHTTPError(http.StatusNotFound, err)
-			}
-			logger.Error("failed to get group from repository", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-	}
 	request, err := h.Repository.CreateRequest(
 		ctx,
-		req.Title, req.Content, tags, targets, group, req.CreatedBy)
+		req.Title, req.Content, tags, targets, req.CreatedBy)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			logger.Info(
@@ -345,17 +309,6 @@ func (h Handlers) PostRequest(c echo.Context) error {
 		}
 		logger.Error("failed to create request in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	var resgroup *GroupResponse
-	if group != nil {
-		resgroup = &GroupResponse{
-			ID:          request.Group.ID,
-			Name:        request.Group.Name,
-			Description: request.Group.Description,
-			Budget:      request.Group.Budget,
-			CreatedAt:   request.Group.CreatedAt,
-			UpdatedAt:   request.Group.UpdatedAt,
-		}
 	}
 	reqtargets := lo.Map(
 		request.Targets,
@@ -412,7 +365,6 @@ func (h Handlers) PostRequest(c echo.Context) error {
 			Content:   request.Content,
 			Tags:      restags,
 			Targets:   reqtargets,
-			Group:     resgroup,
 		},
 		Comments: comments,
 		Statuses: statuses,
@@ -451,17 +403,6 @@ func (h Handlers) GetRequest(c echo.Context) error {
 	if err != nil {
 		logger.Error("failed to get comments from repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-	var resgroup *GroupResponse
-	if request.Group != nil {
-		resgroup = &GroupResponse{
-			ID:          request.Group.ID,
-			Name:        request.Group.Name,
-			Description: request.Group.Description,
-			Budget:      request.Group.Budget,
-			CreatedAt:   request.Group.CreatedAt,
-			UpdatedAt:   request.Group.UpdatedAt,
-		}
 	}
 	reqtargets := lo.Map(
 		request.Targets,
@@ -516,7 +457,6 @@ func (h Handlers) GetRequest(c echo.Context) error {
 			Content:   request.Content,
 			Tags:      restags,
 			Targets:   reqtargets,
-			Group:     resgroup,
 		},
 		Statuses: statuses,
 		Comments: comments,
@@ -580,23 +520,9 @@ func (h Handlers) PutRequest(c echo.Context) error {
 			Amount: target.Amount,
 		}
 	})
-	var group *model.Group
-	if req.Group.Valid {
-		group, err = h.Repository.GetGroup(ctx, req.Group.UUID)
-		if err != nil {
-			if ent.IsNotFound(err) {
-				logger.Info(
-					"could not find group in repository",
-					zap.String("ID", req.Group.UUID.String()))
-				return echo.NewHTTPError(http.StatusNotFound, err)
-			}
-			logger.Error("failed to get group from repository", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
-		}
-	}
 	request, err := h.Repository.UpdateRequest(
 		ctx,
-		requestID, req.Title, req.Content, tags, targets, group)
+		requestID, req.Title, req.Content, tags, targets)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			logger.Info(
@@ -606,18 +532,6 @@ func (h Handlers) PutRequest(c echo.Context) error {
 		}
 		logger.Error("failed to update request in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-
-	var resgroup *GroupResponse
-	if group != nil {
-		resgroup = &GroupResponse{
-			ID:          request.Group.ID,
-			Name:        request.Group.Name,
-			Description: request.Group.Description,
-			Budget:      request.Group.Budget,
-			CreatedAt:   request.Group.CreatedAt,
-			UpdatedAt:   request.Group.UpdatedAt,
-		}
 	}
 	restags := lo.Map(request.Tags, func(tag *model.Tag, _ int) *TagResponse {
 		return &TagResponse{
@@ -673,7 +587,6 @@ func (h Handlers) PutRequest(c echo.Context) error {
 			Content:   request.Content,
 			Tags:      restags,
 			Targets:   restargets,
-			Group:     resgroup,
 		},
 		Comments: comments,
 		Statuses: statuses,

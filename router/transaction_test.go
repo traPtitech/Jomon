@@ -31,21 +31,12 @@ func modelTransactionResponseToTransaction(tx *model.TransactionResponse) *Trans
 		}
 	})
 
-	group := &GroupResponse{
-		ID:          tx.Group.ID,
-		Name:        tx.Group.Name,
-		Description: tx.Group.Description,
-		Budget:      tx.Group.Budget,
-		CreatedAt:   tx.Group.CreatedAt,
-		UpdatedAt:   tx.Group.UpdatedAt,
-	}
 	return &TransactionResponse{
 		ID:        tx.ID,
 		Title:     tx.Title,
 		Amount:    tx.Amount,
 		Target:    tx.Target,
 		Tags:      tag,
-		Group:     group,
 		CreatedAt: tx.CreatedAt,
 		UpdatedAt: tx.UpdatedAt,
 	}
@@ -60,7 +51,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		budget := random.Numeric(t, 1000000)
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -75,14 +65,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			Tags: []*model.Tag{
 				tag,
 			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   date,
-				UpdatedAt:   date,
-			},
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
@@ -93,14 +75,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			Target: random.AlphaNumeric(t, 20),
 			Tags: []*model.Tag{
 				tag,
-			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   date,
-				UpdatedAt:   date,
 			},
 			CreatedAt: date,
 			UpdatedAt: date,
@@ -124,7 +98,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 				Limit:  100,
 				Offset: 0,
 				Tag:    nil,
-				Group:  nil,
 			}).
 			Return(txs, nil)
 
@@ -146,7 +119,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		budget := random.Numeric(t, 1000000)
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -161,14 +133,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			Tags: []*model.Tag{
 				tag,
 			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   date,
-				UpdatedAt:   date,
-			},
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
@@ -180,15 +144,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			Tags: []*model.Tag{
 				tag,
 			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   date.Add(time.Hour),
-				UpdatedAt:   date.Add(time.Hour),
-			},
-
 			CreatedAt: date.Add(time.Hour),
 			UpdatedAt: date.Add(time.Hour),
 		}
@@ -231,7 +186,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		budget := random.Numeric(t, 1000000)
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -246,14 +200,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			Tags: []*model.Tag{
 				tag,
 			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   date,
-				UpdatedAt:   date,
-			},
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
@@ -265,15 +211,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			Tags: []*model.Tag{
 				tag,
 			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   date.Add(time.Hour),
-				UpdatedAt:   date.Add(time.Hour),
-			},
-
 			CreatedAt: date.Add(time.Hour),
 			UpdatedAt: date.Add(time.Hour),
 		}
@@ -317,7 +254,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		budget := random.Numeric(t, 1000000)
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -333,14 +269,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			Tags: []*model.Tag{
 				tag,
 			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   date,
-				UpdatedAt:   date,
-			},
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
@@ -352,15 +280,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			Tags: []*model.Tag{
 				tag,
 			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   date.Add(time.Hour),
-				UpdatedAt:   date.Add(time.Hour),
-			},
-
 			CreatedAt: date.Add(time.Hour),
 			UpdatedAt: date.Add(time.Hour),
 		}
@@ -403,7 +322,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		budget := random.Numeric(t, 1000000)
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -418,14 +336,6 @@ func TestHandlers_GetTransactions(t *testing.T) {
 			Target: target1,
 			Tags: []*model.Tag{
 				tag,
-			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   date,
-				UpdatedAt:   date,
 			},
 			CreatedAt: date,
 			UpdatedAt: date,
@@ -478,7 +388,6 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		budget := random.Numeric(t, 1000000)
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -494,20 +403,11 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Tags: []*model.Tag{
 				tag,
 			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   date,
-				UpdatedAt:   date,
-			},
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
 		txs := []*model.TransactionResponse{tx1}
 		tags := []uuid.UUID{tag.ID}
-		group := tx1.Group.ID
 
 		e := echo.New()
 		reqBody, err := json.Marshal(&struct {
@@ -515,13 +415,11 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Amount  int         `json:"amount"`
 			Targets []string    `json:"targets"`
 			Tags    []uuid.UUID `json:"tags"`
-			Group   uuid.UUID   `json:"group"`
 		}{
 			Title:   tx1.Title,
 			Amount:  tx1.Amount,
 			Targets: []string{tx1.Target},
 			Tags:    []uuid.UUID{tag.ID},
-			Group:   group,
 		})
 		require.NoError(t, err)
 		req := httptest.NewRequestWithContext(
@@ -537,7 +435,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			EXPECT().
 			CreateTransaction(
 				c.Request().Context(),
-				tx1.Title, tx1.Amount, tx1.Target, tags, group, uuid.Nil).
+				tx1.Title, tx1.Amount, tx1.Target, tags, uuid.Nil).
 			Return(tx1, nil)
 
 		require.NoError(t, h.Handlers.PostTransaction(c))
@@ -558,7 +456,6 @@ func TestHandlers_PostTransaction(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		budget := random.Numeric(t, 1000000)
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -574,19 +471,10 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Tags: []*model.Tag{
 				tag,
 			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   date,
-				UpdatedAt:   date,
-			},
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
 		tags := []uuid.UUID{tag.ID}
-		group := tx.Group.ID
 		request := &model.RequestDetail{
 			ID:        uuid.New(),
 			Status:    model.Accepted,
@@ -596,7 +484,6 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Files:     []uuid.UUID{},
 			Statuses:  []*model.RequestStatus{},
 			Tags:      []*model.Tag{},
-			Group:     nil,
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
@@ -608,7 +495,6 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			Amount:  tx.Amount,
 			Targets: []*string{&tx.Target},
 			Tags:    tags,
-			Group:   uuid.NullUUID{UUID: group, Valid: true},
 			Request: uuid.NullUUID{UUID: request.ID, Valid: true},
 		})
 		require.NoError(t, err)
@@ -626,7 +512,7 @@ func TestHandlers_PostTransaction(t *testing.T) {
 			CreateTransaction(
 				c.Request().Context(),
 				tx.Title, tx.Amount, tx.Target,
-				tags, group, request.ID).
+				tags, request.ID).
 			Return(tx, nil)
 
 		require.NoError(t, h.Handlers.PostTransaction(c))
@@ -655,7 +541,6 @@ func TestHandlers_GetTransaction(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		budget := random.Numeric(t, 1000000)
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -669,14 +554,6 @@ func TestHandlers_GetTransaction(t *testing.T) {
 			Target: random.AlphaNumeric(t, 20),
 			Tags: []*model.Tag{
 				tag,
-			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   time.Now(),
-				UpdatedAt:   time.Now(),
 			},
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
@@ -717,7 +594,6 @@ func TestHandlers_PutTransaction(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		budget := random.Numeric(t, 1000000)
 		tag := &model.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -738,14 +614,6 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			Tags: []*model.Tag{
 				tag,
 			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   time.Now(),
-				UpdatedAt:   time.Now(),
-			},
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -756,14 +624,6 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			Target: random.AlphaNumeric(t, 20),
 			Tags: []*model.Tag{
 				updatedTag,
-			},
-			Group: &model.Group{
-				ID:          uuid.New(),
-				Name:        random.AlphaNumeric(t, 20),
-				Description: random.AlphaNumeric(t, 50),
-				Budget:      &budget,
-				CreatedAt:   time.Now(),
-				UpdatedAt:   time.Now(),
 			},
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
@@ -801,7 +661,7 @@ func TestHandlers_PutTransaction(t *testing.T) {
 			UpdateTransaction(
 				c.Request().Context(),
 				tx.ID, updated.Title, updated.Amount, updated.Target,
-				updatedTags, uuid.Nil, uuid.Nil).
+				updatedTags, uuid.Nil).
 			Return(updated, nil)
 		require.NoError(t, h.Handlers.PutTransaction(c))
 		require.Equal(t, http.StatusOK, rec.Code)

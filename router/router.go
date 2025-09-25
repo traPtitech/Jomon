@@ -58,7 +58,6 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))))
 	gob.Register(User{})
 	gob.Register(uuid.UUID{})
-	gob.Register([]*model.Owner{})
 
 	api := e.Group("/api")
 	{
@@ -125,22 +124,6 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 			apiTags.POST("", h.PostTag)
 			apiTags.PUT("/:tagID", h.PutTag)
 			apiTags.DELETE("/:tagID", h.DeleteTag)
-		}
-
-		apiGroups := api.Group("/groups", h.CheckLoginMiddleware)
-		{
-			apiGroups.GET("", h.GetGroups)
-			apiGroups.POST("", h.PostGroup, h.CheckAccountManagerMiddleware)
-			apiGroupIDs := apiGroups.Group("/:groupID")
-			{
-				apiGroupIDs.GET("", h.GetGroupDetail)
-				apiGroupIDs.PUT("", h.PutGroup)
-				apiGroupIDs.DELETE("", h.DeleteGroup)
-				apiGroupIDs.POST("/members", h.PostMember)
-				apiGroupIDs.DELETE("/members", h.DeleteMember)
-				apiGroupIDs.POST("/owners", h.PostOwner)
-				apiGroupIDs.DELETE("/owners", h.DeleteOwner)
-			}
 		}
 
 		apiUsers := api.Group("/users", h.CheckLoginMiddleware)
