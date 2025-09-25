@@ -10,6 +10,8 @@ services:
 
   jomon-server:
     build:
+      # FIXME: Dockerfileのstageで開発用と本番用を分ける
+      # Dockerfile.devは消せる
       context: ./
       dockerfile: ./Dockerfile.dev
     environment:
@@ -20,7 +22,6 @@ services:
       SESSION_KEY: secret
       IS_DEBUG_MODE: "true"
       UPLOAD_DIR: ./uploads
-    env_file: .env
     ports:
       - "1323:1323"
     volumes:
