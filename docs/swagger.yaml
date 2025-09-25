@@ -324,6 +324,7 @@ paths:
         "404":
           $ref: "#/components/responses/404"
     delete:
+      operationId: deleteTag
       description: タグを削除する
       tags:
         - Tags
