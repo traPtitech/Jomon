@@ -36,9 +36,19 @@ func TestEntRepository_GetComments(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		comment1, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), application.ID, user.ID)
+		comment1, err := repo.CreateComment(
+			ctx,
+			random.AlphaNumeric(t, 30),
+			application.ID,
+			user.ID,
+		)
 		require.NoError(t, err)
-		comment2, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), application.ID, user.ID)
+		comment2, err := repo.CreateComment(
+			ctx,
+			random.AlphaNumeric(t, 30),
+			application.ID,
+			user.ID,
+		)
 		require.NoError(t, err)
 
 		got, err := repo.GetComments(ctx, application.ID)
@@ -209,7 +219,12 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 			[]*Tag{}, []*ApplicationTarget{},
 			nil, user.ID)
 		require.NoError(t, err)
-		comment, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), application1.ID, user.ID)
+		comment, err := repo.CreateComment(
+			ctx,
+			random.AlphaNumeric(t, 30),
+			application1.ID,
+			user.ID,
+		)
 		require.NoError(t, err)
 
 		application2, err := repo.CreateApplication(

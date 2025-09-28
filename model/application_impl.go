@@ -263,9 +263,12 @@ func (repo *EntRepository) GetApplication(
 	comments := lo.Map(r.Edges.Comment, func(c *ent.Comment, _ int) *Comment {
 		return ConvertEntCommentToModelComment(c, c.Edges.User.ID)
 	})
-	statuses := lo.Map(r.Edges.Status, func(status *ent.ApplicationStatus, _ int) *ApplicationStatus {
-		return convertEntApplicationStatusToModelApplicationStatus(status)
-	})
+	statuses := lo.Map(
+		r.Edges.Status,
+		func(status *ent.ApplicationStatus, _ int) *ApplicationStatus {
+			return convertEntApplicationStatusToModelApplicationStatus(status)
+		},
+	)
 	files := lo.Map(r.Edges.File, func(f *ent.File, _ int) uuid.UUID {
 		return f.ID
 	})

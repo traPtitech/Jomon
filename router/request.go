@@ -787,9 +787,13 @@ func (h Handlers) PutStatus(c echo.Context) error {
 				logger.Error("failed to get request targets from repository", zap.Error(err))
 				return echo.NewHTTPError(http.StatusInternalServerError, err)
 			}
-			paid := lo.Reduce(targets, func(p bool, target *model.ApplicationTargetDetail, _ int) bool {
-				return p || !target.PaidAt.IsZero()
-			}, false)
+			paid := lo.Reduce(
+				targets,
+				func(p bool, target *model.ApplicationTargetDetail, _ int) bool {
+					return p || !target.PaidAt.IsZero()
+				},
+				false,
+			)
 			if paid {
 				logger.Info("someone already paid")
 				return echo.NewHTTPError(http.StatusBadRequest, errors.New("someone already paid"))

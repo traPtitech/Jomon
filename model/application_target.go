@@ -9,7 +9,10 @@ import (
 )
 
 type ApplicationTargetRepository interface {
-	GetApplicationTargets(ctx context.Context, applicationID uuid.UUID) ([]*ApplicationTargetDetail, error)
+	GetApplicationTargets(
+		ctx context.Context,
+		applicationID uuid.UUID,
+	) ([]*ApplicationTargetDetail, error)
 }
 
 type ApplicationTargetDetail struct {

@@ -226,11 +226,14 @@ func (h Handlers) PostTransaction(c echo.Context) error {
 			}
 		}
 		res := TransactionResponse{
-			ID:        created.ID,
-			Title:     created.Title,
-			Amount:    created.Amount,
-			Target:    created.Target,
-			Request:   uuid.NullUUID{UUID: created.Application, Valid: created.Application != uuid.Nil},
+			ID:     created.ID,
+			Title:  created.Title,
+			Amount: created.Amount,
+			Target: created.Target,
+			Request: uuid.NullUUID{
+				UUID:  created.Application,
+				Valid: created.Application != uuid.Nil,
+			},
 			Tags:      tags,
 			Group:     group,
 			CreatedAt: created.CreatedAt,
@@ -279,11 +282,14 @@ func (h Handlers) GetTransaction(c echo.Context) error {
 		}
 	}
 	res := TransactionResponse{
-		ID:        tx.ID,
-		Title:     tx.Title,
-		Amount:    tx.Amount,
-		Target:    tx.Target,
-		Request:   uuid.NullUUID{UUID: tx.Application, Valid: tx.Application != uuid.Nil},
+		ID:     tx.ID,
+		Title:  tx.Title,
+		Amount: tx.Amount,
+		Target: tx.Target,
+		Request: uuid.NullUUID{
+			UUID:  tx.Application,
+			Valid: tx.Application != uuid.Nil,
+		},
 		Tags:      tags,
 		Group:     group,
 		CreatedAt: tx.CreatedAt,
@@ -341,11 +347,14 @@ func (h Handlers) PutTransaction(c echo.Context) error {
 		}
 	}
 	res := TransactionResponse{
-		ID:        updated.ID,
-		Title:     updated.Title,
-		Amount:    updated.Amount,
-		Target:    updated.Target,
-		Request:   uuid.NullUUID{UUID: updated.Application, Valid: updated.Application != uuid.Nil},
+		ID:     updated.ID,
+		Title:  updated.Title,
+		Amount: updated.Amount,
+		Target: updated.Target,
+		Request: uuid.NullUUID{
+			UUID:  updated.Application,
+			Valid: updated.Application != uuid.Nil,
+		},
 		Tags:      tags,
 		Group:     group,
 		CreatedAt: updated.CreatedAt,

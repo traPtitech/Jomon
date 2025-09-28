@@ -81,7 +81,9 @@ func (repo *EntRepository) deleteApplicationTargets(
 	return err
 }
 
-func ConvertEntApplicationTargetToModelApplicationTargetDetail(t *ent.ApplicationTarget) *ApplicationTargetDetail {
+func ConvertEntApplicationTargetToModelApplicationTargetDetail(
+	t *ent.ApplicationTarget,
+) *ApplicationTargetDetail {
 	return &ApplicationTargetDetail{
 		ID:        t.ID,
 		Target:    t.Edges.User.ID,

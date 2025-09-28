@@ -10,7 +10,11 @@ import (
 
 type FileRepository interface {
 	CreateFile(
-		ctx context.Context, name string, mimetype string, applicationID uuid.UUID, userID uuid.UUID,
+		ctx context.Context,
+		name string,
+		mimetype string,
+		applicationID uuid.UUID,
+		userID uuid.UUID,
 	) (*File, error)
 	GetFile(ctx context.Context, fileID uuid.UUID) (*File, error)
 	DeleteFile(ctx context.Context, fileID uuid.UUID) error

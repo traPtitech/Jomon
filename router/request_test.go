@@ -40,7 +40,9 @@ func modelRequestTargetDetailToTargetOverview(t *model.ApplicationTargetDetail) 
 	}
 }
 
-func modelRequestStatusToStatusResponseOverview(s *model.ApplicationStatus) *StatusResponseOverview {
+func modelRequestStatusToStatusResponseOverview(
+	s *model.ApplicationStatus,
+) *StatusResponseOverview {
 	return &StatusResponseOverview{
 		CreatedBy: s.CreatedBy,
 		Status:    s.Status,
@@ -80,17 +82,23 @@ func modelRequestDetailToRequestResponse(r *model.ApplicationDetail) *RequestDet
 			Content:   r.Content,
 			CreatedAt: r.CreatedAt,
 			UpdatedAt: r.UpdatedAt,
-			Targets: lo.Map(r.Targets, func(m *model.ApplicationTargetDetail, _ int) *TargetOverview {
-				return modelRequestTargetDetailToTargetOverview(m)
-			}),
+			Targets: lo.Map(
+				r.Targets,
+				func(m *model.ApplicationTargetDetail, _ int) *TargetOverview {
+					return modelRequestTargetDetailToTargetOverview(m)
+				},
+			),
 			Tags: lo.Map(r.Tags, func(m *model.Tag, _ int) *TagResponse {
 				return modelTagToTagOverview(m)
 			}),
 			Group: group,
 		},
-		Statuses: lo.Map(r.Statuses, func(m *model.ApplicationStatus, _ int) *StatusResponseOverview {
-			return modelRequestStatusToStatusResponseOverview(m)
-		}),
+		Statuses: lo.Map(
+			r.Statuses,
+			func(m *model.ApplicationStatus, _ int) *StatusResponseOverview {
+				return modelRequestStatusToStatusResponseOverview(m)
+			},
+		),
 		Comments: lo.Map(r.Comments, func(m *model.Comment, _ int) *CommentDetail {
 			return modelCommentToCommentDetail(m)
 		}),

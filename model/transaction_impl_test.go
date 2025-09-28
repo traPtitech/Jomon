@@ -70,10 +70,26 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, application.ID)
+		tx1, err := repo.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, application.ID)
+		tx2, err := repo.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -112,10 +128,26 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo2.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, application.ID)
+		tx1, err := repo2.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo2.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, application.ID)
+		tx2, err := repo2.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -153,10 +185,26 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo3.CreateTransaction(ctx, title, 100, target, nil, uuid.Nil, application.ID)
+		tx1, err := repo3.CreateTransaction(
+			ctx,
+			title,
+			100,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo3.CreateTransaction(ctx, title, 10000, target, nil, uuid.Nil, application.ID)
+		tx2, err := repo3.CreateTransaction(
+			ctx,
+			title,
+			10000,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -199,11 +247,27 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		require.NoError(t, err)
 
 		// nolint:contextcheck
-		tx1, err := repo4.CreateTransaction(ctx, title, 100, target, nil, uuid.Nil, application.ID)
+		tx1, err := repo4.CreateTransaction(
+			ctx,
+			title,
+			100,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
 		// nolint:contextcheck
-		tx2, err := repo4.CreateTransaction(ctx, title, 10000, target, nil, uuid.Nil, application.ID)
+		tx2, err := repo4.CreateTransaction(
+			ctx,
+			title,
+			10000,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -243,10 +307,26 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		tx1, err := repo5.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, application.ID)
+		tx1, err := repo5.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
-		tx2, err := repo5.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, application.ID)
+		tx2, err := repo5.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -286,9 +366,25 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		tx, err := repo6.CreateTransaction(ctx, title, amount, target1, nil, uuid.Nil, application.ID)
+		tx, err := repo6.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target1,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
-		_, err = repo6.CreateTransaction(ctx, title, amount, target2, nil, uuid.Nil, application.ID)
+		_, err = repo6.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target2,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -326,7 +422,15 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		_, err = repo7.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, application.ID)
+		_, err = repo7.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -338,7 +442,15 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 		}
 
 		time.Sleep(1 * time.Second)
-		tx, err := repo7.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, application.ID)
+		tx, err := repo7.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 
 		got, err := repo7.GetTransactions(ctx, query)
@@ -374,7 +486,15 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		_, err = repo8.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, application.ID)
+		_, err = repo8.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -426,7 +546,15 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			nil, user.ID)
 		require.NoError(t, err)
 
-		_, err = repo9.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, application.ID)
+		_, err = repo9.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 
 		// Get Transactions
@@ -434,7 +562,15 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			Group: &group.Name,
 		}
 
-		tx, err := repo9.CreateTransaction(ctx, title, amount, target, nil, group.ID, application.ID)
+		tx, err := repo9.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target,
+			nil,
+			group.ID,
+			application.ID,
+		)
 		require.NoError(t, err)
 
 		got, err := repo9.GetTransactions(ctx, query)
@@ -476,7 +612,15 @@ func TestEntRepository_GetTransactions(t *testing.T) {
 			Application: application.ID,
 		}
 
-		tx, err := repo10.CreateTransaction(ctx, title, amount, target, nil, uuid.Nil, application.ID)
+		tx, err := repo10.CreateTransaction(
+			ctx,
+			title,
+			amount,
+			target,
+			nil,
+			uuid.Nil,
+			application.ID,
+		)
 		require.NoError(t, err)
 
 		got, err := repo10.GetTransactions(ctx, query)

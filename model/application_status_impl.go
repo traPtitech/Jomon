@@ -33,7 +33,9 @@ func (repo *EntRepository) CreateStatus(
 	return convertEntApplicationStatusToModelApplicationStatus(created), nil
 }
 
-func convertEntApplicationStatusToModelApplicationStatus(applicationStatus *ent.ApplicationStatus) *ApplicationStatus {
+func convertEntApplicationStatusToModelApplicationStatus(
+	applicationStatus *ent.ApplicationStatus,
+) *ApplicationStatus {
 	if applicationStatus == nil {
 		return nil
 	}
