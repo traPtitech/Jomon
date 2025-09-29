@@ -162,50 +162,6 @@ var (
 		Columns:    TagsColumns,
 		PrimaryKey: []*schema.Column{TagsColumns[0]},
 	}
-	// TransactionsColumns holds the columns for the "transactions" table.
-	TransactionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "request_transaction", Type: field.TypeUUID, Nullable: true},
-	}
-	// TransactionsTable holds the schema information for the "transactions" table.
-	TransactionsTable = &schema.Table{
-		Name:       "transactions",
-		Columns:    TransactionsColumns,
-		PrimaryKey: []*schema.Column{TransactionsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "transactions_requests_transaction",
-				Columns:    []*schema.Column{TransactionsColumns[2]},
-				RefColumns: []*schema.Column{RequestsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// TransactionDetailsColumns holds the columns for the "transaction_details" table.
-	TransactionDetailsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "title", Type: field.TypeString, Size: 64},
-		{Name: "amount", Type: field.TypeInt, Default: 0},
-		{Name: "target", Type: field.TypeString, Default: ""},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "transaction_detail", Type: field.TypeUUID, Unique: true, Nullable: true},
-	}
-	// TransactionDetailsTable holds the schema information for the "transaction_details" table.
-	TransactionDetailsTable = &schema.Table{
-		Name:       "transaction_details",
-		Columns:    TransactionDetailsColumns,
-		PrimaryKey: []*schema.Column{TransactionDetailsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "transaction_details_transactions_detail",
-				Columns:    []*schema.Column{TransactionDetailsColumns[6]},
-				RefColumns: []*schema.Column{TransactionsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -247,31 +203,6 @@ var (
 			},
 		},
 	}
-	// TransactionTagColumns holds the columns for the "transaction_tag" table.
-	TransactionTagColumns = []*schema.Column{
-		{Name: "transaction_id", Type: field.TypeUUID},
-		{Name: "tag_id", Type: field.TypeUUID},
-	}
-	// TransactionTagTable holds the schema information for the "transaction_tag" table.
-	TransactionTagTable = &schema.Table{
-		Name:       "transaction_tag",
-		Columns:    TransactionTagColumns,
-		PrimaryKey: []*schema.Column{TransactionTagColumns[0], TransactionTagColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "transaction_tag_transaction_id",
-				Columns:    []*schema.Column{TransactionTagColumns[0]},
-				RefColumns: []*schema.Column{TransactionsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "transaction_tag_tag_id",
-				Columns:    []*schema.Column{TransactionTagColumns[1]},
-				RefColumns: []*schema.Column{TagsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CommentsTable,
@@ -280,11 +211,8 @@ var (
 		RequestStatusTable,
 		RequestTargetsTable,
 		TagsTable,
-		TransactionsTable,
-		TransactionDetailsTable,
 		UsersTable,
 		RequestTagTable,
-		TransactionTagTable,
 	}
 )
 
@@ -298,10 +226,6 @@ func init() {
 	RequestStatusTable.ForeignKeys[1].RefTable = UsersTable
 	RequestTargetsTable.ForeignKeys[0].RefTable = RequestsTable
 	RequestTargetsTable.ForeignKeys[1].RefTable = UsersTable
-	TransactionsTable.ForeignKeys[0].RefTable = RequestsTable
-	TransactionDetailsTable.ForeignKeys[0].RefTable = TransactionsTable
 	RequestTagTable.ForeignKeys[0].RefTable = RequestsTable
 	RequestTagTable.ForeignKeys[1].RefTable = TagsTable
-	TransactionTagTable.ForeignKeys[0].RefTable = TransactionsTable
-	TransactionTagTable.ForeignKeys[1].RefTable = TagsTable
 }

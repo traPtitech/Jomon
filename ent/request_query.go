@@ -20,25 +20,23 @@ import (
 	"github.com/traPtitech/Jomon/ent/requeststatus"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/tag"
-	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // RequestQuery is the builder for querying Request entities.
 type RequestQuery struct {
 	config
-	ctx             *QueryContext
-	order           []request.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.Request
-	withStatus      *RequestStatusQuery
-	withTarget      *RequestTargetQuery
-	withFile        *FileQuery
-	withTag         *TagQuery
-	withTransaction *TransactionQuery
-	withComment     *CommentQuery
-	withUser        *UserQuery
-	withFKs         bool
+	ctx         *QueryContext
+	order       []request.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.Request
+	withStatus  *RequestStatusQuery
+	withTarget  *RequestTargetQuery
+	withFile    *FileQuery
+	withTag     *TagQuery
+	withComment *CommentQuery
+	withUser    *UserQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -156,28 +154,6 @@ func (_q *RequestQuery) QueryTag() *TagQuery {
 			sqlgraph.From(request.Table, request.FieldID, selector),
 			sqlgraph.To(tag.Table, tag.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, request.TagTable, request.TagPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryTransaction chains the current query on the "transaction" edge.
-func (_q *RequestQuery) QueryTransaction() *TransactionQuery {
-	query := (&TransactionClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(request.Table, request.FieldID, selector),
-			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.TransactionTable, request.TransactionColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -416,18 +392,17 @@ func (_q *RequestQuery) Clone() *RequestQuery {
 		return nil
 	}
 	return &RequestQuery{
-		config:          _q.config,
-		ctx:             _q.ctx.Clone(),
-		order:           append([]request.OrderOption{}, _q.order...),
-		inters:          append([]Interceptor{}, _q.inters...),
-		predicates:      append([]predicate.Request{}, _q.predicates...),
-		withStatus:      _q.withStatus.Clone(),
-		withTarget:      _q.withTarget.Clone(),
-		withFile:        _q.withFile.Clone(),
-		withTag:         _q.withTag.Clone(),
-		withTransaction: _q.withTransaction.Clone(),
-		withComment:     _q.withComment.Clone(),
-		withUser:        _q.withUser.Clone(),
+		config:      _q.config,
+		ctx:         _q.ctx.Clone(),
+		order:       append([]request.OrderOption{}, _q.order...),
+		inters:      append([]Interceptor{}, _q.inters...),
+		predicates:  append([]predicate.Request{}, _q.predicates...),
+		withStatus:  _q.withStatus.Clone(),
+		withTarget:  _q.withTarget.Clone(),
+		withFile:    _q.withFile.Clone(),
+		withTag:     _q.withTag.Clone(),
+		withComment: _q.withComment.Clone(),
+		withUser:    _q.withUser.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -475,17 +450,6 @@ func (_q *RequestQuery) WithTag(opts ...func(*TagQuery)) *RequestQuery {
 		opt(query)
 	}
 	_q.withTag = query
-	return _q
-}
-
-// WithTransaction tells the query-builder to eager-load the nodes that are connected to
-// the "transaction" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *RequestQuery) WithTransaction(opts ...func(*TransactionQuery)) *RequestQuery {
-	query := (&TransactionClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withTransaction = query
 	return _q
 }
 
@@ -590,12 +554,11 @@ func (_q *RequestQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Requ
 		nodes       = []*Request{}
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [7]bool{
+		loadedTypes = [6]bool{
 			_q.withStatus != nil,
 			_q.withTarget != nil,
 			_q.withFile != nil,
 			_q.withTag != nil,
-			_q.withTransaction != nil,
 			_q.withComment != nil,
 			_q.withUser != nil,
 		}
@@ -649,13 +612,6 @@ func (_q *RequestQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Requ
 		if err := _q.loadTag(ctx, query, nodes,
 			func(n *Request) { n.Edges.Tag = []*Tag{} },
 			func(n *Request, e *Tag) { n.Edges.Tag = append(n.Edges.Tag, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withTransaction; query != nil {
-		if err := _q.loadTransaction(ctx, query, nodes,
-			func(n *Request) { n.Edges.Transaction = []*Transaction{} },
-			func(n *Request, e *Transaction) { n.Edges.Transaction = append(n.Edges.Transaction, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -826,37 +782,6 @@ func (_q *RequestQuery) loadTag(ctx context.Context, query *TagQuery, nodes []*R
 		for kn := range nodes {
 			assign(kn, n)
 		}
-	}
-	return nil
-}
-func (_q *RequestQuery) loadTransaction(ctx context.Context, query *TransactionQuery, nodes []*Request, init func(*Request), assign func(*Request, *Transaction)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Request)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.Transaction(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(request.TransactionColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.request_transaction
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "request_transaction" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "request_transaction" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
 	}
 	return nil
 }

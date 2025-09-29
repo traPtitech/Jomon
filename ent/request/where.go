@@ -378,29 +378,6 @@ func HasTagWith(preds ...predicate.Tag) predicate.Request {
 	})
 }
 
-// HasTransaction applies the HasEdge predicate on the "transaction" edge.
-func HasTransaction() predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TransactionTable, TransactionColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTransactionWith applies the HasEdge predicate on the "transaction" edge with a given conditions (other predicates).
-func HasTransactionWith(preds ...predicate.Transaction) predicate.Request {
-	return predicate.Request(func(s *sql.Selector) {
-		step := newTransactionStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasComment applies the HasEdge predicate on the "comment" edge.
 func HasComment() predicate.Request {
 	return predicate.Request(func(s *sql.Selector) {

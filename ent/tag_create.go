@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
-	"github.com/traPtitech/Jomon/ent/transaction"
 )
 
 // TagCreate is the builder for creating a Tag entity.
@@ -98,21 +97,6 @@ func (_c *TagCreate) AddRequest(v ...*Request) *TagCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddRequestIDs(ids...)
-}
-
-// AddTransactionIDs adds the "transaction" edge to the Transaction entity by IDs.
-func (_c *TagCreate) AddTransactionIDs(ids ...uuid.UUID) *TagCreate {
-	_c.mutation.AddTransactionIDs(ids...)
-	return _c
-}
-
-// AddTransaction adds the "transaction" edges to the Transaction entity.
-func (_c *TagCreate) AddTransaction(v ...*Transaction) *TagCreate {
-	ids := make([]uuid.UUID, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddTransactionIDs(ids...)
 }
 
 // Mutation returns the TagMutation object of the builder.
@@ -240,22 +224,6 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.TransactionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   tag.TransactionTable,
-			Columns: tag.TransactionPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

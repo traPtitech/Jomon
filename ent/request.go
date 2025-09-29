@@ -44,15 +44,13 @@ type RequestEdges struct {
 	File []*File `json:"file,omitempty"`
 	// Tag holds the value of the tag edge.
 	Tag []*Tag `json:"tag,omitempty"`
-	// Transaction holds the value of the transaction edge.
-	Transaction []*Transaction `json:"transaction,omitempty"`
 	// Comment holds the value of the comment edge.
 	Comment []*Comment `json:"comment,omitempty"`
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [7]bool
+	loadedTypes [6]bool
 }
 
 // StatusOrErr returns the Status value or an error if the edge
@@ -91,19 +89,10 @@ func (e RequestEdges) TagOrErr() ([]*Tag, error) {
 	return nil, &NotLoadedError{edge: "tag"}
 }
 
-// TransactionOrErr returns the Transaction value or an error if the edge
-// was not loaded in eager-loading.
-func (e RequestEdges) TransactionOrErr() ([]*Transaction, error) {
-	if e.loadedTypes[4] {
-		return e.Transaction, nil
-	}
-	return nil, &NotLoadedError{edge: "transaction"}
-}
-
 // CommentOrErr returns the Comment value or an error if the edge
 // was not loaded in eager-loading.
 func (e RequestEdges) CommentOrErr() ([]*Comment, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[4] {
 		return e.Comment, nil
 	}
 	return nil, &NotLoadedError{edge: "comment"}
@@ -114,7 +103,7 @@ func (e RequestEdges) CommentOrErr() ([]*Comment, error) {
 func (e RequestEdges) UserOrErr() (*User, error) {
 	if e.User != nil {
 		return e.User, nil
-	} else if e.loadedTypes[6] {
+	} else if e.loadedTypes[5] {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
@@ -216,11 +205,6 @@ func (_m *Request) QueryFile() *FileQuery {
 // QueryTag queries the "tag" edge of the Request entity.
 func (_m *Request) QueryTag() *TagQuery {
 	return NewRequestClient(_m.config).QueryTag(_m)
-}
-
-// QueryTransaction queries the "transaction" edge of the Request entity.
-func (_m *Request) QueryTransaction() *TransactionQuery {
-	return NewRequestClient(_m.config).QueryTransaction(_m)
 }
 
 // QueryComment queries the "comment" edge of the Request entity.

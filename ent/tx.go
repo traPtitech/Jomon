@@ -24,10 +24,6 @@ type Tx struct {
 	RequestTarget *RequestTargetClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
-	// Transaction is the client for interacting with the Transaction builders.
-	Transaction *TransactionClient
-	// TransactionDetail is the client for interacting with the TransactionDetail builders.
-	TransactionDetail *TransactionDetailClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -167,8 +163,6 @@ func (tx *Tx) init() {
 	tx.RequestStatus = NewRequestStatusClient(tx.config)
 	tx.RequestTarget = NewRequestTargetClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
-	tx.Transaction = NewTransactionClient(tx.config)
-	tx.TransactionDetail = NewTransactionDetailClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

@@ -17,7 +17,6 @@ import (
 	"github.com/traPtitech/Jomon/ent/requeststatus"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/tag"
-	"github.com/traPtitech/Jomon/ent/transaction"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -140,21 +139,6 @@ func (_c *RequestCreate) AddTag(v ...*Tag) *RequestCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddTagIDs(ids...)
-}
-
-// AddTransactionIDs adds the "transaction" edge to the Transaction entity by IDs.
-func (_c *RequestCreate) AddTransactionIDs(ids ...uuid.UUID) *RequestCreate {
-	_c.mutation.AddTransactionIDs(ids...)
-	return _c
-}
-
-// AddTransaction adds the "transaction" edges to the Transaction entity.
-func (_c *RequestCreate) AddTransaction(v ...*Transaction) *RequestCreate {
-	ids := make([]uuid.UUID, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddTransactionIDs(ids...)
 }
 
 // AddCommentIDs adds the "comment" edge to the Comment entity by IDs.
@@ -362,22 +346,6 @@ func (_c *RequestCreate) createSpec() (*Request, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.TransactionIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   request.TransactionTable,
-			Columns: []string{request.TransactionColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

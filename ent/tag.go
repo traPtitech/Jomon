@@ -36,11 +36,9 @@ type Tag struct {
 type TagEdges struct {
 	// Request holds the value of the request edge.
 	Request []*Request `json:"request,omitempty"`
-	// Transaction holds the value of the transaction edge.
-	Transaction []*Transaction `json:"transaction,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [1]bool
 }
 
 // RequestOrErr returns the Request value or an error if the edge
@@ -50,15 +48,6 @@ func (e TagEdges) RequestOrErr() ([]*Request, error) {
 		return e.Request, nil
 	}
 	return nil, &NotLoadedError{edge: "request"}
-}
-
-// TransactionOrErr returns the Transaction value or an error if the edge
-// was not loaded in eager-loading.
-func (e TagEdges) TransactionOrErr() ([]*Transaction, error) {
-	if e.loadedTypes[1] {
-		return e.Transaction, nil
-	}
-	return nil, &NotLoadedError{edge: "transaction"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -134,11 +123,6 @@ func (_m *Tag) Value(name string) (ent.Value, error) {
 // QueryRequest queries the "request" edge of the Tag entity.
 func (_m *Tag) QueryRequest() *RequestQuery {
 	return NewTagClient(_m.config).QueryRequest(_m)
-}
-
-// QueryTransaction queries the "transaction" edge of the Tag entity.
-func (_m *Tag) QueryTransaction() *TransactionQuery {
-	return NewTagClient(_m.config).QueryTransaction(_m)
 }
 
 // Update returns a builder for updating this Tag.

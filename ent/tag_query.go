@@ -16,18 +16,16 @@ import (
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
-	"github.com/traPtitech/Jomon/ent/transaction"
 )
 
 // TagQuery is the builder for querying Tag entities.
 type TagQuery struct {
 	config
-	ctx             *QueryContext
-	order           []tag.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.Tag
-	withRequest     *RequestQuery
-	withTransaction *TransactionQuery
+	ctx         *QueryContext
+	order       []tag.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.Tag
+	withRequest *RequestQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -79,28 +77,6 @@ func (_q *TagQuery) QueryRequest() *RequestQuery {
 			sqlgraph.From(tag.Table, tag.FieldID, selector),
 			sqlgraph.To(request.Table, request.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, tag.RequestTable, tag.RequestPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryTransaction chains the current query on the "transaction" edge.
-func (_q *TagQuery) QueryTransaction() *TransactionQuery {
-	query := (&TransactionClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(tag.Table, tag.FieldID, selector),
-			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, tag.TransactionTable, tag.TransactionPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -295,13 +271,12 @@ func (_q *TagQuery) Clone() *TagQuery {
 		return nil
 	}
 	return &TagQuery{
-		config:          _q.config,
-		ctx:             _q.ctx.Clone(),
-		order:           append([]tag.OrderOption{}, _q.order...),
-		inters:          append([]Interceptor{}, _q.inters...),
-		predicates:      append([]predicate.Tag{}, _q.predicates...),
-		withRequest:     _q.withRequest.Clone(),
-		withTransaction: _q.withTransaction.Clone(),
+		config:      _q.config,
+		ctx:         _q.ctx.Clone(),
+		order:       append([]tag.OrderOption{}, _q.order...),
+		inters:      append([]Interceptor{}, _q.inters...),
+		predicates:  append([]predicate.Tag{}, _q.predicates...),
+		withRequest: _q.withRequest.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -316,17 +291,6 @@ func (_q *TagQuery) WithRequest(opts ...func(*RequestQuery)) *TagQuery {
 		opt(query)
 	}
 	_q.withRequest = query
-	return _q
-}
-
-// WithTransaction tells the query-builder to eager-load the nodes that are connected to
-// the "transaction" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *TagQuery) WithTransaction(opts ...func(*TransactionQuery)) *TagQuery {
-	query := (&TransactionClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withTransaction = query
 	return _q
 }
 
@@ -408,9 +372,8 @@ func (_q *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 	var (
 		nodes       = []*Tag{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [1]bool{
 			_q.withRequest != nil,
-			_q.withTransaction != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -435,13 +398,6 @@ func (_q *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 		if err := _q.loadRequest(ctx, query, nodes,
 			func(n *Tag) { n.Edges.Request = []*Request{} },
 			func(n *Tag, e *Request) { n.Edges.Request = append(n.Edges.Request, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withTransaction; query != nil {
-		if err := _q.loadTransaction(ctx, query, nodes,
-			func(n *Tag) { n.Edges.Transaction = []*Transaction{} },
-			func(n *Tag, e *Transaction) { n.Edges.Transaction = append(n.Edges.Transaction, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -502,67 +458,6 @@ func (_q *TagQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes 
 		nodes, ok := nids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected "request" node returned %v`, n.ID)
-		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
-	}
-	return nil
-}
-func (_q *TagQuery) loadTransaction(ctx context.Context, query *TransactionQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Transaction)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[uuid.UUID]*Tag)
-	nids := make(map[uuid.UUID]map[*Tag]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
-		}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(tag.TransactionTable)
-		s.Join(joinT).On(s.C(transaction.FieldID), joinT.C(tag.TransactionPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(tag.TransactionPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(tag.TransactionPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(uuid.UUID)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := *values[0].(*uuid.UUID)
-				inValue := *values[1].(*uuid.UUID)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Tag]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Transaction](ctx, query, qr, query.inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "transaction" node returned %v`, n.ID)
 		}
 		for kn := range nodes {
 			assign(kn, n)

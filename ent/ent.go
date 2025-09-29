@@ -18,8 +18,6 @@ import (
 	"github.com/traPtitech/Jomon/ent/requeststatus"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/tag"
-	"github.com/traPtitech/Jomon/ent/transaction"
-	"github.com/traPtitech/Jomon/ent/transactiondetail"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -81,15 +79,13 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			comment.Table:           comment.ValidColumn,
-			file.Table:              file.ValidColumn,
-			request.Table:           request.ValidColumn,
-			requeststatus.Table:     requeststatus.ValidColumn,
-			requesttarget.Table:     requesttarget.ValidColumn,
-			tag.Table:               tag.ValidColumn,
-			transaction.Table:       transaction.ValidColumn,
-			transactiondetail.Table: transactiondetail.ValidColumn,
-			user.Table:              user.ValidColumn,
+			comment.Table:       comment.ValidColumn,
+			file.Table:          file.ValidColumn,
+			request.Table:       request.ValidColumn,
+			requeststatus.Table: requeststatus.ValidColumn,
+			requesttarget.Table: requesttarget.ValidColumn,
+			tag.Table:           tag.ValidColumn,
+			user.Table:          user.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

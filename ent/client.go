@@ -22,8 +22,6 @@ import (
 	"github.com/traPtitech/Jomon/ent/requeststatus"
 	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/tag"
-	"github.com/traPtitech/Jomon/ent/transaction"
-	"github.com/traPtitech/Jomon/ent/transactiondetail"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -44,10 +42,6 @@ type Client struct {
 	RequestTarget *RequestTargetClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
-	// Transaction is the client for interacting with the Transaction builders.
-	Transaction *TransactionClient
-	// TransactionDetail is the client for interacting with the TransactionDetail builders.
-	TransactionDetail *TransactionDetailClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -67,8 +61,6 @@ func (c *Client) init() {
 	c.RequestStatus = NewRequestStatusClient(c.config)
 	c.RequestTarget = NewRequestTargetClient(c.config)
 	c.Tag = NewTagClient(c.config)
-	c.Transaction = NewTransactionClient(c.config)
-	c.TransactionDetail = NewTransactionDetailClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -160,17 +152,15 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:               ctx,
-		config:            cfg,
-		Comment:           NewCommentClient(cfg),
-		File:              NewFileClient(cfg),
-		Request:           NewRequestClient(cfg),
-		RequestStatus:     NewRequestStatusClient(cfg),
-		RequestTarget:     NewRequestTargetClient(cfg),
-		Tag:               NewTagClient(cfg),
-		Transaction:       NewTransactionClient(cfg),
-		TransactionDetail: NewTransactionDetailClient(cfg),
-		User:              NewUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		Comment:       NewCommentClient(cfg),
+		File:          NewFileClient(cfg),
+		Request:       NewRequestClient(cfg),
+		RequestStatus: NewRequestStatusClient(cfg),
+		RequestTarget: NewRequestTargetClient(cfg),
+		Tag:           NewTagClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
@@ -188,17 +178,15 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:               ctx,
-		config:            cfg,
-		Comment:           NewCommentClient(cfg),
-		File:              NewFileClient(cfg),
-		Request:           NewRequestClient(cfg),
-		RequestStatus:     NewRequestStatusClient(cfg),
-		RequestTarget:     NewRequestTargetClient(cfg),
-		Tag:               NewTagClient(cfg),
-		Transaction:       NewTransactionClient(cfg),
-		TransactionDetail: NewTransactionDetailClient(cfg),
-		User:              NewUserClient(cfg),
+		ctx:           ctx,
+		config:        cfg,
+		Comment:       NewCommentClient(cfg),
+		File:          NewFileClient(cfg),
+		Request:       NewRequestClient(cfg),
+		RequestStatus: NewRequestStatusClient(cfg),
+		RequestTarget: NewRequestTargetClient(cfg),
+		Tag:           NewTagClient(cfg),
+		User:          NewUserClient(cfg),
 	}, nil
 }
 
@@ -228,8 +216,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Comment, c.File, c.Request, c.RequestStatus, c.RequestTarget, c.Tag,
-		c.Transaction, c.TransactionDetail, c.User,
+		c.Comment, c.File, c.Request, c.RequestStatus, c.RequestTarget, c.Tag, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -239,8 +226,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Comment, c.File, c.Request, c.RequestStatus, c.RequestTarget, c.Tag,
-		c.Transaction, c.TransactionDetail, c.User,
+		c.Comment, c.File, c.Request, c.RequestStatus, c.RequestTarget, c.Tag, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -261,10 +247,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.RequestTarget.mutate(ctx, m)
 	case *TagMutation:
 		return c.Tag.mutate(ctx, m)
-	case *TransactionMutation:
-		return c.Transaction.mutate(ctx, m)
-	case *TransactionDetailMutation:
-		return c.TransactionDetail.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
@@ -767,22 +749,6 @@ func (c *RequestClient) QueryTag(_m *Request) *TagQuery {
 			sqlgraph.From(request.Table, request.FieldID, id),
 			sqlgraph.To(tag.Table, tag.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, request.TagTable, request.TagPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryTransaction queries the transaction edge of a Request.
-func (c *RequestClient) QueryTransaction(_m *Request) *TransactionQuery {
-	query := (&TransactionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(request.Table, request.FieldID, id),
-			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, request.TransactionTable, request.TransactionColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1301,22 +1267,6 @@ func (c *TagClient) QueryRequest(_m *Tag) *RequestQuery {
 	return query
 }
 
-// QueryTransaction queries the transaction edge of a Tag.
-func (c *TagClient) QueryTransaction(_m *Tag) *TransactionQuery {
-	query := (&TransactionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(tag.Table, tag.FieldID, id),
-			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, tag.TransactionTable, tag.TransactionPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *TagClient) Hooks() []Hook {
 	return c.hooks.Tag
@@ -1339,336 +1289,6 @@ func (c *TagClient) mutate(ctx context.Context, m *TagMutation) (Value, error) {
 		return (&TagDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Tag mutation op: %q", m.Op())
-	}
-}
-
-// TransactionClient is a client for the Transaction schema.
-type TransactionClient struct {
-	config
-}
-
-// NewTransactionClient returns a client for the Transaction from the given config.
-func NewTransactionClient(c config) *TransactionClient {
-	return &TransactionClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `transaction.Hooks(f(g(h())))`.
-func (c *TransactionClient) Use(hooks ...Hook) {
-	c.hooks.Transaction = append(c.hooks.Transaction, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `transaction.Intercept(f(g(h())))`.
-func (c *TransactionClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Transaction = append(c.inters.Transaction, interceptors...)
-}
-
-// Create returns a builder for creating a Transaction entity.
-func (c *TransactionClient) Create() *TransactionCreate {
-	mutation := newTransactionMutation(c.config, OpCreate)
-	return &TransactionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Transaction entities.
-func (c *TransactionClient) CreateBulk(builders ...*TransactionCreate) *TransactionCreateBulk {
-	return &TransactionCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *TransactionClient) MapCreateBulk(slice any, setFunc func(*TransactionCreate, int)) *TransactionCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &TransactionCreateBulk{err: fmt.Errorf("calling to TransactionClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*TransactionCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &TransactionCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Transaction.
-func (c *TransactionClient) Update() *TransactionUpdate {
-	mutation := newTransactionMutation(c.config, OpUpdate)
-	return &TransactionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *TransactionClient) UpdateOne(_m *Transaction) *TransactionUpdateOne {
-	mutation := newTransactionMutation(c.config, OpUpdateOne, withTransaction(_m))
-	return &TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *TransactionClient) UpdateOneID(id uuid.UUID) *TransactionUpdateOne {
-	mutation := newTransactionMutation(c.config, OpUpdateOne, withTransactionID(id))
-	return &TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Transaction.
-func (c *TransactionClient) Delete() *TransactionDelete {
-	mutation := newTransactionMutation(c.config, OpDelete)
-	return &TransactionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *TransactionClient) DeleteOne(_m *Transaction) *TransactionDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *TransactionClient) DeleteOneID(id uuid.UUID) *TransactionDeleteOne {
-	builder := c.Delete().Where(transaction.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &TransactionDeleteOne{builder}
-}
-
-// Query returns a query builder for Transaction.
-func (c *TransactionClient) Query() *TransactionQuery {
-	return &TransactionQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeTransaction},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a Transaction entity by its id.
-func (c *TransactionClient) Get(ctx context.Context, id uuid.UUID) (*Transaction, error) {
-	return c.Query().Where(transaction.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *TransactionClient) GetX(ctx context.Context, id uuid.UUID) *Transaction {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryDetail queries the detail edge of a Transaction.
-func (c *TransactionClient) QueryDetail(_m *Transaction) *TransactionDetailQuery {
-	query := (&TransactionDetailClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(transaction.Table, transaction.FieldID, id),
-			sqlgraph.To(transactiondetail.Table, transactiondetail.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, transaction.DetailTable, transaction.DetailColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryTag queries the tag edge of a Transaction.
-func (c *TransactionClient) QueryTag(_m *Transaction) *TagQuery {
-	query := (&TagClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(transaction.Table, transaction.FieldID, id),
-			sqlgraph.To(tag.Table, tag.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, transaction.TagTable, transaction.TagPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryRequest queries the request edge of a Transaction.
-func (c *TransactionClient) QueryRequest(_m *Transaction) *RequestQuery {
-	query := (&RequestClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(transaction.Table, transaction.FieldID, id),
-			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, transaction.RequestTable, transaction.RequestColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *TransactionClient) Hooks() []Hook {
-	return c.hooks.Transaction
-}
-
-// Interceptors returns the client interceptors.
-func (c *TransactionClient) Interceptors() []Interceptor {
-	return c.inters.Transaction
-}
-
-func (c *TransactionClient) mutate(ctx context.Context, m *TransactionMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&TransactionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&TransactionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&TransactionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown Transaction mutation op: %q", m.Op())
-	}
-}
-
-// TransactionDetailClient is a client for the TransactionDetail schema.
-type TransactionDetailClient struct {
-	config
-}
-
-// NewTransactionDetailClient returns a client for the TransactionDetail from the given config.
-func NewTransactionDetailClient(c config) *TransactionDetailClient {
-	return &TransactionDetailClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `transactiondetail.Hooks(f(g(h())))`.
-func (c *TransactionDetailClient) Use(hooks ...Hook) {
-	c.hooks.TransactionDetail = append(c.hooks.TransactionDetail, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `transactiondetail.Intercept(f(g(h())))`.
-func (c *TransactionDetailClient) Intercept(interceptors ...Interceptor) {
-	c.inters.TransactionDetail = append(c.inters.TransactionDetail, interceptors...)
-}
-
-// Create returns a builder for creating a TransactionDetail entity.
-func (c *TransactionDetailClient) Create() *TransactionDetailCreate {
-	mutation := newTransactionDetailMutation(c.config, OpCreate)
-	return &TransactionDetailCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of TransactionDetail entities.
-func (c *TransactionDetailClient) CreateBulk(builders ...*TransactionDetailCreate) *TransactionDetailCreateBulk {
-	return &TransactionDetailCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *TransactionDetailClient) MapCreateBulk(slice any, setFunc func(*TransactionDetailCreate, int)) *TransactionDetailCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &TransactionDetailCreateBulk{err: fmt.Errorf("calling to TransactionDetailClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*TransactionDetailCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &TransactionDetailCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for TransactionDetail.
-func (c *TransactionDetailClient) Update() *TransactionDetailUpdate {
-	mutation := newTransactionDetailMutation(c.config, OpUpdate)
-	return &TransactionDetailUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *TransactionDetailClient) UpdateOne(_m *TransactionDetail) *TransactionDetailUpdateOne {
-	mutation := newTransactionDetailMutation(c.config, OpUpdateOne, withTransactionDetail(_m))
-	return &TransactionDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *TransactionDetailClient) UpdateOneID(id uuid.UUID) *TransactionDetailUpdateOne {
-	mutation := newTransactionDetailMutation(c.config, OpUpdateOne, withTransactionDetailID(id))
-	return &TransactionDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for TransactionDetail.
-func (c *TransactionDetailClient) Delete() *TransactionDetailDelete {
-	mutation := newTransactionDetailMutation(c.config, OpDelete)
-	return &TransactionDetailDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *TransactionDetailClient) DeleteOne(_m *TransactionDetail) *TransactionDetailDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *TransactionDetailClient) DeleteOneID(id uuid.UUID) *TransactionDetailDeleteOne {
-	builder := c.Delete().Where(transactiondetail.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &TransactionDetailDeleteOne{builder}
-}
-
-// Query returns a query builder for TransactionDetail.
-func (c *TransactionDetailClient) Query() *TransactionDetailQuery {
-	return &TransactionDetailQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeTransactionDetail},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a TransactionDetail entity by its id.
-func (c *TransactionDetailClient) Get(ctx context.Context, id uuid.UUID) (*TransactionDetail, error) {
-	return c.Query().Where(transactiondetail.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *TransactionDetailClient) GetX(ctx context.Context, id uuid.UUID) *TransactionDetail {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryTransaction queries the transaction edge of a TransactionDetail.
-func (c *TransactionDetailClient) QueryTransaction(_m *TransactionDetail) *TransactionQuery {
-	query := (&TransactionClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(transactiondetail.Table, transactiondetail.FieldID, id),
-			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, transactiondetail.TransactionTable, transactiondetail.TransactionColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *TransactionDetailClient) Hooks() []Hook {
-	return c.hooks.TransactionDetail
-}
-
-// Interceptors returns the client interceptors.
-func (c *TransactionDetailClient) Interceptors() []Interceptor {
-	return c.inters.TransactionDetail
-}
-
-func (c *TransactionDetailClient) mutate(ctx context.Context, m *TransactionDetailMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&TransactionDetailCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&TransactionDetailUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&TransactionDetailUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&TransactionDetailDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown TransactionDetail mutation op: %q", m.Op())
 	}
 }
 
@@ -1888,11 +1508,10 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Comment, File, Request, RequestStatus, RequestTarget, Tag, Transaction,
-		TransactionDetail, User []ent.Hook
+		Comment, File, Request, RequestStatus, RequestTarget, Tag, User []ent.Hook
 	}
 	inters struct {
-		Comment, File, Request, RequestStatus, RequestTarget, Tag, Transaction,
-		TransactionDetail, User []ent.Interceptor
+		Comment, File, Request, RequestStatus, RequestTarget, Tag,
+		User []ent.Interceptor
 	}
 )
