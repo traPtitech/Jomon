@@ -4,11 +4,11 @@ import (
 	"context"
 	"os"
 
-	"github.com/traPtitech/Jomon/logging"
-	"github.com/traPtitech/Jomon/model"
-	"github.com/traPtitech/Jomon/router"
-	"github.com/traPtitech/Jomon/service"
-	"github.com/traPtitech/Jomon/storage"
+	"github.com/traPtitech/Jomon/internal/logging"
+	"github.com/traPtitech/Jomon/internal/model"
+	"github.com/traPtitech/Jomon/internal/router"
+	"github.com/traPtitech/Jomon/internal/service"
+	"github.com/traPtitech/Jomon/internal/storage"
 	"go.uber.org/zap"
 )
 

@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/traPtitech/Jomon/model"
+	"github.com/traPtitech/Jomon/internal/model"
 )
 
 type Mode int
