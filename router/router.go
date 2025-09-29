@@ -91,22 +91,6 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 			}
 		}
 
-		apiTransactions := api.Group("/transactions", h.CheckLoginMiddleware)
-		{
-			apiTransactions.GET("", h.GetTransactions)
-			apiTransactions.POST(
-				"",
-				h.PostTransaction,
-				middleware.BodyDump(h.WebhookService.WebhookTransactionsEventHandler),
-				h.CheckAccountManagerMiddleware)
-			apiTransactions.GET("/:transactionID", h.GetTransaction)
-			apiTransactions.PUT(
-				"/:transactionID",
-				h.PutTransaction,
-				middleware.BodyDump(h.WebhookService.WebhookTransactionsEventHandler),
-				h.CheckAccountManagerMiddleware)
-		}
-
 		apiFiles := api.Group("/files", h.CheckLoginMiddleware)
 		{
 			apiFiles.POST("", h.PostFile)

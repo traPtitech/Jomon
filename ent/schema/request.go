@@ -46,7 +46,6 @@ func (Request) Edges() []ent.Edge {
 				OnDelete: entsql.Cascade,
 			}),
 		edge.To("tag", Tag.Type),
-		edge.To("transaction", Transaction.Type),
 		edge.To("comment", Comment.Type).
 			Annotations(entsql.Annotation{
 				OnDelete: entsql.Cascade,

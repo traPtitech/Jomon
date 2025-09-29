@@ -14,9 +14,6 @@ type Repository interface {
 	RequestTargetRepository
 	RequestRepository
 	TagRepository
-	TransactionDetailRepository
-	TransactionTagRepository
-	TransactionRepository
 	UserRepository
 }
 

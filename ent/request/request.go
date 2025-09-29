@@ -31,8 +31,6 @@ const (
 	EdgeFile = "file"
 	// EdgeTag holds the string denoting the tag edge name in mutations.
 	EdgeTag = "tag"
-	// EdgeTransaction holds the string denoting the transaction edge name in mutations.
-	EdgeTransaction = "transaction"
 	// EdgeComment holds the string denoting the comment edge name in mutations.
 	EdgeComment = "comment"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -65,13 +63,6 @@ const (
 	// TagInverseTable is the table name for the Tag entity.
 	// It exists in this package in order to avoid circular dependency with the "tag" package.
 	TagInverseTable = "tags"
-	// TransactionTable is the table that holds the transaction relation/edge.
-	TransactionTable = "transactions"
-	// TransactionInverseTable is the table name for the Transaction entity.
-	// It exists in this package in order to avoid circular dependency with the "transaction" package.
-	TransactionInverseTable = "transactions"
-	// TransactionColumn is the table column denoting the transaction relation/edge.
-	TransactionColumn = "request_transaction"
 	// CommentTable is the table that holds the comment relation/edge.
 	CommentTable = "comments"
 	// CommentInverseTable is the table name for the Comment entity.
@@ -219,20 +210,6 @@ func ByTag(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByTransactionCount orders the results by transaction count.
-func ByTransactionCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTransactionStep(), opts...)
-	}
-}
-
-// ByTransaction orders the results by transaction terms.
-func ByTransaction(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTransactionStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByCommentCount orders the results by comment count.
 func ByCommentCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -279,13 +256,6 @@ func newTagStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TagInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, false, TagTable, TagPrimaryKey...),
-	)
-}
-func newTransactionStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TransactionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, TransactionTable, TransactionColumn),
 	)
 }
 func newCommentStep() *sqlgraph.Step {
