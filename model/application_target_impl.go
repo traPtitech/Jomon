@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
@@ -84,11 +85,16 @@ func (repo *EntRepository) deleteApplicationTargets(
 func ConvertEntApplicationTargetToModelApplicationTargetDetail(
 	t *ent.ApplicationTarget,
 ) *ApplicationTargetDetail {
+	paidAt := time.Time{}
+	if t.PaidAt != nil {
+		paidAt = *t.PaidAt
+	}
+
 	return &ApplicationTargetDetail{
 		ID:        t.ID,
 		Target:    t.Edges.User.ID,
 		Amount:    t.Amount,
-		PaidAt:    *t.PaidAt,
+		PaidAt:    paidAt,
 		CreatedAt: t.CreatedAt,
 	}
 }
