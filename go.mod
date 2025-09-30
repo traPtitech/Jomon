@@ -5,7 +5,7 @@ go 1.24.2
 require (
 	ariga.io/atlas v0.36.1
 	entgo.io/ent v0.14.5
-	github.com/aws/aws-sdk-go-v2 v1.39.0
+	github.com/aws/aws-sdk-go-v2 v1.39.2
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.19.6
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.88.1
 	github.com/go-sql-driver/mysql v1.9.3
