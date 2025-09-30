@@ -1,9 +1,9 @@
 module github.com/traPtitech/Jomon
 
-go 1.24.2
+go 1.24.6
 
 require (
-	ariga.io/atlas v0.36.1
+	ariga.io/atlas v0.37.0
 	entgo.io/ent v0.14.5
 	github.com/aws/aws-sdk-go-v2 v1.39.0
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.19.6
