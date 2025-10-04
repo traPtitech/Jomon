@@ -675,7 +675,10 @@ func (h Handlers) PutStatus(c echo.Context) error {
 
 	// judging privilege
 	if req.Status == application.Status {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid application: same status"))
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			errors.New("invalid application: same status"),
+		)
 	}
 	if req.Comment == "" {
 		if !IsAbleNoCommentChangeStatus(req.Status, application.Status) {
@@ -806,6 +809,9 @@ func (h Handlers) filterAccountManagerOrApplicationCreator(
 	if application.CreatedBy == user.ID {
 		return nil
 	}
-	logger.Info("user is not accountManager or application creator", zap.String("ID", user.ID.String()))
+	logger.Info(
+		"user is not accountManager or application creator",
+		zap.String("ID", user.ID.String()),
+	)
 	return echo.NewHTTPError(http.StatusForbidden, "you are not application creator")
 }

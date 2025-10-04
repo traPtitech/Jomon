@@ -67,27 +67,27 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 			apiAuth.GET("/genpkce", h.GeneratePKCE)
 		}
 
-		apiRequests := api.Group("/requests", h.CheckLoginMiddleware)
+		apiApplications := api.Group("/applications", h.CheckLoginMiddleware)
 		{
-			apiRequests.GET("", h.GetRequests)
-			apiRequests.POST(
+			apiApplications.GET("", h.GetApplications)
+			apiApplications.POST(
 				"",
-				h.PostRequest,
-				middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler))
-			apiRequestIDs := apiRequests.Group("/:requestID")
+				h.PostApplication,
+				middleware.BodyDump(h.WebhookService.WebhookApplicationsEventHandler))
+			apiApplicationIDs := apiApplications.Group("/:applicationID")
 			{
-				apiRequestIDs.GET("", h.GetRequest)
-				// FIXME: このままでは異常系のrequestでもwebhookが呼ばれる
-				// そのため、webhookの関数呼び出しをPutRequest内に移す
-				apiRequestIDs.PUT(
+				apiApplicationIDs.GET("", h.GetApplication)
+				// FIXME: このままでは異常系のApplicationでもwebhookが呼ばれる
+				// そのため、webhookの関数呼び出しをPutApplication内に移す
+				apiApplicationIDs.PUT(
 					"",
-					h.PutRequest,
-					middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler))
-				apiRequestIDs.POST(
+					h.PutApplication,
+					middleware.BodyDump(h.WebhookService.WebhookApplicationsEventHandler))
+				apiApplicationIDs.POST(
 					"/comments",
 					h.PostComment,
-					middleware.BodyDump(h.WebhookService.WebhookRequestsEventHandler))
-				apiRequestIDs.PUT("/status", h.PutStatus)
+					middleware.BodyDump(h.WebhookService.WebhookApplicationsEventHandler))
+				apiApplicationIDs.PUT("/status", h.PutStatus)
 			}
 		}
 
