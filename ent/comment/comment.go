@@ -23,19 +23,19 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// EdgeRequest holds the string denoting the request edge name in mutations.
-	EdgeRequest = "request"
+	// EdgeApplication holds the string denoting the application edge name in mutations.
+	EdgeApplication = "application"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the comment in the database.
 	Table = "comments"
-	// RequestTable is the table that holds the request relation/edge.
-	RequestTable = "comments"
-	// RequestInverseTable is the table name for the Request entity.
-	// It exists in this package in order to avoid circular dependency with the "request" package.
-	RequestInverseTable = "requests"
-	// RequestColumn is the table column denoting the request relation/edge.
-	RequestColumn = "request_comment"
+	// ApplicationTable is the table that holds the application relation/edge.
+	ApplicationTable = "comments"
+	// ApplicationInverseTable is the table name for the Application entity.
+	// It exists in this package in order to avoid circular dependency with the "application" package.
+	ApplicationInverseTable = "applications"
+	// ApplicationColumn is the table column denoting the application relation/edge.
+	ApplicationColumn = "application_comment"
 	// UserTable is the table that holds the user relation/edge.
 	UserTable = "comments"
 	// UserInverseTable is the table name for the User entity.
@@ -57,8 +57,8 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "comments"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"application_comment",
 	"comment_user",
-	"request_comment",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -115,10 +115,10 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
-// ByRequestField orders the results by request field.
-func ByRequestField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByApplicationField orders the results by application field.
+func ByApplicationField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newRequestStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newApplicationStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -128,11 +128,11 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newRequestStep() *sqlgraph.Step {
+func newApplicationStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(RequestInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, RequestTable, RequestColumn),
+		sqlgraph.To(ApplicationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ApplicationTable, ApplicationColumn),
 	)
 }
 func newUserStep() *sqlgraph.Step {

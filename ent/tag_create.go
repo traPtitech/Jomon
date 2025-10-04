@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/ent/request"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/tag"
 )
 
@@ -84,19 +84,19 @@ func (_c *TagCreate) SetNillableID(v *uuid.UUID) *TagCreate {
 	return _c
 }
 
-// AddRequestIDs adds the "request" edge to the Request entity by IDs.
-func (_c *TagCreate) AddRequestIDs(ids ...uuid.UUID) *TagCreate {
-	_c.mutation.AddRequestIDs(ids...)
+// AddApplicationIDs adds the "application" edge to the Application entity by IDs.
+func (_c *TagCreate) AddApplicationIDs(ids ...uuid.UUID) *TagCreate {
+	_c.mutation.AddApplicationIDs(ids...)
 	return _c
 }
 
-// AddRequest adds the "request" edges to the Request entity.
-func (_c *TagCreate) AddRequest(v ...*Request) *TagCreate {
+// AddApplication adds the "application" edges to the Application entity.
+func (_c *TagCreate) AddApplication(v ...*Application) *TagCreate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddRequestIDs(ids...)
+	return _c.AddApplicationIDs(ids...)
 }
 
 // Mutation returns the TagMutation object of the builder.
@@ -215,15 +215,15 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		_spec.SetField(tag.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if nodes := _c.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   tag.RequestTable,
-			Columns: tag.RequestPrimaryKey,
+			Table:   tag.ApplicationTable,
+			Columns: tag.ApplicationPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

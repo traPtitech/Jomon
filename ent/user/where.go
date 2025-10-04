@@ -379,21 +379,21 @@ func HasCommentWith(preds ...predicate.Comment) predicate.User {
 	})
 }
 
-// HasRequestStatus applies the HasEdge predicate on the "request_status" edge.
-func HasRequestStatus() predicate.User {
+// HasApplicationStatus applies the HasEdge predicate on the "application_status" edge.
+func HasApplicationStatus() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, RequestStatusTable, RequestStatusColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, ApplicationStatusTable, ApplicationStatusColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasRequestStatusWith applies the HasEdge predicate on the "request_status" edge with a given conditions (other predicates).
-func HasRequestStatusWith(preds ...predicate.RequestStatus) predicate.User {
+// HasApplicationStatusWith applies the HasEdge predicate on the "application_status" edge with a given conditions (other predicates).
+func HasApplicationStatusWith(preds ...predicate.ApplicationStatus) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newRequestStatusStep()
+		step := newApplicationStatusStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -402,21 +402,21 @@ func HasRequestStatusWith(preds ...predicate.RequestStatus) predicate.User {
 	})
 }
 
-// HasRequest applies the HasEdge predicate on the "request" edge.
-func HasRequest() predicate.User {
+// HasApplication applies the HasEdge predicate on the "application" edge.
+func HasApplication() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, RequestTable, RequestColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, ApplicationTable, ApplicationColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasRequestWith applies the HasEdge predicate on the "request" edge with a given conditions (other predicates).
-func HasRequestWith(preds ...predicate.Request) predicate.User {
+// HasApplicationWith applies the HasEdge predicate on the "application" edge with a given conditions (other predicates).
+func HasApplicationWith(preds ...predicate.Application) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newRequestStep()
+		step := newApplicationStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -448,21 +448,21 @@ func HasFileWith(preds ...predicate.File) predicate.User {
 	})
 }
 
-// HasRequestTarget applies the HasEdge predicate on the "request_target" edge.
-func HasRequestTarget() predicate.User {
+// HasApplicationTarget applies the HasEdge predicate on the "application_target" edge.
+func HasApplicationTarget() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, RequestTargetTable, RequestTargetColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, ApplicationTargetTable, ApplicationTargetColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasRequestTargetWith applies the HasEdge predicate on the "request_target" edge with a given conditions (other predicates).
-func HasRequestTargetWith(preds ...predicate.RequestTarget) predicate.User {
+// HasApplicationTargetWith applies the HasEdge predicate on the "application_target" edge with a given conditions (other predicates).
+func HasApplicationTargetWith(preds ...predicate.ApplicationTarget) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newRequestTargetStep()
+		step := newApplicationTargetStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

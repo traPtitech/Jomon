@@ -12,22 +12,22 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/file"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
 // FileQuery is the builder for querying File entities.
 type FileQuery struct {
 	config
-	ctx         *QueryContext
-	order       []file.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.File
-	withRequest *RequestQuery
-	withUser    *UserQuery
-	withFKs     bool
+	ctx             *QueryContext
+	order           []file.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.File
+	withApplication *ApplicationQuery
+	withUser        *UserQuery
+	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,9 +64,9 @@ func (_q *FileQuery) Order(o ...file.OrderOption) *FileQuery {
 	return _q
 }
 
-// QueryRequest chains the current query on the "request" edge.
-func (_q *FileQuery) QueryRequest() *RequestQuery {
-	query := (&RequestClient{config: _q.config}).Query()
+// QueryApplication chains the current query on the "application" edge.
+func (_q *FileQuery) QueryApplication() *ApplicationQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -77,8 +77,8 @@ func (_q *FileQuery) QueryRequest() *RequestQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, selector),
-			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, file.RequestTable, file.RequestColumn),
+			sqlgraph.To(application.Table, application.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.ApplicationTable, file.ApplicationColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -295,27 +295,27 @@ func (_q *FileQuery) Clone() *FileQuery {
 		return nil
 	}
 	return &FileQuery{
-		config:      _q.config,
-		ctx:         _q.ctx.Clone(),
-		order:       append([]file.OrderOption{}, _q.order...),
-		inters:      append([]Interceptor{}, _q.inters...),
-		predicates:  append([]predicate.File{}, _q.predicates...),
-		withRequest: _q.withRequest.Clone(),
-		withUser:    _q.withUser.Clone(),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]file.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.File{}, _q.predicates...),
+		withApplication: _q.withApplication.Clone(),
+		withUser:        _q.withUser.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
 }
 
-// WithRequest tells the query-builder to eager-load the nodes that are connected to
-// the "request" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *FileQuery) WithRequest(opts ...func(*RequestQuery)) *FileQuery {
-	query := (&RequestClient{config: _q.config}).Query()
+// WithApplication tells the query-builder to eager-load the nodes that are connected to
+// the "application" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *FileQuery) WithApplication(opts ...func(*ApplicationQuery)) *FileQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withRequest = query
+	_q.withApplication = query
 	return _q
 }
 
@@ -410,11 +410,11 @@ func (_q *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			_q.withRequest != nil,
+			_q.withApplication != nil,
 			_q.withUser != nil,
 		}
 	)
-	if _q.withRequest != nil || _q.withUser != nil {
+	if _q.withApplication != nil || _q.withUser != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -438,9 +438,9 @@ func (_q *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withRequest; query != nil {
-		if err := _q.loadRequest(ctx, query, nodes, nil,
-			func(n *File, e *Request) { n.Edges.Request = e }); err != nil {
+	if query := _q.withApplication; query != nil {
+		if err := _q.loadApplication(ctx, query, nodes, nil,
+			func(n *File, e *Application) { n.Edges.Application = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -453,14 +453,14 @@ func (_q *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 	return nodes, nil
 }
 
-func (_q *FileQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes []*File, init func(*File), assign func(*File, *Request)) error {
+func (_q *FileQuery) loadApplication(ctx context.Context, query *ApplicationQuery, nodes []*File, init func(*File), assign func(*File, *Application)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*File)
 	for i := range nodes {
-		if nodes[i].request_file == nil {
+		if nodes[i].application_file == nil {
 			continue
 		}
-		fk := *nodes[i].request_file
+		fk := *nodes[i].application_file
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -469,7 +469,7 @@ func (_q *FileQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(request.IDIn(ids...))
+	query.Where(application.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -477,7 +477,7 @@ func (_q *FileQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "request_file" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "application_file" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

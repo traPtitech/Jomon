@@ -29,14 +29,14 @@ const (
 	FieldDeletedAt = "deleted_at"
 	// EdgeComment holds the string denoting the comment edge name in mutations.
 	EdgeComment = "comment"
-	// EdgeRequestStatus holds the string denoting the request_status edge name in mutations.
-	EdgeRequestStatus = "request_status"
-	// EdgeRequest holds the string denoting the request edge name in mutations.
-	EdgeRequest = "request"
+	// EdgeApplicationStatus holds the string denoting the application_status edge name in mutations.
+	EdgeApplicationStatus = "application_status"
+	// EdgeApplication holds the string denoting the application edge name in mutations.
+	EdgeApplication = "application"
 	// EdgeFile holds the string denoting the file edge name in mutations.
 	EdgeFile = "file"
-	// EdgeRequestTarget holds the string denoting the request_target edge name in mutations.
-	EdgeRequestTarget = "request_target"
+	// EdgeApplicationTarget holds the string denoting the application_target edge name in mutations.
+	EdgeApplicationTarget = "application_target"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// CommentTable is the table that holds the comment relation/edge.
@@ -46,20 +46,20 @@ const (
 	CommentInverseTable = "comments"
 	// CommentColumn is the table column denoting the comment relation/edge.
 	CommentColumn = "comment_user"
-	// RequestStatusTable is the table that holds the request_status relation/edge.
-	RequestStatusTable = "request_status"
-	// RequestStatusInverseTable is the table name for the RequestStatus entity.
-	// It exists in this package in order to avoid circular dependency with the "requeststatus" package.
-	RequestStatusInverseTable = "request_status"
-	// RequestStatusColumn is the table column denoting the request_status relation/edge.
-	RequestStatusColumn = "request_status_user"
-	// RequestTable is the table that holds the request relation/edge.
-	RequestTable = "requests"
-	// RequestInverseTable is the table name for the Request entity.
-	// It exists in this package in order to avoid circular dependency with the "request" package.
-	RequestInverseTable = "requests"
-	// RequestColumn is the table column denoting the request relation/edge.
-	RequestColumn = "request_user"
+	// ApplicationStatusTable is the table that holds the application_status relation/edge.
+	ApplicationStatusTable = "application_status"
+	// ApplicationStatusInverseTable is the table name for the ApplicationStatus entity.
+	// It exists in this package in order to avoid circular dependency with the "applicationstatus" package.
+	ApplicationStatusInverseTable = "application_status"
+	// ApplicationStatusColumn is the table column denoting the application_status relation/edge.
+	ApplicationStatusColumn = "application_status_user"
+	// ApplicationTable is the table that holds the application relation/edge.
+	ApplicationTable = "applications"
+	// ApplicationInverseTable is the table name for the Application entity.
+	// It exists in this package in order to avoid circular dependency with the "application" package.
+	ApplicationInverseTable = "applications"
+	// ApplicationColumn is the table column denoting the application relation/edge.
+	ApplicationColumn = "application_user"
 	// FileTable is the table that holds the file relation/edge.
 	FileTable = "files"
 	// FileInverseTable is the table name for the File entity.
@@ -67,13 +67,13 @@ const (
 	FileInverseTable = "files"
 	// FileColumn is the table column denoting the file relation/edge.
 	FileColumn = "file_user"
-	// RequestTargetTable is the table that holds the request_target relation/edge.
-	RequestTargetTable = "request_targets"
-	// RequestTargetInverseTable is the table name for the RequestTarget entity.
-	// It exists in this package in order to avoid circular dependency with the "requesttarget" package.
-	RequestTargetInverseTable = "request_targets"
-	// RequestTargetColumn is the table column denoting the request_target relation/edge.
-	RequestTargetColumn = "request_target_user"
+	// ApplicationTargetTable is the table that holds the application_target relation/edge.
+	ApplicationTargetTable = "application_targets"
+	// ApplicationTargetInverseTable is the table name for the ApplicationTarget entity.
+	// It exists in this package in order to avoid circular dependency with the "applicationtarget" package.
+	ApplicationTargetInverseTable = "application_targets"
+	// ApplicationTargetColumn is the table column denoting the application_target relation/edge.
+	ApplicationTargetColumn = "application_target_user"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -164,31 +164,31 @@ func ByComment(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByRequestStatusCount orders the results by request_status count.
-func ByRequestStatusCount(opts ...sql.OrderTermOption) OrderOption {
+// ByApplicationStatusCount orders the results by application_status count.
+func ByApplicationStatusCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newRequestStatusStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newApplicationStatusStep(), opts...)
 	}
 }
 
-// ByRequestStatus orders the results by request_status terms.
-func ByRequestStatus(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByApplicationStatus orders the results by application_status terms.
+func ByApplicationStatus(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newRequestStatusStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newApplicationStatusStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
-// ByRequestCount orders the results by request count.
-func ByRequestCount(opts ...sql.OrderTermOption) OrderOption {
+// ByApplicationCount orders the results by application count.
+func ByApplicationCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newRequestStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newApplicationStep(), opts...)
 	}
 }
 
-// ByRequest orders the results by request terms.
-func ByRequest(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByApplication orders the results by application terms.
+func ByApplication(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newRequestStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newApplicationStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -206,17 +206,17 @@ func ByFile(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByRequestTargetCount orders the results by request_target count.
-func ByRequestTargetCount(opts ...sql.OrderTermOption) OrderOption {
+// ByApplicationTargetCount orders the results by application_target count.
+func ByApplicationTargetCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newRequestTargetStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newApplicationTargetStep(), opts...)
 	}
 }
 
-// ByRequestTarget orders the results by request_target terms.
-func ByRequestTarget(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByApplicationTarget orders the results by application_target terms.
+func ByApplicationTarget(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newRequestTargetStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newApplicationTargetStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newCommentStep() *sqlgraph.Step {
@@ -226,18 +226,18 @@ func newCommentStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, true, CommentTable, CommentColumn),
 	)
 }
-func newRequestStatusStep() *sqlgraph.Step {
+func newApplicationStatusStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(RequestStatusInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, RequestStatusTable, RequestStatusColumn),
+		sqlgraph.To(ApplicationStatusInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, ApplicationStatusTable, ApplicationStatusColumn),
 	)
 }
-func newRequestStep() *sqlgraph.Step {
+func newApplicationStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(RequestInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, RequestTable, RequestColumn),
+		sqlgraph.To(ApplicationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, ApplicationTable, ApplicationColumn),
 	)
 }
 func newFileStep() *sqlgraph.Step {
@@ -247,10 +247,10 @@ func newFileStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, true, FileTable, FileColumn),
 	)
 }
-func newRequestTargetStep() *sqlgraph.Step {
+func newApplicationTargetStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(RequestTargetInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, RequestTargetTable, RequestTargetColumn),
+		sqlgraph.To(ApplicationTargetInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, ApplicationTargetTable, ApplicationTargetColumn),
 	)
 }

@@ -31,7 +31,7 @@ func modelTagToTagOverview(t *model.Tag) *TagResponse {
 	}
 }
 
-func modelRequestTargetDetailToTargetOverview(t *model.RequestTargetDetail) *TargetOverview {
+func modelRequestTargetDetailToTargetOverview(t *model.ApplicationTargetDetail) *TargetOverview {
 	return &TargetOverview{
 		ID:        t.ID,
 		Target:    t.Target,
@@ -40,7 +40,9 @@ func modelRequestTargetDetailToTargetOverview(t *model.RequestTargetDetail) *Tar
 	}
 }
 
-func modelRequestStatusToStatusResponseOverview(s *model.RequestStatus) *StatusResponseOverview {
+func modelRequestStatusToStatusResponseOverview(
+	s *model.ApplicationStatus,
+) *StatusResponseOverview {
 	return &StatusResponseOverview{
 		CreatedBy: s.CreatedBy,
 		Status:    s.Status,
@@ -59,7 +61,7 @@ func modelCommentToCommentDetail(c *model.Comment) *CommentDetail {
 }
 
 // FIXME: この処理はrequest.goにも書かれてある
-func modelRequestDetailToRequestResponse(r *model.RequestDetail) *RequestDetailResponse {
+func modelRequestDetailToRequestResponse(r *model.ApplicationDetail) *RequestDetailResponse {
 	return &RequestDetailResponse{
 		RequestResponse: RequestResponse{
 			ID:        r.ID,
@@ -69,16 +71,22 @@ func modelRequestDetailToRequestResponse(r *model.RequestDetail) *RequestDetailR
 			Content:   r.Content,
 			CreatedAt: r.CreatedAt,
 			UpdatedAt: r.UpdatedAt,
-			Targets: lo.Map(r.Targets, func(m *model.RequestTargetDetail, _ int) *TargetOverview {
-				return modelRequestTargetDetailToTargetOverview(m)
-			}),
+			Targets: lo.Map(
+				r.Targets,
+				func(m *model.ApplicationTargetDetail, _ int) *TargetOverview {
+					return modelRequestTargetDetailToTargetOverview(m)
+				},
+			),
 			Tags: lo.Map(r.Tags, func(m *model.Tag, _ int) *TagResponse {
 				return modelTagToTagOverview(m)
 			}),
 		},
-		Statuses: lo.Map(r.Statuses, func(m *model.RequestStatus, _ int) *StatusResponseOverview {
-			return modelRequestStatusToStatusResponseOverview(m)
-		}),
+		Statuses: lo.Map(
+			r.Statuses,
+			func(m *model.ApplicationStatus, _ int) *StatusResponseOverview {
+				return modelRequestStatusToStatusResponseOverview(m)
+			},
+		),
 		Comments: lo.Map(r.Comments, func(m *model.Comment, _ int) *CommentDetail {
 			return modelCommentToCommentDetail(m)
 		}),
@@ -96,7 +104,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		date1 := time.Now()
 		date2 := date1.Add(time.Hour)
-		request1 := &model.RequestResponse{
+		request1 := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -105,10 +113,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 			CreatedAt: date1,
 			UpdatedAt: date1,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses:  []*model.RequestStatus{},
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses:  []*model.ApplicationStatus{},
 		}
-		request2 := &model.RequestResponse{
+		request2 := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -117,10 +125,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 			CreatedAt: date2,
 			UpdatedAt: date2,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses:  []*model.RequestStatus{},
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses:  []*model.ApplicationStatus{},
 		}
-		requests := []*model.RequestResponse{request2, request1}
+		requests := []*model.ApplicationResponse{request2, request1}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/requests", nil)
@@ -129,9 +137,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), model.RequestQuery{
+			GetApplications(c.Request().Context(), model.ApplicationQuery{
 				Limit:  100,
 				Offset: 0,
 			}).
@@ -174,7 +182,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		requests := []*model.RequestResponse{}
+		requests := []*model.ApplicationResponse{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/requests", nil)
@@ -183,9 +191,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), model.RequestQuery{
+			GetApplications(c.Request().Context(), model.ApplicationQuery{
 				Limit:  100,
 				Offset: 0,
 			}).
@@ -205,7 +213,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date1 := time.Now()
-		request1 := &model.RequestResponse{
+		request1 := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -214,10 +222,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 			CreatedAt: date1,
 			UpdatedAt: date1,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses:  []*model.RequestStatus{},
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses:  []*model.ApplicationStatus{},
 		}
-		requests := []*model.RequestResponse{request1}
+		requests := []*model.ApplicationResponse{request1}
 
 		e := echo.New()
 		status := "submitted"
@@ -228,9 +236,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), model.RequestQuery{
+			GetApplications(c.Request().Context(), model.ApplicationQuery{
 				Status: &status,
 				Limit:  100,
 				Offset: 0,
@@ -268,7 +276,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		date2str := date1.Add(time.Hour).Format("2006-01-02")
 		date2, err := service.StrToDate(date2str)
 		require.NoError(t, err)
-		request1 := &model.RequestResponse{
+		request1 := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -277,10 +285,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 			CreatedAt: date1,
 			UpdatedAt: date1,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses:  []*model.RequestStatus{},
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses:  []*model.ApplicationStatus{},
 		}
-		requests := []*model.RequestResponse{request1}
+		requests := []*model.ApplicationResponse{request1}
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/requests?until=%s", date2str)
@@ -290,9 +298,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), model.RequestQuery{
+			GetApplications(c.Request().Context(), model.ApplicationQuery{
 				Until:  date2,
 				Limit:  100,
 				Offset: 0,
@@ -330,7 +338,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		date2str := date1.Add(-time.Hour).Format("2006-01-02")
 		date2, err := service.StrToDate(date2str)
 		require.NoError(t, err)
-		request1 := &model.RequestResponse{
+		request1 := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -339,10 +347,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 			CreatedAt: date1,
 			UpdatedAt: date1,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses:  []*model.RequestStatus{},
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses:  []*model.ApplicationStatus{},
 		}
-		requests := []*model.RequestResponse{request1}
+		requests := []*model.ApplicationResponse{request1}
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/requests?since=%s", date2str)
@@ -352,9 +360,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), model.RequestQuery{
+			GetApplications(c.Request().Context(), model.ApplicationQuery{
 				Since:  date2,
 				Limit:  100,
 				Offset: 0,
@@ -400,7 +408,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 			CreatedAt: tag1.CreatedAt,
 			UpdatedAt: tag1.UpdatedAt,
 		}
-		request1 := &model.RequestResponse{
+		request1 := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -409,10 +417,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 			CreatedAt: date1,
 			UpdatedAt: date1,
 			Tags:      []*model.Tag{&tag1},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses:  []*model.RequestStatus{},
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses:  []*model.ApplicationStatus{},
 		}
-		requests := []*model.RequestResponse{request1}
+		requests := []*model.ApplicationResponse{request1}
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/requests?tag=%s", tag1.Name)
@@ -422,9 +430,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), model.RequestQuery{
+			GetApplications(c.Request().Context(), model.ApplicationQuery{
 				Tag:    &tag1.Name,
 				Limit:  100,
 				Offset: 0,
@@ -458,7 +466,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		request := &model.RequestResponse{
+		request := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -467,10 +475,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses:  []*model.RequestStatus{},
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses:  []*model.ApplicationStatus{},
 		}
-		modelRequests := []*model.RequestResponse{request}
+		modelRequests := []*model.ApplicationResponse{request}
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/requests?created_by=%s", request.CreatedBy.String())
@@ -480,9 +488,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), model.RequestQuery{
+			GetApplications(c.Request().Context(), model.ApplicationQuery{
 				Limit:     100,
 				Offset:    0,
 				CreatedBy: request.CreatedBy},
@@ -545,9 +553,9 @@ func TestHandlers_GetRequests(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		resErr := errors.New("Failed to get requests.")
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequests(c.Request().Context(), model.RequestQuery{
+			GetApplications(c.Request().Context(), model.ApplicationQuery{
 				Limit:  100,
 				Offset: 0,
 			}).
@@ -569,7 +577,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
@@ -578,8 +586,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				CreatedBy: uuid.New(),
 				Status:    model.Submitted,
@@ -596,7 +604,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
-		targets := []*model.RequestTarget{}
+		targets := []*model.ApplicationTarget{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -607,9 +615,9 @@ func TestHandlers_PostRequest(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			CreateRequest(
+			CreateApplication(
 				c.Request().Context(),
 				reqRequest.Title, reqRequest.Content,
 				tags, targets,
@@ -639,7 +647,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 		}
 		tags := []*model.Tag{tag}
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
@@ -648,8 +656,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 			Tags:      tags,
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				CreatedBy: uuid.New(),
 				Status:    model.Submitted,
@@ -666,7 +674,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		targets := []*model.RequestTarget{}
+		targets := []*model.ApplicationTarget{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -681,9 +689,9 @@ func TestHandlers_PostRequest(t *testing.T) {
 			EXPECT().
 			GetTag(c.Request().Context(), tag.ID).
 			Return(tag, nil)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			CreateRequest(
+			CreateApplication(
 				c.Request().Context(),
 				reqRequest.Title, reqRequest.Content,
 				tags, targets,
@@ -706,17 +714,17 @@ func TestHandlers_PostRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		target := &model.RequestTarget{
+		target := &model.ApplicationTarget{
 			Target: uuid.New(),
 			Amount: random.Numeric(t, 1000000),
 		}
-		tgd := &model.RequestTargetDetail{
+		tgd := &model.ApplicationTargetDetail{
 			ID:        uuid.New(),
 			Target:    target.Target,
 			Amount:    target.Amount,
 			CreatedAt: date,
 		}
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
@@ -725,8 +733,8 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{tgd},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{tgd},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				CreatedBy: uuid.New(),
 				Status:    model.Submitted,
@@ -758,12 +766,12 @@ func TestHandlers_PostRequest(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			CreateRequest(
+			CreateApplication(
 				c.Request().Context(),
 				reqRequest.Title, reqRequest.Content,
-				tags, []*model.RequestTarget{target},
+				tags, []*model.ApplicationTarget{target},
 				reqRequest.CreatedBy).
 			Return(request, nil)
 
@@ -783,7 +791,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
@@ -831,7 +839,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
@@ -848,7 +856,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
-		targets := []*model.RequestTarget{}
+		targets := []*model.ApplicationTarget{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -862,9 +870,9 @@ func TestHandlers_PostRequest(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			CreateRequest(
+			CreateApplication(
 				c.Request().Context(),
 				reqRequest.Title, reqRequest.Content,
 				tags, targets,
@@ -887,7 +895,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -896,8 +904,8 @@ func TestHandlers_GetRequest(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -918,9 +926,9 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(c.Request().Context(), request.ID).
+			GetApplication(c.Request().Context(), request.ID).
 			Return(request, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
@@ -943,7 +951,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		date := time.Now()
 
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -952,8 +960,8 @@ func TestHandlers_GetRequest(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -989,9 +997,9 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(c.Request().Context(), request.ID).
+			GetApplication(c.Request().Context(), request.ID).
 			Return(request, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
@@ -1017,14 +1025,14 @@ func TestHandlers_GetRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		target := &model.RequestTargetDetail{
+		target := &model.ApplicationTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 1000000),
 			PaidAt:    time.Time{},
 			CreatedAt: date,
 		}
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -1033,8 +1041,8 @@ func TestHandlers_GetRequest(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{target},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{target},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -1056,9 +1064,9 @@ func TestHandlers_GetRequest(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(c.Request().Context(), request.ID).
+			GetApplication(c.Request().Context(), request.ID).
 			Return(request, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
@@ -1149,9 +1157,9 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(c.Request().Context(), unknownID).
+			GetApplication(c.Request().Context(), unknownID).
 			Return(nil, resErr)
 
 		err = h.Handlers.GetRequest(c)
@@ -1172,7 +1180,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -1181,8 +1189,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -1200,7 +1208,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
-		updateRequest := &model.RequestDetail{
+		updateRequest := &model.ApplicationDetail{
 			ID:        request.ID,
 			Status:    request.Status,
 			CreatedBy: request.CreatedBy,
@@ -1209,7 +1217,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Title:     reqRequest.Title,
 			Content:   reqRequest.Content,
 			Tags:      tags,
-			Targets:   []*model.RequestTargetDetail{},
+			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  request.Statuses,
 			Comments:  request.Comments,
 			Files:     request.Files,
@@ -1228,8 +1236,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		targets := lo.Map(
 			updateRequest.Targets,
-			func(t *model.RequestTargetDetail, _ int) *model.RequestTarget {
-				return &model.RequestTarget{
+			func(t *model.ApplicationTargetDetail, _ int) *model.ApplicationTarget {
+				return &model.ApplicationTarget{
 					Target: t.Target,
 					Amount: t.Amount,
 				}
@@ -1237,13 +1245,13 @@ func TestHandlers_PutRequest(t *testing.T) {
 		)
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(c.Request().Context(), request.ID).
+			GetApplication(c.Request().Context(), request.ID).
 			Return(request, nil)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			UpdateRequest(
+			UpdateApplication(
 				c.Request().Context(),
 				request.ID,
 				reqRequest.Title, reqRequest.Content,
@@ -1268,7 +1276,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -1277,8 +1285,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -1308,7 +1316,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		updateRequest := &model.RequestDetail{
+		updateRequest := &model.ApplicationDetail{
 			ID:        request.ID,
 			Status:    request.Status,
 			CreatedBy: request.CreatedBy,
@@ -1317,7 +1325,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedAt: request.CreatedAt,
 			UpdatedAt: time.Now(),
 			Tags:      tags,
-			Targets:   []*model.RequestTargetDetail{},
+			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  request.Statuses,
 			Comments:  request.Comments,
 			Files:     request.Files,
@@ -1325,8 +1333,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		targets := lo.Map(
 			updateRequest.Targets,
-			func(t *model.RequestTargetDetail, _ int) *model.RequestTarget {
-				return &model.RequestTarget{
+			func(t *model.ApplicationTargetDetail, _ int) *model.ApplicationTarget {
+				return &model.ApplicationTarget{
 					Target: t.Target,
 					Amount: t.Amount,
 				}
@@ -1345,9 +1353,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(c.Request().Context(), request.ID).
+			GetApplication(c.Request().Context(), request.ID).
 			Return(request, nil)
 		h.Repository.MockTagRepository.
 			EXPECT().
@@ -1357,9 +1365,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 			EXPECT().
 			GetTag(c.Request().Context(), tag2.ID).
 			Return(tag2, nil)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			UpdateRequest(
+			UpdateApplication(
 				c.Request().Context(),
 				request.ID,
 				reqRequest.Title, reqRequest.Content,
@@ -1384,7 +1392,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -1393,8 +1401,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -1403,21 +1411,21 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
-		target1 := &model.RequestTargetDetail{
+		target1 := &model.ApplicationTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 100000),
 			PaidAt:    time.Time{},
 			CreatedAt: date,
 		}
-		target2 := &model.RequestTargetDetail{
+		target2 := &model.ApplicationTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 100000),
 			PaidAt:    time.Time{},
 			CreatedAt: date,
 		}
-		targetDetails := []*model.RequestTargetDetail{target1, target2}
+		targetDetails := []*model.ApplicationTargetDetail{target1, target2}
 		reqRequest := PutRequest{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
@@ -1430,7 +1438,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
-		updateRequest := &model.RequestDetail{
+		updateRequest := &model.ApplicationDetail{
 			ID:        request.ID,
 			Status:    request.Status,
 			CreatedBy: request.CreatedBy,
@@ -1458,8 +1466,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		targets := lo.Map(
 			updateRequest.Targets,
-			func(t *model.RequestTargetDetail, _ int) *model.RequestTarget {
-				return &model.RequestTarget{
+			func(t *model.ApplicationTargetDetail, _ int) *model.ApplicationTarget {
+				return &model.ApplicationTarget{
 					Target: t.Target,
 					Amount: t.Amount,
 				}
@@ -1467,13 +1475,13 @@ func TestHandlers_PutRequest(t *testing.T) {
 		)
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(c.Request().Context(), request.ID).
+			GetApplication(c.Request().Context(), request.ID).
 			Return(request, nil)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			UpdateRequest(
+			UpdateApplication(
 				c.Request().Context(),
 				request.ID,
 				reqRequest.Title, reqRequest.Content,
@@ -1498,7 +1506,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -1507,8 +1515,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -1541,7 +1549,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			UpdatedAt: date,
 		}
 		comments := []*model.Comment{comment1, comment2}
-		updateRequest := &model.RequestDetail{
+		updateRequest := &model.ApplicationDetail{
 			ID:        request.ID,
 			Status:    request.Status,
 			CreatedBy: request.CreatedBy,
@@ -1550,7 +1558,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedAt: request.CreatedAt,
 			UpdatedAt: time.Now(),
 			Tags:      tags,
-			Targets:   []*model.RequestTargetDetail{},
+			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  request.Statuses,
 			Comments:  comments,
 			Files:     request.Files,
@@ -1569,8 +1577,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		targets := lo.Map(
 			updateRequest.Targets,
-			func(t *model.RequestTargetDetail, _ int) *model.RequestTarget {
-				return &model.RequestTarget{
+			func(t *model.ApplicationTargetDetail, _ int) *model.ApplicationTarget {
+				return &model.ApplicationTarget{
 					Target: t.Target,
 					Amount: t.Amount,
 				}
@@ -1578,13 +1586,13 @@ func TestHandlers_PutRequest(t *testing.T) {
 		)
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(c.Request().Context(), request.ID).
+			GetApplication(c.Request().Context(), request.ID).
 			Return(request, nil)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			UpdateRequest(
+			UpdateApplication(
 				c.Request().Context(),
 				request.ID,
 				reqRequest.Title, reqRequest.Content,
@@ -1687,9 +1695,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(c.Request().Context(), unknownID).
+			GetApplication(c.Request().Context(), unknownID).
 			Return(nil, resErr)
 
 		err = h.Handlers.PutRequest(c)
@@ -1706,7 +1714,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -1715,8 +1723,8 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -1756,9 +1764,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(c.Request().Context(), request.ID).
+			GetApplication(c.Request().Context(), request.ID).
 			Return(request, nil)
 		h.Repository.MockTagRepository.
 			EXPECT().
@@ -1783,7 +1791,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.FixRequired,
 			CreatedBy: user.ID,
@@ -1792,8 +1800,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.FixRequired,
 				CreatedAt: date,
@@ -1815,7 +1823,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		status := &model.RequestStatus{
+		status := &model.ApplicationStatus{
 			ID:        uuid.New(),
 			CreatedBy: user.ID,
 			Status:    reqStatus.Status,
@@ -1836,11 +1844,11 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
-		h.Repository.MockRequestStatusRepository.
+		h.Repository.MockApplicationStatusRepository.
 			EXPECT().
 			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
 			Return(status, nil)
@@ -1878,7 +1886,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -1887,8 +1895,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -1910,7 +1918,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		status := &model.RequestStatus{
+		status := &model.ApplicationStatus{
 			ID:        uuid.New(),
 			CreatedBy: user.ID,
 			Status:    reqStatus.Status,
@@ -1931,11 +1939,11 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
-		h.Repository.MockRequestStatusRepository.
+		h.Repository.MockApplicationStatusRepository.
 			EXPECT().
 			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
 			Return(status, nil)
@@ -1973,7 +1981,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -1982,8 +1990,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -2005,7 +2013,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		status := &model.RequestStatus{
+		status := &model.ApplicationStatus{
 			ID:        uuid.New(),
 			CreatedBy: user.ID,
 			Status:    reqStatus.Status,
@@ -2026,11 +2034,11 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
-		h.Repository.MockRequestStatusRepository.
+		h.Repository.MockApplicationStatusRepository.
 			EXPECT().
 			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
 			Return(status, nil)
@@ -2068,7 +2076,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -2077,8 +2085,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -2101,7 +2109,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		status := &model.RequestStatus{
+		status := &model.ApplicationStatus{
 			ID:        uuid.New(),
 			CreatedBy: user.ID,
 			Status:    reqStatus.Status,
@@ -2122,11 +2130,11 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
-		h.Repository.MockRequestStatusRepository.
+		h.Repository.MockApplicationStatusRepository.
 			EXPECT().
 			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
 			Return(status, nil)
@@ -2164,7 +2172,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.FixRequired,
 			CreatedBy: uuid.New(),
@@ -2173,8 +2181,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.FixRequired,
 				CreatedAt: date,
@@ -2196,7 +2204,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		status := &model.RequestStatus{
+		status := &model.ApplicationStatus{
 			ID:        uuid.New(),
 			CreatedBy: user.ID,
 			Status:    reqStatus.Status,
@@ -2217,11 +2225,11 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
-		h.Repository.MockRequestStatusRepository.
+		h.Repository.MockApplicationStatusRepository.
 			EXPECT().
 			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
 			Return(status, nil)
@@ -2259,7 +2267,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Accepted,
 			CreatedBy: uuid.New(),
@@ -2268,8 +2276,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Accepted,
 				CreatedAt: date,
@@ -2278,13 +2286,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
-		target := &model.RequestTargetDetail{
+		target := &model.ApplicationTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			PaidAt:    time.Time{},
 			CreatedAt: date,
 		}
-		targets := []*model.RequestTargetDetail{target}
+		targets := []*model.ApplicationTargetDetail{target}
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
@@ -2298,7 +2306,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		status := &model.RequestStatus{
+		status := &model.ApplicationStatus{
 			ID:        uuid.New(),
 			CreatedBy: user.ID,
 			Status:    reqStatus.Status,
@@ -2319,15 +2327,15 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
-		h.Repository.MockRequestTargetRepository.
+		h.Repository.MockApplicationTargetRepository.
 			EXPECT().
-			GetRequestTargets(ctx, request.ID).
+			GetApplicationTargets(ctx, request.ID).
 			Return(targets, nil)
-		h.Repository.MockRequestStatusRepository.
+		h.Repository.MockApplicationStatusRepository.
 			EXPECT().
 			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
 			Return(status, nil)
@@ -2365,7 +2373,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.FixRequired,
 			CreatedBy: user.ID,
@@ -2374,8 +2382,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.FixRequired,
 				CreatedAt: date,
@@ -2500,7 +2508,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Status(random.Numeric(t, 5) + 1),
 			CreatedBy: user.ID,
@@ -2509,8 +2517,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Status(random.Numeric(t, 5) + 1),
 				CreatedAt: date,
@@ -2540,9 +2548,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
 
 		resErr := errors.New("invalid request: same status")
@@ -2561,7 +2569,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -2570,8 +2578,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -2601,9 +2609,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
 
 		resErr := fmt.Errorf(
@@ -2625,7 +2633,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -2634,8 +2642,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -2664,9 +2672,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
 
 		resErr := fmt.Errorf(
@@ -2688,7 +2696,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Accepted,
 			CreatedBy: user.ID,
@@ -2697,8 +2705,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Accepted,
 				CreatedAt: date,
@@ -2727,9 +2735,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
 
 		resErr := fmt.Errorf(
@@ -2751,7 +2759,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.FixRequired,
 			CreatedBy: uuid.New(),
@@ -2760,8 +2768,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.FixRequired,
 				CreatedAt: date,
@@ -2791,9 +2799,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
 
 		resErr := fmt.Errorf(
@@ -2815,7 +2823,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Accepted,
 			CreatedBy: uuid.New(),
@@ -2824,8 +2832,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Accepted,
 				CreatedAt: date,
@@ -2834,13 +2842,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
-		target := &model.RequestTargetDetail{
+		target := &model.ApplicationTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			PaidAt:    date,
 			CreatedAt: date,
 		}
-		targets := []*model.RequestTargetDetail{target}
+		targets := []*model.ApplicationTargetDetail{target}
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
@@ -2863,13 +2871,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
-		h.Repository.MockRequestTargetRepository.
+		h.Repository.MockApplicationTargetRepository.
 			EXPECT().
-			GetRequestTargets(ctx, request.ID).
+			GetApplicationTargets(ctx, request.ID).
 			Return(targets, nil)
 
 		resErr := errors.New("someone already paid")
@@ -2888,7 +2896,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -2897,8 +2905,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.Submitted,
 				CreatedAt: date,
@@ -2928,9 +2936,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
 
 		resErr := fmt.Errorf(
@@ -2951,7 +2959,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.RequestDetail{
+		request := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.FixRequired,
 			CreatedBy: uuid.New(),
@@ -2960,8 +2968,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 			Tags:      []*model.Tag{},
-			Targets:   []*model.RequestTargetDetail{},
-			Statuses: []*model.RequestStatus{{
+			Targets:   []*model.ApplicationTargetDetail{},
+			Statuses: []*model.ApplicationStatus{{
 				ID:        uuid.New(),
 				Status:    model.FixRequired,
 				CreatedAt: date,
@@ -2991,9 +2999,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		ctx = c.Request().Context()
-		h.Repository.MockRequestRepository.
+		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetRequest(ctx, request.ID).
+			GetApplication(ctx, request.ID).
 			Return(request, nil)
 
 		err = h.Handlers.PutStatus(c)

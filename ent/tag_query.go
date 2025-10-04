@@ -13,19 +13,19 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/predicate"
-	"github.com/traPtitech/Jomon/ent/request"
 	"github.com/traPtitech/Jomon/ent/tag"
 )
 
 // TagQuery is the builder for querying Tag entities.
 type TagQuery struct {
 	config
-	ctx         *QueryContext
-	order       []tag.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.Tag
-	withRequest *RequestQuery
+	ctx             *QueryContext
+	order           []tag.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.Tag
+	withApplication *ApplicationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -62,9 +62,9 @@ func (_q *TagQuery) Order(o ...tag.OrderOption) *TagQuery {
 	return _q
 }
 
-// QueryRequest chains the current query on the "request" edge.
-func (_q *TagQuery) QueryRequest() *RequestQuery {
-	query := (&RequestClient{config: _q.config}).Query()
+// QueryApplication chains the current query on the "application" edge.
+func (_q *TagQuery) QueryApplication() *ApplicationQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -75,8 +75,8 @@ func (_q *TagQuery) QueryRequest() *RequestQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, selector),
-			sqlgraph.To(request.Table, request.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, tag.RequestTable, tag.RequestPrimaryKey...),
+			sqlgraph.To(application.Table, application.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, tag.ApplicationTable, tag.ApplicationPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -271,26 +271,26 @@ func (_q *TagQuery) Clone() *TagQuery {
 		return nil
 	}
 	return &TagQuery{
-		config:      _q.config,
-		ctx:         _q.ctx.Clone(),
-		order:       append([]tag.OrderOption{}, _q.order...),
-		inters:      append([]Interceptor{}, _q.inters...),
-		predicates:  append([]predicate.Tag{}, _q.predicates...),
-		withRequest: _q.withRequest.Clone(),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]tag.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.Tag{}, _q.predicates...),
+		withApplication: _q.withApplication.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
 }
 
-// WithRequest tells the query-builder to eager-load the nodes that are connected to
-// the "request" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *TagQuery) WithRequest(opts ...func(*RequestQuery)) *TagQuery {
-	query := (&RequestClient{config: _q.config}).Query()
+// WithApplication tells the query-builder to eager-load the nodes that are connected to
+// the "application" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *TagQuery) WithApplication(opts ...func(*ApplicationQuery)) *TagQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withRequest = query
+	_q.withApplication = query
 	return _q
 }
 
@@ -373,7 +373,7 @@ func (_q *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 		nodes       = []*Tag{}
 		_spec       = _q.querySpec()
 		loadedTypes = [1]bool{
-			_q.withRequest != nil,
+			_q.withApplication != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -394,17 +394,17 @@ func (_q *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withRequest; query != nil {
-		if err := _q.loadRequest(ctx, query, nodes,
-			func(n *Tag) { n.Edges.Request = []*Request{} },
-			func(n *Tag, e *Request) { n.Edges.Request = append(n.Edges.Request, e) }); err != nil {
+	if query := _q.withApplication; query != nil {
+		if err := _q.loadApplication(ctx, query, nodes,
+			func(n *Tag) { n.Edges.Application = []*Application{} },
+			func(n *Tag, e *Application) { n.Edges.Application = append(n.Edges.Application, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *TagQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Request)) error {
+func (_q *TagQuery) loadApplication(ctx context.Context, query *ApplicationQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Application)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[uuid.UUID]*Tag)
 	nids := make(map[uuid.UUID]map[*Tag]struct{})
@@ -416,11 +416,11 @@ func (_q *TagQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes 
 		}
 	}
 	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(tag.RequestTable)
-		s.Join(joinT).On(s.C(request.FieldID), joinT.C(tag.RequestPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(tag.RequestPrimaryKey[1]), edgeIDs...))
+		joinT := sql.Table(tag.ApplicationTable)
+		s.Join(joinT).On(s.C(application.FieldID), joinT.C(tag.ApplicationPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(tag.ApplicationPrimaryKey[1]), edgeIDs...))
 		columns := s.SelectedColumns()
-		s.Select(joinT.C(tag.RequestPrimaryKey[1]))
+		s.Select(joinT.C(tag.ApplicationPrimaryKey[1]))
 		s.AppendSelect(columns...)
 		s.SetDistinct(false)
 	})
@@ -450,14 +450,14 @@ func (_q *TagQuery) loadRequest(ctx context.Context, query *RequestQuery, nodes 
 			}
 		})
 	})
-	neighbors, err := withInterceptors[[]*Request](ctx, query, qr, query.inters)
+	neighbors, err := withInterceptors[[]*Application](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
 		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "request" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected "application" node returned %v`, n.ID)
 		}
 		for kn := range nodes {
 			assign(kn, n)

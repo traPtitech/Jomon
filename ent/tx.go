@@ -12,16 +12,16 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Application is the client for interacting with the Application builders.
+	Application *ApplicationClient
+	// ApplicationStatus is the client for interacting with the ApplicationStatus builders.
+	ApplicationStatus *ApplicationStatusClient
+	// ApplicationTarget is the client for interacting with the ApplicationTarget builders.
+	ApplicationTarget *ApplicationTargetClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
 	// File is the client for interacting with the File builders.
 	File *FileClient
-	// Request is the client for interacting with the Request builders.
-	Request *RequestClient
-	// RequestStatus is the client for interacting with the RequestStatus builders.
-	RequestStatus *RequestStatusClient
-	// RequestTarget is the client for interacting with the RequestTarget builders.
-	RequestTarget *RequestTargetClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
 	// User is the client for interacting with the User builders.
@@ -157,11 +157,11 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Application = NewApplicationClient(tx.config)
+	tx.ApplicationStatus = NewApplicationStatusClient(tx.config)
+	tx.ApplicationTarget = NewApplicationTargetClient(tx.config)
 	tx.Comment = NewCommentClient(tx.config)
 	tx.File = NewFileClient(tx.config)
-	tx.Request = NewRequestClient(tx.config)
-	tx.RequestStatus = NewRequestStatusClient(tx.config)
-	tx.RequestTarget = NewRequestTargetClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
@@ -173,7 +173,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Comment.QueryXXX(), the query will be executed
+// applies a query, for example: Application.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

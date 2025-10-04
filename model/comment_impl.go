@@ -7,16 +7,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/comment"
-	"github.com/traPtitech/Jomon/ent/request"
 )
 
 func (repo *EntRepository) GetComments(
-	ctx context.Context, requestID uuid.UUID,
+	ctx context.Context, applicationID uuid.UUID,
 ) ([]*Comment, error) {
-	_, err := repo.client.Request.
+	_, err := repo.client.Application.
 		Query().
-		Where(request.IDEQ(requestID)).
+		Where(application.IDEQ(applicationID)).
 		First(ctx)
 	if err != nil {
 		return nil, err
@@ -25,8 +25,8 @@ func (repo *EntRepository) GetComments(
 	comments, err := repo.client.Comment.
 		Query().
 		Where(
-			comment.HasRequestWith(
-				request.ID(requestID),
+			comment.HasApplicationWith(
+				application.ID(applicationID),
 			),
 		).
 		WithUser().
@@ -41,12 +41,12 @@ func (repo *EntRepository) GetComments(
 }
 
 func (repo *EntRepository) CreateComment(
-	ctx context.Context, comment string, requestID uuid.UUID, userID uuid.UUID,
+	ctx context.Context, comment string, applicationID uuid.UUID, userID uuid.UUID,
 ) (*Comment, error) {
 	created, err := repo.client.Comment.
 		Create().
 		SetComment(comment).
-		SetRequestID(requestID).
+		SetApplicationID(applicationID).
 		SetUserID(userID).
 		Save(ctx)
 	if err != nil {
@@ -56,13 +56,13 @@ func (repo *EntRepository) CreateComment(
 }
 
 func (repo *EntRepository) UpdateComment(
-	ctx context.Context, commentContent string, requestID uuid.UUID, commentID uuid.UUID,
+	ctx context.Context, commentContent string, applicationID uuid.UUID, commentID uuid.UUID,
 ) (*Comment, error) {
 	updated, err := repo.client.Comment.
 		UpdateOneID(commentID).
 		SetComment(commentContent).
 		SetUpdatedAt(time.Now()).
-		SetRequestID(requestID).
+		SetApplicationID(applicationID).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -79,13 +79,13 @@ func (repo *EntRepository) UpdateComment(
 }
 
 func (repo *EntRepository) DeleteComment(
-	ctx context.Context, requestID uuid.UUID, commentID uuid.UUID,
+	ctx context.Context, applicationID uuid.UUID, commentID uuid.UUID,
 ) error {
 	c, err := repo.client.Comment.
 		Query().
 		Where(
-			comment.HasRequestWith(
-				request.ID(requestID),
+			comment.HasApplicationWith(
+				application.ID(applicationID),
 			),
 		).
 		Where(comment.IDEQ(commentID)).
