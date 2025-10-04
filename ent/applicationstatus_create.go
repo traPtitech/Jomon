@@ -24,83 +24,83 @@ type ApplicationStatusCreate struct {
 }
 
 // SetStatus sets the "status" field.
-func (asc *ApplicationStatusCreate) SetStatus(a applicationstatus.Status) *ApplicationStatusCreate {
-	asc.mutation.SetStatus(a)
-	return asc
+func (_c *ApplicationStatusCreate) SetStatus(v applicationstatus.Status) *ApplicationStatusCreate {
+	_c.mutation.SetStatus(v)
+	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (asc *ApplicationStatusCreate) SetNillableStatus(a *applicationstatus.Status) *ApplicationStatusCreate {
-	if a != nil {
-		asc.SetStatus(*a)
+func (_c *ApplicationStatusCreate) SetNillableStatus(v *applicationstatus.Status) *ApplicationStatusCreate {
+	if v != nil {
+		_c.SetStatus(*v)
 	}
-	return asc
+	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (asc *ApplicationStatusCreate) SetCreatedAt(t time.Time) *ApplicationStatusCreate {
-	asc.mutation.SetCreatedAt(t)
-	return asc
+func (_c *ApplicationStatusCreate) SetCreatedAt(v time.Time) *ApplicationStatusCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (asc *ApplicationStatusCreate) SetNillableCreatedAt(t *time.Time) *ApplicationStatusCreate {
-	if t != nil {
-		asc.SetCreatedAt(*t)
+func (_c *ApplicationStatusCreate) SetNillableCreatedAt(v *time.Time) *ApplicationStatusCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return asc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (asc *ApplicationStatusCreate) SetID(u uuid.UUID) *ApplicationStatusCreate {
-	asc.mutation.SetID(u)
-	return asc
+func (_c *ApplicationStatusCreate) SetID(v uuid.UUID) *ApplicationStatusCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (asc *ApplicationStatusCreate) SetNillableID(u *uuid.UUID) *ApplicationStatusCreate {
-	if u != nil {
-		asc.SetID(*u)
+func (_c *ApplicationStatusCreate) SetNillableID(v *uuid.UUID) *ApplicationStatusCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return asc
+	return _c
 }
 
 // SetApplicationID sets the "application" edge to the Application entity by ID.
-func (asc *ApplicationStatusCreate) SetApplicationID(id uuid.UUID) *ApplicationStatusCreate {
-	asc.mutation.SetApplicationID(id)
-	return asc
+func (_c *ApplicationStatusCreate) SetApplicationID(id uuid.UUID) *ApplicationStatusCreate {
+	_c.mutation.SetApplicationID(id)
+	return _c
 }
 
 // SetApplication sets the "application" edge to the Application entity.
-func (asc *ApplicationStatusCreate) SetApplication(a *Application) *ApplicationStatusCreate {
-	return asc.SetApplicationID(a.ID)
+func (_c *ApplicationStatusCreate) SetApplication(v *Application) *ApplicationStatusCreate {
+	return _c.SetApplicationID(v.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (asc *ApplicationStatusCreate) SetUserID(id uuid.UUID) *ApplicationStatusCreate {
-	asc.mutation.SetUserID(id)
-	return asc
+func (_c *ApplicationStatusCreate) SetUserID(id uuid.UUID) *ApplicationStatusCreate {
+	_c.mutation.SetUserID(id)
+	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (asc *ApplicationStatusCreate) SetUser(u *User) *ApplicationStatusCreate {
-	return asc.SetUserID(u.ID)
+func (_c *ApplicationStatusCreate) SetUser(v *User) *ApplicationStatusCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // Mutation returns the ApplicationStatusMutation object of the builder.
-func (asc *ApplicationStatusCreate) Mutation() *ApplicationStatusMutation {
-	return asc.mutation
+func (_c *ApplicationStatusCreate) Mutation() *ApplicationStatusMutation {
+	return _c.mutation
 }
 
 // Save creates the ApplicationStatus in the database.
-func (asc *ApplicationStatusCreate) Save(ctx context.Context) (*ApplicationStatus, error) {
-	asc.defaults()
-	return withHooks(ctx, asc.sqlSave, asc.mutation, asc.hooks)
+func (_c *ApplicationStatusCreate) Save(ctx context.Context) (*ApplicationStatus, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (asc *ApplicationStatusCreate) SaveX(ctx context.Context) *ApplicationStatus {
-	v, err := asc.Save(ctx)
+func (_c *ApplicationStatusCreate) SaveX(ctx context.Context) *ApplicationStatus {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -108,62 +108,62 @@ func (asc *ApplicationStatusCreate) SaveX(ctx context.Context) *ApplicationStatu
 }
 
 // Exec executes the query.
-func (asc *ApplicationStatusCreate) Exec(ctx context.Context) error {
-	_, err := asc.Save(ctx)
+func (_c *ApplicationStatusCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (asc *ApplicationStatusCreate) ExecX(ctx context.Context) {
-	if err := asc.Exec(ctx); err != nil {
+func (_c *ApplicationStatusCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (asc *ApplicationStatusCreate) defaults() {
-	if _, ok := asc.mutation.Status(); !ok {
+func (_c *ApplicationStatusCreate) defaults() {
+	if _, ok := _c.mutation.Status(); !ok {
 		v := applicationstatus.DefaultStatus
-		asc.mutation.SetStatus(v)
+		_c.mutation.SetStatus(v)
 	}
-	if _, ok := asc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := applicationstatus.DefaultCreatedAt()
-		asc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := asc.mutation.ID(); !ok {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := applicationstatus.DefaultID()
-		asc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (asc *ApplicationStatusCreate) check() error {
-	if _, ok := asc.mutation.Status(); !ok {
+func (_c *ApplicationStatusCreate) check() error {
+	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "ApplicationStatus.status"`)}
 	}
-	if v, ok := asc.mutation.Status(); ok {
+	if v, ok := _c.mutation.Status(); ok {
 		if err := applicationstatus.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "ApplicationStatus.status": %w`, err)}
 		}
 	}
-	if _, ok := asc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "ApplicationStatus.created_at"`)}
 	}
-	if len(asc.mutation.ApplicationIDs()) == 0 {
+	if len(_c.mutation.ApplicationIDs()) == 0 {
 		return &ValidationError{Name: "application", err: errors.New(`ent: missing required edge "ApplicationStatus.application"`)}
 	}
-	if len(asc.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "ApplicationStatus.user"`)}
 	}
 	return nil
 }
 
-func (asc *ApplicationStatusCreate) sqlSave(ctx context.Context) (*ApplicationStatus, error) {
-	if err := asc.check(); err != nil {
+func (_c *ApplicationStatusCreate) sqlSave(ctx context.Context) (*ApplicationStatus, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := asc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, asc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -176,29 +176,29 @@ func (asc *ApplicationStatusCreate) sqlSave(ctx context.Context) (*ApplicationSt
 			return nil, err
 		}
 	}
-	asc.mutation.id = &_node.ID
-	asc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (asc *ApplicationStatusCreate) createSpec() (*ApplicationStatus, *sqlgraph.CreateSpec) {
+func (_c *ApplicationStatusCreate) createSpec() (*ApplicationStatus, *sqlgraph.CreateSpec) {
 	var (
-		_node = &ApplicationStatus{config: asc.config}
+		_node = &ApplicationStatus{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(applicationstatus.Table, sqlgraph.NewFieldSpec(applicationstatus.FieldID, field.TypeUUID))
 	)
-	if id, ok := asc.mutation.ID(); ok {
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := asc.mutation.Status(); ok {
+	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(applicationstatus.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
-	if value, ok := asc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(applicationstatus.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := asc.mutation.ApplicationIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -215,7 +215,7 @@ func (asc *ApplicationStatusCreate) createSpec() (*ApplicationStatus, *sqlgraph.
 		_node.application_status = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := asc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -243,16 +243,16 @@ type ApplicationStatusCreateBulk struct {
 }
 
 // Save creates the ApplicationStatus entities in the database.
-func (ascb *ApplicationStatusCreateBulk) Save(ctx context.Context) ([]*ApplicationStatus, error) {
-	if ascb.err != nil {
-		return nil, ascb.err
+func (_c *ApplicationStatusCreateBulk) Save(ctx context.Context) ([]*ApplicationStatus, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ascb.builders))
-	nodes := make([]*ApplicationStatus, len(ascb.builders))
-	mutators := make([]Mutator, len(ascb.builders))
-	for i := range ascb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*ApplicationStatus, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := ascb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ApplicationStatusMutation)
@@ -266,11 +266,11 @@ func (ascb *ApplicationStatusCreateBulk) Save(ctx context.Context) ([]*Applicati
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ascb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ascb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -290,7 +290,7 @@ func (ascb *ApplicationStatusCreateBulk) Save(ctx context.Context) ([]*Applicati
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ascb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -298,8 +298,8 @@ func (ascb *ApplicationStatusCreateBulk) Save(ctx context.Context) ([]*Applicati
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ascb *ApplicationStatusCreateBulk) SaveX(ctx context.Context) []*ApplicationStatus {
-	v, err := ascb.Save(ctx)
+func (_c *ApplicationStatusCreateBulk) SaveX(ctx context.Context) []*ApplicationStatus {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -307,14 +307,14 @@ func (ascb *ApplicationStatusCreateBulk) SaveX(ctx context.Context) []*Applicati
 }
 
 // Exec executes the query.
-func (ascb *ApplicationStatusCreateBulk) Exec(ctx context.Context) error {
-	_, err := ascb.Save(ctx)
+func (_c *ApplicationStatusCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ascb *ApplicationStatusCreateBulk) ExecX(ctx context.Context) {
-	if err := ascb.Exec(ctx); err != nil {
+func (_c *ApplicationStatusCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

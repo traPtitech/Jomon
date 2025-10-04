@@ -24,103 +24,103 @@ type FileCreate struct {
 }
 
 // SetName sets the "name" field.
-func (fc *FileCreate) SetName(s string) *FileCreate {
-	fc.mutation.SetName(s)
-	return fc
+func (_c *FileCreate) SetName(v string) *FileCreate {
+	_c.mutation.SetName(v)
+	return _c
 }
 
 // SetMimeType sets the "mime_type" field.
-func (fc *FileCreate) SetMimeType(s string) *FileCreate {
-	fc.mutation.SetMimeType(s)
-	return fc
+func (_c *FileCreate) SetMimeType(v string) *FileCreate {
+	_c.mutation.SetMimeType(v)
+	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (fc *FileCreate) SetCreatedAt(t time.Time) *FileCreate {
-	fc.mutation.SetCreatedAt(t)
-	return fc
+func (_c *FileCreate) SetCreatedAt(v time.Time) *FileCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (fc *FileCreate) SetNillableCreatedAt(t *time.Time) *FileCreate {
-	if t != nil {
-		fc.SetCreatedAt(*t)
+func (_c *FileCreate) SetNillableCreatedAt(v *time.Time) *FileCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return fc
+	return _c
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (fc *FileCreate) SetDeletedAt(t time.Time) *FileCreate {
-	fc.mutation.SetDeletedAt(t)
-	return fc
+func (_c *FileCreate) SetDeletedAt(v time.Time) *FileCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (fc *FileCreate) SetNillableDeletedAt(t *time.Time) *FileCreate {
-	if t != nil {
-		fc.SetDeletedAt(*t)
+func (_c *FileCreate) SetNillableDeletedAt(v *time.Time) *FileCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
 	}
-	return fc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (fc *FileCreate) SetID(u uuid.UUID) *FileCreate {
-	fc.mutation.SetID(u)
-	return fc
+func (_c *FileCreate) SetID(v uuid.UUID) *FileCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (fc *FileCreate) SetNillableID(u *uuid.UUID) *FileCreate {
-	if u != nil {
-		fc.SetID(*u)
+func (_c *FileCreate) SetNillableID(v *uuid.UUID) *FileCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return fc
+	return _c
 }
 
 // SetApplicationID sets the "application" edge to the Application entity by ID.
-func (fc *FileCreate) SetApplicationID(id uuid.UUID) *FileCreate {
-	fc.mutation.SetApplicationID(id)
-	return fc
+func (_c *FileCreate) SetApplicationID(id uuid.UUID) *FileCreate {
+	_c.mutation.SetApplicationID(id)
+	return _c
 }
 
 // SetNillableApplicationID sets the "application" edge to the Application entity by ID if the given value is not nil.
-func (fc *FileCreate) SetNillableApplicationID(id *uuid.UUID) *FileCreate {
+func (_c *FileCreate) SetNillableApplicationID(id *uuid.UUID) *FileCreate {
 	if id != nil {
-		fc = fc.SetApplicationID(*id)
+		_c = _c.SetApplicationID(*id)
 	}
-	return fc
+	return _c
 }
 
 // SetApplication sets the "application" edge to the Application entity.
-func (fc *FileCreate) SetApplication(a *Application) *FileCreate {
-	return fc.SetApplicationID(a.ID)
+func (_c *FileCreate) SetApplication(v *Application) *FileCreate {
+	return _c.SetApplicationID(v.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (fc *FileCreate) SetUserID(id uuid.UUID) *FileCreate {
-	fc.mutation.SetUserID(id)
-	return fc
+func (_c *FileCreate) SetUserID(id uuid.UUID) *FileCreate {
+	_c.mutation.SetUserID(id)
+	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (fc *FileCreate) SetUser(u *User) *FileCreate {
-	return fc.SetUserID(u.ID)
+func (_c *FileCreate) SetUser(v *User) *FileCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
-func (fc *FileCreate) Mutation() *FileMutation {
-	return fc.mutation
+func (_c *FileCreate) Mutation() *FileMutation {
+	return _c.mutation
 }
 
 // Save creates the File in the database.
-func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
-	fc.defaults()
-	return withHooks(ctx, fc.sqlSave, fc.mutation, fc.hooks)
+func (_c *FileCreate) Save(ctx context.Context) (*File, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (fc *FileCreate) SaveX(ctx context.Context) *File {
-	v, err := fc.Save(ctx)
+func (_c *FileCreate) SaveX(ctx context.Context) *File {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -128,58 +128,58 @@ func (fc *FileCreate) SaveX(ctx context.Context) *File {
 }
 
 // Exec executes the query.
-func (fc *FileCreate) Exec(ctx context.Context) error {
-	_, err := fc.Save(ctx)
+func (_c *FileCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (fc *FileCreate) ExecX(ctx context.Context) {
-	if err := fc.Exec(ctx); err != nil {
+func (_c *FileCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (fc *FileCreate) defaults() {
-	if _, ok := fc.mutation.CreatedAt(); !ok {
+func (_c *FileCreate) defaults() {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := file.DefaultCreatedAt()
-		fc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := fc.mutation.ID(); !ok {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := file.DefaultID()
-		fc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (fc *FileCreate) check() error {
-	if _, ok := fc.mutation.Name(); !ok {
+func (_c *FileCreate) check() error {
+	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "File.name"`)}
 	}
-	if v, ok := fc.mutation.Name(); ok {
+	if v, ok := _c.mutation.Name(); ok {
 		if err := file.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "File.name": %w`, err)}
 		}
 	}
-	if _, ok := fc.mutation.MimeType(); !ok {
+	if _, ok := _c.mutation.MimeType(); !ok {
 		return &ValidationError{Name: "mime_type", err: errors.New(`ent: missing required field "File.mime_type"`)}
 	}
-	if _, ok := fc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "File.created_at"`)}
 	}
-	if len(fc.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "File.user"`)}
 	}
 	return nil
 }
 
-func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
-	if err := fc.check(); err != nil {
+func (_c *FileCreate) sqlSave(ctx context.Context) (*File, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := fc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, fc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -192,37 +192,37 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 			return nil, err
 		}
 	}
-	fc.mutation.id = &_node.ID
-	fc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
+func (_c *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 	var (
-		_node = &File{config: fc.config}
+		_node = &File{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(file.Table, sqlgraph.NewFieldSpec(file.FieldID, field.TypeUUID))
 	)
-	if id, ok := fc.mutation.ID(); ok {
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := fc.mutation.Name(); ok {
+	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(file.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := fc.mutation.MimeType(); ok {
+	if value, ok := _c.mutation.MimeType(); ok {
 		_spec.SetField(file.FieldMimeType, field.TypeString, value)
 		_node.MimeType = value
 	}
-	if value, ok := fc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(file.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := fc.mutation.DeletedAt(); ok {
+	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(file.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if nodes := fc.mutation.ApplicationIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -239,7 +239,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		_node.application_file = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := fc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -267,16 +267,16 @@ type FileCreateBulk struct {
 }
 
 // Save creates the File entities in the database.
-func (fcb *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
-	if fcb.err != nil {
-		return nil, fcb.err
+func (_c *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(fcb.builders))
-	nodes := make([]*File, len(fcb.builders))
-	mutators := make([]Mutator, len(fcb.builders))
-	for i := range fcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*File, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := fcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*FileMutation)
@@ -290,11 +290,11 @@ func (fcb *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, fcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, fcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -314,7 +314,7 @@ func (fcb *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, fcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -322,8 +322,8 @@ func (fcb *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (fcb *FileCreateBulk) SaveX(ctx context.Context) []*File {
-	v, err := fcb.Save(ctx)
+func (_c *FileCreateBulk) SaveX(ctx context.Context) []*File {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -331,14 +331,14 @@ func (fcb *FileCreateBulk) SaveX(ctx context.Context) []*File {
 }
 
 // Exec executes the query.
-func (fcb *FileCreateBulk) Exec(ctx context.Context) error {
-	_, err := fcb.Save(ctx)
+func (_c *FileCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (fcb *FileCreateBulk) ExecX(ctx context.Context) {
-	if err := fcb.Exec(ctx); err != nil {
+func (_c *FileCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

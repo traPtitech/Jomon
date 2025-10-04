@@ -21,20 +21,8 @@ type Comment func(*sql.Selector)
 // File is the predicate function for file builders.
 type File func(*sql.Selector)
 
-// Group is the predicate function for group builders.
-type Group func(*sql.Selector)
-
-// GroupBudget is the predicate function for groupbudget builders.
-type GroupBudget func(*sql.Selector)
-
 // Tag is the predicate function for tag builders.
 type Tag func(*sql.Selector)
-
-// Transaction is the predicate function for transaction builders.
-type Transaction func(*sql.Selector)
-
-// TransactionDetail is the predicate function for transactiondetail builders.
-type TransactionDetail func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

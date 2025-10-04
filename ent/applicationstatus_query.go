@@ -34,44 +34,44 @@ type ApplicationStatusQuery struct {
 }
 
 // Where adds a new predicate for the ApplicationStatusQuery builder.
-func (asq *ApplicationStatusQuery) Where(ps ...predicate.ApplicationStatus) *ApplicationStatusQuery {
-	asq.predicates = append(asq.predicates, ps...)
-	return asq
+func (_q *ApplicationStatusQuery) Where(ps ...predicate.ApplicationStatus) *ApplicationStatusQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (asq *ApplicationStatusQuery) Limit(limit int) *ApplicationStatusQuery {
-	asq.ctx.Limit = &limit
-	return asq
+func (_q *ApplicationStatusQuery) Limit(limit int) *ApplicationStatusQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (asq *ApplicationStatusQuery) Offset(offset int) *ApplicationStatusQuery {
-	asq.ctx.Offset = &offset
-	return asq
+func (_q *ApplicationStatusQuery) Offset(offset int) *ApplicationStatusQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (asq *ApplicationStatusQuery) Unique(unique bool) *ApplicationStatusQuery {
-	asq.ctx.Unique = &unique
-	return asq
+func (_q *ApplicationStatusQuery) Unique(unique bool) *ApplicationStatusQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (asq *ApplicationStatusQuery) Order(o ...applicationstatus.OrderOption) *ApplicationStatusQuery {
-	asq.order = append(asq.order, o...)
-	return asq
+func (_q *ApplicationStatusQuery) Order(o ...applicationstatus.OrderOption) *ApplicationStatusQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryApplication chains the current query on the "application" edge.
-func (asq *ApplicationStatusQuery) QueryApplication() *ApplicationQuery {
-	query := (&ApplicationClient{config: asq.config}).Query()
+func (_q *ApplicationStatusQuery) QueryApplication() *ApplicationQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := asq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := asq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -80,20 +80,20 @@ func (asq *ApplicationStatusQuery) QueryApplication() *ApplicationQuery {
 			sqlgraph.To(application.Table, application.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, applicationstatus.ApplicationTable, applicationstatus.ApplicationColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(asq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryUser chains the current query on the "user" edge.
-func (asq *ApplicationStatusQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: asq.config}).Query()
+func (_q *ApplicationStatusQuery) QueryUser() *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := asq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := asq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -102,7 +102,7 @@ func (asq *ApplicationStatusQuery) QueryUser() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, applicationstatus.UserTable, applicationstatus.UserColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(asq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -110,8 +110,8 @@ func (asq *ApplicationStatusQuery) QueryUser() *UserQuery {
 
 // First returns the first ApplicationStatus entity from the query.
 // Returns a *NotFoundError when no ApplicationStatus was found.
-func (asq *ApplicationStatusQuery) First(ctx context.Context) (*ApplicationStatus, error) {
-	nodes, err := asq.Limit(1).All(setContextOp(ctx, asq.ctx, ent.OpQueryFirst))
+func (_q *ApplicationStatusQuery) First(ctx context.Context) (*ApplicationStatus, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +122,8 @@ func (asq *ApplicationStatusQuery) First(ctx context.Context) (*ApplicationStatu
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (asq *ApplicationStatusQuery) FirstX(ctx context.Context) *ApplicationStatus {
-	node, err := asq.First(ctx)
+func (_q *ApplicationStatusQuery) FirstX(ctx context.Context) *ApplicationStatus {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -132,9 +132,9 @@ func (asq *ApplicationStatusQuery) FirstX(ctx context.Context) *ApplicationStatu
 
 // FirstID returns the first ApplicationStatus ID from the query.
 // Returns a *NotFoundError when no ApplicationStatus ID was found.
-func (asq *ApplicationStatusQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *ApplicationStatusQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = asq.Limit(1).IDs(setContextOp(ctx, asq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -145,8 +145,8 @@ func (asq *ApplicationStatusQuery) FirstID(ctx context.Context) (id uuid.UUID, e
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (asq *ApplicationStatusQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := asq.FirstID(ctx)
+func (_q *ApplicationStatusQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -156,8 +156,8 @@ func (asq *ApplicationStatusQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single ApplicationStatus entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one ApplicationStatus entity is found.
 // Returns a *NotFoundError when no ApplicationStatus entities are found.
-func (asq *ApplicationStatusQuery) Only(ctx context.Context) (*ApplicationStatus, error) {
-	nodes, err := asq.Limit(2).All(setContextOp(ctx, asq.ctx, ent.OpQueryOnly))
+func (_q *ApplicationStatusQuery) Only(ctx context.Context) (*ApplicationStatus, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -172,8 +172,8 @@ func (asq *ApplicationStatusQuery) Only(ctx context.Context) (*ApplicationStatus
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (asq *ApplicationStatusQuery) OnlyX(ctx context.Context) *ApplicationStatus {
-	node, err := asq.Only(ctx)
+func (_q *ApplicationStatusQuery) OnlyX(ctx context.Context) *ApplicationStatus {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -183,9 +183,9 @@ func (asq *ApplicationStatusQuery) OnlyX(ctx context.Context) *ApplicationStatus
 // OnlyID is like Only, but returns the only ApplicationStatus ID in the query.
 // Returns a *NotSingularError when more than one ApplicationStatus ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (asq *ApplicationStatusQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *ApplicationStatusQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = asq.Limit(2).IDs(setContextOp(ctx, asq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -200,8 +200,8 @@ func (asq *ApplicationStatusQuery) OnlyID(ctx context.Context) (id uuid.UUID, er
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (asq *ApplicationStatusQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := asq.OnlyID(ctx)
+func (_q *ApplicationStatusQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -209,18 +209,18 @@ func (asq *ApplicationStatusQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of ApplicationStatusSlice.
-func (asq *ApplicationStatusQuery) All(ctx context.Context) ([]*ApplicationStatus, error) {
-	ctx = setContextOp(ctx, asq.ctx, ent.OpQueryAll)
-	if err := asq.prepareQuery(ctx); err != nil {
+func (_q *ApplicationStatusQuery) All(ctx context.Context) ([]*ApplicationStatus, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*ApplicationStatus, *ApplicationStatusQuery]()
-	return withInterceptors[[]*ApplicationStatus](ctx, asq, qr, asq.inters)
+	return withInterceptors[[]*ApplicationStatus](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (asq *ApplicationStatusQuery) AllX(ctx context.Context) []*ApplicationStatus {
-	nodes, err := asq.All(ctx)
+func (_q *ApplicationStatusQuery) AllX(ctx context.Context) []*ApplicationStatus {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -228,20 +228,20 @@ func (asq *ApplicationStatusQuery) AllX(ctx context.Context) []*ApplicationStatu
 }
 
 // IDs executes the query and returns a list of ApplicationStatus IDs.
-func (asq *ApplicationStatusQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if asq.ctx.Unique == nil && asq.path != nil {
-		asq.Unique(true)
+func (_q *ApplicationStatusQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, asq.ctx, ent.OpQueryIDs)
-	if err = asq.Select(applicationstatus.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(applicationstatus.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (asq *ApplicationStatusQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := asq.IDs(ctx)
+func (_q *ApplicationStatusQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -249,17 +249,17 @@ func (asq *ApplicationStatusQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (asq *ApplicationStatusQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, asq.ctx, ent.OpQueryCount)
-	if err := asq.prepareQuery(ctx); err != nil {
+func (_q *ApplicationStatusQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, asq, querierCount[*ApplicationStatusQuery](), asq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*ApplicationStatusQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (asq *ApplicationStatusQuery) CountX(ctx context.Context) int {
-	count, err := asq.Count(ctx)
+func (_q *ApplicationStatusQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -267,9 +267,9 @@ func (asq *ApplicationStatusQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (asq *ApplicationStatusQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, asq.ctx, ent.OpQueryExist)
-	switch _, err := asq.FirstID(ctx); {
+func (_q *ApplicationStatusQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -280,8 +280,8 @@ func (asq *ApplicationStatusQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (asq *ApplicationStatusQuery) ExistX(ctx context.Context) bool {
-	exist, err := asq.Exist(ctx)
+func (_q *ApplicationStatusQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -290,44 +290,44 @@ func (asq *ApplicationStatusQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the ApplicationStatusQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (asq *ApplicationStatusQuery) Clone() *ApplicationStatusQuery {
-	if asq == nil {
+func (_q *ApplicationStatusQuery) Clone() *ApplicationStatusQuery {
+	if _q == nil {
 		return nil
 	}
 	return &ApplicationStatusQuery{
-		config:          asq.config,
-		ctx:             asq.ctx.Clone(),
-		order:           append([]applicationstatus.OrderOption{}, asq.order...),
-		inters:          append([]Interceptor{}, asq.inters...),
-		predicates:      append([]predicate.ApplicationStatus{}, asq.predicates...),
-		withApplication: asq.withApplication.Clone(),
-		withUser:        asq.withUser.Clone(),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]applicationstatus.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.ApplicationStatus{}, _q.predicates...),
+		withApplication: _q.withApplication.Clone(),
+		withUser:        _q.withUser.Clone(),
 		// clone intermediate query.
-		sql:  asq.sql.Clone(),
-		path: asq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithApplication tells the query-builder to eager-load the nodes that are connected to
 // the "application" edge. The optional arguments are used to configure the query builder of the edge.
-func (asq *ApplicationStatusQuery) WithApplication(opts ...func(*ApplicationQuery)) *ApplicationStatusQuery {
-	query := (&ApplicationClient{config: asq.config}).Query()
+func (_q *ApplicationStatusQuery) WithApplication(opts ...func(*ApplicationQuery)) *ApplicationStatusQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	asq.withApplication = query
-	return asq
+	_q.withApplication = query
+	return _q
 }
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (asq *ApplicationStatusQuery) WithUser(opts ...func(*UserQuery)) *ApplicationStatusQuery {
-	query := (&UserClient{config: asq.config}).Query()
+func (_q *ApplicationStatusQuery) WithUser(opts ...func(*UserQuery)) *ApplicationStatusQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	asq.withUser = query
-	return asq
+	_q.withUser = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -344,10 +344,10 @@ func (asq *ApplicationStatusQuery) WithUser(opts ...func(*UserQuery)) *Applicati
 //		GroupBy(applicationstatus.FieldStatus).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (asq *ApplicationStatusQuery) GroupBy(field string, fields ...string) *ApplicationStatusGroupBy {
-	asq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &ApplicationStatusGroupBy{build: asq}
-	grbuild.flds = &asq.ctx.Fields
+func (_q *ApplicationStatusQuery) GroupBy(field string, fields ...string) *ApplicationStatusGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &ApplicationStatusGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = applicationstatus.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -365,56 +365,56 @@ func (asq *ApplicationStatusQuery) GroupBy(field string, fields ...string) *Appl
 //	client.ApplicationStatus.Query().
 //		Select(applicationstatus.FieldStatus).
 //		Scan(ctx, &v)
-func (asq *ApplicationStatusQuery) Select(fields ...string) *ApplicationStatusSelect {
-	asq.ctx.Fields = append(asq.ctx.Fields, fields...)
-	sbuild := &ApplicationStatusSelect{ApplicationStatusQuery: asq}
+func (_q *ApplicationStatusQuery) Select(fields ...string) *ApplicationStatusSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &ApplicationStatusSelect{ApplicationStatusQuery: _q}
 	sbuild.label = applicationstatus.Label
-	sbuild.flds, sbuild.scan = &asq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a ApplicationStatusSelect configured with the given aggregations.
-func (asq *ApplicationStatusQuery) Aggregate(fns ...AggregateFunc) *ApplicationStatusSelect {
-	return asq.Select().Aggregate(fns...)
+func (_q *ApplicationStatusQuery) Aggregate(fns ...AggregateFunc) *ApplicationStatusSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (asq *ApplicationStatusQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range asq.inters {
+func (_q *ApplicationStatusQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, asq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range asq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !applicationstatus.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if asq.path != nil {
-		prev, err := asq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		asq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (asq *ApplicationStatusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*ApplicationStatus, error) {
+func (_q *ApplicationStatusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*ApplicationStatus, error) {
 	var (
 		nodes       = []*ApplicationStatus{}
-		withFKs     = asq.withFKs
-		_spec       = asq.querySpec()
+		withFKs     = _q.withFKs
+		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			asq.withApplication != nil,
-			asq.withUser != nil,
+			_q.withApplication != nil,
+			_q.withUser != nil,
 		}
 	)
-	if asq.withApplication != nil || asq.withUser != nil {
+	if _q.withApplication != nil || _q.withUser != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -424,7 +424,7 @@ func (asq *ApplicationStatusQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 		return (*ApplicationStatus).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &ApplicationStatus{config: asq.config}
+		node := &ApplicationStatus{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -432,20 +432,20 @@ func (asq *ApplicationStatusQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, asq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := asq.withApplication; query != nil {
-		if err := asq.loadApplication(ctx, query, nodes, nil,
+	if query := _q.withApplication; query != nil {
+		if err := _q.loadApplication(ctx, query, nodes, nil,
 			func(n *ApplicationStatus, e *Application) { n.Edges.Application = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := asq.withUser; query != nil {
-		if err := asq.loadUser(ctx, query, nodes, nil,
+	if query := _q.withUser; query != nil {
+		if err := _q.loadUser(ctx, query, nodes, nil,
 			func(n *ApplicationStatus, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
@@ -453,7 +453,7 @@ func (asq *ApplicationStatusQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 	return nodes, nil
 }
 
-func (asq *ApplicationStatusQuery) loadApplication(ctx context.Context, query *ApplicationQuery, nodes []*ApplicationStatus, init func(*ApplicationStatus), assign func(*ApplicationStatus, *Application)) error {
+func (_q *ApplicationStatusQuery) loadApplication(ctx context.Context, query *ApplicationQuery, nodes []*ApplicationStatus, init func(*ApplicationStatus), assign func(*ApplicationStatus, *Application)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*ApplicationStatus)
 	for i := range nodes {
@@ -485,7 +485,7 @@ func (asq *ApplicationStatusQuery) loadApplication(ctx context.Context, query *A
 	}
 	return nil
 }
-func (asq *ApplicationStatusQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*ApplicationStatus, init func(*ApplicationStatus), assign func(*ApplicationStatus, *User)) error {
+func (_q *ApplicationStatusQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*ApplicationStatus, init func(*ApplicationStatus), assign func(*ApplicationStatus, *User)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*ApplicationStatus)
 	for i := range nodes {
@@ -518,24 +518,24 @@ func (asq *ApplicationStatusQuery) loadUser(ctx context.Context, query *UserQuer
 	return nil
 }
 
-func (asq *ApplicationStatusQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := asq.querySpec()
-	_spec.Node.Columns = asq.ctx.Fields
-	if len(asq.ctx.Fields) > 0 {
-		_spec.Unique = asq.ctx.Unique != nil && *asq.ctx.Unique
+func (_q *ApplicationStatusQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, asq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (asq *ApplicationStatusQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *ApplicationStatusQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(applicationstatus.Table, applicationstatus.Columns, sqlgraph.NewFieldSpec(applicationstatus.FieldID, field.TypeUUID))
-	_spec.From = asq.sql
-	if unique := asq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if asq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := asq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, applicationstatus.FieldID)
 		for i := range fields {
@@ -544,20 +544,20 @@ func (asq *ApplicationStatusQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := asq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := asq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := asq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := asq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -567,33 +567,33 @@ func (asq *ApplicationStatusQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (asq *ApplicationStatusQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(asq.driver.Dialect())
+func (_q *ApplicationStatusQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(applicationstatus.Table)
-	columns := asq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = applicationstatus.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if asq.sql != nil {
-		selector = asq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if asq.ctx.Unique != nil && *asq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range asq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range asq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := asq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := asq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -606,41 +606,41 @@ type ApplicationStatusGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (asgb *ApplicationStatusGroupBy) Aggregate(fns ...AggregateFunc) *ApplicationStatusGroupBy {
-	asgb.fns = append(asgb.fns, fns...)
-	return asgb
+func (_g *ApplicationStatusGroupBy) Aggregate(fns ...AggregateFunc) *ApplicationStatusGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (asgb *ApplicationStatusGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, asgb.build.ctx, ent.OpQueryGroupBy)
-	if err := asgb.build.prepareQuery(ctx); err != nil {
+func (_g *ApplicationStatusGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ApplicationStatusQuery, *ApplicationStatusGroupBy](ctx, asgb.build, asgb, asgb.build.inters, v)
+	return scanWithInterceptors[*ApplicationStatusQuery, *ApplicationStatusGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (asgb *ApplicationStatusGroupBy) sqlScan(ctx context.Context, root *ApplicationStatusQuery, v any) error {
+func (_g *ApplicationStatusGroupBy) sqlScan(ctx context.Context, root *ApplicationStatusQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(asgb.fns))
-	for _, fn := range asgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*asgb.flds)+len(asgb.fns))
-		for _, f := range *asgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*asgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := asgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -654,27 +654,27 @@ type ApplicationStatusSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ass *ApplicationStatusSelect) Aggregate(fns ...AggregateFunc) *ApplicationStatusSelect {
-	ass.fns = append(ass.fns, fns...)
-	return ass
+func (_s *ApplicationStatusSelect) Aggregate(fns ...AggregateFunc) *ApplicationStatusSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ass *ApplicationStatusSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ass.ctx, ent.OpQuerySelect)
-	if err := ass.prepareQuery(ctx); err != nil {
+func (_s *ApplicationStatusSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ApplicationStatusQuery, *ApplicationStatusSelect](ctx, ass.ApplicationStatusQuery, ass, ass.inters, v)
+	return scanWithInterceptors[*ApplicationStatusQuery, *ApplicationStatusSelect](ctx, _s.ApplicationStatusQuery, _s, _s.inters, v)
 }
 
-func (ass *ApplicationStatusSelect) sqlScan(ctx context.Context, root *ApplicationStatusQuery, v any) error {
+func (_s *ApplicationStatusSelect) sqlScan(ctx context.Context, root *ApplicationStatusQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ass.fns))
-	for _, fn := range ass.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ass.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -682,7 +682,7 @@ func (ass *ApplicationStatusSelect) sqlScan(ctx context.Context, root *Applicati
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ass.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

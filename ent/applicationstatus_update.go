@@ -26,86 +26,86 @@ type ApplicationStatusUpdate struct {
 }
 
 // Where appends a list predicates to the ApplicationStatusUpdate builder.
-func (asu *ApplicationStatusUpdate) Where(ps ...predicate.ApplicationStatus) *ApplicationStatusUpdate {
-	asu.mutation.Where(ps...)
-	return asu
+func (_u *ApplicationStatusUpdate) Where(ps ...predicate.ApplicationStatus) *ApplicationStatusUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetStatus sets the "status" field.
-func (asu *ApplicationStatusUpdate) SetStatus(a applicationstatus.Status) *ApplicationStatusUpdate {
-	asu.mutation.SetStatus(a)
-	return asu
+func (_u *ApplicationStatusUpdate) SetStatus(v applicationstatus.Status) *ApplicationStatusUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (asu *ApplicationStatusUpdate) SetNillableStatus(a *applicationstatus.Status) *ApplicationStatusUpdate {
-	if a != nil {
-		asu.SetStatus(*a)
+func (_u *ApplicationStatusUpdate) SetNillableStatus(v *applicationstatus.Status) *ApplicationStatusUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
-	return asu
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (asu *ApplicationStatusUpdate) SetCreatedAt(t time.Time) *ApplicationStatusUpdate {
-	asu.mutation.SetCreatedAt(t)
-	return asu
+func (_u *ApplicationStatusUpdate) SetCreatedAt(v time.Time) *ApplicationStatusUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (asu *ApplicationStatusUpdate) SetNillableCreatedAt(t *time.Time) *ApplicationStatusUpdate {
-	if t != nil {
-		asu.SetCreatedAt(*t)
+func (_u *ApplicationStatusUpdate) SetNillableCreatedAt(v *time.Time) *ApplicationStatusUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return asu
+	return _u
 }
 
 // SetApplicationID sets the "application" edge to the Application entity by ID.
-func (asu *ApplicationStatusUpdate) SetApplicationID(id uuid.UUID) *ApplicationStatusUpdate {
-	asu.mutation.SetApplicationID(id)
-	return asu
+func (_u *ApplicationStatusUpdate) SetApplicationID(id uuid.UUID) *ApplicationStatusUpdate {
+	_u.mutation.SetApplicationID(id)
+	return _u
 }
 
 // SetApplication sets the "application" edge to the Application entity.
-func (asu *ApplicationStatusUpdate) SetApplication(a *Application) *ApplicationStatusUpdate {
-	return asu.SetApplicationID(a.ID)
+func (_u *ApplicationStatusUpdate) SetApplication(v *Application) *ApplicationStatusUpdate {
+	return _u.SetApplicationID(v.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (asu *ApplicationStatusUpdate) SetUserID(id uuid.UUID) *ApplicationStatusUpdate {
-	asu.mutation.SetUserID(id)
-	return asu
+func (_u *ApplicationStatusUpdate) SetUserID(id uuid.UUID) *ApplicationStatusUpdate {
+	_u.mutation.SetUserID(id)
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (asu *ApplicationStatusUpdate) SetUser(u *User) *ApplicationStatusUpdate {
-	return asu.SetUserID(u.ID)
+func (_u *ApplicationStatusUpdate) SetUser(v *User) *ApplicationStatusUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the ApplicationStatusMutation object of the builder.
-func (asu *ApplicationStatusUpdate) Mutation() *ApplicationStatusMutation {
-	return asu.mutation
+func (_u *ApplicationStatusUpdate) Mutation() *ApplicationStatusMutation {
+	return _u.mutation
 }
 
 // ClearApplication clears the "application" edge to the Application entity.
-func (asu *ApplicationStatusUpdate) ClearApplication() *ApplicationStatusUpdate {
-	asu.mutation.ClearApplication()
-	return asu
+func (_u *ApplicationStatusUpdate) ClearApplication() *ApplicationStatusUpdate {
+	_u.mutation.ClearApplication()
+	return _u
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (asu *ApplicationStatusUpdate) ClearUser() *ApplicationStatusUpdate {
-	asu.mutation.ClearUser()
-	return asu
+func (_u *ApplicationStatusUpdate) ClearUser() *ApplicationStatusUpdate {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (asu *ApplicationStatusUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, asu.sqlSave, asu.mutation, asu.hooks)
+func (_u *ApplicationStatusUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (asu *ApplicationStatusUpdate) SaveX(ctx context.Context) int {
-	affected, err := asu.Save(ctx)
+func (_u *ApplicationStatusUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -113,53 +113,53 @@ func (asu *ApplicationStatusUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (asu *ApplicationStatusUpdate) Exec(ctx context.Context) error {
-	_, err := asu.Save(ctx)
+func (_u *ApplicationStatusUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (asu *ApplicationStatusUpdate) ExecX(ctx context.Context) {
-	if err := asu.Exec(ctx); err != nil {
+func (_u *ApplicationStatusUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (asu *ApplicationStatusUpdate) check() error {
-	if v, ok := asu.mutation.Status(); ok {
+func (_u *ApplicationStatusUpdate) check() error {
+	if v, ok := _u.mutation.Status(); ok {
 		if err := applicationstatus.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "ApplicationStatus.status": %w`, err)}
 		}
 	}
-	if asu.mutation.ApplicationCleared() && len(asu.mutation.ApplicationIDs()) > 0 {
+	if _u.mutation.ApplicationCleared() && len(_u.mutation.ApplicationIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "ApplicationStatus.application"`)
 	}
-	if asu.mutation.UserCleared() && len(asu.mutation.UserIDs()) > 0 {
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "ApplicationStatus.user"`)
 	}
 	return nil
 }
 
-func (asu *ApplicationStatusUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := asu.check(); err != nil {
-		return n, err
+func (_u *ApplicationStatusUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(applicationstatus.Table, applicationstatus.Columns, sqlgraph.NewFieldSpec(applicationstatus.FieldID, field.TypeUUID))
-	if ps := asu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := asu.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(applicationstatus.FieldStatus, field.TypeEnum, value)
 	}
-	if value, ok := asu.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(applicationstatus.FieldCreatedAt, field.TypeTime, value)
 	}
-	if asu.mutation.ApplicationCleared() {
+	if _u.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -172,7 +172,7 @@ func (asu *ApplicationStatusUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := asu.mutation.ApplicationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -188,7 +188,7 @@ func (asu *ApplicationStatusUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if asu.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -201,7 +201,7 @@ func (asu *ApplicationStatusUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := asu.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -217,7 +217,7 @@ func (asu *ApplicationStatusUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, asu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{applicationstatus.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -225,8 +225,8 @@ func (asu *ApplicationStatusUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		return 0, err
 	}
-	asu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // ApplicationStatusUpdateOne is the builder for updating a single ApplicationStatus entity.
@@ -238,93 +238,93 @@ type ApplicationStatusUpdateOne struct {
 }
 
 // SetStatus sets the "status" field.
-func (asuo *ApplicationStatusUpdateOne) SetStatus(a applicationstatus.Status) *ApplicationStatusUpdateOne {
-	asuo.mutation.SetStatus(a)
-	return asuo
+func (_u *ApplicationStatusUpdateOne) SetStatus(v applicationstatus.Status) *ApplicationStatusUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (asuo *ApplicationStatusUpdateOne) SetNillableStatus(a *applicationstatus.Status) *ApplicationStatusUpdateOne {
-	if a != nil {
-		asuo.SetStatus(*a)
+func (_u *ApplicationStatusUpdateOne) SetNillableStatus(v *applicationstatus.Status) *ApplicationStatusUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
-	return asuo
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (asuo *ApplicationStatusUpdateOne) SetCreatedAt(t time.Time) *ApplicationStatusUpdateOne {
-	asuo.mutation.SetCreatedAt(t)
-	return asuo
+func (_u *ApplicationStatusUpdateOne) SetCreatedAt(v time.Time) *ApplicationStatusUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (asuo *ApplicationStatusUpdateOne) SetNillableCreatedAt(t *time.Time) *ApplicationStatusUpdateOne {
-	if t != nil {
-		asuo.SetCreatedAt(*t)
+func (_u *ApplicationStatusUpdateOne) SetNillableCreatedAt(v *time.Time) *ApplicationStatusUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return asuo
+	return _u
 }
 
 // SetApplicationID sets the "application" edge to the Application entity by ID.
-func (asuo *ApplicationStatusUpdateOne) SetApplicationID(id uuid.UUID) *ApplicationStatusUpdateOne {
-	asuo.mutation.SetApplicationID(id)
-	return asuo
+func (_u *ApplicationStatusUpdateOne) SetApplicationID(id uuid.UUID) *ApplicationStatusUpdateOne {
+	_u.mutation.SetApplicationID(id)
+	return _u
 }
 
 // SetApplication sets the "application" edge to the Application entity.
-func (asuo *ApplicationStatusUpdateOne) SetApplication(a *Application) *ApplicationStatusUpdateOne {
-	return asuo.SetApplicationID(a.ID)
+func (_u *ApplicationStatusUpdateOne) SetApplication(v *Application) *ApplicationStatusUpdateOne {
+	return _u.SetApplicationID(v.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (asuo *ApplicationStatusUpdateOne) SetUserID(id uuid.UUID) *ApplicationStatusUpdateOne {
-	asuo.mutation.SetUserID(id)
-	return asuo
+func (_u *ApplicationStatusUpdateOne) SetUserID(id uuid.UUID) *ApplicationStatusUpdateOne {
+	_u.mutation.SetUserID(id)
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (asuo *ApplicationStatusUpdateOne) SetUser(u *User) *ApplicationStatusUpdateOne {
-	return asuo.SetUserID(u.ID)
+func (_u *ApplicationStatusUpdateOne) SetUser(v *User) *ApplicationStatusUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the ApplicationStatusMutation object of the builder.
-func (asuo *ApplicationStatusUpdateOne) Mutation() *ApplicationStatusMutation {
-	return asuo.mutation
+func (_u *ApplicationStatusUpdateOne) Mutation() *ApplicationStatusMutation {
+	return _u.mutation
 }
 
 // ClearApplication clears the "application" edge to the Application entity.
-func (asuo *ApplicationStatusUpdateOne) ClearApplication() *ApplicationStatusUpdateOne {
-	asuo.mutation.ClearApplication()
-	return asuo
+func (_u *ApplicationStatusUpdateOne) ClearApplication() *ApplicationStatusUpdateOne {
+	_u.mutation.ClearApplication()
+	return _u
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (asuo *ApplicationStatusUpdateOne) ClearUser() *ApplicationStatusUpdateOne {
-	asuo.mutation.ClearUser()
-	return asuo
+func (_u *ApplicationStatusUpdateOne) ClearUser() *ApplicationStatusUpdateOne {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // Where appends a list predicates to the ApplicationStatusUpdate builder.
-func (asuo *ApplicationStatusUpdateOne) Where(ps ...predicate.ApplicationStatus) *ApplicationStatusUpdateOne {
-	asuo.mutation.Where(ps...)
-	return asuo
+func (_u *ApplicationStatusUpdateOne) Where(ps ...predicate.ApplicationStatus) *ApplicationStatusUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (asuo *ApplicationStatusUpdateOne) Select(field string, fields ...string) *ApplicationStatusUpdateOne {
-	asuo.fields = append([]string{field}, fields...)
-	return asuo
+func (_u *ApplicationStatusUpdateOne) Select(field string, fields ...string) *ApplicationStatusUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated ApplicationStatus entity.
-func (asuo *ApplicationStatusUpdateOne) Save(ctx context.Context) (*ApplicationStatus, error) {
-	return withHooks(ctx, asuo.sqlSave, asuo.mutation, asuo.hooks)
+func (_u *ApplicationStatusUpdateOne) Save(ctx context.Context) (*ApplicationStatus, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (asuo *ApplicationStatusUpdateOne) SaveX(ctx context.Context) *ApplicationStatus {
-	node, err := asuo.Save(ctx)
+func (_u *ApplicationStatusUpdateOne) SaveX(ctx context.Context) *ApplicationStatus {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -332,45 +332,45 @@ func (asuo *ApplicationStatusUpdateOne) SaveX(ctx context.Context) *ApplicationS
 }
 
 // Exec executes the query on the entity.
-func (asuo *ApplicationStatusUpdateOne) Exec(ctx context.Context) error {
-	_, err := asuo.Save(ctx)
+func (_u *ApplicationStatusUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (asuo *ApplicationStatusUpdateOne) ExecX(ctx context.Context) {
-	if err := asuo.Exec(ctx); err != nil {
+func (_u *ApplicationStatusUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (asuo *ApplicationStatusUpdateOne) check() error {
-	if v, ok := asuo.mutation.Status(); ok {
+func (_u *ApplicationStatusUpdateOne) check() error {
+	if v, ok := _u.mutation.Status(); ok {
 		if err := applicationstatus.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "ApplicationStatus.status": %w`, err)}
 		}
 	}
-	if asuo.mutation.ApplicationCleared() && len(asuo.mutation.ApplicationIDs()) > 0 {
+	if _u.mutation.ApplicationCleared() && len(_u.mutation.ApplicationIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "ApplicationStatus.application"`)
 	}
-	if asuo.mutation.UserCleared() && len(asuo.mutation.UserIDs()) > 0 {
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "ApplicationStatus.user"`)
 	}
 	return nil
 }
 
-func (asuo *ApplicationStatusUpdateOne) sqlSave(ctx context.Context) (_node *ApplicationStatus, err error) {
-	if err := asuo.check(); err != nil {
+func (_u *ApplicationStatusUpdateOne) sqlSave(ctx context.Context) (_node *ApplicationStatus, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(applicationstatus.Table, applicationstatus.Columns, sqlgraph.NewFieldSpec(applicationstatus.FieldID, field.TypeUUID))
-	id, ok := asuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "ApplicationStatus.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := asuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, applicationstatus.FieldID)
 		for _, f := range fields {
@@ -382,20 +382,20 @@ func (asuo *ApplicationStatusUpdateOne) sqlSave(ctx context.Context) (_node *App
 			}
 		}
 	}
-	if ps := asuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := asuo.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(applicationstatus.FieldStatus, field.TypeEnum, value)
 	}
-	if value, ok := asuo.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(applicationstatus.FieldCreatedAt, field.TypeTime, value)
 	}
-	if asuo.mutation.ApplicationCleared() {
+	if _u.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -408,7 +408,7 @@ func (asuo *ApplicationStatusUpdateOne) sqlSave(ctx context.Context) (_node *App
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := asuo.mutation.ApplicationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -424,7 +424,7 @@ func (asuo *ApplicationStatusUpdateOne) sqlSave(ctx context.Context) (_node *App
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if asuo.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -437,7 +437,7 @@ func (asuo *ApplicationStatusUpdateOne) sqlSave(ctx context.Context) (_node *App
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := asuo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -453,10 +453,10 @@ func (asuo *ApplicationStatusUpdateOne) sqlSave(ctx context.Context) (_node *App
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &ApplicationStatus{config: asuo.config}
+	_node = &ApplicationStatus{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, asuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{applicationstatus.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -464,6 +464,6 @@ func (asuo *ApplicationStatusUpdateOne) sqlSave(ctx context.Context) (_node *App
 		}
 		return nil, err
 	}
-	asuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

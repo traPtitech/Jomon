@@ -34,44 +34,44 @@ type ApplicationTargetQuery struct {
 }
 
 // Where adds a new predicate for the ApplicationTargetQuery builder.
-func (atq *ApplicationTargetQuery) Where(ps ...predicate.ApplicationTarget) *ApplicationTargetQuery {
-	atq.predicates = append(atq.predicates, ps...)
-	return atq
+func (_q *ApplicationTargetQuery) Where(ps ...predicate.ApplicationTarget) *ApplicationTargetQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (atq *ApplicationTargetQuery) Limit(limit int) *ApplicationTargetQuery {
-	atq.ctx.Limit = &limit
-	return atq
+func (_q *ApplicationTargetQuery) Limit(limit int) *ApplicationTargetQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (atq *ApplicationTargetQuery) Offset(offset int) *ApplicationTargetQuery {
-	atq.ctx.Offset = &offset
-	return atq
+func (_q *ApplicationTargetQuery) Offset(offset int) *ApplicationTargetQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (atq *ApplicationTargetQuery) Unique(unique bool) *ApplicationTargetQuery {
-	atq.ctx.Unique = &unique
-	return atq
+func (_q *ApplicationTargetQuery) Unique(unique bool) *ApplicationTargetQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (atq *ApplicationTargetQuery) Order(o ...applicationtarget.OrderOption) *ApplicationTargetQuery {
-	atq.order = append(atq.order, o...)
-	return atq
+func (_q *ApplicationTargetQuery) Order(o ...applicationtarget.OrderOption) *ApplicationTargetQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryApplication chains the current query on the "application" edge.
-func (atq *ApplicationTargetQuery) QueryApplication() *ApplicationQuery {
-	query := (&ApplicationClient{config: atq.config}).Query()
+func (_q *ApplicationTargetQuery) QueryApplication() *ApplicationQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := atq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := atq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -80,20 +80,20 @@ func (atq *ApplicationTargetQuery) QueryApplication() *ApplicationQuery {
 			sqlgraph.To(application.Table, application.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, applicationtarget.ApplicationTable, applicationtarget.ApplicationColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(atq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryUser chains the current query on the "user" edge.
-func (atq *ApplicationTargetQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: atq.config}).Query()
+func (_q *ApplicationTargetQuery) QueryUser() *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := atq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := atq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -102,7 +102,7 @@ func (atq *ApplicationTargetQuery) QueryUser() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, applicationtarget.UserTable, applicationtarget.UserColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(atq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -110,8 +110,8 @@ func (atq *ApplicationTargetQuery) QueryUser() *UserQuery {
 
 // First returns the first ApplicationTarget entity from the query.
 // Returns a *NotFoundError when no ApplicationTarget was found.
-func (atq *ApplicationTargetQuery) First(ctx context.Context) (*ApplicationTarget, error) {
-	nodes, err := atq.Limit(1).All(setContextOp(ctx, atq.ctx, ent.OpQueryFirst))
+func (_q *ApplicationTargetQuery) First(ctx context.Context) (*ApplicationTarget, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +122,8 @@ func (atq *ApplicationTargetQuery) First(ctx context.Context) (*ApplicationTarge
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (atq *ApplicationTargetQuery) FirstX(ctx context.Context) *ApplicationTarget {
-	node, err := atq.First(ctx)
+func (_q *ApplicationTargetQuery) FirstX(ctx context.Context) *ApplicationTarget {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -132,9 +132,9 @@ func (atq *ApplicationTargetQuery) FirstX(ctx context.Context) *ApplicationTarge
 
 // FirstID returns the first ApplicationTarget ID from the query.
 // Returns a *NotFoundError when no ApplicationTarget ID was found.
-func (atq *ApplicationTargetQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *ApplicationTargetQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = atq.Limit(1).IDs(setContextOp(ctx, atq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -145,8 +145,8 @@ func (atq *ApplicationTargetQuery) FirstID(ctx context.Context) (id uuid.UUID, e
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (atq *ApplicationTargetQuery) FirstIDX(ctx context.Context) uuid.UUID {
-	id, err := atq.FirstID(ctx)
+func (_q *ApplicationTargetQuery) FirstIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -156,8 +156,8 @@ func (atq *ApplicationTargetQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Only returns a single ApplicationTarget entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one ApplicationTarget entity is found.
 // Returns a *NotFoundError when no ApplicationTarget entities are found.
-func (atq *ApplicationTargetQuery) Only(ctx context.Context) (*ApplicationTarget, error) {
-	nodes, err := atq.Limit(2).All(setContextOp(ctx, atq.ctx, ent.OpQueryOnly))
+func (_q *ApplicationTargetQuery) Only(ctx context.Context) (*ApplicationTarget, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -172,8 +172,8 @@ func (atq *ApplicationTargetQuery) Only(ctx context.Context) (*ApplicationTarget
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (atq *ApplicationTargetQuery) OnlyX(ctx context.Context) *ApplicationTarget {
-	node, err := atq.Only(ctx)
+func (_q *ApplicationTargetQuery) OnlyX(ctx context.Context) *ApplicationTarget {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -183,9 +183,9 @@ func (atq *ApplicationTargetQuery) OnlyX(ctx context.Context) *ApplicationTarget
 // OnlyID is like Only, but returns the only ApplicationTarget ID in the query.
 // Returns a *NotSingularError when more than one ApplicationTarget ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (atq *ApplicationTargetQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *ApplicationTargetQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = atq.Limit(2).IDs(setContextOp(ctx, atq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -200,8 +200,8 @@ func (atq *ApplicationTargetQuery) OnlyID(ctx context.Context) (id uuid.UUID, er
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (atq *ApplicationTargetQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := atq.OnlyID(ctx)
+func (_q *ApplicationTargetQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -209,18 +209,18 @@ func (atq *ApplicationTargetQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 }
 
 // All executes the query and returns a list of ApplicationTargets.
-func (atq *ApplicationTargetQuery) All(ctx context.Context) ([]*ApplicationTarget, error) {
-	ctx = setContextOp(ctx, atq.ctx, ent.OpQueryAll)
-	if err := atq.prepareQuery(ctx); err != nil {
+func (_q *ApplicationTargetQuery) All(ctx context.Context) ([]*ApplicationTarget, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*ApplicationTarget, *ApplicationTargetQuery]()
-	return withInterceptors[[]*ApplicationTarget](ctx, atq, qr, atq.inters)
+	return withInterceptors[[]*ApplicationTarget](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (atq *ApplicationTargetQuery) AllX(ctx context.Context) []*ApplicationTarget {
-	nodes, err := atq.All(ctx)
+func (_q *ApplicationTargetQuery) AllX(ctx context.Context) []*ApplicationTarget {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -228,20 +228,20 @@ func (atq *ApplicationTargetQuery) AllX(ctx context.Context) []*ApplicationTarge
 }
 
 // IDs executes the query and returns a list of ApplicationTarget IDs.
-func (atq *ApplicationTargetQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
-	if atq.ctx.Unique == nil && atq.path != nil {
-		atq.Unique(true)
+func (_q *ApplicationTargetQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, atq.ctx, ent.OpQueryIDs)
-	if err = atq.Select(applicationtarget.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(applicationtarget.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (atq *ApplicationTargetQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := atq.IDs(ctx)
+func (_q *ApplicationTargetQuery) IDsX(ctx context.Context) []uuid.UUID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -249,17 +249,17 @@ func (atq *ApplicationTargetQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (atq *ApplicationTargetQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, atq.ctx, ent.OpQueryCount)
-	if err := atq.prepareQuery(ctx); err != nil {
+func (_q *ApplicationTargetQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, atq, querierCount[*ApplicationTargetQuery](), atq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*ApplicationTargetQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (atq *ApplicationTargetQuery) CountX(ctx context.Context) int {
-	count, err := atq.Count(ctx)
+func (_q *ApplicationTargetQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -267,9 +267,9 @@ func (atq *ApplicationTargetQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (atq *ApplicationTargetQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, atq.ctx, ent.OpQueryExist)
-	switch _, err := atq.FirstID(ctx); {
+func (_q *ApplicationTargetQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -280,8 +280,8 @@ func (atq *ApplicationTargetQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (atq *ApplicationTargetQuery) ExistX(ctx context.Context) bool {
-	exist, err := atq.Exist(ctx)
+func (_q *ApplicationTargetQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -290,44 +290,44 @@ func (atq *ApplicationTargetQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the ApplicationTargetQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (atq *ApplicationTargetQuery) Clone() *ApplicationTargetQuery {
-	if atq == nil {
+func (_q *ApplicationTargetQuery) Clone() *ApplicationTargetQuery {
+	if _q == nil {
 		return nil
 	}
 	return &ApplicationTargetQuery{
-		config:          atq.config,
-		ctx:             atq.ctx.Clone(),
-		order:           append([]applicationtarget.OrderOption{}, atq.order...),
-		inters:          append([]Interceptor{}, atq.inters...),
-		predicates:      append([]predicate.ApplicationTarget{}, atq.predicates...),
-		withApplication: atq.withApplication.Clone(),
-		withUser:        atq.withUser.Clone(),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]applicationtarget.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.ApplicationTarget{}, _q.predicates...),
+		withApplication: _q.withApplication.Clone(),
+		withUser:        _q.withUser.Clone(),
 		// clone intermediate query.
-		sql:  atq.sql.Clone(),
-		path: atq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithApplication tells the query-builder to eager-load the nodes that are connected to
 // the "application" edge. The optional arguments are used to configure the query builder of the edge.
-func (atq *ApplicationTargetQuery) WithApplication(opts ...func(*ApplicationQuery)) *ApplicationTargetQuery {
-	query := (&ApplicationClient{config: atq.config}).Query()
+func (_q *ApplicationTargetQuery) WithApplication(opts ...func(*ApplicationQuery)) *ApplicationTargetQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	atq.withApplication = query
-	return atq
+	_q.withApplication = query
+	return _q
 }
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (atq *ApplicationTargetQuery) WithUser(opts ...func(*UserQuery)) *ApplicationTargetQuery {
-	query := (&UserClient{config: atq.config}).Query()
+func (_q *ApplicationTargetQuery) WithUser(opts ...func(*UserQuery)) *ApplicationTargetQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	atq.withUser = query
-	return atq
+	_q.withUser = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -344,10 +344,10 @@ func (atq *ApplicationTargetQuery) WithUser(opts ...func(*UserQuery)) *Applicati
 //		GroupBy(applicationtarget.FieldAmount).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (atq *ApplicationTargetQuery) GroupBy(field string, fields ...string) *ApplicationTargetGroupBy {
-	atq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &ApplicationTargetGroupBy{build: atq}
-	grbuild.flds = &atq.ctx.Fields
+func (_q *ApplicationTargetQuery) GroupBy(field string, fields ...string) *ApplicationTargetGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &ApplicationTargetGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = applicationtarget.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -365,56 +365,56 @@ func (atq *ApplicationTargetQuery) GroupBy(field string, fields ...string) *Appl
 //	client.ApplicationTarget.Query().
 //		Select(applicationtarget.FieldAmount).
 //		Scan(ctx, &v)
-func (atq *ApplicationTargetQuery) Select(fields ...string) *ApplicationTargetSelect {
-	atq.ctx.Fields = append(atq.ctx.Fields, fields...)
-	sbuild := &ApplicationTargetSelect{ApplicationTargetQuery: atq}
+func (_q *ApplicationTargetQuery) Select(fields ...string) *ApplicationTargetSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &ApplicationTargetSelect{ApplicationTargetQuery: _q}
 	sbuild.label = applicationtarget.Label
-	sbuild.flds, sbuild.scan = &atq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a ApplicationTargetSelect configured with the given aggregations.
-func (atq *ApplicationTargetQuery) Aggregate(fns ...AggregateFunc) *ApplicationTargetSelect {
-	return atq.Select().Aggregate(fns...)
+func (_q *ApplicationTargetQuery) Aggregate(fns ...AggregateFunc) *ApplicationTargetSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (atq *ApplicationTargetQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range atq.inters {
+func (_q *ApplicationTargetQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, atq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range atq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !applicationtarget.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if atq.path != nil {
-		prev, err := atq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		atq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (atq *ApplicationTargetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*ApplicationTarget, error) {
+func (_q *ApplicationTargetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*ApplicationTarget, error) {
 	var (
 		nodes       = []*ApplicationTarget{}
-		withFKs     = atq.withFKs
-		_spec       = atq.querySpec()
+		withFKs     = _q.withFKs
+		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			atq.withApplication != nil,
-			atq.withUser != nil,
+			_q.withApplication != nil,
+			_q.withUser != nil,
 		}
 	)
-	if atq.withApplication != nil || atq.withUser != nil {
+	if _q.withApplication != nil || _q.withUser != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -424,7 +424,7 @@ func (atq *ApplicationTargetQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 		return (*ApplicationTarget).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &ApplicationTarget{config: atq.config}
+		node := &ApplicationTarget{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -432,20 +432,20 @@ func (atq *ApplicationTargetQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, atq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := atq.withApplication; query != nil {
-		if err := atq.loadApplication(ctx, query, nodes, nil,
+	if query := _q.withApplication; query != nil {
+		if err := _q.loadApplication(ctx, query, nodes, nil,
 			func(n *ApplicationTarget, e *Application) { n.Edges.Application = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := atq.withUser; query != nil {
-		if err := atq.loadUser(ctx, query, nodes, nil,
+	if query := _q.withUser; query != nil {
+		if err := _q.loadUser(ctx, query, nodes, nil,
 			func(n *ApplicationTarget, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
@@ -453,7 +453,7 @@ func (atq *ApplicationTargetQuery) sqlAll(ctx context.Context, hooks ...queryHoo
 	return nodes, nil
 }
 
-func (atq *ApplicationTargetQuery) loadApplication(ctx context.Context, query *ApplicationQuery, nodes []*ApplicationTarget, init func(*ApplicationTarget), assign func(*ApplicationTarget, *Application)) error {
+func (_q *ApplicationTargetQuery) loadApplication(ctx context.Context, query *ApplicationQuery, nodes []*ApplicationTarget, init func(*ApplicationTarget), assign func(*ApplicationTarget, *Application)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*ApplicationTarget)
 	for i := range nodes {
@@ -485,7 +485,7 @@ func (atq *ApplicationTargetQuery) loadApplication(ctx context.Context, query *A
 	}
 	return nil
 }
-func (atq *ApplicationTargetQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*ApplicationTarget, init func(*ApplicationTarget), assign func(*ApplicationTarget, *User)) error {
+func (_q *ApplicationTargetQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*ApplicationTarget, init func(*ApplicationTarget), assign func(*ApplicationTarget, *User)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*ApplicationTarget)
 	for i := range nodes {
@@ -518,24 +518,24 @@ func (atq *ApplicationTargetQuery) loadUser(ctx context.Context, query *UserQuer
 	return nil
 }
 
-func (atq *ApplicationTargetQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := atq.querySpec()
-	_spec.Node.Columns = atq.ctx.Fields
-	if len(atq.ctx.Fields) > 0 {
-		_spec.Unique = atq.ctx.Unique != nil && *atq.ctx.Unique
+func (_q *ApplicationTargetQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, atq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (atq *ApplicationTargetQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *ApplicationTargetQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(applicationtarget.Table, applicationtarget.Columns, sqlgraph.NewFieldSpec(applicationtarget.FieldID, field.TypeUUID))
-	_spec.From = atq.sql
-	if unique := atq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if atq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := atq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, applicationtarget.FieldID)
 		for i := range fields {
@@ -544,20 +544,20 @@ func (atq *ApplicationTargetQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := atq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := atq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := atq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := atq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -567,33 +567,33 @@ func (atq *ApplicationTargetQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (atq *ApplicationTargetQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(atq.driver.Dialect())
+func (_q *ApplicationTargetQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(applicationtarget.Table)
-	columns := atq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = applicationtarget.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if atq.sql != nil {
-		selector = atq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if atq.ctx.Unique != nil && *atq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range atq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range atq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := atq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := atq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -606,41 +606,41 @@ type ApplicationTargetGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (atgb *ApplicationTargetGroupBy) Aggregate(fns ...AggregateFunc) *ApplicationTargetGroupBy {
-	atgb.fns = append(atgb.fns, fns...)
-	return atgb
+func (_g *ApplicationTargetGroupBy) Aggregate(fns ...AggregateFunc) *ApplicationTargetGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (atgb *ApplicationTargetGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, atgb.build.ctx, ent.OpQueryGroupBy)
-	if err := atgb.build.prepareQuery(ctx); err != nil {
+func (_g *ApplicationTargetGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ApplicationTargetQuery, *ApplicationTargetGroupBy](ctx, atgb.build, atgb, atgb.build.inters, v)
+	return scanWithInterceptors[*ApplicationTargetQuery, *ApplicationTargetGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (atgb *ApplicationTargetGroupBy) sqlScan(ctx context.Context, root *ApplicationTargetQuery, v any) error {
+func (_g *ApplicationTargetGroupBy) sqlScan(ctx context.Context, root *ApplicationTargetQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(atgb.fns))
-	for _, fn := range atgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*atgb.flds)+len(atgb.fns))
-		for _, f := range *atgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*atgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := atgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -654,27 +654,27 @@ type ApplicationTargetSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ats *ApplicationTargetSelect) Aggregate(fns ...AggregateFunc) *ApplicationTargetSelect {
-	ats.fns = append(ats.fns, fns...)
-	return ats
+func (_s *ApplicationTargetSelect) Aggregate(fns ...AggregateFunc) *ApplicationTargetSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ats *ApplicationTargetSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ats.ctx, ent.OpQuerySelect)
-	if err := ats.prepareQuery(ctx); err != nil {
+func (_s *ApplicationTargetSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ApplicationTargetQuery, *ApplicationTargetSelect](ctx, ats.ApplicationTargetQuery, ats, ats.inters, v)
+	return scanWithInterceptors[*ApplicationTargetQuery, *ApplicationTargetSelect](ctx, _s.ApplicationTargetQuery, _s, _s.inters, v)
 }
 
-func (ats *ApplicationTargetSelect) sqlScan(ctx context.Context, root *ApplicationTargetQuery, v any) error {
+func (_s *ApplicationTargetSelect) sqlScan(ctx context.Context, root *ApplicationTargetQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ats.fns))
-	for _, fn := range ats.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ats.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -682,7 +682,7 @@ func (ats *ApplicationTargetSelect) sqlScan(ctx context.Context, root *Applicati
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ats.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

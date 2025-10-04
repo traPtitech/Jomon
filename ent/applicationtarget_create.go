@@ -24,89 +24,89 @@ type ApplicationTargetCreate struct {
 }
 
 // SetAmount sets the "amount" field.
-func (atc *ApplicationTargetCreate) SetAmount(i int) *ApplicationTargetCreate {
-	atc.mutation.SetAmount(i)
-	return atc
+func (_c *ApplicationTargetCreate) SetAmount(v int) *ApplicationTargetCreate {
+	_c.mutation.SetAmount(v)
+	return _c
 }
 
 // SetPaidAt sets the "paid_at" field.
-func (atc *ApplicationTargetCreate) SetPaidAt(t time.Time) *ApplicationTargetCreate {
-	atc.mutation.SetPaidAt(t)
-	return atc
+func (_c *ApplicationTargetCreate) SetPaidAt(v time.Time) *ApplicationTargetCreate {
+	_c.mutation.SetPaidAt(v)
+	return _c
 }
 
 // SetNillablePaidAt sets the "paid_at" field if the given value is not nil.
-func (atc *ApplicationTargetCreate) SetNillablePaidAt(t *time.Time) *ApplicationTargetCreate {
-	if t != nil {
-		atc.SetPaidAt(*t)
+func (_c *ApplicationTargetCreate) SetNillablePaidAt(v *time.Time) *ApplicationTargetCreate {
+	if v != nil {
+		_c.SetPaidAt(*v)
 	}
-	return atc
+	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (atc *ApplicationTargetCreate) SetCreatedAt(t time.Time) *ApplicationTargetCreate {
-	atc.mutation.SetCreatedAt(t)
-	return atc
+func (_c *ApplicationTargetCreate) SetCreatedAt(v time.Time) *ApplicationTargetCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (atc *ApplicationTargetCreate) SetNillableCreatedAt(t *time.Time) *ApplicationTargetCreate {
-	if t != nil {
-		atc.SetCreatedAt(*t)
+func (_c *ApplicationTargetCreate) SetNillableCreatedAt(v *time.Time) *ApplicationTargetCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return atc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (atc *ApplicationTargetCreate) SetID(u uuid.UUID) *ApplicationTargetCreate {
-	atc.mutation.SetID(u)
-	return atc
+func (_c *ApplicationTargetCreate) SetID(v uuid.UUID) *ApplicationTargetCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (atc *ApplicationTargetCreate) SetNillableID(u *uuid.UUID) *ApplicationTargetCreate {
-	if u != nil {
-		atc.SetID(*u)
+func (_c *ApplicationTargetCreate) SetNillableID(v *uuid.UUID) *ApplicationTargetCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
-	return atc
+	return _c
 }
 
 // SetApplicationID sets the "application" edge to the Application entity by ID.
-func (atc *ApplicationTargetCreate) SetApplicationID(id uuid.UUID) *ApplicationTargetCreate {
-	atc.mutation.SetApplicationID(id)
-	return atc
+func (_c *ApplicationTargetCreate) SetApplicationID(id uuid.UUID) *ApplicationTargetCreate {
+	_c.mutation.SetApplicationID(id)
+	return _c
 }
 
 // SetApplication sets the "application" edge to the Application entity.
-func (atc *ApplicationTargetCreate) SetApplication(a *Application) *ApplicationTargetCreate {
-	return atc.SetApplicationID(a.ID)
+func (_c *ApplicationTargetCreate) SetApplication(v *Application) *ApplicationTargetCreate {
+	return _c.SetApplicationID(v.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (atc *ApplicationTargetCreate) SetUserID(id uuid.UUID) *ApplicationTargetCreate {
-	atc.mutation.SetUserID(id)
-	return atc
+func (_c *ApplicationTargetCreate) SetUserID(id uuid.UUID) *ApplicationTargetCreate {
+	_c.mutation.SetUserID(id)
+	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (atc *ApplicationTargetCreate) SetUser(u *User) *ApplicationTargetCreate {
-	return atc.SetUserID(u.ID)
+func (_c *ApplicationTargetCreate) SetUser(v *User) *ApplicationTargetCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // Mutation returns the ApplicationTargetMutation object of the builder.
-func (atc *ApplicationTargetCreate) Mutation() *ApplicationTargetMutation {
-	return atc.mutation
+func (_c *ApplicationTargetCreate) Mutation() *ApplicationTargetMutation {
+	return _c.mutation
 }
 
 // Save creates the ApplicationTarget in the database.
-func (atc *ApplicationTargetCreate) Save(ctx context.Context) (*ApplicationTarget, error) {
-	atc.defaults()
-	return withHooks(ctx, atc.sqlSave, atc.mutation, atc.hooks)
+func (_c *ApplicationTargetCreate) Save(ctx context.Context) (*ApplicationTarget, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (atc *ApplicationTargetCreate) SaveX(ctx context.Context) *ApplicationTarget {
-	v, err := atc.Save(ctx)
+func (_c *ApplicationTargetCreate) SaveX(ctx context.Context) *ApplicationTarget {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -114,53 +114,53 @@ func (atc *ApplicationTargetCreate) SaveX(ctx context.Context) *ApplicationTarge
 }
 
 // Exec executes the query.
-func (atc *ApplicationTargetCreate) Exec(ctx context.Context) error {
-	_, err := atc.Save(ctx)
+func (_c *ApplicationTargetCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (atc *ApplicationTargetCreate) ExecX(ctx context.Context) {
-	if err := atc.Exec(ctx); err != nil {
+func (_c *ApplicationTargetCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (atc *ApplicationTargetCreate) defaults() {
-	if _, ok := atc.mutation.CreatedAt(); !ok {
+func (_c *ApplicationTargetCreate) defaults() {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := applicationtarget.DefaultCreatedAt()
-		atc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := atc.mutation.ID(); !ok {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := applicationtarget.DefaultID()
-		atc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (atc *ApplicationTargetCreate) check() error {
-	if _, ok := atc.mutation.Amount(); !ok {
+func (_c *ApplicationTargetCreate) check() error {
+	if _, ok := _c.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "ApplicationTarget.amount"`)}
 	}
-	if _, ok := atc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "ApplicationTarget.created_at"`)}
 	}
-	if len(atc.mutation.ApplicationIDs()) == 0 {
+	if len(_c.mutation.ApplicationIDs()) == 0 {
 		return &ValidationError{Name: "application", err: errors.New(`ent: missing required edge "ApplicationTarget.application"`)}
 	}
-	if len(atc.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "ApplicationTarget.user"`)}
 	}
 	return nil
 }
 
-func (atc *ApplicationTargetCreate) sqlSave(ctx context.Context) (*ApplicationTarget, error) {
-	if err := atc.check(); err != nil {
+func (_c *ApplicationTargetCreate) sqlSave(ctx context.Context) (*ApplicationTarget, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := atc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, atc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -173,33 +173,33 @@ func (atc *ApplicationTargetCreate) sqlSave(ctx context.Context) (*ApplicationTa
 			return nil, err
 		}
 	}
-	atc.mutation.id = &_node.ID
-	atc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (atc *ApplicationTargetCreate) createSpec() (*ApplicationTarget, *sqlgraph.CreateSpec) {
+func (_c *ApplicationTargetCreate) createSpec() (*ApplicationTarget, *sqlgraph.CreateSpec) {
 	var (
-		_node = &ApplicationTarget{config: atc.config}
+		_node = &ApplicationTarget{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(applicationtarget.Table, sqlgraph.NewFieldSpec(applicationtarget.FieldID, field.TypeUUID))
 	)
-	if id, ok := atc.mutation.ID(); ok {
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := atc.mutation.Amount(); ok {
+	if value, ok := _c.mutation.Amount(); ok {
 		_spec.SetField(applicationtarget.FieldAmount, field.TypeInt, value)
 		_node.Amount = value
 	}
-	if value, ok := atc.mutation.PaidAt(); ok {
+	if value, ok := _c.mutation.PaidAt(); ok {
 		_spec.SetField(applicationtarget.FieldPaidAt, field.TypeTime, value)
 		_node.PaidAt = &value
 	}
-	if value, ok := atc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(applicationtarget.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := atc.mutation.ApplicationIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -216,7 +216,7 @@ func (atc *ApplicationTargetCreate) createSpec() (*ApplicationTarget, *sqlgraph.
 		_node.application_target = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := atc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -244,16 +244,16 @@ type ApplicationTargetCreateBulk struct {
 }
 
 // Save creates the ApplicationTarget entities in the database.
-func (atcb *ApplicationTargetCreateBulk) Save(ctx context.Context) ([]*ApplicationTarget, error) {
-	if atcb.err != nil {
-		return nil, atcb.err
+func (_c *ApplicationTargetCreateBulk) Save(ctx context.Context) ([]*ApplicationTarget, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(atcb.builders))
-	nodes := make([]*ApplicationTarget, len(atcb.builders))
-	mutators := make([]Mutator, len(atcb.builders))
-	for i := range atcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*ApplicationTarget, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := atcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ApplicationTargetMutation)
@@ -267,11 +267,11 @@ func (atcb *ApplicationTargetCreateBulk) Save(ctx context.Context) ([]*Applicati
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, atcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, atcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -291,7 +291,7 @@ func (atcb *ApplicationTargetCreateBulk) Save(ctx context.Context) ([]*Applicati
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, atcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -299,8 +299,8 @@ func (atcb *ApplicationTargetCreateBulk) Save(ctx context.Context) ([]*Applicati
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (atcb *ApplicationTargetCreateBulk) SaveX(ctx context.Context) []*ApplicationTarget {
-	v, err := atcb.Save(ctx)
+func (_c *ApplicationTargetCreateBulk) SaveX(ctx context.Context) []*ApplicationTarget {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -308,14 +308,14 @@ func (atcb *ApplicationTargetCreateBulk) SaveX(ctx context.Context) []*Applicati
 }
 
 // Exec executes the query.
-func (atcb *ApplicationTargetCreateBulk) Exec(ctx context.Context) error {
-	_, err := atcb.Save(ctx)
+func (_c *ApplicationTargetCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (atcb *ApplicationTargetCreateBulk) ExecX(ctx context.Context) {
-	if err := atcb.Exec(ctx); err != nil {
+func (_c *ApplicationTargetCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

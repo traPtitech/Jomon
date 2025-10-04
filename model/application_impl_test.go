@@ -24,7 +24,6 @@ func (rd *ApplicationDetail) toExpectedApplicationResponse(t *testing.T) *Applic
 		Tags:      rd.Tags,
 		//Targets:   rd.Targets,
 		//Statuses:  rd.Statuses,
-		Group: rd.Group,
 	}
 }
 
@@ -80,21 +79,12 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			Amount: random.Numeric(t, 10000),
 		}
 
-		budget := random.Numeric(t, 10000)
-		group, err := repo.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-
 		application1, err := repo.CreateApplication(
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user1.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
@@ -104,7 +94,6 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user2.ID)
 		require.NoError(t, err)
 
@@ -148,21 +137,12 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			Amount: random.Numeric(t, 10000),
 		}
 
-		budget := random.Numeric(t, 10000)
-		group, err := repo2.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-
 		application1, err := repo2.CreateApplication(
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user1.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
@@ -172,7 +152,6 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user2.ID)
 		require.NoError(t, err)
 
@@ -216,21 +195,12 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			Amount: random.Numeric(t, 10000),
 		}
 
-		budget := random.Numeric(t, 10000)
-		group, err := repo3.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-
 		application1, err := repo3.CreateApplication(
 			ctx,
 			"b",
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user1.ID)
 		require.NoError(t, err)
 		application2, err := repo3.CreateApplication(
@@ -239,7 +209,6 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user2.ID)
 		require.NoError(t, err)
 
@@ -283,21 +252,12 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			Amount: random.Numeric(t, 10000),
 		}
 
-		budget := random.Numeric(t, 10000)
-		group, err := repo4.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-
 		application1, err := repo4.CreateApplication(
 			ctx,
 			"b",
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user1.ID)
 		require.NoError(t, err)
 		application2, err := repo4.CreateApplication(
@@ -306,7 +266,6 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user2.ID)
 		require.NoError(t, err)
 
@@ -354,21 +313,12 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			Amount: random.Numeric(t, 10000),
 		}
 
-		budget := random.Numeric(t, 10000)
-		group, err := repo5.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-
 		application1, err := repo5.CreateApplication(
 			ctx,
 			"b",
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target1},
-			group,
 			user1.ID)
 		require.NoError(t, err)
 		_, err = repo5.CreateApplication(
@@ -377,7 +327,6 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target2},
-			group,
 			user2.ID)
 		require.NoError(t, err)
 
@@ -414,21 +363,12 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			Amount: random.Numeric(t, 10000),
 		}
 
-		budget := random.Numeric(t, 10000)
-		group, err := repo6.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-
 		application1, err := repo6.CreateApplication(
 			ctx,
 			"b",
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user1.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
@@ -438,7 +378,6 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user2.ID)
 		require.NoError(t, err)
 
@@ -475,21 +414,12 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			Amount: random.Numeric(t, 10000),
 		}
 
-		budget := random.Numeric(t, 10000)
-		group, err := repo7.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-
 		application1, err := repo7.CreateApplication(
 			ctx,
 			"b",
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user1.ID)
 		require.NoError(t, err)
 		time.Sleep(2 * time.Second)
@@ -499,7 +429,6 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user2.ID)
 		require.NoError(t, err)
 
@@ -510,7 +439,6 @@ func TestEntRepository_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, got, 1)
 		exp := application1.toExpectedApplicationResponse(t)
-		exp.Group.UpdatedAt = application2.Group.UpdatedAt
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, exp, got[0], opts...)
 	})
@@ -537,31 +465,21 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			Amount: random.Numeric(t, 10000),
 		}
 
-		budget := random.Numeric(t, 10000)
-		group, err := repo8.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-
 		application1, err := repo8.CreateApplication(
 			ctx,
 			"b",
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user1.ID)
 		require.NoError(t, err)
 		time.Sleep(2 * time.Second)
-		application2, err := repo8.CreateApplication(
+		_, err = repo8.CreateApplication(
 			ctx,
 			"a",
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag},
 			[]*ApplicationTarget{target},
-			group,
 			user2.ID)
 		require.NoError(t, err)
 
@@ -578,7 +496,6 @@ func TestEntRepository_GetApplications(t *testing.T) {
 		require.Len(t, got, 1)
 		exp := application1.toExpectedApplicationResponse(t)
 		exp.Status = Accepted
-		exp.Group.UpdatedAt = application2.Group.UpdatedAt
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, exp, got[0], opts...)
 	})
@@ -603,21 +520,12 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			Amount: random.Numeric(t, 10000),
 		}
 
-		budget := random.Numeric(t, 10000)
-		group, err := repo9.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-
 		application1, err := repo9.CreateApplication(
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{},
 			[]*ApplicationTarget{target},
-			group,
 			user1.ID)
 		require.NoError(t, err)
 		_, err = repo9.CreateApplication(
@@ -626,7 +534,6 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			random.AlphaNumeric(t, 100),
 			[]*Tag{},
 			[]*ApplicationTarget{target},
-			group,
 			user2.ID)
 		require.NoError(t, err)
 
@@ -652,9 +559,6 @@ func TestEntRepository_CreateApplication(t *testing.T) {
 	client3, err := setup(t, ctx, "create_application3")
 	require.NoError(t, err)
 	repo3 := NewEntRepository(client3)
-	client4, err := setup(t, ctx, "create_application4")
-	require.NoError(t, err)
-	repo4 := NewEntRepository(client4)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -674,19 +578,11 @@ func TestEntRepository_CreateApplication(t *testing.T) {
 			Amount: random.Numeric(t, 10000),
 		}
 
-		budget := random.Numeric(t, 10000)
-		group, err := repo.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-
 		application, err := repo.CreateApplication(
 			ctx,
 			title, content,
 			[]*Tag{tag}, []*ApplicationTarget{target},
-			group, user.ID)
+			user.ID)
 		require.NoError(t, err)
 		exp := &ApplicationDetail{
 			Status:  Submitted,
@@ -701,7 +597,6 @@ func TestEntRepository_CreateApplication(t *testing.T) {
 				CreatedBy: user.ID,
 				Status:    Submitted,
 			}},
-			Group:     group,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 			CreatedBy: user.ID,
@@ -722,19 +617,11 @@ func TestEntRepository_CreateApplication(t *testing.T) {
 		tag, err := repo2.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
 
-		budget := random.Numeric(t, 10000)
-		group, err := repo2.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-
 		_, err = repo2.CreateApplication(
 			ctx,
 			title, content,
 			[]*Tag{tag}, []*ApplicationTarget{},
-			group, uuid.New())
+			uuid.New())
 		require.Error(t, err)
 	})
 
@@ -758,52 +645,11 @@ func TestEntRepository_CreateApplication(t *testing.T) {
 			UpdatedAt: date,
 		}
 
-		budget := random.Numeric(t, 10000)
-		group, err := repo3.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-
 		_, err = repo3.CreateApplication(
 			ctx,
 			title, content,
 			[]*Tag{tag}, []*ApplicationTarget{},
-			group, user.ID)
-		require.Error(t, err)
-	})
-
-	t.Run("UnknownGroup", func(t *testing.T) {
-		t.Parallel()
-		ctx := testutil.NewContext(t)
-		title := random.AlphaNumeric(t, 40)
-		content := random.AlphaNumeric(t, 100)
-		user, err := repo4.CreateUser(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			true)
-		require.NoError(t, err)
-		tag, err := repo4.CreateTag(ctx, random.AlphaNumeric(t, 20))
-		require.NoError(t, err)
-
-		date := time.Now()
-		budget := random.Numeric(t, 100000)
-		group := &Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 20),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-
-		_, err = repo4.CreateApplication(
-			ctx,
-			title, content,
-			[]*Tag{tag}, []*ApplicationTarget{},
-			group, user.ID)
+			user.ID)
 		require.Error(t, err)
 	})
 }
@@ -832,19 +678,13 @@ func TestEntRepository_GetApplication(t *testing.T) {
 			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
-		budget := random.Numeric(t, 10000)
-		group, err := repo.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
 		require.NoError(t, err)
 		application, err := repo.CreateApplication(
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag}, []*ApplicationTarget{target},
-			group, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		got, err := repo.GetApplication(ctx, application.ID)
@@ -875,9 +715,6 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 	client4, err := setup(t, ctx, "update_application4")
 	require.NoError(t, err)
 	repo4 := NewEntRepository(client4)
-	client5, err := setup(t, ctx, "update_application5")
-	require.NoError(t, err)
-	repo5 := NewEntRepository(client5)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Parallel()
@@ -890,13 +727,6 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		budget := random.Numeric(t, 10000)
-		group, err := repo.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
 		target := &ApplicationTarget{
 			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
@@ -906,7 +736,7 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag}, []*ApplicationTarget{target},
-			group, user.ID)
+			user.ID)
 		require.NoError(t, err)
 		// CreatedAt の差を1秒以内に収めるためにここで time.Now を取る
 		expTarget := &ApplicationTargetDetail{
@@ -918,8 +748,7 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		updatedApplication, err := repo.UpdateApplication(
 			ctx,
 			application.ID, application.Title, application.Content,
-			[]*Tag{tag}, []*ApplicationTarget{target},
-			group)
+			[]*Tag{tag}, []*ApplicationTarget{target})
 		require.NoError(t, err)
 		exp := &ApplicationDetail{
 			ID:        application.ID,
@@ -931,7 +760,6 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 			Tags:      []*Tag{tag},
 			Targets:   []*ApplicationTargetDetail{expTarget},
 			Statuses:  application.Statuses,
-			Group:     group,
 			CreatedAt: application.CreatedAt,
 			UpdatedAt: time.Now(),
 			CreatedBy: application.CreatedBy,
@@ -957,19 +785,12 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
-		budget := random.Numeric(t, 10000)
-		group, err := repo2.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
 		application, err := repo2.CreateApplication(
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag}, []*ApplicationTarget{target},
-			group, user.ID)
+			user.ID)
 		require.NoError(t, err)
 		// CreatedAt の差を1秒以内に収めるためにここで time.Now を取る
 		expTarget := &ApplicationTargetDetail{
@@ -982,8 +803,7 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		updatedApplication, err := repo2.UpdateApplication(
 			ctx,
 			application.ID, title, application.Content,
-			[]*Tag{tag}, []*ApplicationTarget{target},
-			group)
+			[]*Tag{tag}, []*ApplicationTarget{target})
 		require.NoError(t, err)
 		exp := &ApplicationDetail{
 			ID:        application.ID,
@@ -995,7 +815,6 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 			Tags:      []*Tag{tag},
 			Targets:   []*ApplicationTargetDetail{expTarget},
 			Statuses:  application.Statuses,
-			Group:     group,
 			CreatedAt: application.CreatedAt,
 			UpdatedAt: time.Now(),
 			CreatedBy: application.CreatedBy,
@@ -1021,19 +840,12 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
-		budget := random.Numeric(t, 10000)
-		group, err := repo3.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
 		application, err := repo3.CreateApplication(
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag}, []*ApplicationTarget{target},
-			group, user.ID)
+			user.ID)
 		require.NoError(t, err)
 		// CreatedAt の差を1秒以内に収めるためにここで time.Now を取る
 		expTarget := &ApplicationTargetDetail{
@@ -1045,8 +857,7 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		updatedApplication, err := repo3.UpdateApplication(
 			ctx,
 			application.ID, application.Title, content,
-			[]*Tag{tag}, []*ApplicationTarget{target},
-			group)
+			[]*Tag{tag}, []*ApplicationTarget{target})
 		require.NoError(t, err)
 		exp := &ApplicationDetail{
 			ID:        application.ID,
@@ -1058,7 +869,6 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 			Tags:      []*Tag{tag},
 			Targets:   []*ApplicationTargetDetail{expTarget},
 			Statuses:  application.Statuses,
-			Group:     group,
 			CreatedAt: application.CreatedAt,
 			UpdatedAt: time.Now(),
 			CreatedBy: application.CreatedBy,
@@ -1084,19 +894,12 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
-		budget := random.Numeric(t, 10000)
-		group, err := repo4.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
 		application, err := repo4.CreateApplication(
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
 			[]*Tag{tag}, []*ApplicationTarget{target},
-			group, user.ID)
+			user.ID)
 		require.NoError(t, err)
 
 		date := time.Now()
@@ -1109,56 +912,7 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		_, err = repo4.UpdateApplication(
 			ctx,
 			application.ID, application.Title, application.Content,
-			[]*Tag{unknownTag}, []*ApplicationTarget{target},
-			group)
-		require.Error(t, err)
-	})
-
-	t.Run("UnknownGroup", func(t *testing.T) {
-		t.Parallel()
-		ctx := testutil.NewContext(t)
-		user, err := repo5.CreateUser(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			true)
-		require.NoError(t, err)
-		tag, err := repo5.CreateTag(ctx, random.AlphaNumeric(t, 20))
-		require.NoError(t, err)
-		target := &ApplicationTarget{
-			Target: user.ID,
-			Amount: random.Numeric(t, 10000),
-		}
-		budget := random.Numeric(t, 10000)
-		group, err := repo5.CreateGroup(
-			ctx,
-			random.AlphaNumeric(t, 20),
-			random.AlphaNumeric(t, 30),
-			&budget)
-		require.NoError(t, err)
-		application, err := repo5.CreateApplication(
-			ctx,
-			random.AlphaNumeric(t, 40),
-			random.AlphaNumeric(t, 100),
-			[]*Tag{tag}, []*ApplicationTarget{target},
-			group, user.ID)
-		require.NoError(t, err)
-
-		date := time.Now()
-		unknownBudget := random.Numeric(t, 100000)
-		unknownGroup := &Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 30),
-			Budget:      &unknownBudget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-		_, err = repo5.UpdateApplication(
-			ctx,
-			application.ID, application.Title, application.Content,
-			[]*Tag{tag}, []*ApplicationTarget{target},
-			unknownGroup)
+			[]*Tag{unknownTag}, []*ApplicationTarget{target})
 		require.Error(t, err)
 	})
 }

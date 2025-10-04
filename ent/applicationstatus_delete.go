@@ -20,56 +20,56 @@ type ApplicationStatusDelete struct {
 }
 
 // Where appends a list predicates to the ApplicationStatusDelete builder.
-func (asd *ApplicationStatusDelete) Where(ps ...predicate.ApplicationStatus) *ApplicationStatusDelete {
-	asd.mutation.Where(ps...)
-	return asd
+func (_d *ApplicationStatusDelete) Where(ps ...predicate.ApplicationStatus) *ApplicationStatusDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (asd *ApplicationStatusDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, asd.sqlExec, asd.mutation, asd.hooks)
+func (_d *ApplicationStatusDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (asd *ApplicationStatusDelete) ExecX(ctx context.Context) int {
-	n, err := asd.Exec(ctx)
+func (_d *ApplicationStatusDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (asd *ApplicationStatusDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *ApplicationStatusDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(applicationstatus.Table, sqlgraph.NewFieldSpec(applicationstatus.FieldID, field.TypeUUID))
-	if ps := asd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, asd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	asd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // ApplicationStatusDeleteOne is the builder for deleting a single ApplicationStatus entity.
 type ApplicationStatusDeleteOne struct {
-	asd *ApplicationStatusDelete
+	_d *ApplicationStatusDelete
 }
 
 // Where appends a list predicates to the ApplicationStatusDelete builder.
-func (asdo *ApplicationStatusDeleteOne) Where(ps ...predicate.ApplicationStatus) *ApplicationStatusDeleteOne {
-	asdo.asd.mutation.Where(ps...)
-	return asdo
+func (_d *ApplicationStatusDeleteOne) Where(ps ...predicate.ApplicationStatus) *ApplicationStatusDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (asdo *ApplicationStatusDeleteOne) Exec(ctx context.Context) error {
-	n, err := asdo.asd.Exec(ctx)
+func (_d *ApplicationStatusDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (asdo *ApplicationStatusDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (asdo *ApplicationStatusDeleteOne) ExecX(ctx context.Context) {
-	if err := asdo.Exec(ctx); err != nil {
+func (_d *ApplicationStatusDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -16,7 +16,6 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "application_user", Type: field.TypeUUID, Nullable: true},
-		{Name: "group_application", Type: field.TypeUUID, Nullable: true},
 	}
 	// ApplicationsTable holds the schema information for the "applications" table.
 	ApplicationsTable = &schema.Table{
@@ -28,12 +27,6 @@ var (
 				Symbol:     "applications_users_user",
 				Columns:    []*schema.Column{ApplicationsColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "applications_groups_application",
-				Columns:    []*schema.Column{ApplicationsColumns[6]},
-				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -155,44 +148,6 @@ var (
 			},
 		},
 	}
-	// GroupsColumns holds the columns for the "groups" table.
-	GroupsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "name", Type: field.TypeString},
-		{Name: "description", Type: field.TypeString},
-		{Name: "budget", Type: field.TypeInt, Nullable: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-	}
-	// GroupsTable holds the schema information for the "groups" table.
-	GroupsTable = &schema.Table{
-		Name:       "groups",
-		Columns:    GroupsColumns,
-		PrimaryKey: []*schema.Column{GroupsColumns[0]},
-	}
-	// GroupBudgetsColumns holds the columns for the "group_budgets" table.
-	GroupBudgetsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "amount", Type: field.TypeInt},
-		{Name: "comment", Type: field.TypeString, Nullable: true, Size: 2147483647},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "group_group_budget", Type: field.TypeUUID},
-	}
-	// GroupBudgetsTable holds the schema information for the "group_budgets" table.
-	GroupBudgetsTable = &schema.Table{
-		Name:       "group_budgets",
-		Columns:    GroupBudgetsColumns,
-		PrimaryKey: []*schema.Column{GroupBudgetsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "group_budgets_groups_group_budget",
-				Columns:    []*schema.Column{GroupBudgetsColumns[4]},
-				RefColumns: []*schema.Column{GroupsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// TagsColumns holds the columns for the "tags" table.
 	TagsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -206,57 +161,6 @@ var (
 		Name:       "tags",
 		Columns:    TagsColumns,
 		PrimaryKey: []*schema.Column{TagsColumns[0]},
-	}
-	// TransactionsColumns holds the columns for the "transactions" table.
-	TransactionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "application_transaction", Type: field.TypeUUID, Nullable: true},
-		{Name: "group_budget_transaction", Type: field.TypeUUID, Nullable: true},
-	}
-	// TransactionsTable holds the schema information for the "transactions" table.
-	TransactionsTable = &schema.Table{
-		Name:       "transactions",
-		Columns:    TransactionsColumns,
-		PrimaryKey: []*schema.Column{TransactionsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "transactions_applications_transaction",
-				Columns:    []*schema.Column{TransactionsColumns[2]},
-				RefColumns: []*schema.Column{ApplicationsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "transactions_group_budgets_transaction",
-				Columns:    []*schema.Column{TransactionsColumns[3]},
-				RefColumns: []*schema.Column{GroupBudgetsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// TransactionDetailsColumns holds the columns for the "transaction_details" table.
-	TransactionDetailsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
-		{Name: "title", Type: field.TypeString, Size: 64},
-		{Name: "amount", Type: field.TypeInt, Default: 0},
-		{Name: "target", Type: field.TypeString, Default: ""},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "transaction_detail", Type: field.TypeUUID, Unique: true, Nullable: true},
-	}
-	// TransactionDetailsTable holds the schema information for the "transaction_details" table.
-	TransactionDetailsTable = &schema.Table{
-		Name:       "transaction_details",
-		Columns:    TransactionDetailsColumns,
-		PrimaryKey: []*schema.Column{TransactionDetailsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "transaction_details_transactions_detail",
-				Columns:    []*schema.Column{TransactionDetailsColumns[6]},
-				RefColumns: []*schema.Column{TransactionsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -299,81 +203,6 @@ var (
 			},
 		},
 	}
-	// GroupUserColumns holds the columns for the "group_user" table.
-	GroupUserColumns = []*schema.Column{
-		{Name: "group_id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
-	}
-	// GroupUserTable holds the schema information for the "group_user" table.
-	GroupUserTable = &schema.Table{
-		Name:       "group_user",
-		Columns:    GroupUserColumns,
-		PrimaryKey: []*schema.Column{GroupUserColumns[0], GroupUserColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "group_user_group_id",
-				Columns:    []*schema.Column{GroupUserColumns[0]},
-				RefColumns: []*schema.Column{GroupsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "group_user_user_id",
-				Columns:    []*schema.Column{GroupUserColumns[1]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
-	// GroupOwnerColumns holds the columns for the "group_owner" table.
-	GroupOwnerColumns = []*schema.Column{
-		{Name: "group_id", Type: field.TypeUUID},
-		{Name: "user_id", Type: field.TypeUUID},
-	}
-	// GroupOwnerTable holds the schema information for the "group_owner" table.
-	GroupOwnerTable = &schema.Table{
-		Name:       "group_owner",
-		Columns:    GroupOwnerColumns,
-		PrimaryKey: []*schema.Column{GroupOwnerColumns[0], GroupOwnerColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "group_owner_group_id",
-				Columns:    []*schema.Column{GroupOwnerColumns[0]},
-				RefColumns: []*schema.Column{GroupsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "group_owner_user_id",
-				Columns:    []*schema.Column{GroupOwnerColumns[1]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
-	// TransactionTagColumns holds the columns for the "transaction_tag" table.
-	TransactionTagColumns = []*schema.Column{
-		{Name: "transaction_id", Type: field.TypeUUID},
-		{Name: "tag_id", Type: field.TypeUUID},
-	}
-	// TransactionTagTable holds the schema information for the "transaction_tag" table.
-	TransactionTagTable = &schema.Table{
-		Name:       "transaction_tag",
-		Columns:    TransactionTagColumns,
-		PrimaryKey: []*schema.Column{TransactionTagColumns[0], TransactionTagColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "transaction_tag_transaction_id",
-				Columns:    []*schema.Column{TransactionTagColumns[0]},
-				RefColumns: []*schema.Column{TransactionsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "transaction_tag_tag_id",
-				Columns:    []*schema.Column{TransactionTagColumns[1]},
-				RefColumns: []*schema.Column{TagsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ApplicationsTable,
@@ -381,22 +210,14 @@ var (
 		ApplicationTargetsTable,
 		CommentsTable,
 		FilesTable,
-		GroupsTable,
-		GroupBudgetsTable,
 		TagsTable,
-		TransactionsTable,
-		TransactionDetailsTable,
 		UsersTable,
 		ApplicationTagTable,
-		GroupUserTable,
-		GroupOwnerTable,
-		TransactionTagTable,
 	}
 )
 
 func init() {
 	ApplicationsTable.ForeignKeys[0].RefTable = UsersTable
-	ApplicationsTable.ForeignKeys[1].RefTable = GroupsTable
 	ApplicationStatusTable.ForeignKeys[0].RefTable = ApplicationsTable
 	ApplicationStatusTable.ForeignKeys[1].RefTable = UsersTable
 	ApplicationTargetsTable.ForeignKeys[0].RefTable = ApplicationsTable
@@ -405,16 +226,6 @@ func init() {
 	CommentsTable.ForeignKeys[1].RefTable = UsersTable
 	FilesTable.ForeignKeys[0].RefTable = ApplicationsTable
 	FilesTable.ForeignKeys[1].RefTable = UsersTable
-	GroupBudgetsTable.ForeignKeys[0].RefTable = GroupsTable
-	TransactionsTable.ForeignKeys[0].RefTable = ApplicationsTable
-	TransactionsTable.ForeignKeys[1].RefTable = GroupBudgetsTable
-	TransactionDetailsTable.ForeignKeys[0].RefTable = TransactionsTable
 	ApplicationTagTable.ForeignKeys[0].RefTable = ApplicationsTable
 	ApplicationTagTable.ForeignKeys[1].RefTable = TagsTable
-	GroupUserTable.ForeignKeys[0].RefTable = GroupsTable
-	GroupUserTable.ForeignKeys[1].RefTable = UsersTable
-	GroupOwnerTable.ForeignKeys[0].RefTable = GroupsTable
-	GroupOwnerTable.ForeignKeys[1].RefTable = UsersTable
-	TransactionTagTable.ForeignKeys[0].RefTable = TransactionsTable
-	TransactionTagTable.ForeignKeys[1].RefTable = TagsTable
 }

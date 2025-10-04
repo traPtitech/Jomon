@@ -35,14 +35,6 @@ func dropAll(t *testing.T, ctx context.Context, client *ent.Client) error {
 	if err != nil {
 		return err
 	}
-	_, err = client.Group.Delete().Exec(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = client.GroupBudget.Delete().Exec(ctx)
-	if err != nil {
-		return err
-	}
 	_, err = client.Application.Delete().Exec(ctx)
 	if err != nil {
 		return err
@@ -56,14 +48,6 @@ func dropAll(t *testing.T, ctx context.Context, client *ent.Client) error {
 		return err
 	}
 	_, err = client.Tag.Delete().Exec(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = client.Transaction.Delete().Exec(ctx)
-	if err != nil {
-		return err
-	}
-	_, err = client.TransactionDetail.Delete().Exec(ctx)
 	if err != nil {
 		return err
 	}

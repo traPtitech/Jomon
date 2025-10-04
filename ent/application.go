@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/ent/application"
-	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -30,10 +29,9 @@ type Application struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ApplicationQuery when eager-loading is set.
-	Edges             ApplicationEdges `json:"edges"`
-	application_user  *uuid.UUID
-	group_application *uuid.UUID
-	selectValues      sql.SelectValues
+	Edges            ApplicationEdges `json:"edges"`
+	application_user *uuid.UUID
+	selectValues     sql.SelectValues
 }
 
 // ApplicationEdges holds the relations/edges for other nodes in the graph.
@@ -46,17 +44,13 @@ type ApplicationEdges struct {
 	File []*File `json:"file,omitempty"`
 	// Tag holds the value of the tag edge.
 	Tag []*Tag `json:"tag,omitempty"`
-	// Transaction holds the value of the transaction edge.
-	Transaction []*Transaction `json:"transaction,omitempty"`
 	// Comment holds the value of the comment edge.
 	Comment []*Comment `json:"comment,omitempty"`
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
-	// Group holds the value of the group edge.
-	Group *Group `json:"group,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [6]bool
 }
 
 // StatusOrErr returns the Status value or an error if the edge
@@ -95,19 +89,10 @@ func (e ApplicationEdges) TagOrErr() ([]*Tag, error) {
 	return nil, &NotLoadedError{edge: "tag"}
 }
 
-// TransactionOrErr returns the Transaction value or an error if the edge
-// was not loaded in eager-loading.
-func (e ApplicationEdges) TransactionOrErr() ([]*Transaction, error) {
-	if e.loadedTypes[4] {
-		return e.Transaction, nil
-	}
-	return nil, &NotLoadedError{edge: "transaction"}
-}
-
 // CommentOrErr returns the Comment value or an error if the edge
 // was not loaded in eager-loading.
 func (e ApplicationEdges) CommentOrErr() ([]*Comment, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[4] {
 		return e.Comment, nil
 	}
 	return nil, &NotLoadedError{edge: "comment"}
@@ -118,21 +103,10 @@ func (e ApplicationEdges) CommentOrErr() ([]*Comment, error) {
 func (e ApplicationEdges) UserOrErr() (*User, error) {
 	if e.User != nil {
 		return e.User, nil
-	} else if e.loadedTypes[6] {
+	} else if e.loadedTypes[5] {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
-}
-
-// GroupOrErr returns the Group value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e ApplicationEdges) GroupOrErr() (*Group, error) {
-	if e.Group != nil {
-		return e.Group, nil
-	} else if e.loadedTypes[7] {
-		return nil, &NotFoundError{label: group.Label}
-	}
-	return nil, &NotLoadedError{edge: "group"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -148,8 +122,6 @@ func (*Application) scanValues(columns []string) ([]any, error) {
 			values[i] = new(uuid.UUID)
 		case application.ForeignKeys[0]: // application_user
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case application.ForeignKeys[1]: // group_application
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -159,7 +131,7 @@ func (*Application) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Application fields.
-func (a *Application) assignValues(columns []string, values []any) error {
+func (_m *Application) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -169,48 +141,41 @@ func (a *Application) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				a.ID = *value
+				_m.ID = *value
 			}
 		case application.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
 			} else if value.Valid {
-				a.Title = value.String
+				_m.Title = value.String
 			}
 		case application.FieldContent:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field content", values[i])
 			} else if value.Valid {
-				a.Content = value.String
+				_m.Content = value.String
 			}
 		case application.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				a.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case application.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				a.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		case application.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field application_user", values[i])
 			} else if value.Valid {
-				a.application_user = new(uuid.UUID)
-				*a.application_user = *value.S.(*uuid.UUID)
-			}
-		case application.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field group_application", values[i])
-			} else if value.Valid {
-				a.group_application = new(uuid.UUID)
-				*a.group_application = *value.S.(*uuid.UUID)
+				_m.application_user = new(uuid.UUID)
+				*_m.application_user = *value.S.(*uuid.UUID)
 			}
 		default:
-			a.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -218,84 +183,74 @@ func (a *Application) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Application.
 // This includes values selected through modifiers, order, etc.
-func (a *Application) Value(name string) (ent.Value, error) {
-	return a.selectValues.Get(name)
+func (_m *Application) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryStatus queries the "status" edge of the Application entity.
-func (a *Application) QueryStatus() *ApplicationStatusQuery {
-	return NewApplicationClient(a.config).QueryStatus(a)
+func (_m *Application) QueryStatus() *ApplicationStatusQuery {
+	return NewApplicationClient(_m.config).QueryStatus(_m)
 }
 
 // QueryTarget queries the "target" edge of the Application entity.
-func (a *Application) QueryTarget() *ApplicationTargetQuery {
-	return NewApplicationClient(a.config).QueryTarget(a)
+func (_m *Application) QueryTarget() *ApplicationTargetQuery {
+	return NewApplicationClient(_m.config).QueryTarget(_m)
 }
 
 // QueryFile queries the "file" edge of the Application entity.
-func (a *Application) QueryFile() *FileQuery {
-	return NewApplicationClient(a.config).QueryFile(a)
+func (_m *Application) QueryFile() *FileQuery {
+	return NewApplicationClient(_m.config).QueryFile(_m)
 }
 
 // QueryTag queries the "tag" edge of the Application entity.
-func (a *Application) QueryTag() *TagQuery {
-	return NewApplicationClient(a.config).QueryTag(a)
-}
-
-// QueryTransaction queries the "transaction" edge of the Application entity.
-func (a *Application) QueryTransaction() *TransactionQuery {
-	return NewApplicationClient(a.config).QueryTransaction(a)
+func (_m *Application) QueryTag() *TagQuery {
+	return NewApplicationClient(_m.config).QueryTag(_m)
 }
 
 // QueryComment queries the "comment" edge of the Application entity.
-func (a *Application) QueryComment() *CommentQuery {
-	return NewApplicationClient(a.config).QueryComment(a)
+func (_m *Application) QueryComment() *CommentQuery {
+	return NewApplicationClient(_m.config).QueryComment(_m)
 }
 
 // QueryUser queries the "user" edge of the Application entity.
-func (a *Application) QueryUser() *UserQuery {
-	return NewApplicationClient(a.config).QueryUser(a)
-}
-
-// QueryGroup queries the "group" edge of the Application entity.
-func (a *Application) QueryGroup() *GroupQuery {
-	return NewApplicationClient(a.config).QueryGroup(a)
+func (_m *Application) QueryUser() *UserQuery {
+	return NewApplicationClient(_m.config).QueryUser(_m)
 }
 
 // Update returns a builder for updating this Application.
 // Note that you need to call Application.Unwrap() before calling this method if this Application
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (a *Application) Update() *ApplicationUpdateOne {
-	return NewApplicationClient(a.config).UpdateOne(a)
+func (_m *Application) Update() *ApplicationUpdateOne {
+	return NewApplicationClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Application entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (a *Application) Unwrap() *Application {
-	_tx, ok := a.config.driver.(*txDriver)
+func (_m *Application) Unwrap() *Application {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Application is not a transactional entity")
 	}
-	a.config.driver = _tx.drv
-	return a
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (a *Application) String() string {
+func (_m *Application) String() string {
 	var builder strings.Builder
 	builder.WriteString("Application(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("title=")
-	builder.WriteString(a.Title)
+	builder.WriteString(_m.Title)
 	builder.WriteString(", ")
 	builder.WriteString("content=")
-	builder.WriteString(a.Content)
+	builder.WriteString(_m.Content)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(a.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(a.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

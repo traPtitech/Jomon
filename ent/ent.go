@@ -17,11 +17,7 @@ import (
 	"github.com/traPtitech/Jomon/ent/applicationtarget"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/group"
-	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/tag"
-	"github.com/traPtitech/Jomon/ent/transaction"
-	"github.com/traPtitech/Jomon/ent/transactiondetail"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -80,7 +76,7 @@ var (
 )
 
 // checkColumn checks if the column exists in the given table.
-func checkColumn(table, column string) error {
+func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			application.Table:       application.ValidColumn,
@@ -88,15 +84,11 @@ func checkColumn(table, column string) error {
 			applicationtarget.Table: applicationtarget.ValidColumn,
 			comment.Table:           comment.ValidColumn,
 			file.Table:              file.ValidColumn,
-			group.Table:             group.ValidColumn,
-			groupbudget.Table:       groupbudget.ValidColumn,
 			tag.Table:               tag.ValidColumn,
-			transaction.Table:       transaction.ValidColumn,
-			transactiondetail.Table: transactiondetail.ValidColumn,
 			user.Table:              user.ValidColumn,
 		})
 	})
-	return columnCheck(table, column)
+	return columnCheck(t, c)
 }
 
 // Asc applies the given fields in ASC order.

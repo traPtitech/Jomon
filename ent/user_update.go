@@ -17,7 +17,6 @@ import (
 	"github.com/traPtitech/Jomon/ent/applicationtarget"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/predicate"
 	"github.com/traPtitech/Jomon/ent/user"
 )
@@ -30,359 +29,287 @@ type UserUpdate struct {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.mutation.Where(ps...)
-	return uu
+func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (uu *UserUpdate) SetName(s string) *UserUpdate {
-	uu.mutation.SetName(s)
-	return uu
+func (_u *UserUpdate) SetName(v string) *UserUpdate {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetName(*s)
+func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return uu
+	return _u
 }
 
 // SetDisplayName sets the "display_name" field.
-func (uu *UserUpdate) SetDisplayName(s string) *UserUpdate {
-	uu.mutation.SetDisplayName(s)
-	return uu
+func (_u *UserUpdate) SetDisplayName(v string) *UserUpdate {
+	_u.mutation.SetDisplayName(v)
+	return _u
 }
 
 // SetNillableDisplayName sets the "display_name" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableDisplayName(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetDisplayName(*s)
+func (_u *UserUpdate) SetNillableDisplayName(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetDisplayName(*v)
 	}
-	return uu
+	return _u
 }
 
 // SetAccountManager sets the "account_manager" field.
-func (uu *UserUpdate) SetAccountManager(b bool) *UserUpdate {
-	uu.mutation.SetAccountManager(b)
-	return uu
+func (_u *UserUpdate) SetAccountManager(v bool) *UserUpdate {
+	_u.mutation.SetAccountManager(v)
+	return _u
 }
 
 // SetNillableAccountManager sets the "account_manager" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAccountManager(b *bool) *UserUpdate {
-	if b != nil {
-		uu.SetAccountManager(*b)
+func (_u *UserUpdate) SetNillableAccountManager(v *bool) *UserUpdate {
+	if v != nil {
+		_u.SetAccountManager(*v)
 	}
-	return uu
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (uu *UserUpdate) SetCreatedAt(t time.Time) *UserUpdate {
-	uu.mutation.SetCreatedAt(t)
-	return uu
+func (_u *UserUpdate) SetCreatedAt(v time.Time) *UserUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableCreatedAt(t *time.Time) *UserUpdate {
-	if t != nil {
-		uu.SetCreatedAt(*t)
+func (_u *UserUpdate) SetNillableCreatedAt(v *time.Time) *UserUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return uu
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
-	uu.mutation.SetUpdatedAt(t)
-	return uu
+func (_u *UserUpdate) SetUpdatedAt(v time.Time) *UserUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (uu *UserUpdate) SetDeletedAt(t time.Time) *UserUpdate {
-	uu.mutation.SetDeletedAt(t)
-	return uu
+func (_u *UserUpdate) SetDeletedAt(v time.Time) *UserUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableDeletedAt(t *time.Time) *UserUpdate {
-	if t != nil {
-		uu.SetDeletedAt(*t)
+func (_u *UserUpdate) SetNillableDeletedAt(v *time.Time) *UserUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return uu
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (uu *UserUpdate) ClearDeletedAt() *UserUpdate {
-	uu.mutation.ClearDeletedAt()
-	return uu
-}
-
-// AddGroupUserIDs adds the "group_user" edge to the Group entity by IDs.
-func (uu *UserUpdate) AddGroupUserIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.AddGroupUserIDs(ids...)
-	return uu
-}
-
-// AddGroupUser adds the "group_user" edges to the Group entity.
-func (uu *UserUpdate) AddGroupUser(g ...*Group) *UserUpdate {
-	ids := make([]uuid.UUID, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
-	}
-	return uu.AddGroupUserIDs(ids...)
-}
-
-// AddGroupOwnerIDs adds the "group_owner" edge to the Group entity by IDs.
-func (uu *UserUpdate) AddGroupOwnerIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.AddGroupOwnerIDs(ids...)
-	return uu
-}
-
-// AddGroupOwner adds the "group_owner" edges to the Group entity.
-func (uu *UserUpdate) AddGroupOwner(g ...*Group) *UserUpdate {
-	ids := make([]uuid.UUID, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
-	}
-	return uu.AddGroupOwnerIDs(ids...)
+func (_u *UserUpdate) ClearDeletedAt() *UserUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // AddCommentIDs adds the "comment" edge to the Comment entity by IDs.
-func (uu *UserUpdate) AddCommentIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.AddCommentIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddCommentIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.AddCommentIDs(ids...)
+	return _u
 }
 
 // AddComment adds the "comment" edges to the Comment entity.
-func (uu *UserUpdate) AddComment(c ...*Comment) *UserUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *UserUpdate) AddComment(v ...*Comment) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.AddCommentIDs(ids...)
+	return _u.AddCommentIDs(ids...)
 }
 
 // AddApplicationStatuIDs adds the "application_status" edge to the ApplicationStatus entity by IDs.
-func (uu *UserUpdate) AddApplicationStatuIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.AddApplicationStatuIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddApplicationStatuIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.AddApplicationStatuIDs(ids...)
+	return _u
 }
 
 // AddApplicationStatus adds the "application_status" edges to the ApplicationStatus entity.
-func (uu *UserUpdate) AddApplicationStatus(a ...*ApplicationStatus) *UserUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *UserUpdate) AddApplicationStatus(v ...*ApplicationStatus) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.AddApplicationStatuIDs(ids...)
+	return _u.AddApplicationStatuIDs(ids...)
 }
 
 // AddApplicationIDs adds the "application" edge to the Application entity by IDs.
-func (uu *UserUpdate) AddApplicationIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.AddApplicationIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddApplicationIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.AddApplicationIDs(ids...)
+	return _u
 }
 
 // AddApplication adds the "application" edges to the Application entity.
-func (uu *UserUpdate) AddApplication(a ...*Application) *UserUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *UserUpdate) AddApplication(v ...*Application) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.AddApplicationIDs(ids...)
+	return _u.AddApplicationIDs(ids...)
 }
 
 // AddFileIDs adds the "file" edge to the File entity by IDs.
-func (uu *UserUpdate) AddFileIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.AddFileIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddFileIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.AddFileIDs(ids...)
+	return _u
 }
 
 // AddFile adds the "file" edges to the File entity.
-func (uu *UserUpdate) AddFile(f ...*File) *UserUpdate {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *UserUpdate) AddFile(v ...*File) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.AddFileIDs(ids...)
+	return _u.AddFileIDs(ids...)
 }
 
 // AddApplicationTargetIDs adds the "application_target" edge to the ApplicationTarget entity by IDs.
-func (uu *UserUpdate) AddApplicationTargetIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.AddApplicationTargetIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddApplicationTargetIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.AddApplicationTargetIDs(ids...)
+	return _u
 }
 
 // AddApplicationTarget adds the "application_target" edges to the ApplicationTarget entity.
-func (uu *UserUpdate) AddApplicationTarget(a ...*ApplicationTarget) *UserUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *UserUpdate) AddApplicationTarget(v ...*ApplicationTarget) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.AddApplicationTargetIDs(ids...)
+	return _u.AddApplicationTargetIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uu *UserUpdate) Mutation() *UserMutation {
-	return uu.mutation
-}
-
-// ClearGroupUser clears all "group_user" edges to the Group entity.
-func (uu *UserUpdate) ClearGroupUser() *UserUpdate {
-	uu.mutation.ClearGroupUser()
-	return uu
-}
-
-// RemoveGroupUserIDs removes the "group_user" edge to Group entities by IDs.
-func (uu *UserUpdate) RemoveGroupUserIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.RemoveGroupUserIDs(ids...)
-	return uu
-}
-
-// RemoveGroupUser removes "group_user" edges to Group entities.
-func (uu *UserUpdate) RemoveGroupUser(g ...*Group) *UserUpdate {
-	ids := make([]uuid.UUID, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
-	}
-	return uu.RemoveGroupUserIDs(ids...)
-}
-
-// ClearGroupOwner clears all "group_owner" edges to the Group entity.
-func (uu *UserUpdate) ClearGroupOwner() *UserUpdate {
-	uu.mutation.ClearGroupOwner()
-	return uu
-}
-
-// RemoveGroupOwnerIDs removes the "group_owner" edge to Group entities by IDs.
-func (uu *UserUpdate) RemoveGroupOwnerIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.RemoveGroupOwnerIDs(ids...)
-	return uu
-}
-
-// RemoveGroupOwner removes "group_owner" edges to Group entities.
-func (uu *UserUpdate) RemoveGroupOwner(g ...*Group) *UserUpdate {
-	ids := make([]uuid.UUID, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
-	}
-	return uu.RemoveGroupOwnerIDs(ids...)
+func (_u *UserUpdate) Mutation() *UserMutation {
+	return _u.mutation
 }
 
 // ClearComment clears all "comment" edges to the Comment entity.
-func (uu *UserUpdate) ClearComment() *UserUpdate {
-	uu.mutation.ClearComment()
-	return uu
+func (_u *UserUpdate) ClearComment() *UserUpdate {
+	_u.mutation.ClearComment()
+	return _u
 }
 
 // RemoveCommentIDs removes the "comment" edge to Comment entities by IDs.
-func (uu *UserUpdate) RemoveCommentIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.RemoveCommentIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveCommentIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.RemoveCommentIDs(ids...)
+	return _u
 }
 
 // RemoveComment removes "comment" edges to Comment entities.
-func (uu *UserUpdate) RemoveComment(c ...*Comment) *UserUpdate {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *UserUpdate) RemoveComment(v ...*Comment) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.RemoveCommentIDs(ids...)
+	return _u.RemoveCommentIDs(ids...)
 }
 
 // ClearApplicationStatus clears all "application_status" edges to the ApplicationStatus entity.
-func (uu *UserUpdate) ClearApplicationStatus() *UserUpdate {
-	uu.mutation.ClearApplicationStatus()
-	return uu
+func (_u *UserUpdate) ClearApplicationStatus() *UserUpdate {
+	_u.mutation.ClearApplicationStatus()
+	return _u
 }
 
 // RemoveApplicationStatuIDs removes the "application_status" edge to ApplicationStatus entities by IDs.
-func (uu *UserUpdate) RemoveApplicationStatuIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.RemoveApplicationStatuIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveApplicationStatuIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.RemoveApplicationStatuIDs(ids...)
+	return _u
 }
 
 // RemoveApplicationStatus removes "application_status" edges to ApplicationStatus entities.
-func (uu *UserUpdate) RemoveApplicationStatus(a ...*ApplicationStatus) *UserUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *UserUpdate) RemoveApplicationStatus(v ...*ApplicationStatus) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.RemoveApplicationStatuIDs(ids...)
+	return _u.RemoveApplicationStatuIDs(ids...)
 }
 
 // ClearApplication clears all "application" edges to the Application entity.
-func (uu *UserUpdate) ClearApplication() *UserUpdate {
-	uu.mutation.ClearApplication()
-	return uu
+func (_u *UserUpdate) ClearApplication() *UserUpdate {
+	_u.mutation.ClearApplication()
+	return _u
 }
 
 // RemoveApplicationIDs removes the "application" edge to Application entities by IDs.
-func (uu *UserUpdate) RemoveApplicationIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.RemoveApplicationIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveApplicationIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.RemoveApplicationIDs(ids...)
+	return _u
 }
 
 // RemoveApplication removes "application" edges to Application entities.
-func (uu *UserUpdate) RemoveApplication(a ...*Application) *UserUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *UserUpdate) RemoveApplication(v ...*Application) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.RemoveApplicationIDs(ids...)
+	return _u.RemoveApplicationIDs(ids...)
 }
 
 // ClearFile clears all "file" edges to the File entity.
-func (uu *UserUpdate) ClearFile() *UserUpdate {
-	uu.mutation.ClearFile()
-	return uu
+func (_u *UserUpdate) ClearFile() *UserUpdate {
+	_u.mutation.ClearFile()
+	return _u
 }
 
 // RemoveFileIDs removes the "file" edge to File entities by IDs.
-func (uu *UserUpdate) RemoveFileIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.RemoveFileIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveFileIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.RemoveFileIDs(ids...)
+	return _u
 }
 
 // RemoveFile removes "file" edges to File entities.
-func (uu *UserUpdate) RemoveFile(f ...*File) *UserUpdate {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *UserUpdate) RemoveFile(v ...*File) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.RemoveFileIDs(ids...)
+	return _u.RemoveFileIDs(ids...)
 }
 
 // ClearApplicationTarget clears all "application_target" edges to the ApplicationTarget entity.
-func (uu *UserUpdate) ClearApplicationTarget() *UserUpdate {
-	uu.mutation.ClearApplicationTarget()
-	return uu
+func (_u *UserUpdate) ClearApplicationTarget() *UserUpdate {
+	_u.mutation.ClearApplicationTarget()
+	return _u
 }
 
 // RemoveApplicationTargetIDs removes the "application_target" edge to ApplicationTarget entities by IDs.
-func (uu *UserUpdate) RemoveApplicationTargetIDs(ids ...uuid.UUID) *UserUpdate {
-	uu.mutation.RemoveApplicationTargetIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveApplicationTargetIDs(ids ...uuid.UUID) *UserUpdate {
+	_u.mutation.RemoveApplicationTargetIDs(ids...)
+	return _u
 }
 
 // RemoveApplicationTarget removes "application_target" edges to ApplicationTarget entities.
-func (uu *UserUpdate) RemoveApplicationTarget(a ...*ApplicationTarget) *UserUpdate {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *UserUpdate) RemoveApplicationTarget(v ...*ApplicationTarget) *UserUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.RemoveApplicationTargetIDs(ids...)
+	return _u.RemoveApplicationTargetIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	uu.defaults()
-	return withHooks(ctx, uu.sqlSave, uu.mutation, uu.hooks)
+func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uu *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := uu.Save(ctx)
+func (_u *UserUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -390,29 +317,29 @@ func (uu *UserUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (uu *UserUpdate) Exec(ctx context.Context) error {
-	_, err := uu.Save(ctx)
+func (_u *UserUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uu *UserUpdate) ExecX(ctx context.Context) {
-	if err := uu.Exec(ctx); err != nil {
+func (_u *UserUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (uu *UserUpdate) defaults() {
-	if _, ok := uu.mutation.UpdatedAt(); !ok {
+func (_u *UserUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := user.UpdateDefaultUpdatedAt()
-		uu.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uu *UserUpdate) check() error {
-	if v, ok := uu.mutation.Name(); ok {
+func (_u *UserUpdate) check() error {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := user.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "User.name": %w`, err)}
 		}
@@ -420,130 +347,40 @@ func (uu *UserUpdate) check() error {
 	return nil
 }
 
-func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := uu.check(); err != nil {
-		return n, err
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
-	if ps := uu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
-	if value, ok := uu.mutation.DisplayName(); ok {
+	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(user.FieldDisplayName, field.TypeString, value)
 	}
-	if value, ok := uu.mutation.AccountManager(); ok {
+	if value, ok := _u.mutation.AccountManager(); ok {
 		_spec.SetField(user.FieldAccountManager, field.TypeBool, value)
 	}
-	if value, ok := uu.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := uu.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := uu.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(user.FieldDeletedAt, field.TypeTime, value)
 	}
-	if uu.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(user.FieldDeletedAt, field.TypeTime)
 	}
-	if uu.mutation.GroupUserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.GroupUserTable,
-			Columns: user.GroupUserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.RemovedGroupUserIDs(); len(nodes) > 0 && !uu.mutation.GroupUserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.GroupUserTable,
-			Columns: user.GroupUserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.GroupUserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.GroupUserTable,
-			Columns: user.GroupUserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uu.mutation.GroupOwnerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.GroupOwnerTable,
-			Columns: user.GroupOwnerPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.RemovedGroupOwnerIDs(); len(nodes) > 0 && !uu.mutation.GroupOwnerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.GroupOwnerTable,
-			Columns: user.GroupOwnerPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.GroupOwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.GroupOwnerTable,
-			Columns: user.GroupOwnerPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uu.mutation.CommentCleared() {
+	if _u.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -556,7 +393,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedCommentIDs(); len(nodes) > 0 && !uu.mutation.CommentCleared() {
+	if nodes := _u.mutation.RemovedCommentIDs(); len(nodes) > 0 && !_u.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -572,7 +409,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.CommentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CommentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -588,7 +425,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.ApplicationStatusCleared() {
+	if _u.mutation.ApplicationStatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -601,23 +438,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedApplicationStatusIDs(); len(nodes) > 0 && !uu.mutation.ApplicationStatusCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.ApplicationStatusTable,
-			Columns: []string{user.ApplicationStatusColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(applicationstatus.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.ApplicationStatusIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedApplicationStatusIDs(); len(nodes) > 0 && !_u.mutation.ApplicationStatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -631,9 +452,25 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ApplicationStatusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ApplicationStatusTable,
+			Columns: []string{user.ApplicationStatusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(applicationstatus.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.ApplicationCleared() {
+	if _u.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -646,7 +483,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedApplicationIDs(); len(nodes) > 0 && !uu.mutation.ApplicationCleared() {
+	if nodes := _u.mutation.RemovedApplicationIDs(); len(nodes) > 0 && !_u.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -662,7 +499,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.ApplicationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -678,7 +515,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.FileCleared() {
+	if _u.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -691,7 +528,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedFileIDs(); len(nodes) > 0 && !uu.mutation.FileCleared() {
+	if nodes := _u.mutation.RemovedFileIDs(); len(nodes) > 0 && !_u.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -707,7 +544,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.FileIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -723,7 +560,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.ApplicationTargetCleared() {
+	if _u.mutation.ApplicationTargetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -736,7 +573,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedApplicationTargetIDs(); len(nodes) > 0 && !uu.mutation.ApplicationTargetCleared() {
+	if nodes := _u.mutation.RemovedApplicationTargetIDs(); len(nodes) > 0 && !_u.mutation.ApplicationTargetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -752,7 +589,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.ApplicationTargetIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ApplicationTargetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -768,7 +605,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -776,8 +613,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	uu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -789,366 +626,294 @@ type UserUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	uuo.mutation.SetName(s)
-	return uuo
+func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetName(*s)
+func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return uuo
+	return _u
 }
 
 // SetDisplayName sets the "display_name" field.
-func (uuo *UserUpdateOne) SetDisplayName(s string) *UserUpdateOne {
-	uuo.mutation.SetDisplayName(s)
-	return uuo
+func (_u *UserUpdateOne) SetDisplayName(v string) *UserUpdateOne {
+	_u.mutation.SetDisplayName(v)
+	return _u
 }
 
 // SetNillableDisplayName sets the "display_name" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableDisplayName(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetDisplayName(*s)
+func (_u *UserUpdateOne) SetNillableDisplayName(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetDisplayName(*v)
 	}
-	return uuo
+	return _u
 }
 
 // SetAccountManager sets the "account_manager" field.
-func (uuo *UserUpdateOne) SetAccountManager(b bool) *UserUpdateOne {
-	uuo.mutation.SetAccountManager(b)
-	return uuo
+func (_u *UserUpdateOne) SetAccountManager(v bool) *UserUpdateOne {
+	_u.mutation.SetAccountManager(v)
+	return _u
 }
 
 // SetNillableAccountManager sets the "account_manager" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAccountManager(b *bool) *UserUpdateOne {
-	if b != nil {
-		uuo.SetAccountManager(*b)
+func (_u *UserUpdateOne) SetNillableAccountManager(v *bool) *UserUpdateOne {
+	if v != nil {
+		_u.SetAccountManager(*v)
 	}
-	return uuo
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (uuo *UserUpdateOne) SetCreatedAt(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetCreatedAt(t)
-	return uuo
+func (_u *UserUpdateOne) SetCreatedAt(v time.Time) *UserUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableCreatedAt(t *time.Time) *UserUpdateOne {
-	if t != nil {
-		uuo.SetCreatedAt(*t)
+func (_u *UserUpdateOne) SetNillableCreatedAt(v *time.Time) *UserUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return uuo
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetUpdatedAt(t)
-	return uuo
+func (_u *UserUpdateOne) SetUpdatedAt(v time.Time) *UserUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (uuo *UserUpdateOne) SetDeletedAt(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetDeletedAt(t)
-	return uuo
+func (_u *UserUpdateOne) SetDeletedAt(v time.Time) *UserUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableDeletedAt(t *time.Time) *UserUpdateOne {
-	if t != nil {
-		uuo.SetDeletedAt(*t)
+func (_u *UserUpdateOne) SetNillableDeletedAt(v *time.Time) *UserUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return uuo
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (uuo *UserUpdateOne) ClearDeletedAt() *UserUpdateOne {
-	uuo.mutation.ClearDeletedAt()
-	return uuo
-}
-
-// AddGroupUserIDs adds the "group_user" edge to the Group entity by IDs.
-func (uuo *UserUpdateOne) AddGroupUserIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.AddGroupUserIDs(ids...)
-	return uuo
-}
-
-// AddGroupUser adds the "group_user" edges to the Group entity.
-func (uuo *UserUpdateOne) AddGroupUser(g ...*Group) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
-	}
-	return uuo.AddGroupUserIDs(ids...)
-}
-
-// AddGroupOwnerIDs adds the "group_owner" edge to the Group entity by IDs.
-func (uuo *UserUpdateOne) AddGroupOwnerIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.AddGroupOwnerIDs(ids...)
-	return uuo
-}
-
-// AddGroupOwner adds the "group_owner" edges to the Group entity.
-func (uuo *UserUpdateOne) AddGroupOwner(g ...*Group) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
-	}
-	return uuo.AddGroupOwnerIDs(ids...)
+func (_u *UserUpdateOne) ClearDeletedAt() *UserUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // AddCommentIDs adds the "comment" edge to the Comment entity by IDs.
-func (uuo *UserUpdateOne) AddCommentIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.AddCommentIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddCommentIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.AddCommentIDs(ids...)
+	return _u
 }
 
 // AddComment adds the "comment" edges to the Comment entity.
-func (uuo *UserUpdateOne) AddComment(c ...*Comment) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *UserUpdateOne) AddComment(v ...*Comment) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.AddCommentIDs(ids...)
+	return _u.AddCommentIDs(ids...)
 }
 
 // AddApplicationStatuIDs adds the "application_status" edge to the ApplicationStatus entity by IDs.
-func (uuo *UserUpdateOne) AddApplicationStatuIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.AddApplicationStatuIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddApplicationStatuIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.AddApplicationStatuIDs(ids...)
+	return _u
 }
 
 // AddApplicationStatus adds the "application_status" edges to the ApplicationStatus entity.
-func (uuo *UserUpdateOne) AddApplicationStatus(a ...*ApplicationStatus) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *UserUpdateOne) AddApplicationStatus(v ...*ApplicationStatus) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.AddApplicationStatuIDs(ids...)
+	return _u.AddApplicationStatuIDs(ids...)
 }
 
 // AddApplicationIDs adds the "application" edge to the Application entity by IDs.
-func (uuo *UserUpdateOne) AddApplicationIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.AddApplicationIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddApplicationIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.AddApplicationIDs(ids...)
+	return _u
 }
 
 // AddApplication adds the "application" edges to the Application entity.
-func (uuo *UserUpdateOne) AddApplication(a ...*Application) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *UserUpdateOne) AddApplication(v ...*Application) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.AddApplicationIDs(ids...)
+	return _u.AddApplicationIDs(ids...)
 }
 
 // AddFileIDs adds the "file" edge to the File entity by IDs.
-func (uuo *UserUpdateOne) AddFileIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.AddFileIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddFileIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.AddFileIDs(ids...)
+	return _u
 }
 
 // AddFile adds the "file" edges to the File entity.
-func (uuo *UserUpdateOne) AddFile(f ...*File) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *UserUpdateOne) AddFile(v ...*File) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.AddFileIDs(ids...)
+	return _u.AddFileIDs(ids...)
 }
 
 // AddApplicationTargetIDs adds the "application_target" edge to the ApplicationTarget entity by IDs.
-func (uuo *UserUpdateOne) AddApplicationTargetIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.AddApplicationTargetIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddApplicationTargetIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.AddApplicationTargetIDs(ids...)
+	return _u
 }
 
 // AddApplicationTarget adds the "application_target" edges to the ApplicationTarget entity.
-func (uuo *UserUpdateOne) AddApplicationTarget(a ...*ApplicationTarget) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *UserUpdateOne) AddApplicationTarget(v ...*ApplicationTarget) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.AddApplicationTargetIDs(ids...)
+	return _u.AddApplicationTargetIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uuo *UserUpdateOne) Mutation() *UserMutation {
-	return uuo.mutation
-}
-
-// ClearGroupUser clears all "group_user" edges to the Group entity.
-func (uuo *UserUpdateOne) ClearGroupUser() *UserUpdateOne {
-	uuo.mutation.ClearGroupUser()
-	return uuo
-}
-
-// RemoveGroupUserIDs removes the "group_user" edge to Group entities by IDs.
-func (uuo *UserUpdateOne) RemoveGroupUserIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.RemoveGroupUserIDs(ids...)
-	return uuo
-}
-
-// RemoveGroupUser removes "group_user" edges to Group entities.
-func (uuo *UserUpdateOne) RemoveGroupUser(g ...*Group) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
-	}
-	return uuo.RemoveGroupUserIDs(ids...)
-}
-
-// ClearGroupOwner clears all "group_owner" edges to the Group entity.
-func (uuo *UserUpdateOne) ClearGroupOwner() *UserUpdateOne {
-	uuo.mutation.ClearGroupOwner()
-	return uuo
-}
-
-// RemoveGroupOwnerIDs removes the "group_owner" edge to Group entities by IDs.
-func (uuo *UserUpdateOne) RemoveGroupOwnerIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.RemoveGroupOwnerIDs(ids...)
-	return uuo
-}
-
-// RemoveGroupOwner removes "group_owner" edges to Group entities.
-func (uuo *UserUpdateOne) RemoveGroupOwner(g ...*Group) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
-	}
-	return uuo.RemoveGroupOwnerIDs(ids...)
+func (_u *UserUpdateOne) Mutation() *UserMutation {
+	return _u.mutation
 }
 
 // ClearComment clears all "comment" edges to the Comment entity.
-func (uuo *UserUpdateOne) ClearComment() *UserUpdateOne {
-	uuo.mutation.ClearComment()
-	return uuo
+func (_u *UserUpdateOne) ClearComment() *UserUpdateOne {
+	_u.mutation.ClearComment()
+	return _u
 }
 
 // RemoveCommentIDs removes the "comment" edge to Comment entities by IDs.
-func (uuo *UserUpdateOne) RemoveCommentIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.RemoveCommentIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveCommentIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.RemoveCommentIDs(ids...)
+	return _u
 }
 
 // RemoveComment removes "comment" edges to Comment entities.
-func (uuo *UserUpdateOne) RemoveComment(c ...*Comment) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *UserUpdateOne) RemoveComment(v ...*Comment) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.RemoveCommentIDs(ids...)
+	return _u.RemoveCommentIDs(ids...)
 }
 
 // ClearApplicationStatus clears all "application_status" edges to the ApplicationStatus entity.
-func (uuo *UserUpdateOne) ClearApplicationStatus() *UserUpdateOne {
-	uuo.mutation.ClearApplicationStatus()
-	return uuo
+func (_u *UserUpdateOne) ClearApplicationStatus() *UserUpdateOne {
+	_u.mutation.ClearApplicationStatus()
+	return _u
 }
 
 // RemoveApplicationStatuIDs removes the "application_status" edge to ApplicationStatus entities by IDs.
-func (uuo *UserUpdateOne) RemoveApplicationStatuIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.RemoveApplicationStatuIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveApplicationStatuIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.RemoveApplicationStatuIDs(ids...)
+	return _u
 }
 
 // RemoveApplicationStatus removes "application_status" edges to ApplicationStatus entities.
-func (uuo *UserUpdateOne) RemoveApplicationStatus(a ...*ApplicationStatus) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *UserUpdateOne) RemoveApplicationStatus(v ...*ApplicationStatus) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.RemoveApplicationStatuIDs(ids...)
+	return _u.RemoveApplicationStatuIDs(ids...)
 }
 
 // ClearApplication clears all "application" edges to the Application entity.
-func (uuo *UserUpdateOne) ClearApplication() *UserUpdateOne {
-	uuo.mutation.ClearApplication()
-	return uuo
+func (_u *UserUpdateOne) ClearApplication() *UserUpdateOne {
+	_u.mutation.ClearApplication()
+	return _u
 }
 
 // RemoveApplicationIDs removes the "application" edge to Application entities by IDs.
-func (uuo *UserUpdateOne) RemoveApplicationIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.RemoveApplicationIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveApplicationIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.RemoveApplicationIDs(ids...)
+	return _u
 }
 
 // RemoveApplication removes "application" edges to Application entities.
-func (uuo *UserUpdateOne) RemoveApplication(a ...*Application) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *UserUpdateOne) RemoveApplication(v ...*Application) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.RemoveApplicationIDs(ids...)
+	return _u.RemoveApplicationIDs(ids...)
 }
 
 // ClearFile clears all "file" edges to the File entity.
-func (uuo *UserUpdateOne) ClearFile() *UserUpdateOne {
-	uuo.mutation.ClearFile()
-	return uuo
+func (_u *UserUpdateOne) ClearFile() *UserUpdateOne {
+	_u.mutation.ClearFile()
+	return _u
 }
 
 // RemoveFileIDs removes the "file" edge to File entities by IDs.
-func (uuo *UserUpdateOne) RemoveFileIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.RemoveFileIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveFileIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.RemoveFileIDs(ids...)
+	return _u
 }
 
 // RemoveFile removes "file" edges to File entities.
-func (uuo *UserUpdateOne) RemoveFile(f ...*File) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *UserUpdateOne) RemoveFile(v ...*File) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.RemoveFileIDs(ids...)
+	return _u.RemoveFileIDs(ids...)
 }
 
 // ClearApplicationTarget clears all "application_target" edges to the ApplicationTarget entity.
-func (uuo *UserUpdateOne) ClearApplicationTarget() *UserUpdateOne {
-	uuo.mutation.ClearApplicationTarget()
-	return uuo
+func (_u *UserUpdateOne) ClearApplicationTarget() *UserUpdateOne {
+	_u.mutation.ClearApplicationTarget()
+	return _u
 }
 
 // RemoveApplicationTargetIDs removes the "application_target" edge to ApplicationTarget entities by IDs.
-func (uuo *UserUpdateOne) RemoveApplicationTargetIDs(ids ...uuid.UUID) *UserUpdateOne {
-	uuo.mutation.RemoveApplicationTargetIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveApplicationTargetIDs(ids ...uuid.UUID) *UserUpdateOne {
+	_u.mutation.RemoveApplicationTargetIDs(ids...)
+	return _u
 }
 
 // RemoveApplicationTarget removes "application_target" edges to ApplicationTarget entities.
-func (uuo *UserUpdateOne) RemoveApplicationTarget(a ...*ApplicationTarget) *UserUpdateOne {
-	ids := make([]uuid.UUID, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *UserUpdateOne) RemoveApplicationTarget(v ...*ApplicationTarget) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.RemoveApplicationTargetIDs(ids...)
+	return _u.RemoveApplicationTargetIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uuo *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	uuo.mutation.Where(ps...)
-	return uuo
+func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
-	uuo.fields = append([]string{field}, fields...)
-	return uuo
+func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated User entity.
-func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	uuo.defaults()
-	return withHooks(ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
+func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := uuo.Save(ctx)
+func (_u *UserUpdateOne) SaveX(ctx context.Context) *User {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -1156,29 +921,29 @@ func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query on the entity.
-func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := uuo.Save(ctx)
+func (_u *UserUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
-	if err := uuo.Exec(ctx); err != nil {
+func (_u *UserUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (uuo *UserUpdateOne) defaults() {
-	if _, ok := uuo.mutation.UpdatedAt(); !ok {
+func (_u *UserUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := user.UpdateDefaultUpdatedAt()
-		uuo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uuo *UserUpdateOne) check() error {
-	if v, ok := uuo.mutation.Name(); ok {
+func (_u *UserUpdateOne) check() error {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := user.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "User.name": %w`, err)}
 		}
@@ -1186,17 +951,17 @@ func (uuo *UserUpdateOne) check() error {
 	return nil
 }
 
-func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
-	if err := uuo.check(); err != nil {
+func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
-	id, ok := uuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := uuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
 		for _, f := range fields {
@@ -1208,125 +973,35 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if ps := uuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uuo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
-	if value, ok := uuo.mutation.DisplayName(); ok {
+	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(user.FieldDisplayName, field.TypeString, value)
 	}
-	if value, ok := uuo.mutation.AccountManager(); ok {
+	if value, ok := _u.mutation.AccountManager(); ok {
 		_spec.SetField(user.FieldAccountManager, field.TypeBool, value)
 	}
-	if value, ok := uuo.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := uuo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := uuo.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(user.FieldDeletedAt, field.TypeTime, value)
 	}
-	if uuo.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(user.FieldDeletedAt, field.TypeTime)
 	}
-	if uuo.mutation.GroupUserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.GroupUserTable,
-			Columns: user.GroupUserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.RemovedGroupUserIDs(); len(nodes) > 0 && !uuo.mutation.GroupUserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.GroupUserTable,
-			Columns: user.GroupUserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.GroupUserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.GroupUserTable,
-			Columns: user.GroupUserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uuo.mutation.GroupOwnerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.GroupOwnerTable,
-			Columns: user.GroupOwnerPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.RemovedGroupOwnerIDs(); len(nodes) > 0 && !uuo.mutation.GroupOwnerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.GroupOwnerTable,
-			Columns: user.GroupOwnerPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.GroupOwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.GroupOwnerTable,
-			Columns: user.GroupOwnerPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uuo.mutation.CommentCleared() {
+	if _u.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1339,7 +1014,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedCommentIDs(); len(nodes) > 0 && !uuo.mutation.CommentCleared() {
+	if nodes := _u.mutation.RemovedCommentIDs(); len(nodes) > 0 && !_u.mutation.CommentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1355,7 +1030,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.CommentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CommentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1371,7 +1046,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.ApplicationStatusCleared() {
+	if _u.mutation.ApplicationStatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1384,23 +1059,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedApplicationStatusIDs(); len(nodes) > 0 && !uuo.mutation.ApplicationStatusCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.ApplicationStatusTable,
-			Columns: []string{user.ApplicationStatusColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(applicationstatus.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.ApplicationStatusIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedApplicationStatusIDs(); len(nodes) > 0 && !_u.mutation.ApplicationStatusCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1414,9 +1073,25 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ApplicationStatusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ApplicationStatusTable,
+			Columns: []string{user.ApplicationStatusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(applicationstatus.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.ApplicationCleared() {
+	if _u.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1429,7 +1104,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedApplicationIDs(); len(nodes) > 0 && !uuo.mutation.ApplicationCleared() {
+	if nodes := _u.mutation.RemovedApplicationIDs(); len(nodes) > 0 && !_u.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1445,7 +1120,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.ApplicationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1461,7 +1136,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.FileCleared() {
+	if _u.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1474,7 +1149,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedFileIDs(); len(nodes) > 0 && !uuo.mutation.FileCleared() {
+	if nodes := _u.mutation.RemovedFileIDs(); len(nodes) > 0 && !_u.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1490,7 +1165,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.FileIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1506,7 +1181,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.ApplicationTargetCleared() {
+	if _u.mutation.ApplicationTargetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1519,7 +1194,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedApplicationTargetIDs(); len(nodes) > 0 && !uuo.mutation.ApplicationTargetCleared() {
+	if nodes := _u.mutation.RemovedApplicationTargetIDs(); len(nodes) > 0 && !_u.mutation.ApplicationTargetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1535,7 +1210,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.ApplicationTargetIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ApplicationTargetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1551,10 +1226,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &User{config: uuo.config}
+	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -1562,6 +1237,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		return nil, err
 	}
-	uuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

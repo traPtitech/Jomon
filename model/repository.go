@@ -8,17 +8,12 @@ type Repository interface {
 	AccountManagerRepository
 	CommentRepository
 	FileRepository
-	GroupBudgetRepository
-	GroupRepository
 	ApplicationFileRepository
 	ApplicationStatusRepository
 	ApplicationTagRepository
 	ApplicationTargetRepository
 	ApplicationRepository
 	TagRepository
-	TransactionDetailRepository
-	TransactionTagRepository
-	TransactionRepository
 	UserRepository
 }
 

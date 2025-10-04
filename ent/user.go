@@ -38,10 +38,6 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// GroupUser holds the value of the group_user edge.
-	GroupUser []*Group `json:"group_user,omitempty"`
-	// GroupOwner holds the value of the group_owner edge.
-	GroupOwner []*Group `json:"group_owner,omitempty"`
 	// Comment holds the value of the comment edge.
 	Comment []*Comment `json:"comment,omitempty"`
 	// ApplicationStatus holds the value of the application_status edge.
@@ -54,31 +50,13 @@ type UserEdges struct {
 	ApplicationTarget []*ApplicationTarget `json:"application_target,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [7]bool
-}
-
-// GroupUserOrErr returns the GroupUser value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) GroupUserOrErr() ([]*Group, error) {
-	if e.loadedTypes[0] {
-		return e.GroupUser, nil
-	}
-	return nil, &NotLoadedError{edge: "group_user"}
-}
-
-// GroupOwnerOrErr returns the GroupOwner value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) GroupOwnerOrErr() ([]*Group, error) {
-	if e.loadedTypes[1] {
-		return e.GroupOwner, nil
-	}
-	return nil, &NotLoadedError{edge: "group_owner"}
+	loadedTypes [5]bool
 }
 
 // CommentOrErr returns the Comment value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) CommentOrErr() ([]*Comment, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[0] {
 		return e.Comment, nil
 	}
 	return nil, &NotLoadedError{edge: "comment"}
@@ -87,7 +65,7 @@ func (e UserEdges) CommentOrErr() ([]*Comment, error) {
 // ApplicationStatusOrErr returns the ApplicationStatus value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ApplicationStatusOrErr() ([]*ApplicationStatus, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[1] {
 		return e.ApplicationStatus, nil
 	}
 	return nil, &NotLoadedError{edge: "application_status"}
@@ -96,7 +74,7 @@ func (e UserEdges) ApplicationStatusOrErr() ([]*ApplicationStatus, error) {
 // ApplicationOrErr returns the Application value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ApplicationOrErr() ([]*Application, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[2] {
 		return e.Application, nil
 	}
 	return nil, &NotLoadedError{edge: "application"}
@@ -105,7 +83,7 @@ func (e UserEdges) ApplicationOrErr() ([]*Application, error) {
 // FileOrErr returns the File value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) FileOrErr() ([]*File, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[3] {
 		return e.File, nil
 	}
 	return nil, &NotLoadedError{edge: "file"}
@@ -114,7 +92,7 @@ func (e UserEdges) FileOrErr() ([]*File, error) {
 // ApplicationTargetOrErr returns the ApplicationTarget value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) ApplicationTargetOrErr() ([]*ApplicationTarget, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[4] {
 		return e.ApplicationTarget, nil
 	}
 	return nil, &NotLoadedError{edge: "application_target"}
@@ -142,7 +120,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(columns []string, values []any) error {
+func (_m *User) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -152,47 +130,47 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				u.ID = *value
+				_m.ID = *value
 			}
 		case user.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				u.Name = value.String
+				_m.Name = value.String
 			}
 		case user.FieldDisplayName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field display_name", values[i])
 			} else if value.Valid {
-				u.DisplayName = value.String
+				_m.DisplayName = value.String
 			}
 		case user.FieldAccountManager:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field account_manager", values[i])
 			} else if value.Valid {
-				u.AccountManager = value.Bool
+				_m.AccountManager = value.Bool
 			}
 		case user.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				u.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case user.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				u.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		case user.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
-				u.DeletedAt = new(time.Time)
-				*u.DeletedAt = value.Time
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
 			}
 		default:
-			u.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -200,84 +178,74 @@ func (u *User) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the User.
 // This includes values selected through modifiers, order, etc.
-func (u *User) Value(name string) (ent.Value, error) {
-	return u.selectValues.Get(name)
-}
-
-// QueryGroupUser queries the "group_user" edge of the User entity.
-func (u *User) QueryGroupUser() *GroupQuery {
-	return NewUserClient(u.config).QueryGroupUser(u)
-}
-
-// QueryGroupOwner queries the "group_owner" edge of the User entity.
-func (u *User) QueryGroupOwner() *GroupQuery {
-	return NewUserClient(u.config).QueryGroupOwner(u)
+func (_m *User) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryComment queries the "comment" edge of the User entity.
-func (u *User) QueryComment() *CommentQuery {
-	return NewUserClient(u.config).QueryComment(u)
+func (_m *User) QueryComment() *CommentQuery {
+	return NewUserClient(_m.config).QueryComment(_m)
 }
 
 // QueryApplicationStatus queries the "application_status" edge of the User entity.
-func (u *User) QueryApplicationStatus() *ApplicationStatusQuery {
-	return NewUserClient(u.config).QueryApplicationStatus(u)
+func (_m *User) QueryApplicationStatus() *ApplicationStatusQuery {
+	return NewUserClient(_m.config).QueryApplicationStatus(_m)
 }
 
 // QueryApplication queries the "application" edge of the User entity.
-func (u *User) QueryApplication() *ApplicationQuery {
-	return NewUserClient(u.config).QueryApplication(u)
+func (_m *User) QueryApplication() *ApplicationQuery {
+	return NewUserClient(_m.config).QueryApplication(_m)
 }
 
 // QueryFile queries the "file" edge of the User entity.
-func (u *User) QueryFile() *FileQuery {
-	return NewUserClient(u.config).QueryFile(u)
+func (_m *User) QueryFile() *FileQuery {
+	return NewUserClient(_m.config).QueryFile(_m)
 }
 
 // QueryApplicationTarget queries the "application_target" edge of the User entity.
-func (u *User) QueryApplicationTarget() *ApplicationTargetQuery {
-	return NewUserClient(u.config).QueryApplicationTarget(u)
+func (_m *User) QueryApplicationTarget() *ApplicationTargetQuery {
+	return NewUserClient(_m.config).QueryApplicationTarget(_m)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (u *User) Update() *UserUpdateOne {
-	return NewUserClient(u.config).UpdateOne(u)
+func (_m *User) Update() *UserUpdateOne {
+	return NewUserClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (u *User) Unwrap() *User {
-	_tx, ok := u.config.driver.(*txDriver)
+func (_m *User) Unwrap() *User {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: User is not a transactional entity")
 	}
-	u.config.driver = _tx.drv
-	return u
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (u *User) String() string {
+func (_m *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(u.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("display_name=")
-	builder.WriteString(u.DisplayName)
+	builder.WriteString(_m.DisplayName)
 	builder.WriteString(", ")
 	builder.WriteString("account_manager=")
-	builder.WriteString(fmt.Sprintf("%v", u.AccountManager))
+	builder.WriteString(fmt.Sprintf("%v", _m.AccountManager))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := u.DeletedAt; v != nil {
+	if v := _m.DeletedAt; v != nil {
 		builder.WriteString("deleted_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}

@@ -27,10 +27,6 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// EdgeGroupUser holds the string denoting the group_user edge name in mutations.
-	EdgeGroupUser = "group_user"
-	// EdgeGroupOwner holds the string denoting the group_owner edge name in mutations.
-	EdgeGroupOwner = "group_owner"
 	// EdgeComment holds the string denoting the comment edge name in mutations.
 	EdgeComment = "comment"
 	// EdgeApplicationStatus holds the string denoting the application_status edge name in mutations.
@@ -43,16 +39,6 @@ const (
 	EdgeApplicationTarget = "application_target"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// GroupUserTable is the table that holds the group_user relation/edge. The primary key declared below.
-	GroupUserTable = "group_user"
-	// GroupUserInverseTable is the table name for the Group entity.
-	// It exists in this package in order to avoid circular dependency with the "group" package.
-	GroupUserInverseTable = "groups"
-	// GroupOwnerTable is the table that holds the group_owner relation/edge. The primary key declared below.
-	GroupOwnerTable = "group_owner"
-	// GroupOwnerInverseTable is the table name for the Group entity.
-	// It exists in this package in order to avoid circular dependency with the "group" package.
-	GroupOwnerInverseTable = "groups"
 	// CommentTable is the table that holds the comment relation/edge.
 	CommentTable = "comments"
 	// CommentInverseTable is the table name for the Comment entity.
@@ -100,15 +86,6 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldDeletedAt,
 }
-
-var (
-	// GroupUserPrimaryKey and GroupUserColumn2 are the table columns denoting the
-	// primary key for the group_user relation (M2M).
-	GroupUserPrimaryKey = []string{"group_id", "user_id"}
-	// GroupOwnerPrimaryKey and GroupOwnerColumn2 are the table columns denoting the
-	// primary key for the group_owner relation (M2M).
-	GroupOwnerPrimaryKey = []string{"group_id", "user_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -171,34 +148,6 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
-}
-
-// ByGroupUserCount orders the results by group_user count.
-func ByGroupUserCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newGroupUserStep(), opts...)
-	}
-}
-
-// ByGroupUser orders the results by group_user terms.
-func ByGroupUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newGroupUserStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByGroupOwnerCount orders the results by group_owner count.
-func ByGroupOwnerCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newGroupOwnerStep(), opts...)
-	}
-}
-
-// ByGroupOwner orders the results by group_owner terms.
-func ByGroupOwner(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newGroupOwnerStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
 }
 
 // ByCommentCount orders the results by comment count.
@@ -269,20 +218,6 @@ func ByApplicationTarget(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newApplicationTargetStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
-}
-func newGroupUserStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(GroupUserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, GroupUserTable, GroupUserPrimaryKey...),
-	)
-}
-func newGroupOwnerStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(GroupOwnerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, GroupOwnerTable, GroupOwnerPrimaryKey...),
-	)
 }
 func newCommentStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

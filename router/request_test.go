@@ -62,17 +62,6 @@ func modelCommentToCommentDetail(c *model.Comment) *CommentDetail {
 
 // FIXME: この処理はrequest.goにも書かれてある
 func modelRequestDetailToRequestResponse(r *model.ApplicationDetail) *RequestDetailResponse {
-	var group *GroupResponse
-	if r.Group != nil {
-		group = &GroupResponse{
-			ID:          r.Group.ID,
-			Name:        r.Group.Name,
-			Description: r.Group.Description,
-			Budget:      r.Group.Budget,
-			CreatedAt:   r.Group.CreatedAt,
-			UpdatedAt:   r.Group.UpdatedAt,
-		}
-	}
 	return &RequestDetailResponse{
 		RequestResponse: RequestResponse{
 			ID:        r.ID,
@@ -91,7 +80,6 @@ func modelRequestDetailToRequestResponse(r *model.ApplicationDetail) *RequestDet
 			Tags: lo.Map(r.Tags, func(m *model.Tag, _ int) *TagResponse {
 				return modelTagToTagOverview(m)
 			}),
-			Group: group,
 		},
 		Statuses: lo.Map(
 			r.Statuses,
@@ -127,7 +115,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Tags:      []*model.Tag{},
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
-			Group:     nil,
 		}
 		request2 := &model.ApplicationResponse{
 			ID:        uuid.New(),
@@ -140,7 +127,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Tags:      []*model.Tag{},
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
-			Group:     nil,
 		}
 		requests := []*model.ApplicationResponse{request2, request1}
 
@@ -176,7 +162,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Content:   request2.Content,
 				Targets:   []*TargetOverview{},
 				Tags:      []*TagResponse{},
-				Group:     nil,
 			},
 			{
 				ID:        request1.ID,
@@ -187,8 +172,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Title:     request1.Title,
 				Content:   request1.Content,
 				Targets:   []*TargetOverview{},
-				Tags:      []*TagResponse{},
-				Group:     nil,
 			},
 		}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -241,7 +224,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Tags:      []*model.Tag{},
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
-			Group:     nil,
 		}
 		requests := []*model.ApplicationResponse{request1}
 
@@ -280,7 +262,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Content:   request1.Content,
 				Tags:      []*TagResponse{},
 				Targets:   []*TargetOverview{},
-				Group:     nil,
 			},
 		}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -306,7 +287,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Tags:      []*model.Tag{},
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
-			Group:     nil,
 		}
 		requests := []*model.ApplicationResponse{request1}
 
@@ -344,7 +324,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Content:   request1.Content,
 				Tags:      []*TagResponse{},
 				Targets:   []*TargetOverview{},
-				Group:     nil,
 			},
 		}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -370,7 +349,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Tags:      []*model.Tag{},
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
-			Group:     nil,
 		}
 		requests := []*model.ApplicationResponse{request1}
 
@@ -407,7 +385,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Content:   request1.Content,
 				Targets:   []*TargetOverview{},
 				Tags:      []*TagResponse{},
-				Group:     nil,
 			},
 		}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -442,7 +419,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Tags:      []*model.Tag{&tag1},
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
-			Group:     nil,
 		}
 		requests := []*model.ApplicationResponse{request1}
 
@@ -479,7 +455,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Content:   request1.Content,
 				Tags:      []*TagResponse{&tag1ov},
 				Targets:   []*TargetOverview{},
-				Group:     nil,
 			},
 		}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -502,7 +477,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Tags:      []*model.Tag{},
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
-			Group:     nil,
 		}
 		modelRequests := []*model.ApplicationResponse{request}
 
@@ -541,7 +515,6 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Content:   request.Content,
 				Tags:      []*TagResponse{},
 				Targets:   []*TargetOverview{},
-				Group:     nil,
 			},
 		}
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -620,7 +593,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 				Status:    model.Submitted,
 				CreatedAt: date,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -633,7 +605,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 		require.NoError(t, err)
 		tags := []*model.Tag{}
 		targets := []*model.ApplicationTarget{}
-		var group *model.Group
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -650,7 +621,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 				c.Request().Context(),
 				reqRequest.Title, reqRequest.Content,
 				tags, targets,
-				group, reqRequest.CreatedBy).
+				reqRequest.CreatedBy).
 			Return(request, nil)
 
 		require.NoError(t, h.Handlers.PostRequest(c))
@@ -692,7 +663,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 				Status:    model.Submitted,
 				CreatedAt: date,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -705,7 +675,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
 		targets := []*model.ApplicationTarget{}
-		var group *model.Group
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -726,83 +695,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 				c.Request().Context(),
 				reqRequest.Title, reqRequest.Content,
 				tags, targets,
-				group, reqRequest.CreatedBy).
-			Return(request, nil)
-
-		require.NoError(t, h.Handlers.PostRequest(c))
-		require.Equal(t, http.StatusOK, rec.Code)
-		var got *RequestDetailResponse
-		err = json.Unmarshal(rec.Body.Bytes(), &got)
-		require.NoError(t, err)
-		opts := testutil.ApproxEqualOptions()
-		exp := modelRequestDetailToRequestResponse(request)
-		testutil.RequireEqual(t, exp, got, opts...)
-	})
-
-	t.Run("SuccessWithGroup", func(t *testing.T) {
-		t.Parallel()
-		ctx := testutil.NewContext(t)
-		ctrl := gomock.NewController(t)
-
-		date := time.Now()
-		budget := random.Numeric(t, 100000)
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-		}
-		request := &model.ApplicationDetail{
-			ID:        uuid.New(),
-			Status:    model.Submitted,
-			Title:     random.AlphaNumeric(t, 20),
-			Content:   random.AlphaNumeric(t, 50),
-			CreatedAt: date,
-			UpdatedAt: date,
-			CreatedBy: uuid.New(),
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
-				ID:        uuid.New(),
-				CreatedBy: uuid.New(),
-				Status:    model.Submitted,
-				CreatedAt: date,
-			}},
-			Group:    group,
-			Comments: []*model.Comment{},
-			Files:    []uuid.UUID{},
-		}
-		reqRequest := Request{
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
-			Group:     uuid.NullUUID{UUID: group.ID, Valid: true},
-		}
-		reqBody, err := json.Marshal(reqRequest)
-		require.NoError(t, err)
-		tags := []*model.Tag{}
-		targets := []*model.ApplicationTarget{}
-
-		e := echo.New()
-		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-		h.Repository.MockGroupRepository.
-			EXPECT().
-			GetGroup(c.Request().Context(), group.ID).
-			Return(group, nil)
-		h.Repository.MockApplicationRepository.
-			EXPECT().
-			CreateApplication(
-				c.Request().Context(),
-				reqRequest.Title, reqRequest.Content,
-				tags, targets,
-				group, reqRequest.CreatedBy).
+				reqRequest.CreatedBy).
 			Return(request, nil)
 
 		require.NoError(t, h.Handlers.PostRequest(c))
@@ -847,7 +740,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 				Status:    model.Submitted,
 				CreatedAt: date,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -864,7 +756,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
-		var group *model.Group
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -881,7 +772,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 				c.Request().Context(),
 				reqRequest.Title, reqRequest.Content,
 				tags, []*model.ApplicationTarget{target},
-				group, reqRequest.CreatedBy).
+				reqRequest.CreatedBy).
 			Return(request, nil)
 
 		require.NoError(t, h.Handlers.PostRequest(c))
@@ -942,54 +833,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 
-	t.Run("UnknownGroupID", func(t *testing.T) {
-		t.Parallel()
-		ctx := testutil.NewContext(t)
-		ctrl := gomock.NewController(t)
-
-		date := time.Now()
-		request := &model.ApplicationDetail{
-			ID:        uuid.New(),
-			Status:    model.Submitted,
-			Title:     random.AlphaNumeric(t, 20),
-			Content:   random.AlphaNumeric(t, 50),
-			CreatedAt: date,
-			UpdatedAt: date,
-			CreatedBy: uuid.New(),
-		}
-		unknownGroupID := uuid.New()
-		reqRequest := Request{
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
-			Group:     uuid.NullUUID{UUID: unknownGroupID, Valid: true},
-		}
-		reqBody, err := json.Marshal(reqRequest)
-		require.NoError(t, err)
-
-		e := echo.New()
-		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-
-		var resErr *ent.NotFoundError
-		errors.As(errors.New("unknown id"), &resErr)
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-		h.Repository.MockGroupRepository.
-			EXPECT().
-			GetGroup(c.Request().Context(), unknownGroupID).
-			Return(nil, resErr)
-
-		err = h.Handlers.PostRequest(c)
-		require.Error(t, err)
-		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-	})
-
 	t.Run("UnknownUserID", func(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
@@ -1014,7 +857,6 @@ func TestHandlers_PostRequest(t *testing.T) {
 		require.NoError(t, err)
 		tags := []*model.Tag{}
 		targets := []*model.ApplicationTarget{}
-		var group *model.Group
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -1034,7 +876,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 				c.Request().Context(),
 				reqRequest.Title, reqRequest.Content,
 				tags, targets,
-				group, reqRequest.CreatedBy).
+				reqRequest.CreatedBy).
 			Return(nil, resErr)
 
 		err = h.Handlers.PostRequest(c)
@@ -1069,7 +911,6 @@ func TestHandlers_GetRequest(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -1126,7 +967,6 @@ func TestHandlers_GetRequest(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -1356,7 +1196,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -1365,12 +1204,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
-			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
-		var group *model.Group
 		updateRequest := &model.ApplicationDetail{
 			ID:        request.ID,
 			Status:    request.Status,
@@ -1382,7 +1219,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Tags:      tags,
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  request.Statuses,
-			Group:     group,
 			Comments:  request.Comments,
 			Files:     request.Files,
 		}
@@ -1419,8 +1255,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 				c.Request().Context(),
 				request.ID,
 				reqRequest.Title, reqRequest.Content,
-				tags, targets,
-				group).
+				tags, targets).
 			Return(updateRequest, nil)
 
 		require.NoError(t, h.Handlers.PutRequest(c))
@@ -1457,7 +1292,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -1479,11 +1313,9 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{tag1.ID, tag2.ID},
 			Targets: []*Target{},
-			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
-		var group *model.Group
 		updateRequest := &model.ApplicationDetail{
 			ID:        request.ID,
 			Status:    request.Status,
@@ -1495,7 +1327,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Tags:      tags,
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  request.Statuses,
-			Group:     group,
 			Comments:  request.Comments,
 			Files:     request.Files,
 		}
@@ -1540,8 +1371,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 				c.Request().Context(),
 				request.ID,
 				reqRequest.Title, reqRequest.Content,
-				tags, targets,
-				group).
+				tags, targets).
 			Return(updateRequest, nil)
 
 		require.NoError(t, h.Handlers.PutRequest(c))
@@ -1578,7 +1408,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -1605,12 +1434,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 				{Target: target1.Target, Amount: target1.Amount},
 				{Target: target2.Target, Amount: target2.Amount},
 			},
-			Group: uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
-		var group *model.Group
 		updateRequest := &model.ApplicationDetail{
 			ID:        request.ID,
 			Status:    request.Status,
@@ -1622,7 +1449,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Tags:      tags,
 			Targets:   targetDetails,
 			Statuses:  request.Statuses,
-			Group:     group,
 			Comments:  request.Comments,
 			Files:     request.Files,
 		}
@@ -1659,121 +1485,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 				c.Request().Context(),
 				request.ID,
 				reqRequest.Title, reqRequest.Content,
-				tags, targets,
-				group).
-			Return(updateRequest, nil)
-
-		require.NoError(t, h.Handlers.PutRequest(c))
-		require.Equal(t, http.StatusOK, rec.Code)
-		var got *RequestDetailResponse
-		err = json.Unmarshal(rec.Body.Bytes(), &got)
-		require.NoError(t, err)
-		opts := testutil.ApproxEqualOptions()
-		exp := modelRequestDetailToRequestResponse(updateRequest)
-		testutil.RequireEqual(t, exp, got, opts...)
-	})
-
-	t.Run("SuccessWithGroup", func(t *testing.T) {
-		t.Parallel()
-		ctx := testutil.NewContext(t)
-		ctrl := gomock.NewController(t)
-
-		accessUser := makeUser(t, false)
-		user := userFromModelUser(*accessUser)
-		date := time.Now()
-		request := &model.ApplicationDetail{
-			ID:        uuid.New(),
-			Status:    model.Submitted,
-			CreatedBy: user.ID,
-			Title:     random.AlphaNumeric(t, 20),
-			Content:   random.AlphaNumeric(t, 50),
-			CreatedAt: date,
-			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
-				ID:        uuid.New(),
-				Status:    model.Submitted,
-				CreatedAt: date,
-				CreatedBy: user.ID,
-			}},
-			Group:    nil,
-			Comments: []*model.Comment{},
-			Files:    []uuid.UUID{},
-		}
-		budget := random.Numeric(t, 100000)
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-		reqRequest := PutRequest{
-			Title:   random.AlphaNumeric(t, 30),
-			Content: random.AlphaNumeric(t, 50),
-			Tags:    []uuid.UUID{},
-			Targets: []*Target{},
-			Group:   uuid.NullUUID{UUID: group.ID, Valid: true},
-		}
-		reqBody, err := json.Marshal(reqRequest)
-		require.NoError(t, err)
-		tags := []*model.Tag{}
-		updateRequest := &model.ApplicationDetail{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   reqRequest.Content,
-			CreatedAt: request.CreatedAt,
-			UpdatedAt: time.Now(),
-			Tags:      tags,
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses:  request.Statuses,
-			Group:     group,
-			Comments:  request.Comments,
-			Files:     request.Files,
-		}
-
-		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
-		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
-		c.Set(loginUserKey, user)
-
-		targets := lo.Map(
-			updateRequest.Targets,
-			func(t *model.ApplicationTargetDetail, _ int) *model.ApplicationTarget {
-				return &model.ApplicationTarget{
-					Target: t.Target,
-					Amount: t.Amount,
-				}
-			},
-		)
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-		h.Repository.MockApplicationRepository.
-			EXPECT().
-			GetApplication(c.Request().Context(), request.ID).
-			Return(request, nil)
-		h.Repository.MockGroupRepository.
-			EXPECT().
-			GetGroup(c.Request().Context(), group.ID).
-			Return(group, nil)
-		h.Repository.MockApplicationRepository.
-			EXPECT().
-			UpdateApplication(
-				c.Request().Context(),
-				request.ID,
-				reqRequest.Title, reqRequest.Content,
-				tags, targets,
-				group).
+				tags, targets).
 			Return(updateRequest, nil)
 
 		require.NoError(t, h.Handlers.PutRequest(c))
@@ -1810,7 +1522,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -1819,12 +1530,10 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
-			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
-		var group *model.Group
 		comment1 := &model.Comment{
 			ID:        uuid.New(),
 			User:      request.CreatedBy,
@@ -1851,7 +1560,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Tags:      tags,
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  request.Statuses,
-			Group:     nil,
 			Comments:  comments,
 			Files:     request.Files,
 		}
@@ -1888,8 +1596,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 				c.Request().Context(),
 				request.ID,
 				reqRequest.Title, reqRequest.Content,
-				tags, targets,
-				group).
+				tags, targets).
 			Return(updateRequest, nil)
 
 		require.NoError(t, h.Handlers.PutRequest(c))
@@ -1968,7 +1675,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
-			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -2024,7 +1730,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -2039,7 +1744,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{tag.ID},
 			Targets: []*Target{},
-			Group:   uuid.NullUUID{},
 		}
 		reqBody, err := json.Marshal(reqRequest)
 		require.NoError(t, err)
@@ -2067,84 +1771,6 @@ func TestHandlers_PutRequest(t *testing.T) {
 		h.Repository.MockTagRepository.
 			EXPECT().
 			GetTag(c.Request().Context(), tag.ID).
-			Return(nil, resErr)
-
-		err = h.Handlers.PutRequest(c)
-		require.Error(t, err)
-		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
-	})
-
-	t.Run("UnknownGroupID", func(t *testing.T) {
-		t.Parallel()
-		ctx := testutil.NewContext(t)
-		ctrl := gomock.NewController(t)
-
-		accessUser := makeUser(t, false)
-		user := userFromModelUser(*accessUser)
-		date := time.Now()
-		request := &model.ApplicationDetail{
-			ID:        uuid.New(),
-			Status:    model.Submitted,
-			CreatedBy: user.ID,
-			Title:     random.AlphaNumeric(t, 20),
-			Content:   random.AlphaNumeric(t, 50),
-			CreatedAt: date,
-			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
-				ID:        uuid.New(),
-				Status:    model.Submitted,
-				CreatedAt: date,
-				CreatedBy: user.ID,
-			}},
-			Group:    nil,
-			Comments: []*model.Comment{},
-			Files:    []uuid.UUID{},
-		}
-		budget := random.Numeric(t, 100000)
-		group := &model.Group{
-			ID:          uuid.New(),
-			Name:        random.AlphaNumeric(t, 20),
-			Description: random.AlphaNumeric(t, 50),
-			Budget:      &budget,
-			CreatedAt:   date,
-			UpdatedAt:   date,
-		}
-		reqRequest := PutRequest{
-			Title:   random.AlphaNumeric(t, 30),
-			Content: random.AlphaNumeric(t, 50),
-			Tags:    []uuid.UUID{},
-			Targets: []*Target{},
-			Group:   uuid.NullUUID{UUID: group.ID, Valid: true},
-		}
-		reqBody, err := json.Marshal(reqRequest)
-		require.NoError(t, err)
-
-		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
-		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.SetPath("/api/requests/:requestID")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
-		c.Set(loginUserKey, user)
-
-		var resErr *ent.NotFoundError
-		errors.As(errors.New("unknown id"), &resErr)
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-		h.Repository.MockApplicationRepository.
-			EXPECT().
-			GetApplication(c.Request().Context(), request.ID).
-			Return(request, nil)
-		h.Repository.MockGroupRepository.
-			EXPECT().
-			GetGroup(c.Request().Context(), group.ID).
 			Return(nil, resErr)
 
 		err = h.Handlers.PutRequest(c)
@@ -2181,7 +1807,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -2277,7 +1902,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -2373,7 +1997,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -2469,7 +2092,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -2566,7 +2188,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -2662,7 +2283,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -2769,7 +2389,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -2905,7 +2524,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -2967,7 +2585,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -3032,7 +2649,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -3096,7 +2712,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -3160,7 +2775,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -3225,7 +2839,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -3299,7 +2912,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
@@ -3363,7 +2975,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Group:    nil,
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}

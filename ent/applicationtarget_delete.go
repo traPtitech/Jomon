@@ -20,56 +20,56 @@ type ApplicationTargetDelete struct {
 }
 
 // Where appends a list predicates to the ApplicationTargetDelete builder.
-func (atd *ApplicationTargetDelete) Where(ps ...predicate.ApplicationTarget) *ApplicationTargetDelete {
-	atd.mutation.Where(ps...)
-	return atd
+func (_d *ApplicationTargetDelete) Where(ps ...predicate.ApplicationTarget) *ApplicationTargetDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (atd *ApplicationTargetDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, atd.sqlExec, atd.mutation, atd.hooks)
+func (_d *ApplicationTargetDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (atd *ApplicationTargetDelete) ExecX(ctx context.Context) int {
-	n, err := atd.Exec(ctx)
+func (_d *ApplicationTargetDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (atd *ApplicationTargetDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *ApplicationTargetDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(applicationtarget.Table, sqlgraph.NewFieldSpec(applicationtarget.FieldID, field.TypeUUID))
-	if ps := atd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, atd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	atd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // ApplicationTargetDeleteOne is the builder for deleting a single ApplicationTarget entity.
 type ApplicationTargetDeleteOne struct {
-	atd *ApplicationTargetDelete
+	_d *ApplicationTargetDelete
 }
 
 // Where appends a list predicates to the ApplicationTargetDelete builder.
-func (atdo *ApplicationTargetDeleteOne) Where(ps ...predicate.ApplicationTarget) *ApplicationTargetDeleteOne {
-	atdo.atd.mutation.Where(ps...)
-	return atdo
+func (_d *ApplicationTargetDeleteOne) Where(ps ...predicate.ApplicationTarget) *ApplicationTargetDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (atdo *ApplicationTargetDeleteOne) Exec(ctx context.Context) error {
-	n, err := atdo.atd.Exec(ctx)
+func (_d *ApplicationTargetDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (atdo *ApplicationTargetDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (atdo *ApplicationTargetDeleteOne) ExecX(ctx context.Context) {
-	if err := atdo.Exec(ctx); err != nil {
+func (_d *ApplicationTargetDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

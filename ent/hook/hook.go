@@ -69,30 +69,6 @@ func (f FileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FileMutation", m)
 }
 
-// The GroupFunc type is an adapter to allow the use of ordinary
-// function as Group mutator.
-type GroupFunc func(context.Context, *ent.GroupMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f GroupFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.GroupMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GroupMutation", m)
-}
-
-// The GroupBudgetFunc type is an adapter to allow the use of ordinary
-// function as GroupBudget mutator.
-type GroupBudgetFunc func(context.Context, *ent.GroupBudgetMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f GroupBudgetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.GroupBudgetMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GroupBudgetMutation", m)
-}
-
 // The TagFunc type is an adapter to allow the use of ordinary
 // function as Tag mutator.
 type TagFunc func(context.Context, *ent.TagMutation) (ent.Value, error)
@@ -103,30 +79,6 @@ func (f TagFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) 
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TagMutation", m)
-}
-
-// The TransactionFunc type is an adapter to allow the use of ordinary
-// function as Transaction mutator.
-type TransactionFunc func(context.Context, *ent.TransactionMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f TransactionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.TransactionMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TransactionMutation", m)
-}
-
-// The TransactionDetailFunc type is an adapter to allow the use of ordinary
-// function as TransactionDetail mutator.
-type TransactionDetailFunc func(context.Context, *ent.TransactionDetailMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f TransactionDetailFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.TransactionDetailMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TransactionDetailMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary

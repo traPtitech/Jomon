@@ -12,12 +12,12 @@ type ApplicationRepository interface {
 	GetApplications(ctx context.Context, query ApplicationQuery) ([]*ApplicationResponse, error)
 	CreateApplication(
 		ctx context.Context, title string, content string,
-		tags []*Tag, targets []*ApplicationTarget, group *Group, userID uuid.UUID,
+		tags []*Tag, targets []*ApplicationTarget, userID uuid.UUID,
 	) (*ApplicationDetail, error)
 	GetApplication(ctx context.Context, applicationID uuid.UUID) (*ApplicationDetail, error)
 	UpdateApplication(
 		ctx context.Context, applicationID uuid.UUID, title string, content string,
-		tags []*Tag, targets []*ApplicationTarget, group *Group,
+		tags []*Tag, targets []*ApplicationTarget,
 	) (*ApplicationDetail, error)
 }
 
@@ -39,7 +39,6 @@ type ApplicationResponse struct {
 	Tags      []*Tag
 	Targets   []*ApplicationTargetDetail
 	Statuses  []*ApplicationStatus
-	Group     *Group
 }
 
 type ApplicationDetail struct {
@@ -52,7 +51,6 @@ type ApplicationDetail struct {
 	Statuses  []*ApplicationStatus
 	Tags      []*Tag
 	Targets   []*ApplicationTargetDetail
-	Group     *Group
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	CreatedBy uuid.UUID
@@ -67,6 +65,5 @@ type ApplicationQuery struct {
 	Limit     int
 	Offset    int
 	Tag       *string
-	Group     *string
 	CreatedBy uuid.UUID
 }

@@ -11,12 +11,8 @@ import (
 	"github.com/traPtitech/Jomon/ent/applicationtarget"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/group"
-	"github.com/traPtitech/Jomon/ent/groupbudget"
 	"github.com/traPtitech/Jomon/ent/schema"
 	"github.com/traPtitech/Jomon/ent/tag"
-	"github.com/traPtitech/Jomon/ent/transaction"
-	"github.com/traPtitech/Jomon/ent/transactiondetail"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -90,36 +86,6 @@ func init() {
 	fileDescID := fileFields[0].Descriptor()
 	// file.DefaultID holds the default value on creation for the id field.
 	file.DefaultID = fileDescID.Default.(func() uuid.UUID)
-	groupFields := schema.Group{}.Fields()
-	_ = groupFields
-	// groupDescName is the schema descriptor for name field.
-	groupDescName := groupFields[1].Descriptor()
-	// group.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	group.NameValidator = groupDescName.Validators[0].(func(string) error)
-	// groupDescCreatedAt is the schema descriptor for created_at field.
-	groupDescCreatedAt := groupFields[4].Descriptor()
-	// group.DefaultCreatedAt holds the default value on creation for the created_at field.
-	group.DefaultCreatedAt = groupDescCreatedAt.Default.(func() time.Time)
-	// groupDescUpdatedAt is the schema descriptor for updated_at field.
-	groupDescUpdatedAt := groupFields[5].Descriptor()
-	// group.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	group.DefaultUpdatedAt = groupDescUpdatedAt.Default.(func() time.Time)
-	// group.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	group.UpdateDefaultUpdatedAt = groupDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// groupDescID is the schema descriptor for id field.
-	groupDescID := groupFields[0].Descriptor()
-	// group.DefaultID holds the default value on creation for the id field.
-	group.DefaultID = groupDescID.Default.(func() uuid.UUID)
-	groupbudgetFields := schema.GroupBudget{}.Fields()
-	_ = groupbudgetFields
-	// groupbudgetDescCreatedAt is the schema descriptor for created_at field.
-	groupbudgetDescCreatedAt := groupbudgetFields[3].Descriptor()
-	// groupbudget.DefaultCreatedAt holds the default value on creation for the created_at field.
-	groupbudget.DefaultCreatedAt = groupbudgetDescCreatedAt.Default.(func() time.Time)
-	// groupbudgetDescID is the schema descriptor for id field.
-	groupbudgetDescID := groupbudgetFields[0].Descriptor()
-	// groupbudget.DefaultID holds the default value on creation for the id field.
-	groupbudget.DefaultID = groupbudgetDescID.Default.(func() uuid.UUID)
 	tagFields := schema.Tag{}.Fields()
 	_ = tagFields
 	// tagDescName is the schema descriptor for name field.
@@ -140,59 +106,6 @@ func init() {
 	tagDescID := tagFields[0].Descriptor()
 	// tag.DefaultID holds the default value on creation for the id field.
 	tag.DefaultID = tagDescID.Default.(func() uuid.UUID)
-	transactionFields := schema.Transaction{}.Fields()
-	_ = transactionFields
-	// transactionDescCreatedAt is the schema descriptor for created_at field.
-	transactionDescCreatedAt := transactionFields[1].Descriptor()
-	// transaction.DefaultCreatedAt holds the default value on creation for the created_at field.
-	transaction.DefaultCreatedAt = transactionDescCreatedAt.Default.(func() time.Time)
-	// transactionDescID is the schema descriptor for id field.
-	transactionDescID := transactionFields[0].Descriptor()
-	// transaction.DefaultID holds the default value on creation for the id field.
-	transaction.DefaultID = transactionDescID.Default.(func() uuid.UUID)
-	transactiondetailFields := schema.TransactionDetail{}.Fields()
-	_ = transactiondetailFields
-	// transactiondetailDescTitle is the schema descriptor for title field.
-	transactiondetailDescTitle := transactiondetailFields[1].Descriptor()
-	// transactiondetail.TitleValidator is a validator for the "title" field. It is called by the builders before save.
-	transactiondetail.TitleValidator = func() func(string) error {
-		validators := transactiondetailDescTitle.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-			validators[2].(func(string) error),
-		}
-		return func(title string) error {
-			for _, fn := range fns {
-				if err := fn(title); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// transactiondetailDescAmount is the schema descriptor for amount field.
-	transactiondetailDescAmount := transactiondetailFields[2].Descriptor()
-	// transactiondetail.DefaultAmount holds the default value on creation for the amount field.
-	transactiondetail.DefaultAmount = transactiondetailDescAmount.Default.(int)
-	// transactiondetailDescTarget is the schema descriptor for target field.
-	transactiondetailDescTarget := transactiondetailFields[3].Descriptor()
-	// transactiondetail.DefaultTarget holds the default value on creation for the target field.
-	transactiondetail.DefaultTarget = transactiondetailDescTarget.Default.(string)
-	// transactiondetailDescCreatedAt is the schema descriptor for created_at field.
-	transactiondetailDescCreatedAt := transactiondetailFields[4].Descriptor()
-	// transactiondetail.DefaultCreatedAt holds the default value on creation for the created_at field.
-	transactiondetail.DefaultCreatedAt = transactiondetailDescCreatedAt.Default.(func() time.Time)
-	// transactiondetailDescUpdatedAt is the schema descriptor for updated_at field.
-	transactiondetailDescUpdatedAt := transactiondetailFields[5].Descriptor()
-	// transactiondetail.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	transactiondetail.DefaultUpdatedAt = transactiondetailDescUpdatedAt.Default.(func() time.Time)
-	// transactiondetail.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	transactiondetail.UpdateDefaultUpdatedAt = transactiondetailDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// transactiondetailDescID is the schema descriptor for id field.
-	transactiondetailDescID := transactiondetailFields[0].Descriptor()
-	// transactiondetail.DefaultID holds the default value on creation for the id field.
-	transactiondetail.DefaultID = transactiondetailDescID.Default.(func() uuid.UUID)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescName is the schema descriptor for name field.

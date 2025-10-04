@@ -43,18 +43,18 @@ func (m *MockApplicationRepository) EXPECT() *MockApplicationRepositoryMockRecor
 }
 
 // CreateApplication mocks base method.
-func (m *MockApplicationRepository) CreateApplication(ctx context.Context, title, content string, tags []*model.Tag, targets []*model.ApplicationTarget, group *model.Group, userID uuid.UUID) (*model.ApplicationDetail, error) {
+func (m *MockApplicationRepository) CreateApplication(ctx context.Context, title, content string, tags []*model.Tag, targets []*model.ApplicationTarget, userID uuid.UUID) (*model.ApplicationDetail, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateApplication", ctx, title, content, tags, targets, group, userID)
+	ret := m.ctrl.Call(m, "CreateApplication", ctx, title, content, tags, targets, userID)
 	ret0, _ := ret[0].(*model.ApplicationDetail)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateApplication indicates an expected call of CreateApplication.
-func (mr *MockApplicationRepositoryMockRecorder) CreateApplication(ctx, title, content, tags, targets, group, userID any) *gomock.Call {
+func (mr *MockApplicationRepositoryMockRecorder) CreateApplication(ctx, title, content, tags, targets, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApplication", reflect.TypeOf((*MockApplicationRepository)(nil).CreateApplication), ctx, title, content, tags, targets, group, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateApplication", reflect.TypeOf((*MockApplicationRepository)(nil).CreateApplication), ctx, title, content, tags, targets, userID)
 }
 
 // GetApplication mocks base method.
@@ -88,16 +88,16 @@ func (mr *MockApplicationRepositoryMockRecorder) GetApplications(ctx, query any)
 }
 
 // UpdateApplication mocks base method.
-func (m *MockApplicationRepository) UpdateApplication(ctx context.Context, applicationID uuid.UUID, title, content string, tags []*model.Tag, targets []*model.ApplicationTarget, group *model.Group) (*model.ApplicationDetail, error) {
+func (m *MockApplicationRepository) UpdateApplication(ctx context.Context, applicationID uuid.UUID, title, content string, tags []*model.Tag, targets []*model.ApplicationTarget) (*model.ApplicationDetail, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateApplication", ctx, applicationID, title, content, tags, targets, group)
+	ret := m.ctrl.Call(m, "UpdateApplication", ctx, applicationID, title, content, tags, targets)
 	ret0, _ := ret[0].(*model.ApplicationDetail)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateApplication indicates an expected call of UpdateApplication.
-func (mr *MockApplicationRepositoryMockRecorder) UpdateApplication(ctx, applicationID, title, content, tags, targets, group any) *gomock.Call {
+func (mr *MockApplicationRepositoryMockRecorder) UpdateApplication(ctx, applicationID, title, content, tags, targets any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApplication", reflect.TypeOf((*MockApplicationRepository)(nil).UpdateApplication), ctx, applicationID, title, content, tags, targets, group)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateApplication", reflect.TypeOf((*MockApplicationRepository)(nil).UpdateApplication), ctx, applicationID, title, content, tags, targets)
 }

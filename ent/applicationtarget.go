@@ -91,7 +91,7 @@ func (*ApplicationTarget) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the ApplicationTarget fields.
-func (at *ApplicationTarget) assignValues(columns []string, values []any) error {
+func (_m *ApplicationTarget) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -101,43 +101,43 @@ func (at *ApplicationTarget) assignValues(columns []string, values []any) error 
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				at.ID = *value
+				_m.ID = *value
 			}
 		case applicationtarget.FieldAmount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field amount", values[i])
 			} else if value.Valid {
-				at.Amount = int(value.Int64)
+				_m.Amount = int(value.Int64)
 			}
 		case applicationtarget.FieldPaidAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field paid_at", values[i])
 			} else if value.Valid {
-				at.PaidAt = new(time.Time)
-				*at.PaidAt = value.Time
+				_m.PaidAt = new(time.Time)
+				*_m.PaidAt = value.Time
 			}
 		case applicationtarget.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				at.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case applicationtarget.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field application_target", values[i])
 			} else if value.Valid {
-				at.application_target = new(uuid.UUID)
-				*at.application_target = *value.S.(*uuid.UUID)
+				_m.application_target = new(uuid.UUID)
+				*_m.application_target = *value.S.(*uuid.UUID)
 			}
 		case applicationtarget.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field application_target_user", values[i])
 			} else if value.Valid {
-				at.application_target_user = new(uuid.UUID)
-				*at.application_target_user = *value.S.(*uuid.UUID)
+				_m.application_target_user = new(uuid.UUID)
+				*_m.application_target_user = *value.S.(*uuid.UUID)
 			}
 		default:
-			at.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -145,53 +145,53 @@ func (at *ApplicationTarget) assignValues(columns []string, values []any) error 
 
 // Value returns the ent.Value that was dynamically selected and assigned to the ApplicationTarget.
 // This includes values selected through modifiers, order, etc.
-func (at *ApplicationTarget) Value(name string) (ent.Value, error) {
-	return at.selectValues.Get(name)
+func (_m *ApplicationTarget) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryApplication queries the "application" edge of the ApplicationTarget entity.
-func (at *ApplicationTarget) QueryApplication() *ApplicationQuery {
-	return NewApplicationTargetClient(at.config).QueryApplication(at)
+func (_m *ApplicationTarget) QueryApplication() *ApplicationQuery {
+	return NewApplicationTargetClient(_m.config).QueryApplication(_m)
 }
 
 // QueryUser queries the "user" edge of the ApplicationTarget entity.
-func (at *ApplicationTarget) QueryUser() *UserQuery {
-	return NewApplicationTargetClient(at.config).QueryUser(at)
+func (_m *ApplicationTarget) QueryUser() *UserQuery {
+	return NewApplicationTargetClient(_m.config).QueryUser(_m)
 }
 
 // Update returns a builder for updating this ApplicationTarget.
 // Note that you need to call ApplicationTarget.Unwrap() before calling this method if this ApplicationTarget
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (at *ApplicationTarget) Update() *ApplicationTargetUpdateOne {
-	return NewApplicationTargetClient(at.config).UpdateOne(at)
+func (_m *ApplicationTarget) Update() *ApplicationTargetUpdateOne {
+	return NewApplicationTargetClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the ApplicationTarget entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (at *ApplicationTarget) Unwrap() *ApplicationTarget {
-	_tx, ok := at.config.driver.(*txDriver)
+func (_m *ApplicationTarget) Unwrap() *ApplicationTarget {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: ApplicationTarget is not a transactional entity")
 	}
-	at.config.driver = _tx.drv
-	return at
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (at *ApplicationTarget) String() string {
+func (_m *ApplicationTarget) String() string {
 	var builder strings.Builder
 	builder.WriteString("ApplicationTarget(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", at.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("amount=")
-	builder.WriteString(fmt.Sprintf("%v", at.Amount))
+	builder.WriteString(fmt.Sprintf("%v", _m.Amount))
 	builder.WriteString(", ")
-	if v := at.PaidAt; v != nil {
+	if v := _m.PaidAt; v != nil {
 		builder.WriteString("paid_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(at.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

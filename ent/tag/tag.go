@@ -25,8 +25,6 @@ const (
 	FieldDeletedAt = "deleted_at"
 	// EdgeApplication holds the string denoting the application edge name in mutations.
 	EdgeApplication = "application"
-	// EdgeTransaction holds the string denoting the transaction edge name in mutations.
-	EdgeTransaction = "transaction"
 	// Table holds the table name of the tag in the database.
 	Table = "tags"
 	// ApplicationTable is the table that holds the application relation/edge. The primary key declared below.
@@ -34,11 +32,6 @@ const (
 	// ApplicationInverseTable is the table name for the Application entity.
 	// It exists in this package in order to avoid circular dependency with the "application" package.
 	ApplicationInverseTable = "applications"
-	// TransactionTable is the table that holds the transaction relation/edge. The primary key declared below.
-	TransactionTable = "transaction_tag"
-	// TransactionInverseTable is the table name for the Transaction entity.
-	// It exists in this package in order to avoid circular dependency with the "transaction" package.
-	TransactionInverseTable = "transactions"
 )
 
 // Columns holds all SQL columns for tag fields.
@@ -54,9 +47,6 @@ var (
 	// ApplicationPrimaryKey and ApplicationColumn2 are the table columns denoting the
 	// primary key for the application relation (M2M).
 	ApplicationPrimaryKey = []string{"application_id", "tag_id"}
-	// TransactionPrimaryKey and TransactionColumn2 are the table columns denoting the
-	// primary key for the transaction relation (M2M).
-	TransactionPrimaryKey = []string{"transaction_id", "tag_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -123,31 +113,10 @@ func ByApplication(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newApplicationStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByTransactionCount orders the results by transaction count.
-func ByTransactionCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTransactionStep(), opts...)
-	}
-}
-
-// ByTransaction orders the results by transaction terms.
-func ByTransaction(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTransactionStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newApplicationStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ApplicationInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, ApplicationTable, ApplicationPrimaryKey...),
-	)
-}
-func newTransactionStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TransactionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, TransactionTable, TransactionPrimaryKey...),
 	)
 }

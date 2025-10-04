@@ -31,14 +31,10 @@ const (
 	EdgeFile = "file"
 	// EdgeTag holds the string denoting the tag edge name in mutations.
 	EdgeTag = "tag"
-	// EdgeTransaction holds the string denoting the transaction edge name in mutations.
-	EdgeTransaction = "transaction"
 	// EdgeComment holds the string denoting the comment edge name in mutations.
 	EdgeComment = "comment"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
-	// EdgeGroup holds the string denoting the group edge name in mutations.
-	EdgeGroup = "group"
 	// Table holds the table name of the application in the database.
 	Table = "applications"
 	// StatusTable is the table that holds the status relation/edge.
@@ -67,13 +63,6 @@ const (
 	// TagInverseTable is the table name for the Tag entity.
 	// It exists in this package in order to avoid circular dependency with the "tag" package.
 	TagInverseTable = "tags"
-	// TransactionTable is the table that holds the transaction relation/edge.
-	TransactionTable = "transactions"
-	// TransactionInverseTable is the table name for the Transaction entity.
-	// It exists in this package in order to avoid circular dependency with the "transaction" package.
-	TransactionInverseTable = "transactions"
-	// TransactionColumn is the table column denoting the transaction relation/edge.
-	TransactionColumn = "application_transaction"
 	// CommentTable is the table that holds the comment relation/edge.
 	CommentTable = "comments"
 	// CommentInverseTable is the table name for the Comment entity.
@@ -88,13 +77,6 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "application_user"
-	// GroupTable is the table that holds the group relation/edge.
-	GroupTable = "applications"
-	// GroupInverseTable is the table name for the Group entity.
-	// It exists in this package in order to avoid circular dependency with the "group" package.
-	GroupInverseTable = "groups"
-	// GroupColumn is the table column denoting the group relation/edge.
-	GroupColumn = "group_application"
 )
 
 // Columns holds all SQL columns for application fields.
@@ -110,7 +92,6 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"application_user",
-	"group_application",
 }
 
 var (
@@ -229,20 +210,6 @@ func ByTag(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByTransactionCount orders the results by transaction count.
-func ByTransactionCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTransactionStep(), opts...)
-	}
-}
-
-// ByTransaction orders the results by transaction terms.
-func ByTransaction(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTransactionStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByCommentCount orders the results by comment count.
 func ByCommentCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -261,13 +228,6 @@ func ByComment(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByGroupField orders the results by group field.
-func ByGroupField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newGroupStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newStatusStep() *sqlgraph.Step {
@@ -298,13 +258,6 @@ func newTagStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2M, false, TagTable, TagPrimaryKey...),
 	)
 }
-func newTransactionStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TransactionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, TransactionTable, TransactionColumn),
-	)
-}
 func newCommentStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -317,12 +270,5 @@ func newUserStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
-	)
-}
-func newGroupStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(GroupInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
 	)
 }

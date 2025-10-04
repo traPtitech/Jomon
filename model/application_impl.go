@@ -10,7 +10,6 @@ import (
 	"github.com/traPtitech/Jomon/ent/application"
 	"github.com/traPtitech/Jomon/ent/applicationstatus"
 	"github.com/traPtitech/Jomon/ent/applicationtarget"
-	"github.com/traPtitech/Jomon/ent/group"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/user"
 )
@@ -25,7 +24,6 @@ func (repo *EntRepository) GetApplications(
 		applicationsq = repo.client.Application.
 			Query().
 			WithTag().
-			WithGroup().
 			WithStatus(func(q *ent.ApplicationStatusQuery) {
 				q.Order(ent.Desc(applicationstatus.FieldCreatedAt))
 			}).
@@ -35,7 +33,6 @@ func (repo *EntRepository) GetApplications(
 		applicationsq = repo.client.Application.
 			Query().
 			WithTag().
-			WithGroup().
 			WithStatus(func(q *ent.ApplicationStatusQuery) {
 				q.Order(ent.Desc(applicationstatus.FieldCreatedAt))
 			}).
@@ -45,7 +42,6 @@ func (repo *EntRepository) GetApplications(
 		applicationsq = repo.client.Application.
 			Query().
 			WithTag().
-			WithGroup().
 			WithStatus(func(q *ent.ApplicationStatusQuery) {
 				q.Order(ent.Desc(applicationstatus.FieldCreatedAt))
 			}).
@@ -55,7 +51,6 @@ func (repo *EntRepository) GetApplications(
 		applicationsq = repo.client.Application.
 			Query().
 			WithTag().
-			WithGroup().
 			WithStatus(func(q *ent.ApplicationStatusQuery) {
 				q.Order(ent.Desc(applicationstatus.FieldCreatedAt))
 			}).
@@ -104,14 +99,6 @@ func (repo *EntRepository) GetApplications(
 
 	applicationsq = applicationsq.Limit(query.Limit).Offset(query.Offset)
 
-	if query.Group != nil && *query.Group != "" {
-		applicationsq = applicationsq.
-			Where(
-				application.HasGroupWith(
-					group.NameEQ(*query.Group),
-				),
-			)
-	}
 	if query.CreatedBy != uuid.Nil {
 		applicationsq = applicationsq.
 			Where(
@@ -128,7 +115,7 @@ func (repo *EntRepository) GetApplications(
 
 	reqres := lo.Map(applications, func(r *ent.Application, _ int) *ApplicationResponse {
 		return convertEntApplicationResponseToModelApplicationResponse(
-			r, r.Edges.Tag, r.Edges.Group, r.Edges.Status[0], r.Edges.User)
+			r, r.Edges.Tag, r.Edges.Status[0], r.Edges.User)
 	})
 
 	return reqres, nil
@@ -136,7 +123,7 @@ func (repo *EntRepository) GetApplications(
 
 func (repo *EntRepository) CreateApplication(
 	ctx context.Context, title string, content string,
-	tags []*Tag, targets []*ApplicationTarget, group *Group, userID uuid.UUID,
+	tags []*Tag, targets []*ApplicationTarget, userID uuid.UUID,
 ) (*ApplicationDetail, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
@@ -168,17 +155,6 @@ func (repo *EntRepository) CreateApplication(
 	if err != nil {
 		err = RollbackWithError(tx, err)
 		return nil, err
-	}
-	if group != nil {
-		g, err := tx.Client().Group.
-			UpdateOneID(group.ID).
-			AddApplication(created).
-			Save(ctx)
-		group = ConvertEntGroupToModelGroup(g)
-		if err != nil {
-			err = RollbackWithError(tx, err)
-			return nil, err
-		}
 	}
 	s, err := tx.Client().ApplicationStatus.
 		Create().
@@ -217,7 +193,6 @@ func (repo *EntRepository) CreateApplication(
 		Content:   created.Content,
 		Tags:      tags,
 		Targets:   ts,
-		Group:     group,
 		CreatedAt: created.CreatedAt,
 		UpdatedAt: created.UpdatedAt,
 		CreatedBy: t.ID,
@@ -238,7 +213,6 @@ func (repo *EntRepository) GetApplication(
 		WithTarget(func(q *ent.ApplicationTargetQuery) {
 			q.WithUser()
 		}).
-		WithGroup().
 		WithStatus(func(q *ent.ApplicationStatusQuery) {
 			q.Order(ent.Desc(applicationstatus.FieldCreatedAt))
 			q.WithUser()
@@ -259,7 +233,6 @@ func (repo *EntRepository) GetApplication(
 			return ConvertEntApplicationTargetToModelApplicationTargetDetail(target)
 		},
 	)
-	modelGroup := ConvertEntGroupToModelGroup(r.Edges.Group)
 	comments := lo.Map(r.Edges.Comment, func(c *ent.Comment, _ int) *Comment {
 		return ConvertEntCommentToModelComment(c, c.Edges.User.ID)
 	})
@@ -279,7 +252,6 @@ func (repo *EntRepository) GetApplication(
 		Content:   r.Content,
 		Tags:      tags,
 		Targets:   targets,
-		Group:     modelGroup,
 		CreatedAt: r.CreatedAt,
 		UpdatedAt: r.UpdatedAt,
 		CreatedBy: r.Edges.User.ID,
@@ -292,7 +264,7 @@ func (repo *EntRepository) GetApplication(
 
 func (repo *EntRepository) UpdateApplication(
 	ctx context.Context, applicationID uuid.UUID, title string, content string,
-	tags []*Tag, targets []*ApplicationTarget, group *Group,
+	tags []*Tag, targets []*ApplicationTarget,
 ) (*ApplicationDetail, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
@@ -319,18 +291,9 @@ func (repo *EntRepository) UpdateApplication(
 		return nil, err
 	}
 
-	if group != nil {
-		_, err = tx.Client().Application.
-			UpdateOneID(applicationID).
-			ClearGroup().
-			SetGroupID(group.ID).
-			Save(ctx)
-	} else {
-		_, err = tx.Client().Application.
-			UpdateOneID(applicationID).
-			ClearGroup().
-			Save(ctx)
-	}
+	_, err = tx.Client().Application.
+		UpdateOneID(applicationID).
+		Save(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
 		return nil, err
@@ -358,14 +321,6 @@ func (repo *EntRepository) UpdateApplication(
 	modeltags := lo.Map(enttags, func(enttag *ent.Tag, _ int) *Tag {
 		return ConvertEntTagToModelTag(enttag)
 	})
-	var entgroup *ent.Group
-	if group != nil {
-		entgroup, err = updated.QueryGroup().Only(ctx)
-		if err != nil {
-			err = RollbackWithError(tx, err)
-			return nil, err
-		}
-	}
 
 	err = repo.deleteApplicationTargets(ctx, tx, applicationID)
 	if err != nil {
@@ -401,7 +356,6 @@ func (repo *EntRepository) UpdateApplication(
 		return nil, err
 	}
 
-	modelgroup := ConvertEntGroupToModelGroup(entgroup)
 	reqdetail := &ApplicationDetail{
 		ID:        updated.ID,
 		Status:    convertEntApplicationStatusToModelStatus(&status.Status),
@@ -409,7 +363,6 @@ func (repo *EntRepository) UpdateApplication(
 		Content:   updated.Content,
 		Tags:      modeltags,
 		Targets:   modeltargets,
-		Group:     modelgroup,
 		CreatedAt: updated.CreatedAt,
 		UpdatedAt: updated.UpdatedAt,
 		CreatedBy: u.ID,
@@ -422,7 +375,7 @@ func (repo *EntRepository) UpdateApplication(
 
 func convertEntApplicationResponseToModelApplicationResponse(
 	application *ent.Application, tags []*ent.Tag,
-	group *ent.Group, status *ent.ApplicationStatus, user *ent.User,
+	status *ent.ApplicationStatus, user *ent.User,
 ) *ApplicationResponse {
 	if application == nil {
 		return nil
@@ -439,6 +392,5 @@ func convertEntApplicationResponseToModelApplicationResponse(
 		Title:     application.Title,
 		Content:   application.Content,
 		Tags:      modeltags,
-		Group:     ConvertEntGroupToModelGroup(group),
 	}
 }

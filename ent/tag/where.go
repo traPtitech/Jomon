@@ -294,29 +294,6 @@ func HasApplicationWith(preds ...predicate.Application) predicate.Tag {
 	})
 }
 
-// HasTransaction applies the HasEdge predicate on the "transaction" edge.
-func HasTransaction() predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, TransactionTable, TransactionPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTransactionWith applies the HasEdge predicate on the "transaction" edge with a given conditions (other predicates).
-func HasTransactionWith(preds ...predicate.Transaction) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		step := newTransactionStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Tag) predicate.Tag {
 	return predicate.Tag(sql.AndPredicates(predicates...))

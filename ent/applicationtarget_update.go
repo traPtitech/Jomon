@@ -26,113 +26,113 @@ type ApplicationTargetUpdate struct {
 }
 
 // Where appends a list predicates to the ApplicationTargetUpdate builder.
-func (atu *ApplicationTargetUpdate) Where(ps ...predicate.ApplicationTarget) *ApplicationTargetUpdate {
-	atu.mutation.Where(ps...)
-	return atu
+func (_u *ApplicationTargetUpdate) Where(ps ...predicate.ApplicationTarget) *ApplicationTargetUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetAmount sets the "amount" field.
-func (atu *ApplicationTargetUpdate) SetAmount(i int) *ApplicationTargetUpdate {
-	atu.mutation.ResetAmount()
-	atu.mutation.SetAmount(i)
-	return atu
+func (_u *ApplicationTargetUpdate) SetAmount(v int) *ApplicationTargetUpdate {
+	_u.mutation.ResetAmount()
+	_u.mutation.SetAmount(v)
+	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (atu *ApplicationTargetUpdate) SetNillableAmount(i *int) *ApplicationTargetUpdate {
-	if i != nil {
-		atu.SetAmount(*i)
+func (_u *ApplicationTargetUpdate) SetNillableAmount(v *int) *ApplicationTargetUpdate {
+	if v != nil {
+		_u.SetAmount(*v)
 	}
-	return atu
+	return _u
 }
 
-// AddAmount adds i to the "amount" field.
-func (atu *ApplicationTargetUpdate) AddAmount(i int) *ApplicationTargetUpdate {
-	atu.mutation.AddAmount(i)
-	return atu
+// AddAmount adds value to the "amount" field.
+func (_u *ApplicationTargetUpdate) AddAmount(v int) *ApplicationTargetUpdate {
+	_u.mutation.AddAmount(v)
+	return _u
 }
 
 // SetPaidAt sets the "paid_at" field.
-func (atu *ApplicationTargetUpdate) SetPaidAt(t time.Time) *ApplicationTargetUpdate {
-	atu.mutation.SetPaidAt(t)
-	return atu
+func (_u *ApplicationTargetUpdate) SetPaidAt(v time.Time) *ApplicationTargetUpdate {
+	_u.mutation.SetPaidAt(v)
+	return _u
 }
 
 // SetNillablePaidAt sets the "paid_at" field if the given value is not nil.
-func (atu *ApplicationTargetUpdate) SetNillablePaidAt(t *time.Time) *ApplicationTargetUpdate {
-	if t != nil {
-		atu.SetPaidAt(*t)
+func (_u *ApplicationTargetUpdate) SetNillablePaidAt(v *time.Time) *ApplicationTargetUpdate {
+	if v != nil {
+		_u.SetPaidAt(*v)
 	}
-	return atu
+	return _u
 }
 
 // ClearPaidAt clears the value of the "paid_at" field.
-func (atu *ApplicationTargetUpdate) ClearPaidAt() *ApplicationTargetUpdate {
-	atu.mutation.ClearPaidAt()
-	return atu
+func (_u *ApplicationTargetUpdate) ClearPaidAt() *ApplicationTargetUpdate {
+	_u.mutation.ClearPaidAt()
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (atu *ApplicationTargetUpdate) SetCreatedAt(t time.Time) *ApplicationTargetUpdate {
-	atu.mutation.SetCreatedAt(t)
-	return atu
+func (_u *ApplicationTargetUpdate) SetCreatedAt(v time.Time) *ApplicationTargetUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (atu *ApplicationTargetUpdate) SetNillableCreatedAt(t *time.Time) *ApplicationTargetUpdate {
-	if t != nil {
-		atu.SetCreatedAt(*t)
+func (_u *ApplicationTargetUpdate) SetNillableCreatedAt(v *time.Time) *ApplicationTargetUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return atu
+	return _u
 }
 
 // SetApplicationID sets the "application" edge to the Application entity by ID.
-func (atu *ApplicationTargetUpdate) SetApplicationID(id uuid.UUID) *ApplicationTargetUpdate {
-	atu.mutation.SetApplicationID(id)
-	return atu
+func (_u *ApplicationTargetUpdate) SetApplicationID(id uuid.UUID) *ApplicationTargetUpdate {
+	_u.mutation.SetApplicationID(id)
+	return _u
 }
 
 // SetApplication sets the "application" edge to the Application entity.
-func (atu *ApplicationTargetUpdate) SetApplication(a *Application) *ApplicationTargetUpdate {
-	return atu.SetApplicationID(a.ID)
+func (_u *ApplicationTargetUpdate) SetApplication(v *Application) *ApplicationTargetUpdate {
+	return _u.SetApplicationID(v.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (atu *ApplicationTargetUpdate) SetUserID(id uuid.UUID) *ApplicationTargetUpdate {
-	atu.mutation.SetUserID(id)
-	return atu
+func (_u *ApplicationTargetUpdate) SetUserID(id uuid.UUID) *ApplicationTargetUpdate {
+	_u.mutation.SetUserID(id)
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (atu *ApplicationTargetUpdate) SetUser(u *User) *ApplicationTargetUpdate {
-	return atu.SetUserID(u.ID)
+func (_u *ApplicationTargetUpdate) SetUser(v *User) *ApplicationTargetUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the ApplicationTargetMutation object of the builder.
-func (atu *ApplicationTargetUpdate) Mutation() *ApplicationTargetMutation {
-	return atu.mutation
+func (_u *ApplicationTargetUpdate) Mutation() *ApplicationTargetMutation {
+	return _u.mutation
 }
 
 // ClearApplication clears the "application" edge to the Application entity.
-func (atu *ApplicationTargetUpdate) ClearApplication() *ApplicationTargetUpdate {
-	atu.mutation.ClearApplication()
-	return atu
+func (_u *ApplicationTargetUpdate) ClearApplication() *ApplicationTargetUpdate {
+	_u.mutation.ClearApplication()
+	return _u
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (atu *ApplicationTargetUpdate) ClearUser() *ApplicationTargetUpdate {
-	atu.mutation.ClearUser()
-	return atu
+func (_u *ApplicationTargetUpdate) ClearUser() *ApplicationTargetUpdate {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (atu *ApplicationTargetUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, atu.sqlSave, atu.mutation, atu.hooks)
+func (_u *ApplicationTargetUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (atu *ApplicationTargetUpdate) SaveX(ctx context.Context) int {
-	affected, err := atu.Save(ctx)
+func (_u *ApplicationTargetUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -140,57 +140,57 @@ func (atu *ApplicationTargetUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (atu *ApplicationTargetUpdate) Exec(ctx context.Context) error {
-	_, err := atu.Save(ctx)
+func (_u *ApplicationTargetUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (atu *ApplicationTargetUpdate) ExecX(ctx context.Context) {
-	if err := atu.Exec(ctx); err != nil {
+func (_u *ApplicationTargetUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (atu *ApplicationTargetUpdate) check() error {
-	if atu.mutation.ApplicationCleared() && len(atu.mutation.ApplicationIDs()) > 0 {
+func (_u *ApplicationTargetUpdate) check() error {
+	if _u.mutation.ApplicationCleared() && len(_u.mutation.ApplicationIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "ApplicationTarget.application"`)
 	}
-	if atu.mutation.UserCleared() && len(atu.mutation.UserIDs()) > 0 {
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "ApplicationTarget.user"`)
 	}
 	return nil
 }
 
-func (atu *ApplicationTargetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := atu.check(); err != nil {
-		return n, err
+func (_u *ApplicationTargetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(applicationtarget.Table, applicationtarget.Columns, sqlgraph.NewFieldSpec(applicationtarget.FieldID, field.TypeUUID))
-	if ps := atu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := atu.mutation.Amount(); ok {
+	if value, ok := _u.mutation.Amount(); ok {
 		_spec.SetField(applicationtarget.FieldAmount, field.TypeInt, value)
 	}
-	if value, ok := atu.mutation.AddedAmount(); ok {
+	if value, ok := _u.mutation.AddedAmount(); ok {
 		_spec.AddField(applicationtarget.FieldAmount, field.TypeInt, value)
 	}
-	if value, ok := atu.mutation.PaidAt(); ok {
+	if value, ok := _u.mutation.PaidAt(); ok {
 		_spec.SetField(applicationtarget.FieldPaidAt, field.TypeTime, value)
 	}
-	if atu.mutation.PaidAtCleared() {
+	if _u.mutation.PaidAtCleared() {
 		_spec.ClearField(applicationtarget.FieldPaidAt, field.TypeTime)
 	}
-	if value, ok := atu.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(applicationtarget.FieldCreatedAt, field.TypeTime, value)
 	}
-	if atu.mutation.ApplicationCleared() {
+	if _u.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -203,7 +203,7 @@ func (atu *ApplicationTargetUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := atu.mutation.ApplicationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -219,7 +219,7 @@ func (atu *ApplicationTargetUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if atu.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -232,7 +232,7 @@ func (atu *ApplicationTargetUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := atu.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -248,7 +248,7 @@ func (atu *ApplicationTargetUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, atu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{applicationtarget.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -256,8 +256,8 @@ func (atu *ApplicationTargetUpdate) sqlSave(ctx context.Context) (n int, err err
 		}
 		return 0, err
 	}
-	atu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // ApplicationTargetUpdateOne is the builder for updating a single ApplicationTarget entity.
@@ -269,120 +269,120 @@ type ApplicationTargetUpdateOne struct {
 }
 
 // SetAmount sets the "amount" field.
-func (atuo *ApplicationTargetUpdateOne) SetAmount(i int) *ApplicationTargetUpdateOne {
-	atuo.mutation.ResetAmount()
-	atuo.mutation.SetAmount(i)
-	return atuo
+func (_u *ApplicationTargetUpdateOne) SetAmount(v int) *ApplicationTargetUpdateOne {
+	_u.mutation.ResetAmount()
+	_u.mutation.SetAmount(v)
+	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (atuo *ApplicationTargetUpdateOne) SetNillableAmount(i *int) *ApplicationTargetUpdateOne {
-	if i != nil {
-		atuo.SetAmount(*i)
+func (_u *ApplicationTargetUpdateOne) SetNillableAmount(v *int) *ApplicationTargetUpdateOne {
+	if v != nil {
+		_u.SetAmount(*v)
 	}
-	return atuo
+	return _u
 }
 
-// AddAmount adds i to the "amount" field.
-func (atuo *ApplicationTargetUpdateOne) AddAmount(i int) *ApplicationTargetUpdateOne {
-	atuo.mutation.AddAmount(i)
-	return atuo
+// AddAmount adds value to the "amount" field.
+func (_u *ApplicationTargetUpdateOne) AddAmount(v int) *ApplicationTargetUpdateOne {
+	_u.mutation.AddAmount(v)
+	return _u
 }
 
 // SetPaidAt sets the "paid_at" field.
-func (atuo *ApplicationTargetUpdateOne) SetPaidAt(t time.Time) *ApplicationTargetUpdateOne {
-	atuo.mutation.SetPaidAt(t)
-	return atuo
+func (_u *ApplicationTargetUpdateOne) SetPaidAt(v time.Time) *ApplicationTargetUpdateOne {
+	_u.mutation.SetPaidAt(v)
+	return _u
 }
 
 // SetNillablePaidAt sets the "paid_at" field if the given value is not nil.
-func (atuo *ApplicationTargetUpdateOne) SetNillablePaidAt(t *time.Time) *ApplicationTargetUpdateOne {
-	if t != nil {
-		atuo.SetPaidAt(*t)
+func (_u *ApplicationTargetUpdateOne) SetNillablePaidAt(v *time.Time) *ApplicationTargetUpdateOne {
+	if v != nil {
+		_u.SetPaidAt(*v)
 	}
-	return atuo
+	return _u
 }
 
 // ClearPaidAt clears the value of the "paid_at" field.
-func (atuo *ApplicationTargetUpdateOne) ClearPaidAt() *ApplicationTargetUpdateOne {
-	atuo.mutation.ClearPaidAt()
-	return atuo
+func (_u *ApplicationTargetUpdateOne) ClearPaidAt() *ApplicationTargetUpdateOne {
+	_u.mutation.ClearPaidAt()
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (atuo *ApplicationTargetUpdateOne) SetCreatedAt(t time.Time) *ApplicationTargetUpdateOne {
-	atuo.mutation.SetCreatedAt(t)
-	return atuo
+func (_u *ApplicationTargetUpdateOne) SetCreatedAt(v time.Time) *ApplicationTargetUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (atuo *ApplicationTargetUpdateOne) SetNillableCreatedAt(t *time.Time) *ApplicationTargetUpdateOne {
-	if t != nil {
-		atuo.SetCreatedAt(*t)
+func (_u *ApplicationTargetUpdateOne) SetNillableCreatedAt(v *time.Time) *ApplicationTargetUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return atuo
+	return _u
 }
 
 // SetApplicationID sets the "application" edge to the Application entity by ID.
-func (atuo *ApplicationTargetUpdateOne) SetApplicationID(id uuid.UUID) *ApplicationTargetUpdateOne {
-	atuo.mutation.SetApplicationID(id)
-	return atuo
+func (_u *ApplicationTargetUpdateOne) SetApplicationID(id uuid.UUID) *ApplicationTargetUpdateOne {
+	_u.mutation.SetApplicationID(id)
+	return _u
 }
 
 // SetApplication sets the "application" edge to the Application entity.
-func (atuo *ApplicationTargetUpdateOne) SetApplication(a *Application) *ApplicationTargetUpdateOne {
-	return atuo.SetApplicationID(a.ID)
+func (_u *ApplicationTargetUpdateOne) SetApplication(v *Application) *ApplicationTargetUpdateOne {
+	return _u.SetApplicationID(v.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (atuo *ApplicationTargetUpdateOne) SetUserID(id uuid.UUID) *ApplicationTargetUpdateOne {
-	atuo.mutation.SetUserID(id)
-	return atuo
+func (_u *ApplicationTargetUpdateOne) SetUserID(id uuid.UUID) *ApplicationTargetUpdateOne {
+	_u.mutation.SetUserID(id)
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (atuo *ApplicationTargetUpdateOne) SetUser(u *User) *ApplicationTargetUpdateOne {
-	return atuo.SetUserID(u.ID)
+func (_u *ApplicationTargetUpdateOne) SetUser(v *User) *ApplicationTargetUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the ApplicationTargetMutation object of the builder.
-func (atuo *ApplicationTargetUpdateOne) Mutation() *ApplicationTargetMutation {
-	return atuo.mutation
+func (_u *ApplicationTargetUpdateOne) Mutation() *ApplicationTargetMutation {
+	return _u.mutation
 }
 
 // ClearApplication clears the "application" edge to the Application entity.
-func (atuo *ApplicationTargetUpdateOne) ClearApplication() *ApplicationTargetUpdateOne {
-	atuo.mutation.ClearApplication()
-	return atuo
+func (_u *ApplicationTargetUpdateOne) ClearApplication() *ApplicationTargetUpdateOne {
+	_u.mutation.ClearApplication()
+	return _u
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (atuo *ApplicationTargetUpdateOne) ClearUser() *ApplicationTargetUpdateOne {
-	atuo.mutation.ClearUser()
-	return atuo
+func (_u *ApplicationTargetUpdateOne) ClearUser() *ApplicationTargetUpdateOne {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // Where appends a list predicates to the ApplicationTargetUpdate builder.
-func (atuo *ApplicationTargetUpdateOne) Where(ps ...predicate.ApplicationTarget) *ApplicationTargetUpdateOne {
-	atuo.mutation.Where(ps...)
-	return atuo
+func (_u *ApplicationTargetUpdateOne) Where(ps ...predicate.ApplicationTarget) *ApplicationTargetUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (atuo *ApplicationTargetUpdateOne) Select(field string, fields ...string) *ApplicationTargetUpdateOne {
-	atuo.fields = append([]string{field}, fields...)
-	return atuo
+func (_u *ApplicationTargetUpdateOne) Select(field string, fields ...string) *ApplicationTargetUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated ApplicationTarget entity.
-func (atuo *ApplicationTargetUpdateOne) Save(ctx context.Context) (*ApplicationTarget, error) {
-	return withHooks(ctx, atuo.sqlSave, atuo.mutation, atuo.hooks)
+func (_u *ApplicationTargetUpdateOne) Save(ctx context.Context) (*ApplicationTarget, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (atuo *ApplicationTargetUpdateOne) SaveX(ctx context.Context) *ApplicationTarget {
-	node, err := atuo.Save(ctx)
+func (_u *ApplicationTargetUpdateOne) SaveX(ctx context.Context) *ApplicationTarget {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -390,40 +390,40 @@ func (atuo *ApplicationTargetUpdateOne) SaveX(ctx context.Context) *ApplicationT
 }
 
 // Exec executes the query on the entity.
-func (atuo *ApplicationTargetUpdateOne) Exec(ctx context.Context) error {
-	_, err := atuo.Save(ctx)
+func (_u *ApplicationTargetUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (atuo *ApplicationTargetUpdateOne) ExecX(ctx context.Context) {
-	if err := atuo.Exec(ctx); err != nil {
+func (_u *ApplicationTargetUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (atuo *ApplicationTargetUpdateOne) check() error {
-	if atuo.mutation.ApplicationCleared() && len(atuo.mutation.ApplicationIDs()) > 0 {
+func (_u *ApplicationTargetUpdateOne) check() error {
+	if _u.mutation.ApplicationCleared() && len(_u.mutation.ApplicationIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "ApplicationTarget.application"`)
 	}
-	if atuo.mutation.UserCleared() && len(atuo.mutation.UserIDs()) > 0 {
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "ApplicationTarget.user"`)
 	}
 	return nil
 }
 
-func (atuo *ApplicationTargetUpdateOne) sqlSave(ctx context.Context) (_node *ApplicationTarget, err error) {
-	if err := atuo.check(); err != nil {
+func (_u *ApplicationTargetUpdateOne) sqlSave(ctx context.Context) (_node *ApplicationTarget, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(applicationtarget.Table, applicationtarget.Columns, sqlgraph.NewFieldSpec(applicationtarget.FieldID, field.TypeUUID))
-	id, ok := atuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "ApplicationTarget.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := atuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, applicationtarget.FieldID)
 		for _, f := range fields {
@@ -435,29 +435,29 @@ func (atuo *ApplicationTargetUpdateOne) sqlSave(ctx context.Context) (_node *App
 			}
 		}
 	}
-	if ps := atuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := atuo.mutation.Amount(); ok {
+	if value, ok := _u.mutation.Amount(); ok {
 		_spec.SetField(applicationtarget.FieldAmount, field.TypeInt, value)
 	}
-	if value, ok := atuo.mutation.AddedAmount(); ok {
+	if value, ok := _u.mutation.AddedAmount(); ok {
 		_spec.AddField(applicationtarget.FieldAmount, field.TypeInt, value)
 	}
-	if value, ok := atuo.mutation.PaidAt(); ok {
+	if value, ok := _u.mutation.PaidAt(); ok {
 		_spec.SetField(applicationtarget.FieldPaidAt, field.TypeTime, value)
 	}
-	if atuo.mutation.PaidAtCleared() {
+	if _u.mutation.PaidAtCleared() {
 		_spec.ClearField(applicationtarget.FieldPaidAt, field.TypeTime)
 	}
-	if value, ok := atuo.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(applicationtarget.FieldCreatedAt, field.TypeTime, value)
 	}
-	if atuo.mutation.ApplicationCleared() {
+	if _u.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -470,7 +470,7 @@ func (atuo *ApplicationTargetUpdateOne) sqlSave(ctx context.Context) (_node *App
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := atuo.mutation.ApplicationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -486,7 +486,7 @@ func (atuo *ApplicationTargetUpdateOne) sqlSave(ctx context.Context) (_node *App
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if atuo.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -499,7 +499,7 @@ func (atuo *ApplicationTargetUpdateOne) sqlSave(ctx context.Context) (_node *App
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := atuo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -515,10 +515,10 @@ func (atuo *ApplicationTargetUpdateOne) sqlSave(ctx context.Context) (_node *App
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &ApplicationTarget{config: atuo.config}
+	_node = &ApplicationTarget{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, atuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{applicationtarget.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -526,6 +526,6 @@ func (atuo *ApplicationTargetUpdateOne) sqlSave(ctx context.Context) (_node *App
 		}
 		return nil, err
 	}
-	atuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

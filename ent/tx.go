@@ -22,16 +22,8 @@ type Tx struct {
 	Comment *CommentClient
 	// File is the client for interacting with the File builders.
 	File *FileClient
-	// Group is the client for interacting with the Group builders.
-	Group *GroupClient
-	// GroupBudget is the client for interacting with the GroupBudget builders.
-	GroupBudget *GroupBudgetClient
 	// Tag is the client for interacting with the Tag builders.
 	Tag *TagClient
-	// Transaction is the client for interacting with the Transaction builders.
-	Transaction *TransactionClient
-	// TransactionDetail is the client for interacting with the TransactionDetail builders.
-	TransactionDetail *TransactionDetailClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -170,11 +162,7 @@ func (tx *Tx) init() {
 	tx.ApplicationTarget = NewApplicationTargetClient(tx.config)
 	tx.Comment = NewCommentClient(tx.config)
 	tx.File = NewFileClient(tx.config)
-	tx.Group = NewGroupClient(tx.config)
-	tx.GroupBudget = NewGroupBudgetClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
-	tx.Transaction = NewTransactionClient(tx.config)
-	tx.TransactionDetail = NewTransactionDetailClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

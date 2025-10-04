@@ -47,7 +47,7 @@ func TestEntRepository_GetApplicationTargets(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
 			nil, []*ApplicationTarget{target1, target2},
-			nil, user1.ID)
+			user1.ID)
 		require.NoError(t, err)
 		// CreatedAt の差を1秒以内に収めるためにここで time.Now を取る
 		exp := []*ApplicationTargetDetail{
@@ -79,7 +79,7 @@ func TestEntRepository_GetApplicationTargets(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
 			nil, nil,
-			nil, user.ID)
+			user.ID)
 		require.NoError(t, err)
 		got, err := repo2.GetApplicationTargets(ctx, application.ID)
 		require.NoError(t, err)
@@ -121,7 +121,7 @@ func TestEntRepository_createApplicationTargets(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
 			nil, []*ApplicationTarget{target1, target2},
-			nil, user1.ID)
+			user1.ID)
 		require.NoError(t, err)
 		exp := []*ApplicationTargetDetail{
 			{Target: target1.Target, Amount: target1.Amount, CreatedAt: time.Now()},
@@ -174,15 +174,14 @@ func TestEntRepository_deleteApplicationTargets(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
 			nil, []*ApplicationTarget{target1, target2},
-			nil, user1.ID)
+			user1.ID)
 		require.NoError(t, err)
 		_, err = repo.UpdateApplication(
 			ctx,
 			application.ID,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
-			nil, []*ApplicationTarget{},
-			nil)
+			nil, []*ApplicationTarget{})
 		require.NoError(t, err)
 		got, err := repo.GetApplicationTargets(ctx, application.ID)
 		require.NoError(t, err)
@@ -217,15 +216,14 @@ func TestEntRepository_deleteApplicationTargets(t *testing.T) {
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
 			nil, nil,
-			nil, user1.ID)
+			user1.ID)
 		require.NoError(t, err)
 		_, err = repo2.UpdateApplication(
 			ctx,
 			application.ID,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
-			nil, []*ApplicationTarget{target1, target2},
-			nil)
+			nil, []*ApplicationTarget{target1, target2})
 		require.NoError(t, err)
 		got, err := repo2.GetApplicationTargets(ctx, application.ID)
 		require.NoError(t, err)

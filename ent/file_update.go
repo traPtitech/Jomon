@@ -26,128 +26,128 @@ type FileUpdate struct {
 }
 
 // Where appends a list predicates to the FileUpdate builder.
-func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
-	fu.mutation.Where(ps...)
-	return fu
+func (_u *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (fu *FileUpdate) SetName(s string) *FileUpdate {
-	fu.mutation.SetName(s)
-	return fu
+func (_u *FileUpdate) SetName(v string) *FileUpdate {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableName(s *string) *FileUpdate {
-	if s != nil {
-		fu.SetName(*s)
+func (_u *FileUpdate) SetNillableName(v *string) *FileUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return fu
+	return _u
 }
 
 // SetMimeType sets the "mime_type" field.
-func (fu *FileUpdate) SetMimeType(s string) *FileUpdate {
-	fu.mutation.SetMimeType(s)
-	return fu
+func (_u *FileUpdate) SetMimeType(v string) *FileUpdate {
+	_u.mutation.SetMimeType(v)
+	return _u
 }
 
 // SetNillableMimeType sets the "mime_type" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableMimeType(s *string) *FileUpdate {
-	if s != nil {
-		fu.SetMimeType(*s)
+func (_u *FileUpdate) SetNillableMimeType(v *string) *FileUpdate {
+	if v != nil {
+		_u.SetMimeType(*v)
 	}
-	return fu
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (fu *FileUpdate) SetCreatedAt(t time.Time) *FileUpdate {
-	fu.mutation.SetCreatedAt(t)
-	return fu
+func (_u *FileUpdate) SetCreatedAt(v time.Time) *FileUpdate {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableCreatedAt(t *time.Time) *FileUpdate {
-	if t != nil {
-		fu.SetCreatedAt(*t)
+func (_u *FileUpdate) SetNillableCreatedAt(v *time.Time) *FileUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return fu
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (fu *FileUpdate) SetDeletedAt(t time.Time) *FileUpdate {
-	fu.mutation.SetDeletedAt(t)
-	return fu
+func (_u *FileUpdate) SetDeletedAt(v time.Time) *FileUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableDeletedAt(t *time.Time) *FileUpdate {
-	if t != nil {
-		fu.SetDeletedAt(*t)
+func (_u *FileUpdate) SetNillableDeletedAt(v *time.Time) *FileUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return fu
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (fu *FileUpdate) ClearDeletedAt() *FileUpdate {
-	fu.mutation.ClearDeletedAt()
-	return fu
+func (_u *FileUpdate) ClearDeletedAt() *FileUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetApplicationID sets the "application" edge to the Application entity by ID.
-func (fu *FileUpdate) SetApplicationID(id uuid.UUID) *FileUpdate {
-	fu.mutation.SetApplicationID(id)
-	return fu
+func (_u *FileUpdate) SetApplicationID(id uuid.UUID) *FileUpdate {
+	_u.mutation.SetApplicationID(id)
+	return _u
 }
 
 // SetNillableApplicationID sets the "application" edge to the Application entity by ID if the given value is not nil.
-func (fu *FileUpdate) SetNillableApplicationID(id *uuid.UUID) *FileUpdate {
+func (_u *FileUpdate) SetNillableApplicationID(id *uuid.UUID) *FileUpdate {
 	if id != nil {
-		fu = fu.SetApplicationID(*id)
+		_u = _u.SetApplicationID(*id)
 	}
-	return fu
+	return _u
 }
 
 // SetApplication sets the "application" edge to the Application entity.
-func (fu *FileUpdate) SetApplication(a *Application) *FileUpdate {
-	return fu.SetApplicationID(a.ID)
+func (_u *FileUpdate) SetApplication(v *Application) *FileUpdate {
+	return _u.SetApplicationID(v.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (fu *FileUpdate) SetUserID(id uuid.UUID) *FileUpdate {
-	fu.mutation.SetUserID(id)
-	return fu
+func (_u *FileUpdate) SetUserID(id uuid.UUID) *FileUpdate {
+	_u.mutation.SetUserID(id)
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (fu *FileUpdate) SetUser(u *User) *FileUpdate {
-	return fu.SetUserID(u.ID)
+func (_u *FileUpdate) SetUser(v *User) *FileUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
-func (fu *FileUpdate) Mutation() *FileMutation {
-	return fu.mutation
+func (_u *FileUpdate) Mutation() *FileMutation {
+	return _u.mutation
 }
 
 // ClearApplication clears the "application" edge to the Application entity.
-func (fu *FileUpdate) ClearApplication() *FileUpdate {
-	fu.mutation.ClearApplication()
-	return fu
+func (_u *FileUpdate) ClearApplication() *FileUpdate {
+	_u.mutation.ClearApplication()
+	return _u
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (fu *FileUpdate) ClearUser() *FileUpdate {
-	fu.mutation.ClearUser()
-	return fu
+func (_u *FileUpdate) ClearUser() *FileUpdate {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, fu.sqlSave, fu.mutation, fu.hooks)
+func (_u *FileUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (fu *FileUpdate) SaveX(ctx context.Context) int {
-	affected, err := fu.Save(ctx)
+func (_u *FileUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -155,59 +155,59 @@ func (fu *FileUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (fu *FileUpdate) Exec(ctx context.Context) error {
-	_, err := fu.Save(ctx)
+func (_u *FileUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (fu *FileUpdate) ExecX(ctx context.Context) {
-	if err := fu.Exec(ctx); err != nil {
+func (_u *FileUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (fu *FileUpdate) check() error {
-	if v, ok := fu.mutation.Name(); ok {
+func (_u *FileUpdate) check() error {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := file.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "File.name": %w`, err)}
 		}
 	}
-	if fu.mutation.UserCleared() && len(fu.mutation.UserIDs()) > 0 {
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "File.user"`)
 	}
 	return nil
 }
 
-func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := fu.check(); err != nil {
-		return n, err
+func (_u *FileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(file.Table, file.Columns, sqlgraph.NewFieldSpec(file.FieldID, field.TypeUUID))
-	if ps := fu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := fu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(file.FieldName, field.TypeString, value)
 	}
-	if value, ok := fu.mutation.MimeType(); ok {
+	if value, ok := _u.mutation.MimeType(); ok {
 		_spec.SetField(file.FieldMimeType, field.TypeString, value)
 	}
-	if value, ok := fu.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(file.FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := fu.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(file.FieldDeletedAt, field.TypeTime, value)
 	}
-	if fu.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(file.FieldDeletedAt, field.TypeTime)
 	}
-	if fu.mutation.ApplicationCleared() {
+	if _u.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -220,7 +220,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fu.mutation.ApplicationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -236,7 +236,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if fu.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -249,7 +249,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fu.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -265,7 +265,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, fu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{file.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -273,8 +273,8 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	fu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // FileUpdateOne is the builder for updating a single File entity.
@@ -286,135 +286,135 @@ type FileUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (fuo *FileUpdateOne) SetName(s string) *FileUpdateOne {
-	fuo.mutation.SetName(s)
-	return fuo
+func (_u *FileUpdateOne) SetName(v string) *FileUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableName(s *string) *FileUpdateOne {
-	if s != nil {
-		fuo.SetName(*s)
+func (_u *FileUpdateOne) SetNillableName(v *string) *FileUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return fuo
+	return _u
 }
 
 // SetMimeType sets the "mime_type" field.
-func (fuo *FileUpdateOne) SetMimeType(s string) *FileUpdateOne {
-	fuo.mutation.SetMimeType(s)
-	return fuo
+func (_u *FileUpdateOne) SetMimeType(v string) *FileUpdateOne {
+	_u.mutation.SetMimeType(v)
+	return _u
 }
 
 // SetNillableMimeType sets the "mime_type" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableMimeType(s *string) *FileUpdateOne {
-	if s != nil {
-		fuo.SetMimeType(*s)
+func (_u *FileUpdateOne) SetNillableMimeType(v *string) *FileUpdateOne {
+	if v != nil {
+		_u.SetMimeType(*v)
 	}
-	return fuo
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (fuo *FileUpdateOne) SetCreatedAt(t time.Time) *FileUpdateOne {
-	fuo.mutation.SetCreatedAt(t)
-	return fuo
+func (_u *FileUpdateOne) SetCreatedAt(v time.Time) *FileUpdateOne {
+	_u.mutation.SetCreatedAt(v)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableCreatedAt(t *time.Time) *FileUpdateOne {
-	if t != nil {
-		fuo.SetCreatedAt(*t)
+func (_u *FileUpdateOne) SetNillableCreatedAt(v *time.Time) *FileUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
-	return fuo
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (fuo *FileUpdateOne) SetDeletedAt(t time.Time) *FileUpdateOne {
-	fuo.mutation.SetDeletedAt(t)
-	return fuo
+func (_u *FileUpdateOne) SetDeletedAt(v time.Time) *FileUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableDeletedAt(t *time.Time) *FileUpdateOne {
-	if t != nil {
-		fuo.SetDeletedAt(*t)
+func (_u *FileUpdateOne) SetNillableDeletedAt(v *time.Time) *FileUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return fuo
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (fuo *FileUpdateOne) ClearDeletedAt() *FileUpdateOne {
-	fuo.mutation.ClearDeletedAt()
-	return fuo
+func (_u *FileUpdateOne) ClearDeletedAt() *FileUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetApplicationID sets the "application" edge to the Application entity by ID.
-func (fuo *FileUpdateOne) SetApplicationID(id uuid.UUID) *FileUpdateOne {
-	fuo.mutation.SetApplicationID(id)
-	return fuo
+func (_u *FileUpdateOne) SetApplicationID(id uuid.UUID) *FileUpdateOne {
+	_u.mutation.SetApplicationID(id)
+	return _u
 }
 
 // SetNillableApplicationID sets the "application" edge to the Application entity by ID if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableApplicationID(id *uuid.UUID) *FileUpdateOne {
+func (_u *FileUpdateOne) SetNillableApplicationID(id *uuid.UUID) *FileUpdateOne {
 	if id != nil {
-		fuo = fuo.SetApplicationID(*id)
+		_u = _u.SetApplicationID(*id)
 	}
-	return fuo
+	return _u
 }
 
 // SetApplication sets the "application" edge to the Application entity.
-func (fuo *FileUpdateOne) SetApplication(a *Application) *FileUpdateOne {
-	return fuo.SetApplicationID(a.ID)
+func (_u *FileUpdateOne) SetApplication(v *Application) *FileUpdateOne {
+	return _u.SetApplicationID(v.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (fuo *FileUpdateOne) SetUserID(id uuid.UUID) *FileUpdateOne {
-	fuo.mutation.SetUserID(id)
-	return fuo
+func (_u *FileUpdateOne) SetUserID(id uuid.UUID) *FileUpdateOne {
+	_u.mutation.SetUserID(id)
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (fuo *FileUpdateOne) SetUser(u *User) *FileUpdateOne {
-	return fuo.SetUserID(u.ID)
+func (_u *FileUpdateOne) SetUser(v *User) *FileUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
-func (fuo *FileUpdateOne) Mutation() *FileMutation {
-	return fuo.mutation
+func (_u *FileUpdateOne) Mutation() *FileMutation {
+	return _u.mutation
 }
 
 // ClearApplication clears the "application" edge to the Application entity.
-func (fuo *FileUpdateOne) ClearApplication() *FileUpdateOne {
-	fuo.mutation.ClearApplication()
-	return fuo
+func (_u *FileUpdateOne) ClearApplication() *FileUpdateOne {
+	_u.mutation.ClearApplication()
+	return _u
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (fuo *FileUpdateOne) ClearUser() *FileUpdateOne {
-	fuo.mutation.ClearUser()
-	return fuo
+func (_u *FileUpdateOne) ClearUser() *FileUpdateOne {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // Where appends a list predicates to the FileUpdate builder.
-func (fuo *FileUpdateOne) Where(ps ...predicate.File) *FileUpdateOne {
-	fuo.mutation.Where(ps...)
-	return fuo
+func (_u *FileUpdateOne) Where(ps ...predicate.File) *FileUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (fuo *FileUpdateOne) Select(field string, fields ...string) *FileUpdateOne {
-	fuo.fields = append([]string{field}, fields...)
-	return fuo
+func (_u *FileUpdateOne) Select(field string, fields ...string) *FileUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated File entity.
-func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
-	return withHooks(ctx, fuo.sqlSave, fuo.mutation, fuo.hooks)
+func (_u *FileUpdateOne) Save(ctx context.Context) (*File, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (fuo *FileUpdateOne) SaveX(ctx context.Context) *File {
-	node, err := fuo.Save(ctx)
+func (_u *FileUpdateOne) SaveX(ctx context.Context) *File {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -422,42 +422,42 @@ func (fuo *FileUpdateOne) SaveX(ctx context.Context) *File {
 }
 
 // Exec executes the query on the entity.
-func (fuo *FileUpdateOne) Exec(ctx context.Context) error {
-	_, err := fuo.Save(ctx)
+func (_u *FileUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (fuo *FileUpdateOne) ExecX(ctx context.Context) {
-	if err := fuo.Exec(ctx); err != nil {
+func (_u *FileUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (fuo *FileUpdateOne) check() error {
-	if v, ok := fuo.mutation.Name(); ok {
+func (_u *FileUpdateOne) check() error {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := file.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "File.name": %w`, err)}
 		}
 	}
-	if fuo.mutation.UserCleared() && len(fuo.mutation.UserIDs()) > 0 {
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "File.user"`)
 	}
 	return nil
 }
 
-func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) {
-	if err := fuo.check(); err != nil {
+func (_u *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(file.Table, file.Columns, sqlgraph.NewFieldSpec(file.FieldID, field.TypeUUID))
-	id, ok := fuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "File.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := fuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, file.FieldID)
 		for _, f := range fields {
@@ -469,29 +469,29 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 			}
 		}
 	}
-	if ps := fuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := fuo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(file.FieldName, field.TypeString, value)
 	}
-	if value, ok := fuo.mutation.MimeType(); ok {
+	if value, ok := _u.mutation.MimeType(); ok {
 		_spec.SetField(file.FieldMimeType, field.TypeString, value)
 	}
-	if value, ok := fuo.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(file.FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := fuo.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(file.FieldDeletedAt, field.TypeTime, value)
 	}
-	if fuo.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(file.FieldDeletedAt, field.TypeTime)
 	}
-	if fuo.mutation.ApplicationCleared() {
+	if _u.mutation.ApplicationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -504,7 +504,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fuo.mutation.ApplicationIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -520,7 +520,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if fuo.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -533,7 +533,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := fuo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -549,10 +549,10 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &File{config: fuo.config}
+	_node = &File{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, fuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{file.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -560,6 +560,6 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 		}
 		return nil, err
 	}
-	fuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }
