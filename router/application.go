@@ -41,7 +41,7 @@ func (s Status) String() string {
 	return string(s)
 }
 
-type Request struct {
+type Application struct {
 	CreatedBy uuid.UUID   `json:"created_by"`
 	Title     string      `json:"title"`
 	Content   string      `json:"content"`
@@ -49,14 +49,14 @@ type Request struct {
 	Targets   []*Target   `json:"targets"`
 }
 
-type PutRequest struct {
+type PutApplication struct {
 	Title   string      `json:"title"`
 	Content string      `json:"content"`
 	Tags    []uuid.UUID `json:"tags"`
 	Targets []*Target   `json:"targets"`
 }
 
-type RequestResponse struct {
+type ApplicationResponse struct {
 	ID        uuid.UUID         `json:"id"`
 	Status    model.Status      `json:"status"`
 	CreatedAt time.Time         `json:"created_at"`
@@ -68,8 +68,8 @@ type RequestResponse struct {
 	Targets   []*TargetOverview `json:"targets"`
 }
 
-type RequestDetailResponse struct {
-	RequestResponse
+type ApplicationDetailResponse struct {
+	ApplicationResponse
 	Comments []*CommentDetail          `json:"comments"`
 	Statuses []*StatusResponseOverview `json:"statuses"`
 	Files    []uuid.UUID               `json:"files"`
