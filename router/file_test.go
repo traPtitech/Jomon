@@ -36,7 +36,7 @@ func TestHandlers_PostFile(t *testing.T) {
 
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
-		requestID := uuid.New()
+		applicationID := uuid.New()
 		file := &model.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -54,7 +54,7 @@ func TestHandlers_PostFile(t *testing.T) {
 			}()
 			err := writer.WriteField("name", "test")
 			require.NoError(t, err)
-			err = writer.WriteField("request_id", requestID.String())
+			err = writer.WriteField("application_id", applicationID.String())
 			require.NoError(t, err)
 			part := make(textproto.MIMEHeader)
 			part.Set("Content-Type", "image/jpeg")
@@ -79,7 +79,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
-			CreateFile(c.Request().Context(), "test", "image/jpeg", requestID, user.ID).
+			CreateFile(c.Request().Context(), "test", "image/jpeg", applicationID, user.ID).
 			Return(file, nil)
 
 		h.Storage.
@@ -98,7 +98,7 @@ func TestHandlers_PostFile(t *testing.T) {
 
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
-		requestID := uuid.New()
+		applicationID := uuid.New()
 
 		pr, pw := io.Pipe()
 		writer := multipart.NewWriter(pw)
@@ -109,7 +109,7 @@ func TestHandlers_PostFile(t *testing.T) {
 			}()
 			err := writer.WriteField("name", "test")
 			require.NoError(t, err)
-			err = writer.WriteField("request_id", requestID.String())
+			err = writer.WriteField("application_id", applicationID.String())
 			require.NoError(t, err)
 			part := make(textproto.MIMEHeader)
 			part.Set("Content-Type", "image/jpeg")
@@ -138,7 +138,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
-			CreateFile(c.Request().Context(), "test", "image/jpeg", requestID, user.ID).
+			CreateFile(c.Request().Context(), "test", "image/jpeg", applicationID, user.ID).
 			Return(nil, mocErr)
 
 		err = h.Handlers.PostFile(c)
@@ -154,7 +154,7 @@ func TestHandlers_PostFile(t *testing.T) {
 
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
-		requestID := uuid.New()
+		applicationID := uuid.New()
 		file := &model.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
@@ -172,7 +172,7 @@ func TestHandlers_PostFile(t *testing.T) {
 			}()
 			err := writer.WriteField("name", "test")
 			require.NoError(t, err)
-			err = writer.WriteField("request_id", requestID.String())
+			err = writer.WriteField("application_id", applicationID.String())
 			require.NoError(t, err)
 			part := make(textproto.MIMEHeader)
 			part.Set("Content-Type", "image/jpeg")
@@ -197,7 +197,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
-			CreateFile(c.Request().Context(), "test", "image/jpeg", requestID, user.ID).
+			CreateFile(c.Request().Context(), "test", "image/jpeg", applicationID, user.ID).
 			Return(file, nil)
 
 		mocErr := errors.New("failed to save file")

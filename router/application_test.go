@@ -31,7 +31,9 @@ func modelTagToTagOverview(t *model.Tag) *TagResponse {
 	}
 }
 
-func modelRequestTargetDetailToTargetOverview(t *model.ApplicationTargetDetail) *TargetOverview {
+func modelApplicationTargetDetailToTargetOverview(
+	t *model.ApplicationTargetDetail,
+) *TargetOverview {
 	return &TargetOverview{
 		ID:        t.ID,
 		Target:    t.Target,
@@ -40,7 +42,7 @@ func modelRequestTargetDetailToTargetOverview(t *model.ApplicationTargetDetail) 
 	}
 }
 
-func modelRequestStatusToStatusResponseOverview(
+func modelApplicationStatusToStatusResponseOverview(
 	s *model.ApplicationStatus,
 ) *StatusResponseOverview {
 	return &StatusResponseOverview{
@@ -60,10 +62,12 @@ func modelCommentToCommentDetail(c *model.Comment) *CommentDetail {
 	}
 }
 
-// FIXME: この処理はrequest.goにも書かれてある
-func modelRequestDetailToRequestResponse(r *model.ApplicationDetail) *RequestDetailResponse {
-	return &RequestDetailResponse{
-		RequestResponse: RequestResponse{
+// FIXME: この処理はapplication.goにも書かれてある
+func modelApplicationDetailToApplicationResponse(
+	r *model.ApplicationDetail,
+) *ApplicationDetailResponse {
+	return &ApplicationDetailResponse{
+		ApplicationResponse: ApplicationResponse{
 			ID:        r.ID,
 			Status:    r.Status,
 			CreatedBy: r.CreatedBy,
@@ -74,7 +78,7 @@ func modelRequestDetailToRequestResponse(r *model.ApplicationDetail) *RequestDet
 			Targets: lo.Map(
 				r.Targets,
 				func(m *model.ApplicationTargetDetail, _ int) *TargetOverview {
-					return modelRequestTargetDetailToTargetOverview(m)
+					return modelApplicationTargetDetailToTargetOverview(m)
 				},
 			),
 			Tags: lo.Map(r.Tags, func(m *model.Tag, _ int) *TagResponse {
@@ -84,7 +88,7 @@ func modelRequestDetailToRequestResponse(r *model.ApplicationDetail) *RequestDet
 		Statuses: lo.Map(
 			r.Statuses,
 			func(m *model.ApplicationStatus, _ int) *StatusResponseOverview {
-				return modelRequestStatusToStatusResponseOverview(m)
+				return modelApplicationStatusToStatusResponseOverview(m)
 			},
 		),
 		Comments: lo.Map(r.Comments, func(m *model.Comment, _ int) *CommentDetail {
@@ -94,7 +98,7 @@ func modelRequestDetailToRequestResponse(r *model.ApplicationDetail) *RequestDet
 	}
 }
 
-func TestHandlers_GetRequests(t *testing.T) {
+func TestHandlers_GetApplications(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
@@ -104,7 +108,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 
 		date1 := time.Now()
 		date2 := date1.Add(time.Hour)
-		request1 := &model.ApplicationResponse{
+		application1 := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -116,7 +120,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
 		}
-		request2 := &model.ApplicationResponse{
+		application2 := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -128,10 +132,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
 		}
-		requests := []*model.ApplicationResponse{request2, request1}
+		applications := []*model.ApplicationResponse{application2, application1}
 
 		e := echo.New()
-		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/requests", nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/applications", nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -143,34 +147,34 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Limit:  100,
 				Offset: 0,
 			}).
-			Return(requests, nil)
+			Return(applications, nil)
 
-		require.NoError(t, h.Handlers.GetRequests(c))
+		require.NoError(t, h.Handlers.GetApplications(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*RequestResponse
+		var got []*ApplicationResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := []*RequestResponse{
+		exp := []*ApplicationResponse{
 			{
-				ID:        request2.ID,
-				Status:    request2.Status,
-				CreatedAt: request2.CreatedAt,
-				UpdatedAt: request2.UpdatedAt,
-				CreatedBy: request2.CreatedBy,
-				Title:     request2.Title,
-				Content:   request2.Content,
+				ID:        application2.ID,
+				Status:    application2.Status,
+				CreatedAt: application2.CreatedAt,
+				UpdatedAt: application2.UpdatedAt,
+				CreatedBy: application2.CreatedBy,
+				Title:     application2.Title,
+				Content:   application2.Content,
 				Targets:   []*TargetOverview{},
 				Tags:      []*TagResponse{},
 			},
 			{
-				ID:        request1.ID,
-				Status:    request1.Status,
-				CreatedAt: request1.CreatedAt,
-				UpdatedAt: request1.UpdatedAt,
-				CreatedBy: request1.CreatedBy,
-				Title:     request1.Title,
-				Content:   request1.Content,
+				ID:        application1.ID,
+				Status:    application1.Status,
+				CreatedAt: application1.CreatedAt,
+				UpdatedAt: application1.UpdatedAt,
+				CreatedBy: application1.CreatedBy,
+				Title:     application1.Title,
+				Content:   application1.Content,
 				Targets:   []*TargetOverview{},
 			},
 		}
@@ -182,10 +186,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		requests := []*model.ApplicationResponse{}
+		applications := []*model.ApplicationResponse{}
 
 		e := echo.New()
-		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/requests", nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/applications", nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -197,11 +201,11 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Limit:  100,
 				Offset: 0,
 			}).
-			Return(requests, nil)
+			Return(applications, nil)
 
-		require.NoError(t, h.Handlers.GetRequests(c))
+		require.NoError(t, h.Handlers.GetApplications(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*RequestResponse
+		var got []*ApplicationResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		require.Empty(t, got)
@@ -213,7 +217,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date1 := time.Now()
-		request1 := &model.ApplicationResponse{
+		application1 := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -225,11 +229,11 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
 		}
-		requests := []*model.ApplicationResponse{request1}
+		applications := []*model.ApplicationResponse{application1}
 
 		e := echo.New()
 		status := "submitted"
-		path := fmt.Sprintf("/api/requests?status=%s", status)
+		path := fmt.Sprintf("/api/applications?status=%s", status)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -243,23 +247,23 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Limit:  100,
 				Offset: 0,
 			}).
-			Return(requests, nil)
+			Return(applications, nil)
 
-		require.NoError(t, h.Handlers.GetRequests(c))
+		require.NoError(t, h.Handlers.GetApplications(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*RequestResponse
+		var got []*ApplicationResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := []*RequestResponse{
+		exp := []*ApplicationResponse{
 			{
-				ID:        request1.ID,
-				Status:    request1.Status,
-				CreatedAt: request1.CreatedAt,
-				UpdatedAt: request1.UpdatedAt,
-				CreatedBy: request1.CreatedBy,
-				Title:     request1.Title,
-				Content:   request1.Content,
+				ID:        application1.ID,
+				Status:    application1.Status,
+				CreatedAt: application1.CreatedAt,
+				UpdatedAt: application1.UpdatedAt,
+				CreatedBy: application1.CreatedBy,
+				Title:     application1.Title,
+				Content:   application1.Content,
 				Tags:      []*TagResponse{},
 				Targets:   []*TargetOverview{},
 			},
@@ -276,7 +280,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		date2str := date1.Add(time.Hour).Format("2006-01-02")
 		date2, err := service.StrToDate(date2str)
 		require.NoError(t, err)
-		request1 := &model.ApplicationResponse{
+		application1 := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -288,10 +292,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
 		}
-		requests := []*model.ApplicationResponse{request1}
+		applications := []*model.ApplicationResponse{application1}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests?until=%s", date2str)
+		path := fmt.Sprintf("/api/applications?until=%s", date2str)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -305,23 +309,23 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Limit:  100,
 				Offset: 0,
 			}).
-			Return(requests, nil)
+			Return(applications, nil)
 
-		require.NoError(t, h.Handlers.GetRequests(c))
+		require.NoError(t, h.Handlers.GetApplications(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*RequestResponse
+		var got []*ApplicationResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := []*RequestResponse{
+		exp := []*ApplicationResponse{
 			{
-				ID:        request1.ID,
-				Status:    request1.Status,
-				CreatedAt: request1.CreatedAt,
-				UpdatedAt: request1.UpdatedAt,
-				CreatedBy: request1.CreatedBy,
-				Title:     request1.Title,
-				Content:   request1.Content,
+				ID:        application1.ID,
+				Status:    application1.Status,
+				CreatedAt: application1.CreatedAt,
+				UpdatedAt: application1.UpdatedAt,
+				CreatedBy: application1.CreatedBy,
+				Title:     application1.Title,
+				Content:   application1.Content,
 				Tags:      []*TagResponse{},
 				Targets:   []*TargetOverview{},
 			},
@@ -338,7 +342,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		date2str := date1.Add(-time.Hour).Format("2006-01-02")
 		date2, err := service.StrToDate(date2str)
 		require.NoError(t, err)
-		request1 := &model.ApplicationResponse{
+		application1 := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -350,10 +354,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
 		}
-		requests := []*model.ApplicationResponse{request1}
+		applications := []*model.ApplicationResponse{application1}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests?since=%s", date2str)
+		path := fmt.Sprintf("/api/applications?since=%s", date2str)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -367,22 +371,22 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Limit:  100,
 				Offset: 0,
 			}).
-			Return(requests, nil)
-		require.NoError(t, h.Handlers.GetRequests(c))
+			Return(applications, nil)
+		require.NoError(t, h.Handlers.GetApplications(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*RequestResponse
+		var got []*ApplicationResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := []*RequestResponse{
+		exp := []*ApplicationResponse{
 			{
-				ID:        request1.ID,
-				Status:    request1.Status,
-				CreatedAt: request1.CreatedAt,
-				UpdatedAt: request1.UpdatedAt,
-				CreatedBy: request1.CreatedBy,
-				Title:     request1.Title,
-				Content:   request1.Content,
+				ID:        application1.ID,
+				Status:    application1.Status,
+				CreatedAt: application1.CreatedAt,
+				UpdatedAt: application1.UpdatedAt,
+				CreatedBy: application1.CreatedBy,
+				Title:     application1.Title,
+				Content:   application1.Content,
 				Targets:   []*TargetOverview{},
 				Tags:      []*TagResponse{},
 			},
@@ -408,7 +412,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 			CreatedAt: tag1.CreatedAt,
 			UpdatedAt: tag1.UpdatedAt,
 		}
-		request1 := &model.ApplicationResponse{
+		application1 := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -420,10 +424,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
 		}
-		requests := []*model.ApplicationResponse{request1}
+		applications := []*model.ApplicationResponse{application1}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests?tag=%s", tag1.Name)
+		path := fmt.Sprintf("/api/applications?tag=%s", tag1.Name)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -437,22 +441,22 @@ func TestHandlers_GetRequests(t *testing.T) {
 				Limit:  100,
 				Offset: 0,
 			}).
-			Return(requests, nil)
-		require.NoError(t, h.Handlers.GetRequests(c))
+			Return(applications, nil)
+		require.NoError(t, h.Handlers.GetApplications(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*RequestResponse
+		var got []*ApplicationResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := []*RequestResponse{
+		exp := []*ApplicationResponse{
 			{
-				ID:        request1.ID,
-				Status:    request1.Status,
-				CreatedAt: request1.CreatedAt,
-				UpdatedAt: request1.UpdatedAt,
-				CreatedBy: request1.CreatedBy,
-				Title:     request1.Title,
-				Content:   request1.Content,
+				ID:        application1.ID,
+				Status:    application1.Status,
+				CreatedAt: application1.CreatedAt,
+				UpdatedAt: application1.UpdatedAt,
+				CreatedBy: application1.CreatedBy,
+				Title:     application1.Title,
+				Content:   application1.Content,
 				Tags:      []*TagResponse{&tag1ov},
 				Targets:   []*TargetOverview{},
 			},
@@ -466,7 +470,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		request := &model.ApplicationResponse{
+		application := &model.ApplicationResponse{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -478,10 +482,10 @@ func TestHandlers_GetRequests(t *testing.T) {
 			Targets:   []*model.ApplicationTargetDetail{},
 			Statuses:  []*model.ApplicationStatus{},
 		}
-		modelRequests := []*model.ApplicationResponse{request}
+		modelApplications := []*model.ApplicationResponse{application}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests?created_by=%s", request.CreatedBy.String())
+		path := fmt.Sprintf("/api/applications?created_by=%s", application.CreatedBy.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -493,26 +497,26 @@ func TestHandlers_GetRequests(t *testing.T) {
 			GetApplications(c.Request().Context(), model.ApplicationQuery{
 				Limit:     100,
 				Offset:    0,
-				CreatedBy: request.CreatedBy},
+				CreatedBy: application.CreatedBy},
 			).
-			Return(modelRequests, nil)
+			Return(modelApplications, nil)
 
-		err = h.Handlers.GetRequests(c)
+		err = h.Handlers.GetApplications(c)
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got []*RequestResponse
+		var got []*ApplicationResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := []*RequestResponse{
+		exp := []*ApplicationResponse{
 			{
-				ID:        request.ID,
-				Status:    request.Status,
+				ID:        application.ID,
+				Status:    application.Status,
 				CreatedAt: date,
 				UpdatedAt: date,
-				CreatedBy: request.CreatedBy,
-				Title:     request.Title,
-				Content:   request.Content,
+				CreatedBy: application.CreatedBy,
+				Title:     application.Title,
+				Content:   application.Content,
 				Tags:      []*TagResponse{},
 				Targets:   []*TargetOverview{},
 			},
@@ -526,7 +530,7 @@ func TestHandlers_GetRequests(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		path := "/api/requests?status=invalid-status"
+		path := "/api/applications?status=invalid-status"
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -534,25 +538,25 @@ func TestHandlers_GetRequests(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		err = h.Handlers.GetRequests(c)
+		err = h.Handlers.GetApplications(c)
 		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい
 		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, "invalid status"), err)
 	})
 
-	t.Run("FailedToGetRequests", func(t *testing.T) {
+	t.Run("FailedToGetApplications", func(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/requests", nil)
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/applications", nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		resErr := errors.New("Failed to get requests.")
+		resErr := errors.New("Failed to get applications.")
 		h.Repository.MockApplicationRepository.
 			EXPECT().
 			GetApplications(c.Request().Context(), model.ApplicationQuery{
@@ -561,14 +565,14 @@ func TestHandlers_GetRequests(t *testing.T) {
 			}).
 			Return(nil, resErr)
 
-		err = h.Handlers.GetRequests(c)
+		err = h.Handlers.GetApplications(c)
 		require.Error(t, err)
 		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
 	})
 }
 
-func TestHandlers_PostRequest(t *testing.T) {
+func TestHandlers_PostApplication(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
@@ -577,7 +581,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
@@ -596,19 +600,19 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
-		reqRequest := Request{
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
+		reqApplication := Application{
+			CreatedBy: application.CreatedBy,
+			Title:     application.Title,
+			Content:   application.Content,
 		}
-		reqBody, err := json.Marshal(reqRequest)
+		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
 		targets := []*model.ApplicationTarget{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
+			ctx, http.MethodPost, "/api/applications", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -619,18 +623,18 @@ func TestHandlers_PostRequest(t *testing.T) {
 			EXPECT().
 			CreateApplication(
 				c.Request().Context(),
-				reqRequest.Title, reqRequest.Content,
+				reqApplication.Title, reqApplication.Content,
 				tags, targets,
-				reqRequest.CreatedBy).
-			Return(request, nil)
+				reqApplication.CreatedBy).
+			Return(application, nil)
 
-		require.NoError(t, h.Handlers.PostRequest(c))
+		require.NoError(t, h.Handlers.PostApplication(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got *RequestDetailResponse
+		var got *ApplicationDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := modelRequestDetailToRequestResponse(request)
+		exp := modelApplicationDetailToApplicationResponse(application)
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
@@ -647,7 +651,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 		}
 		tags := []*model.Tag{tag}
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
@@ -666,19 +670,19 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
-		reqRequest := Request{
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
+		reqApplication := Application{
+			CreatedBy: application.CreatedBy,
+			Title:     application.Title,
+			Content:   application.Content,
 			Tags:      []uuid.UUID{tag.ID},
 		}
-		reqBody, err := json.Marshal(reqRequest)
+		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
 		targets := []*model.ApplicationTarget{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
+			ctx, http.MethodPost, "/api/applications", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -693,18 +697,18 @@ func TestHandlers_PostRequest(t *testing.T) {
 			EXPECT().
 			CreateApplication(
 				c.Request().Context(),
-				reqRequest.Title, reqRequest.Content,
+				reqApplication.Title, reqApplication.Content,
 				tags, targets,
-				reqRequest.CreatedBy).
-			Return(request, nil)
+				reqApplication.CreatedBy).
+			Return(application, nil)
 
-		require.NoError(t, h.Handlers.PostRequest(c))
+		require.NoError(t, h.Handlers.PostApplication(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got *RequestDetailResponse
+		var got *ApplicationDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := modelRequestDetailToRequestResponse(request)
+		exp := modelApplicationDetailToApplicationResponse(application)
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
@@ -724,7 +728,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Amount:    target.Amount,
 			CreatedAt: date,
 		}
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
@@ -747,19 +751,19 @@ func TestHandlers_PostRequest(t *testing.T) {
 			Target: target.Target,
 			Amount: target.Amount,
 		}
-		reqRequest := Request{
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
+		reqApplication := Application{
+			CreatedBy: application.CreatedBy,
+			Title:     application.Title,
+			Content:   application.Content,
 			Targets:   []*Target{tg},
 		}
-		reqBody, err := json.Marshal(reqRequest)
+		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
+			ctx, http.MethodPost, "/api/applications", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -770,18 +774,18 @@ func TestHandlers_PostRequest(t *testing.T) {
 			EXPECT().
 			CreateApplication(
 				c.Request().Context(),
-				reqRequest.Title, reqRequest.Content,
+				reqApplication.Title, reqApplication.Content,
 				tags, []*model.ApplicationTarget{target},
-				reqRequest.CreatedBy).
-			Return(request, nil)
+				reqApplication.CreatedBy).
+			Return(application, nil)
 
-		require.NoError(t, h.Handlers.PostRequest(c))
+		require.NoError(t, h.Handlers.PostApplication(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got *RequestDetailResponse
+		var got *ApplicationDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := modelRequestDetailToRequestResponse(request)
+		exp := modelApplicationDetailToApplicationResponse(application)
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
@@ -791,7 +795,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
@@ -801,18 +805,18 @@ func TestHandlers_PostRequest(t *testing.T) {
 			CreatedBy: uuid.New(),
 		}
 		unknownTagID := uuid.New()
-		reqRequest := Request{
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
+		reqApplication := Application{
+			CreatedBy: application.CreatedBy,
+			Title:     application.Title,
+			Content:   application.Content,
 			Tags:      []uuid.UUID{unknownTagID},
 		}
-		reqBody, err := json.Marshal(reqRequest)
+		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
+			ctx, http.MethodPost, "/api/applications", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -827,7 +831,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 			GetTag(c.Request().Context(), unknownTagID).
 			Return(nil, resErr)
 
-		err = h.Handlers.PostRequest(c)
+		err = h.Handlers.PostApplication(c)
 		require.Error(t, err)
 		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
@@ -839,7 +843,7 @@ func TestHandlers_PostRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
@@ -848,19 +852,19 @@ func TestHandlers_PostRequest(t *testing.T) {
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 		}
-		reqRequest := Request{
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   request.Content,
+		reqApplication := Application{
+			CreatedBy: application.CreatedBy,
+			Title:     application.Title,
+			Content:   application.Content,
 		}
-		reqBody, err := json.Marshal(reqRequest)
+		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
 		targets := []*model.ApplicationTarget{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
+			ctx, http.MethodPost, "/api/applications", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -874,19 +878,19 @@ func TestHandlers_PostRequest(t *testing.T) {
 			EXPECT().
 			CreateApplication(
 				c.Request().Context(),
-				reqRequest.Title, reqRequest.Content,
+				reqApplication.Title, reqApplication.Content,
 				tags, targets,
-				reqRequest.CreatedBy).
+				reqApplication.CreatedBy).
 			Return(nil, resErr)
 
-		err = h.Handlers.PostRequest(c)
+		err = h.Handlers.PostApplication(c)
 		require.Error(t, err)
 		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 }
 
-func TestHandlers_GetRequest(t *testing.T) {
+func TestHandlers_GetApplication(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
@@ -895,7 +899,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -916,32 +920,32 @@ func TestHandlers_GetRequest(t *testing.T) {
 		}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/requests/:requestID")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("/api/applications/:applicationID")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(c.Request().Context(), request.ID).
-			Return(request, nil)
+			GetApplication(c.Request().Context(), application.ID).
+			Return(application, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
-			GetComments(c.Request().Context(), request.ID).
+			GetComments(c.Request().Context(), application.ID).
 			Return(nil, nil)
 
-		require.NoError(t, h.Handlers.GetRequest(c))
+		require.NoError(t, h.Handlers.GetApplication(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got *RequestDetailResponse
+		var got *ApplicationDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := modelRequestDetailToRequestResponse(request)
+		exp := modelApplicationDetailToApplicationResponse(application)
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
@@ -951,7 +955,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		date := time.Now()
 
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -972,14 +976,14 @@ func TestHandlers_GetRequest(t *testing.T) {
 		}
 		comment1 := &model.Comment{
 			ID:        uuid.New(),
-			User:      request.CreatedBy,
+			User:      application.CreatedBy,
 			Comment:   random.AlphaNumeric(t, 100),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
 		comment2 := &model.Comment{
 			ID:        uuid.New(),
-			User:      request.CreatedBy,
+			User:      application.CreatedBy,
 			Comment:   random.AlphaNumeric(t, 100),
 			CreatedAt: date,
 			UpdatedAt: date,
@@ -987,32 +991,32 @@ func TestHandlers_GetRequest(t *testing.T) {
 		comments := []*model.Comment{comment1, comment2}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/requests/:requestID")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("/api/applications/:applicationID")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(c.Request().Context(), request.ID).
-			Return(request, nil)
+			GetApplication(c.Request().Context(), application.ID).
+			Return(application, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
-			GetComments(c.Request().Context(), request.ID).
+			GetComments(c.Request().Context(), application.ID).
 			Return(comments, nil)
 
-		require.NoError(t, h.Handlers.GetRequest(c))
+		require.NoError(t, h.Handlers.GetApplication(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got *RequestDetailResponse
+		var got *ApplicationDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := modelRequestDetailToRequestResponse(request)
+		exp := modelApplicationDetailToApplicationResponse(application)
 		exp.Comments = lo.Map(comments, func(c *model.Comment, _ int) *CommentDetail {
 			return modelCommentToCommentDetail(c)
 		})
@@ -1032,7 +1036,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 			PaidAt:    time.Time{},
 			CreatedAt: date,
 		}
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -1053,34 +1057,34 @@ func TestHandlers_GetRequest(t *testing.T) {
 		}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/requests/:requestID")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("/api/applications/:applicationID")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(c.Request().Context(), request.ID).
-			Return(request, nil)
+			GetApplication(c.Request().Context(), application.ID).
+			Return(application, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
-			GetComments(c.Request().Context(), request.ID).
+			GetComments(c.Request().Context(), application.ID).
 			Return(nil, nil)
-		require.NoError(t, h.Handlers.GetRequest(c))
+		require.NoError(t, h.Handlers.GetApplication(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got *RequestDetailResponse
+		var got *ApplicationDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := modelRequestDetailToRequestResponse(request)
+		exp := modelApplicationDetailToApplicationResponse(application)
 		exp.Targets = []*TargetOverview{
-			modelRequestTargetDetailToTargetOverview(target),
+			modelApplicationTargetDetailToTargetOverview(target),
 		}
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
@@ -1094,18 +1098,18 @@ func TestHandlers_GetRequest(t *testing.T) {
 		_, resErr := uuid.Parse(invalidUUID)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", invalidUUID)
+		path := fmt.Sprintf("/api/applications/%s", invalidUUID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/requests/:requestID")
-		c.SetParamNames("requestID")
+		c.SetPath("/api/applications/:applicationID")
+		c.SetParamNames("applicationID")
 		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		err = h.Handlers.GetRequest(c)
+		err = h.Handlers.GetApplication(c)
 		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
@@ -1117,12 +1121,12 @@ func TestHandlers_GetRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", uuid.Nil)
+		path := fmt.Sprintf("/api/applications/%s", uuid.Nil)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/requests/:requestID")
-		c.SetParamNames("requestID")
+		c.SetPath("/api/applications/:applicationID")
+		c.SetParamNames("applicationID")
 		c.SetParamValues(uuid.Nil.String())
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -1130,7 +1134,7 @@ func TestHandlers_GetRequest(t *testing.T) {
 
 		resErr := errors.New("invalid UUID")
 
-		err = h.Handlers.GetRequest(c)
+		err = h.Handlers.GetApplication(c)
 		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
@@ -1144,12 +1148,12 @@ func TestHandlers_GetRequest(t *testing.T) {
 		unknownID := uuid.New()
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", unknownID.String())
+		path := fmt.Sprintf("/api/applications/%s", unknownID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/requests/:requestID")
-		c.SetParamNames("requestID")
+		c.SetPath("/api/applications/:applicationID")
+		c.SetParamNames("applicationID")
 		c.SetParamValues(unknownID.String())
 
 		var resErr *ent.NotFoundError
@@ -1162,14 +1166,14 @@ func TestHandlers_GetRequest(t *testing.T) {
 			GetApplication(c.Request().Context(), unknownID).
 			Return(nil, resErr)
 
-		err = h.Handlers.GetRequest(c)
+		err = h.Handlers.GetApplication(c)
 		require.Error(t, err)
 		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
 	})
 }
 
-func TestHandlers_PutRequest(t *testing.T) {
+func TestHandlers_PutApplication(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Success", func(t *testing.T) {
@@ -1180,7 +1184,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -1199,43 +1203,43 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
-		reqRequest := PutRequest{
+		reqApplication := PutApplication{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
 		}
-		reqBody, err := json.Marshal(reqRequest)
+		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
-		updateRequest := &model.ApplicationDetail{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedBy: request.CreatedBy,
-			CreatedAt: request.CreatedAt,
+		updateApplication := &model.ApplicationDetail{
+			ID:        application.ID,
+			Status:    application.Status,
+			CreatedBy: application.CreatedBy,
+			CreatedAt: application.CreatedAt,
 			UpdatedAt: time.Now(),
-			Title:     reqRequest.Title,
-			Content:   reqRequest.Content,
+			Title:     reqApplication.Title,
+			Content:   reqApplication.Content,
 			Tags:      tags,
 			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses:  request.Statuses,
-			Comments:  request.Comments,
-			Files:     request.Files,
+			Statuses:  application.Statuses,
+			Comments:  application.Comments,
+			Files:     application.Files,
 		}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", request.ID)
+		path := fmt.Sprintf("/api/applications/%s", application.ID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		targets := lo.Map(
-			updateRequest.Targets,
+			updateApplication.Targets,
 			func(t *model.ApplicationTargetDetail, _ int) *model.ApplicationTarget {
 				return &model.ApplicationTarget{
 					Target: t.Target,
@@ -1247,24 +1251,24 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(c.Request().Context(), request.ID).
-			Return(request, nil)
+			GetApplication(c.Request().Context(), application.ID).
+			Return(application, nil)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
 			UpdateApplication(
 				c.Request().Context(),
-				request.ID,
-				reqRequest.Title, reqRequest.Content,
+				application.ID,
+				reqApplication.Title, reqApplication.Content,
 				tags, targets).
-			Return(updateRequest, nil)
+			Return(updateApplication, nil)
 
-		require.NoError(t, h.Handlers.PutRequest(c))
+		require.NoError(t, h.Handlers.PutApplication(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got *RequestDetailResponse
+		var got *ApplicationDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := modelRequestDetailToRequestResponse(updateRequest)
+		exp := modelApplicationDetailToApplicationResponse(updateApplication)
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
@@ -1276,7 +1280,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -1308,31 +1312,31 @@ func TestHandlers_PutRequest(t *testing.T) {
 			UpdatedAt: date,
 		}
 		tags := []*model.Tag{tag1, tag2}
-		reqRequest := PutRequest{
+		reqApplication := PutApplication{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{tag1.ID, tag2.ID},
 			Targets: []*Target{},
 		}
-		reqBody, err := json.Marshal(reqRequest)
+		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
-		updateRequest := &model.ApplicationDetail{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   reqRequest.Content,
-			CreatedAt: request.CreatedAt,
+		updateApplication := &model.ApplicationDetail{
+			ID:        application.ID,
+			Status:    application.Status,
+			CreatedBy: application.CreatedBy,
+			Title:     application.Title,
+			Content:   reqApplication.Content,
+			CreatedAt: application.CreatedAt,
 			UpdatedAt: time.Now(),
 			Tags:      tags,
 			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses:  request.Statuses,
-			Comments:  request.Comments,
-			Files:     request.Files,
+			Statuses:  application.Statuses,
+			Comments:  application.Comments,
+			Files:     application.Files,
 		}
 
 		targets := lo.Map(
-			updateRequest.Targets,
+			updateApplication.Targets,
 			func(t *model.ApplicationTargetDetail, _ int) *model.ApplicationTarget {
 				return &model.ApplicationTarget{
 					Target: t.Target,
@@ -1341,22 +1345,22 @@ func TestHandlers_PutRequest(t *testing.T) {
 			},
 		)
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(c.Request().Context(), request.ID).
-			Return(request, nil)
+			GetApplication(c.Request().Context(), application.ID).
+			Return(application, nil)
 		h.Repository.MockTagRepository.
 			EXPECT().
 			GetTag(c.Request().Context(), tag1.ID).
@@ -1369,18 +1373,18 @@ func TestHandlers_PutRequest(t *testing.T) {
 			EXPECT().
 			UpdateApplication(
 				c.Request().Context(),
-				request.ID,
-				reqRequest.Title, reqRequest.Content,
+				application.ID,
+				reqApplication.Title, reqApplication.Content,
 				tags, targets).
-			Return(updateRequest, nil)
+			Return(updateApplication, nil)
 
-		require.NoError(t, h.Handlers.PutRequest(c))
+		require.NoError(t, h.Handlers.PutApplication(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got *RequestDetailResponse
+		var got *ApplicationDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := modelRequestDetailToRequestResponse(updateRequest)
+		exp := modelApplicationDetailToApplicationResponse(updateApplication)
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
@@ -1392,7 +1396,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -1426,7 +1430,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedAt: date,
 		}
 		targetDetails := []*model.ApplicationTargetDetail{target1, target2}
-		reqRequest := PutRequest{
+		reqApplication := PutApplication{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{},
@@ -1435,37 +1439,37 @@ func TestHandlers_PutRequest(t *testing.T) {
 				{Target: target2.Target, Amount: target2.Amount},
 			},
 		}
-		reqBody, err := json.Marshal(reqRequest)
+		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
-		updateRequest := &model.ApplicationDetail{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedBy: request.CreatedBy,
-			Title:     request.Title,
-			Content:   reqRequest.Content,
-			CreatedAt: request.CreatedAt,
+		updateApplication := &model.ApplicationDetail{
+			ID:        application.ID,
+			Status:    application.Status,
+			CreatedBy: application.CreatedBy,
+			Title:     application.Title,
+			Content:   reqApplication.Content,
+			CreatedAt: application.CreatedAt,
 			UpdatedAt: time.Now(),
 			Tags:      tags,
 			Targets:   targetDetails,
-			Statuses:  request.Statuses,
-			Comments:  request.Comments,
-			Files:     request.Files,
+			Statuses:  application.Statuses,
+			Comments:  application.Comments,
+			Files:     application.Files,
 		}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		targets := lo.Map(
-			updateRequest.Targets,
+			updateApplication.Targets,
 			func(t *model.ApplicationTargetDetail, _ int) *model.ApplicationTarget {
 				return &model.ApplicationTarget{
 					Target: t.Target,
@@ -1477,24 +1481,24 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(c.Request().Context(), request.ID).
-			Return(request, nil)
+			GetApplication(c.Request().Context(), application.ID).
+			Return(application, nil)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
 			UpdateApplication(
 				c.Request().Context(),
-				request.ID,
-				reqRequest.Title, reqRequest.Content,
+				application.ID,
+				reqApplication.Title, reqApplication.Content,
 				tags, targets).
-			Return(updateRequest, nil)
+			Return(updateApplication, nil)
 
-		require.NoError(t, h.Handlers.PutRequest(c))
+		require.NoError(t, h.Handlers.PutApplication(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got *RequestDetailResponse
+		var got *ApplicationDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := modelRequestDetailToRequestResponse(updateRequest)
+		exp := modelApplicationDetailToApplicationResponse(updateApplication)
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
@@ -1506,7 +1510,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -1525,58 +1529,58 @@ func TestHandlers_PutRequest(t *testing.T) {
 			Comments: []*model.Comment{},
 			Files:    []uuid.UUID{},
 		}
-		reqRequest := PutRequest{
+		reqApplication := PutApplication{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
 		}
-		reqBody, err := json.Marshal(reqRequest)
+		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
 		tags := []*model.Tag{}
 		comment1 := &model.Comment{
 			ID:        uuid.New(),
-			User:      request.CreatedBy,
+			User:      application.CreatedBy,
 			Comment:   random.AlphaNumeric(t, 100),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
 		comment2 := &model.Comment{
 			ID:        uuid.New(),
-			User:      request.CreatedBy,
+			User:      application.CreatedBy,
 			Comment:   random.AlphaNumeric(t, 100),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
 		comments := []*model.Comment{comment1, comment2}
-		updateRequest := &model.ApplicationDetail{
-			ID:        request.ID,
-			Status:    request.Status,
-			CreatedBy: request.CreatedBy,
-			Title:     reqRequest.Title,
-			Content:   reqRequest.Content,
-			CreatedAt: request.CreatedAt,
+		updateApplication := &model.ApplicationDetail{
+			ID:        application.ID,
+			Status:    application.Status,
+			CreatedBy: application.CreatedBy,
+			Title:     reqApplication.Title,
+			Content:   reqApplication.Content,
+			CreatedAt: application.CreatedAt,
 			UpdatedAt: time.Now(),
 			Tags:      tags,
 			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses:  request.Statuses,
+			Statuses:  application.Statuses,
 			Comments:  comments,
-			Files:     request.Files,
+			Files:     application.Files,
 		}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", request.ID)
+		path := fmt.Sprintf("/api/applications/%s", application.ID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		targets := lo.Map(
-			updateRequest.Targets,
+			updateApplication.Targets,
 			func(t *model.ApplicationTargetDetail, _ int) *model.ApplicationTarget {
 				return &model.ApplicationTarget{
 					Target: t.Target,
@@ -1588,24 +1592,24 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(c.Request().Context(), request.ID).
-			Return(request, nil)
+			GetApplication(c.Request().Context(), application.ID).
+			Return(application, nil)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
 			UpdateApplication(
 				c.Request().Context(),
-				request.ID,
-				reqRequest.Title, reqRequest.Content,
+				application.ID,
+				reqApplication.Title, reqApplication.Content,
 				tags, targets).
-			Return(updateRequest, nil)
+			Return(updateApplication, nil)
 
-		require.NoError(t, h.Handlers.PutRequest(c))
+		require.NoError(t, h.Handlers.PutApplication(c))
 		require.Equal(t, http.StatusOK, rec.Code)
-		var got *RequestDetailResponse
+		var got *ApplicationDetailResponse
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := modelRequestDetailToRequestResponse(updateRequest)
+		exp := modelApplicationDetailToApplicationResponse(updateApplication)
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
@@ -1618,19 +1622,19 @@ func TestHandlers_PutRequest(t *testing.T) {
 		_, resErr := uuid.Parse(invalidUUID)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", invalidUUID)
+		path := fmt.Sprintf("/api/applications/%s", invalidUUID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/requests/:requestID")
-		c.SetParamNames("requestID")
+		c.SetPath("/api/applications/:applicationID")
+		c.SetParamNames("applicationID")
 		c.SetParamValues(invalidUUID)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		err = h.Handlers.PutRequest(c)
+		err = h.Handlers.PutApplication(c)
 		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
@@ -1642,13 +1646,13 @@ func TestHandlers_PutRequest(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", uuid.Nil)
+		path := fmt.Sprintf("/api/applications/%s", uuid.Nil)
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/requests/:requestID")
-		c.SetParamNames("requestID")
+		c.SetPath("/api/applications/:applicationID")
+		c.SetParamNames("applicationID")
 		c.SetParamValues(uuid.Nil.String())
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -1656,7 +1660,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 
 		resErr := errors.New("invalid UUID")
 
-		err = h.Handlers.PutRequest(c)
+		err = h.Handlers.PutApplication(c)
 		require.Error(t, err)
 		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
@@ -1670,23 +1674,23 @@ func TestHandlers_PutRequest(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		unknownID := uuid.New()
-		reqRequest := PutRequest{
+		reqApplication := PutApplication{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{},
 			Targets: []*Target{},
 		}
-		reqBody, err := json.Marshal(reqRequest)
+		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", unknownID.String())
+		path := fmt.Sprintf("/api/applications/%s", unknownID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/requests/:requestID")
-		c.SetParamNames("requestID")
+		c.SetPath("/api/applications/:applicationID")
+		c.SetParamNames("applicationID")
 		c.SetParamValues(unknownID.String())
 		c.Set(loginUserKey, user)
 
@@ -1700,7 +1704,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 			GetApplication(c.Request().Context(), unknownID).
 			Return(nil, resErr)
 
-		err = h.Handlers.PutRequest(c)
+		err = h.Handlers.PutApplication(c)
 		require.Error(t, err)
 		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
@@ -1714,7 +1718,7 @@ func TestHandlers_PutRequest(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -1739,24 +1743,24 @@ func TestHandlers_PutRequest(t *testing.T) {
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		reqRequest := PutRequest{
+		reqApplication := PutApplication{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
 			Tags:    []uuid.UUID{tag.ID},
 			Targets: []*Target{},
 		}
-		reqBody, err := json.Marshal(reqRequest)
+		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/requests/:requestID")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("/api/applications/:applicationID")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		var resErr *ent.NotFoundError
@@ -1766,14 +1770,14 @@ func TestHandlers_PutRequest(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(c.Request().Context(), request.ID).
-			Return(request, nil)
+			GetApplication(c.Request().Context(), application.ID).
+			Return(application, nil)
 		h.Repository.MockTagRepository.
 			EXPECT().
 			GetTag(c.Request().Context(), tag.ID).
 			Return(nil, resErr)
 
-		err = h.Handlers.PutRequest(c)
+		err = h.Handlers.PutApplication(c)
 		require.Error(t, err)
 		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
 		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
@@ -1791,7 +1795,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.FixRequired,
 			CreatedBy: user.ID,
@@ -1831,14 +1835,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -1846,15 +1850,15 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 		h.Repository.MockApplicationStatusRepository.
 			EXPECT().
-			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
+			CreateStatus(ctx, application.ID, user.ID, reqStatus.Status).
 			Return(status, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
-			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
+			CreateComment(ctx, reqStatus.Comment, application.ID, user.ID).
 			Return(comment, nil)
 
 		require.NoError(t, h.Handlers.PutStatus(c))
@@ -1886,7 +1890,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -1926,14 +1930,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -1941,15 +1945,15 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 		h.Repository.MockApplicationStatusRepository.
 			EXPECT().
-			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
+			CreateStatus(ctx, application.ID, user.ID, reqStatus.Status).
 			Return(status, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
-			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
+			CreateComment(ctx, reqStatus.Comment, application.ID, user.ID).
 			Return(comment, nil)
 
 		require.NoError(t, h.Handlers.PutStatus(c))
@@ -1981,7 +1985,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -2021,14 +2025,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2036,15 +2040,15 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 		h.Repository.MockApplicationStatusRepository.
 			EXPECT().
-			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
+			CreateStatus(ctx, application.ID, user.ID, reqStatus.Status).
 			Return(status, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
-			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
+			CreateComment(ctx, reqStatus.Comment, application.ID, user.ID).
 			Return(comment, nil)
 
 		require.NoError(t, h.Handlers.PutStatus(c))
@@ -2076,7 +2080,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: uuid.New(),
@@ -2117,14 +2121,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("/api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2132,15 +2136,15 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 		h.Repository.MockApplicationStatusRepository.
 			EXPECT().
-			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
+			CreateStatus(ctx, application.ID, user.ID, reqStatus.Status).
 			Return(status, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
-			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
+			CreateComment(ctx, reqStatus.Comment, application.ID, user.ID).
 			Return(comment, nil)
 
 		require.NoError(t, h.Handlers.PutStatus(c))
@@ -2172,7 +2176,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.FixRequired,
 			CreatedBy: uuid.New(),
@@ -2212,14 +2216,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2227,15 +2231,15 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 		h.Repository.MockApplicationStatusRepository.
 			EXPECT().
-			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
+			CreateStatus(ctx, application.ID, user.ID, reqStatus.Status).
 			Return(status, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
-			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
+			CreateComment(ctx, reqStatus.Comment, application.ID, user.ID).
 			Return(comment, nil)
 
 		require.NoError(t, h.Handlers.PutStatus(c))
@@ -2267,7 +2271,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Accepted,
 			CreatedBy: uuid.New(),
@@ -2314,14 +2318,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		}
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2329,19 +2333,19 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 		h.Repository.MockApplicationTargetRepository.
 			EXPECT().
-			GetApplicationTargets(ctx, request.ID).
+			GetApplicationTargets(ctx, application.ID).
 			Return(targets, nil)
 		h.Repository.MockApplicationStatusRepository.
 			EXPECT().
-			CreateStatus(ctx, request.ID, user.ID, reqStatus.Status).
+			CreateStatus(ctx, application.ID, user.ID, reqStatus.Status).
 			Return(status, nil)
 		h.Repository.MockCommentRepository.
 			EXPECT().
-			CreateComment(ctx, reqStatus.Comment, request.ID, user.ID).
+			CreateComment(ctx, reqStatus.Comment, application.ID, user.ID).
 			Return(comment, nil)
 
 		require.NoError(t, h.Handlers.PutStatus(c))
@@ -2373,7 +2377,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.FixRequired,
 			CreatedBy: user.ID,
@@ -2403,14 +2407,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2445,13 +2449,13 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", invalidUUID)
+		path := fmt.Sprintf("/api/applications/%s/status", invalidUUID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
 		c.SetParamValues(invalidUUID)
 		c.Set(loginUserKey, user)
 
@@ -2479,20 +2483,20 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", uuid.Nil)
+		path := fmt.Sprintf("/api/applications/%s/status", uuid.Nil)
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
 		c.SetParamValues(uuid.Nil.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		_, resErr := uuid.Parse(c.Param("requestID"))
+		_, resErr := uuid.Parse(c.Param("applicationID"))
 
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
@@ -2508,7 +2512,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Status(random.Numeric(t, 5) + 1),
 			CreatedBy: user.ID,
@@ -2528,21 +2532,21 @@ func TestHandlers_PutStatus(t *testing.T) {
 			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
-			Status:  request.Status,
+			Status:  application.Status,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2550,10 +2554,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 
-		resErr := errors.New("invalid request: same status")
+		resErr := errors.New("invalid application: same status")
 
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
@@ -2569,7 +2573,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -2596,14 +2600,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2611,12 +2615,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 
 		resErr := fmt.Errorf(
 			"unable to change %v to %v without comment",
-			request.Status.String(),
+			application.Status.String(),
 			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
@@ -2633,7 +2637,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -2659,14 +2663,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2674,12 +2678,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 
 		resErr := fmt.Errorf(
 			"unable to change %v to %v without comment",
-			request.Status.String(),
+			application.Status.String(),
 			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
@@ -2696,7 +2700,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Accepted,
 			CreatedBy: user.ID,
@@ -2722,14 +2726,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2737,12 +2741,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 
 		resErr := fmt.Errorf(
 			"unable to change %v to %v without comment",
-			request.Status.String(),
+			application.Status.String(),
 			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
@@ -2759,7 +2763,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.FixRequired,
 			CreatedBy: uuid.New(),
@@ -2786,14 +2790,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2801,12 +2805,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 
 		resErr := fmt.Errorf(
 			"accountManager unable to change %v to %v",
-			request.Status.String(),
+			application.Status.String(),
 			reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
@@ -2823,7 +2827,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Accepted,
 			CreatedBy: uuid.New(),
@@ -2857,14 +2861,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2873,11 +2877,11 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 		h.Repository.MockApplicationTargetRepository.
 			EXPECT().
-			GetApplicationTargets(ctx, request.ID).
+			GetApplicationTargets(ctx, application.ID).
 			Return(targets, nil)
 
 		resErr := errors.New("someone already paid")
@@ -2896,7 +2900,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.Submitted,
 			CreatedBy: user.ID,
@@ -2923,14 +2927,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2938,12 +2942,12 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 
 		resErr := fmt.Errorf(
 			"creator unable to change %v to %v",
-			request.Status.String(), reqStatus.Status.String())
+			application.Status.String(), reqStatus.Status.String())
 
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
@@ -2959,7 +2963,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		request := &model.ApplicationDetail{
+		application := &model.ApplicationDetail{
 			ID:        uuid.New(),
 			Status:    model.FixRequired,
 			CreatedBy: uuid.New(),
@@ -2986,14 +2990,14 @@ func TestHandlers_PutStatus(t *testing.T) {
 		require.NoError(t, err)
 
 		e := echo.New()
-		path := fmt.Sprintf("/api/requests/%s/status", request.ID.String())
+		path := fmt.Sprintf("/api/applications/%s/status", application.ID.String())
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/requests/:requestID/status")
-		c.SetParamNames("requestID")
-		c.SetParamValues(request.ID.String())
+		c.SetPath("api/applications/:applicationID/status")
+		c.SetParamNames("applicationID")
+		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -3001,15 +3005,15 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctx = c.Request().Context()
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplication(ctx, request.ID).
-			Return(request, nil)
+			GetApplication(ctx, application.ID).
+			Return(application, nil)
 
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
 		// FIXME: http.StatusForbiddenだけ判定したい
 		require.Equal(
 			t,
-			echo.NewHTTPError(http.StatusForbidden, "you are not request creator"),
+			echo.NewHTTPError(http.StatusForbidden, "you are not application creator"),
 			err)
 	})
 }
