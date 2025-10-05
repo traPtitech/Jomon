@@ -816,7 +816,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPost, "/api/requests", bytes.NewReader(reqBody))
+			ctx, http.MethodPost, "/api/applications", bytes.NewReader(reqBody))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
