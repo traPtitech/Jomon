@@ -46,7 +46,7 @@ func SetupTestEntClient(t *testing.T, ctx context.Context, dbName string) (*ent.
 	client := enttest.Open(t, "mysql", dsn, entOptions...).Debug()
 
 	// model/ ディレクトリをPWDとしてテストが実行されるため, migrations ディレクトリのパスを揃える
-	if err := MigrateApply(ctx, client, MigrationsDir("../migrations")); err != nil {
+	if err := MigrateApply(ctx, client, MigrationsDir("../../migrations")); err != nil {
 		return nil, fmt.Errorf("failed to apply migration: %w", err)
 	}
 
