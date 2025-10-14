@@ -34,20 +34,20 @@ type Tag struct {
 
 // TagEdges holds the relations/edges for other nodes in the graph.
 type TagEdges struct {
-	// Request holds the value of the request edge.
-	Request []*Request `json:"request,omitempty"`
+	// Application holds the value of the application edge.
+	Application []*Application `json:"application,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// RequestOrErr returns the Request value or an error if the edge
+// ApplicationOrErr returns the Application value or an error if the edge
 // was not loaded in eager-loading.
-func (e TagEdges) RequestOrErr() ([]*Request, error) {
+func (e TagEdges) ApplicationOrErr() ([]*Application, error) {
 	if e.loadedTypes[0] {
-		return e.Request, nil
+		return e.Application, nil
 	}
-	return nil, &NotLoadedError{edge: "request"}
+	return nil, &NotLoadedError{edge: "application"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -120,9 +120,9 @@ func (_m *Tag) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryRequest queries the "request" edge of the Tag entity.
-func (_m *Tag) QueryRequest() *RequestQuery {
-	return NewTagClient(_m.config).QueryRequest(_m)
+// QueryApplication queries the "application" edge of the Tag entity.
+func (_m *Tag) QueryApplication() *ApplicationQuery {
+	return NewTagClient(_m.config).QueryApplication(_m)
 }
 
 // Update returns a builder for updating this Tag.

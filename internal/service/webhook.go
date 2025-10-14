@@ -98,7 +98,7 @@ func NewWebhookService(secret, channelID, webhookID string) *WebhookService {
 	}
 }
 
-func (ws *WebhookService) WebhookRequestsEventHandler(c echo.Context, reqBody, resBody []byte) {
+func (ws *WebhookService) WebhookApplicationsEventHandler(c echo.Context, reqBody, resBody []byte) {
 	var message string
 
 	if strings.Contains(c.Request().URL.Path, "/comments") {
@@ -110,7 +110,7 @@ func (ws *WebhookService) WebhookRequestsEventHandler(c echo.Context, reqBody, r
 		splitedPath := strings.Split(c.Request().URL.Path, "/")
 
 		message += fmt.Sprintf(
-			"## :comment:[申請](%s/requests/%s)",
+			"## :comment:[申請](%s/applications/%s)",
 			"https://jomon.trap.jp",
 			splitedPath[3])
 		message += "に対する"

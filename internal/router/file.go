@@ -62,14 +62,14 @@ func (h Handlers) PostFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid file name"))
 	}
 	name := names[0]
-	requestIDs, ok := form.Value["request_id"]
-	if !ok || len(requestIDs) != 1 {
-		logger.Info("could not find field `request_id` in request, or its length is not 1")
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid file request id"))
+	applicationIDs, ok := form.Value["application_id"]
+	if !ok || len(applicationIDs) != 1 {
+		logger.Info("could not find field `application_id` in request, or its length is not 1")
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid file application id"))
 	}
-	requestID, err := uuid.Parse(requestIDs[0])
+	applicationID, err := uuid.Parse(applicationIDs[0])
 	if err != nil {
-		logger.Info("could not parse request_id as UUID", zap.Error(err))
+		logger.Info("could not parse application_id as UUID", zap.Error(err))
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
@@ -88,7 +88,7 @@ func (h Handlers) PostFile(c echo.Context) error {
 	}
 	defer src.Close()
 
-	file, err := h.Repository.CreateFile(ctx, name, mimetype, requestID, loginUser.ID)
+	file, err := h.Repository.CreateFile(ctx, name, mimetype, applicationID, loginUser.ID)
 	if err != nil {
 		logger.Error("failed to create file in repository", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)

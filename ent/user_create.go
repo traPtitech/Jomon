@@ -11,11 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
+	"github.com/traPtitech/Jomon/ent/applicationstatus"
+	"github.com/traPtitech/Jomon/ent/applicationtarget"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/request"
-	"github.com/traPtitech/Jomon/ent/requeststatus"
-	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/user"
 )
 
@@ -123,34 +123,34 @@ func (_c *UserCreate) AddComment(v ...*Comment) *UserCreate {
 	return _c.AddCommentIDs(ids...)
 }
 
-// AddRequestStatuIDs adds the "request_status" edge to the RequestStatus entity by IDs.
-func (_c *UserCreate) AddRequestStatuIDs(ids ...uuid.UUID) *UserCreate {
-	_c.mutation.AddRequestStatuIDs(ids...)
+// AddApplicationStatuIDs adds the "application_status" edge to the ApplicationStatus entity by IDs.
+func (_c *UserCreate) AddApplicationStatuIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddApplicationStatuIDs(ids...)
 	return _c
 }
 
-// AddRequestStatus adds the "request_status" edges to the RequestStatus entity.
-func (_c *UserCreate) AddRequestStatus(v ...*RequestStatus) *UserCreate {
+// AddApplicationStatus adds the "application_status" edges to the ApplicationStatus entity.
+func (_c *UserCreate) AddApplicationStatus(v ...*ApplicationStatus) *UserCreate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddRequestStatuIDs(ids...)
+	return _c.AddApplicationStatuIDs(ids...)
 }
 
-// AddRequestIDs adds the "request" edge to the Request entity by IDs.
-func (_c *UserCreate) AddRequestIDs(ids ...uuid.UUID) *UserCreate {
-	_c.mutation.AddRequestIDs(ids...)
+// AddApplicationIDs adds the "application" edge to the Application entity by IDs.
+func (_c *UserCreate) AddApplicationIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddApplicationIDs(ids...)
 	return _c
 }
 
-// AddRequest adds the "request" edges to the Request entity.
-func (_c *UserCreate) AddRequest(v ...*Request) *UserCreate {
+// AddApplication adds the "application" edges to the Application entity.
+func (_c *UserCreate) AddApplication(v ...*Application) *UserCreate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddRequestIDs(ids...)
+	return _c.AddApplicationIDs(ids...)
 }
 
 // AddFileIDs adds the "file" edge to the File entity by IDs.
@@ -168,19 +168,19 @@ func (_c *UserCreate) AddFile(v ...*File) *UserCreate {
 	return _c.AddFileIDs(ids...)
 }
 
-// AddRequestTargetIDs adds the "request_target" edge to the RequestTarget entity by IDs.
-func (_c *UserCreate) AddRequestTargetIDs(ids ...uuid.UUID) *UserCreate {
-	_c.mutation.AddRequestTargetIDs(ids...)
+// AddApplicationTargetIDs adds the "application_target" edge to the ApplicationTarget entity by IDs.
+func (_c *UserCreate) AddApplicationTargetIDs(ids ...uuid.UUID) *UserCreate {
+	_c.mutation.AddApplicationTargetIDs(ids...)
 	return _c
 }
 
-// AddRequestTarget adds the "request_target" edges to the RequestTarget entity.
-func (_c *UserCreate) AddRequestTarget(v ...*RequestTarget) *UserCreate {
+// AddApplicationTarget adds the "application_target" edges to the ApplicationTarget entity.
+func (_c *UserCreate) AddApplicationTarget(v ...*ApplicationTarget) *UserCreate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddRequestTargetIDs(ids...)
+	return _c.AddApplicationTargetIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -333,15 +333,15 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.RequestStatusIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ApplicationStatusIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   user.RequestStatusTable,
-			Columns: []string{user.RequestStatusColumn},
+			Table:   user.ApplicationStatusTable,
+			Columns: []string{user.ApplicationStatusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(requeststatus.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(applicationstatus.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -349,15 +349,15 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.RequestIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   user.RequestTable,
-			Columns: []string{user.RequestColumn},
+			Table:   user.ApplicationTable,
+			Columns: []string{user.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(request.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -381,15 +381,15 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.RequestTargetIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ApplicationTargetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   user.RequestTargetTable,
-			Columns: []string{user.RequestTargetColumn},
+			Table:   user.ApplicationTargetTable,
+			Columns: []string{user.ApplicationTargetColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(requesttarget.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(applicationtarget.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

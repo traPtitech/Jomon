@@ -12,11 +12,11 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/traPtitech/Jomon/ent/application"
+	"github.com/traPtitech/Jomon/ent/applicationstatus"
+	"github.com/traPtitech/Jomon/ent/applicationtarget"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/request"
-	"github.com/traPtitech/Jomon/ent/requeststatus"
-	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/user"
 )
@@ -79,13 +79,13 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			comment.Table:       comment.ValidColumn,
-			file.Table:          file.ValidColumn,
-			request.Table:       request.ValidColumn,
-			requeststatus.Table: requeststatus.ValidColumn,
-			requesttarget.Table: requesttarget.ValidColumn,
-			tag.Table:           tag.ValidColumn,
-			user.Table:          user.ValidColumn,
+			application.Table:       application.ValidColumn,
+			applicationstatus.Table: applicationstatus.ValidColumn,
+			applicationtarget.Table: applicationtarget.ValidColumn,
+			comment.Table:           comment.ValidColumn,
+			file.Table:              file.ValidColumn,
+			tag.Table:               tag.ValidColumn,
+			user.Table:              user.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

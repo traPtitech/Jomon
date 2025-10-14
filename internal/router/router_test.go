@@ -18,11 +18,11 @@ type MockRepository struct {
 	*mock_model.MockAccountManagerRepository
 	*mock_model.MockCommentRepository
 	*mock_model.MockFileRepository
-	*mock_model.MockRequestRepository
-	*mock_model.MockRequestStatusRepository
-	*mock_model.MockRequestFileRepository
-	*mock_model.MockRequestTagRepository
-	*mock_model.MockRequestTargetRepository
+	*mock_model.MockApplicationRepository
+	*mock_model.MockApplicationStatusRepository
+	*mock_model.MockApplicationFileRepository
+	*mock_model.MockApplicationTagRepository
+	*mock_model.MockApplicationTargetRepository
 	*mock_model.MockTagRepository
 	*mock_model.MockUserRepository
 }
@@ -33,16 +33,16 @@ type MockStorage struct {
 
 func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 	return &MockRepository{
-		MockAccountManagerRepository: mock_model.NewMockAccountManagerRepository(ctrl),
-		MockCommentRepository:        mock_model.NewMockCommentRepository(ctrl),
-		MockFileRepository:           mock_model.NewMockFileRepository(ctrl),
-		MockRequestRepository:        mock_model.NewMockRequestRepository(ctrl),
-		MockRequestStatusRepository:  mock_model.NewMockRequestStatusRepository(ctrl),
-		MockRequestFileRepository:    mock_model.NewMockRequestFileRepository(ctrl),
-		MockRequestTagRepository:     mock_model.NewMockRequestTagRepository(ctrl),
-		MockRequestTargetRepository:  mock_model.NewMockRequestTargetRepository(ctrl),
-		MockTagRepository:            mock_model.NewMockTagRepository(ctrl),
-		MockUserRepository:           mock_model.NewMockUserRepository(ctrl),
+		MockAccountManagerRepository:    mock_model.NewMockAccountManagerRepository(ctrl),
+		MockCommentRepository:           mock_model.NewMockCommentRepository(ctrl),
+		MockFileRepository:              mock_model.NewMockFileRepository(ctrl),
+		MockApplicationRepository:       mock_model.NewMockApplicationRepository(ctrl),
+		MockApplicationStatusRepository: mock_model.NewMockApplicationStatusRepository(ctrl),
+		MockApplicationFileRepository:   mock_model.NewMockApplicationFileRepository(ctrl),
+		MockApplicationTagRepository:    mock_model.NewMockApplicationTagRepository(ctrl),
+		MockApplicationTargetRepository: mock_model.NewMockApplicationTargetRepository(ctrl),
+		MockTagRepository:               mock_model.NewMockTagRepository(ctrl),
+		MockUserRepository:              mock_model.NewMockUserRepository(ctrl),
 	}
 }
 

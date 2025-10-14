@@ -8,11 +8,11 @@ type Repository interface {
 	AccountManagerRepository
 	CommentRepository
 	FileRepository
-	RequestFileRepository
-	RequestStatusRepository
-	RequestTagRepository
-	RequestTargetRepository
-	RequestRepository
+	ApplicationFileRepository
+	ApplicationStatusRepository
+	ApplicationTagRepository
+	ApplicationTargetRepository
+	ApplicationRepository
 	TagRepository
 	UserRepository
 }

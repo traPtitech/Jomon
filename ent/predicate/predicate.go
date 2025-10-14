@@ -6,20 +6,20 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Application is the predicate function for application builders.
+type Application func(*sql.Selector)
+
+// ApplicationStatus is the predicate function for applicationstatus builders.
+type ApplicationStatus func(*sql.Selector)
+
+// ApplicationTarget is the predicate function for applicationtarget builders.
+type ApplicationTarget func(*sql.Selector)
+
 // Comment is the predicate function for comment builders.
 type Comment func(*sql.Selector)
 
 // File is the predicate function for file builders.
 type File func(*sql.Selector)
-
-// Request is the predicate function for request builders.
-type Request func(*sql.Selector)
-
-// RequestStatus is the predicate function for requeststatus builders.
-type RequestStatus func(*sql.Selector)
-
-// RequestTarget is the predicate function for requesttarget builders.
-type RequestTarget func(*sql.Selector)
 
 // Tag is the predicate function for tag builders.
 type Tag func(*sql.Selector)

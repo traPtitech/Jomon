@@ -33,7 +33,7 @@ func (File) Fields() []ent.Field {
 // Edges of the File.
 func (File) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("request", Request.Type).
+		edge.From("application", Application.Type).
 			Ref("file").
 			Unique(),
 		edge.To("user", User.Type).

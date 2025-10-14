@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/ent/application"
+	"github.com/traPtitech/Jomon/ent/applicationstatus"
+	"github.com/traPtitech/Jomon/ent/applicationtarget"
 	"github.com/traPtitech/Jomon/ent/comment"
 	"github.com/traPtitech/Jomon/ent/file"
-	"github.com/traPtitech/Jomon/ent/request"
-	"github.com/traPtitech/Jomon/ent/requeststatus"
-	"github.com/traPtitech/Jomon/ent/requesttarget"
 	"github.com/traPtitech/Jomon/ent/schema"
 	"github.com/traPtitech/Jomon/ent/tag"
 	"github.com/traPtitech/Jomon/ent/user"
@@ -20,6 +20,42 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	applicationFields := schema.Application{}.Fields()
+	_ = applicationFields
+	// applicationDescCreatedAt is the schema descriptor for created_at field.
+	applicationDescCreatedAt := applicationFields[3].Descriptor()
+	// application.DefaultCreatedAt holds the default value on creation for the created_at field.
+	application.DefaultCreatedAt = applicationDescCreatedAt.Default.(func() time.Time)
+	// applicationDescUpdatedAt is the schema descriptor for updated_at field.
+	applicationDescUpdatedAt := applicationFields[4].Descriptor()
+	// application.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	application.DefaultUpdatedAt = applicationDescUpdatedAt.Default.(func() time.Time)
+	// application.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	application.UpdateDefaultUpdatedAt = applicationDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// applicationDescID is the schema descriptor for id field.
+	applicationDescID := applicationFields[0].Descriptor()
+	// application.DefaultID holds the default value on creation for the id field.
+	application.DefaultID = applicationDescID.Default.(func() uuid.UUID)
+	applicationstatusFields := schema.ApplicationStatus{}.Fields()
+	_ = applicationstatusFields
+	// applicationstatusDescCreatedAt is the schema descriptor for created_at field.
+	applicationstatusDescCreatedAt := applicationstatusFields[2].Descriptor()
+	// applicationstatus.DefaultCreatedAt holds the default value on creation for the created_at field.
+	applicationstatus.DefaultCreatedAt = applicationstatusDescCreatedAt.Default.(func() time.Time)
+	// applicationstatusDescID is the schema descriptor for id field.
+	applicationstatusDescID := applicationstatusFields[0].Descriptor()
+	// applicationstatus.DefaultID holds the default value on creation for the id field.
+	applicationstatus.DefaultID = applicationstatusDescID.Default.(func() uuid.UUID)
+	applicationtargetFields := schema.ApplicationTarget{}.Fields()
+	_ = applicationtargetFields
+	// applicationtargetDescCreatedAt is the schema descriptor for created_at field.
+	applicationtargetDescCreatedAt := applicationtargetFields[3].Descriptor()
+	// applicationtarget.DefaultCreatedAt holds the default value on creation for the created_at field.
+	applicationtarget.DefaultCreatedAt = applicationtargetDescCreatedAt.Default.(func() time.Time)
+	// applicationtargetDescID is the schema descriptor for id field.
+	applicationtargetDescID := applicationtargetFields[0].Descriptor()
+	// applicationtarget.DefaultID holds the default value on creation for the id field.
+	applicationtarget.DefaultID = applicationtargetDescID.Default.(func() uuid.UUID)
 	commentFields := schema.Comment{}.Fields()
 	_ = commentFields
 	// commentDescCreatedAt is the schema descriptor for created_at field.
@@ -50,42 +86,6 @@ func init() {
 	fileDescID := fileFields[0].Descriptor()
 	// file.DefaultID holds the default value on creation for the id field.
 	file.DefaultID = fileDescID.Default.(func() uuid.UUID)
-	requestFields := schema.Request{}.Fields()
-	_ = requestFields
-	// requestDescCreatedAt is the schema descriptor for created_at field.
-	requestDescCreatedAt := requestFields[3].Descriptor()
-	// request.DefaultCreatedAt holds the default value on creation for the created_at field.
-	request.DefaultCreatedAt = requestDescCreatedAt.Default.(func() time.Time)
-	// requestDescUpdatedAt is the schema descriptor for updated_at field.
-	requestDescUpdatedAt := requestFields[4].Descriptor()
-	// request.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	request.DefaultUpdatedAt = requestDescUpdatedAt.Default.(func() time.Time)
-	// request.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	request.UpdateDefaultUpdatedAt = requestDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// requestDescID is the schema descriptor for id field.
-	requestDescID := requestFields[0].Descriptor()
-	// request.DefaultID holds the default value on creation for the id field.
-	request.DefaultID = requestDescID.Default.(func() uuid.UUID)
-	requeststatusFields := schema.RequestStatus{}.Fields()
-	_ = requeststatusFields
-	// requeststatusDescCreatedAt is the schema descriptor for created_at field.
-	requeststatusDescCreatedAt := requeststatusFields[2].Descriptor()
-	// requeststatus.DefaultCreatedAt holds the default value on creation for the created_at field.
-	requeststatus.DefaultCreatedAt = requeststatusDescCreatedAt.Default.(func() time.Time)
-	// requeststatusDescID is the schema descriptor for id field.
-	requeststatusDescID := requeststatusFields[0].Descriptor()
-	// requeststatus.DefaultID holds the default value on creation for the id field.
-	requeststatus.DefaultID = requeststatusDescID.Default.(func() uuid.UUID)
-	requesttargetFields := schema.RequestTarget{}.Fields()
-	_ = requesttargetFields
-	// requesttargetDescCreatedAt is the schema descriptor for created_at field.
-	requesttargetDescCreatedAt := requesttargetFields[3].Descriptor()
-	// requesttarget.DefaultCreatedAt holds the default value on creation for the created_at field.
-	requesttarget.DefaultCreatedAt = requesttargetDescCreatedAt.Default.(func() time.Time)
-	// requesttargetDescID is the schema descriptor for id field.
-	requesttargetDescID := requesttargetFields[0].Descriptor()
-	// requesttarget.DefaultID holds the default value on creation for the id field.
-	requesttarget.DefaultID = requesttargetDescID.Default.(func() uuid.UUID)
 	tagFields := schema.Tag{}.Fields()
 	_ = tagFields
 	// tagDescName is the schema descriptor for name field.
