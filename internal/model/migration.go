@@ -8,7 +8,7 @@ import (
 	atlas "ariga.io/atlas/sql/migrate"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/internal/ent"
 )
 
 type MigrateConfig struct {

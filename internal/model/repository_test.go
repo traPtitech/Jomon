@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/internal/ent"
 )
 
 const (

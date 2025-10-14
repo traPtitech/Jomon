@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/ent"
-	"github.com/traPtitech/Jomon/ent/file"
+	"github.com/traPtitech/Jomon/internal/ent"
+	"github.com/traPtitech/Jomon/internal/ent/file"
 )
 
 func (repo *EntRepository) CreateFile(

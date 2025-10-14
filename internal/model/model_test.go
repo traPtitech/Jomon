@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/traPtitech/Jomon/ent"
-	"github.com/traPtitech/Jomon/ent/enttest"
+	"github.com/traPtitech/Jomon/internal/ent"
+	"github.com/traPtitech/Jomon/internal/ent/enttest"
 	"github.com/traPtitech/Jomon/internal/testutil"
 )
 

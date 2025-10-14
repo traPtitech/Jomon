@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/internal/ent"
 )
 
 type Repository interface {

@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
-	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"go.uber.org/mock/gomock"

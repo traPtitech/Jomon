@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
-	"github.com/traPtitech/Jomon/ent"
-	"github.com/traPtitech/Jomon/ent/application"
-	"github.com/traPtitech/Jomon/ent/comment"
+	"github.com/traPtitech/Jomon/internal/ent"
+	"github.com/traPtitech/Jomon/internal/ent/application"
+	"github.com/traPtitech/Jomon/internal/ent/comment"
 )
 
 func (repo *EntRepository) GetComments(

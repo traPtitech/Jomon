@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
-	"github.com/traPtitech/Jomon/ent"
-	"github.com/traPtitech/Jomon/ent/application"
-	"github.com/traPtitech/Jomon/ent/applicationstatus"
-	"github.com/traPtitech/Jomon/ent/applicationtarget"
-	"github.com/traPtitech/Jomon/ent/tag"
-	"github.com/traPtitech/Jomon/ent/user"
+	"github.com/traPtitech/Jomon/internal/ent"
+	"github.com/traPtitech/Jomon/internal/ent/application"
+	"github.com/traPtitech/Jomon/internal/ent/applicationstatus"
+	"github.com/traPtitech/Jomon/internal/ent/applicationtarget"
+	"github.com/traPtitech/Jomon/internal/ent/tag"
+	"github.com/traPtitech/Jomon/internal/ent/user"
 )
 
 func (repo *EntRepository) GetApplications(

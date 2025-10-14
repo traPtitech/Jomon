@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/ent"
-	"github.com/traPtitech/Jomon/ent/applicationstatus"
+	"github.com/traPtitech/Jomon/internal/ent"
+	"github.com/traPtitech/Jomon/internal/ent/applicationstatus"
 )
 
 func (repo *EntRepository) CreateStatus(

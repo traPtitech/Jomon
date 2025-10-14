@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
-	"github.com/traPtitech/Jomon/ent"
-	"github.com/traPtitech/Jomon/ent/user"
+	"github.com/traPtitech/Jomon/internal/ent"
+	"github.com/traPtitech/Jomon/internal/ent/user"
 )
 
 func (repo *EntRepository) GetAccountManagers(ctx context.Context) ([]*AccountManager, error) {

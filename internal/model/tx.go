@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/traPtitech/Jomon/ent"
+	"github.com/traPtitech/Jomon/internal/ent"
 )
 
 // RollbackWithError is a helper function to rollback a transaction and return an error.
