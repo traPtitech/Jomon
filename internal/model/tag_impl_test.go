@@ -1,0 +1,152 @@
+package model
+
+import (
+	"testing"
+	"time"
+
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/internal/testutil"
+	"github.com/traPtitech/Jomon/internal/testutil/random"
+)
+
+func TestEntRepository_GetTags(t *testing.T) {
+	ctx := testutil.NewContext(t)
+	client, err := setup(t, ctx, "get_tags")
+	require.NoError(t, err)
+	repo := NewEntRepository(client)
+	client2, err := setup(t, ctx, "get_tags2")
+	require.NoError(t, err)
+	repo2 := NewEntRepository(client2)
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		tag1, _ := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
+		tag2, _ := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
+
+		got, err := repo.GetTags(ctx)
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.SortSlices(func(l, r *Tag) bool {
+				return l.ID.ID() < r.ID.ID()
+			}))
+		exp := []*Tag{tag1, tag2}
+		testutil.RequireEqual(t, exp, got, opts...)
+	})
+
+	t.Run("Success2", func(t *testing.T) {
+		t.Parallel()
+		got, err := repo2.GetTags(ctx)
+		require.NoError(t, err)
+		require.Empty(t, got)
+	})
+}
+
+func TestEntRepository_CreateTag(t *testing.T) {
+	ctx := testutil.NewContext(t)
+	client, err := setup(t, ctx, "create_tag")
+	require.NoError(t, err)
+	repo := NewEntRepository(client)
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		name := random.AlphaNumeric(t, 20)
+		tag, err := repo.CreateTag(ctx, name)
+
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		opts = append(opts,
+			cmpopts.IgnoreFields(Tag{}, "ID"))
+		exp := &Tag{
+			Name:      name,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			DeletedAt: time.Time{},
+		}
+		testutil.RequireEqual(t, exp, tag, opts...)
+	})
+
+	t.Run("MissingName", func(t *testing.T) {
+		t.Parallel()
+		name := ""
+		_, err := repo.CreateTag(ctx, name)
+
+		require.Error(t, err)
+	})
+}
+
+func TestEntRepository_UpdateTag(t *testing.T) {
+	ctx := testutil.NewContext(t)
+	client, err := setup(t, ctx, "update_tag")
+	require.NoError(t, err)
+	repo := NewEntRepository(client)
+
+	t.Run("Success1", func(t *testing.T) {
+		t.Parallel()
+		created, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
+		require.NoError(t, err)
+
+		name := random.AlphaNumeric(t, 20)
+
+		updated, err := repo.UpdateTag(ctx, created.ID, name)
+
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		exp := &Tag{
+			ID:        created.ID,
+			Name:      name,
+			CreatedAt: created.CreatedAt,
+			UpdatedAt: time.Now(),
+			DeletedAt: time.Time{},
+		}
+		testutil.RequireEqual(t, exp, updated, opts...)
+	})
+
+	t.Run("Success2", func(t *testing.T) {
+		t.Parallel()
+		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
+		require.NoError(t, err)
+
+		updated, err := repo.UpdateTag(ctx, tag.ID, tag.Name)
+
+		require.NoError(t, err)
+		opts := testutil.ApproxEqualOptions()
+		testutil.RequireEqual(t, tag, updated, opts...)
+	})
+
+	t.Run("MissingName", func(t *testing.T) {
+		t.Parallel()
+		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
+		require.NoError(t, err)
+
+		name := ""
+		_, err = repo.UpdateTag(ctx, tag.ID, name)
+
+		require.Error(t, err)
+	})
+}
+
+func TestEntRepository_DeleteTag(t *testing.T) {
+	ctx := testutil.NewContext(t)
+	client, err := setup(t, ctx, "delete_tag")
+	require.NoError(t, err)
+	repo := NewEntRepository(client)
+
+	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
+		name := random.AlphaNumeric(t, 20)
+		tag, err := repo.CreateTag(ctx, name)
+		require.NoError(t, err)
+
+		err = repo.DeleteTag(ctx, tag.ID)
+		require.NoError(t, err)
+	})
+
+	t.Run("UnknownTag", func(t *testing.T) {
+		t.Parallel()
+		err = repo.DeleteTag(ctx, uuid.New())
+		require.Error(t, err)
+	})
+}
