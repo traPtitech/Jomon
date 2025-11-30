@@ -6,7 +6,7 @@ require (
 	ariga.io/atlas v0.38.0
 	entgo.io/ent v0.14.5
 	github.com/aws/aws-sdk-go-v2 v1.40.0
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.20.2
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.20.12
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.92.1
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/google/go-cmp v0.7.0
