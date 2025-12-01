@@ -16,6 +16,7 @@ module.exports = {
   transpileDependencies: ["vuetify"],
   devServer: {
     proxy: {
+      // Proxy for local development (not used in Docker compose with Nginx)
       "/api": {
         target: "http://127.0.0.1:1323",
         changeOrigin: true
@@ -24,11 +25,11 @@ module.exports = {
   },
   configureWebpack: {
     output: {
-      hashFunction: "xxhash64"
+      hashFunction: "xxhash64" // Use xxhash64 for OpenSSL 3 compatibility
     },
-    cache: false
+    cache: false // Disable cache for stability
   },
-  parallel: false,
+  parallel: false, // Disable parallel build for stability
   chainWebpack: config => {
     config.module
       .rule("js")
