@@ -16,6 +16,11 @@
     "vuetify": "^2.7.1",
     "vuex": "^3.6.2"
   },
+  "overrides": {
+    "cross-spawn": "^7.0.3",
+    "postcss": "^8.4.31",
+    "webpack-dev-server": "^4.15.2"
+  },
   "devDependencies": {
     "@babel/eslint-parser": "^7.23.3",
     "@vue/cli-plugin-babel": "~5.0.8",
