@@ -9,8 +9,6 @@ tasks:
     deps: [build]
     cmds:
       - /app/Jomon
-    sources:
-      - "**/*.go"
 
   build:
     dir: /src
