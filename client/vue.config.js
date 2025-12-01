@@ -20,7 +20,7 @@ module.exports = {
   devServer: {
     proxy: {
       "/api": {
-        target: "https://jomon-dev.tokyotech.org",
+        target: "http://localhost:1323",
         changeOrigin: true,
         agent: keepAliveAgent
       }
