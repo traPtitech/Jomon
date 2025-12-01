@@ -6,6 +6,7 @@
 
 <script>
 export default {
+  name: "UserIcon",
   computed: {
     iconSrc: function () {
       return this.user !== ""

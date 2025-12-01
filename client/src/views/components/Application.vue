@@ -8,8 +8,11 @@
         ></state-chip>
       </div>
     </v-col>
+
     <v-col cols="4">{{ list.current_detail.title }}</v-col>
+
     <v-col cols="4" class="text-lg-left">{{ list.applicant.trap_id }}</v-col>
+
     <v-col cols="2">{{ list.current_detail.amount }}</v-col>
   </v-row>
 </template>
@@ -18,6 +21,7 @@
 import StateChip from "@/views/shared/StateChip";
 
 export default {
+  name: "ApplicationItem",
   components: {
     StateChip
   },
