@@ -35,7 +35,7 @@ jobs:
     needs: [build]
     services:
       mariadb:
-        image: mariadb:10.0.19
+        image: mariadb:10.11
         ports:
           - 50000:3306
         env:
