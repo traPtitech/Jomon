@@ -1,4 +1,4 @@
-version: '2'
+version: "3"
 
 tasks:
   default:
@@ -10,7 +10,7 @@ tasks:
     cmds:
       - /app/Jomon
     sources:
-      - '**/*.go'
+      - "**/*.go"
 
   build:
     dir: /src

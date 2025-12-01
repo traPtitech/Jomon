@@ -1,4 +1,4 @@
-FROM golang:1.17.5-alpine as build
+FROM golang:alpine as build
 ENV DOCKERIZE_VERSION v0.6.1
 ENV CGO_ENABLED 0
 ENV TZ Asia/Tokyo
@@ -14,13 +14,8 @@ RUN apk --update --no-cache add ca-certificates \
     && update-ca-certificates \
     && rm -rf /usr/share/ca-certificates /etc/ssl/certificates
 
-RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-
-RUN wget https://github.com/go-task/task/releases/download/v3.0.0/task_linux_386.tar.gz \
-    && tar -C /usr/local/bin -zxvf task_linux_386.tar.gz task \
-    && rm task_linux_386.tar.gz
+RUN go install github.com/powerman/dockerize@latest
+RUN go install github.com/go-task/task/v3/cmd/task@latest
 
 WORKDIR /src
 
