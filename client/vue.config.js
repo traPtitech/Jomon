@@ -1,12 +1,9 @@
-const https = require("https");
 const crypto = require("crypto");
 
 // Workaround for OpenSSL 3 bug
 const crypto_orig_createHash = crypto.createHash;
 crypto.createHash = algorithm =>
   crypto_orig_createHash(algorithm == "md4" ? "sha256" : algorithm);
-
-const keepAliveAgent = new https.Agent({ keepAlive: true });
 
 module.exports = {
   css: {
@@ -20,9 +17,8 @@ module.exports = {
   devServer: {
     proxy: {
       "/api": {
-        target: "http://localhost:1323",
-        changeOrigin: true,
-        agent: keepAliveAgent
+        target: "http://127.0.0.1:1323",
+        changeOrigin: true
       }
     }
   },
