@@ -1,6 +1,6 @@
 <template>
   <div :class="$style.container">
-    <v-dialog v-model="dialog" max-width="600px">
+    <v-dialog v-model="isDialogOpen" max-width="600px">
       <template #activator="{ props }">
         <simple-button
           :label="
@@ -28,7 +28,7 @@
                   <v-text-field
                     ref="reason"
                     v-model="reason"
-                    :autofocus="dialog"
+                    :autofocus="isDialogOpen"
                     :rules="nullRules"
                     @blur="blur"
                   />
@@ -41,7 +41,7 @@
             <simple-button
               :label="'戻る'"
               :variant="'secondary'"
-              @click="dialog = false"
+              @click="isDialogOpen = false"
             />
             <simple-button
               :label="toStateName(toState) + 'にする'"
@@ -72,13 +72,14 @@ export default {
   },
   data: () => ({
     valid: true,
-    dialog: false,
+    isDialogOpen: false,
     reason: "",
     nullRules: [v => !!v || ""]
   }),
   watch: {
-    dialog: function () {
-      if (this.dialog) {
+    isDialogOpen: function () {
+      // @ts-ignore
+      if (this.isDialogOpen) {
         let self = this;
         this.$nextTick().then(function () {
           self.$refs.form.reset();
@@ -110,7 +111,7 @@ export default {
             return;
           });
         this.$refs.form.reset();
-        this.dialog = false;
+        this.isDialogOpen = false;
         this.getApplicationDetail(
           this.$store.state.application_detail_paper.core.application_id
         );

@@ -7,7 +7,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "type-check": "vue-tsc --noEmit -p jsconfig.json",
+    "type-check": "vue-tsc --noEmit -p tsconfig.json",
     "test": "vitest"
   },
   "dependencies": {
@@ -15,6 +15,7 @@
     "axios": "^1.6.0",
     "core-js": "^3.15.2",
     "markdown-it": "^12.0.6",
+    "pinia": "^3.0.4",
     "vue": "^3.5.25",
     "vue-router": "^4.6.3",
     "vuetify": "^3.11.0",
