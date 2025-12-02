@@ -1,31 +1,27 @@
 import { useMeStore } from "@/stores/me";
 import { redirectAuthEndpoint } from "@/use/api";
-import AdminPage from "@/views/AdminPage.vue";
-import ApplicationDetailPage from "@/views/ApplicationDetailPage.vue";
-import ApplicationListPage from "@/views/ApplicationListPage.vue";
-import NewApplicationPage from "@/views/NewApplicationPage.vue";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "All Applications",
-    component: ApplicationListPage
+    component: () => import("@/views/ApplicationListPage.vue")
   },
   {
     path: "/admin",
     name: "Admin Page",
-    component: AdminPage
+    component: () => import("@/views/AdminPage.vue")
   },
   {
     path: "/applications/new/:type",
     name: "New Application Page",
-    component: NewApplicationPage
+    component: () => import("@/views/NewApplicationPage.vue")
   },
   {
     path: "/applications/:id",
     name: "Application",
-    component: ApplicationDetailPage
+    component: () => import("@/views/ApplicationDetailPage.vue")
   }
 ];
 
