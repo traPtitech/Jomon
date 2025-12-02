@@ -173,7 +173,7 @@ export default {
         },
         current_state: ""
       },
-      show: null,
+      show: false,
       params: {
         sort: sort.created_at,
         current_state: "",

@@ -15,7 +15,7 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { applicationType } from "@/use/applicationDetail";
 import { dayPrint, numberFormat } from "@/use/dataFormat";
 import { render } from "@/use/markdown";
@@ -52,8 +52,10 @@ export default {
           return "金額";
         case "paid_at":
           return "支払日";
+        default:
+          return "";
       }
-    })(this.item);
+    })((this as any).item);
     const preRender = (item, data) => {
       switch (item) {
         case "type":

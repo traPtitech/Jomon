@@ -55,7 +55,7 @@
     </v-dialog>
   </div>
 </template>
-<script>
+<script lang="ts">
 import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
 import { mapActions } from "vuex";
@@ -82,7 +82,7 @@ export default {
       if (this.isDialogOpen) {
         let self = this;
         this.$nextTick().then(function () {
-          self.$refs.form.reset();
+          (self.$refs.form as any).reset();
         });
       }
     }
@@ -91,11 +91,11 @@ export default {
     ...mapActions(["getApplicationDetail"]),
     blur() {
       if (this.reason === "" || this.reason === undefined) {
-        this.$refs.form.reset();
+        (this.$refs.form as any).reset();
       }
     },
     async postReason() {
-      if (this.$refs.form.validate()) {
+      if ((this.$refs.form as any).validate()) {
         await axios
           .put(
             "../api/applications/" +
@@ -106,11 +106,11 @@ export default {
               reason: this.reason
             }
           )
-          .catch(e => {
+          .catch((e: any) => {
             alert(e);
             return;
           });
-        this.$refs.form.reset();
+        (this.$refs.form as any).reset();
         this.isDialogOpen = false;
         this.getApplicationDetail(
           this.$store.state.application_detail_paper.core.application_id

@@ -12,8 +12,8 @@
             <v-divider />
             <div>
               申請者:
-              <Icon :user="$store.state.me.trap_id" :size="20" />
-              {{ $store.state.me.trap_id }}
+              <Icon :user="trapId" :size="20" />
+              {{ trapId }}
             </div>
             <div>
               <v-divider />
@@ -133,7 +133,8 @@
   </v-container>
 </template>
 
-<script>
+<script lang="ts">
+import { useMeStore } from "@/stores/me";
 import { applicationType, remarksTitle } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
 import {
@@ -142,6 +143,7 @@ import {
   titlePlaceholder
 } from "@/use/inputFormText";
 import axios from "axios";
+import { mapState } from "pinia";
 import { mapActions, mapGetters } from "vuex";
 import Icon from "./shared/Icon.vue";
 import ImageUploader from "./shared/ImageUploader.vue";
@@ -183,6 +185,7 @@ export default {
   }),
   computed: {
     ...mapGetters({ traPIDs: "trap_ids" }),
+    ...mapState(useMeStore, ["trapId"]),
     computedDateFormatted() {
       return this.formatDate(this.date);
     },
@@ -196,16 +199,16 @@ export default {
     await this.getUsers();
   },
   mounted() {
-    this.$refs.firstfocus.focus();
+    (this.$refs.firstfocus as any).focus();
   },
   methods: {
     ...mapActions({
       getUsers: "getUserList"
     }),
     submit() {
-      if (this.$refs.form.validate()) {
+      if ((this.$refs.form as any).validate()) {
         let form = new FormData();
-        let paid_at = new Date(this.date);
+        let paid_at = new Date(this.date || Date.now());
         let details = {
           type: this.$route.params.type,
           title: this.title,

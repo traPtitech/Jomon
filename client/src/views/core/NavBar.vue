@@ -12,7 +12,7 @@
     </router-link>
     <v-spacer />
 
-    <v-btn v-if="me.is_admin" to="/admin" variant="text"> 管理ページ </v-btn>
+    <v-btn v-if="isAdmin" to="/admin" variant="text"> 管理ページ </v-btn>
     <v-menu location="bottom">
       <template #activator="{ props }">
         <v-btn v-bind="props" variant="text"> 新規作成 </v-btn>
@@ -28,13 +28,14 @@
         </v-list-item>
       </v-list>
     </v-menu>
-    <Icon :user="$store.state.me.trap_id" :size="35" />
+    <Icon :user="trapId" :size="35" />
   </v-app-bar>
 </template>
 <script>
 import logo from "@/assets/logo.svg";
+import { useMeStore } from "@/stores/me";
 import Icon from "@/views/shared/Icon.vue";
-import { mapState } from "vuex";
+import { mapState } from "pinia";
 
 export default {
   components: {
@@ -52,7 +53,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(["me"])
+    ...mapState(useMeStore, ["trapId", "isAdmin"])
   }
 };
 </script>

@@ -8,15 +8,19 @@
 </template>
 
 <script>
+import { useMeStore } from "@/stores/me";
+import { mapActions } from "pinia";
 import NavBar from "./views/core/NavBar.vue";
-
 export default {
   name: "App",
   components: {
     NavBar
   },
   created() {
-    this.$store.dispatch("getMe");
+    this.fetchMe();
+  },
+  methods: {
+    ...mapActions(useMeStore, ["fetchMe"])
   }
 };
 </script>

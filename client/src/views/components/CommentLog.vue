@@ -6,7 +6,7 @@
       がコメントしました。
       <formatted-date :date="log.content.created_at" :simple="true" />
     </div>
-    <div v-if="log.content.user.trap_id === $store.state.me.trap_id">
+    <div v-if="log.content.user.trap_id === trapId">
       <v-btn icon color="success" :disabled="!comment_readonly">
         <v-icon @click="commentChange()"> mdi-pencil </v-icon>
       </v-btn>
@@ -56,16 +56,18 @@
 
       <span
         v-if="log.content.created_at !== log.content.updated_at"
-        :class="grey_text"
+        :class="$style.grey_text"
         >編集済</span
       >
     </v-form>
   </v-timeline-item>
 </template>
 
-<script>
+<script lang="ts">
+import { useMeStore } from "@/stores/me";
 import Icon from "@/views/shared/Icon.vue";
 import axios from "axios";
+import { mapState } from "pinia";
 import { mapActions } from "vuex";
 import FormattedDate from "./FormattedDate.vue";
 
@@ -88,12 +90,15 @@ export default {
       changeRules: [v => v !== this.log.content.comment && !!v]
     };
   },
+  computed: {
+    ...mapState(useMeStore, ["trapId"])
+  },
   watch: {
     comment_readonly: function () {
       if (!this.comment_readonly) {
         let self = this;
         this.$nextTick().then(function () {
-          self.$refs.comment.focus();
+          (self.$refs.comment as any).focus();
         });
       }
     }
@@ -153,5 +158,8 @@ export default {
 }
 .button {
   margin: 8px 8px 0 0;
+}
+.grey_text {
+  color: $color-grey;
 }
 </style>

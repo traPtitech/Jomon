@@ -43,7 +43,7 @@
           transition="scale-transition"
           offset-y
         >
-          <template #activator="{ on }">
+          <template #activator="{ props }">
             <v-text-field
               v-model="computedDateFormatted"
               :rules="nullRules"
@@ -51,7 +51,7 @@
               filled
               readonly
               placeholder="2020年5月2日"
-              v-on="on"
+              v-bind="props"
             />
           </template>
           <v-date-picker
@@ -74,7 +74,8 @@
           ref="traPID"
           v-model="repaid_to_id_change"
           :rules="[
-            () => !(repaid_to_id_change === 0) || '返金対象者は一人以上必要です'
+            () =>
+              repaid_to_id_change.length > 0 || '返金対象者は一人以上必要です'
           ]"
           label="返金対象者"
           filled
@@ -147,7 +148,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { remarksTitle } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
 import {
@@ -206,7 +207,10 @@ export default {
       Images: [],
       imageBlobs: [],
       // todo返金リスト配列
-      changeRules: [v => (v !== this.detail.core.repayment_logs && !!v) || ""]
+      changeRules: [
+        v => (v !== (this as any).detail.core.repayment_logs && !!v) || ""
+      ],
+      images_change: [] as boolean[]
     };
   },
   computed: {
@@ -215,7 +219,7 @@ export default {
       return this.formatDate(this.paid_at_change);
     },
     me() {
-      return this.$stor.me;
+      return this.$store.state.me;
     },
     form() {
       return {
@@ -223,7 +227,7 @@ export default {
       };
     },
     traPIDs() {
-      let trap_ids = [];
+      let trap_ids: string[] = [];
       for (let i = 0; i < this.$store.state.userList.length - 1; i++) {
         trap_ids[i] = this.$store.state.userList[i].trap_id;
       }
@@ -254,7 +258,7 @@ export default {
       getApplicationDetail: "getApplicationDetail"
     }),
     async submit() {
-      if (this.$refs.form.validate()) {
+      if ((this.$refs.form as any).validate()) {
         this.images_change.forEach((flag, index) => {
           if (!flag) {
             axios.delete("/api/images/" + this.detail.core.images[index]);

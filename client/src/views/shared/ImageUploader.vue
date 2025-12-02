@@ -17,7 +17,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 export default {
   props: {
     modelValue: {
@@ -28,9 +28,9 @@ export default {
   emits: ["update:modelValue"],
   data() {
     return {
-      images: null,
-      uploadImageUrl: [],
-      uploadImageBlob: []
+      images: [] as File[],
+      uploadImageUrl: [] as string[],
+      uploadImageBlob: [] as File[]
     };
   },
   methods: {
@@ -44,7 +44,7 @@ export default {
         this.uploadImageBlob.push(file);
         this.$emit("update:modelValue", this.uploadImageBlob);
         fr.addEventListener("load", () => {
-          this.uploadImageUrl.push(fr.result);
+          this.uploadImageUrl.push(fr.result as string);
         });
       });
     }

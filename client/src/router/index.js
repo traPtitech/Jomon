@@ -1,4 +1,4 @@
-import store from "@/store";
+import { useMeStore } from "@/stores/me";
 import { redirectAuthEndpoint } from "@/use/api";
 import AdminPage from "@/views/AdminPage.vue";
 import ApplicationDetailPage from "@/views/ApplicationDetailPage.vue";
@@ -35,9 +35,10 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, _from, next) => {
-  if (store.state.me.trap_id === "") {
+  const meStore = useMeStore();
+  if (meStore.trapId === "") {
     try {
-      await store.dispatch("getMe");
+      await meStore.fetchMe();
     } catch (err) {
       sessionStorage.setItem(`destination`, to.fullPath);
       await redirectAuthEndpoint();

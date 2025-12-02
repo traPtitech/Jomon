@@ -7,7 +7,7 @@
     max-width="290px"
     min-width="290px"
   >
-    <template #activator="{ on }">
+    <template #activator="{ props }">
       <v-text-field
         v-model="computedDateFormatted"
         :rules="nullRules"
@@ -16,21 +16,35 @@
         readonly
         placeholder="2020年5月2日"
         height="10"
-        v-on="on"
+        v-bind="props"
       />
     </template>
     <v-date-picker
       v-model="date"
       no-title
       color="primary"
-      @input="menu = false"
+      @update:model-value="menu = false"
     />
   </v-menu>
 </template>
 
 <script>
 export default {
-  props: {}
+  props: {},
+  data() {
+    return {
+      menu: false,
+      date: null,
+      nullRules: [v => !!v || ""]
+    };
+  },
+  computed: {
+    computedDateFormatted() {
+      if (!this.date) return null;
+      const d = new Date(this.date);
+      return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+    }
+  }
 };
 </script>
 

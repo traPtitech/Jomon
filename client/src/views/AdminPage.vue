@@ -1,5 +1,5 @@
 <template>
-  <div v-if="$store.state.me.is_admin" class="admin">
+  <div v-if="isAdmin" class="admin">
     <v-chip v-for="(user, index) in adminList" :key="index">
       {{ user }}
     </v-chip>
@@ -26,8 +26,10 @@
 </template>
 
 <script>
+import { useMeStore } from "@/stores/me";
 import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
+import { mapState } from "pinia";
 import { mapActions, mapGetters } from "vuex";
 
 export default {
@@ -41,7 +43,8 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["adminList", "notAdminList"])
+    ...mapGetters(["adminList", "notAdminList"]),
+    ...mapState(useMeStore, ["isAdmin"])
   },
   created() {
     this.getUserList();

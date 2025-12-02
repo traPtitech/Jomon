@@ -14,8 +14,10 @@
   </div>
 </template>
 <script>
+import { useMeStore } from "@/stores/me";
 import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
+import { mapState as mapPiniaState } from "pinia";
 import { mapActions, mapMutations, mapState } from "vuex";
 import RepaidButton from "./RepaidButton.vue";
 import WithReasonButton from "./StateWithReasonButton.vue";
@@ -33,23 +35,17 @@ export default {
   },
   computed: {
     ...mapState({ detail: "application_detail_paper" }),
+    ...mapPiniaState(useMeStore, ["trapId", "isAdmin"]),
     displayAcceptBottom() {
-      return (
-        this.detail.core.current_state === `submitted` &&
-        this.$store.state.me.is_admin
-      );
+      return this.detail.core.current_state === `submitted` && this.isAdmin;
     },
     displayRepaidBottom() {
-      return (
-        this.detail.core.current_state === `accepted` &&
-        this.$store.state.me.is_admin
-      );
+      return this.detail.core.current_state === `accepted` && this.isAdmin;
     },
     displayFixResubmitBottom() {
       return (
         this.detail.core.current_state === `fix_required` &&
-        (this.$store.state.me.is_admin ||
-          this.$store.state.me.trap_id === this.detail.core.applicant.trap_id)
+        (this.isAdmin || this.trapId === this.detail.core.applicant.trap_id)
       );
     }
   },

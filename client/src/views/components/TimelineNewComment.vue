@@ -2,7 +2,7 @@
   <div>
     <v-row justify="space-between">
       <v-col cols="1">
-        <Icon :user="$store.state.me.trap_id" :size="25" />
+        <Icon :user="trapId" :size="25" />
       </v-col>
       <v-col cols="11">
         <v-card class="pa-2">
@@ -28,9 +28,11 @@
     </v-row>
   </div>
 </template>
-<script>
+<script lang="ts">
+import { useMeStore } from "@/stores/me";
 import Icon from "@/views/shared/Icon.vue";
 import axios from "axios";
+import { mapState } from "pinia";
 import { mapActions } from "vuex";
 
 export default {
@@ -44,15 +46,18 @@ export default {
       nullRules: [v => !!v || ""]
     };
   },
+  computed: {
+    ...mapState(useMeStore, ["trapId"])
+  },
   methods: {
     blur() {
       if (this.comment === "" || this.comment === undefined) {
-        this.$refs.form.reset();
+        (this.$refs.form as any).reset();
       }
     },
     ...mapActions(["getApplicationDetail"]),
     postcomment() {
-      if (this.$refs.form.validate()) {
+      if ((this.$refs.form as any).validate()) {
         axios
           .post(
             "/api/applications/" +
@@ -62,11 +67,11 @@ export default {
               comment: this.comment
             }
           )
-          .catch(e => {
+          .catch((e: any) => {
             alert(e);
             return;
           });
-        this.$refs.form.reset();
+        (this.$refs.form as any).reset();
         this.getApplicationDetail(
           this.$store.state.application_detail_paper.core.application_id
         );
