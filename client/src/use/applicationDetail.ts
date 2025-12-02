@@ -1,4 +1,4 @@
-export const remarksTitle = type => {
+export const remarksTitle = (type: string): string => {
   switch (type) {
     case "club":
       return "購入物の概要";
@@ -12,7 +12,7 @@ export const remarksTitle = type => {
       return "タイプが間違っています";
   }
 };
-export const applicationType = type => {
+export const applicationType = (type: string): string => {
   switch (type) {
     case "club":
       return "部費利用";

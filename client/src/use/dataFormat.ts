@@ -1,7 +1,7 @@
-export const numberFormat = price => {
+export const numberFormat = (price: number | string): string => {
   return price.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
 };
-export const dayPrint = time => {
+export const dayPrint = (time: string | number | Date): string => {
   const d = new Date(time);
   const year = d.getFullYear();
   const month = d.getMonth() + 1;

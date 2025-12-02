@@ -1,4 +1,4 @@
-export const titlePlaceholder = type => {
+export const titlePlaceholder = (type: string): string => {
   switch (type) {
     case "club":
       return "工大祭用ポスターの印刷代";
@@ -12,7 +12,7 @@ export const titlePlaceholder = type => {
       return "タイプが間違っています";
   }
 };
-export const remarksPlaceholder = type => {
+export const remarksPlaceholder = (type: string): string => {
   switch (type) {
     case "club":
       return "OO印刷所にA3サイズのポスターをXX部";
@@ -25,7 +25,7 @@ export const remarksPlaceholder = type => {
       return "タイプが間違っています";
   }
 };
-export const remarksHint = type => {
+export const remarksHint = (type: string): string => {
   switch (type) {
     case "club":
       return "具体的購入物、用途等を記入";

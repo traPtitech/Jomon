@@ -7,7 +7,7 @@ export const traQBaseURL = "https://q.trap.jp/api/v3";
 //     ? "http://localhost:3000"
 //     : process.env.VUE_APP_API_ENDPOINT;
 
-export async function redirectAuthEndpoint() {
+export async function redirectAuthEndpoint(): Promise<void> {
   const data = (await axios.get("/api/auth/genpkce")).data;
   const authorizationEndpointUrl = new URL(`${traQBaseURL}/oauth2/authorize`);
 

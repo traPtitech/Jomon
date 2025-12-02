@@ -4,9 +4,9 @@ import AdminPage from "@/views/AdminPage.vue";
 import ApplicationDetailPage from "@/views/ApplicationDetailPage.vue";
 import ApplicationListPage from "@/views/ApplicationListPage.vue";
 import NewApplicationPage from "@/views/NewApplicationPage.vue";
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 
-const routes = [
+const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "All Applications",

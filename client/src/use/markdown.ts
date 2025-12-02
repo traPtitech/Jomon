@@ -18,6 +18,6 @@ const mdPromise = (async () => {
   return md;
 })();
 
-export const render = async text => {
+export const render = async (text: string): Promise<string> => {
   return (await mdPromise).render(text);
 };

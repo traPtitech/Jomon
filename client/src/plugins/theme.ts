@@ -1,4 +1,6 @@
-export default {
+import { ThemeDefinition } from "vuetify";
+
+const theme: ThemeDefinition["colors"] = {
   primary: "#011A27", //ヘッダーの色等
   secondary: "#f0daee",
   primary_accent: "#52254f",
@@ -9,3 +11,5 @@ export default {
   success: "#5cb860",
   warning: "#ffa21a"
 };
+
+export default theme;
