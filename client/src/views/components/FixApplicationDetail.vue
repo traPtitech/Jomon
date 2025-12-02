@@ -191,7 +191,7 @@ const response = reactive({
   }
 });
 
-const type_object = reactive({ jpn: "", type: "" });
+const type_object = ref({ jpn: "", type: "" });
 const types = [
   { jpn: "部費利用", type: "club" },
   { jpn: "大会等旅費補助", type: "contest" },
@@ -262,7 +262,7 @@ const submit = async () => {
     const form = new FormData();
     const date = new Date(paid_at_change.value);
     const details = {
-      type: type_object.type,
+      type: type_object.value.type,
       title: title_change.value,
       remarks: remarks_change.value,
       paid_at: date.toISOString(),
@@ -288,7 +288,7 @@ const submit = async () => {
 
 onMounted(async () => {
   title_change.value = detailCore.value.current_detail.title;
-  type_object.type = detailCore.value.current_detail.type;
+  type_object.value.type = detailCore.value.current_detail.type;
   // title_change.value = detailCore.value.current_detail.title; // Duplicate in original
   remarks_change.value = detailCore.value.current_detail.remarks;
   paid_at_change.value = detailCore.value.current_detail.paid_at;
