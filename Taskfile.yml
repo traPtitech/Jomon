@@ -11,6 +11,8 @@ tasks:
     deps: [build]
     cmds:
       - /app/Jomon
+    sources:
+      - '**/*.go'
 
   build:
     desc: Build the Go application
