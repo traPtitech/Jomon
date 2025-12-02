@@ -38,60 +38,52 @@
     </span>
   </div>
 </template>
-<script>
+<script setup lang="ts">
+import { useApplicationDetailStore } from "@/stores/applicationDetail";
 import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
-import { mapActions } from "vuex";
+import { storeToRefs } from "pinia";
+import { computed, ref } from "vue";
 
-export default {
-  components: {
-    SimpleButton
-  },
-  data: () => ({
-    date: new Date().toISOString().substr(0, 10),
-    menu: false,
-    dialog: false,
-    traPID: []
-  }),
-  computed: {
-    repaidToTraPId() {
-      let trap_ids = [];
-      this.$store.state.application_detail_paper.core.repayment_logs.forEach(
-        log => {
-          if (log.repaid_at === "" || log.repaid_at === null) {
-            trap_ids.push(log.repaid_to_user.trap_id);
+const applicationDetailStore = useApplicationDetailStore();
+const { core: detailCore } = storeToRefs(applicationDetailStore);
+const { fetchApplicationDetail } = applicationDetailStore;
+
+const date = ref(new Date().toISOString().substr(0, 10));
+const menu = ref(false);
+const dialog = ref(false);
+const traPID = ref<string[]>([]);
+
+const repaidToTraPId = computed(() => {
+  const trap_ids: string[] = [];
+  detailCore.value.repayment_logs.forEach(log => {
+    if (log.repaid_at === "" || log.repaid_at === null) {
+      trap_ids.push(log.repaid_to_user.trap_id);
+    }
+  });
+  return trap_ids;
+});
+
+const putRepaid = async (traPIDs: string[], date: string) => {
+  await Promise.all(
+    traPIDs.map(async traPID => {
+      await axios
+        .put(
+          "../api/applications/" +
+            detailCore.value.application_id +
+            "/states/repaid/" +
+            traPID,
+          {
+            repaid_at: date
           }
-        }
-      );
-      return trap_ids;
-    }
-  },
-  methods: {
-    ...mapActions(["getApplicationDetail"]),
-    async putRepaid(traPIDs, date) {
-      await Promise.all(
-        traPIDs.map(async traPID => {
-          await axios
-            .put(
-              "../api/applications/" +
-                this.$store.state.application_detail_paper.core.application_id +
-                "/states/repaid/" +
-                traPID,
-              {
-                repaid_at: date
-              }
-            )
-            .catch(e => alert(e));
-        })
-      ).then(() => {
-        this.traPID = [];
-        this.dialog = false;
-        this.getApplicationDetail(
-          this.$store.state.application_detail_paper.core.application_id
-        );
-      });
-    }
-  }
+        )
+        .catch(e => alert(e));
+    })
+  ).then(async () => {
+    traPID.value = [];
+    dialog.value = false;
+    await fetchApplicationDetail(detailCore.value.application_id);
+  });
 };
 </script>
 

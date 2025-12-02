@@ -23,39 +23,58 @@
   </v-row>
 </template>
 
-<script>
+<script setup lang="ts">
 import StateChip from "@/views/shared/StateChip.vue";
 
-export default {
-  name: "ApplicationItem",
-  components: {
-    StateChip
-  },
-  props: {
-    list: {
-      type: Object,
-      default: () => ({
-        application_id: "",
-        created_at: "",
-        applicant: {
+interface User {
+  trap_id: string;
+  is_admin: boolean;
+}
+
+interface ApplicationDetail {
+  update_user: User;
+  type: string;
+  title: string;
+  remarks: string;
+  amount: number;
+  paid_at: string;
+  updated_at: string;
+}
+
+interface ApplicationList {
+  application_id: string;
+  created_at: string;
+  applicant: User;
+  current_detail: ApplicationDetail;
+  current_state: string;
+}
+
+withDefaults(
+  defineProps<{
+    list: ApplicationList | Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  }>(),
+  {
+    list: () => ({
+      application_id: "",
+      created_at: "",
+      applicant: {
+        trap_id: "",
+        is_admin: false
+      },
+      current_detail: {
+        update_user: {
           trap_id: "",
           is_admin: false
         },
-        current_detail: {
-          update_user: {
-            trap_id: "",
-            is_admin: false
-          },
-          type: "",
-          title: "",
-          remarks: "",
-          amount: 0,
-          paid_at: "",
-          updated_at: ""
-        },
-        current_state: ""
-      })
-    }
+        type: "",
+        title: "",
+        remarks: "",
+        amount: 0,
+        paid_at: "",
+        updated_at: ""
+      },
+      current_state: ""
+    })
   }
-};
+);
 </script>

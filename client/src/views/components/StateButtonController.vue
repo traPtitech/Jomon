@@ -13,84 +13,68 @@
     <simple-button :label="'再申請'" @click="reSubmit" />
   </div>
 </template>
-<script>
+<script setup lang="ts">
+import { useApplicationDetailStore } from "@/stores/applicationDetail";
 import { useMeStore } from "@/stores/me";
 import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
-import { mapState as mapPiniaState } from "pinia";
-import { mapActions, mapMutations, mapState } from "vuex";
+import { storeToRefs } from "pinia";
+import { computed } from "vue";
 import RepaidButton from "./RepaidButton.vue";
 import WithReasonButton from "./StateWithReasonButton.vue";
 
-export default {
-  components: {
-    WithReasonButton,
-    RepaidButton,
-    SimpleButton
-  },
-  data: function () {
-    return {
-      dialog: false
-    };
-  },
-  computed: {
-    ...mapState({ detail: "application_detail_paper" }),
-    ...mapPiniaState(useMeStore, ["trapId", "isAdmin"]),
-    displayAcceptBottom() {
-      return this.detail.core.current_state === `submitted` && this.isAdmin;
-    },
-    displayRepaidBottom() {
-      return this.detail.core.current_state === `accepted` && this.isAdmin;
-    },
-    displayFixResubmitBottom() {
-      return (
-        this.detail.core.current_state === `fix_required` &&
-        (this.isAdmin || this.trapId === this.detail.core.applicant.trap_id)
-      );
-    }
-  },
-  methods: {
-    ...mapMutations(["changeFix"]),
-    ...mapActions(["getApplicationDetail"]),
-    async accept() {
-      await axios
-        .put(
-          "../api/applications/" +
-            this.$store.state.application_detail_paper.core.application_id +
-            "/states",
-          {
-            to_state: "accepted"
-          }
-        )
-        .catch(e => {
-          alert(e);
-          return;
-        });
-      alert("承認しました");
-      this.getApplicationDetail(
-        this.$store.state.application_detail_paper.core.application_id
-      );
-    },
-    async reSubmit() {
-      await axios
-        .put(
-          "../api/applications/" +
-            this.$store.state.application_detail_paper.core.application_id +
-            "/states",
-          {
-            to_state: "submitted"
-          }
-        )
-        .catch(e => {
-          alert(e);
-          return;
-        });
-      alert("再申請しました");
-      this.getApplicationDetail(
-        this.$store.state.application_detail_paper.core.application_id
-      );
-    }
+const applicationDetailStore = useApplicationDetailStore();
+const meStore = useMeStore();
+
+const { core: detailCore } = storeToRefs(applicationDetailStore);
+const { trapId, isAdmin } = storeToRefs(meStore);
+const { fetchApplicationDetail, changeFix } = applicationDetailStore;
+
+const displayAcceptBottom = computed(() => {
+  return detailCore.value.current_state === `submitted` && isAdmin.value;
+});
+
+const displayRepaidBottom = computed(() => {
+  return detailCore.value.current_state === `accepted` && isAdmin.value;
+});
+
+const displayFixResubmitBottom = computed(() => {
+  return (
+    detailCore.value.current_state === `fix_required` &&
+    (isAdmin.value || trapId.value === detailCore.value.applicant.trap_id)
+  );
+});
+
+const accept = async () => {
+  try {
+    await axios.put(
+      "../api/applications/" + detailCore.value.application_id + "/states",
+      {
+        to_state: "accepted"
+      }
+    );
+  } catch (e) {
+    alert(e);
+    return;
   }
+  alert("承認しました");
+  await fetchApplicationDetail(detailCore.value.application_id);
+};
+
+const reSubmit = async () => {
+  try {
+    await axios.put(
+      "../api/applications/" + detailCore.value.application_id + "/states",
+      {
+        to_state: "submitted"
+      }
+    );
+  } catch (e) {
+    alert(e);
+    return;
+  }
+  alert("再申請しました");
+  await fetchApplicationDetail(detailCore.value.application_id);
 };
 </script>
 

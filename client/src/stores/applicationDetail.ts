@@ -148,11 +148,11 @@ export const useApplicationDetailStore = defineStore(
       Object.assign(core, response.data);
     };
 
-    const toggleFix = () => {
+    const changeFix = () => {
       fix.value = !fix.value;
     };
 
-    const disableFix = () => {
+    const deleteFix = () => {
       fix.value = false;
     };
 
@@ -161,8 +161,8 @@ export const useApplicationDetailStore = defineStore(
       core,
       logs,
       fetchApplicationDetail,
-      toggleFix,
-      disableFix
+      changeFix,
+      deleteFix
     };
   }
 );

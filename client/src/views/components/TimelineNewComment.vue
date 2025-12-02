@@ -6,7 +6,7 @@
       </v-col>
       <v-col cols="11">
         <v-card class="pa-2">
-          <v-form ref="form" v-model="valid">
+          <v-form ref="formRef" v-model="valid">
             <v-textarea
               v-model="comment"
               :rules="nullRules"
@@ -28,55 +28,47 @@
     </v-row>
   </div>
 </template>
-<script lang="ts">
+<script setup lang="ts">
+import { useApplicationDetailStore } from "@/stores/applicationDetail";
 import { useMeStore } from "@/stores/me";
 import Icon from "@/views/shared/Icon.vue";
 import axios from "axios";
-import { mapState } from "pinia";
-import { mapActions } from "vuex";
+import { storeToRefs } from "pinia";
+import { ref } from "vue";
 
-export default {
-  components: {
-    Icon
-  },
-  data: () => {
-    return {
-      valid: true,
-      comment: "",
-      nullRules: [v => !!v || ""]
-    };
-  },
-  computed: {
-    ...mapState(useMeStore, ["trapId"])
-  },
-  methods: {
-    blur() {
-      if (this.comment === "" || this.comment === undefined) {
-        (this.$refs.form as any).reset();
-      }
-    },
-    ...mapActions(["getApplicationDetail"]),
-    postcomment() {
-      if ((this.$refs.form as any).validate()) {
-        axios
-          .post(
-            "/api/applications/" +
-              this.$store.state.application_detail_paper.core.application_id +
-              "/comments",
-            {
-              comment: this.comment
-            }
-          )
-          .catch((e: any) => {
-            alert(e);
-            return;
-          });
-        (this.$refs.form as any).reset();
-        this.getApplicationDetail(
-          this.$store.state.application_detail_paper.core.application_id
-        );
-      }
+const applicationDetailStore = useApplicationDetailStore();
+const meStore = useMeStore();
+
+const { core: detailCore } = storeToRefs(applicationDetailStore);
+const { trapId } = storeToRefs(meStore);
+const { fetchApplicationDetail } = applicationDetailStore;
+
+const valid = ref(true);
+const comment = ref("");
+const nullRules = [(v: unknown) => !!v || ""];
+const formRef = ref<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+const blur = () => {
+  if (comment.value === "" || comment.value === undefined) {
+    formRef.value.reset();
+  }
+};
+
+const postcomment = async () => {
+  if (formRef.value.validate()) {
+    try {
+      await axios.post(
+        "/api/applications/" + detailCore.value.application_id + "/comments",
+        {
+          comment: comment.value
+        }
+      );
+    } catch (e) {
+      alert(e);
+      return;
     }
+    formRef.value.reset();
+    await fetchApplicationDetail(detailCore.value.application_id);
   }
 };
 </script>

@@ -39,7 +39,7 @@ router.beforeEach(async (to, _from, next) => {
   if (meStore.trapId === "") {
     try {
       await meStore.fetchMe();
-    } catch (err) {
+    } catch {
       sessionStorage.setItem(`destination`, to.fullPath);
       await redirectAuthEndpoint();
     }

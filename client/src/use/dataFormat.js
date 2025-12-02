@@ -2,10 +2,10 @@ export const numberFormat = price => {
   return price.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
 };
 export const dayPrint = time => {
-  let d = new Date(time);
-  let year = d.getFullYear();
-  let month = d.getMonth() + 1;
-  let day = d.getDate();
-  let res = year + "年" + month + "月" + day + "日";
+  const d = new Date(time);
+  const year = d.getFullYear();
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  const res = year + "年" + month + "月" + day + "日";
   return res;
 };

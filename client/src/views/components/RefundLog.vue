@@ -18,55 +18,51 @@
   </v-timeline-item>
 </template>
 
-<script>
+<script setup lang="ts">
 import Icon from "@/views/shared/Icon.vue";
 
-export default {
-  components: {
-    Icon
-  },
-  props: {
-    log: {
-      type: Object,
-      default: () => ({})
-    }
-  },
-  methods: {
-    dayPrint(time) {
-      let now = new Date();
-      let d = new Date(time);
-      let diff = (now.getTime() - d.getTime()) / 1000;
-      if (diff < 60) {
-        //1分以内
-        return Math.round(diff) + "秒前";
-      } else if (diff < 60 * 60) {
-        //一時間以内
-        return Math.round(diff / 60) + "分前";
-      } else if (diff < 60 * 60 * 24) {
-        //一日以内
-        return Math.round(diff / 60 / 60) + "時間前";
-      } else if (diff < 60 * 60 * 24 * 28) {
-        //一か月以内
-        let month = d.getMonth() + 1;
-        let day = d.getDate();
-        return month + "/" + day;
-      } else {
-        let year = d.getFullYear();
-        let month = d.getMonth() + 1;
-        let day = d.getDate();
-        return year + "/" + month + "/" + day;
-      }
-    },
-    datePrint(date) {
-      let res;
-      let d = new Date(date);
-      let year = d.getFullYear();
-      let month = d.getMonth() + 1;
-      let day = d.getDate();
-      res = year + "/" + month + "/" + day;
-      return res;
-    }
+withDefaults(
+  defineProps<{
+    log: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  }>(),
+  {
+    log: () => ({})
   }
+);
+
+const dayPrint = (time: string) => {
+  const now = new Date();
+  const d = new Date(time);
+  const diff = (now.getTime() - d.getTime()) / 1000;
+  if (diff < 60) {
+    //1分以内
+    return Math.round(diff) + "秒前";
+  } else if (diff < 60 * 60) {
+    //一時間以内
+    return Math.round(diff / 60) + "分前";
+  } else if (diff < 60 * 60 * 24) {
+    //一日以内
+    return Math.round(diff / 60 / 60) + "時間前";
+  } else if (diff < 60 * 60 * 24 * 28) {
+    //一か月以内
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    return month + "/" + day;
+  } else {
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    return year + "/" + month + "/" + day;
+  }
+};
+
+const datePrint = (date: string) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  const res = year + "/" + month + "/" + day;
+  return res;
 };
 </script>
 

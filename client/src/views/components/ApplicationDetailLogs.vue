@@ -19,27 +19,17 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from "vuex";
+<script setup lang="ts">
+import { useApplicationDetailStore } from "@/stores/applicationDetail";
+import { storeToRefs } from "pinia";
 import ChangeLog from "./ChangeLog.vue";
 import CommentLog from "./CommentLog.vue";
 import RefundLog from "./RefundLog.vue";
 import StatusLog from "./StatusLog.vue";
 import NewComment from "./TimelineNewComment.vue";
 
-export default {
-  components: {
-    CommentLog,
-    StatusLog,
-    ChangeLog,
-    RefundLog,
-    NewComment
-  },
-  props: {},
-  computed: {
-    ...mapGetters(["logs"])
-  }
-};
+const applicationDetailStore = useApplicationDetailStore();
+const { logs } = storeToRefs(applicationDetailStore);
 </script>
 
 <style lang="scss" module>

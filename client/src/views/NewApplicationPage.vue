@@ -133,128 +133,121 @@
   </v-container>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { useMeStore } from "@/stores/me";
+import { useUserListStore } from "@/stores/userList";
 import { applicationType, remarksTitle } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
-import {
-  remarksHint,
-  remarksPlaceholder,
-  titlePlaceholder
-} from "@/use/inputFormText";
+import { remarksHint } from "@/use/inputFormText";
+import Icon from "@/views/shared/Icon.vue";
+import ImageUploader from "@/views/shared/ImageUploader.vue";
 import axios from "axios";
-import { mapState } from "pinia";
-import { mapActions, mapGetters } from "vuex";
-import Icon from "./shared/Icon.vue";
-import ImageUploader from "./shared/ImageUploader.vue";
+import { storeToRefs } from "pinia";
+import { computed, onMounted, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
 
-export default {
-  components: {
-    Icon,
-    ImageUploader
-  },
-  props: {},
-  data: () => ({
-    response: {
-      application_id: null,
-      applicant: { trapid: null },
-      created_at: null,
-      current_detail: {
-        title: null,
-        type: null,
-        amount: 0,
-        remarks: null,
-        created_at: null,
-        paid_at: null
-      }
-    },
-    snackbar: false,
-    date: null,
-    menu: false,
-    traPID: [],
-    valid: true,
-    title: "",
-    amount: "",
-    remarks: "",
-    imageBlobs: [],
-    amountRules: [
-      v => !!v || "必須の項目です",
-      v => !!String(v).match("^[1-9][0-9]*$") || "金額が不正です"
-    ],
-    nullRules: [v => !!v || "必須の項目です"]
-  }),
-  computed: {
-    ...mapGetters({ traPIDs: "trap_ids" }),
-    ...mapState(useMeStore, ["trapId"]),
-    computedDateFormatted() {
-      return this.formatDate(this.date);
-    },
-    form() {
-      return {
-        traPID: this.traPID
-      };
-    }
-  },
-  async created() {
-    await this.getUsers();
-  },
-  mounted() {
-    (this.$refs.firstfocus as any).focus();
-  },
-  methods: {
-    ...mapActions({
-      getUsers: "getUserList"
-    }),
-    submit() {
-      if ((this.$refs.form as any).validate()) {
-        let form = new FormData();
-        let paid_at = new Date(this.date || Date.now());
-        let details = {
-          type: this.$route.params.type,
-          title: this.title,
-          remarks: this.remarks,
-          paid_at: paid_at.toISOString(),
-          amount: Number(this.amount),
-          repaid_to_id: this.traPID
-        };
-        form.append("details", JSON.stringify(details));
-        this.imageBlobs.forEach(imageBlob => {
-          form.append("images", imageBlob);
-        });
-        axios
-          .post("/api/applications", form, {
-            headers: { "content-type": "multipart/form-data" }
-          })
-          .then(response => {
-            this.response = response.data;
-            this.snackbar = true;
-          });
-      }
-    },
-    formatDate(date) {
-      if (!date) return null;
-      const d = new Date(date);
-      return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
-    },
-    returnToday: function () {
-      const date = new Date();
-      return dayPrint(date);
-    },
-    returnType: function (type) {
-      return applicationType(type);
-    },
-    returnRemarksTitle: function (type) {
-      return remarksTitle(type);
-    },
-    returnTitlePlaceholder: function (type) {
-      return titlePlaceholder(type);
-    },
-    returnRemarksPlaceholder: function (type) {
-      return remarksPlaceholder(type);
-    },
-    returnRemarksHint: function (type) {
-      return remarksHint(type);
-    }
+const route = useRoute();
+const meStore = useMeStore();
+const userListStore = useUserListStore();
+
+const { trapId } = storeToRefs(meStore);
+const { userList } = storeToRefs(userListStore);
+const { fetchUserList } = userListStore;
+
+const form = ref<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+const firstfocus = ref<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+const response = reactive({
+  application_id: null,
+  applicant: { trapid: null },
+  created_at: null,
+  current_detail: {
+    title: null,
+    type: null,
+    amount: 0,
+    remarks: null,
+    created_at: null,
+    paid_at: null
+  }
+});
+
+const snackbar = ref(false);
+const date = ref(null);
+const menu = ref(false);
+const traPID = ref<string[]>([]);
+const valid = ref(true);
+const title = ref("");
+const amount = ref("");
+const remarks = ref("");
+const imageBlobs = ref<File[]>([]);
+
+const amountRules = [
+  (v: unknown) => !!v || "必須の項目です",
+  (v: unknown) => !!String(v).match("^[1-9][0-9]*$") || "金額が不正です"
+];
+const nullRules = [(v: unknown) => !!v || "必須の項目です"];
+
+const traPIDs = computed(() => {
+  return userList.value.map(user => user.trap_id);
+});
+
+const computedDateFormatted = computed(() => {
+  return formatDate(date.value);
+});
+
+const formatDate = (date: string | number | Date | null) => {
+  if (!date) return null;
+  const d = new Date(date);
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+};
+
+const returnToday = () => {
+  const date = new Date();
+  return dayPrint(date);
+};
+
+const returnType = (type: string) => {
+  return applicationType(type);
+};
+
+const returnRemarksTitle = (type: string) => {
+  return remarksTitle(type);
+};
+
+const returnRemarksHint = (type: string) => {
+  return remarksHint(type);
+};
+
+const submit = () => {
+  if (form.value.validate()) {
+    const formData = new FormData();
+    const paid_at = new Date(date.value || Date.now());
+    const details = {
+      type: route.params.type,
+      title: title.value,
+      remarks: remarks.value,
+      paid_at: paid_at.toISOString(),
+      amount: Number(amount.value),
+      repaid_to_id: traPID.value
+    };
+    formData.append("details", JSON.stringify(details));
+    imageBlobs.value.forEach(imageBlob => {
+      formData.append("images", imageBlob);
+    });
+    axios
+      .post("/api/applications", formData, {
+        headers: { "content-type": "multipart/form-data" }
+      })
+      .then(res => {
+        Object.assign(response, res.data);
+        snackbar.value = true;
+      });
   }
 };
+
+onMounted(async () => {
+  await fetchUserList();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  firstfocus.value.focus();
+});
 </script>

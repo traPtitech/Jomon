@@ -19,12 +19,12 @@ export default {
   },
   computed: {
     formatted: function () {
-      let now = new Date();
-      let d = new Date(this.date);
+      const now = new Date();
+      const d = new Date(this.date);
       if (this.simple) {
         return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
       }
-      let diff = (now.getTime() - d.getTime()) / 1000;
+      const diff = (now.getTime() - d.getTime()) / 1000;
       if (diff < 60) {
         //1分以内
         return Math.round(diff) + "秒前";
@@ -36,13 +36,13 @@ export default {
         return Math.round(diff / 60 / 60) + "時間前";
       } else if (diff < 60 * 60 * 24 * 28) {
         //一か月以内
-        let month = d.getMonth() + 1;
-        let day = d.getDate();
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
         return month + "/" + day;
       } else {
-        let year = d.getFullYear();
-        let month = d.getMonth() + 1;
-        let day = d.getDate();
+        const year = d.getFullYear();
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
         return year + "/" + month + "/" + day;
       }
     }

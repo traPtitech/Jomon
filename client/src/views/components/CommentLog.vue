@@ -22,7 +22,7 @@
 
     <v-form v-model="comment_valid">
       <v-textarea
-        ref="comment"
+        ref="commentRef"
         v-model="comment_change"
         label="変更後のコメント"
         :readonly="comment_readonly"
@@ -63,91 +63,90 @@
   </v-timeline-item>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { useApplicationDetailStore } from "@/stores/applicationDetail";
 import { useMeStore } from "@/stores/me";
 import Icon from "@/views/shared/Icon.vue";
 import axios from "axios";
-import { mapState } from "pinia";
-import { mapActions } from "vuex";
+import { storeToRefs } from "pinia";
+import { nextTick, ref, watch } from "vue";
 import FormattedDate from "./FormattedDate.vue";
 
-export default {
-  components: {
-    Icon,
-    FormattedDate
-  },
-  props: {
-    log: {
-      type: Object,
-      default: () => ({})
-    }
-  },
-  data: function () {
-    return {
-      comment_readonly: true,
-      comment_change: this.log.content.comment,
-      comment_valid: true,
-      changeRules: [v => v !== this.log.content.comment && !!v]
-    };
-  },
-  computed: {
-    ...mapState(useMeStore, ["trapId"])
-  },
-  watch: {
-    comment_readonly: function () {
-      if (!this.comment_readonly) {
-        let self = this;
-        this.$nextTick().then(function () {
-          (self.$refs.comment as any).focus();
-        });
-      }
-    }
-  },
-  methods: {
-    ...mapActions(["getApplicationDetail"]),
-    commentChange() {
-      this.comment_readonly = false;
-    },
-    async deleteComment() {
-      await axios
-        .delete(
-          "../api/applications/" +
-            this.$store.state.application_detail_paper.core.application_id +
-            "/comments/" +
-            this.log.content.comment_id
-        )
-        .catch(e => alert(e));
-      alert("コメントを削除しました。");
-      this.getApplicationDetail(
-        this.$store.state.application_detail_paper.core.application_id
-      );
-    },
-    async putComment() {
-      await axios
-        .put(
-          "../api/applications/" +
-            this.$store.state.application_detail_paper.core.application_id +
-            "/comments/" +
-            this.log.content.comment_id,
-          {
-            comment: this.comment_change
-          }
-        )
-        .catch(e => {
-          alert(e);
-          return;
-        });
-      alert("コメントを変更しました");
-      this.comment_readonly = true;
-      this.getApplicationDetail(
-        this.$store.state.application_detail_paper.core.application_id
-      );
-    },
-    cancelChange() {
-      this.comment_readonly = true;
-      this.comment_change = this.log.content.comment;
-    }
+const props = withDefaults(
+  defineProps<{
+    log: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  }>(),
+  {
+    log: () => ({})
   }
+);
+
+const applicationDetailStore = useApplicationDetailStore();
+const meStore = useMeStore();
+
+const { core: detailCore } = storeToRefs(applicationDetailStore);
+const { trapId } = storeToRefs(meStore);
+const { fetchApplicationDetail } = applicationDetailStore;
+
+const comment_readonly = ref(true);
+const comment_change = ref(props.log.content.comment);
+const comment_valid = ref(true);
+const changeRules = [
+  (v: unknown) => (v !== props.log.content.comment && !!v) || ""
+];
+
+const commentRef = ref<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+watch(comment_readonly, async () => {
+  if (!comment_readonly.value) {
+    await nextTick();
+    commentRef.value.focus();
+  }
+});
+
+const commentChange = () => {
+  comment_readonly.value = false;
+};
+
+const deleteComment = async () => {
+  try {
+    await axios.delete(
+      "../api/applications/" +
+        detailCore.value.application_id +
+        "/comments/" +
+        props.log.content.comment_id
+    );
+  } catch (e) {
+    alert(e);
+    return;
+  }
+  alert("コメントを削除しました。");
+  await fetchApplicationDetail(detailCore.value.application_id);
+};
+
+const putComment = async () => {
+  try {
+    await axios.put(
+      "../api/applications/" +
+        detailCore.value.application_id +
+        "/comments/" +
+        props.log.content.comment_id,
+      {
+        comment: comment_change.value
+      }
+    );
+  } catch (e) {
+    alert(e);
+    return;
+  }
+  alert("コメントを変更しました");
+  comment_readonly.value = true;
+  await fetchApplicationDetail(detailCore.value.application_id);
+};
+
+const cancelChange = () => {
+  comment_readonly.value = true;
+  comment_change.value = props.log.content.comment;
 };
 </script>
 

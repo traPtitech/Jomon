@@ -1,13 +1,13 @@
 <template>
   <div :class="$style.container">
     <v-dialog v-model="isDialogOpen" max-width="600px">
-      <template #activator="{ props }">
+      <template #activator="{ props: activatorProps }">
         <simple-button
           :label="
             toStateName(toState) + (toState === 'submitted' ? 'に戻す' : '')
           "
           :variant="toState === 'submitted' ? 'warning' : 'error'"
-          v-bind="props"
+          v-bind="activatorProps"
         />
       </template>
 
@@ -20,7 +20,7 @@
             >承認待ち→{{ toStateName(toState) }} への変更理由</span
           >
         </v-card-title>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="formRef" v-model="valid">
           <v-card-text>
             <v-container>
               <v-row>
@@ -55,80 +55,75 @@
     </v-dialog>
   </div>
 </template>
-<script lang="ts">
+<script setup lang="ts">
+import { useApplicationDetailStore } from "@/stores/applicationDetail";
 import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
-import { mapActions } from "vuex";
+import { storeToRefs } from "pinia";
+import { nextTick, ref, watch } from "vue";
 
-export default {
-  components: {
-    SimpleButton
-  },
-  props: {
-    toState: {
-      type: String,
-      default: ""
+const props = withDefaults(
+  defineProps<{
+    toState?: string;
+  }>(),
+  {
+    toState: ""
+  }
+);
+
+const applicationDetailStore = useApplicationDetailStore();
+const { core: detailCore } = storeToRefs(applicationDetailStore);
+const { fetchApplicationDetail } = applicationDetailStore;
+
+const valid = ref(true);
+const isDialogOpen = ref(false);
+const reason = ref("");
+const nullRules = [(v: unknown) => !!v || ""];
+const formRef = ref<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+watch(isDialogOpen, async () => {
+  if (isDialogOpen.value) {
+    await nextTick();
+    formRef.value.reset();
+  }
+});
+
+const blur = () => {
+  if (reason.value === "" || reason.value === undefined) {
+    formRef.value.reset();
+  }
+};
+
+const postReason = async () => {
+  if (formRef.value.validate()) {
+    try {
+      await axios.put(
+        "../api/applications/" + detailCore.value.application_id + "/states",
+        {
+          to_state: props.toState,
+          reason: reason.value
+        }
+      );
+    } catch (e) {
+      alert(e);
+      return;
     }
-  },
-  data: () => ({
-    valid: true,
-    isDialogOpen: false,
-    reason: "",
-    nullRules: [v => !!v || ""]
-  }),
-  watch: {
-    isDialogOpen: function () {
-      // @ts-ignore
-      if (this.isDialogOpen) {
-        let self = this;
-        this.$nextTick().then(function () {
-          (self.$refs.form as any).reset();
-        });
-      }
-    }
-  },
-  methods: {
-    ...mapActions(["getApplicationDetail"]),
-    blur() {
-      if (this.reason === "" || this.reason === undefined) {
-        (this.$refs.form as any).reset();
-      }
-    },
-    async postReason() {
-      if ((this.$refs.form as any).validate()) {
-        await axios
-          .put(
-            "../api/applications/" +
-              this.$store.state.application_detail_paper.core.application_id +
-              "/states",
-            {
-              to_state: this.toState,
-              reason: this.reason
-            }
-          )
-          .catch((e: any) => {
-            alert(e);
-            return;
-          });
-        (this.$refs.form as any).reset();
-        this.isDialogOpen = false;
-        this.getApplicationDetail(
-          this.$store.state.application_detail_paper.core.application_id
-        );
-      }
-    },
-    toStateName: function (toState) {
-      switch (toState) {
-        case "submitted":
-          return "提出済み";
-        case "fix_required":
-          return "要修正";
-        case "rejected":
-          return "取り下げ";
-        default:
-          return "状態が間違っています";
-      }
-    }
+    formRef.value.reset();
+    isDialogOpen.value = false;
+    await fetchApplicationDetail(detailCore.value.application_id);
+  }
+};
+
+const toStateName = (toState: string) => {
+  switch (toState) {
+    case "submitted":
+      return "提出済み";
+    case "fix_required":
+      return "要修正";
+    case "rejected":
+      return "取り下げ";
+    default:
+      return "状態が間違っています";
   }
 };
 </script>

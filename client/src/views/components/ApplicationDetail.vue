@@ -3,8 +3,8 @@
   <div :class="$style.container">
     <div :class="$style.header">
       <div :class="$style.title">
-        <h1>{{ returnType(detail.core.current_detail.type) }}申請</h1>
-        <state-chip :state="detail.core.current_state" />
+        <h1>{{ returnType(detailCore.current_detail.type) }}申請</h1>
+        <state-chip :state="detailCore.current_state" />
       </div>
       <state-button-controller />
     </div>
@@ -12,36 +12,36 @@
     <div :class="$style.section">
       <div :class="$style.section_title">申請日</div>
       <div :class="$style.section_item">
-        {{ returnDate(detail.core.created_at) }}
+        {{ returnDate(detailCore.created_at) }}
       </div>
     </div>
 
     <div :class="$style.section">
       <div :class="$style.section_title">申請者</div>
       <div :class="$style.section_item">
-        <Icon :user="detail.core.applicant.trap_id" :size="24" />
-        {{ detail.core.applicant.trap_id }}
+        <Icon :user="detailCore.applicant.trap_id" :size="24" />
+        {{ detailCore.applicant.trap_id }}
       </div>
     </div>
 
     <div :class="$style.section">
       <div :class="$style.section_title">概要</div>
       <div :class="$style.section_item">
-        {{ detail.core.current_detail.title }}
+        {{ detailCore.current_detail.title }}
       </div>
     </div>
 
     <div :class="$style.section">
       <div :class="$style.section_title">支払日</div>
       <div :class="$style.section_item">
-        {{ returnDate(detail.core.current_detail.paid_at) }}
+        {{ returnDate(detailCore.current_detail.paid_at) }}
       </div>
     </div>
 
     <div :class="$style.section">
       <div :class="$style.section_title">支払金額</div>
       <div :class="$style.section_item">
-        {{ detail.core.current_detail.amount }}円
+        {{ detailCore.current_detail.amount }}円
       </div>
     </div>
 
@@ -49,7 +49,7 @@
       <div :class="$style.section_title">払い戻し対象者</div>
       <div :class="$style.target_container">
         <div
-          v-for="user in detail.core.repayment_logs"
+          v-for="user in detailCore.repayment_logs"
           :key="user.repaid_to_user.trap_id"
         >
           <Icon :user="user.repaid_to_user.trap_id" :size="24" />
@@ -60,7 +60,7 @@
 
     <div :class="$style.section">
       <div :class="$style.section_title">
-        {{ returnRemarksTitle(detail.core.current_detail.type) }}
+        {{ returnRemarksTitle(detailCore.current_detail.type) }}
       </div>
       <!-- eslint-disable-next-line vue/no-v-html -->
       <div :class="$style.section_item" v-html="rendered" />
@@ -71,54 +71,57 @@
       <div :class="$style.section_title">画像</div>
       <div :class="$style.image_container">
         <img
-          v-for="path in detail.core.images"
+          v-for="path in detailCore.images"
           :key="path"
           :src="`/api/images/${path}`"
         />
       </div>
-      <div v-if="detail.core.images.length === 0">画像はありません</div>
+      <div v-if="detailCore.images.length === 0">画像はありません</div>
     </div>
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { useApplicationDetailStore } from "@/stores/applicationDetail";
 import { applicationType, remarksTitle } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
 import { render } from "@/use/markdown";
 import StateButtonController from "@/views/components/StateButtonController.vue";
 import Icon from "@/views/shared/Icon.vue";
 import StateChip from "@/views/shared/StateChip.vue";
-import { mapState } from "vuex";
+import { storeToRefs } from "pinia";
+import { onMounted, ref, watch } from "vue";
 
-export default {
-  components: {
-    Icon,
-    StateChip,
-    StateButtonController
-  },
-  data: function () {
-    return {
-      rendered: ""
-    };
-  },
-  computed: {
-    ...mapState({ detail: "application_detail_paper" })
-  },
-  async mounted() {
-    this.rendered = await render(this.detail.core.current_detail.remarks);
-  },
-  methods: {
-    returnDate: function (date) {
-      return dayPrint(date);
-    },
-    returnType: function (type) {
-      return applicationType(type);
-    },
-    returnRemarksTitle: function (type) {
-      return remarksTitle(type);
-    }
-  }
+const applicationDetailStore = useApplicationDetailStore();
+const { core: detailCore } = storeToRefs(applicationDetailStore);
+
+const rendered = ref("");
+
+const returnDate = (date: string) => {
+  return dayPrint(date);
 };
+
+const returnType = (type: string) => {
+  return applicationType(type);
+};
+
+const returnRemarksTitle = (type: string) => {
+  return remarksTitle(type);
+};
+
+// Watch for changes in remarks to re-render markdown
+watch(
+  () => detailCore.value.current_detail.remarks,
+  async newVal => {
+    rendered.value = await render(newVal);
+  }
+);
+
+onMounted(async () => {
+  if (detailCore.value.current_detail.remarks) {
+    rendered.value = await render(detailCore.value.current_detail.remarks);
+  }
+});
 </script>
 
 <style lang="scss" module>

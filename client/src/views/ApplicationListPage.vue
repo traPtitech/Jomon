@@ -131,123 +131,121 @@
   </div>
 </template>
 
-<script>
-import { mapActions, mapState } from "vuex";
+<script setup lang="ts">
+import { useApplicationListStore } from "@/stores/applicationList";
+import { useUserListStore } from "@/stores/userList";
+import { storeToRefs } from "pinia";
+import { onMounted, reactive, ref } from "vue";
+import { useDisplay } from "vuetify";
 import Application from "./components/Application.vue";
 
-let sort = {
+const applicationListStore = useApplicationListStore();
+const userListStore = useUserListStore();
+
+const { applicationList } = storeToRefs(applicationListStore);
+const { userList } = storeToRefs(userListStore);
+const { fetchApplicationList } = applicationListStore;
+const { fetchUserList } = userListStore;
+
+const display = useDisplay();
+
+const sort = {
   created_at: "created_at",
   inv_created_at: "-created_at",
   title: "title",
   inv_title: "-title"
 };
-export default {
-  name: "ApplicationList",
-  components: {
-    Application
+
+const type_items = [
+  { type: "club", jpn: "部費利用申請" },
+  { type: "contest", jpn: "大会等旅費補助申請" },
+  { type: "event", jpn: "イベント交通費補助申請" },
+  { type: "public", jpn: "渉外交通費補助" }
+];
+
+const state_items = [
+  { state: "submitted", jpn: "提出済み" },
+  { state: "rejected", jpn: "却下" },
+  { state: "fix_required", jpn: "要修正" },
+  { state: "accepted", jpn: "払い戻し待ち" },
+  { state: "fully_repaid", jpn: "払い戻し完了" }
+];
+
+const header = {
+  current_detail: {
+    title: "タイトル",
+    amount: "金額"
   },
-  data() {
-    return {
-      type_items: [
-        { type: "club", jpn: "部費利用申請" },
-        { type: "contest", jpn: "大会等旅費補助申請" },
-        { type: "event", jpn: "イベント交通費補助申請" },
-        { type: "public", jpn: "渉外交通費補助" }
-      ],
-      type: { type: "", jpn: "" },
-      state_items: [
-        { state: "submitted", jpn: "提出済み" },
-        { state: "rejected", jpn: "却下" },
-        { state: "fix_required", jpn: "要修正" },
-        { state: "accepted", jpn: "払い戻し待ち" },
-        { state: "fully_repaid", jpn: "払い戻し完了" }
-      ],
-      state: { state: "", jpn: "" },
-      header: {
-        current_detail: {
-          title: "タイトル",
-          amount: "金額"
-        },
-        applicant: {
-          trap_id: "申請者ID"
-        },
-        current_state: ""
-      },
-      show: false,
-      params: {
-        sort: sort.created_at,
-        current_state: "",
-        financial_year: "",
-        applicant: "",
-        type: "",
-        submitted_since: "",
-        submitted_until: ""
-      },
-      dayRule: [
-        value =>
-          !value ||
-          /^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/.test(value) ||
-          "Invalid Day."
-      ],
-      yearRule: [value => !value || /^[0-9]{4}$/.test(value) || "Invalid Year."]
-    };
+  applicant: {
+    trap_id: "申請者ID"
   },
-  computed: {
-    ...mapState(["applicationList", "userList"])
-  },
-  async created() {
-    const p1 = this.getApplicationList({});
-    const p2 = this.getUserList();
-    await Promise.all([p1, p2]);
-    this.show = this.defaultShow();
-  },
-  methods: {
-    ...mapActions(["getApplicationList", "getUserList"]),
-    /**
-     * 絞り込み画面表示の初期値を画面のサイズによって変える
-     */
-    defaultShow() {
-      switch (this.$vuetify.display.name) {
-        case "xs":
-        case "sm":
-          return false;
-        default:
-          return true;
-      }
-    },
-    /**
-     * 絞り込みリセット
-     */
-    resetParams() {
-      this.params = {
-        sort: sort.created_at,
-        current_state: "",
-        financial_year: "",
-        applicant: "",
-        type: "",
-        submitted_since: "",
-        submitted_until: ""
-      };
-    },
-    /**
-     * 作成日でソート
-     */
-    sortCreatedAt() {
-      if (this.params.sort === sort.created_at)
-        this.params.sort = sort.inv_created_at;
-      else this.params.sort = sort.created_at;
-      this.getApplicationList(this.params);
-    },
-    /**
-     * タイトルでソート
-     */
-    sortTitle() {
-      if (this.params.sort === sort.title) this.params.sort = sort.inv_title;
-      else this.params.sort = sort.title;
-      this.getApplicationList(this.params);
-    }
+  current_state: ""
+};
+
+const show = ref(false);
+const params = reactive({
+  sort: sort.created_at,
+  current_state: "",
+  financial_year: "",
+  applicant: "",
+  type: "",
+  submitted_since: "",
+  submitted_until: ""
+});
+
+const dayRule = [
+  (value: string) =>
+    !value || /^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/.test(value) || "Invalid Day."
+];
+const yearRule = [
+  (value: string) => !value || /^[0-9]{4}$/.test(value) || "Invalid Year."
+];
+
+const defaultShow = () => {
+  switch (display.name.value) {
+    case "xs":
+    case "sm":
+      return false;
+    default:
+      return true;
   }
 };
+
+const resetParams = () => {
+  Object.assign(params, {
+    sort: sort.created_at,
+    current_state: "",
+    financial_year: "",
+    applicant: "",
+    type: "",
+    submitted_since: "",
+    submitted_until: ""
+  });
+};
+
+const sortCreatedAt = () => {
+  if (params.sort === sort.created_at) params.sort = sort.inv_created_at;
+  else params.sort = sort.created_at;
+  fetchApplicationList(params);
+};
+
+const sortTitle = () => {
+  if (params.sort === sort.title) params.sort = sort.inv_title;
+  else params.sort = sort.title;
+  fetchApplicationList(params);
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getApplicationList = (p: any) => {
+  fetchApplicationList(p);
+};
+
+onMounted(async () => {
+  const p1 = fetchApplicationList({});
+  const p2 = fetchUserList();
+  await Promise.all([p1, p2]);
+  show.value = defaultShow();
+});
 </script>
 
 <style lang="scss" module>
