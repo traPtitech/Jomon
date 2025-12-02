@@ -29,5 +29,15 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: ["./tests/setup.js"],
+    server: {
+      deps: {
+        inline: ["vuetify"]
+      }
+    }
   }
 });
