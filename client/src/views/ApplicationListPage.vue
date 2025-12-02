@@ -4,18 +4,27 @@
       <v-row justify="space-around">
         <!-- 絞り込み検索欄 -->
         <v-col cols="12" md="3">
-          <v-card width="1200px" class="mx-auto mt-5" color="primary">
+          <v-card class="mx-auto mt-5" color="#011A27">
             <v-card-title
               style="color: white; font-weight: bold; font-size: 1.5em"
             >
               絞り込み
-              <v-btn icon @click="show = !show">
+              <v-btn
+                variant="text"
+                icon="mdi-chevron-down"
+                color="white"
+                @click="show = !show"
+              >
                 <v-icon color="white">
                   {{ show ? "mdi-chevron-up" : "mdi-chevron-down" }}
                 </v-icon>
               </v-btn>
             </v-card-title>
-            <v-card-text v-show="show" style="background: white" class="pt-4">
+            <v-card-text
+              v-show="show"
+              style="background: white; color: black"
+              class="pt-4"
+            >
               <v-form>
                 <div>
                   <v-btn
@@ -93,7 +102,7 @@
         </v-col>
         <!-- 申請一覧 -->
         <v-col cols="12" md="7">
-          <v-card width="1200px" class="mx-auto mt-5" color="primary">
+          <v-card class="mx-auto mt-5" color="#011A27">
             <v-card-title
               style="color: white; font-weight: bold; font-size: 1.5em"
             >

@@ -31,11 +31,12 @@ services:
   jomon-client:
     build: ./client
     volumes:
-      - "./client/src:/app/src:cached"
+      - "./client:/app:cached"
+      - "/app/node_modules"
     tty: true
     environment:
       - CHOKIDAR_USEPOLLING=true
-    entrypoint: npm run serve
+    entrypoint: npm run dev
 
   db:
     image: mariadb:10.11

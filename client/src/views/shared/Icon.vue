@@ -1,5 +1,5 @@
 <template>
-  <v-avatar :size="size">
+  <v-avatar :size="size" color="secondary">
     <v-img :src="iconSrc" width="100%" alt="" />
   </v-avatar>
 </template>

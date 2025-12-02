@@ -30,7 +30,6 @@
             :rules="nullRules"
             label="概要"
             filled
-            :placeholder="returnTitlePlaceholder($route.params.type)"
           />
         </div>
 
@@ -52,9 +51,7 @@
                     label="支払日"
                     filled
                     readonly
-                    placeholder="2020年5月2日"
                     v-bind="props"
-                    height="10"
                   />
                 </template>
                 <v-date-picker
@@ -77,9 +74,7 @@
                 label="支払金額"
                 filled
                 type="number"
-                placeholder="100"
                 class="pa-0"
-                height="25"
                 suffix="円"
               />
             </v-col>
@@ -96,7 +91,6 @@
             label="返金対象者"
             filled
             :items="traPIDs"
-            placeholder="traQIDs"
             hint="traQ IDの一部入力で候補が表示されます"
             required
             multiple
@@ -109,7 +103,6 @@
             :rules="nullRules"
             filled
             :label="returnRemarksTitle($route.params.type)"
-            :placeholder="returnRemarksPlaceholder($route.params.type)"
             :hint="returnRemarksHint($route.params.type)"
             auto-grow
           />
@@ -237,9 +230,8 @@ export default {
     },
     formatDate(date) {
       if (!date) return null;
-
-      const [year, month, day] = date.split("-");
-      return `${year}年${month.replace(/^0/, "")}月${day.replace(/^0/, "")}日`;
+      const d = new Date(date);
+      return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
     },
     returnToday: function () {
       const date = new Date();
