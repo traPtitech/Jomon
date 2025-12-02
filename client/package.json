@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "type-check": "vue-tsc --noEmit -p tsconfig.json",
-    "test": "vitest"
+    "test": "vitest run"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
