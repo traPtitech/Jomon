@@ -22,11 +22,14 @@
 import Icon from "@/views/shared/Icon";
 
 export default {
-  props: {
-    log: Object
-  },
   components: {
     Icon
+  },
+  props: {
+    log: {
+      type: Object,
+      default: () => ({})
+    }
   },
   methods: {
     dayPrint(time) {

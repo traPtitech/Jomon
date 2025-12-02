@@ -7,7 +7,7 @@
     max-width="290px"
     min-width="290px"
   >
-    <template v-slot:activator="{ on }">
+    <template #activator="{ on }">
       <v-text-field
         v-model="computedDateFormatted"
         :rules="nullRules"
@@ -15,16 +15,16 @@
         filled
         readonly
         placeholder="2020年5月2日"
-        v-on="on"
         height="10"
-      ></v-text-field>
+        v-on="on"
+      />
     </template>
     <v-date-picker
       v-model="date"
       no-title
       color="primary"
       @input="menu = false"
-    ></v-date-picker>
+    />
   </v-menu>
 </template>
 

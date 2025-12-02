@@ -18,12 +18,15 @@ import Icon from "@/views/shared/Icon";
 import StateChip from "@/views/shared/StateChip";
 
 export default {
-  props: {
-    log: Object
-  },
   components: {
     Icon,
     StateChip
+  },
+  props: {
+    log: {
+      type: Object,
+      default: () => ({})
+    }
   },
   methods: {
     dayPrint(time) {

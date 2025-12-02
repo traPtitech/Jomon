@@ -16,6 +16,7 @@ export default {
       default: "primary"
     }
   },
+  emits: ["click"],
   methods: {
     onClick(e) {
       this.$emit("click", e);

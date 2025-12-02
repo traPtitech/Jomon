@@ -1,12 +1,17 @@
 <template>
   <div>
     <v-dialog v-model="dialog" scrollable max-width="500px">
-      <template v-slot:activator="{ on }">
-        <simple-button :label="'払い戻し済みのユーザーを選択'" v-on="on" />
+      <template #activator="{ props }">
+        <simple-button :label="'払い戻し済みのユーザーを選択'" v-bind="props" />
       </template>
       <v-card :class="$style.container">
         <h3>払い戻し日</h3>
-        <v-date-picker v-model="date" full-width flat @input="menu = false" />
+        <v-date-picker
+          v-model="date"
+          full-width
+          flat
+          @update:model-value="menu = false"
+        />
         <v-autocomplete
           ref="traPID"
           v-model="traPID"
@@ -34,9 +39,9 @@
   </div>
 </template>
 <script>
+import SimpleButton from "@/views/shared/SimpleButton";
 import axios from "axios";
 import { mapActions } from "vuex";
-import SimpleButton from "@/views/shared/SimpleButton";
 
 export default {
   components: {
@@ -48,6 +53,19 @@ export default {
     dialog: false,
     traPID: []
   }),
+  computed: {
+    repaidToTraPId() {
+      let trap_ids = [];
+      this.$store.state.application_detail_paper.core.repayment_logs.forEach(
+        log => {
+          if (log.repaid_at === "" || log.repaid_at === null) {
+            trap_ids.push(log.repaid_to_user.trap_id);
+          }
+        }
+      );
+      return trap_ids;
+    }
+  },
   methods: {
     ...mapActions(["getApplicationDetail"]),
     async putRepaid(traPIDs, date) {
@@ -72,19 +90,6 @@ export default {
           this.$store.state.application_detail_paper.core.application_id
         );
       });
-    }
-  },
-  computed: {
-    repaidToTraPId() {
-      let trap_ids = [];
-      this.$store.state.application_detail_paper.core.repayment_logs.forEach(
-        log => {
-          if (log.repaid_at === "" || log.repaid_at === null) {
-            trap_ids.push(log.repaid_to_user.trap_id);
-          }
-        }
-      );
-      return trap_ids;
     }
   }
 };

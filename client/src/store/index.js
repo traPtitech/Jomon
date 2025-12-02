@@ -1,12 +1,10 @@
-import Vue from "vue";
-import Vuex from "vuex";
-import { me } from "@/store/me";
-import { applicationList } from "@/store/applicationList";
 import { applicationDetail } from "@/store/applicationDetail";
+import { applicationList } from "@/store/applicationList";
+import { me } from "@/store/me";
 import { userList } from "@/store/userList";
+import { createStore } from "vuex";
 
-Vue.use(Vuex);
-export default new Vuex.Store({
+export default createStore({
   state: {},
   mutations: {},
   actions: {},

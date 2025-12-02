@@ -5,15 +5,21 @@
         <state-chip
           v-if="list.current_state !== ''"
           :state="list.current_state"
-        ></state-chip>
+        />
       </div>
     </v-col>
 
-    <v-col cols="4">{{ list.current_detail.title }}</v-col>
+    <v-col cols="4">
+      {{ list.current_detail.title }}
+    </v-col>
 
-    <v-col cols="4" class="text-lg-left">{{ list.applicant.trap_id }}</v-col>
+    <v-col cols="4" class="text-lg-left">
+      {{ list.applicant.trap_id }}
+    </v-col>
 
-    <v-col cols="2">{{ list.current_detail.amount }}</v-col>
+    <v-col cols="2">
+      {{ list.current_detail.amount }}
+    </v-col>
   </v-row>
 </template>
 
@@ -27,25 +33,28 @@ export default {
   },
   props: {
     list: {
-      application_id: String,
-      created_at: String,
-      applicant: {
-        trap_id: String,
-        is_admin: Boolean
-      },
-      current_detail: {
-        update_user: {
-          trap_id: String,
-          is_admin: Boolean
+      type: Object,
+      default: () => ({
+        application_id: "",
+        created_at: "",
+        applicant: {
+          trap_id: "",
+          is_admin: false
         },
-        type: String,
-        title: String,
-        remarks: String,
-        amount: Number,
-        paid_at: String,
-        updated_at: String
-      },
-      current_state: String
+        current_detail: {
+          update_user: {
+            trap_id: "",
+            is_admin: false
+          },
+          type: "",
+          title: "",
+          remarks: "",
+          amount: 0,
+          paid_at: "",
+          updated_at: ""
+        },
+        current_state: ""
+      })
     }
   }
 };

@@ -1,5 +1,4 @@
 import axios from "axios";
-import Vue from "vue";
 
 export const userList = {
   state: [
@@ -11,9 +10,7 @@ export const userList = {
   mutations: {
     setUserList(state, newState) {
       state.splice(0);
-      newState.forEach((element, index) => {
-        Vue.set(state, index, element);
-      });
+      state.push(...newState);
     }
   },
   actions: {

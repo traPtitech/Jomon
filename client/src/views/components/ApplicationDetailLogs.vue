@@ -2,7 +2,7 @@
   <div :class="$style.container">
     <h1>申請ログ</h1>
     <v-timeline dense clipped>
-      <div v-for="(log, index) in this.logs" :key="index">
+      <div v-for="(log, index) in logs" :key="index">
         <comment-log v-if="log.log_type === `comment`" :log="log" />
         <status-log v-else-if="log.log_type === `state`" :log="log" />
         <change-log v-else-if="log.log_type === `application`" :log="log" />
@@ -20,24 +20,24 @@
 </template>
 
 <script>
-import CommentLog from "./CommentLog";
-import StatusLog from "./StatusLog";
-import ChangeLog from "./ChangeLog";
-import RefundLog from "./RefundLog";
-import NewComment from "./TimelineNewComment";
 import { mapGetters } from "vuex";
+import ChangeLog from "./ChangeLog";
+import CommentLog from "./CommentLog";
+import RefundLog from "./RefundLog";
+import StatusLog from "./StatusLog";
+import NewComment from "./TimelineNewComment";
 
 export default {
-  props: {},
-  computed: {
-    ...mapGetters(["logs"])
-  },
   components: {
     CommentLog,
     StatusLog,
     ChangeLog,
     RefundLog,
     NewComment
+  },
+  props: {},
+  computed: {
+    ...mapGetters(["logs"])
   }
 };
 </script>

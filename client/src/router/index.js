@@ -1,13 +1,10 @@
-import Vue from "vue";
-import VueRouter from "vue-router";
-import ApplicationListPage from "@/views/ApplicationListPage.vue";
-import ApplicationDetailPage from "@/views/ApplicationDetailPage.vue";
-import AdminPage from "@/views/AdminPage";
-import NewApplicationPage from "@/views/NewApplicationPage.vue";
 import store from "@/store";
 import { redirectAuthEndpoint } from "@/use/api";
-
-Vue.use(VueRouter);
+import AdminPage from "@/views/AdminPage";
+import ApplicationDetailPage from "@/views/ApplicationDetailPage.vue";
+import ApplicationListPage from "@/views/ApplicationListPage.vue";
+import NewApplicationPage from "@/views/NewApplicationPage.vue";
+import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
   {
@@ -32,9 +29,8 @@ const routes = [
   }
 ];
 
-const router = new VueRouter({
-  mode: "history",
-  base: process.env.BASE_URL,
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes
 });
 

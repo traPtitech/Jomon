@@ -9,31 +9,29 @@
 
           <v-col cols="12" sm="4" class="pt-0 pb-0">
             <div>申請日: {{ returnToday() }}</div>
-            <v-divider></v-divider>
+            <v-divider />
             <div>
               申請者:
-              <Icon :user="this.$store.state.me.trap_id" :size="20" />
-              {{ this.$store.state.me.trap_id }}
+              <Icon :user="$store.state.me.trap_id" :size="20" />
+              {{ $store.state.me.trap_id }}
             </div>
             <div>
-              <v-divider></v-divider>
+              <v-divider />
             </div>
           </v-col>
         </v-row>
 
-        <template>
-          <v-divider class="mt-1 mb-2"></v-divider>
-        </template>
+        <v-divider class="mt-1 mb-2" />
 
         <div>
           <v-text-field
+            ref="firstfocus"
             v-model="title"
             :rules="nullRules"
             label="概要"
             filled
             :placeholder="returnTitlePlaceholder($route.params.type)"
-            ref="firstfocus"
-          ></v-text-field>
+          />
         </div>
 
         <div>
@@ -43,11 +41,11 @@
                 v-model="menu"
                 :close-on-content-click="false"
                 transition="scale-transition"
-                offset-y
+                location="bottom"
                 max-width="290px"
                 min-width="290px"
               >
-                <template v-slot:activator="{ on }">
+                <template #activator="{ props }">
                   <v-text-field
                     v-model="computedDateFormatted"
                     :rules="nullRules"
@@ -55,16 +53,16 @@
                     filled
                     readonly
                     placeholder="2020年5月2日"
-                    v-on="on"
+                    v-bind="props"
                     height="10"
-                  ></v-text-field>
+                  />
                 </template>
                 <v-date-picker
                   v-model="date"
                   no-title
                   color="primary"
-                  @input="menu = false"
-                ></v-date-picker>
+                  @update:model-value="menu = false"
+                />
               </v-menu>
             </v-col>
           </v-row>
@@ -83,7 +81,7 @@
                 class="pa-0"
                 height="25"
                 suffix="円"
-              ></v-text-field>
+              />
             </v-col>
           </v-row>
         </div>
@@ -102,8 +100,7 @@
             hint="traQ IDの一部入力で候補が表示されます"
             required
             multiple
-          >
-          </v-autocomplete>
+          />
         </div>
 
         <div>
@@ -115,7 +112,7 @@
             :placeholder="returnRemarksPlaceholder($route.params.type)"
             :hint="returnRemarksHint($route.params.type)"
             auto-grow
-          ></v-textarea>
+          />
         </div>
 
         <div>
@@ -124,8 +121,8 @@
       </v-card>
 
       <!-- todo focusしていないところのvalidateが機能していない -->
-      <v-btn :disabled="!valid" @click.stop="submit" class="ma-3"
-        >作成する
+      <v-btn :disabled="!valid" class="ma-3" @click.stop="submit">
+        作成する
       </v-btn>
     </v-form>
     <!-- ここ作成したらokを押しても押さなくても自動遷移 -->
@@ -136,26 +133,32 @@
         color="green darken-1"
         text
         @click="snackbar = false"
-        >OK
+      >
+        OK
       </v-btn>
     </v-snackbar>
   </v-container>
 </template>
 
 <script>
+import { applicationType, remarksTitle } from "@/use/applicationDetail";
+import { dayPrint } from "@/use/dataFormat";
+import {
+  remarksHint,
+  remarksPlaceholder,
+  titlePlaceholder
+} from "@/use/inputFormText";
 import axios from "axios";
+import { mapActions, mapGetters } from "vuex";
 import Icon from "./shared/Icon";
 import ImageUploader from "./shared/ImageUploader";
-import { mapActions, mapGetters } from "vuex";
-import {
-  titlePlaceholder,
-  remarksPlaceholder,
-  remarksHint
-} from "@/use/inputFormText";
-import { remarksTitle, applicationType } from "@/use/applicationDetail";
-import { dayPrint } from "@/use/dataFormat";
 
 export default {
+  components: {
+    Icon,
+    ImageUploader
+  },
+  props: {},
   data: () => ({
     response: {
       application_id: null,
@@ -185,9 +188,6 @@ export default {
     ],
     nullRules: [v => !!v || "必須の項目です"]
   }),
-  mounted() {
-    this.$refs.firstfocus.focus();
-  },
   computed: {
     ...mapGetters({ traPIDs: "trap_ids" }),
     computedDateFormatted() {
@@ -199,9 +199,11 @@ export default {
       };
     }
   },
-
   async created() {
     await this.getUsers();
+  },
+  mounted() {
+    this.$refs.firstfocus.focus();
   },
   methods: {
     ...mapActions({
@@ -258,11 +260,6 @@ export default {
     returnRemarksHint: function (type) {
       return remarksHint(type);
     }
-  },
-  props: {},
-  components: {
-    Icon,
-    ImageUploader
   }
 };
 </script>

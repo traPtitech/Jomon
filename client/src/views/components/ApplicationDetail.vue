@@ -3,8 +3,8 @@
   <div :class="$style.container">
     <div :class="$style.header">
       <div :class="$style.title">
-        <h1>{{ returnType(this.detail.core.current_detail.type) }}申請</h1>
-        <state-chip :state="this.detail.core.current_state" />
+        <h1>{{ returnType(detail.core.current_detail.type) }}申請</h1>
+        <state-chip :state="detail.core.current_state" />
       </div>
       <state-button-controller />
     </div>
@@ -12,36 +12,36 @@
     <div :class="$style.section">
       <div :class="$style.section_title">申請日</div>
       <div :class="$style.section_item">
-        {{ returnDate(this.detail.core.created_at) }}
+        {{ returnDate(detail.core.created_at) }}
       </div>
     </div>
 
     <div :class="$style.section">
       <div :class="$style.section_title">申請者</div>
       <div :class="$style.section_item">
-        <Icon :user="this.detail.core.applicant.trap_id" :size="24" />
-        {{ this.detail.core.applicant.trap_id }}
+        <Icon :user="detail.core.applicant.trap_id" :size="24" />
+        {{ detail.core.applicant.trap_id }}
       </div>
     </div>
 
     <div :class="$style.section">
       <div :class="$style.section_title">概要</div>
       <div :class="$style.section_item">
-        {{ this.detail.core.current_detail.title }}
+        {{ detail.core.current_detail.title }}
       </div>
     </div>
 
     <div :class="$style.section">
       <div :class="$style.section_title">支払日</div>
       <div :class="$style.section_item">
-        {{ returnDate(this.detail.core.current_detail.paid_at) }}
+        {{ returnDate(detail.core.current_detail.paid_at) }}
       </div>
     </div>
 
     <div :class="$style.section">
       <div :class="$style.section_title">支払金額</div>
       <div :class="$style.section_item">
-        {{ this.detail.core.current_detail.amount }}円
+        {{ detail.core.current_detail.amount }}円
       </div>
     </div>
 
@@ -49,8 +49,8 @@
       <div :class="$style.section_title">払い戻し対象者</div>
       <div :class="$style.target_container">
         <div
+          v-for="user in detail.core.repayment_logs"
           :key="user.repaid_to_user.trap_id"
-          v-for="user in this.detail.core.repayment_logs"
         >
           <Icon :user="user.repaid_to_user.trap_id" :size="24" />
           {{ user.repaid_to_user.trap_id }}
@@ -60,8 +60,9 @@
 
     <div :class="$style.section">
       <div :class="$style.section_title">
-        {{ returnRemarksTitle(this.detail.core.current_detail.type) }}
+        {{ returnRemarksTitle(detail.core.current_detail.type) }}
       </div>
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <div :class="$style.section_item" v-html="rendered" />
     </div>
 
@@ -70,24 +71,24 @@
       <div :class="$style.section_title">画像</div>
       <div :class="$style.image_container">
         <img
+          v-for="path in detail.core.images"
           :key="path"
-          v-for="path in this.detail.core.images"
           :src="`/api/images/${path}`"
         />
       </div>
-      <div v-if="this.detail.core.images.length === 0">画像はありません</div>
+      <div v-if="detail.core.images.length === 0">画像はありません</div>
     </div>
   </div>
 </template>
 
 <script>
-import Icon from "@/views/shared/Icon";
-import StateChip from "@/views/shared/StateChip";
-import StateButtonController from "@/views/components/StateButtonController";
-import { mapState } from "vuex";
-import { remarksTitle, applicationType } from "@/use/applicationDetail";
+import { applicationType, remarksTitle } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
 import { render } from "@/use/markdown";
+import StateButtonController from "@/views/components/StateButtonController";
+import Icon from "@/views/shared/Icon";
+import StateChip from "@/views/shared/StateChip";
+import { mapState } from "vuex";
 
 export default {
   components: {
@@ -95,8 +96,16 @@ export default {
     StateChip,
     StateButtonController
   },
+  data: function () {
+    return {
+      rendered: ""
+    };
+  },
   computed: {
     ...mapState({ detail: "application_detail_paper" })
+  },
+  async mounted() {
+    this.rendered = await render(this.detail.core.current_detail.remarks);
   },
   methods: {
     returnDate: function (date) {
@@ -108,14 +117,6 @@ export default {
     returnRemarksTitle: function (type) {
       return remarksTitle(type);
     }
-  },
-  data: function () {
-    return {
-      rendered: ""
-    };
-  },
-  async mounted() {
-    this.rendered = await render(this.detail.core.current_detail.remarks);
   }
 };
 </script>

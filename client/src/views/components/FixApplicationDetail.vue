@@ -15,16 +15,16 @@
               single-line
               dense
               :class="$style.selector"
-            ></v-select>
+            />
             申請
           </h1>
 
           <div>
-            <div>申請日: {{ returnDate(this.detail.core.created_at) }}</div>
+            <div>申請日: {{ returnDate(detail.core.created_at) }}</div>
             <div>
               申請者:
-              <Icon :user="this.detail.core.applicant.trap_id" :size="20" />
-              {{ this.detail.core.applicant.trap_id }}
+              <Icon :user="detail.core.applicant.trap_id" :size="20" />
+              {{ detail.core.applicant.trap_id }}
             </div>
           </div>
         </div>
@@ -34,8 +34,8 @@
           :rules="nullRules"
           label="概要"
           filled
-          :placeholder="returnTitlePlaceholder(this.type_object.type)"
-        ></v-text-field>
+          :placeholder="returnTitlePlaceholder(type_object.type)"
+        />
 
         <v-menu
           v-model="menu"
@@ -43,7 +43,7 @@
           transition="scale-transition"
           offset-y
         >
-          <template v-slot:activator="{ on }">
+          <template #activator="{ on }">
             <v-text-field
               v-model="computedDateFormatted"
               :rules="nullRules"
@@ -52,13 +52,13 @@
               readonly
               placeholder="2020年5月2日"
               v-on="on"
-            ></v-text-field>
+            />
           </template>
           <v-date-picker
             v-model="paid_at_change"
             no-title
             @input="menu = false"
-          ></v-date-picker>
+          />
         </v-menu>
 
         <v-text-field
@@ -68,7 +68,7 @@
           label="支払金額"
           placeholder="100"
           suffix="円"
-        ></v-text-field>
+        />
 
         <v-autocomplete
           ref="traPID"
@@ -89,16 +89,16 @@
           v-model="remarks_change"
           :rules="nullRules"
           filled
-          :label="returnRemarksTitle(this.type_object.type)"
-          :placeholder="returnRemarksPlaceholder(this.type_object.type)"
-          :hint="returnRemarksHint(this.type_object.type)"
+          :label="returnRemarksTitle(type_object.type)"
+          :placeholder="returnRemarksPlaceholder(type_object.type)"
+          :hint="returnRemarksHint(type_object.type)"
           auto-grow
-        ></v-textarea>
+        />
 
         <div>
           <h3>画像</h3>
           <div :class="$style.image_container">
-            <div :key="path" v-for="(path, index) in this.detail.core.images">
+            <div v-for="(path, index) in detail.core.images" :key="path">
               <div v-if="images_change[index]">
                 <img :src="`/api/images/${path}`" />
                 <v-btn
@@ -140,26 +140,26 @@
         color="green darken-1"
         text
         @click="afterChange()"
-        >OK
+      >
+        OK
       </v-btn>
     </v-snackbar>
   </div>
 </template>
 
 <script>
-import axios from "axios";
+import { remarksTitle } from "@/use/applicationDetail";
+import { dayPrint } from "@/use/dataFormat";
+import {
+  remarksHint,
+  remarksPlaceholder,
+  titlePlaceholder
+} from "@/use/inputFormText";
 import Icon from "@/views/shared/Icon";
 import ImageUploader from "@/views/shared/ImageUploader";
 import SimpleButton from "@/views/shared/SimpleButton";
-import { mapActions } from "vuex";
-import { mapState, mapMutations } from "vuex";
-import {
-  titlePlaceholder,
-  remarksPlaceholder,
-  remarksHint
-} from "@/use/inputFormText";
-import { remarksTitle } from "@/use/applicationDetail";
-import { dayPrint } from "@/use/dataFormat";
+import axios from "axios";
+import { mapActions, mapMutations, mapState } from "vuex";
 
 export default {
   components: {
@@ -209,22 +209,6 @@ export default {
       changeRules: [v => (v !== this.detail.core.repayment_logs && !!v) || ""]
     };
   },
-  async created() {
-    this.title_change = this.detail.core.current_detail.title;
-    this.type_object.type = this.detail.core.current_detail.type;
-    this.title_change = this.detail.core.current_detail.title;
-    this.remarks_change = this.detail.core.current_detail.remarks;
-    this.paid_at_change = this.detail.core.current_detail.paid_at;
-    this.amount_change = this.detail.core.current_detail.amount;
-    this.images_change = new Array(this.detail.core.images.length);
-    this.images_change.fill(true);
-    await this.getUsers();
-    const trap_ids = this.detail.core.repayment_logs.map(
-      log => log.repaid_to_user.trap_id
-    );
-    this.repaid_to_id_change = trap_ids;
-  },
-  mounted() {},
   computed: {
     ...mapState({ detail: "application_detail_paper" }),
     computedDateFormatted() {
@@ -246,6 +230,22 @@ export default {
       return trap_ids;
     }
   },
+  async created() {
+    this.title_change = this.detail.core.current_detail.title;
+    this.type_object.type = this.detail.core.current_detail.type;
+    this.title_change = this.detail.core.current_detail.title;
+    this.remarks_change = this.detail.core.current_detail.remarks;
+    this.paid_at_change = this.detail.core.current_detail.paid_at;
+    this.amount_change = this.detail.core.current_detail.amount;
+    this.images_change = new Array(this.detail.core.images.length);
+    this.images_change.fill(true);
+    await this.getUsers();
+    const trap_ids = this.detail.core.repayment_logs.map(
+      log => log.repaid_to_user.trap_id
+    );
+    this.repaid_to_id_change = trap_ids;
+  },
+  mounted() {},
 
   methods: {
     ...mapMutations(["deleteFix"]),

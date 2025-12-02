@@ -9,8 +9,8 @@
       chips
       accept="image/*"
       placeholder="画像を添付"
-      @change="imageChange"
-    ></v-file-input>
+      @update:model-value="imageChange"
+    />
     <div v-for="(imageUrl, index) in uploadImageUrl" :key="index">
       <v-img :src="imageUrl" max-width="50%" />
     </div>
@@ -19,6 +19,13 @@
 
 <script>
 export default {
+  props: {
+    modelValue: {
+      type: Array,
+      default: () => []
+    }
+  },
+  emits: ["update:modelValue"],
   data() {
     return {
       images: null,
@@ -26,21 +33,16 @@ export default {
       uploadImageBlob: []
     };
   },
-  props: {
-    value: {
-      type: Array,
-      value: []
-    }
-  },
   methods: {
     imageChange(files) {
       this.uploadImageUrl = [];
       this.uploadImageBlob = [];
+      if (!files) return;
       files.forEach(file => {
         const fr = new FileReader();
         fr.readAsDataURL(file);
         this.uploadImageBlob.push(file);
-        this.$emit("input", this.uploadImageBlob);
+        this.$emit("update:modelValue", this.uploadImageBlob);
         fr.addEventListener("load", () => {
           this.uploadImageUrl.push(fr.result);
         });

@@ -4,10 +4,12 @@
     <div>
       <div :class="$style.before">
         <div :class="$style.mark">−</div>
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <div v-html="renderedBefore" />
       </div>
       <div :class="$style.after">
         <div :class="$style.mark">+</div>
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <div v-html="renderedAfter" />
       </div>
     </div>
@@ -15,15 +17,24 @@
 </template>
 <script>
 import { applicationType } from "@/use/applicationDetail";
-import { numberFormat, dayPrint } from "@/use/dataFormat";
+import { dayPrint, numberFormat } from "@/use/dataFormat";
 import { render } from "@/use/markdown";
 
 export default {
   name: "ApplicationDetailDifference",
   props: {
-    item: String,
-    pre: null,
-    now: null
+    item: {
+      type: String,
+      default: ""
+    },
+    pre: {
+      type: [String, Number],
+      default: null
+    },
+    now: {
+      type: [String, Number],
+      default: null
+    }
   },
   data: () => {
     return { changedItem: "", renderedBefore: "", renderedAfter: "" };

@@ -1,11 +1,9 @@
 <template>
   <div :class="$style.container">
     <v-chip
-      :x-small="size === `x-small`"
-      :small="size === `small`"
-      :large="size === `large`"
-      :x-large="size === `x-large`"
-      :class="chip_style"
+      :size="size || 'default'"
+      :color="chip_color"
+      :class="text_color"
       label
     >
       {{ state_ja }}
@@ -15,6 +13,16 @@
 
 <script>
 export default {
+  props: {
+    state: {
+      type: String,
+      default: ""
+    },
+    size: {
+      type: String,
+      default: ""
+    }
+  },
   computed: {
     state_ja() {
       switch (this.state) {
@@ -32,31 +40,33 @@ export default {
           return "ERROR";
       }
     },
-    chip_style() {
+    chip_color() {
       switch (this.state) {
         case "submitted":
-          return "yellow black--text";
+          return "yellow";
         case "rejected":
-          return "gray black--text";
+          return "grey";
         case "fix_required":
-          return "red white--text";
+          return "red";
         case "accepted":
-          return "blue white--text";
+          return "blue";
         case "fully_repaid":
-          return "green black--text";
+          return "green";
         default:
-          return "white black--text";
+          return "white";
       }
-    }
-  },
-
-  props: {
-    state: {
-      type: String
     },
-    size: {
-      type: String,
-      default: ""
+    text_color() {
+      switch (this.state) {
+        case "submitted":
+        case "rejected":
+        case "fully_repaid":
+        default:
+          return "text-black";
+        case "fix_required":
+        case "accepted":
+          return "text-white";
+      }
     }
   }
 };

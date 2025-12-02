@@ -6,9 +6,9 @@
       がコメントしました。
       <formatted-date :date="log.content.created_at" :simple="true" />
     </div>
-    <div v-if="log.content.user.trap_id === this.$store.state.me.trap_id">
+    <div v-if="log.content.user.trap_id === $store.state.me.trap_id">
       <v-btn icon color="success" :disabled="!comment_readonly">
-        <v-icon @click="commentChange()">mdi-pencil</v-icon>
+        <v-icon @click="commentChange()"> mdi-pencil </v-icon>
       </v-btn>
       <v-btn
         icon
@@ -34,28 +34,29 @@
         :rules="changeRules"
         rows="1"
         auto-grow
-      >
-      </v-textarea>
+      />
 
       <div>
         <v-btn
+          v-if="!comment_readonly"
           :class="$style.button"
           @click="cancelChange"
-          v-if="!comment_readonly"
-          >変更を取消
+        >
+          変更を取消
         </v-btn>
         <v-btn
-          :class="$style.button"
-          @click="putComment"
-          :disabled="!comment_valid"
           v-if="!comment_readonly"
-          >変更を送信
+          :class="$style.button"
+          :disabled="!comment_valid"
+          @click="putComment"
+        >
+          変更を送信
         </v-btn>
       </div>
 
       <span
-        :class="grey_text"
         v-if="log.content.created_at !== log.content.updated_at"
+        :class="grey_text"
         >編集済</span
       >
     </v-form>
@@ -64,12 +65,22 @@
 
 <script>
 import Icon from "@/views/shared/Icon";
-import FormattedDate from "./FormattedDate";
-import Vue from "vue";
-import { mapActions } from "vuex";
 import axios from "axios";
+import { nextTick } from "vue";
+import { mapActions } from "vuex";
+import FormattedDate from "./FormattedDate";
 
 export default {
+  components: {
+    Icon,
+    FormattedDate
+  },
+  props: {
+    log: {
+      type: Object,
+      default: () => ({})
+    }
+  },
   data: function () {
     return {
       comment_readonly: true,
@@ -78,18 +89,11 @@ export default {
       changeRules: [v => v !== this.log.content.comment && !!v]
     };
   },
-  props: {
-    log: Object
-  },
-  components: {
-    Icon,
-    FormattedDate
-  },
   watch: {
     comment_readonly: function () {
       if (!this.comment_readonly) {
         let self = this;
-        Vue.nextTick().then(function () {
+        nextTick().then(function () {
           self.$refs.comment.focus();
         });
       }

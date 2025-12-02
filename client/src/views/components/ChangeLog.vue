@@ -52,7 +52,10 @@ export default {
     FormattedDate
   },
   props: {
-    log: Object
+    log: {
+      type: Object,
+      default: () => ({})
+    }
   }
 };
 </script>

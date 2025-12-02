@@ -1,5 +1,4 @@
 import axios from "axios";
-import Vue from "vue";
 
 export const applicationList = {
   state: [
@@ -28,9 +27,7 @@ export const applicationList = {
   mutations: {
     setApplicationList(state, newState) {
       state.splice(0);
-      newState.forEach((element, index) => {
-        Vue.set(state, index, element);
-      });
+      state.push(...newState);
     }
   },
   actions: {

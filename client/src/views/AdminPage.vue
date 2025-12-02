@@ -1,43 +1,50 @@
 <template>
-  <div v-if="this.$store.state.me.is_admin" class="admin">
-    <v-chip v-for="(user, index) in adminList" :key="index">{{ user }}</v-chip>
+  <div v-if="$store.state.me.is_admin" class="admin">
+    <v-chip v-for="(user, index) in adminList" :key="index">
+      {{ user }}
+    </v-chip>
     <v-autocomplete
       v-model="removeAdminUsers"
       :items="adminList"
       label="管理権限を削除"
       multiple
-    ></v-autocomplete>
+    />
     <simple-button
       :label="'設定'"
       :variant="'warning'"
       @click="removeAdmin()"
-    ></simple-button>
+    />
     <v-autocomplete
       v-model="addAdminUsers"
       :items="notAdminList"
       label="管理権限を追加"
       multiple
-    ></v-autocomplete>
-    <simple-button
-      :label="'設定'"
-      :variant="'warning'"
-      @click="addAdmin()"
-    ></simple-button>
+    />
+    <simple-button :label="'設定'" :variant="'warning'" @click="addAdmin()" />
   </div>
   <div v-else>権限がありません</div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
-import axios from "axios";
 import SimpleButton from "@/views/shared/SimpleButton";
+import axios from "axios";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   components: {
     SimpleButton
   },
+  data() {
+    return {
+      addAdminUsers: [],
+      removeAdminUsers: []
+    };
+  },
   computed: {
     ...mapGetters(["adminList", "notAdminList"])
+  },
+  created() {
+    this.getUserList();
   },
   methods: {
     ...mapActions(["getUserList"]),
@@ -61,15 +68,6 @@ export default {
       }
       this.getUserList();
     }
-  },
-  data() {
-    return {
-      addAdminUsers: [],
-      removeAdminUsers: []
-    };
-  },
-  created() {
-    this.getUserList();
   }
 };
 </script>

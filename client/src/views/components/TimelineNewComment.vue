@@ -2,18 +2,18 @@
   <div>
     <v-row justify="space-between">
       <v-col cols="1">
-        <Icon :user="this.$store.state.me.trap_id" :size="25" />
+        <Icon :user="$store.state.me.trap_id" :size="25" />
       </v-col>
       <v-col cols="11">
         <v-card class="pa-2">
           <v-form ref="form" v-model="valid">
             <v-textarea
-              @blur="blur"
               v-model="comment"
               :rules="nullRules"
               outlined
               label="コメントを書いてください"
-            ></v-textarea>
+              @blur="blur"
+            />
             <v-btn
               :disabled="!valid"
               color="primary"
@@ -34,15 +34,15 @@ import Icon from "@/views/shared/Icon";
 import { mapActions } from "vuex";
 
 export default {
+  components: {
+    Icon
+  },
   data: () => {
     return {
       valid: true,
       comment: "",
       nullRules: [v => !!v || ""]
     };
-  },
-  components: {
-    Icon
   },
   methods: {
     blur() {

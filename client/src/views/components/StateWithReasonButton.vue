@@ -1,23 +1,23 @@
 <template>
   <div :class="$style.container">
     <v-dialog v-model="dialog" max-width="600px">
-      <template v-slot:activator="{ on }">
+      <template #activator="{ props }">
         <simple-button
           :label="
-            toStateName(to_state) + (to_state === 'submitted' ? 'に戻す' : '')
+            toStateName(toState) + (toState === 'submitted' ? 'に戻す' : '')
           "
-          :variant="to_state === 'submitted' ? 'warning' : 'error'"
-          v-on="on"
+          :variant="toState === 'submitted' ? 'warning' : 'error'"
+          v-bind="props"
         />
       </template>
 
       <v-card>
         <v-card-title>
-          <span v-if="to_state === `submitted`" class="headline"
-            >承認済み→{{ this.toStateName(to_state) }} へ戻す理由</span
+          <span v-if="toState === `submitted`" class="headline"
+            >承認済み→{{ toStateName(toState) }} へ戻す理由</span
           >
           <span v-else class="headline"
-            >承認待ち→{{ this.toStateName(to_state) }} への変更理由</span
+            >承認待ち→{{ toStateName(toState) }} への変更理由</span
           >
         </v-card-title>
         <v-form ref="form" v-model="valid">
@@ -26,25 +26,25 @@
               <v-row>
                 <v-col cols="12">
                   <v-text-field
-                    @blur="blur"
                     ref="reason"
-                    :autofocus="dialog"
                     v-model="reason"
+                    :autofocus="dialog"
                     :rules="nullRules"
-                  ></v-text-field>
+                    @blur="blur"
+                  />
                 </v-col>
               </v-row>
             </v-container>
           </v-card-text>
           <v-card-actions>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <simple-button
               :label="'戻る'"
               :variant="'secondary'"
               @click="dialog = false"
             />
             <simple-button
-              :label="this.toStateName(to_state) + 'にする'"
+              :label="toStateName(toState) + 'にする'"
               :variant="'secondary'"
               :disabled="!valid"
               @click="postReason"
@@ -56,14 +56,20 @@
   </div>
 </template>
 <script>
-import axios from "axios";
-import Vue from "vue";
-import { mapActions } from "vuex";
 import SimpleButton from "@/views/shared/SimpleButton";
+import axios from "axios";
+import { nextTick } from "vue";
+import { mapActions } from "vuex";
 
 export default {
   components: {
     SimpleButton
+  },
+  props: {
+    toState: {
+      type: String,
+      default: ""
+    }
   },
   data: () => ({
     valid: true,
@@ -71,14 +77,11 @@ export default {
     reason: "",
     nullRules: [v => !!v || ""]
   }),
-  props: {
-    to_state: String
-  },
   watch: {
     dialog: function () {
       if (this.dialog) {
         let self = this;
-        Vue.nextTick().then(function () {
+        nextTick().then(function () {
           self.$refs.reason.focus();
         });
       }
@@ -99,7 +102,7 @@ export default {
               this.$store.state.application_detail_paper.core.application_id +
               "/states",
             {
-              to_state: this.to_state,
+              to_state: this.toState,
               reason: this.reason
             }
           )
@@ -114,8 +117,8 @@ export default {
         );
       }
     },
-    toStateName: function (to_state) {
-      switch (to_state) {
+    toStateName: function (toState) {
+      switch (toState) {
         case "submitted":
           return "提出済み";
         case "fix_required":

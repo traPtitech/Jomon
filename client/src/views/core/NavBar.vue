@@ -1,21 +1,20 @@
 <template>
-  <v-app-bar app color="primary" dark>
+  <v-app-bar color="primary" theme="dark">
     <router-link to="/">
       <v-img
         alt="Jomon Logo"
         class="shrink-mr-2"
-        contain
         src="@/assets/logo.svg"
         transition="scale-transition"
         width="144"
       />
     </router-link>
-    <v-spacer></v-spacer>
+    <v-spacer />
 
-    <v-btn v-if="me.is_admin" to="/admin" text> 管理ページ </v-btn>
-    <v-menu open-on-hover offset-y>
-      <template v-slot:activator="{ on }">
-        <v-btn v-on="on" text> 新規作成 </v-btn>
+    <v-btn v-if="me.is_admin" to="/admin" variant="text"> 管理ページ </v-btn>
+    <v-menu open-on-hover location="bottom">
+      <template #activator="{ props }">
+        <v-btn v-bind="props" variant="text"> 新規作成 </v-btn>
       </template>
 
       <v-list>
@@ -28,19 +27,16 @@
         </v-list-item>
       </v-list>
     </v-menu>
-    <Icon :user="this.$store.state.me.trap_id" :size="35" />
+    <Icon :user="$store.state.me.trap_id" :size="35" />
   </v-app-bar>
 </template>
 <script>
-import { mapState } from "vuex";
 import Icon from "@/views/shared/Icon";
+import { mapState } from "vuex";
 
 export default {
   components: {
     Icon
-  },
-  computed: {
-    ...mapState(["me"])
   },
   data: () => ({
     items: [
@@ -49,6 +45,9 @@ export default {
       { title: "event", page: "イベント交通費補助申請" },
       { title: "public", page: "渉外交通費補助" }
     ]
-  })
+  }),
+  computed: {
+    ...mapState(["me"])
+  }
 };
 </script>

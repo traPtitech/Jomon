@@ -1,11 +1,11 @@
 <template>
   <div v-if="displayAcceptBottom" :class="$style.button_container">
     <simple-button :label="'承認'" @click="accept()" />
-    <with-reason-button to_state="fix_required" />
-    <with-reason-button to_state="rejected" />
+    <with-reason-button to-state="fix_required" />
+    <with-reason-button to-state="rejected" />
   </div>
   <div v-else-if="displayRepaidBottom" :class="$style.button_container">
-    <with-reason-button to_state="submitted" />
+    <with-reason-button to-state="submitted" />
     <repaid-button />
   </div>
   <div v-else-if="displayFixResubmitBottom" :class="$style.button_container">
@@ -14,22 +14,22 @@
   </div>
 </template>
 <script>
-import axios from "axios";
-import WithReasonButton from "./StateWithReasonButton";
-import RepaidButton from "./RepaidButton";
 import SimpleButton from "@/views/shared/SimpleButton";
-import { mapState, mapMutations, mapActions } from "vuex";
+import axios from "axios";
+import { mapActions, mapMutations, mapState } from "vuex";
+import RepaidButton from "./RepaidButton";
+import WithReasonButton from "./StateWithReasonButton";
 
 export default {
-  data: function () {
-    return {
-      dialog: false
-    };
-  },
   components: {
     WithReasonButton,
     RepaidButton,
     SimpleButton
+  },
+  data: function () {
+    return {
+      dialog: false
+    };
   },
   computed: {
     ...mapState({ detail: "application_detail_paper" }),

@@ -7,18 +7,21 @@
 <script>
 export default {
   name: "UserIcon",
+  props: {
+    user: {
+      type: String,
+      default: ""
+    },
+    size: {
+      type: Number,
+      default: 40
+    }
+  },
   computed: {
     iconSrc: function () {
       return this.user !== ""
         ? "https://q.trap.jp/api/v3/public/icon/" + this.user
         : "https://q.trap.jp/api/v3/public/icon/traP";
-    }
-  },
-  props: {
-    user: String,
-    size: {
-      type: Number,
-      default: 40
     }
   }
 };

@@ -10,8 +10,8 @@
             >
               絞り込み
               <v-btn icon @click="show = !show">
-                <v-icon color="white"
-                  >{{ show ? "mdi-chevron-up" : "mdi-chevron-down" }}
+                <v-icon color="white">
+                  {{ show ? "mdi-chevron-up" : "mdi-chevron-down" }}
                 </v-icon>
               </v-btn>
             </v-card-title>
@@ -20,12 +20,12 @@
                 <div>
                   <v-btn
                     color="primary"
-                    @click="getApplicationList(params)"
                     class="ma-1"
+                    @click="getApplicationList(params)"
                   >
                     <v-icon>mdi-reload</v-icon>
                   </v-btn>
-                  <v-btn color="primary" @click="resetParams()" class="ma-1">
+                  <v-btn color="primary" class="ma-1" @click="resetParams()">
                     <v-icon>mdi-close</v-icon>
                   </v-btn>
                 </div>
@@ -33,16 +33,18 @@
                   <v-btn
                     outlined
                     color="primary"
-                    @click="sortCreatedAt()"
                     class="ma-1"
-                    >日付順
+                    @click="sortCreatedAt()"
+                  >
+                    日付順
                   </v-btn>
                   <v-btn
                     outlined
                     color="primary"
-                    @click="sortTitle()"
                     class="ma-1"
-                    >タイトル順
+                    @click="sortTitle()"
+                  >
+                    タイトル順
                   </v-btn>
                 </div>
                 <div :class="$style.date_range">
@@ -50,41 +52,41 @@
                     v-model="params.submitted_since"
                     placeholder="2019-01-01"
                     :rules="dayRule"
-                  ></v-text-field>
+                  />
                   <span :class="$style.tilde">〜</span>
                   <v-text-field
                     v-model="params.submitted_until"
                     placeholder="2019-01-01"
                     :rules="dayRule"
-                  ></v-text-field>
+                  />
                 </div>
                 <v-text-field
                   v-model="params.financial_year"
                   :rules="yearRule"
                   placeholder="2020"
                   label="年度"
-                ></v-text-field>
+                />
                 <v-select
                   v-model="params.type"
                   :items="type_items"
-                  item-text="jpn"
+                  item-title="jpn"
                   item-value="type"
                   label="申請タイプ"
-                ></v-select>
+                />
                 <v-select
                   v-model="params.current_state"
                   :items="state_items"
-                  item-text="jpn"
+                  item-title="jpn"
                   item-value="state"
                   label="現在の状態"
-                ></v-select>
+                />
                 <v-select
                   v-model="params.applicant"
                   :items="userList"
                   label="申請者"
-                  item-text="trap_id"
+                  item-title="trap_id"
                   item-value="trap_id"
-                ></v-select>
+                />
               </v-form>
             </v-card-text>
           </v-card>
@@ -94,24 +96,22 @@
           <v-card width="1200px" class="mx-auto mt-5" color="primary">
             <v-card-title
               style="color: white; font-weight: bold; font-size: 1.5em"
-              >申請一覧
+            >
+              申請一覧
             </v-card-title>
             <v-card-text class="pl-0 pr-0 pb-0">
               <v-list>
-                <v-list-item-group
-                  v-if="applicationList.length > 0"
-                  color="primary"
-                >
-                  <Application :list="header" class="pb-0 pt-0"></Application>
+                <template v-if="applicationList.length > 0">
+                  <Application :list="header" class="pb-0 pt-0" />
                   <v-list-item
                     v-for="(list, index) in applicationList"
-                    v-bind:key="index"
+                    :key="index"
                     :to="'/applications/' + list.application_id"
                     class="pl-0 pr-0"
                   >
-                    <Application :list="list"></Application>
+                    <Application :list="list" />
                   </v-list-item>
-                </v-list-item-group>
+                </template>
                 <div v-else>該当する申請はありません。</div>
               </v-list>
             </v-card-text>
@@ -123,7 +123,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 import Application from "./components/Application";
 
 let sort = {
@@ -134,54 +134,8 @@ let sort = {
 };
 export default {
   name: "ApplicationList",
-  computed: {
-    ...mapState(["applicationList", "userList"])
-  },
-  methods: {
-    ...mapActions(["getApplicationList", "getUserList"]),
-    /**
-     * 絞り込み画面表示の初期値を画面のサイズによって変える
-     */
-    defaultShow() {
-      switch (this.$vuetify.breakpoint.name) {
-        case "xs":
-        case "sm":
-          return false;
-        default:
-          return true;
-      }
-    },
-    /**
-     * 絞り込みリセット
-     */
-    resetParams() {
-      this.params = {
-        sort: sort.created_at,
-        current_state: "",
-        financial_year: "",
-        applicant: "",
-        type: "",
-        submitted_since: "",
-        submitted_until: ""
-      };
-    },
-    /**
-     * 作成日でソート
-     */
-    sortCreatedAt() {
-      if (this.params.sort === sort.created_at)
-        this.params.sort = sort.inv_created_at;
-      else this.params.sort = sort.created_at;
-      this.getApplicationList(this.params);
-    },
-    /**
-     * タイトルでソート
-     */
-    sortTitle() {
-      if (this.params.sort === sort.title) this.params.sort = sort.inv_title;
-      else this.params.sort = sort.title;
-      this.getApplicationList(this.params);
-    }
+  components: {
+    Application
   },
   data() {
     return {
@@ -229,14 +183,60 @@ export default {
       yearRule: [value => !value || /^[0-9]{4}$/.test(value) || "Invalid Year."]
     };
   },
+  computed: {
+    ...mapState(["applicationList", "userList"])
+  },
   async created() {
     const p1 = this.getApplicationList({});
     const p2 = this.getUserList();
     await Promise.all([p1, p2]);
     this.show = this.defaultShow();
   },
-  components: {
-    Application
+  methods: {
+    ...mapActions(["getApplicationList", "getUserList"]),
+    /**
+     * 絞り込み画面表示の初期値を画面のサイズによって変える
+     */
+    defaultShow() {
+      switch (this.$vuetify.display.name) {
+        case "xs":
+        case "sm":
+          return false;
+        default:
+          return true;
+      }
+    },
+    /**
+     * 絞り込みリセット
+     */
+    resetParams() {
+      this.params = {
+        sort: sort.created_at,
+        current_state: "",
+        financial_year: "",
+        applicant: "",
+        type: "",
+        submitted_since: "",
+        submitted_until: ""
+      };
+    },
+    /**
+     * 作成日でソート
+     */
+    sortCreatedAt() {
+      if (this.params.sort === sort.created_at)
+        this.params.sort = sort.inv_created_at;
+      else this.params.sort = sort.created_at;
+      this.getApplicationList(this.params);
+    },
+    /**
+     * タイトルでソート
+     */
+    sortTitle() {
+      if (this.params.sort === sort.title) this.params.sort = sort.inv_title;
+      else this.params.sort = sort.title;
+      this.getApplicationList(this.params);
+    }
   }
 };
 </script>

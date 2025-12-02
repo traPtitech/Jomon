@@ -1,9 +1,9 @@
 <template>
-  <div v-if="this.loading">loading...</div>
+  <div v-if="loading">loading...</div>
   <div v-else :class="$style.container">
     <!-- todo storeのfixで制御する、このページのcreatedでstoreのfixはfalseに。 -->
-    <application-paper :class="$style.paper" v-if="!this.detail.fix" />
-    <fix-application-paper :class="$style.paper" v-else />
+    <application-paper v-if="!detail.fix" :class="$style.paper" />
+    <fix-application-paper v-else :class="$style.paper" />
     <application-logs :class="$style.log" />
   </div>
 </template>
