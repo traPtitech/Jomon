@@ -206,15 +206,24 @@ const returnToday = () => {
   return dayPrint(date);
 };
 
-const returnType = (type: string) => {
+const returnType = (type: string | string[]) => {
+  if (Array.isArray(type)) {
+    return applicationType(type[0]);
+  }
   return applicationType(type);
 };
 
-const returnRemarksTitle = (type: string) => {
+const returnRemarksTitle = (type: string | string[]) => {
+  if (Array.isArray(type)) {
+    return remarksTitle(type[0]);
+  }
   return remarksTitle(type);
 };
 
-const returnRemarksHint = (type: string) => {
+const returnRemarksHint = (type: string | string[]) => {
+  if (Array.isArray(type)) {
+    return remarksHint(type[0]);
+  }
   return remarksHint(type);
 };
 
