@@ -47,5 +47,15 @@ export default defineConfig({
         inline: ["vuetify"]
       }
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vuetify: ["vuetify"],
+          vendor: ["vue", "vue-router", "pinia"]
+        }
+      }
+    }
   }
 });

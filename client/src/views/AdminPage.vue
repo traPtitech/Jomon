@@ -25,52 +25,53 @@
   <div v-else>権限がありません</div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { useMeStore } from "@/stores/me";
+import { useUserListStore } from "@/stores/userList";
 import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
-import { mapState } from "pinia";
-import { mapActions, mapGetters } from "vuex";
+import { storeToRefs } from "pinia";
+import { onMounted, ref } from "vue";
 
-export default {
-  components: {
-    SimpleButton
-  },
-  data() {
-    return {
-      addAdminUsers: [],
-      removeAdminUsers: []
-    };
-  },
-  computed: {
-    ...mapGetters(["adminList", "notAdminList"]),
-    ...mapState(useMeStore, ["isAdmin"])
-  },
-  created() {
-    this.getUserList();
-  },
-  methods: {
-    ...mapActions(["getUserList"]),
-    async addAdmin() {
-      if (this.addAdminUsers.length > 0) {
-        await this.addAdminUsers.forEach(user => {
-          axios
-            .put("api/users/admins", { trap_id: user, to_admin: true })
-            .catch(e => alert(e));
-        });
-        this.getUserList();
-      }
-    },
-    async removeAdmin() {
-      if (this.removeAdminUsers.length > 0) {
-        await this.removeAdminUsers.forEach(user => {
-          axios
-            .put("api/users/admins", { trap_id: user, to_admin: false })
-            .catch(e => alert(e));
-        });
-      }
-      this.getUserList();
-    }
+const meStore = useMeStore();
+const { isAdmin } = storeToRefs(meStore);
+
+const userListStore = useUserListStore();
+const { adminList, notAdminList } = storeToRefs(userListStore);
+const { fetchUserList } = userListStore;
+
+const addAdminUsers = ref<string[]>([]);
+const removeAdminUsers = ref<string[]>([]);
+
+const addAdmin = async () => {
+  if (addAdminUsers.value.length > 0) {
+    await Promise.all(
+      addAdminUsers.value.map(user =>
+        axios
+          .put("api/users/admins", { trap_id: user, to_admin: true })
+          .catch(e => alert(e))
+      )
+    );
+    fetchUserList();
+    addAdminUsers.value = [];
   }
 };
+
+const removeAdmin = async () => {
+  if (removeAdminUsers.value.length > 0) {
+    await Promise.all(
+      removeAdminUsers.value.map(user =>
+        axios
+          .put("api/users/admins", { trap_id: user, to_admin: false })
+          .catch(e => alert(e))
+      )
+    );
+    fetchUserList();
+    removeAdminUsers.value = [];
+  }
+};
+
+onMounted(() => {
+  fetchUserList();
+});
 </script>
