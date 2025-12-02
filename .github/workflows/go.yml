@@ -2,34 +2,32 @@ name: Go
 on: [push, pull_request]
 
 jobs:
-
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Go 1.25
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.25
+        id: go
 
-    - name: Set up Go 1.17.5
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.17.5
-      id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v6
 
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v1
+      - name: Check cache
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-    - name: Check cache
-      uses: actions/cache@v1
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
+      - name: Download dependencies
+        run: go mod download
 
-    - name: Download dependencies
-      run: go mod download
-
-    - name: Build
-      run: go build -v
+      - name: Build
+        run: go build -v
 
   test:
     name: Test
@@ -37,7 +35,7 @@ jobs:
     needs: [build]
     services:
       mariadb:
-        image: mariadb:10.0.19
+        image: mariadb:10.11
         ports:
           - 50000:3306
         env:
@@ -45,31 +43,30 @@ jobs:
           MYSQL_DATABASE: jomon
 
     steps:
+      - name: Set up Go 1.25
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.25
+        id: go
 
-    - name: Set up Go 1.17.5
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.17.5
-      id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v6
 
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v1
+      - name: Check cache
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-    - name: Check cache
-      uses: actions/cache@v1
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
+      - name: Download dependencies
+        run: go mod download
 
-    - name: Download dependencies
-      run: go mod download
-
-    - name: Test
-      run: go test -v ./...
-      env:
-        MARIADB_USERNAME: root
-        MARIADB_PASSWORD: password
-        MARIADB_HOSTNAME: "localhost:50000"
-        MARIADB_DATABASE: jomon
+      - name: Test
+        run: go test -v ./...
+        env:
+          MARIADB_USERNAME: root
+          MARIADB_PASSWORD: password
+          MARIADB_HOSTNAME: "localhost:50000"
+          MARIADB_DATABASE: jomon

@@ -1,6 +1,9 @@
-const https = require("https");
+const crypto = require("crypto");
 
-const keepAliveAgent = new https.Agent({ keepAlive: true });
+// Workaround for OpenSSL 3 bug
+const crypto_orig_createHash = crypto.createHash;
+crypto.createHash = algorithm =>
+  crypto_orig_createHash(algorithm == "md4" ? "sha256" : algorithm);
 
 module.exports = {
   css: {
@@ -13,12 +16,27 @@ module.exports = {
   transpileDependencies: ["vuetify"],
   devServer: {
     proxy: {
+      // Proxy for local development (not used in Docker compose with Nginx)
       "/api": {
-        target: "https://jomon-dev.tokyotech.org",
-        changeOrigin: true,
-        agent: keepAliveAgent
+        target: "http://127.0.0.1:1323",
+        changeOrigin: true
       }
     }
+  },
+  configureWebpack: {
+    output: {
+      hashFunction: "xxhash64" // Use xxhash64 for OpenSSL 3 compatibility
+    },
+    cache: false // Disable cache for stability
+  },
+  parallel: false, // Disable parallel build for stability
+  chainWebpack: config => {
+    config.module
+      .rule("js")
+      .use("babel-loader")
+      .tap(options => {
+        return { ...options, cacheCompression: false };
+      });
   },
   productionSourceMap: false
 };

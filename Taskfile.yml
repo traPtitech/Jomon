@@ -1,11 +1,13 @@
-version: '2'
+version: "3"
 
 tasks:
   default:
+    desc: Run the application (alias for run)
     cmds:
       - task: run
 
   run:
+    desc: Run the built binary
     deps: [build]
     cmds:
       - /app/Jomon
@@ -13,6 +15,7 @@ tasks:
       - '**/*.go'
 
   build:
+    desc: Build the Go application
     dir: /src
     cmds:
       - go build -tags debug -o /app/Jomon

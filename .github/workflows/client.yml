@@ -9,11 +9,11 @@ jobs:
     env:
       CI: true
     steps:
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v6
         with:
-          node-version: 14.x
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v1
+          node-version: 18.x
+      - uses: actions/checkout@v6
+      - uses: actions/cache@v4
         with:
           path: client/node_modules
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
@@ -26,11 +26,11 @@ jobs:
       CI: true
       NODE_ENV: production
     steps:
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v6
         with:
-          node-version: 14.x
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v1
+          node-version: 18.x
+      - uses: actions/checkout@v6
+      - uses: actions/cache@v4
         with:
           path: client/node_modules
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
@@ -45,11 +45,11 @@ jobs:
       CI: true
       NODE_ENV: production
     steps:
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v6
         with:
-          node-version: 14.x
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v1
+          node-version: 18.x
+      - uses: actions/checkout@v6
+      - uses: actions/cache@v4
         with:
           path: client/node_modules
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
