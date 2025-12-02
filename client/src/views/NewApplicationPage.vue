@@ -143,8 +143,8 @@ import {
 } from "@/use/inputFormText";
 import axios from "axios";
 import { mapActions, mapGetters } from "vuex";
-import Icon from "./shared/Icon";
-import ImageUploader from "./shared/ImageUploader";
+import Icon from "./shared/Icon.vue";
+import ImageUploader from "./shared/ImageUploader.vue";
 
 export default {
   components: {

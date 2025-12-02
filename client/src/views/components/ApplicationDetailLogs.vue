@@ -21,11 +21,11 @@
 
 <script>
 import { mapGetters } from "vuex";
-import ChangeLog from "./ChangeLog";
-import CommentLog from "./CommentLog";
-import RefundLog from "./RefundLog";
-import StatusLog from "./StatusLog";
-import NewComment from "./TimelineNewComment";
+import ChangeLog from "./ChangeLog.vue";
+import CommentLog from "./CommentLog.vue";
+import RefundLog from "./RefundLog.vue";
+import StatusLog from "./StatusLog.vue";
+import NewComment from "./TimelineNewComment.vue";
 
 export default {
   components: {

@@ -9,10 +9,10 @@
 </template>
 
 <script>
-import ApplicationPaper from "@/views/components/ApplicationDetail";
-import FixApplicationPaper from "@/views/components/FixApplicationDetail";
-import ApplicationLogs from "@/views/components/ApplicationDetailLogs";
-import { mapState, mapActions, mapMutations } from "vuex";
+import ApplicationPaper from "@/views/components/ApplicationDetail.vue";
+import ApplicationLogs from "@/views/components/ApplicationDetailLogs.vue";
+import FixApplicationPaper from "@/views/components/FixApplicationDetail.vue";
+import { mapActions, mapMutations, mapState } from "vuex";
 
 export default {
   components: {

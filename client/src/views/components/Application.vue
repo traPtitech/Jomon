@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import StateChip from "@/views/shared/StateChip";
+import StateChip from "@/views/shared/StateChip.vue";
 
 export default {
   name: "ApplicationItem",

@@ -5,19 +5,20 @@
     "strict": false,
     "jsx": "preserve",
     "importHelpers": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "types": ["vite/client", "vuetify"],
+    "types": ["vite/client", "vuetify", "node"],
+    "maxNodeModuleJsDepth": 0,
     "paths": {
       "@/*": ["src/*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "checkJs": true
   },
-  "include": ["src/**/*.js", "src/**/*.vue", "tests/**/*.js"],
+  "include": ["src/**/*.js", "src/**/*.vue", "tests/**/*.js", "src/**/*.d.ts"],
   "exclude": ["node_modules"]
 }

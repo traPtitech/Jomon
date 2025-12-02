@@ -14,11 +14,11 @@
   </div>
 </template>
 <script>
-import SimpleButton from "@/views/shared/SimpleButton";
+import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
 import { mapActions, mapMutations, mapState } from "vuex";
-import RepaidButton from "./RepaidButton";
-import WithReasonButton from "./StateWithReasonButton";
+import RepaidButton from "./RepaidButton.vue";
+import WithReasonButton from "./StateWithReasonButton.vue";
 
 export default {
   components: {

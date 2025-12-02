@@ -33,7 +33,7 @@
 </template>
 <script>
 import logo from "@/assets/logo.svg";
-import Icon from "@/views/shared/Icon";
+import Icon from "@/views/shared/Icon.vue";
 import { mapState } from "vuex";
 
 export default {

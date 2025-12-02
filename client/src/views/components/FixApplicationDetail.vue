@@ -155,9 +155,9 @@ import {
   remarksPlaceholder,
   titlePlaceholder
 } from "@/use/inputFormText";
-import Icon from "@/views/shared/Icon";
-import ImageUploader from "@/views/shared/ImageUploader";
-import SimpleButton from "@/views/shared/SimpleButton";
+import Icon from "@/views/shared/Icon.vue";
+import ImageUploader from "@/views/shared/ImageUploader.vue";
+import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
 import { mapActions, mapMutations, mapState } from "vuex";
 

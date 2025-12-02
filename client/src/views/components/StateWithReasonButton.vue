@@ -56,9 +56,8 @@
   </div>
 </template>
 <script>
-import SimpleButton from "@/views/shared/SimpleButton";
+import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
-import { nextTick } from "vue";
 import { mapActions } from "vuex";
 
 export default {
@@ -81,8 +80,8 @@ export default {
     dialog: function () {
       if (this.dialog) {
         let self = this;
-        nextTick().then(function () {
-          self.$refs.reason.focus();
+        this.$nextTick().then(function () {
+          self.$refs.form.reset();
         });
       }
     }

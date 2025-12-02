@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import Icon from "@/views/shared/Icon";
+import Icon from "@/views/shared/Icon.vue";
 
 export default {
   components: {

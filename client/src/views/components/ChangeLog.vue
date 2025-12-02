@@ -41,9 +41,9 @@
 </template>
 
 <script>
-import Icon from "@/views/shared/Icon";
-import Difference from "./ApplicationDetailDifference";
-import FormattedDate from "./FormattedDate";
+import Icon from "@/views/shared/Icon.vue";
+import Difference from "./ApplicationDetailDifference.vue";
+import FormattedDate from "./FormattedDate.vue";
 
 export default {
   components: {

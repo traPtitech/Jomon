@@ -1,6 +1,6 @@
 import store from "@/store";
 import { redirectAuthEndpoint } from "@/use/api";
-import AdminPage from "@/views/AdminPage";
+import AdminPage from "@/views/AdminPage.vue";
 import ApplicationDetailPage from "@/views/ApplicationDetailPage.vue";
 import ApplicationListPage from "@/views/ApplicationListPage.vue";
 import NewApplicationPage from "@/views/NewApplicationPage.vue";

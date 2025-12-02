@@ -29,8 +29,8 @@
   </div>
 </template>
 <script>
+import Icon from "@/views/shared/Icon.vue";
 import axios from "axios";
-import Icon from "@/views/shared/Icon";
 import { mapActions } from "vuex";
 
 export default {

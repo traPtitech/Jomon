@@ -14,8 +14,8 @@
 </template>
 
 <script>
-import Icon from "@/views/shared/Icon";
-import StateChip from "@/views/shared/StateChip";
+import Icon from "@/views/shared/Icon.vue";
+import StateChip from "@/views/shared/StateChip.vue";
 
 export default {
   components: {

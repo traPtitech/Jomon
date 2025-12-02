@@ -133,7 +133,7 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
-import Application from "./components/Application";
+import Application from "./components/Application.vue";
 
 let sort = {
   created_at: "created_at",

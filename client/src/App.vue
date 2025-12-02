@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import NavBar from "./views/core/NavBar";
+import NavBar from "./views/core/NavBar.vue";
 
 export default {
   name: "App",

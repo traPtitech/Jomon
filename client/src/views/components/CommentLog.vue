@@ -64,11 +64,10 @@
 </template>
 
 <script>
-import Icon from "@/views/shared/Icon";
+import Icon from "@/views/shared/Icon.vue";
 import axios from "axios";
-import { nextTick } from "vue";
 import { mapActions } from "vuex";
-import FormattedDate from "./FormattedDate";
+import FormattedDate from "./FormattedDate.vue";
 
 export default {
   components: {
@@ -93,7 +92,7 @@ export default {
     comment_readonly: function () {
       if (!this.comment_readonly) {
         let self = this;
-        nextTick().then(function () {
+        this.$nextTick().then(function () {
           self.$refs.comment.focus();
         });
       }

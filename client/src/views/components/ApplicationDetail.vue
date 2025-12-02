@@ -85,9 +85,9 @@
 import { applicationType, remarksTitle } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
 import { render } from "@/use/markdown";
-import StateButtonController from "@/views/components/StateButtonController";
-import Icon from "@/views/shared/Icon";
-import StateChip from "@/views/shared/StateChip";
+import StateButtonController from "@/views/components/StateButtonController.vue";
+import Icon from "@/views/shared/Icon.vue";
+import StateChip from "@/views/shared/StateChip.vue";
 import { mapState } from "vuex";
 
 export default {

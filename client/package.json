@@ -7,7 +7,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "type-check": "vue-tsc --noEmit",
+    "type-check": "vue-tsc --noEmit -p jsconfig.json",
     "test": "vitest"
   },
   "dependencies": {
@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.23.3",
+    "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "^5.0.0",
     "@vue/eslint-config-prettier": "^6.0.0",
     "@vue/test-utils": "^2.4.6",

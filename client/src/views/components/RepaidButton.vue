@@ -39,7 +39,7 @@
   </div>
 </template>
 <script>
-import SimpleButton from "@/views/shared/SimpleButton";
+import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
 import { mapActions } from "vuex";
 
