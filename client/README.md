@@ -1,4 +1,15 @@
-# client
+# Jomon Client
+
+This is the frontend application for Jomon, built with Vue 3, Vite, and Pinia.
+
+## Tech Stack
+
+- **Framework**: Vue 3 (Composition API)
+- **Build Tool**: Vite
+- **State Management**: Pinia
+- **UI Framework**: Vuetify 3
+- **Testing**: Vitest (Unit), Playwright (E2E)
+- **Language**: TypeScript
 
 ## Project setup
 

@@ -113,7 +113,6 @@
         </div>
       </v-card>
 
-      <!-- todo focusしていないところのvalidateが機能していない -->
       <v-btn :disabled="!valid" class="ma-3" @click.stop="submit">
         作成する
       </v-btn>

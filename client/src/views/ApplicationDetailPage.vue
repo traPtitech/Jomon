@@ -4,7 +4,6 @@
     <v-alert type="error"> 申請情報の取得に失敗しました。 </v-alert>
   </div>
   <div v-else :class="$style.container">
-    <!-- todo storeのfixで制御する、このページのcreatedでstoreのfixはfalseに。 -->
     <application-paper v-if="!fix" :class="$style.paper" />
     <fix-application-paper v-else :class="$style.paper" />
     <application-logs :class="$style.log" />
