@@ -102,3 +102,4 @@ Jomon
 uploads/*
 
 .vscode
+coverage/
