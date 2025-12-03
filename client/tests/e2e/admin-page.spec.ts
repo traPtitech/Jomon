@@ -1,7 +1,18 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Admin Page Flow", () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, browserName }) => {
+    // Disable animations for stability (Firefox only)
+    if (browserName === "firefox") {
+      await page.addStyleTag({
+        content: `
+          *, *::before, *::after {
+            transition: none !important;
+            animation: none !important;
+          }
+        `
+      });
+    }
     // Mock user API (Admin user)
     await page.route("*/**/api/users/me", async route => {
       await route.fulfill({
@@ -49,17 +60,20 @@ test.describe("Admin Page Flow", () => {
     await expect(page.getByLabel("管理権限を追加")).toBeVisible();
   });
 
-  test("should add admin privileges", async ({ page }) => {
+  test("should add admin privileges", async ({ page, browserName }) => {
     await page.goto("/admin");
 
     // Select user to add as admin
     // Use .v-field selector for Vuetify v-autocomplete
-    await page
+    const addAdminField = page
       .locator(".v-input")
       .filter({ hasText: "管理権限を追加" })
-      .locator(".v-field")
-      .click();
-    await page.getByRole("option", { name: "new-admin" }).click();
+      .locator(".v-field");
+    await addAdminField.click({ force: browserName === "firefox" });
+    if (browserName === "firefox") await page.waitForTimeout(200);
+    await page
+      .getByRole("option", { name: "new-admin" })
+      .click({ force: browserName === "firefox" });
 
     // Close the dropdown by pressing Escape
     await page.keyboard.press("Escape");
@@ -79,21 +93,24 @@ test.describe("Admin Page Flow", () => {
       .filter({ hasText: "管理権限を追加" })
       .locator("xpath=following-sibling::button | following::button")
       .first()
-      .click({ force: true });
+      .click({ force: browserName === "firefox" });
 
     await requestPromise;
   });
 
-  test("should remove admin privileges", async ({ page }) => {
+  test("should remove admin privileges", async ({ page, browserName }) => {
     await page.goto("/admin");
 
     // Select user to remove from admin
-    await page
+    const removeAdminField = page
       .locator(".v-input")
       .filter({ hasText: "管理権限を削除" })
-      .locator(".v-field")
-      .click();
-    await page.getByRole("option", { name: "admin-user" }).click();
+      .locator(".v-field");
+    await removeAdminField.click({ force: browserName === "firefox" });
+    if (browserName === "firefox") await page.waitForTimeout(200);
+    await page
+      .getByRole("option", { name: "admin-user" })
+      .click({ force: browserName === "firefox" });
 
     // Close dropdown by pressing Escape
     await page.keyboard.press("Escape");
@@ -113,7 +130,7 @@ test.describe("Admin Page Flow", () => {
       .filter({ hasText: "管理権限を削除" })
       .locator("xpath=following-sibling::button | following::button")
       .first()
-      .click({ force: true });
+      .click({ force: browserName === "firefox" });
 
     await requestPromise;
   });

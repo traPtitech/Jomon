@@ -1,7 +1,18 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Application List Flow", () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, browserName }) => {
+    // Disable animations for stability (Firefox only)
+    if (browserName === "firefox") {
+      await page.addStyleTag({
+        content: `
+          *, *::before, *::after {
+            transition: none !important;
+            animation: none !important;
+          }
+        `
+      });
+    }
     // Mock user API (Admin user)
     await page.route("*/**/api/users/me", async route => {
       await route.fulfill({
@@ -73,7 +84,7 @@ test.describe("Application List Flow", () => {
     await expect(page.getByText("Contest App")).toBeVisible();
   });
 
-  test("should filter by application type", async ({ page }) => {
+  test("should filter by application type", async ({ page, browserName }) => {
     await page.goto("/");
 
     // Ensure filter menu is open
@@ -84,7 +95,7 @@ test.describe("Application List Flow", () => {
 
     // Check if the button shows 'mdi-chevron-down' (meaning it's closed)
     if (await filterButton.getByText("mdi-chevron-down").isVisible()) {
-      await filterButton.click({ force: true });
+      await filterButton.click({ force: browserName === "firefox" });
     }
     // Wait for animation
     await page.waitForTimeout(500);
@@ -92,11 +103,16 @@ test.describe("Application List Flow", () => {
 
     // Select type 'club'
     // Click the v-field containing the label
-    await filterForm
+    const typeField = filterForm
       .locator(".v-field")
-      .filter({ hasText: "申請タイプ" })
-      .click();
-    await page.getByRole("option", { name: "部費利用申請" }).click();
+      .filter({ hasText: "申請タイプ" });
+    await typeField.click({ force: browserName === "firefox" });
+    if (browserName === "firefox") await page.waitForTimeout(200);
+    await page
+      .getByRole("option", { name: "部費利用申請" })
+      .click({ force: browserName === "firefox" });
+    // Wait for selection to be applied
+    await expect(filterForm.getByText("部費利用申請")).toBeVisible();
 
     // Click reload button
     await filterForm.locator("button.bg-primary").first().click();
@@ -105,7 +121,7 @@ test.describe("Application List Flow", () => {
     await expect(page.getByText("Contest App")).not.toBeVisible();
   });
 
-  test("should filter by status", async ({ page }) => {
+  test("should filter by status", async ({ page, browserName }) => {
     await page.goto("/");
 
     // Ensure filter menu is open
@@ -116,18 +132,23 @@ test.describe("Application List Flow", () => {
 
     // Check if the button shows 'mdi-chevron-down' (meaning it's closed)
     if (await filterButton.getByText("mdi-chevron-down").isVisible()) {
-      await filterButton.click({ force: true });
+      await filterButton.click({ force: browserName === "firefox" });
     }
     // Wait for animation
     await page.waitForTimeout(500);
     await expect(filterForm).toBeVisible();
 
     // Select state 'accepted'
-    await filterForm
+    const statusField = filterForm
       .locator(".v-field")
-      .filter({ hasText: "現在の状態" })
-      .click();
-    await page.getByRole("option", { name: "払い戻し待ち" }).click();
+      .filter({ hasText: "現在の状態" });
+    await statusField.click({ force: browserName === "firefox" });
+    if (browserName === "firefox") await page.waitForTimeout(200);
+    await page
+      .getByRole("option", { name: "払い戻し待ち" })
+      .click({ force: browserName === "firefox" });
+    // Wait for selection to be applied
+    await expect(filterForm.getByText("払い戻し待ち")).toBeVisible();
 
     // Click reload button
     await filterForm.locator("button.bg-primary").first().click();

@@ -1,7 +1,18 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Create Application Flow", () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, browserName }) => {
+    // Disable animations for stability (Firefox only)
+    if (browserName === "firefox") {
+      await page.addStyleTag({
+        content: `
+          *, *::before, *::after {
+            transition: none !important;
+            animation: none !important;
+          }
+        `
+      });
+    }
     // Mock login
     await page.route("*/**/api/users/me", async route => {
       await route.fulfill({
@@ -79,6 +90,7 @@ test.describe("Create Application Flow", () => {
     });
 
     await page.goto("/applications/new/club");
+    await page.waitForLoadState("networkidle");
 
     // Fill form
     const summaryInput = page.getByLabel("概要", { exact: true });

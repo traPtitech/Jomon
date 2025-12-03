@@ -26,7 +26,6 @@
               <v-row>
                 <v-col cols="12">
                   <v-text-field
-                    ref="reason"
                     v-model="reason"
                     :autofocus="isDialogOpen"
                     :rules="nullRules"
@@ -86,18 +85,20 @@ const formRef = ref<VForm | null>(null);
 watch(isDialogOpen, async () => {
   if (isDialogOpen.value) {
     await nextTick();
-    formRef.value.reset();
+    reason.value = "";
+    formRef.value?.resetValidation();
   }
 });
 
 const blur = () => {
   if (reason.value === "" || reason.value === undefined) {
-    formRef.value.reset();
+    formRef.value?.resetValidation();
   }
 };
 
 const postReason = async () => {
-  if (formRef.value.validate()) {
+  const { valid } = await formRef.value.validate();
+  if (valid) {
     try {
       await axios.put(
         "../api/applications/" + detailCore.value.application_id + "/states",
@@ -110,7 +111,8 @@ const postReason = async () => {
       alert(e);
       return;
     }
-    formRef.value.reset();
+    reason.value = "";
+    formRef.value?.resetValidation();
     isDialogOpen.value = false;
     await fetchApplicationDetail(detailCore.value.application_id);
   }
