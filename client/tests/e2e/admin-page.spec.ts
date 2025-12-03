@@ -59,7 +59,7 @@ test.describe("Admin Page Flow", () => {
 
     // Close the dropdown (clicking the label/field again might close it, or clicking outside)
     // Clicking the title or somewhere safe
-    await page.getByText("admin-user").first().click();
+    await page.getByText("admin-user").first().click({ force: true });
 
     // Wait for API call
     const requestPromise = page.waitForRequest(
@@ -95,7 +95,7 @@ test.describe("Admin Page Flow", () => {
     await page.getByRole("option", { name: "admin-user" }).click();
 
     // Close dropdown
-    await page.getByText("admin-user").first().click();
+    await page.getByText("admin-user").first().click({ force: true });
 
     // Wait for API call
     const requestPromise = page.waitForRequest(
