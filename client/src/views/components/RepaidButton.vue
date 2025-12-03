@@ -69,7 +69,7 @@ const putRepaid = async (traPIDs: string[], date: string) => {
     traPIDs.map(async traPID => {
       await axios
         .put(
-          "../api/applications/" +
+          "/api/applications/" +
             detailCore.value.application_id +
             "/states/repaid/" +
             traPID,

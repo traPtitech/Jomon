@@ -70,7 +70,7 @@ describe("StateWithReasonButton.vue", () => {
 
     // Verify axios call
     expect(axios.put).toHaveBeenCalledWith(
-      "../api/applications/test-app-id/states",
+      "/api/applications/test-app-id/states",
       expect.objectContaining({
         to_state: "submitted",
         reason: "test reason"

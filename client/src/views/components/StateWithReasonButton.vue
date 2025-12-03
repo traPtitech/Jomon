@@ -101,7 +101,7 @@ const postReason = async () => {
   if (valid) {
     try {
       await axios.put(
-        "../api/applications/" + detailCore.value.application_id + "/states",
+        "/api/applications/" + detailCore.value.application_id + "/states",
         {
           to_state: props.toState,
           reason: reason.value

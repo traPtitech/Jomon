@@ -1,18 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Application List Flow", () => {
-  test.beforeEach(async ({ page, browserName }) => {
-    // Disable animations for stability (Firefox only)
-    if (browserName === "firefox") {
-      await page.addStyleTag({
-        content: `
-          *, *::before, *::after {
-            transition: none !important;
-            animation: none !important;
-          }
-        `
-      });
-    }
+  test.beforeEach(async ({ page }) => {
     // Mock user API (Admin user)
     await page.route("*/**/api/users/me", async route => {
       await route.fulfill({
@@ -84,10 +73,9 @@ test.describe("Application List Flow", () => {
     await expect(page.getByText("Contest App")).toBeVisible();
   });
 
-  test("should filter by application type", async ({ page, browserName }) => {
+  test("should filter by application type", async ({ page }) => {
     await page.goto("/");
 
-    // Ensure filter menu is open
     // Ensure filter menu is open
     const filterCard = page.locator(".v-card").filter({ hasText: "絞り込み" });
     const filterButton = filterCard.locator(".v-card-title button");
@@ -95,10 +83,9 @@ test.describe("Application List Flow", () => {
 
     // Check if the button shows 'mdi-chevron-down' (meaning it's closed)
     if (await filterButton.getByText("mdi-chevron-down").isVisible()) {
-      await filterButton.click({ force: browserName === "firefox" });
+      await filterButton.click();
     }
     // Wait for animation
-    await page.waitForTimeout(500);
     await expect(filterForm).toBeVisible();
 
     // Select type 'club'
@@ -106,11 +93,12 @@ test.describe("Application List Flow", () => {
     const typeField = filterForm
       .locator(".v-field")
       .filter({ hasText: "申請タイプ" });
-    await typeField.click({ force: browserName === "firefox" });
-    if (browserName === "firefox") await page.waitForTimeout(200);
-    await page
-      .getByRole("option", { name: "部費利用申請" })
-      .click({ force: browserName === "firefox" });
+    await typeField.click();
+
+    const option = page.getByRole("option", { name: "部費利用申請" });
+    await expect(option).toBeVisible();
+    await option.click();
+
     // Wait for selection to be applied
     await expect(filterForm.getByText("部費利用申請")).toBeVisible();
 
@@ -121,10 +109,9 @@ test.describe("Application List Flow", () => {
     await expect(page.getByText("Contest App")).not.toBeVisible();
   });
 
-  test("should filter by status", async ({ page, browserName }) => {
+  test("should filter by status", async ({ page }) => {
     await page.goto("/");
 
-    // Ensure filter menu is open
     // Ensure filter menu is open
     const filterCard = page.locator(".v-card").filter({ hasText: "絞り込み" });
     const filterButton = filterCard.locator(".v-card-title button");
@@ -132,21 +119,21 @@ test.describe("Application List Flow", () => {
 
     // Check if the button shows 'mdi-chevron-down' (meaning it's closed)
     if (await filterButton.getByText("mdi-chevron-down").isVisible()) {
-      await filterButton.click({ force: browserName === "firefox" });
+      await filterButton.click();
     }
     // Wait for animation
-    await page.waitForTimeout(500);
     await expect(filterForm).toBeVisible();
 
     // Select state 'accepted'
     const statusField = filterForm
       .locator(".v-field")
       .filter({ hasText: "現在の状態" });
-    await statusField.click({ force: browserName === "firefox" });
-    if (browserName === "firefox") await page.waitForTimeout(200);
-    await page
-      .getByRole("option", { name: "払い戻し待ち" })
-      .click({ force: browserName === "firefox" });
+    await statusField.click();
+
+    const option = page.getByRole("option", { name: "払い戻し待ち" });
+    await expect(option).toBeVisible();
+    await option.click();
+
     // Wait for selection to be applied
     await expect(filterForm.getByText("払い戻し待ち")).toBeVisible();
 

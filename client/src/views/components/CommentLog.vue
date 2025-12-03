@@ -109,7 +109,7 @@ const commentChange = () => {
 const deleteComment = async () => {
   try {
     await axios.delete(
-      "../api/applications/" +
+      "/api/applications/" +
         detailCore.value.application_id +
         "/comments/" +
         props.log.content.comment_id
@@ -125,7 +125,7 @@ const deleteComment = async () => {
 const putComment = async () => {
   try {
     await axios.put(
-      "../api/applications/" +
+      "/api/applications/" +
         detailCore.value.application_id +
         "/comments/" +
         props.log.content.comment_id,

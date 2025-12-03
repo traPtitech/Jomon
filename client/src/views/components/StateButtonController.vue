@@ -48,7 +48,7 @@ const displayFixResubmitBottom = computed(() => {
 const accept = async () => {
   try {
     await axios.put(
-      "../api/applications/" + detailCore.value.application_id + "/states",
+      "/api/applications/" + detailCore.value.application_id + "/states",
       {
         to_state: "accepted"
       }
@@ -64,7 +64,7 @@ const accept = async () => {
 const reSubmit = async () => {
   try {
     await axios.put(
-      "../api/applications/" + detailCore.value.application_id + "/states",
+      "/api/applications/" + detailCore.value.application_id + "/states",
       {
         to_state: "submitted"
       }
