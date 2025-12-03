@@ -66,7 +66,7 @@ describe("ApplicationListPage.vue", () => {
     // For now, let's just check if clicking toggles the value.
 
     // We can check the vm state
-    const vm = wrapper.vm as any;
+    const vm = wrapper.vm as unknown as { show: boolean };
     const initialShow = vm.show;
 
     await toggleButton.trigger("click");
@@ -78,14 +78,11 @@ describe("ApplicationListPage.vue", () => {
     const applicationListStore = useApplicationListStore();
 
     // Show the filter form first to make buttons interactive (though v-show doesn't remove from DOM)
-    const vm = wrapper.vm as any;
+    const vm = wrapper.vm as unknown as { show: boolean };
     vm.show = true;
     await wrapper.vm.$nextTick();
 
-    const reloadButton = wrapper
-      .findAll("button")
-      .filter(b => b.text() === "")
-      .at(1); // Finding by icon is tricky, let's look for the one calling getApplicationList
+    // Finding by icon is tricky, let's look for the one calling getApplicationList
     // Or better, find by icon class if possible, or just call the method directly if UI testing is flaky.
     // Let's try to find the button with mdi-reload icon.
     // Since we are using Vuetify, icons are often in v-icon.

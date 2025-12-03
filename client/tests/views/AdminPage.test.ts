@@ -63,7 +63,7 @@ describe("AdminPage.vue", () => {
     // Select user to add
     // Since we are using VAutocomplete, interacting with it directly in unit test is hard.
     // We can set the model value directly.
-    const vm = wrapper.vm as any;
+    const vm = wrapper.vm as unknown as { addAdminUsers: string[] };
     vm.addAdminUsers = ["normal-user"];
 
     // Find the second button (Add Admin)
@@ -82,7 +82,7 @@ describe("AdminPage.vue", () => {
     const userListStore = useUserListStore();
 
     // Select user to remove
-    const vm = wrapper.vm as any;
+    const vm = wrapper.vm as unknown as { removeAdminUsers: string[] };
     vm.removeAdminUsers = ["admin-user"];
 
     // Find the first button (Remove Admin)

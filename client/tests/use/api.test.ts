@@ -34,7 +34,9 @@ describe("api", () => {
         code_challenge_method: "S256"
       };
 
-      (axios.get as any).mockResolvedValue({ data: mockData });
+      (axios.get as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+        data: mockData
+      });
 
       await redirectAuthEndpoint();
 
