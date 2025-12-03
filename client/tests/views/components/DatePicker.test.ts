@@ -1,22 +1,9 @@
 import DatePicker from "@/views/components/DatePicker.vue";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
-import { createVuetify } from "vuetify";
-import * as components from "vuetify/components";
-import * as directives from "vuetify/directives";
-
-const vuetify = createVuetify({
-  components,
-  directives
-});
-
 describe("DatePicker.vue", () => {
   it("formats date correctly", async () => {
-    const wrapper = mount(DatePicker, {
-      global: {
-        plugins: [vuetify]
-      }
-    });
+    const wrapper = mount(DatePicker);
 
     // Simulate date selection
     // Since v-date-picker is complex to interact with in unit tests,

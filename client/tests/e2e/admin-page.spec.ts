@@ -39,7 +39,11 @@ test.describe("Admin Page Flow", () => {
   });
 
   test("should display admin page for admin user", async ({ page }) => {
+    const userListPromise = page.waitForResponse(
+      resp => resp.url().includes("/api/users") && resp.status() === 200
+    );
     await page.goto("/admin");
+    await userListPromise;
     await expect(page.getByText("admin-user")).toBeVisible();
     await expect(page.getByLabel("管理権限を削除")).toBeVisible();
     await expect(page.getByLabel("管理権限を追加")).toBeVisible();

@@ -1,22 +1,10 @@
 import ImageUploader from "@/views/shared/ImageUploader.vue";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it, vi } from "vitest";
-import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
-import * as directives from "vuetify/directives";
-
-const vuetify = createVuetify({
-  components,
-  directives
-});
-
 describe("ImageUploader.vue", () => {
   it("emits update:modelValue when images are selected", async () => {
-    const wrapper = mount(ImageUploader, {
-      global: {
-        plugins: [vuetify]
-      }
-    });
+    const wrapper = mount(ImageUploader);
 
     const file = new File(["content"], "test.png", { type: "image/png" });
 
