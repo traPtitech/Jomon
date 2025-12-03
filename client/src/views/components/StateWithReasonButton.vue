@@ -75,11 +75,13 @@ const applicationDetailStore = useApplicationDetailStore();
 const { core: detailCore } = storeToRefs(applicationDetailStore);
 const { fetchApplicationDetail } = applicationDetailStore;
 
+import { VForm } from "vuetify/components";
+
 const valid = ref(true);
 const isDialogOpen = ref(false);
 const reason = ref("");
 const nullRules = [(v: unknown) => !!v || ""];
-const formRef = ref<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+const formRef = ref<VForm | null>(null);
 
 watch(isDialogOpen, async () => {
   if (isDialogOpen.value) {

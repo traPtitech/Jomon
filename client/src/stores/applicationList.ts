@@ -1,10 +1,10 @@
+import { ApplicationList } from "@/types/application";
 import axios from "axios";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useApplicationListStore = defineStore("applicationList", () => {
-  // Using unknown[] for now as the application object structure is complex and not fully defined here
-  const applicationList = ref<unknown[]>([]);
+  const applicationList = ref<ApplicationList[]>([]);
 
   const fetchApplicationList = async (params: Record<string, unknown>) => {
     const cleanParams = { ...params };
@@ -17,7 +17,7 @@ export const useApplicationListStore = defineStore("applicationList", () => {
         delete cleanParams[key];
       }
     });
-    const response = await axios.get("/api/applications", {
+    const response = await axios.get<ApplicationList[]>("/api/applications", {
       params: cleanParams
     });
     applicationList.value = response.data;

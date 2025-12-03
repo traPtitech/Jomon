@@ -175,7 +175,9 @@ const { userList } = storeToRefs(userListStore);
 const { fetchApplicationDetail, deleteFix } = applicationDetailStore;
 const { fetchUserList } = userListStore;
 
-const formRef = ref<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+import { VForm } from "vuetify/components";
+
+const formRef = ref<VForm | null>(null);
 
 const response = reactive({
   application_id: null,

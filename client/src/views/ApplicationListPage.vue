@@ -113,7 +113,7 @@
                 <template v-if="applicationList.length > 0">
                   <Application :list="header" class="pb-0 pt-0" />
                   <v-list-item
-                    v-for="(list, index) in (applicationList as any[])"
+                    v-for="(list, index) in applicationList"
                     :key="index"
                     :to="'/applications/' + list.application_id"
                     class="pl-0 pr-0"
@@ -235,8 +235,7 @@ const sortTitle = () => {
   fetchApplicationList(params);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getApplicationList = (p: any) => {
+const getApplicationList = (p: Record<string, unknown>) => {
   fetchApplicationList(p);
 };
 

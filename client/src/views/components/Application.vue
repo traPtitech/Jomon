@@ -24,34 +24,12 @@
 </template>
 
 <script setup lang="ts">
+import { ApplicationList } from "@/types/application";
 import StateChip from "@/views/shared/StateChip.vue";
-
-interface User {
-  trap_id: string;
-  is_admin: boolean;
-}
-
-interface ApplicationDetail {
-  update_user: User;
-  type: string;
-  title: string;
-  remarks: string;
-  amount: number;
-  paid_at: string;
-  updated_at: string;
-}
-
-interface ApplicationList {
-  application_id: string;
-  created_at: string;
-  applicant: User;
-  current_detail: ApplicationDetail;
-  current_state: string;
-}
 
 withDefaults(
   defineProps<{
-    list: ApplicationList | Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+    list: ApplicationList;
   }>(),
   {
     list: () => ({

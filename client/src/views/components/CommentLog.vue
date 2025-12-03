@@ -66,20 +66,16 @@
 <script setup lang="ts">
 import { useApplicationDetailStore } from "@/stores/applicationDetail";
 import { useMeStore } from "@/stores/me";
+import { CommentLog } from "@/types/log";
 import Icon from "@/views/shared/Icon.vue";
 import axios from "axios";
 import { storeToRefs } from "pinia";
 import { nextTick, ref, watch } from "vue";
 import FormattedDate from "./FormattedDate.vue";
 
-const props = withDefaults(
-  defineProps<{
-    log: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
-  }>(),
-  {
-    log: () => ({})
-  }
-);
+const props = defineProps<{
+  log: CommentLog;
+}>();
 
 const applicationDetailStore = useApplicationDetailStore();
 const meStore = useMeStore();
@@ -95,7 +91,9 @@ const changeRules = [
   (v: unknown) => (v !== props.log.content.comment && !!v) || ""
 ];
 
-const commentRef = ref<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+import { VTextarea } from "vuetify/components";
+
+const commentRef = ref<VTextarea | null>(null);
 
 watch(comment_readonly, async () => {
   if (!comment_readonly.value) {

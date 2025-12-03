@@ -19,16 +19,12 @@
 </template>
 
 <script setup lang="ts">
+import { RefundLog } from "@/types/log";
 import Icon from "@/views/shared/Icon.vue";
 
-withDefaults(
-  defineProps<{
-    log: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
-  }>(),
-  {
-    log: () => ({})
-  }
-);
+defineProps<{
+  log: RefundLog;
+}>();
 
 const dayPrint = (time: string) => {
   const now = new Date();

@@ -43,10 +43,12 @@ const { core: detailCore } = storeToRefs(applicationDetailStore);
 const { trapId } = storeToRefs(meStore);
 const { fetchApplicationDetail } = applicationDetailStore;
 
+import { VForm } from "vuetify/components";
+
 const valid = ref(true);
 const comment = ref("");
 const nullRules = [(v: unknown) => !!v || ""];
-const formRef = ref<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+const formRef = ref<VForm | null>(null);
 
 const blur = () => {
   if (comment.value === "" || comment.value === undefined) {

@@ -41,13 +41,13 @@
 </template>
 
 <script setup lang="ts">
+import { ChangeLog } from "@/types/log";
 import Icon from "@/views/shared/Icon.vue";
 import Difference from "./ApplicationDetailDifference.vue";
 import FormattedDate from "./FormattedDate.vue";
 
 defineProps<{
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  log: any;
+  log: ChangeLog;
 }>();
 </script>
 <style lang="scss" module>

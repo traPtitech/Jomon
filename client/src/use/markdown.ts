@@ -6,8 +6,7 @@ const mdPromise = (async () => {
   });
 
   md.block.State.prototype.skipEmptyLines = function skipEmptyLines(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    from: any
+    from: number
   ) {
     let fromIndex = from;
     for (let max = this.lineMax; fromIndex < max; fromIndex++) {

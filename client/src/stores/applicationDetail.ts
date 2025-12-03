@@ -1,59 +1,32 @@
+import { ApplicationDetail, User } from "@/types/application";
+import { CommentLog, RefundLog, StatusLog } from "@/types/log";
 import axios from "axios";
 import { defineStore } from "pinia";
 import { computed, reactive, ref } from "vue";
 
-interface User {
-  trap_id: string;
-  is_admin: boolean;
-}
+// Local interfaces for API response structure if they differ from shared types
+// Or reuse shared types if they match.
 
-interface Comment {
-  comment_id: number;
-  user: User;
-  comment: string;
-  created_at: string;
-  updated_at: string;
-}
+// API response for comments seems to match CommentLog content
+type Comment = CommentLog["content"];
 
-interface StateLog {
-  update_user: User;
-  to_state: string;
-  reason: string;
-  created_at: string;
-}
+// API response for state logs
+// StatusLog in types/log.ts has content: { to_state, reason, created_at, update_user }
+// Store StateLog has: { update_user, to_state, reason, created_at }
+// They match.
+type StateLog = StatusLog["content"];
 
-interface ApplicationDetailLog {
-  update_user: User;
-  type: string;
-  title: string;
-  remarks: string;
-  amount: number;
-  paid_at: string;
-  updated_at: string;
-}
+// ApplicationDetailLog in store matches ApplicationDetail in types/application.ts
+type ApplicationDetailLog = ApplicationDetail;
 
-interface RepaymentLog {
-  repaid_by_user: User;
-  repaid_to_user: User;
-  created_at: string;
-  repaid_at: string;
-}
+// RepaymentLog in store matches RefundLog content
+type RepaymentLog = RefundLog["content"];
 
 interface ApplicationCore {
   application_id: string;
   created_at: string;
   applicant: User;
-  current_detail: {
-    update_user: {
-      trap_id: string;
-      is_admin: string; // Note: In original code it was string, but likely boolean? Keeping as string to match
-    };
-    type: string;
-    title: string;
-    remarks: string;
-    amount: number;
-    paid_at: string;
-    updated_at: string;
+  current_detail: ApplicationDetail & {
     repaid_to_id: string[];
   };
   current_state: string;
@@ -78,7 +51,7 @@ export const useApplicationDetailStore = defineStore(
       current_detail: {
         update_user: {
           trap_id: "",
-          is_admin: ""
+          is_admin: false
         },
         type: "",
         title: "",
@@ -89,22 +62,34 @@ export const useApplicationDetailStore = defineStore(
         repaid_to_id: []
       },
       current_state: "",
-      images: [""],
+      images: [],
       comments: [],
       state_logs: [],
       application_detail_logs: [],
       repayment_logs: []
     });
 
-    interface Log {
-      log_type: string;
-      content:
-        | Comment
-        | StateLog
-        | { log: ApplicationDetailLog; pre_log: ApplicationDetailLog }
-        | RepaymentLog;
-      sort_date: Date;
-    }
+    type Log =
+      | {
+          log_type: "comment";
+          content: Comment;
+          sort_date: Date;
+        }
+      | {
+          log_type: "state";
+          content: StateLog;
+          sort_date: Date;
+        }
+      | {
+          log_type: "application";
+          content: { log: ApplicationDetailLog; pre_log: ApplicationDetailLog };
+          sort_date: Date;
+        }
+      | {
+          log_type: "repayment";
+          content: RepaymentLog;
+          sort_date: Date;
+        };
 
     const logs = computed(() => {
       const logs: Log[] = [];

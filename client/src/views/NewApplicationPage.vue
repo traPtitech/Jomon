@@ -158,8 +158,10 @@ const { trapId } = storeToRefs(meStore);
 const { userList } = storeToRefs(userListStore);
 const { fetchUserList } = userListStore;
 
-const form = ref<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
-const firstfocus = ref<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+import { VForm, VTextField } from "vuetify/components";
+
+const form = ref<VForm | null>(null);
+const firstfocus = ref<VTextField | null>(null);
 
 const response = reactive({
   application_id: null,
@@ -273,7 +275,8 @@ const submit = async () => {
 
 onMounted(async () => {
   await fetchUserList();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  firstfocus.value.focus();
+  if (firstfocus.value) {
+    firstfocus.value.focus();
+  }
 });
 </script>

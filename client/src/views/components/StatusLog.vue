@@ -14,12 +14,12 @@
 </template>
 
 <script setup lang="ts">
+import { StatusLog } from "@/types/log";
 import Icon from "@/views/shared/Icon.vue";
 import StateChip from "@/views/shared/StateChip.vue";
 
 defineProps<{
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  log: any;
+  log: StatusLog;
 }>();
 
 const dayPrint = (time: string | Date) => {
