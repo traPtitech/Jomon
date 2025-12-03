@@ -2,10 +2,16 @@ import { useUserListStore } from "@/stores/userList";
 import NewApplicationPage from "@/views/NewApplicationPage.vue";
 import { createTestingPinia } from "@pinia/testing";
 import { flushPromises, mount } from "@vue/test-utils";
+import axios from "axios";
 import { describe, expect, it, vi } from "vitest";
 
 // Mock axios
-vi.mock("axios");
+vi.mock("axios", () => ({
+  default: {
+    post: vi.fn(() => Promise.resolve({ data: {} })),
+    get: vi.fn(() => Promise.resolve({ data: {} }))
+  }
+}));
 
 // Mock child components
 vi.mock("@/views/shared/Icon.vue", () => ({
@@ -129,5 +135,66 @@ describe("NewApplicationPage.vue", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const vm = wrapper.vm as any;
     expect(Array.isArray(vm.traPID)).toBe(true);
+  });
+  it("submits the form successfully with correct data", async () => {
+    const wrapper = mount(NewApplicationPage, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            createSpy: vi.fn,
+            initialState: {
+              me: { trapId: "test-user" },
+              userList: {
+                userList: [{ trap_id: "test-user" }, { trap_id: "other-user" }]
+              }
+            }
+          })
+        ],
+        mocks: {
+          $route: {
+            params: { type: "club" }
+          }
+        }
+      }
+    });
+    await flushPromises();
+
+    // Mock form validation to return true
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (wrapper.vm as any).form = {
+      validate: async () => ({ valid: true })
+    };
+
+    // Set form data
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const vm = wrapper.vm as any;
+    vm.title = "Test Application";
+    vm.amount = "1000";
+    vm.remarks = "Test Remarks";
+    vm.traPID = ["test-user"]; // Simulate user selection
+    vm.date = "2023-01-01";
+
+    // Mock axios post return value
+    const axiosPost = vi.mocked(axios.post);
+    // axiosPost.mockResolvedValue({ data: { application_id: 1 } }); // Rely on factory
+
+    // Trigger submit
+    await vm.submit();
+    await flushPromises();
+
+    // Verify axios call
+    expect(axiosPost).toHaveBeenCalled();
+
+    const formData = axiosPost.mock.calls[0][1] as FormData;
+    const details = JSON.parse(formData.get("details") as string);
+
+    expect(details).toEqual({
+      type: "club",
+      title: "Test Application",
+      remarks: "Test Remarks",
+      paid_at: expect.any(String),
+      amount: 1000,
+      repaid_to_id: ["test-user"]
+    });
   });
 });

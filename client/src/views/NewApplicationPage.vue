@@ -227,8 +227,9 @@ const returnRemarksHint = (type: string | string[]) => {
   return remarksHint(type);
 };
 
-const submit = () => {
-  if (form.value.validate()) {
+const submit = async () => {
+  const { valid } = await form.value.validate();
+  if (valid) {
     const formData = new FormData();
     const paid_at = new Date(date.value || Date.now());
     const details = {

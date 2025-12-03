@@ -16,3 +16,17 @@ global.ResizeObserver = class ResizeObserver {
   unobserve() {}
   disconnect() {}
 };
+
+// Mock visualViewport
+global.visualViewport = {
+  width: 1024,
+  height: 768,
+  offsetLeft: 0,
+  offsetTop: 0,
+  pageLeft: 0,
+  pageTop: 0,
+  scale: 1,
+  addEventListener: () => {},
+  removeEventListener: () => {},
+  dispatchEvent: () => true
+} as unknown as VisualViewport;
