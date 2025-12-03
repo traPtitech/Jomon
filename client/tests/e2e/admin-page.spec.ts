@@ -61,9 +61,8 @@ test.describe("Admin Page Flow", () => {
       .click();
     await page.getByRole("option", { name: "new-admin" }).click();
 
-    // Close the dropdown (clicking the label/field again might close it, or clicking outside)
-    // Clicking the title or somewhere safe
-    await page.getByText("admin-user").first().click({ force: true });
+    // Close the dropdown by pressing Escape
+    await page.keyboard.press("Escape");
 
     // Wait for API call
     const requestPromise = page.waitForRequest(
@@ -75,14 +74,12 @@ test.describe("Admin Page Flow", () => {
     );
 
     // Click the second "設定" button (for adding)
-    // We can scope it by the surrounding structure if possible, but nth(1) is okay if order is guaranteed.
-    // Alternatively, we can look for the button following the "管理権限を追加" input.
     await page
       .locator(".v-input")
       .filter({ hasText: "管理権限を追加" })
       .locator("xpath=following-sibling::button | following::button")
       .first()
-      .click();
+      .click({ force: true });
 
     await requestPromise;
   });
@@ -98,8 +95,8 @@ test.describe("Admin Page Flow", () => {
       .click();
     await page.getByRole("option", { name: "admin-user" }).click();
 
-    // Close dropdown
-    await page.getByText("admin-user").first().click({ force: true });
+    // Close dropdown by pressing Escape
+    await page.keyboard.press("Escape");
 
     // Wait for API call
     const requestPromise = page.waitForRequest(
@@ -116,7 +113,7 @@ test.describe("Admin Page Flow", () => {
       .filter({ hasText: "管理権限を削除" })
       .locator("xpath=following-sibling::button | following::button")
       .first()
-      .click();
+      .click({ force: true });
 
     await requestPromise;
   });

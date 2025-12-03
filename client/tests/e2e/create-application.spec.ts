@@ -81,7 +81,9 @@ test.describe("Create Application Flow", () => {
     await page.goto("/applications/new/club");
 
     // Fill form
-    await page.getByLabel("概要", { exact: true }).fill("Test Application");
+    const summaryInput = page.getByLabel("概要", { exact: true });
+    await summaryInput.waitFor({ state: "visible" });
+    await summaryInput.fill("Test Application");
 
     // Date picker interaction
     await page.getByLabel("支払日").click();

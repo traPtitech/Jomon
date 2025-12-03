@@ -84,8 +84,10 @@ test.describe("Application List Flow", () => {
 
     // Check if the button shows 'mdi-chevron-down' (meaning it's closed)
     if (await filterButton.getByText("mdi-chevron-down").isVisible()) {
-      await filterButton.click();
+      await filterButton.click({ force: true });
     }
+    // Wait for animation
+    await page.waitForTimeout(500);
     await expect(filterForm).toBeVisible();
 
     // Select type 'club'
@@ -114,8 +116,10 @@ test.describe("Application List Flow", () => {
 
     // Check if the button shows 'mdi-chevron-down' (meaning it's closed)
     if (await filterButton.getByText("mdi-chevron-down").isVisible()) {
-      await filterButton.click();
+      await filterButton.click({ force: true });
     }
+    // Wait for animation
+    await page.waitForTimeout(500);
     await expect(filterForm).toBeVisible();
 
     // Select state 'accepted'

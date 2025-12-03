@@ -105,6 +105,13 @@ test.describe("Approve Application Flow", () => {
 
     await page.goto(`/applications/${appId}`);
 
+    // Wait for the application detail to be loaded
+    await page.waitForResponse(
+      response =>
+        response.url().includes(`/api/applications/${appId}`) &&
+        response.status() === 200
+    );
+
     // Verify "承認" button is visible
     const approveButton = page.getByRole("button", { name: "承認" });
     await expect(approveButton).toBeVisible();
