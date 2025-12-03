@@ -28,14 +28,14 @@
   </v-menu>
 </template>
 
-<script>
+<script lang="ts">
 export default {
   props: {},
   data() {
     return {
       menu: false,
       date: null,
-      nullRules: [v => !!v || ""]
+      nullRules: [(v: unknown) => !!v || ""]
     };
   },
   computed: {

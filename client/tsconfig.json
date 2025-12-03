@@ -20,7 +20,7 @@
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
-    "noImplicitAny": false
+    "noImplicitAny": true
   },
   "include": [
     "src/**/*.ts",

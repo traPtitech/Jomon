@@ -34,11 +34,12 @@ export default {
     };
   },
   methods: {
-    imageChange(files) {
+    imageChange(files: File | File[]) {
       this.uploadImageUrl = [];
       this.uploadImageBlob = [];
       if (!files) return;
-      files.forEach(file => {
+      const fileList = Array.isArray(files) ? files : [files];
+      fileList.forEach((file: File) => {
         const fr = new FileReader();
         fr.readAsDataURL(file);
         this.uploadImageBlob.push(file);

@@ -4,7 +4,7 @@
   </button>
 </template>
 
-<script>
+<script lang="ts">
 export default {
   props: {
     label: {
@@ -18,7 +18,7 @@ export default {
   },
   emits: ["click"],
   methods: {
-    onClick(e) {
+    onClick(e: Event) {
       this.$emit("click", e);
     }
   }

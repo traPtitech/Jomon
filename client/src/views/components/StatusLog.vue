@@ -13,7 +13,7 @@
   </v-timeline-item>
 </template>
 
-<script>
+<script lang="ts">
 import Icon from "@/views/shared/Icon.vue";
 import StateChip from "@/views/shared/StateChip.vue";
 
@@ -29,7 +29,7 @@ export default {
     }
   },
   methods: {
-    dayPrint(time) {
+    dayPrint(time: string | Date) {
       const now = new Date();
       const d = new Date(time);
       const diff = (now.getTime() - d.getTime()) / 1000;

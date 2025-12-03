@@ -5,14 +5,21 @@ const mdPromise = (async () => {
     breaks: true
   });
 
-  md.block.State.prototype.skipEmptyLines = function skipEmptyLines(from) {
-    for (let max = this.lineMax; from < max; from++) {
-      if (this.bMarks[from] + this.tShift[from] < this.eMarks[from]) {
+  md.block.State.prototype.skipEmptyLines = function skipEmptyLines(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    from: any
+  ) {
+    let fromIndex = from;
+    for (let max = this.lineMax; fromIndex < max; fromIndex++) {
+      if (
+        this.bMarks[fromIndex] + this.tShift[fromIndex] <
+        this.eMarks[fromIndex]
+      ) {
         break;
       }
       this.push("hardbreak", "br", 0);
     }
-    return from;
+    return fromIndex;
   };
 
   return md;
