@@ -10,7 +10,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "type-check": "vue-tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test --reporter=list"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
