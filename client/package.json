@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "type-check": "vue-tsc --noEmit -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
@@ -26,6 +27,8 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.23.3",
+    "@pinia/testing": "^1.0.3",
+    "@playwright/test": "^1.57.0",
     "@types/node": "^24.10.1",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
@@ -37,7 +40,7 @@
     "eslint": "^8.57.1",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-vue": "^9.0.0",
-    "jsdom": "^27.2.0",
+    "happy-dom": "^20.0.11",
     "prettier": "^2.3.2",
     "sass": "^1.94.2",
     "typescript": "^5.9.3",

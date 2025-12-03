@@ -39,13 +39,21 @@ export default defineConfig({
   // @ts-expect-error: test option is not in UserConfigExport
   test: {
     globals: true,
-    environment: "jsdom",
+    environment: "happy-dom",
     setupFiles: ["./tests/setup.ts"],
     server: {
       deps: {
         inline: ["vuetify"]
       }
-    }
+    },
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/cypress/**",
+      "**/.{idea,git,cache,output,temp}/**",
+      "**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*",
+      "tests/e2e/**"
+    ]
   },
   build: {
     rollupOptions: {
