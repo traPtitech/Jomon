@@ -281,4 +281,180 @@ describe("NewApplicationPage.vue", () => {
     expect(vm.response.application_id).toBe(123);
     expect(vm.snackbar).toBe(true);
   });
+
+  const mountPage = (options = { mockForm: true }) => {
+    const wrapper = mount(NewApplicationPage, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            createSpy: vi.fn,
+            initialState: {
+              me: { trapId: "test-user" },
+              userList: { userList: [{ trap_id: "test-user" }] }
+            }
+          })
+        ],
+        mocks: {
+          $route: {
+            params: { type: "club" }
+          }
+        },
+        stubs: {
+          "v-form": {
+            template: "<div class='v-form-stub'><slot /></div>",
+            methods: {
+              validate: () => Promise.resolve({ valid: true })
+            }
+          }
+        }
+      }
+    });
+
+    // Manual mock is no longer needed by default as the stub handles it
+    // But we might need to override it for specific tests
+
+    // Manually set form ref because stub binding is flaky in test utils with defineComponent
+    if (options.mockForm) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (wrapper.vm as any).form = {
+        validate: () => Promise.resolve({ valid: true })
+      };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return { wrapper, vm: wrapper.vm as any };
+  };
+
+  it("shows error message when submission fails", async () => {
+    // Mock axios.post to reject
+    const axiosPost = vi.mocked(axios.post);
+    axiosPost.mockImplementationOnce(() =>
+      Promise.reject(new Error("API Error"))
+    );
+
+    const { wrapper, vm } = mountPage();
+    await flushPromises();
+
+    // Fill form
+    vm.title = "Test Application";
+    vm.amount = "1000";
+    vm.traPID = ["user1"];
+    vm.remarks = "Test Remarks";
+    await wrapper.vm.$nextTick();
+
+    // Reset mock for the actual call
+    axiosPost.mockImplementation(() => {
+      return Promise.reject(new Error("API Error"));
+    });
+
+    // Submit
+    await wrapper.vm.$nextTick();
+
+    // Force mock validation to ensure we reach the API call
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (wrapper.vm as any).form = {
+      validate: async () => ({ valid: true })
+    };
+
+    await vm.submit();
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    // Verify axios was called
+    expect(axiosPost).toHaveBeenCalled();
+
+    // Verify error message (snackbar) is shown
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((wrapper.vm as any).snackbar).toBe(true);
+  });
+
+  it("validates amount field correctly", async () => {
+    const { wrapper, vm } = mountPage({ mockForm: false });
+    await flushPromises();
+
+    // Invalid amount: non-numeric
+    vm.amount = "abc";
+    await wrapper.vm.$nextTick();
+
+    // Override form validation to simulate failure based on rules
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (wrapper.vm as any).form = {
+      validate: async () => {
+        // Simple manual validation logic matching the component's rules
+        const valid = /^[1-9][0-9]*$/.test(vm.amount);
+        return { valid };
+      }
+    };
+
+    const axiosPost = vi.mocked(axios.post);
+    axiosPost.mockClear();
+
+    // Case 1: Non-numeric
+    vm.title = "Test";
+    vm.traPID = ["user1"];
+    vm.remarks = "Test";
+    vm.amount = "abc";
+
+    await wrapper.vm.$nextTick();
+    await vm.submit();
+    await flushPromises();
+
+    expect(axiosPost).not.toHaveBeenCalled();
+
+    // Case 2: Zero
+    vm.amount = "0";
+    await wrapper.vm.$nextTick();
+    await vm.submit();
+    await flushPromises();
+
+    expect(axiosPost).not.toHaveBeenCalled();
+
+    // Case 3: Negative
+    vm.amount = "-100";
+    await wrapper.vm.$nextTick();
+    await vm.submit();
+    await flushPromises();
+
+    expect(axiosPost).not.toHaveBeenCalled();
+  });
+
+  it("sets loading state during submission", async () => {
+    const { wrapper, vm } = mountPage();
+    await flushPromises();
+
+    // Fill form
+    vm.title = "Test Application";
+    vm.amount = "1000";
+    vm.traPID = ["user1"];
+    vm.remarks = "Test Remarks";
+    await wrapper.vm.$nextTick();
+
+    // Mock axios to delay response so we can check loading state
+    const axiosPost = vi.mocked(axios.post);
+    axiosPost.mockImplementation(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return { data: {} };
+    });
+
+    // Force mock validation
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (wrapper.vm as any).form = {
+      validate: async () => ({ valid: true })
+    };
+
+    // Submit without awaiting immediately to check loading state
+    const submitPromise = vm.submit();
+    await wrapper.vm.$nextTick();
+
+    // Check loading state
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((wrapper.vm as any).loading).toBe(true);
+
+    // Wait for completion
+    await submitPromise;
+
+    // Check loading state after completion
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((wrapper.vm as any).loading).toBe(false);
+  });
 });

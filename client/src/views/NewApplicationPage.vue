@@ -119,15 +119,19 @@
       </v-btn>
     </v-form>
     <!-- ここ作成したらokを押しても押さなくても自動遷移 -->
-    <v-snackbar v-model="snackbar">
-      作成できました
+    <v-snackbar v-model="snackbar" :color="snackbarColor">
+      {{ snackbarMessage }}
       <v-btn
+        v-if="snackbarColor === 'success'"
         :to="`/applications/` + response.application_id"
-        color="green darken-1"
+        color="white"
         text
         @click="snackbar = false"
       >
         OK
+      </v-btn>
+      <v-btn v-else color="white" text @click="snackbar = false">
+        閉じる
       </v-btn>
     </v-snackbar>
   </v-container>
@@ -172,6 +176,8 @@ const response = reactive({
 });
 
 const snackbar = ref(false);
+const snackbarColor = ref("success");
+const snackbarMessage = ref("");
 const date = ref(null);
 const menu = ref(false);
 const traPID = ref<string[]>([]);
@@ -180,6 +186,7 @@ const title = ref("");
 const amount = ref("");
 const remarks = ref("");
 const imageBlobs = ref<File[]>([]);
+const loading = ref(false);
 
 const amountRules = [
   (v: unknown) => !!v || "必須の項目です",
@@ -230,6 +237,7 @@ const returnRemarksHint = (type: string | string[]) => {
 const submit = async () => {
   const { valid } = await form.value.validate();
   if (valid) {
+    loading.value = true;
     const formData = new FormData();
     const paid_at = new Date(date.value || Date.now());
     const details = {
@@ -244,14 +252,22 @@ const submit = async () => {
     imageBlobs.value.forEach(imageBlob => {
       formData.append("images", imageBlob);
     });
-    axios
-      .post("/api/applications", formData, {
+    try {
+      const res = await axios.post("/api/applications", formData, {
         headers: { "content-type": "multipart/form-data" }
-      })
-      .then(res => {
-        Object.assign(response, res.data);
-        snackbar.value = true;
       });
+      Object.assign(response, res.data);
+      snackbarColor.value = "success";
+      snackbarMessage.value = "作成できました";
+      snackbar.value = true;
+    } catch (err) {
+      console.error(err);
+      snackbarColor.value = "error";
+      snackbarMessage.value = "作成に失敗しました";
+      snackbar.value = true;
+    } finally {
+      loading.value = false;
+    }
   }
 };
 

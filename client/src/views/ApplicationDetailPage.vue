@@ -1,5 +1,8 @@
 <template>
   <div v-if="loading">loading...</div>
+  <div v-else-if="error">
+    <v-alert type="error"> 申請情報の取得に失敗しました。 </v-alert>
+  </div>
   <div v-else :class="$style.container">
     <!-- todo storeのfixで制御する、このページのcreatedでstoreのfixはfalseに。 -->
     <application-paper v-if="!fix" :class="$style.paper" />
@@ -24,10 +27,18 @@ const { fetchApplicationDetail, deleteFix } = applicationDetailStore;
 
 const loading = ref(true);
 
+const error = ref(false);
+
 onMounted(async () => {
-  await fetchApplicationDetail(route.params.id as string);
-  deleteFix();
-  loading.value = false;
+  try {
+    await fetchApplicationDetail(route.params.id as string);
+    deleteFix();
+  } catch (e) {
+    console.error(e);
+    error.value = true;
+  } finally {
+    loading.value = false;
+  }
 });
 </script>
 
