@@ -197,4 +197,88 @@ describe("NewApplicationPage.vue", () => {
       repaid_to_id: ["test-user"]
     });
   });
+
+  it("handles array route params correctly", async () => {
+    const wrapper = mount(NewApplicationPage, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            createSpy: vi.fn,
+            initialState: {
+              me: { trapId: "test-user" },
+              userList: { userList: [{ trap_id: "test-user" }] }
+            }
+          })
+        ],
+        mocks: {
+          $route: {
+            params: { type: ["club"] }
+          }
+        }
+      }
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("部費利用申請");
+  });
+
+  it("submits the form with images and handles success", async () => {
+    const wrapper = mount(NewApplicationPage, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            createSpy: vi.fn,
+            initialState: {
+              me: { trapId: "test-user" },
+              userList: { userList: [{ trap_id: "test-user" }] }
+            }
+          })
+        ],
+        mocks: {
+          $route: {
+            params: { type: "club" }
+          }
+        }
+      }
+    });
+    await flushPromises();
+
+    // Mock form validation
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (wrapper.vm as any).form = {
+      validate: async () => ({ valid: true })
+    };
+
+    // Set form data
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const vm = wrapper.vm as any;
+    vm.title = "Test Application";
+    vm.amount = "1000";
+    vm.traPID = ["test-user"];
+
+    // Add image
+    const file = new File(["content"], "test.png", { type: "image/png" });
+    vm.imageBlobs = [file];
+
+    // Mock axios post return value
+    const axiosPost = vi.mocked(axios.post);
+    axiosPost.mockResolvedValue({ data: { application_id: 123 } });
+
+    // Spy on FormData
+    const appendSpy = vi.spyOn(FormData.prototype, "append");
+
+    // Trigger submit
+    await vm.submit();
+    await flushPromises();
+
+    // Verify axios call includes images
+    expect(axiosPost).toHaveBeenCalled();
+
+    // Verify append was called with images
+    expect(appendSpy).toHaveBeenCalledWith("images", file);
+
+    // Verify success state
+    expect(vm.response.application_id).toBe(123);
+    expect(vm.snackbar).toBe(true);
+  });
 });
