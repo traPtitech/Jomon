@@ -26,7 +26,15 @@ make server-test
 make client
 ```
 
-Now you can access to `http://localhost:3000` for Jomon client page.
+Or run manually:
+
+```shell script
+cd client
+npm install
+npm run dev
+```
+
+Now you can access to `http://localhost:8080` for Jomon client page.
 And you can access to `http://localhost:1323` for Jomon mock server using `swagger.yaml`.
 
 ## Staging

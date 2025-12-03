@@ -5,27 +5,27 @@
 ## プロジェクト構成
 
 - サーバー: `main.go` を起点に `router/`（Echo のエンドポイント）と `model/`（GORM モデル・DB アクセス）で構成。
-- クライアント: `client/src/` に Vue 2.7 + Vuetify の SPA。静的ファイルは `client/public/`。
+- クライアント: `client/src/` に Vue 3 + Vuetify 3 + Pinia + TypeScript の SPA。静的ファイルは `client/public/`。
 - インフラ/開発補助: `docker-compose.yml` と `Dockerfile`、テスト用 `server-test.yml`・モック用 `mock.yml`。CI は `.github/workflows/` に Go/Client/Image の 3 つ。
 - ドキュメントとデータ: `docs/`、一時保存は `uploads/`、永続化ボリューム用に `storage/`。
 
 ## ビルド・実行・開発コマンド
 
 - サーバーモック+DB 付き統合テスト: `make server-test`（Docker で mariadb を起動して Go テストを実行）。
-- クライアント開発: `make client` （`npm run lint` → `npm run serve`。localhost:8080 で確認）。
+- クライアント開発: `make client` （`npm run lint` → `npm run dev`。localhost:8080 で確認）。
 - 単体ビルド: `go build ./...`（Go 1.25+ 推奨） / `cd client && npm run build`。
 - ローカル起動（Docker 本番イメージ確認用）: `docker-compose up -d --build`。停止は `make down`。
 
 ## コーディングスタイル
 
 - Go: `gofmt`（タブインデント）必須。`go vet ./...` で静的検査。公開シンボルは PascalCase、テストダブルには `_test` 接尾辞。
-- Vue/TS: ESLint + Prettier 設定済み（`npm run lint`）。コンポーネントは `PascalCase.vue`、ルートや小要素は `kebab-case` ファイル名。CSS/SCSS は BEM か Vuetify のユーティリティを優先。
+- Vue/TS: ESLint + Prettier 設定済み（`npm run lint`）。Composition API (`<script setup lang="ts">`) を推奨。コンポーネントは `PascalCase.vue`、ルートや小要素は `kebab-case` ファイル名。CSS/SCSS は BEM か Vuetify のユーティリティを優先。
 - API/DB: モデル名は単数形、テーブル/カラムはスネークケース。JSON フィールドは camelCase を維持。
 
 ## テスト指針
 
 - Go: `go test ./...` を基本。DB を使うテストは `MARIADB_USERNAME`/`PASSWORD`/`HOSTNAME`/`DATABASE` 環境変数を設定（CI と同値: `root/password/localhost:50000/jomon`）。
-- Vue: 現状は静的検証中心。UI 振る舞いを追加する際は `@vue/test-utils` + Jest を推奨し、`client/tests/unit/` に `_spec.js` で配置。
+- Vue: `vitest` を使用。`client/tests/` 以下にテストファイルを配置。ユーティリティ関数やロジックのテストを推奨。UI テストが必要な場合は `@vue/test-utils` を使用。
 - カバレッジはクリティカルパス（決裁フロー、認可、アップロード処理）を優先し、回帰バグは再現テストを追加。
 
 ## コミット & プルリク運用
