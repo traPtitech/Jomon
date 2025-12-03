@@ -64,7 +64,6 @@ describe("StateWithReasonButton.vue", () => {
     const submitBtn = wrapper.findAllComponents({ name: "SimpleButton" })[2]; // 0: activator, 1: back, 2: submit
 
     // Check if enabled
-    // expect(submitBtn.attributes("disabled")).toBeUndefined();
 
     // Should not throw error
     await submitBtn.trigger("click");
