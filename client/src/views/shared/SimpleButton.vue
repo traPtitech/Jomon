@@ -4,24 +4,23 @@
   </button>
 </template>
 
-<script lang="ts">
-export default {
-  props: {
-    label: {
-      type: String,
-      required: true
-    },
-    variant: {
-      type: String,
-      default: "primary"
-    }
-  },
-  emits: ["click"],
-  methods: {
-    onClick(e: Event) {
-      this.$emit("click", e);
-    }
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    label: string;
+    variant?: string;
+  }>(),
+  {
+    variant: "primary"
   }
+);
+
+const emit = defineEmits<{
+  (e: "click", event: Event): void;
+}>();
+
+const onClick = (e: Event) => {
+  emit("click", e);
 };
 </script>
 

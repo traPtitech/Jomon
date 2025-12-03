@@ -17,38 +17,39 @@
   </div>
 </template>
 
-<script lang="ts">
-export default {
-  props: {
-    modelValue: {
-      type: Array,
-      default: () => []
-    }
-  },
-  emits: ["update:modelValue"],
-  data() {
-    return {
-      images: [] as File[],
-      uploadImageUrl: [] as string[],
-      uploadImageBlob: [] as File[]
-    };
-  },
-  methods: {
-    imageChange(files: File | File[]) {
-      this.uploadImageUrl = [];
-      this.uploadImageBlob = [];
-      if (!files) return;
-      const fileList = Array.isArray(files) ? files : [files];
-      fileList.forEach((file: File) => {
-        const fr = new FileReader();
-        fr.readAsDataURL(file);
-        this.uploadImageBlob.push(file);
-        this.$emit("update:modelValue", this.uploadImageBlob);
-        fr.addEventListener("load", () => {
-          this.uploadImageUrl.push(fr.result as string);
-        });
-      });
-    }
+<script setup lang="ts">
+import { ref } from "vue";
+
+withDefaults(
+  defineProps<{
+    modelValue?: unknown[];
+  }>(),
+  {
+    modelValue: () => []
   }
+);
+
+const emit = defineEmits<{
+  (e: "update:modelValue", value: File[]): void;
+}>();
+
+const images = ref<File[]>([]);
+const uploadImageUrl = ref<string[]>([]);
+const uploadImageBlob = ref<File[]>([]);
+
+const imageChange = (files: File | File[]) => {
+  uploadImageUrl.value = [];
+  uploadImageBlob.value = [];
+  if (!files) return;
+  const fileList = Array.isArray(files) ? files : [files];
+  fileList.forEach((file: File) => {
+    const fr = new FileReader();
+    fr.readAsDataURL(file);
+    uploadImageBlob.value.push(file);
+    emit("update:modelValue", uploadImageBlob.value);
+    fr.addEventListener("load", () => {
+      uploadImageUrl.value.push(fr.result as string);
+    });
+  });
 };
 </script>

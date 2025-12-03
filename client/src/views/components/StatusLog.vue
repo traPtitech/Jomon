@@ -13,47 +13,38 @@
   </v-timeline-item>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Icon from "@/views/shared/Icon.vue";
 import StateChip from "@/views/shared/StateChip.vue";
 
-export default {
-  components: {
-    Icon,
-    StateChip
-  },
-  props: {
-    log: {
-      type: Object,
-      default: () => ({})
-    }
-  },
-  methods: {
-    dayPrint(time: string | Date) {
-      const now = new Date();
-      const d = new Date(time);
-      const diff = (now.getTime() - d.getTime()) / 1000;
-      if (diff < 60) {
-        //1分以内
-        return Math.round(diff) + "秒前";
-      } else if (diff < 60 * 60) {
-        //一時間以内
-        return Math.round(diff / 60) + "分前";
-      } else if (diff < 60 * 60 * 24) {
-        //一日以内
-        return Math.round(diff / 60 / 60) + "時間前";
-      } else if (diff < 60 * 60 * 24 * 28) {
-        //一か月以内
-        const month = d.getMonth() + 1;
-        const day = d.getDate();
-        return month + "/" + day;
-      } else {
-        const year = d.getFullYear();
-        const month = d.getMonth() + 1;
-        const day = d.getDate();
-        return year + "/" + month + "/" + day;
-      }
-    }
+defineProps<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  log: any;
+}>();
+
+const dayPrint = (time: string | Date) => {
+  const now = new Date();
+  const d = new Date(time);
+  const diff = (now.getTime() - d.getTime()) / 1000;
+  if (diff < 60) {
+    //1分以内
+    return Math.round(diff) + "秒前";
+  } else if (diff < 60 * 60) {
+    //一時間以内
+    return Math.round(diff / 60) + "分前";
+  } else if (diff < 60 * 60 * 24) {
+    //一日以内
+    return Math.round(diff / 60 / 60) + "時間前";
+  } else if (diff < 60 * 60 * 24 * 28) {
+    //一か月以内
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    return month + "/" + day;
+  } else {
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    return year + "/" + month + "/" + day;
   }
 };
 </script>

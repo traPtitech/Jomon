@@ -7,20 +7,10 @@
   </v-app>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { useMeStore } from "@/stores/me";
-import { mapActions } from "pinia";
 import NavBar from "./views/core/NavBar.vue";
-export default {
-  name: "App",
-  components: {
-    NavBar
-  },
-  created() {
-    this.fetchMe();
-  },
-  methods: {
-    ...mapActions(useMeStore, ["fetchMe"])
-  }
-};
+
+const store = useMeStore();
+store.fetchMe();
 </script>

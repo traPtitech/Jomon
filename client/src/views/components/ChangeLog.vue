@@ -40,24 +40,15 @@
   </v-timeline-item>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Icon from "@/views/shared/Icon.vue";
 import Difference from "./ApplicationDetailDifference.vue";
 import FormattedDate from "./FormattedDate.vue";
 
-export default {
-  components: {
-    Icon,
-    Difference,
-    FormattedDate
-  },
-  props: {
-    log: {
-      type: Object,
-      default: () => ({})
-    }
-  }
-};
+defineProps<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  log: any;
+}>();
 </script>
 <style lang="scss" module>
 .text {

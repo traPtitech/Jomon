@@ -31,29 +31,19 @@
     <Icon :user="trapId" :size="35" />
   </v-app-bar>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import logo from "@/assets/logo.svg";
 import { useMeStore } from "@/stores/me";
 import Icon from "@/views/shared/Icon.vue";
-import { mapState } from "pinia";
+import { storeToRefs } from "pinia";
 
-export default {
-  components: {
-    Icon
-  },
-  data() {
-    return {
-      logo,
-      items: [
-        { title: "club", page: "部費利用申請" },
-        { title: "contest", page: "大会等旅費補助申請" },
-        { title: "event", page: "イベント交通費補助申請" },
-        { title: "public", page: "渉外交通費補助" }
-      ]
-    };
-  },
-  computed: {
-    ...mapState(useMeStore, ["trapId", "isAdmin"])
-  }
-};
+const items = [
+  { title: "club", page: "部費利用申請" },
+  { title: "contest", page: "大会等旅費補助申請" },
+  { title: "event", page: "イベント交通費補助申請" },
+  { title: "public", page: "渉外交通費補助" }
+];
+
+const store = useMeStore();
+const { trapId, isAdmin } = storeToRefs(store);
 </script>

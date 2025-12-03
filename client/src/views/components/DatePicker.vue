@@ -28,24 +28,18 @@
   </v-menu>
 </template>
 
-<script lang="ts">
-export default {
-  props: {},
-  data() {
-    return {
-      menu: false,
-      date: null,
-      nullRules: [(v: unknown) => !!v || ""]
-    };
-  },
-  computed: {
-    computedDateFormatted() {
-      if (!this.date) return null;
-      const d = new Date(this.date);
-      return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
-    }
-  }
-};
+<script setup lang="ts">
+import { computed, ref } from "vue";
+
+const menu = ref(false);
+const date = ref<string | null>(null);
+const nullRules = [(v: unknown) => !!v || ""];
+
+const computedDateFormatted = computed(() => {
+  if (!date.value) return null;
+  const d = new Date(date.value);
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+});
 </script>
 
 <style lang="scss" module></style>
