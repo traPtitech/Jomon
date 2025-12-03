@@ -35,9 +35,9 @@ npm run test
 #### E2E Tests (Playwright)
 
 ```bash
-npx playwright test
+npm run test:e2e
 ```
 
 ### Customize configuration
 
-See [Configuration Reference](https://cli.vuejs.org/config/).
+See [Vite Configuration Reference](https://vitejs.dev/config/).
