@@ -83,7 +83,7 @@
 
         <div>
           <v-autocomplete
-            ref="traPID"
+            ref="traPIDRef"
             v-model="traPID"
             :rules="[
               () => !(traPID.length === 0) || '返金対象者は一人以上必要です'

@@ -104,4 +104,30 @@ describe("NewApplicationPage.vue", () => {
     // For now, let's just check if the button exists.
     expect(submitBtn.exists()).toBe(true);
   });
+
+  it("traPID model should be an array, not a component instance (regression test for ref collision)", async () => {
+    const wrapper = mount(NewApplicationPage, {
+      global: {
+        plugins: [
+          createTestingPinia({
+            createSpy: vi.fn,
+            initialState: {
+              me: { trapId: "test-user" },
+              userList: { userList: [{ trap_id: "test-user" }] }
+            }
+          })
+        ],
+        mocks: {
+          $route: {
+            params: { type: "club" }
+          }
+        }
+      }
+    });
+    await flushPromises();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const vm = wrapper.vm as any;
+    expect(Array.isArray(vm.traPID)).toBe(true);
+  });
 });
