@@ -9,7 +9,7 @@
         <refund-log
           v-else-if="
             log.log_type === `repayment` &&
-            !(log.content.repaid_at === `` || log.content.repaid_at === null)
+            !((log.content as any).repaid_at === `` || (log.content as any).repaid_at === null)
           "
           :log="log"
         />

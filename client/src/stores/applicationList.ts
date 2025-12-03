@@ -3,10 +3,10 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useApplicationListStore = defineStore("applicationList", () => {
-  // Using any[] for now as the application object structure is complex and not fully defined here
-  const applicationList = ref<any[]>([]);
+  // Using unknown[] for now as the application object structure is complex and not fully defined here
+  const applicationList = ref<unknown[]>([]);
 
-  const fetchApplicationList = async (params: Record<string, any>) => {
+  const fetchApplicationList = async (params: Record<string, unknown>) => {
     const cleanParams = { ...params };
     Object.keys(cleanParams).forEach(key => {
       if (

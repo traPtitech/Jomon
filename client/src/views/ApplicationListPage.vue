@@ -113,7 +113,7 @@
                 <template v-if="applicationList.length > 0">
                   <Application :list="header" class="pb-0 pt-0" />
                   <v-list-item
-                    v-for="(list, index) in applicationList"
+                    v-for="(list, index) in (applicationList as any[])"
                     :key="index"
                     :to="'/applications/' + list.application_id"
                     class="pl-0 pr-0"

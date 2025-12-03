@@ -96,8 +96,18 @@ export const useApplicationDetailStore = defineStore(
       repayment_logs: []
     });
 
+    interface Log {
+      log_type: string;
+      content:
+        | Comment
+        | StateLog
+        | { log: ApplicationDetailLog; pre_log: ApplicationDetailLog }
+        | RepaymentLog;
+      sort_date: Date;
+    }
+
     const logs = computed(() => {
-      let logs: any[] = [];
+      const logs: Log[] = [];
       core.comments.forEach(log => {
         logs.push({
           log_type: "comment",
