@@ -40,7 +40,7 @@
   </v-timeline-item>
 </template>
 
-<script>
+<script lang="ts">
 import Icon from "@/views/shared/Icon.vue";
 import Difference from "./ApplicationDetailDifference.vue";
 import FormattedDate from "./FormattedDate.vue";

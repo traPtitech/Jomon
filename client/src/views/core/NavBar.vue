@@ -31,7 +31,7 @@
     <Icon :user="trapId" :size="35" />
   </v-app-bar>
 </template>
-<script>
+<script lang="ts">
 import logo from "@/assets/logo.svg";
 import { useMeStore } from "@/stores/me";
 import Icon from "@/views/shared/Icon.vue";

@@ -7,7 +7,7 @@
   </v-app>
 </template>
 
-<script>
+<script lang="ts">
 import { useMeStore } from "@/stores/me";
 import { mapActions } from "pinia";
 import NavBar from "./views/core/NavBar.vue";
