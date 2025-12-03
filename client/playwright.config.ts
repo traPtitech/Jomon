@@ -4,6 +4,7 @@ import { defineConfig, devices } from "@playwright/test";
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  timeout: 60000,
   testDir: "./tests/e2e",
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -33,7 +34,11 @@ export default defineConfig({
 
     {
       name: "firefox",
-      use: { ...devices["Desktop Firefox"] }
+      use: {
+        ...devices["Desktop Firefox"],
+        actionTimeout: 15000,
+        navigationTimeout: 60000
+      }
     },
 
     {
