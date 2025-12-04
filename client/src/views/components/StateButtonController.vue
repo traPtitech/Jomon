@@ -17,7 +17,6 @@
 import { useApplicationDetailStore } from "@/stores/applicationDetail";
 import { useMeStore } from "@/stores/me";
 import SimpleButton from "@/views/shared/SimpleButton.vue";
-import axios from "axios";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
 import RepaidButton from "./RepaidButton.vue";
@@ -28,7 +27,7 @@ const meStore = useMeStore();
 
 const { core: detailCore } = storeToRefs(applicationDetailStore);
 const { trapId, isAdmin } = storeToRefs(meStore);
-const { fetchApplicationDetail, changeFix } = applicationDetailStore;
+const { changeFix, updateApplicationState } = applicationDetailStore;
 
 const displayAcceptBottom = computed(() => {
   return detailCore.value.current_state === `submitted` && isAdmin.value;
@@ -47,34 +46,22 @@ const displayFixResubmitBottom = computed(() => {
 
 const accept = async () => {
   try {
-    await axios.put(
-      "/api/applications/" + detailCore.value.application_id + "/states",
-      {
-        to_state: "accepted"
-      }
-    );
+    await updateApplicationState("accepted");
   } catch (e) {
     alert(e);
     return;
   }
   alert("承認しました");
-  await fetchApplicationDetail(detailCore.value.application_id);
 };
 
 const reSubmit = async () => {
   try {
-    await axios.put(
-      "/api/applications/" + detailCore.value.application_id + "/states",
-      {
-        to_state: "submitted"
-      }
-    );
+    await updateApplicationState("submitted");
   } catch (e) {
     alert(e);
     return;
   }
   alert("再申請しました");
-  await fetchApplicationDetail(detailCore.value.application_id);
 };
 </script>
 

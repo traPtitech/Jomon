@@ -151,13 +151,25 @@ export const useApplicationDetailStore = defineStore(
       fix.value = false;
     };
 
+    const updateApplicationState = async (
+      to_state: string,
+      reason: string = ""
+    ) => {
+      await axios.put("/api/applications/" + core.application_id + "/states", {
+        to_state: to_state,
+        reason: reason
+      });
+      await fetchApplicationDetail(core.application_id);
+    };
+
     return {
       fix,
       core,
       logs,
       fetchApplicationDetail,
       changeFix,
-      deleteFix
+      deleteFix,
+      updateApplicationState
     };
   }
 );
