@@ -45,6 +45,7 @@ onMounted(async () => {
 .container {
   display: flex;
   justify-content: center;
+  align-items: flex-start;
   flex-wrap: wrap;
   max-width: 100%;
   padding: 16px;

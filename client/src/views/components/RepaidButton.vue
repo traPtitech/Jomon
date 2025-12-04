@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog v-model="dialog" scrollable max-width="500px">
+    <v-dialog v-model="dialog" max-width="500px">
       <template #activator="{ props }">
         <simple-button
           :label="'払い戻し済みのユーザーを選択'"
@@ -26,7 +26,7 @@
           ]"
           :items="repaidToTraPId"
           label="払い戻し済みのユーザーを選択"
-          :menu-props="{ attach: true, zIndex: 2500 }"
+          :menu-props="{ zIndex: 3000 }"
           required
           multiple
         />
