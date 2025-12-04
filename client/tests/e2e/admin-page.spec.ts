@@ -1,7 +1,18 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Admin Page Flow", () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, browserName }) => {
+    // Disable animations for stability (Firefox only)
+    if (browserName === "firefox") {
+      await page.addStyleTag({
+        content: `
+          *, *::before, *::after {
+            transition: none !important;
+            animation: none !important;
+          }
+        `
+      });
+    }
     // Mock user API (Admin user)
     await page.route("*/**/api/users/me", async route => {
       await route.fulfill({
