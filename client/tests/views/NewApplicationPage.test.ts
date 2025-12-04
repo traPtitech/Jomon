@@ -3,7 +3,7 @@ import NewApplicationPage from "@/views/NewApplicationPage.vue";
 import { createTestingPinia } from "@pinia/testing";
 import { flushPromises, mount } from "@vue/test-utils";
 import axios from "axios";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock axios
 vi.mock("axios", () => ({
@@ -22,13 +22,22 @@ vi.mock("@/views/shared/ImageUploader.vue", () => ({
 }));
 
 // Mock useRoute
+// Mock useRoute and useRouter
+const pushMock = vi.fn();
 vi.mock("vue-router", () => ({
   useRoute: () => ({
     params: { type: "club" }
+  }),
+  useRouter: () => ({
+    push: pushMock
   })
 }));
 
 describe("NewApplicationPage.vue", () => {
+  beforeEach(() => {
+    pushMock.mockClear();
+  });
+
   it("renders correctly", async () => {
     const wrapper = mount(NewApplicationPage, {
       global: {
@@ -176,7 +185,7 @@ describe("NewApplicationPage.vue", () => {
 
     // Mock axios post return value
     const axiosPost = vi.mocked(axios.post);
-    // axiosPost.mockResolvedValue({ data: { application_id: 1 } }); // Rely on factory
+    axiosPost.mockResolvedValue({ data: { application_id: 1 } });
 
     // Trigger submit
     await vm.submit();
@@ -196,6 +205,9 @@ describe("NewApplicationPage.vue", () => {
       amount: 1000,
       repaid_to_id: ["test-user"]
     });
+
+    // Verify redirection
+    expect(pushMock).toHaveBeenCalledWith("/applications/1");
   });
 
   it("handles array route params correctly", async () => {
@@ -280,6 +292,9 @@ describe("NewApplicationPage.vue", () => {
     // Verify success state
     expect(vm.response.application_id).toBe(123);
     expect(vm.snackbar).toBe(true);
+
+    // Verify redirection
+    expect(pushMock).toHaveBeenCalledWith("/applications/123");
   });
 
   const mountPage = (options = { mockForm: true }) => {

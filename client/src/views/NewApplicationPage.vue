@@ -113,7 +113,12 @@
         </div>
       </v-card>
 
-      <v-btn :disabled="!valid" class="ma-3" @click.stop="submit">
+      <v-btn
+        :disabled="!valid || loading"
+        :loading="loading"
+        class="ma-3"
+        @click.stop="submit"
+      >
         作成する
       </v-btn>
     </v-form>
@@ -122,7 +127,6 @@
       {{ snackbarMessage }}
       <v-btn
         v-if="snackbarColor === 'success'"
-        :to="`/applications/` + response.application_id"
         color="white"
         text
         @click="snackbar = false"
@@ -147,9 +151,10 @@ import ImageUploader from "@/views/shared/ImageUploader.vue";
 import axios from "axios";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, reactive, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
+const router = useRouter();
 const meStore = useMeStore();
 const userListStore = useUserListStore();
 
@@ -266,6 +271,7 @@ const submit = async () => {
     snackbarColor.value = "success";
     snackbarMessage.value = "作成できました";
     snackbar.value = true;
+    await router.push(`/applications/${res.data.application_id}`);
   } catch (err) {
     console.error(err);
     snackbarColor.value = "error";
