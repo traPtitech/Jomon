@@ -9,12 +9,7 @@
               style="color: white; font-weight: bold; font-size: 1.5em"
             >
               絞り込み
-              <v-btn
-                variant="text"
-                icon="mdi-chevron-down"
-                color="white"
-                @click="show = !show"
-              >
+              <v-btn variant="text" icon color="white" @click="show = !show">
                 <v-icon color="white">
                   {{ show ? "mdi-chevron-up" : "mdi-chevron-down" }}
                 </v-icon>
