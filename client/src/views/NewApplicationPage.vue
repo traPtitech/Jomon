@@ -169,9 +169,6 @@ const response = reactive({
   }
 });
 
-const snackbar = ref(false);
-const snackbarColor = ref("success");
-const snackbarMessage = ref("");
 const date = ref(null);
 const menu = ref(false);
 const traPID = ref<string[]>([]);
