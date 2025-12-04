@@ -236,39 +236,43 @@ const returnRemarksHint = (type: string | string[]) => {
 };
 
 const submit = async () => {
-  const { valid } = await form.value.validate();
-  if (valid) {
-    loading.value = true;
-    const formData = new FormData();
-    const paid_at = new Date(date.value || Date.now());
-    const details = {
-      type: route.params.type,
-      title: title.value,
-      remarks: remarks.value,
-      paid_at: paid_at.toISOString(),
-      amount: Number(amount.value),
-      repaid_to_id: traPID.value
-    };
-    formData.append("details", JSON.stringify(details));
-    imageBlobs.value.forEach(imageBlob => {
-      formData.append("images", imageBlob);
+  if (loading.value) return;
+  loading.value = true;
+  const validateResult = await form.value?.validate();
+  if (!validateResult?.valid) {
+    loading.value = false;
+    return;
+  }
+
+  const formData = new FormData();
+  const paid_at = new Date(date.value || Date.now());
+  const details = {
+    type: route.params.type,
+    title: title.value,
+    remarks: remarks.value,
+    paid_at: paid_at.toISOString(),
+    amount: Number(amount.value),
+    repaid_to_id: traPID.value
+  };
+  formData.append("details", JSON.stringify(details));
+  imageBlobs.value.forEach(imageBlob => {
+    formData.append("images", imageBlob);
+  });
+  try {
+    const res = await axios.post("/api/applications", formData, {
+      headers: { "content-type": "multipart/form-data" }
     });
-    try {
-      const res = await axios.post("/api/applications", formData, {
-        headers: { "content-type": "multipart/form-data" }
-      });
-      Object.assign(response, res.data);
-      snackbarColor.value = "success";
-      snackbarMessage.value = "作成できました";
-      snackbar.value = true;
-    } catch (err) {
-      console.error(err);
-      snackbarColor.value = "error";
-      snackbarMessage.value = "作成に失敗しました";
-      snackbar.value = true;
-    } finally {
-      loading.value = false;
-    }
+    Object.assign(response, res.data);
+    snackbarColor.value = "success";
+    snackbarMessage.value = "作成できました";
+    snackbar.value = true;
+  } catch (err) {
+    console.error(err);
+    snackbarColor.value = "error";
+    snackbarMessage.value = "作成に失敗しました";
+    snackbar.value = true;
+  } finally {
+    loading.value = false;
   }
 };
 

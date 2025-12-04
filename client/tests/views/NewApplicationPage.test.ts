@@ -457,4 +457,39 @@ describe("NewApplicationPage.vue", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((wrapper.vm as any).loading).toBe(false);
   });
+
+  it("prevents double submission", async () => {
+    const { wrapper, vm } = mountPage();
+    await flushPromises();
+
+    // Fill form
+    vm.title = "Test Application";
+    vm.amount = "1000";
+    vm.traPID = ["user1"];
+    vm.remarks = "Test Remarks";
+    await wrapper.vm.$nextTick();
+
+    // Mock axios with delay
+    const axiosPost = vi.mocked(axios.post);
+    axiosPost.mockClear();
+    axiosPost.mockImplementation(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return { data: { application_id: 1 } };
+    });
+
+    // Force mock validation
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (wrapper.vm as any).form = {
+      validate: async () => ({ valid: true })
+    };
+
+    // Trigger submit twice rapidly
+    const p1 = vm.submit();
+    const p2 = vm.submit();
+
+    await Promise.all([p1, p2]);
+
+    // Should be called only once
+    expect(axiosPost).toHaveBeenCalledTimes(1);
+  });
 });
