@@ -32,7 +32,7 @@
 import { computed, ref } from "vue";
 
 const menu = ref(false);
-const date = ref<string | null>(null);
+const date = defineModel<string | null>({ default: null });
 const nullRules = [(v: unknown) => !!v || ""];
 
 const computedDateFormatted = computed(() => {

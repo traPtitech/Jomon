@@ -20,20 +20,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-withDefaults(
-  defineProps<{
-    modelValue?: unknown[];
-  }>(),
-  {
-    modelValue: () => []
-  }
-);
-
-const emit = defineEmits<{
-  (e: "update:modelValue", value: File[]): void;
-}>();
-
-const images = ref<File[]>([]);
+const images = defineModel<File[]>({ default: () => [] });
 const uploadImageUrl = ref<string[]>([]);
 const uploadImageBlob = ref<File[]>([]);
 
@@ -46,7 +33,7 @@ const imageChange = (files: File | File[]) => {
     const fr = new FileReader();
     fr.readAsDataURL(file);
     uploadImageBlob.value.push(file);
-    emit("update:modelValue", uploadImageBlob.value);
+    images.value = uploadImageBlob.value;
     fr.addEventListener("load", () => {
       uploadImageUrl.value.push(fr.result as string);
     });
