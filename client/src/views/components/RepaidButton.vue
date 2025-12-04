@@ -10,11 +10,11 @@
       </template>
       <v-card :class="$style.container">
         <h3>払い戻し日</h3>
-        <v-date-picker
+        <v-text-field
           v-model="date"
-          full-width
-          flat
-          @update:model-value="menu = false"
+          type="date"
+          variant="outlined"
+          density="compact"
         />
         <v-select
           ref="traPID"
@@ -29,6 +29,8 @@
           :menu-props="{ zIndex: 3000 }"
           required
           multiple
+          chips
+          closable-chips
         />
         <simple-button
           :label="'OK'"

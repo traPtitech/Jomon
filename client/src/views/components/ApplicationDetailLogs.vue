@@ -8,21 +8,27 @@
           dot-color="purple"
           size="small"
         >
-          <comment-log :log="log" />
+          <v-sheet color="transparent" border="0">
+            <comment-log :log="log" />
+          </v-sheet>
         </v-timeline-item>
         <v-timeline-item
           v-else-if="log.log_type === `state`"
           dot-color="red"
           size="small"
         >
-          <status-log :log="log" />
+          <v-sheet color="transparent" border="0">
+            <status-log :log="log" />
+          </v-sheet>
         </v-timeline-item>
         <v-timeline-item
           v-else-if="log.log_type === `application`"
           dot-color="purple"
           size="small"
         >
-          <change-log :log="log" />
+          <v-sheet color="transparent" border="0">
+            <change-log :log="log" />
+          </v-sheet>
         </v-timeline-item>
         <v-timeline-item
           v-else-if="
@@ -32,7 +38,9 @@
           dot-color="grey"
           size="small"
         >
-          <refund-log :log="log" />
+          <v-sheet color="transparent" border="0">
+            <refund-log :log="log" />
+          </v-sheet>
         </v-timeline-item>
       </template>
     </v-timeline>
