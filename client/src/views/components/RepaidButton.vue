@@ -17,7 +17,6 @@
           density="compact"
         />
         <v-select
-          ref="traPID"
           v-model="traPID"
           :rules="[
             traPID =>
