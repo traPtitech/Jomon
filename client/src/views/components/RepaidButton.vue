@@ -26,7 +26,7 @@
           ]"
           :items="repaidToTraPId"
           label="払い戻し済みのユーザーを選択"
-          :menu-props="{ zIndex: 2500 }"
+          :menu-props="{ attach: true, zIndex: 2500 }"
           required
           multiple
         />
