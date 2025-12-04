@@ -2,7 +2,11 @@
   <div>
     <v-dialog v-model="dialog" scrollable max-width="500px">
       <template #activator="{ props }">
-        <simple-button :label="'払い戻し済みのユーザーを選択'" v-bind="props" />
+        <simple-button
+          :label="'払い戻し済みのユーザーを選択'"
+          :variant="'info'"
+          v-bind="props"
+        />
       </template>
       <v-card :class="$style.container">
         <h3>払い戻し日</h3>

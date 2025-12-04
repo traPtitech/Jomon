@@ -8,7 +8,7 @@
           "
           :variant="
             toState === 'submitted'
-              ? 'primary'
+              ? 'info'
               : toState === 'fix_required'
                 ? 'warning'
                 : 'error'
