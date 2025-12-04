@@ -69,5 +69,11 @@ const { logs } = storeToRefs(applicationDetailStore);
 
 <style lang="scss" module>
 .container {
+  :global {
+    .v-timeline-divider__line {
+      min-height: 100%;
+      background-color: #9e9e9e; // $color-grey
+    }
+  }
 }
 </style>
