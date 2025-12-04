@@ -4,7 +4,7 @@
       <v-row justify="space-around">
         <!-- 絞り込み検索欄 -->
         <v-col cols="12" md="3">
-          <v-card class="mx-auto mt-5" color="#011A27">
+          <v-card class="mx-auto mt-5" color="primary">
             <v-card-title
               style="color: white; font-weight: bold; font-size: 1.5em"
             >
@@ -97,7 +97,7 @@
         </v-col>
         <!-- 申請一覧 -->
         <v-col cols="12" md="7">
-          <v-card class="mx-auto mt-5" color="#011A27">
+          <v-card class="mx-auto mt-5" color="primary">
             <v-card-title
               style="color: white; font-weight: bold; font-size: 1.5em"
             >

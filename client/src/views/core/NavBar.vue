@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar color="#011A27" theme="dark">
+  <v-app-bar color="primary" theme="dark">
     <router-link to="/">
       <v-img
         alt="Jomon Logo"

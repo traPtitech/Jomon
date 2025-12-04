@@ -1,7 +1,7 @@
 import "@mdi/font/css/materialdesignicons.css";
 import { createVuetify } from "vuetify";
 import "vuetify/styles";
-import light from "./theme";
+import { colors } from "./theme";
 
 export default createVuetify({
   theme: {
@@ -12,7 +12,13 @@ export default createVuetify({
         colors: {
           background: "#FFFFFF",
           surface: "#FFFFFF",
-          ...light
+          ...colors
+        }
+      },
+      dark: {
+        dark: true,
+        colors: {
+          ...colors
         }
       }
     }
