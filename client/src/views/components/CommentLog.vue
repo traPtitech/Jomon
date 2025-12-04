@@ -7,17 +7,22 @@
       <formatted-date :date="log.content.created_at" :simple="true" />
     </div>
     <div v-if="log.content.user.trap_id === trapId">
-      <v-btn icon color="success" :disabled="!comment_readonly">
-        <v-icon @click="commentChange()"> mdi-pencil </v-icon>
-      </v-btn>
       <v-btn
-        icon
+        icon="mdi-pencil"
+        size="small"
+        variant="text"
+        color="success"
+        :disabled="!comment_readonly"
+        @click="commentChange()"
+      />
+      <v-btn
+        icon="mdi-delete"
+        size="small"
+        variant="text"
         color="error"
         :disabled="!comment_readonly"
         @click="deleteComment()"
-      >
-        <v-icon>mdi-delete</v-icon>
-      </v-btn>
+      />
     </div>
 
     <v-form v-model="comment_valid">
