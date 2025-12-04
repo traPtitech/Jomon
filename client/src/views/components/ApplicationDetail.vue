@@ -152,5 +152,10 @@ onMounted(async () => {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
   gap: 16px;
   padding: 8px;
+
+  > img {
+    max-width: 100%;
+    height: auto;
+  }
 }
 </style>

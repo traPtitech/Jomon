@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isAdmin" class="admin">
+  <div v-if="isAdmin" class="admin pa-4">
     <v-chip v-for="(user, index) in adminList" :key="index">
       {{ user }}
     </v-chip>

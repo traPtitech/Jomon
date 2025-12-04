@@ -3,7 +3,7 @@
     <router-link to="/">
       <v-img
         alt="Jomon Logo"
-        class="shrink-mr-2"
+        class="shrink-mr-2 ml-4"
         :src="logo"
         transition="scale-transition"
         width="144"
