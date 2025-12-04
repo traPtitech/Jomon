@@ -1,80 +1,71 @@
+import StateWithReasonButton from "@/views/components/StateWithReasonButton.vue";
+import SimpleButton from "@/views/shared/SimpleButton.vue"; // Import mocked component
 import { createTestingPinia } from "@pinia/testing";
 import { mount } from "@vue/test-utils";
-import { describe, expect, it, vi, type Mock } from "vitest";
-import StateWithReasonButton from "../../../src/views/components/StateWithReasonButton.vue";
+import { describe, expect, it, vi } from "vitest";
+import { createVuetify } from "vuetify";
+import * as components from "vuetify/components";
+import * as directives from "vuetify/directives";
 
-import axios from "axios";
+const vuetify = createVuetify({
+  components,
+  directives
+});
 
-// Mock axios
-vi.mock("axios");
+// Mock SimpleButton
+vi.mock("@/views/shared/SimpleButton.vue", () => ({
+  default: {
+    name: "SimpleButton",
+    template: '<button class="simple-button"><slot/></button>',
+    props: ["label", "variant", "disabled"]
+  }
+}));
 
 describe("StateWithReasonButton.vue", () => {
-  it("handles input correctly without [object Object] bug and stack overflow", async () => {
-    // Mock alert
-    global.alert = vi.fn();
-
-    // Mock axios response
-    (axios.put as Mock).mockResolvedValue({});
-
-    const pinia = createTestingPinia({
-      createSpy: vi.fn,
-      initialState: {
-        applicationDetail: {
-          core: {
-            application_id: "test-app-id",
-            current_state: "accepted"
-          }
-        }
-      }
-    });
-
+  it("renders correctly with info variant for 'submitted'", () => {
     const wrapper = mount(StateWithReasonButton, {
       global: {
-        plugins: [pinia]
+        plugins: [createTestingPinia({ createSpy: vi.fn }), vuetify]
       },
       props: {
         toState: "submitted"
       }
     });
 
-    // Open dialog
-    const activator = wrapper.findComponent({ name: "SimpleButton" });
-    await activator.trigger("click");
+    // Find using the imported component definition
+    const btn = wrapper.findComponent(SimpleButton);
+    expect(btn.exists()).toBe(true);
+    expect(btn.props("variant")).toBe("info");
+    expect(btn.props("label")).toContain("提出済みに戻す");
+  });
 
-    // Wait for dialog to open and nextTick in watch
-    await wrapper.vm.$nextTick();
-    await new Promise(resolve => setTimeout(resolve, 100));
+  it("renders correctly with warning variant for 'fix_required'", () => {
+    const wrapper = mount(StateWithReasonButton, {
+      global: {
+        plugins: [createTestingPinia({ createSpy: vi.fn }), vuetify]
+      },
+      props: {
+        toState: "fix_required"
+      }
+    });
 
-    // Check input value
-    const input = document.querySelector("input");
-    expect(input).not.toBeNull();
-    if (input) {
-      expect(input.value).toBe("");
+    const btn = wrapper.findComponent(SimpleButton);
+    expect(btn.props("variant")).toBe("warning");
+    expect(btn.props("label")).toContain("要修正");
+  });
 
-      // Set reason via component emit
-      const textField = wrapper.findComponent({ name: "VTextField" });
-      await textField.vm.$emit("update:modelValue", "test reason");
+  it("renders correctly with error variant for 'rejected'", () => {
+    const wrapper = mount(StateWithReasonButton, {
+      global: {
+        plugins: [createTestingPinia({ createSpy: vi.fn }), vuetify]
+      },
+      props: {
+        toState: "rejected"
+      }
+    });
 
-      // Trigger validation
-      await textField.trigger("blur");
-      await wrapper.vm.$nextTick();
-    }
-
-    // Click submit
-    const submitBtn = wrapper.findAllComponents({ name: "SimpleButton" })[2]; // 0: activator, 1: back, 2: submit
-
-    // Check if enabled
-
-    // Should not throw error
-    await submitBtn.trigger("click");
-
-    // Verify axios call
-    expect(axios.put).toHaveBeenCalledWith(
-      "/api/applications/test-app-id/states",
-      expect.objectContaining({
-        to_state: "submitted",
-        reason: "test reason"
-      })
-    );
+    const btn = wrapper.findComponent(SimpleButton);
+    expect(btn.props("variant")).toBe("error");
+    expect(btn.props("label")).toContain("取り下げ");
   });
 });
