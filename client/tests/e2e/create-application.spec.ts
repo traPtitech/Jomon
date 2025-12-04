@@ -121,10 +121,10 @@ test.describe("Create Application Flow", () => {
     // Submit
     await page.getByRole("button", { name: "作成する" }).click();
 
-    // Verify success message (optional, might disappear quickly)
-    // await expect(page.getByText("作成できました")).toBeVisible();
-
     // Verify redirection
     await expect(page).toHaveURL(/\/applications\/new-app-id/);
+
+    // Verify success message (global notification)
+    await expect(page.getByText("作成できました")).toBeVisible();
   });
 });

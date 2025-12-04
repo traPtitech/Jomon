@@ -1,3 +1,4 @@
+import { useToastStore } from "@/stores/toast";
 import { useUserListStore } from "@/stores/userList";
 import NewApplicationPage from "@/views/NewApplicationPage.vue";
 import { createTestingPinia } from "@pinia/testing";
@@ -48,6 +49,9 @@ describe("NewApplicationPage.vue", () => {
               me: { trapId: "test-user" },
               userList: {
                 userList: [{ trap_id: "test-user" }, { trap_id: "other-user" }]
+              },
+              toast: {
+                show: vi.fn()
               }
             }
           })
@@ -291,7 +295,8 @@ describe("NewApplicationPage.vue", () => {
 
     // Verify success state
     expect(vm.response.application_id).toBe(123);
-    expect(vm.snackbar).toBe(true);
+    const toastStore = useToastStore();
+    expect(toastStore.show).toHaveBeenCalledWith("作成できました", "success");
 
     // Verify redirection
     expect(pushMock).toHaveBeenCalledWith("/applications/123");
@@ -379,8 +384,8 @@ describe("NewApplicationPage.vue", () => {
     expect(axiosPost).toHaveBeenCalled();
 
     // Verify error message (snackbar) is shown
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((wrapper.vm as any).snackbar).toBe(true);
+    const toastStore = useToastStore();
+    expect(toastStore.show).toHaveBeenCalledWith("作成に失敗しました", "error");
   });
 
   it("validates amount field correctly", async () => {

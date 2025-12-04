@@ -123,25 +123,12 @@
       </v-btn>
     </v-form>
     <!-- ここ作成したらokを押しても押さなくても自動遷移 -->
-    <v-snackbar v-model="snackbar" :color="snackbarColor">
-      {{ snackbarMessage }}
-      <v-btn
-        v-if="snackbarColor === 'success'"
-        color="white"
-        text
-        @click="snackbar = false"
-      >
-        OK
-      </v-btn>
-      <v-btn v-else color="white" text @click="snackbar = false">
-        閉じる
-      </v-btn>
-    </v-snackbar>
   </v-container>
 </template>
 
 <script setup lang="ts">
 import { useMeStore } from "@/stores/me";
+import { useToastStore } from "@/stores/toast";
 import { useUserListStore } from "@/stores/userList";
 import { applicationType, remarksTitle } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
@@ -157,6 +144,7 @@ const route = useRoute();
 const router = useRouter();
 const meStore = useMeStore();
 const userListStore = useUserListStore();
+const toastStore = useToastStore();
 
 const { trapId } = storeToRefs(meStore);
 const { userList } = storeToRefs(userListStore);
@@ -268,15 +256,11 @@ const submit = async () => {
       headers: { "content-type": "multipart/form-data" }
     });
     Object.assign(response, res.data);
-    snackbarColor.value = "success";
-    snackbarMessage.value = "作成できました";
-    snackbar.value = true;
+    toastStore.show("作成できました", "success");
     await router.push(`/applications/${res.data.application_id}`);
   } catch (err) {
     console.error(err);
-    snackbarColor.value = "error";
-    snackbarMessage.value = "作成に失敗しました";
-    snackbar.value = true;
+    toastStore.show("作成に失敗しました", "error");
   } finally {
     loading.value = false;
   }
