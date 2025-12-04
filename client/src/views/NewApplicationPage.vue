@@ -137,7 +137,7 @@ import Icon from "@/views/shared/Icon.vue";
 import ImageUploader from "@/views/shared/ImageUploader.vue";
 import axios from "axios";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref, useTemplateRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
@@ -152,8 +152,8 @@ const { fetchUserList } = userListStore;
 
 import { VForm, VTextField } from "vuetify/components";
 
-const form = ref<VForm | null>(null);
-const firstfocus = ref<VTextField | null>(null);
+const form = useTemplateRef<VForm>("form");
+const firstfocus = useTemplateRef<VTextField>("firstfocus");
 
 const response = reactive({
   application_id: null,
@@ -266,7 +266,7 @@ const submit = async () => {
 onMounted(async () => {
   await fetchUserList();
   if (firstfocus.value) {
-    firstfocus.value.focus();
+    firstfocus.value?.focus();
   }
 });
 </script>

@@ -60,7 +60,7 @@ import { useApplicationDetailStore } from "@/stores/applicationDetail";
 import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
 import { storeToRefs } from "pinia";
-import { nextTick, ref, watch } from "vue";
+import { nextTick, ref, useTemplateRef, watch } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -81,7 +81,7 @@ const valid = ref(true);
 const isDialogOpen = ref(false);
 const reason = ref("");
 const nullRules = [(v: unknown) => !!v || ""];
-const formRef = ref<VForm | null>(null);
+const formRef = useTemplateRef<VForm>("formRef");
 
 watch(isDialogOpen, async () => {
   if (isDialogOpen.value) {
@@ -98,8 +98,8 @@ const blur = () => {
 };
 
 const postReason = async () => {
-  const { valid } = await formRef.value.validate();
-  if (valid) {
+  const validateResult = await formRef.value?.validate();
+  if (validateResult?.valid) {
     try {
       await axios.put(
         "/api/applications/" + detailCore.value.application_id + "/states",

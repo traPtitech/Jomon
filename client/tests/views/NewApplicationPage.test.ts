@@ -6,6 +6,15 @@ import { flushPromises, mount } from "@vue/test-utils";
 import axios from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("vue", async importOriginal => {
+  const actual = await importOriginal<typeof import("vue")>();
+  return {
+    ...actual,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    useTemplateRef: (key: string) => actual.ref(null)
+  };
+});
+
 // Mock axios
 vi.mock("axios", () => ({
   default: {
@@ -323,7 +332,9 @@ describe("NewApplicationPage.vue", () => {
           "v-form": {
             template: "<div class='v-form-stub'><slot /></div>",
             methods: {
-              validate: () => Promise.resolve({ valid: true })
+              validate: () => Promise.resolve({ valid: true }),
+              reset: () => {},
+              resetValidation: () => {}
             }
           }
         }
@@ -333,6 +344,7 @@ describe("NewApplicationPage.vue", () => {
     // Manual mock is no longer needed by default as the stub handles it
     // But we might need to override it for specific tests
 
+    // Manually set form ref because stub binding is flaky in test utils with defineComponent
     // Manually set form ref because stub binding is flaky in test utils with defineComponent
     if (options.mockForm) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -34,7 +34,7 @@ import { useMeStore } from "@/stores/me";
 import Icon from "@/views/shared/Icon.vue";
 import axios from "axios";
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import { ref, useTemplateRef } from "vue";
 
 const applicationDetailStore = useApplicationDetailStore();
 const meStore = useMeStore();
@@ -48,16 +48,17 @@ import { VForm } from "vuetify/components";
 const valid = ref(true);
 const comment = ref("");
 const nullRules = [(v: unknown) => !!v || ""];
-const formRef = ref<VForm | null>(null);
+const formRef = useTemplateRef<VForm>("formRef");
 
 const blur = () => {
   if (comment.value === "" || comment.value === undefined) {
-    formRef.value.reset();
+    formRef.value?.reset();
   }
 };
 
 const postcomment = async () => {
-  if (formRef.value.validate()) {
+  const validateResult = await formRef.value?.validate();
+  if (validateResult?.valid) {
     try {
       await axios.post(
         "/api/applications/" + detailCore.value.application_id + "/comments",
@@ -69,7 +70,7 @@ const postcomment = async () => {
       alert(e);
       return;
     }
-    formRef.value.reset();
+    formRef.value?.reset();
     await fetchApplicationDetail(detailCore.value.application_id);
   }
 };

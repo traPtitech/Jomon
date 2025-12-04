@@ -163,7 +163,7 @@ import ImageUploader from "@/views/shared/ImageUploader.vue";
 import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref, useTemplateRef } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
@@ -177,7 +177,7 @@ const { fetchUserList } = userListStore;
 
 import { VForm } from "vuetify/components";
 
-const formRef = ref<VForm | null>(null);
+const formRef = useTemplateRef<VForm>("formRef");
 
 const response = reactive({
   application_id: null,
@@ -255,7 +255,8 @@ const afterChange = () => {
 };
 
 const submit = async () => {
-  if (formRef.value.validate()) {
+  const validateResult = await formRef.value?.validate();
+  if (validateResult?.valid) {
     images_change.value.forEach((flag, index) => {
       if (!flag) {
         axios.delete("/api/images/" + detailCore.value.images[index]);

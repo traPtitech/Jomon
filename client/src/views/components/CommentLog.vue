@@ -75,7 +75,7 @@ import { CommentLog } from "@/types/log";
 import Icon from "@/views/shared/Icon.vue";
 import axios from "axios";
 import { storeToRefs } from "pinia";
-import { nextTick, ref, watch } from "vue";
+import { nextTick, ref, useTemplateRef, watch } from "vue";
 import FormattedDate from "./FormattedDate.vue";
 
 const props = defineProps<{
@@ -98,12 +98,12 @@ const changeRules = [
 
 import { VTextarea } from "vuetify/components";
 
-const commentRef = ref<VTextarea | null>(null);
+const commentRef = useTemplateRef<VTextarea>("commentRef");
 
 watch(comment_readonly, async () => {
   if (!comment_readonly.value) {
     await nextTick();
-    commentRef.value.focus();
+    commentRef.value?.focus();
   }
 });
 
