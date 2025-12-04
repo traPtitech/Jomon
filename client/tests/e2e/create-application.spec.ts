@@ -89,8 +89,11 @@ test.describe("Create Application Flow", () => {
       });
     });
 
+    const userListResponsePromise = page.waitForResponse(
+      resp => resp.url().includes("/api/users") && resp.status() === 200
+    );
     await page.goto("/applications/new/club");
-    await page.waitForLoadState("networkidle");
+    await userListResponsePromise;
 
     // Fill form
     const summaryInput = page.getByLabel("概要", { exact: true });
