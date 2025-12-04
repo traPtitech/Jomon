@@ -16,7 +16,7 @@
           flat
           @update:model-value="menu = false"
         />
-        <v-autocomplete
+        <v-select
           ref="traPID"
           v-model="traPID"
           :rules="[
