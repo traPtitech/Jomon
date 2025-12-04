@@ -1,6 +1,6 @@
 import "@mdi/font/css/materialdesignicons.css";
 import { createVuetify } from "vuetify";
-// import "vuetify/styles"; // Removed as vite-plugin-vuetify handles this
+import "vuetify/styles";
 import light from "./theme";
 
 export default createVuetify({
