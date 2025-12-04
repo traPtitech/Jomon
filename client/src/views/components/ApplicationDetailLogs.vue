@@ -3,16 +3,37 @@
     <h1>申請ログ</h1>
     <v-timeline density="compact" side="end">
       <template v-for="(log, index) in logs" :key="index">
-        <comment-log v-if="log.log_type === `comment`" :log="log" />
-        <status-log v-else-if="log.log_type === `state`" :log="log" />
-        <change-log v-else-if="log.log_type === `application`" :log="log" />
-        <refund-log
+        <v-timeline-item
+          v-if="log.log_type === `comment`"
+          dot-color="purple"
+          size="small"
+        >
+          <comment-log :log="log" />
+        </v-timeline-item>
+        <v-timeline-item
+          v-else-if="log.log_type === `state`"
+          dot-color="red"
+          size="small"
+        >
+          <status-log :log="log" />
+        </v-timeline-item>
+        <v-timeline-item
+          v-else-if="log.log_type === `application`"
+          dot-color="purple"
+          size="small"
+        >
+          <change-log :log="log" />
+        </v-timeline-item>
+        <v-timeline-item
           v-else-if="
             log.log_type === `repayment` &&
             !(log.content.repaid_at === `` || log.content.repaid_at === null)
           "
-          :log="log"
-        />
+          dot-color="grey"
+          size="small"
+        >
+          <refund-log :log="log" />
+        </v-timeline-item>
       </template>
     </v-timeline>
     <new-comment />

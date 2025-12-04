@@ -4,6 +4,7 @@
       :size="size || 'default'"
       :color="chip_color"
       :class="text_color"
+      variant="flat"
       label
     >
       {{ state_ja }}
@@ -61,13 +62,13 @@ const chip_color = computed(() => {
 
 const text_color = computed(() => {
   switch (props.state) {
-    case "rejected":
-    default:
-      return "text-white";
     case "submitted":
+      return "text-black";
+    case "rejected":
     case "fix_required":
     case "accepted":
     case "fully_repaid":
+    default:
       return "text-white";
   }
 });

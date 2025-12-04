@@ -1,6 +1,6 @@
 <!-- ここはログの最小単位の表示を制御-->
 <template>
-  <v-timeline-item color="grey" :class="$style.text">
+  <div :class="$style.text">
     <icon :user="log.content.repaid_by_user.trap_id" :size="25" />
     <strong>
       {{ log.content.repaid_by_user.trap_id }}
@@ -15,7 +15,7 @@
     </strong>
     に払い戻しました。
     {{ dayPrint(log.content.created_at) }}
-  </v-timeline-item>
+  </div>
 </template>
 
 <script setup lang="ts">

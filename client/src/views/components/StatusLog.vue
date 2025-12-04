@@ -1,5 +1,5 @@
 <template>
-  <v-timeline-item color="red" large>
+  <div>
     <div :class="$style.text">
       <icon :user="log.content.update_user.trap_id" :size="25" />
       {{ log.content.update_user.trap_id }}
@@ -10,7 +10,7 @@
     <v-card v-if="log.content.reason !== ''">
       <v-card-text> 理由: {{ log.content.reason }} </v-card-text>
     </v-card>
-  </v-timeline-item>
+  </div>
 </template>
 
 <script setup lang="ts">

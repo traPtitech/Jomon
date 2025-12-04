@@ -1,5 +1,5 @@
 <template>
-  <v-timeline-item color="purple">
+  <div>
     <div :class="$style.text">
       <icon :user="log.content.user.trap_id" :size="24" />
       {{ log.content.user.trap_id }}
@@ -60,7 +60,7 @@
         >編集済</span
       >
     </v-form>
-  </v-timeline-item>
+  </div>
 </template>
 
 <script setup lang="ts">

@@ -1,5 +1,5 @@
 <template>
-  <v-timeline-item color="purple">
+  <div>
     <div :class="$style.text">
       <icon :user="log.content.log.update_user.trap_id" :size="25" />
       {{ `${log.content.log.update_user.trap_id}が修正しました。` }}
@@ -37,7 +37,7 @@
         :now="log.content.log.paid_at"
       />
     </v-card>
-  </v-timeline-item>
+  </div>
 </template>
 
 <script setup lang="ts">
