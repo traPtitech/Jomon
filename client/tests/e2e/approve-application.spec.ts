@@ -106,15 +106,24 @@ test.describe("Approve Application Flow", () => {
     await page.goto(`/applications/${appId}`);
 
     // Wait for the application detail to be loaded
-    await page.waitForResponse(
-      response =>
-        response.url().includes(`/api/applications/${appId}`) &&
-        response.status() === 200
+    // Use a race condition or ensure response waiting starts before goto if possible, 
+    // but since we already called goto, we might have missed it.
+    // Ideally, we should set up the waiter before navigation.
+    
+    // Re-structuring to wait correctly:
+    const responsePromise = page.waitForResponse(
+        response =>
+          response.url().includes(`/api/applications/${appId}`) &&
+          response.status() === 200
     );
+    // Reload page to ensure we catch the request
+    await page.reload();
+    await responsePromise;
 
-    // Verify "承認" button is visible
+    // Verify "承認" button is visible and has correct color (success)
     const approveButton = page.getByRole("button", { name: "承認" });
     await expect(approveButton).toBeVisible();
+    await expect(approveButton).toHaveClass(/bg-success/);
 
     // Handle dialog
     const dialogPromise = new Promise<void>(resolve => {
