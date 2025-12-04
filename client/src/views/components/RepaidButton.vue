@@ -56,7 +56,6 @@ const { core: detailCore } = storeToRefs(applicationDetailStore);
 const { fetchApplicationDetail } = applicationDetailStore;
 
 const date = ref(new Date().toISOString().substr(0, 10));
-const menu = ref(false);
 const dialog = ref(false);
 const traPID = ref<string[]>([]);
 

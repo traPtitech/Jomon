@@ -90,7 +90,7 @@ test.describe("Repaid Application Flow", () => {
         response.url().includes(`/api/applications/${appId}`) &&
         response.status() === 200
     );
-    
+
     await page.goto(`/applications/${appId}`);
     await responsePromise;
 

@@ -106,15 +106,15 @@ test.describe("Approve Application Flow", () => {
     await page.goto(`/applications/${appId}`);
 
     // Wait for the application detail to be loaded
-    // Use a race condition or ensure response waiting starts before goto if possible, 
+    // Use a race condition or ensure response waiting starts before goto if possible,
     // but since we already called goto, we might have missed it.
     // Ideally, we should set up the waiter before navigation.
-    
+
     // Re-structuring to wait correctly:
     const responsePromise = page.waitForResponse(
-        response =>
-          response.url().includes(`/api/applications/${appId}`) &&
-          response.status() === 200
+      response =>
+        response.url().includes(`/api/applications/${appId}`) &&
+        response.status() === 200
     );
     // Reload page to ensure we catch the request
     await page.reload();

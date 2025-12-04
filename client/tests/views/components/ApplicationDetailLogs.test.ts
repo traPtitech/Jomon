@@ -1,4 +1,3 @@
-import { useApplicationDetailStore } from "@/stores/applicationDetail";
 import ApplicationDetailLogs from "@/views/components/ApplicationDetailLogs.vue";
 import { createTestingPinia } from "@pinia/testing";
 import { mount } from "@vue/test-utils";
@@ -55,7 +54,6 @@ describe("ApplicationDetailLogs.vue", () => {
       }
     });
 
-    const store = useApplicationDetailStore();
     // Force re-evaluation of computed if needed, though initial state should work.
     // The computed 'logs' depends on 'core'.
 

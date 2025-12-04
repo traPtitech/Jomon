@@ -3,14 +3,6 @@ import SimpleButton from "@/views/shared/SimpleButton.vue"; // Import mocked com
 import { createTestingPinia } from "@pinia/testing";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it, vi } from "vitest";
-import { createVuetify } from "vuetify";
-import * as components from "vuetify/components";
-import * as directives from "vuetify/directives";
-
-const vuetify = createVuetify({
-  components,
-  directives
-});
 
 // Mock SimpleButton
 vi.mock("@/views/shared/SimpleButton.vue", () => ({
@@ -25,7 +17,7 @@ describe("StateWithReasonButton.vue", () => {
   it("renders correctly with info variant for 'submitted'", () => {
     const wrapper = mount(StateWithReasonButton, {
       global: {
-        plugins: [createTestingPinia({ createSpy: vi.fn }), vuetify]
+        plugins: [createTestingPinia({ createSpy: vi.fn })]
       },
       props: {
         toState: "submitted"
@@ -42,7 +34,7 @@ describe("StateWithReasonButton.vue", () => {
   it("renders correctly with warning variant for 'fix_required'", () => {
     const wrapper = mount(StateWithReasonButton, {
       global: {
-        plugins: [createTestingPinia({ createSpy: vi.fn }), vuetify]
+        plugins: [createTestingPinia({ createSpy: vi.fn })]
       },
       props: {
         toState: "fix_required"
@@ -57,7 +49,7 @@ describe("StateWithReasonButton.vue", () => {
   it("renders correctly with error variant for 'rejected'", () => {
     const wrapper = mount(StateWithReasonButton, {
       global: {
-        plugins: [createTestingPinia({ createSpy: vi.fn }), vuetify]
+        plugins: [createTestingPinia({ createSpy: vi.fn })]
       },
       props: {
         toState: "rejected"

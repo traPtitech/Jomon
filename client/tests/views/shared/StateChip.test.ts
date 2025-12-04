@@ -1,20 +1,12 @@
 import StateChip from "@/views/shared/StateChip.vue";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
-import { createVuetify } from "vuetify";
-import * as components from "vuetify/components";
-import * as directives from "vuetify/directives";
-
-const vuetify = createVuetify({
-  components,
-  directives
-});
 
 describe("StateChip.vue", () => {
   const mountStateChip = (state: string) => {
     return mount(StateChip, {
       global: {
-        plugins: [vuetify]
+        plugins: []
       },
       props: {
         state

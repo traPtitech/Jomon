@@ -1,44 +1,42 @@
-import { useApplicationDetailStore } from "@/stores/applicationDetail";
 import RepaidButton from "@/views/components/RepaidButton.vue";
-import SimpleButton from "@/views/shared/SimpleButton.vue"; // Import mocked component
+import SimpleButton from "@/views/shared/SimpleButton.vue";
 import { createTestingPinia } from "@pinia/testing";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it, vi } from "vitest";
-import { createVuetify } from "vuetify";
-import * as components from "vuetify/components";
-import * as directives from "vuetify/directives";
-
-const vuetify = createVuetify({
-  components,
-  directives
-});
 
 // Mock SimpleButton
 vi.mock("@/views/shared/SimpleButton.vue", () => ({
   default: {
-    name: "SimpleButton", // Explicit name for finding
+    name: "SimpleButton",
     template:
       '<button class="simple-button" @click="$emit(\'click\')"><slot/></button>',
     props: ["label", "disabled", "variant"]
   }
 }));
 
+// Mock v-dialog to render content directly
+const VDialog = {
+  template: '<div><slot name="activator" :props="{}"></slot><slot></slot></div>'
+};
+
 describe("RepaidButton.vue", () => {
   it("renders button correctly", () => {
     const wrapper = mount(RepaidButton, {
       global: {
-        plugins: [createTestingPinia({ createSpy: vi.fn }), vuetify]
+        plugins: [createTestingPinia({ createSpy: vi.fn })],
+        stubs: {
+          VDialog: VDialog
+        }
       }
     });
 
-    // Find by imported component definition (which is the mock)
     const btn = wrapper.findComponent(SimpleButton);
     expect(btn.exists()).toBe(true);
     expect(btn.props("label")).toBe("払い戻し済みのユーザーを選択");
     expect(btn.props("variant")).toBe("done");
   });
 
-  it("computes repaidToTraPId correctly from logs", () => {
+  it("disables OK button when no user is selected", async () => {
     const wrapper = mount(RepaidButton, {
       global: {
         plugins: [
@@ -48,44 +46,29 @@ describe("RepaidButton.vue", () => {
               applicationDetail: {
                 core: {
                   repayment_logs: [
-                    {
-                      repaid_to_user: { trap_id: "user1" },
-                      repaid_at: null
-                    },
-                    {
-                      repaid_to_user: { trap_id: "user2" },
-                      repaid_at: "2023-01-01"
-                    }
+                    { repaid_to_user: { trap_id: "user1" }, repaid_at: null }
                   ]
                 }
               }
             }
-          }),
-          vuetify
-        ]
+          })
+        ],
+        stubs: {
+          VDialog: VDialog
+        }
       }
     });
 
-    // VSelect might be inside VCard which is inside VDialog.
-    // Vuetify's VDialog activator renders, but content is lazy.
-    // We need to find the VSelect. Since we removed 'attach', it might be tricky if not rendered.
-    // But RepaidButton has the VSelect inside the VCard directly (template structure).
-    // Wait, VDialog content is NOT rendered until opened by default.
-    // We need to force render or open it.
-    // Or simply check the VM state if possible, but better to simulate opening.
+    const buttons = wrapper.findAllComponents(SimpleButton);
+    const okBtn = buttons.find(b => b.props("label") === "OK");
 
-    // In RepaidButton.vue, VDialog has v-model="dialog".
-    // We can set that to true.
+    expect(okBtn).toBeDefined();
+    expect(okBtn?.props("disabled")).toBe(true);
 
+    // Select user
     const select = wrapper.findComponent({ name: "VSelect" });
-    // If select is not found, it's likely because dialog is closed.
-    // However, previously we saw it failed.
+    await select.setValue(["user1"]);
 
-    // Let's check computed property directly via vm if possible,
-    // or stub VDialog to render content immediately.
-
-    // For now, let's assume we can access the internal state or force render.
+    expect(okBtn?.props("disabled")).toBe(false);
   });
-
-  // Refactor to test logic through store or by forcing dialog open
 });
