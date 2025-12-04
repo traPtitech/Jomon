@@ -3,7 +3,7 @@
   <div :class="$style.container">
     <div :class="$style.header">
       <div :class="$style.title">
-        <h1>{{ returnType(detailCore.current_detail.type) }}申請</h1>
+        <h1>{{ applicationType(detailCore.current_detail.type) }}申請</h1>
         <state-chip :state="detailCore.current_state" />
       </div>
       <state-button-controller />
@@ -12,7 +12,7 @@
     <div :class="$style.section">
       <div :class="$style.section_title">申請日</div>
       <div :class="$style.section_item">
-        {{ returnDate(detailCore.created_at) }}
+        {{ dayPrint(detailCore.created_at) }}
       </div>
     </div>
 
@@ -34,7 +34,7 @@
     <div :class="$style.section">
       <div :class="$style.section_title">支払日</div>
       <div :class="$style.section_item">
-        {{ returnDate(detailCore.current_detail.paid_at) }}
+        {{ dayPrint(detailCore.current_detail.paid_at) }}
       </div>
     </div>
 
@@ -60,7 +60,7 @@
 
     <div :class="$style.section">
       <div :class="$style.section_title">
-        {{ returnRemarksTitle(detailCore.current_detail.type) }}
+        {{ remarksTitle(detailCore.current_detail.type) }}
       </div>
       <!-- eslint-disable-next-line vue/no-v-html -->
       <div :class="$style.section_item" v-html="rendered" />
@@ -96,18 +96,6 @@ const applicationDetailStore = useApplicationDetailStore();
 const { core: detailCore } = storeToRefs(applicationDetailStore);
 
 const rendered = ref("");
-
-const returnDate = (date: string) => {
-  return dayPrint(date);
-};
-
-const returnType = (type: string) => {
-  return applicationType(type);
-};
-
-const returnRemarksTitle = (type: string) => {
-  return remarksTitle(type);
-};
 
 // Watch for changes in remarks to re-render markdown
 watch(
