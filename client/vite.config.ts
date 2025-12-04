@@ -2,7 +2,7 @@
 import vue from "@vitejs/plugin-vue";
 import path from "path";
 import { fileURLToPath } from "url";
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import vuetify from "vite-plugin-vuetify";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -36,7 +36,6 @@ export default defineConfig({
       }
     }
   },
-  // @ts-expect-error: test option is not in UserConfigExport
   test: {
     globals: true,
     environment: "happy-dom",
