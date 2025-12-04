@@ -4,7 +4,7 @@
       <template #activator="{ props }">
         <simple-button
           :label="'払い戻し済みのユーザーを選択'"
-          :variant="'info'"
+          :variant="'success'"
           v-bind="props"
         />
       </template>

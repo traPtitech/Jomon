@@ -56,9 +56,12 @@ const { logs } = storeToRefs(applicationDetailStore);
 <style lang="scss" module>
 .container {
   :global {
+    .v-timeline--density-compact .v-timeline-item {
+      min-height: auto !important;
+    }
     .v-timeline-item__body {
       padding-block-start: 0 !important;
-      padding-block-end: 12px !important;
+      padding-block-end: 8px !important;
     }
   }
 }

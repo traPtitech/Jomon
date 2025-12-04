@@ -27,6 +27,5 @@ const onClick = (e: Event) => {
 <style lang="scss" module>
 .button {
   margin: 4px;
-  color: white !important;
 }
 </style>
