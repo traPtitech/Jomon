@@ -1,5 +1,6 @@
 ## build backend
-FROM golang:1.17.5-alpine as server-build
+## build backend
+FROM golang:1.22-alpine as server-build
 
 WORKDIR /github.com/traPtitech/Jomon
 COPY go.mod go.sum ./
@@ -13,7 +14,7 @@ COPY ./model ./model
 RUN go build -o /Jomon -ldflags "-s -w"
 
 ## build frontend
-FROM node:13.12.0-alpine as client-build
+FROM node:22-alpine as client-build
 WORKDIR /github.com/traPtitech/Jomon/client
 COPY ./client/package.json ./client/package-lock.json ./
 RUN npm ci
