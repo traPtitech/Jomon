@@ -1,7 +1,7 @@
 <template>
   <div :class="$style.container">
     <h1>申請ログ</h1>
-    <v-timeline dense clipped>
+    <v-timeline density="compact" side="end">
       <template v-for="(log, index) in logs" :key="index">
         <comment-log v-if="log.log_type === `comment`" :log="log" />
         <status-log v-else-if="log.log_type === `state`" :log="log" />

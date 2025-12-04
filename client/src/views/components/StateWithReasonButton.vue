@@ -6,7 +6,13 @@
           :label="
             toStateName(toState) + (toState === 'submitted' ? 'に戻す' : '')
           "
-          :variant="toState === 'submitted' ? 'warning' : 'error'"
+          :variant="
+            toState === 'submitted'
+              ? 'primary'
+              : toState === 'fix_required'
+                ? 'warning'
+                : 'error'
+          "
           v-bind="activatorProps"
         />
       </template>

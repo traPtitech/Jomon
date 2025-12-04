@@ -45,15 +45,15 @@ const state_ja = computed(() => {
 const chip_color = computed(() => {
   switch (props.state) {
     case "submitted":
-      return "yellow";
+      return "warning";
     case "rejected":
       return "grey";
     case "fix_required":
-      return "red";
+      return "error";
     case "accepted":
-      return "blue";
+      return "info";
     case "fully_repaid":
-      return "green";
+      return "success";
     default:
       return "white";
   }
@@ -61,13 +61,13 @@ const chip_color = computed(() => {
 
 const text_color = computed(() => {
   switch (props.state) {
-    case "submitted":
     case "rejected":
-    case "fully_repaid":
     default:
-      return "text-black";
+      return "text-white";
+    case "submitted":
     case "fix_required":
     case "accepted":
+    case "fully_repaid":
       return "text-white";
   }
 });

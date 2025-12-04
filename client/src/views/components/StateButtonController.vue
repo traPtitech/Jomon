@@ -1,6 +1,6 @@
 <template>
   <div v-if="displayAcceptBottom" :class="$style.button_container">
-    <simple-button :label="'承認'" @click="accept()" />
+    <simple-button :label="'承認'" :variant="'success'" @click="accept()" />
     <with-reason-button to-state="fix_required" />
     <with-reason-button to-state="rejected" />
   </div>
