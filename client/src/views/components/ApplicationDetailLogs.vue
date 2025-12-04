@@ -57,11 +57,12 @@ const { logs } = storeToRefs(applicationDetailStore);
 .container {
   :global {
     .v-timeline--density-compact .v-timeline-item {
-      min-height: auto !important;
+      min-height: 0 !important;
     }
     .v-timeline-item__body {
       padding-block-start: 0 !important;
-      padding-block-end: 8px !important;
+      padding-block-end: 0 !important;
+      margin-bottom: 4px !important;
     }
   }
 }

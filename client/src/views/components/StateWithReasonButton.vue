@@ -43,14 +43,9 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer />
-            <simple-button
-              :label="'戻る'"
-              :variant="'secondary'"
-              @click="isDialogOpen = false"
-            />
+            <simple-button :label="'戻る'" @click="isDialogOpen = false" />
             <simple-button
               :label="toStateName(toState) + 'にする'"
-              :variant="'secondary'"
               :disabled="!valid"
               @click="postReason"
             />

@@ -52,8 +52,9 @@ const chip_color = computed(() => {
     case "fix_required":
       return "warning";
     case "accepted":
-    case "fully_repaid":
       return "success";
+    case "fully_repaid":
+      return "done";
     default:
       return "white";
   }
