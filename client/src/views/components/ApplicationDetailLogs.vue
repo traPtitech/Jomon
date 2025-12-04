@@ -1,40 +1,28 @@
 <template>
   <div :class="$style.container">
     <h1>申請ログ</h1>
-    <v-timeline
-      density="compact"
-      side="end"
-      align="top"
-      line-color="grey"
-      line-thickness="2"
-    >
+    <v-timeline density="compact" side="end">
       <template v-for="(log, index) in logs" :key="index">
         <v-timeline-item
           v-if="log.log_type === `comment`"
           dot-color="purple"
           size="small"
         >
-          <v-sheet color="transparent" border="0">
-            <comment-log :log="log" />
-          </v-sheet>
+          <comment-log :log="log" />
         </v-timeline-item>
         <v-timeline-item
           v-else-if="log.log_type === `state`"
           dot-color="red"
           size="small"
         >
-          <v-sheet color="transparent" border="0">
-            <status-log :log="log" />
-          </v-sheet>
+          <status-log :log="log" />
         </v-timeline-item>
         <v-timeline-item
           v-else-if="log.log_type === `application`"
           dot-color="purple"
           size="small"
         >
-          <v-sheet color="transparent" border="0">
-            <change-log :log="log" />
-          </v-sheet>
+          <change-log :log="log" />
         </v-timeline-item>
         <v-timeline-item
           v-else-if="
@@ -44,9 +32,7 @@
           dot-color="grey"
           size="small"
         >
-          <v-sheet color="transparent" border="0">
-            <refund-log :log="log" />
-          </v-sheet>
+          <refund-log :log="log" />
         </v-timeline-item>
       </template>
     </v-timeline>
@@ -69,11 +55,5 @@ const { logs } = storeToRefs(applicationDetailStore);
 
 <style lang="scss" module>
 .container {
-  :global {
-    .v-timeline-divider__line {
-      min-height: 100%;
-      background-color: #9e9e9e; // $color-grey
-    }
-  }
 }
 </style>
