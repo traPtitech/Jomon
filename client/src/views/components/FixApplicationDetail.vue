@@ -1,6 +1,6 @@
 <template>
   <div :class="$style.container">
-    <v-form ref="form" v-model="valid" lazy-validation>
+    <v-form ref="formRef" v-model="valid" lazy-validation>
       <div>
         <div :class="$style.header">
           <h1 :class="$style.title">
@@ -15,16 +15,16 @@
               single-line
               dense
               :class="$style.selector"
-            ></v-select>
+            />
             申請
           </h1>
 
           <div>
-            <div>申請日: {{ returnDate(this.detail.core.created_at) }}</div>
+            <div>申請日: {{ returnDate(detailCore.created_at) }}</div>
             <div>
               申請者:
-              <Icon :user="this.detail.core.applicant.trap_id" :size="20" />
-              {{ this.detail.core.applicant.trap_id }}
+              <Icon :user="detailCore.applicant.trap_id" :size="20" />
+              {{ detailCore.applicant.trap_id }}
             </div>
           </div>
         </div>
@@ -34,8 +34,8 @@
           :rules="nullRules"
           label="概要"
           filled
-          :placeholder="returnTitlePlaceholder(this.type_object.type)"
-        ></v-text-field>
+          :placeholder="returnTitlePlaceholder(type_object.type)"
+        />
 
         <v-menu
           v-model="menu"
@@ -43,7 +43,7 @@
           transition="scale-transition"
           offset-y
         >
-          <template v-slot:activator="{ on }">
+          <template #activator="{ props }">
             <v-text-field
               v-model="computedDateFormatted"
               :rules="nullRules"
@@ -51,14 +51,14 @@
               filled
               readonly
               placeholder="2020年5月2日"
-              v-on="on"
-            ></v-text-field>
+              v-bind="props"
+            />
           </template>
           <v-date-picker
             v-model="paid_at_change"
             no-title
             @input="menu = false"
-          ></v-date-picker>
+          />
         </v-menu>
 
         <v-text-field
@@ -68,13 +68,14 @@
           label="支払金額"
           placeholder="100"
           suffix="円"
-        ></v-text-field>
+        />
 
         <v-autocomplete
           ref="traPID"
           v-model="repaid_to_id_change"
           :rules="[
-            () => !(repaid_to_id_change === 0) || '返金対象者は一人以上必要です'
+            () =>
+              repaid_to_id_change.length > 0 || '返金対象者は一人以上必要です'
           ]"
           label="返金対象者"
           filled
@@ -89,16 +90,16 @@
           v-model="remarks_change"
           :rules="nullRules"
           filled
-          :label="returnRemarksTitle(this.type_object.type)"
-          :placeholder="returnRemarksPlaceholder(this.type_object.type)"
-          :hint="returnRemarksHint(this.type_object.type)"
+          :label="returnRemarksTitle(type_object.type)"
+          :placeholder="returnRemarksPlaceholder(type_object.type)"
+          :hint="returnRemarksHint(type_object.type)"
           auto-grow
-        ></v-textarea>
+        />
 
         <div>
           <h3>画像</h3>
           <div :class="$style.image_container">
-            <div :key="path" v-for="(path, index) in this.detail.core.images">
+            <div v-for="(path, index) in detailCore.images" :key="path">
               <div v-if="images_change[index]">
                 <img :src="`/api/images/${path}`" />
                 <v-btn
@@ -140,187 +141,169 @@
         color="green darken-1"
         text
         @click="afterChange()"
-        >OK
+      >
+        OK
       </v-btn>
     </v-snackbar>
   </div>
 </template>
 
-<script>
-import axios from "axios";
-import Icon from "@/views/shared/Icon";
-import ImageUploader from "@/views/shared/ImageUploader";
-import SimpleButton from "@/views/shared/SimpleButton";
-import { mapActions } from "vuex";
-import { mapState, mapMutations } from "vuex";
-import {
-  titlePlaceholder,
-  remarksPlaceholder,
-  remarksHint
-} from "@/use/inputFormText";
+<script setup lang="ts">
+import { useApplicationDetailStore } from "@/stores/applicationDetail";
+import { useUserListStore } from "@/stores/userList";
 import { remarksTitle } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
+import {
+  remarksHint,
+  remarksPlaceholder,
+  titlePlaceholder
+} from "@/use/inputFormText";
+import Icon from "@/views/shared/Icon.vue";
+import ImageUploader from "@/views/shared/ImageUploader.vue";
+import SimpleButton from "@/views/shared/SimpleButton.vue";
+import axios from "axios";
+import { storeToRefs } from "pinia";
+import { computed, onMounted, reactive, ref, useTemplateRef } from "vue";
+import { useRoute } from "vue-router";
 
-export default {
-  components: {
-    Icon,
-    ImageUploader,
-    SimpleButton
-  },
-  data: function () {
-    return {
-      response: {
-        application_id: null,
-        applicant: { trapid: null },
-        created_at: null,
-        current_detail: {
-          title: null,
-          type: null,
-          amount: 0,
-          remarks: null,
-          created_at: null,
-          paid_at: null
-        }
-      },
-      type_object: { jpn: "", type: "" },
-      types: [
-        { jpn: "部費利用", type: "club" },
-        { jpn: "大会等旅費補助", type: "contest" },
-        { jpn: "イベント交通費補助", type: "event" },
-        { jpn: "渉外交通費補助", type: "public" }
-      ],
-      snackbar: false,
-      menu: false,
-      valid: true,
-      amountRules: [
-        v => !!v || "",
-        v => !!String(v).match("^[1-9][0-9]*$") || "金額が不正です"
-      ],
-      nullRules: [v => !!v || ""],
-      type_change: "",
-      title_change: "",
-      remarks_change: "",
-      paid_at_change: "",
-      amount_change: "",
-      repaid_to_id_change: [],
-      Images: [],
-      imageBlobs: [],
-      // todo返金リスト配列
-      changeRules: [v => (v !== this.detail.core.repayment_logs && !!v) || ""]
+const route = useRoute();
+const applicationDetailStore = useApplicationDetailStore();
+const userListStore = useUserListStore();
+
+const { core: detailCore } = storeToRefs(applicationDetailStore);
+const { userList } = storeToRefs(userListStore);
+const { fetchApplicationDetail, deleteFix } = applicationDetailStore;
+const { fetchUserList } = userListStore;
+
+import { VForm } from "vuetify/components";
+
+const formRef = useTemplateRef<VForm>("formRef");
+
+const response = reactive({
+  application_id: null,
+  applicant: { trapid: null },
+  created_at: null,
+  current_detail: {
+    title: null,
+    type: null,
+    amount: 0,
+    remarks: null,
+    created_at: null,
+    paid_at: null
+  }
+});
+
+const type_object = ref({ jpn: "", type: "" });
+const types = [
+  { jpn: "部費利用", type: "club" },
+  { jpn: "大会等旅費補助", type: "contest" },
+  { jpn: "イベント交通費補助", type: "event" },
+  { jpn: "渉外交通費補助", type: "public" }
+];
+
+const snackbar = ref(false);
+const menu = ref(false);
+const valid = ref(true);
+
+const amountRules = [
+  (v: unknown) => !!v || "",
+  (v: unknown) => !!String(v).match("^[1-9][0-9]*$") || "金額が不正です"
+];
+const nullRules = [(v: unknown) => !!v || ""];
+
+const title_change = ref("");
+const remarks_change = ref("");
+const paid_at_change = ref("");
+const amount_change = ref("");
+const repaid_to_id_change = ref<string[]>([]);
+const imageBlobs = ref<File[]>([]);
+const images_change = ref<boolean[]>([]);
+
+// const changeRules = [
+//   (v: unknown) => (v !== detailCore.value.repayment_logs && !!v) || ""
+// ];
+
+const formatDate = (date: string) => {
+  if (!date) return null;
+  const [year, month, day] = date.split("-");
+  return `${year}年${month.replace(/^0/, "")}月${day.replace(/^0/, "")}日`;
+};
+
+const computedDateFormatted = computed(() => formatDate(paid_at_change.value));
+
+const traPIDs = computed(() => {
+  return userList.value.map(user => user.trap_id);
+});
+
+const returnDate = (date: string) => dayPrint(date);
+const returnRemarksTitle = (type: string) => remarksTitle(type);
+const returnTitlePlaceholder = (type: string) => titlePlaceholder(type);
+const returnRemarksPlaceholder = (type: string) => remarksPlaceholder(type);
+const returnRemarksHint = (type: string) => remarksHint(type);
+
+const deleteImage = (index: number) => {
+  images_change.value[index] = false;
+};
+
+const cancelDeleteImage = (index: number) => {
+  images_change.value[index] = true;
+};
+
+const afterChange = () => {
+  snackbar.value = false;
+  deleteFix();
+};
+
+const submit = async () => {
+  const validateResult = await formRef.value?.validate();
+  if (validateResult?.valid) {
+    images_change.value.forEach((flag, index) => {
+      if (!flag) {
+        axios.delete("/api/images/" + detailCore.value.images[index]);
+      }
+    });
+    const form = new FormData();
+    const date = new Date(paid_at_change.value);
+    const details = {
+      type: type_object.value.type,
+      title: title_change.value,
+      remarks: remarks_change.value,
+      paid_at: date.toISOString(),
+      amount: Number(amount_change.value),
+      repaid_to_id: repaid_to_id_change.value
     };
-  },
-  async created() {
-    this.title_change = this.detail.core.current_detail.title;
-    this.type_object.type = this.detail.core.current_detail.type;
-    this.title_change = this.detail.core.current_detail.title;
-    this.remarks_change = this.detail.core.current_detail.remarks;
-    this.paid_at_change = this.detail.core.current_detail.paid_at;
-    this.amount_change = this.detail.core.current_detail.amount;
-    this.images_change = new Array(this.detail.core.images.length);
-    this.images_change.fill(true);
-    await this.getUsers();
-    const trap_ids = this.detail.core.repayment_logs.map(
-      log => log.repaid_to_user.trap_id
+    form.append("details", JSON.stringify(details));
+    imageBlobs.value.forEach(imageBlob => {
+      form.append("images", imageBlob);
+    });
+    const res = await axios.patch(
+      "/api/applications/" + detailCore.value.application_id,
+      form,
+      {
+        headers: { "content-type": "multipart/form-data" }
+      }
     );
-    this.repaid_to_id_change = trap_ids;
-  },
-  mounted() {},
-  computed: {
-    ...mapState({ detail: "application_detail_paper" }),
-    computedDateFormatted() {
-      return this.formatDate(this.paid_at_change);
-    },
-    me() {
-      return this.$stor.me;
-    },
-    form() {
-      return {
-        repaid_to_id_change: this.repaid_to_id_change
-      };
-    },
-    traPIDs() {
-      let trap_ids = [];
-      for (let i = 0; i < this.$store.state.userList.length - 1; i++) {
-        trap_ids[i] = this.$store.state.userList[i].trap_id;
-      }
-      return trap_ids;
-    }
-  },
-
-  methods: {
-    ...mapMutations(["deleteFix"]),
-    ...mapActions({
-      getUsers: "getUserList",
-      getApplicationDetail: "getApplicationDetail"
-    }),
-    async submit() {
-      if (this.$refs.form.validate()) {
-        this.images_change.forEach((flag, index) => {
-          if (!flag) {
-            axios.delete("/api/images/" + this.detail.core.images[index]);
-          }
-        });
-        let form = new FormData();
-        let date = new Date(this.paid_at_change);
-        let details = {
-          type: this.type_object.type,
-          title: this.title_change,
-          remarks: this.remarks_change,
-          paid_at: date.toISOString(),
-          amount: Number(this.amount_change),
-          repaid_to_id: this.repaid_to_id_change
-        };
-        form.append("details", JSON.stringify(details));
-        this.imageBlobs.forEach(imageBlob => {
-          form.append("images", imageBlob);
-        });
-        const response = await axios.patch(
-          "/api/applications/" + this.detail.core.application_id,
-          form,
-          {
-            headers: { "content-type": "multipart/form-data" }
-          }
-        );
-        this.response = response.data;
-        await this.getApplicationDetail(this.$route.params.id);
-        this.snackbar = true;
-      }
-    },
-    formatDate(date) {
-      if (!date) return null;
-
-      const [year, month, day] = date.split("-");
-      return `${year}年${month.replace(/^0/, "")}月${day.replace(/^0/, "")}日`;
-    },
-    returnDate: function (date) {
-      return dayPrint(date);
-    },
-    returnRemarksTitle: function (type) {
-      return remarksTitle(type);
-    },
-    returnTitlePlaceholder: function (type) {
-      return titlePlaceholder(type);
-    },
-    returnRemarksPlaceholder: function (type) {
-      return remarksPlaceholder(type);
-    },
-    returnRemarksHint: function (type) {
-      return remarksHint(type);
-    },
-    deleteImage(index) {
-      this.images_change[index] = false;
-      this.$forceUpdate();
-    },
-    cancelDeleteImage(index) {
-      this.images_change[index] = true;
-      this.$forceUpdate();
-    },
-    afterChange() {
-      this.snackbar = false;
-      this.deleteFix();
-    }
+    Object.assign(response, res.data);
+    await fetchApplicationDetail(route.params.id as string);
+    snackbar.value = true;
   }
 };
+
+onMounted(async () => {
+  title_change.value = detailCore.value.current_detail.title;
+  type_object.value.type = detailCore.value.current_detail.type;
+  // title_change.value = detailCore.value.current_detail.title; // Duplicate in original
+  remarks_change.value = detailCore.value.current_detail.remarks;
+  paid_at_change.value = detailCore.value.current_detail.paid_at;
+  amount_change.value = String(detailCore.value.current_detail.amount);
+  images_change.value = new Array(detailCore.value.images.length).fill(true);
+
+  await fetchUserList();
+  const trap_ids = detailCore.value.repayment_logs.map(
+    log => log.repaid_to_user.trap_id
+  );
+  repaid_to_id_change.value = trap_ids;
+});
 </script>
 
 <style lang="scss" module>
@@ -328,7 +311,9 @@ export default {
   height: fit-content;
   margin: 12px;
   padding: 12px;
-  box-shadow: 0 3px 1px -2px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%),
+  box-shadow:
+    0 3px 1px -2px rgb(0 0 0 / 20%),
+    0 2px 2px 0 rgb(0 0 0 / 14%),
     0 1px 5px 0 rgb(0 0 0 / 12%);
 }
 .header {

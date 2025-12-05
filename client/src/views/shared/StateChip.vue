@@ -1,11 +1,10 @@
 <template>
   <div :class="$style.container">
     <v-chip
-      :x-small="size === `x-small`"
-      :small="size === `small`"
-      :large="size === `large`"
-      :x-large="size === `x-large`"
-      :class="chip_style"
+      :size="size || 'default'"
+      :color="chip_color"
+      :class="text_color"
+      variant="flat"
       label
     >
       {{ state_ja }}
@@ -13,53 +12,66 @@
   </div>
 </template>
 
-<script>
-export default {
-  computed: {
-    state_ja() {
-      switch (this.state) {
-        case "submitted":
-          return "承認待ち";
-        case "fix_required":
-          return "要修正";
-        case "accepted":
-          return "承認済み";
-        case "fully_repaid":
-          return "返済完了";
-        case "rejected":
-          return "却下";
-        default:
-          return "ERROR";
-      }
-    },
-    chip_style() {
-      switch (this.state) {
-        case "submitted":
-          return "yellow black--text";
-        case "rejected":
-          return "gray black--text";
-        case "fix_required":
-          return "red white--text";
-        case "accepted":
-          return "blue white--text";
-        case "fully_repaid":
-          return "green black--text";
-        default:
-          return "white black--text";
-      }
-    }
-  },
+<script setup lang="ts">
+import { computed } from "vue";
 
-  props: {
-    state: {
-      type: String
-    },
-    size: {
-      type: String,
-      default: ""
-    }
+const props = withDefaults(
+  defineProps<{
+    state?: string;
+    size?: string;
+  }>(),
+  {
+    state: "",
+    size: ""
   }
-};
+);
+
+const state_ja = computed(() => {
+  switch (props.state) {
+    case "submitted":
+      return "承認待ち";
+    case "fix_required":
+      return "要修正";
+    case "accepted":
+      return "承認済み";
+    case "fully_repaid":
+      return "返済完了";
+    case "rejected":
+      return "却下";
+    default:
+      return "ERROR";
+  }
+});
+
+const chip_color = computed(() => {
+  switch (props.state) {
+    case "submitted":
+      return "info";
+    case "rejected":
+      return "grey";
+    case "fix_required":
+      return "warning";
+    case "accepted":
+      return "success";
+    case "fully_repaid":
+      return "done";
+    default:
+      return "white";
+  }
+});
+
+const text_color = computed(() => {
+  switch (props.state) {
+    case "fix_required":
+      return "text-black";
+    case "submitted":
+    case "rejected":
+    case "accepted":
+    case "fully_repaid":
+    default:
+      return "text-white";
+  }
+});
 </script>
 
 <style lang="scss" module>

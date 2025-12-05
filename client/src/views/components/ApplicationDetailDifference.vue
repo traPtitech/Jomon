@@ -4,65 +4,82 @@
     <div>
       <div :class="$style.before">
         <div :class="$style.mark">−</div>
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <div v-html="renderedBefore" />
       </div>
       <div :class="$style.after">
         <div :class="$style.mark">+</div>
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <div v-html="renderedAfter" />
       </div>
     </div>
   </div>
 </template>
-<script>
+<script setup lang="ts">
 import { applicationType } from "@/use/applicationDetail";
-import { numberFormat, dayPrint } from "@/use/dataFormat";
+import { dayPrint, numberFormat } from "@/use/dataFormat";
 import { render } from "@/use/markdown";
+import { onMounted, ref } from "vue";
 
-export default {
-  name: "ApplicationDetailDifference",
-  props: {
-    item: String,
+const props = withDefaults(
+  defineProps<{
+    item?: string;
+    pre?: string | number | null;
+    now?: string | number | null;
+  }>(),
+  {
+    item: "",
     pre: null,
     now: null
-  },
-  data: () => {
-    return { changedItem: "", renderedBefore: "", renderedAfter: "" };
-  },
-  async mounted() {
-    this.changedItem = (item => {
-      switch (item) {
-        case "type":
-          return "申請様式";
-        case "title":
-          return "タイトル";
-        case "remarks":
-          return "詳細";
-        case "amount":
-          return "金額";
-        case "paid_at":
-          return "支払日";
-      }
-    })(this.item);
-    const preRender = (item, data) => {
-      switch (item) {
-        case "type":
-          return applicationType(data) + "申請";
-        case "title":
-          return data;
-        case "remarks":
-          return data;
-        case "amount":
-          return numberFormat(data) + "円";
-        case "paid_at":
-          return dayPrint(data);
-        default:
-          return "error";
-      }
-    };
-    this.renderedBefore = await render(preRender(this.item, this.pre));
-    this.renderedAfter = await render(preRender(this.item, this.now));
   }
-};
+);
+
+const changedItem = ref("");
+const renderedBefore = ref("");
+const renderedAfter = ref("");
+
+onMounted(async () => {
+  switch (props.item) {
+    case "type":
+      changedItem.value = "申請様式";
+      break;
+    case "title":
+      changedItem.value = "タイトル";
+      break;
+    case "remarks":
+      changedItem.value = "詳細";
+      break;
+    case "amount":
+      changedItem.value = "金額";
+      break;
+    case "paid_at":
+      changedItem.value = "支払日";
+      break;
+    default:
+      changedItem.value = "";
+  }
+
+  const preRender = (item: string, data: string | number | null) => {
+    if (data === null) return "error";
+    switch (item) {
+      case "type":
+        return applicationType(String(data)) + "申請";
+      case "title":
+        return String(data);
+      case "remarks":
+        return String(data);
+      case "amount":
+        return numberFormat(Number(data)) + "円";
+      case "paid_at":
+        return dayPrint(String(data));
+      default:
+        return "error";
+    }
+  };
+
+  renderedBefore.value = await render(preRender(props.item, props.pre));
+  renderedAfter.value = await render(preRender(props.item, props.now));
+});
 </script>
 
 <style lang="scss" module>

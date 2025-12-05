@@ -1,28 +1,33 @@
 <template>
-  <v-timeline-item color="purple">
+  <div>
     <div :class="$style.text">
       <icon :user="log.content.user.trap_id" :size="24" />
       {{ log.content.user.trap_id }}
       がコメントしました。
       <formatted-date :date="log.content.created_at" :simple="true" />
     </div>
-    <div v-if="log.content.user.trap_id === this.$store.state.me.trap_id">
-      <v-btn icon color="success" :disabled="!comment_readonly">
-        <v-icon @click="commentChange()">mdi-pencil</v-icon>
-      </v-btn>
+    <div v-if="log.content.user.trap_id === trapId">
       <v-btn
-        icon
+        icon="mdi-pencil"
+        size="small"
+        variant="text"
+        color="success"
+        :disabled="!comment_readonly"
+        @click="commentChange()"
+      />
+      <v-btn
+        icon="mdi-delete"
+        size="small"
+        variant="text"
         color="error"
         :disabled="!comment_readonly"
         @click="deleteComment()"
-      >
-        <v-icon>mdi-delete</v-icon>
-      </v-btn>
+      />
     </div>
 
     <v-form v-model="comment_valid">
       <v-textarea
-        ref="comment"
+        ref="commentRef"
         v-model="comment_change"
         label="変更後のコメント"
         :readonly="comment_readonly"
@@ -34,112 +39,117 @@
         :rules="changeRules"
         rows="1"
         auto-grow
-      >
-      </v-textarea>
+      />
 
       <div>
         <v-btn
+          v-if="!comment_readonly"
           :class="$style.button"
           @click="cancelChange"
-          v-if="!comment_readonly"
-          >変更を取消
+        >
+          変更を取消
         </v-btn>
         <v-btn
-          :class="$style.button"
-          @click="putComment"
-          :disabled="!comment_valid"
           v-if="!comment_readonly"
-          >変更を送信
+          :class="$style.button"
+          :disabled="!comment_valid"
+          @click="putComment"
+        >
+          変更を送信
         </v-btn>
       </div>
 
       <span
-        :class="grey_text"
         v-if="log.content.created_at !== log.content.updated_at"
+        :class="$style.grey_text"
         >編集済</span
       >
     </v-form>
-  </v-timeline-item>
+  </div>
 </template>
 
-<script>
-import Icon from "@/views/shared/Icon";
-import FormattedDate from "./FormattedDate";
-import Vue from "vue";
-import { mapActions } from "vuex";
+<script setup lang="ts">
+import { useApplicationDetailStore } from "@/stores/applicationDetail";
+import { useMeStore } from "@/stores/me";
+import { CommentLog } from "@/types/log";
+import Icon from "@/views/shared/Icon.vue";
 import axios from "axios";
+import { storeToRefs } from "pinia";
+import { nextTick, ref, useTemplateRef, watch } from "vue";
+import FormattedDate from "./FormattedDate.vue";
 
-export default {
-  data: function () {
-    return {
-      comment_readonly: true,
-      comment_change: this.log.content.comment,
-      comment_valid: true,
-      changeRules: [v => v !== this.log.content.comment && !!v]
-    };
-  },
-  props: {
-    log: Object
-  },
-  components: {
-    Icon,
-    FormattedDate
-  },
-  watch: {
-    comment_readonly: function () {
-      if (!this.comment_readonly) {
-        let self = this;
-        Vue.nextTick().then(function () {
-          self.$refs.comment.focus();
-        });
-      }
-    }
-  },
-  methods: {
-    ...mapActions(["getApplicationDetail"]),
-    commentChange() {
-      this.comment_readonly = false;
-    },
-    async deleteComment() {
-      await axios
-        .delete(
-          "../api/applications/" +
-            this.$store.state.application_detail_paper.core.application_id +
-            "/comments/" +
-            this.log.content.comment_id
-        )
-        .catch(e => alert(e));
-      alert("コメントを削除しました。");
-      this.getApplicationDetail(
-        this.$store.state.application_detail_paper.core.application_id
-      );
-    },
-    async putComment() {
-      await axios
-        .put(
-          "../api/applications/" +
-            this.$store.state.application_detail_paper.core.application_id +
-            "/comments/" +
-            this.log.content.comment_id,
-          {
-            comment: this.comment_change
-          }
-        )
-        .catch(e => {
-          alert(e);
-          return;
-        });
-      alert("コメントを変更しました");
-      this.comment_readonly = true;
-      this.getApplicationDetail(
-        this.$store.state.application_detail_paper.core.application_id
-      );
-    },
-    cancelChange() {
-      this.comment_readonly = true;
-      this.comment_change = this.log.content.comment;
-    }
+const props = defineProps<{
+  log: CommentLog;
+}>();
+
+const applicationDetailStore = useApplicationDetailStore();
+const meStore = useMeStore();
+
+const { core: detailCore } = storeToRefs(applicationDetailStore);
+const { trapId } = storeToRefs(meStore);
+const { fetchApplicationDetail } = applicationDetailStore;
+
+const comment_readonly = ref(true);
+const comment_change = ref(props.log.content.comment);
+const comment_valid = ref(true);
+const changeRules = [
+  (v: unknown) => (v !== props.log.content.comment && !!v) || ""
+];
+
+import { VTextarea } from "vuetify/components";
+
+const commentRef = useTemplateRef<VTextarea>("commentRef");
+
+watch(comment_readonly, async () => {
+  if (!comment_readonly.value) {
+    await nextTick();
+    commentRef.value?.focus();
   }
+});
+
+const commentChange = () => {
+  comment_readonly.value = false;
+};
+
+const deleteComment = async () => {
+  try {
+    await axios.delete(
+      "/api/applications/" +
+        detailCore.value.application_id +
+        "/comments/" +
+        props.log.content.comment_id
+    );
+  } catch (e) {
+    alert(e);
+    return;
+  }
+  alert("コメントを削除しました。");
+  await fetchApplicationDetail(detailCore.value.application_id);
+};
+
+const putComment = async () => {
+  try {
+    await axios.put(
+      "/api/applications/" +
+        detailCore.value.application_id +
+        "/comments/" +
+        props.log.content.comment_id,
+      {
+        comment: comment_change.value
+      }
+    );
+  } catch (e) {
+    alert(e);
+    return;
+  }
+  alert("コメントを変更しました");
+  comment_readonly.value = true;
+  await fetchApplicationDetail(detailCore.value.application_id);
+};
+
+const cancelChange = () => {
+  comment_readonly.value = true;
+  comment_change.value = props.log.content.comment;
 };
 </script>
 
@@ -150,5 +160,8 @@ export default {
 }
 .button {
   margin: 8px 8px 0 0;
+}
+.grey_text {
+  color: $color-grey;
 }
 </style>

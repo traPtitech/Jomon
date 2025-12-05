@@ -9,31 +9,28 @@
 
           <v-col cols="12" sm="4" class="pt-0 pb-0">
             <div>申請日: {{ returnToday() }}</div>
-            <v-divider></v-divider>
+            <v-divider />
             <div>
               申請者:
-              <Icon :user="this.$store.state.me.trap_id" :size="20" />
-              {{ this.$store.state.me.trap_id }}
+              <Icon :user="trapId" :size="20" />
+              {{ trapId }}
             </div>
             <div>
-              <v-divider></v-divider>
+              <v-divider />
             </div>
           </v-col>
         </v-row>
 
-        <template>
-          <v-divider class="mt-1 mb-2"></v-divider>
-        </template>
+        <v-divider class="mt-1 mb-2" />
 
         <div>
           <v-text-field
+            ref="firstfocus"
             v-model="title"
             :rules="nullRules"
             label="概要"
             filled
-            :placeholder="returnTitlePlaceholder($route.params.type)"
-            ref="firstfocus"
-          ></v-text-field>
+          />
         </div>
 
         <div>
@@ -43,28 +40,26 @@
                 v-model="menu"
                 :close-on-content-click="false"
                 transition="scale-transition"
-                offset-y
+                location="bottom"
                 max-width="290px"
                 min-width="290px"
               >
-                <template v-slot:activator="{ on }">
+                <template #activator="{ props }">
                   <v-text-field
                     v-model="computedDateFormatted"
                     :rules="nullRules"
                     label="支払日"
                     filled
                     readonly
-                    placeholder="2020年5月2日"
-                    v-on="on"
-                    height="10"
-                  ></v-text-field>
+                    v-bind="props"
+                  />
                 </template>
                 <v-date-picker
                   v-model="date"
                   no-title
                   color="primary"
-                  @input="menu = false"
-                ></v-date-picker>
+                  @update:model-value="menu = false"
+                />
               </v-menu>
             </v-col>
           </v-row>
@@ -79,18 +74,16 @@
                 label="支払金額"
                 filled
                 type="number"
-                placeholder="100"
                 class="pa-0"
-                height="25"
                 suffix="円"
-              ></v-text-field>
+              />
             </v-col>
           </v-row>
         </div>
 
         <div>
           <v-autocomplete
-            ref="traPID"
+            ref="traPIDRef"
             v-model="traPID"
             :rules="[
               () => !(traPID.length === 0) || '返金対象者は一人以上必要です'
@@ -98,12 +91,10 @@
             label="返金対象者"
             filled
             :items="traPIDs"
-            placeholder="traQIDs"
             hint="traQ IDの一部入力で候補が表示されます"
             required
             multiple
-          >
-          </v-autocomplete>
+          />
         </div>
 
         <div>
@@ -112,10 +103,9 @@
             :rules="nullRules"
             filled
             :label="returnRemarksTitle($route.params.type)"
-            :placeholder="returnRemarksPlaceholder($route.params.type)"
             :hint="returnRemarksHint($route.params.type)"
             auto-grow
-          ></v-textarea>
+          />
         </div>
 
         <div>
@@ -123,146 +113,160 @@
         </div>
       </v-card>
 
-      <!-- todo focusしていないところのvalidateが機能していない -->
-      <v-btn :disabled="!valid" @click.stop="submit" class="ma-3"
-        >作成する
+      <v-btn
+        :disabled="!valid || loading"
+        :loading="loading"
+        class="ma-3"
+        @click.stop="submit"
+      >
+        作成する
       </v-btn>
     </v-form>
     <!-- ここ作成したらokを押しても押さなくても自動遷移 -->
-    <v-snackbar v-model="snackbar">
-      作成できました
-      <v-btn
-        :to="`/applications/` + response.application_id"
-        color="green darken-1"
-        text
-        @click="snackbar = false"
-        >OK
-      </v-btn>
-    </v-snackbar>
   </v-container>
 </template>
 
-<script>
-import axios from "axios";
-import Icon from "./shared/Icon";
-import ImageUploader from "./shared/ImageUploader";
-import { mapActions, mapGetters } from "vuex";
-import {
-  titlePlaceholder,
-  remarksPlaceholder,
-  remarksHint
-} from "@/use/inputFormText";
-import { remarksTitle, applicationType } from "@/use/applicationDetail";
+<script setup lang="ts">
+import { useMeStore } from "@/stores/me";
+import { useToastStore } from "@/stores/toast";
+import { useUserListStore } from "@/stores/userList";
+import { applicationType, remarksTitle } from "@/use/applicationDetail";
 import { dayPrint } from "@/use/dataFormat";
+import { remarksHint } from "@/use/inputFormText";
+import Icon from "@/views/shared/Icon.vue";
+import ImageUploader from "@/views/shared/ImageUploader.vue";
+import axios from "axios";
+import { storeToRefs } from "pinia";
+import { computed, onMounted, reactive, ref, useTemplateRef } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-export default {
-  data: () => ({
-    response: {
-      application_id: null,
-      applicant: { trapid: null },
-      created_at: null,
-      current_detail: {
-        title: null,
-        type: null,
-        amount: 0,
-        remarks: null,
-        created_at: null,
-        paid_at: null
-      }
-    },
-    snackbar: false,
-    date: null,
-    menu: false,
-    traPID: [],
-    valid: true,
-    title: "",
-    amount: "",
-    remarks: "",
-    imageBlobs: [],
-    amountRules: [
-      v => !!v || "必須の項目です",
-      v => !!String(v).match("^[1-9][0-9]*$") || "金額が不正です"
-    ],
-    nullRules: [v => !!v || "必須の項目です"]
-  }),
-  mounted() {
-    this.$refs.firstfocus.focus();
-  },
-  computed: {
-    ...mapGetters({ traPIDs: "trap_ids" }),
-    computedDateFormatted() {
-      return this.formatDate(this.date);
-    },
-    form() {
-      return {
-        traPID: this.traPID
-      };
-    }
-  },
+const route = useRoute();
+const router = useRouter();
+const meStore = useMeStore();
+const userListStore = useUserListStore();
+const toastStore = useToastStore();
 
-  async created() {
-    await this.getUsers();
-  },
-  methods: {
-    ...mapActions({
-      getUsers: "getUserList"
-    }),
-    submit() {
-      if (this.$refs.form.validate()) {
-        let form = new FormData();
-        let paid_at = new Date(this.date);
-        let details = {
-          type: this.$route.params.type,
-          title: this.title,
-          remarks: this.remarks,
-          paid_at: paid_at.toISOString(),
-          amount: Number(this.amount),
-          repaid_to_id: this.traPID
-        };
-        form.append("details", JSON.stringify(details));
-        this.imageBlobs.forEach(imageBlob => {
-          form.append("images", imageBlob);
-        });
-        axios
-          .post("/api/applications", form, {
-            headers: { "content-type": "multipart/form-data" }
-          })
-          .then(response => {
-            this.response = response.data;
-            this.snackbar = true;
-          });
-      }
-    },
-    formatDate(date) {
-      if (!date) return null;
+const { trapId } = storeToRefs(meStore);
+const { userList } = storeToRefs(userListStore);
+const { fetchUserList } = userListStore;
 
-      const [year, month, day] = date.split("-");
-      return `${year}年${month.replace(/^0/, "")}月${day.replace(/^0/, "")}日`;
-    },
-    returnToday: function () {
-      const date = new Date();
-      return dayPrint(date);
-    },
-    returnType: function (type) {
-      return applicationType(type);
-    },
-    returnRemarksTitle: function (type) {
-      return remarksTitle(type);
-    },
-    returnTitlePlaceholder: function (type) {
-      return titlePlaceholder(type);
-    },
-    returnRemarksPlaceholder: function (type) {
-      return remarksPlaceholder(type);
-    },
-    returnRemarksHint: function (type) {
-      return remarksHint(type);
-    }
-  },
-  props: {},
-  components: {
-    Icon,
-    ImageUploader
+import { VForm, VTextField } from "vuetify/components";
+
+const form = useTemplateRef<VForm>("form");
+const firstfocus = useTemplateRef<VTextField>("firstfocus");
+
+const response = reactive({
+  application_id: null,
+  applicant: { trapid: null },
+  created_at: null,
+  current_detail: {
+    title: null,
+    type: null,
+    amount: 0,
+    remarks: null,
+    created_at: null,
+    paid_at: null
+  }
+});
+
+const date = ref(null);
+const menu = ref(false);
+const traPID = ref<string[]>([]);
+const valid = ref(true);
+const title = ref("");
+const amount = ref("");
+const remarks = ref("");
+const imageBlobs = ref<File[]>([]);
+const loading = ref(false);
+
+const amountRules = [
+  (v: unknown) => !!v || "必須の項目です",
+  (v: unknown) => !!String(v).match("^[1-9][0-9]*$") || "金額が不正です"
+];
+const nullRules = [(v: unknown) => !!v || "必須の項目です"];
+
+const traPIDs = computed(() => {
+  return userList.value.map(user => user.trap_id);
+});
+
+const computedDateFormatted = computed(() => {
+  return formatDate(date.value);
+});
+
+const formatDate = (date: string | number | Date | null) => {
+  if (!date) return null;
+  const d = new Date(date);
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+};
+
+const returnToday = () => {
+  const date = new Date();
+  return dayPrint(date);
+};
+
+const returnType = (type: string | string[]) => {
+  if (Array.isArray(type)) {
+    return applicationType(type[0]);
+  }
+  return applicationType(type);
+};
+
+const returnRemarksTitle = (type: string | string[]) => {
+  if (Array.isArray(type)) {
+    return remarksTitle(type[0]);
+  }
+  return remarksTitle(type);
+};
+
+const returnRemarksHint = (type: string | string[]) => {
+  if (Array.isArray(type)) {
+    return remarksHint(type[0]);
+  }
+  return remarksHint(type);
+};
+
+const submit = async () => {
+  if (loading.value) return;
+  loading.value = true;
+  const validateResult = await form.value?.validate();
+  if (!validateResult?.valid) {
+    loading.value = false;
+    return;
+  }
+
+  const formData = new FormData();
+  const paid_at = new Date(date.value || Date.now());
+  const details = {
+    type: route.params.type,
+    title: title.value,
+    remarks: remarks.value,
+    paid_at: paid_at.toISOString(),
+    amount: Number(amount.value),
+    repaid_to_id: traPID.value
+  };
+  formData.append("details", JSON.stringify(details));
+  imageBlobs.value.forEach(imageBlob => {
+    formData.append("images", imageBlob);
+  });
+  try {
+    const res = await axios.post("/api/applications", formData, {
+      headers: { "content-type": "multipart/form-data" }
+    });
+    Object.assign(response, res.data);
+    toastStore.show("作成できました", "success");
+    await router.push(`/applications/${res.data.application_id}`);
+  } catch (err) {
+    console.error(err);
+    toastStore.show("作成に失敗しました", "error");
+  } finally {
+    loading.value = false;
   }
 };
+
+onMounted(async () => {
+  await fetchUserList();
+  if (firstfocus.value) {
+    firstfocus.value?.focus();
+  }
+});
 </script>

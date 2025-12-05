@@ -102,3 +102,6 @@ Jomon
 uploads/*
 
 .vscode
+coverage/
+
+.task/checksum/run

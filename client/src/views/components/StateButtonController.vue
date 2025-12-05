@@ -1,100 +1,67 @@
 <template>
   <div v-if="displayAcceptBottom" :class="$style.button_container">
-    <simple-button :label="'承認'" @click="accept()" />
-    <with-reason-button to_state="fix_required" />
-    <with-reason-button to_state="rejected" />
+    <simple-button :label="'承認'" :variant="'success'" @click="accept()" />
+    <with-reason-button to-state="fix_required" />
+    <with-reason-button to-state="rejected" />
   </div>
   <div v-else-if="displayRepaidBottom" :class="$style.button_container">
-    <with-reason-button to_state="submitted" />
+    <with-reason-button to-state="submitted" />
     <repaid-button />
   </div>
   <div v-else-if="displayFixResubmitBottom" :class="$style.button_container">
     <simple-button :label="'修正'" @click="changeFix" />
-    <simple-button :label="'再申請'" @click="reSubmit" />
+    <simple-button :label="'再申請'" :variant="'info'" @click="reSubmit" />
   </div>
 </template>
-<script>
-import axios from "axios";
-import WithReasonButton from "./StateWithReasonButton";
-import RepaidButton from "./RepaidButton";
-import SimpleButton from "@/views/shared/SimpleButton";
-import { mapState, mapMutations, mapActions } from "vuex";
+<script setup lang="ts">
+import { useApplicationDetailStore } from "@/stores/applicationDetail";
+import { useMeStore } from "@/stores/me";
+import SimpleButton from "@/views/shared/SimpleButton.vue";
+import { storeToRefs } from "pinia";
+import { computed } from "vue";
+import RepaidButton from "./RepaidButton.vue";
+import WithReasonButton from "./StateWithReasonButton.vue";
 
-export default {
-  data: function () {
-    return {
-      dialog: false
-    };
-  },
-  components: {
-    WithReasonButton,
-    RepaidButton,
-    SimpleButton
-  },
-  computed: {
-    ...mapState({ detail: "application_detail_paper" }),
-    displayAcceptBottom() {
-      return (
-        this.detail.core.current_state === `submitted` &&
-        this.$store.state.me.is_admin
-      );
-    },
-    displayRepaidBottom() {
-      return (
-        this.detail.core.current_state === `accepted` &&
-        this.$store.state.me.is_admin
-      );
-    },
-    displayFixResubmitBottom() {
-      return (
-        this.detail.core.current_state === `fix_required` &&
-        (this.$store.state.me.is_admin ||
-          this.$store.state.me.trap_id === this.detail.core.applicant.trap_id)
-      );
-    }
-  },
-  methods: {
-    ...mapMutations(["changeFix"]),
-    ...mapActions(["getApplicationDetail"]),
-    async accept() {
-      await axios
-        .put(
-          "../api/applications/" +
-            this.$store.state.application_detail_paper.core.application_id +
-            "/states",
-          {
-            to_state: "accepted"
-          }
-        )
-        .catch(e => {
-          alert(e);
-          return;
-        });
-      alert("承認しました");
-      this.getApplicationDetail(
-        this.$store.state.application_detail_paper.core.application_id
-      );
-    },
-    async reSubmit() {
-      await axios
-        .put(
-          "../api/applications/" +
-            this.$store.state.application_detail_paper.core.application_id +
-            "/states",
-          {
-            to_state: "submitted"
-          }
-        )
-        .catch(e => {
-          alert(e);
-          return;
-        });
-      alert("再申請しました");
-      this.getApplicationDetail(
-        this.$store.state.application_detail_paper.core.application_id
-      );
-    }
+const applicationDetailStore = useApplicationDetailStore();
+const meStore = useMeStore();
+
+const { core: detailCore } = storeToRefs(applicationDetailStore);
+const { trapId, isAdmin } = storeToRefs(meStore);
+const { changeFix, updateApplicationState } = applicationDetailStore;
+
+const displayAcceptBottom = computed(() => {
+  return detailCore.value.current_state === `submitted` && isAdmin.value;
+});
+
+const displayRepaidBottom = computed(() => {
+  return detailCore.value.current_state === `accepted` && isAdmin.value;
+});
+
+const displayFixResubmitBottom = computed(() => {
+  return (
+    detailCore.value.current_state === `fix_required` &&
+    (isAdmin.value || trapId.value === detailCore.value.applicant.trap_id)
+  );
+});
+
+const accept = async () => {
+  try {
+    await updateApplicationState("accepted");
+  } catch (e) {
+    alert(e);
+    return;
   }
+  alert("承認しました");
+};
+
+const reSubmit = async () => {
+  try {
+    await updateApplicationState("submitted");
+  } catch (e) {
+    alert(e);
+    return;
+  }
+  alert("再申請しました");
 };
 </script>
 

@@ -1,51 +1,51 @@
 <template>
   <div :class="$style.container">
-    <v-dialog v-model="dialog" max-width="600px">
-      <template v-slot:activator="{ on }">
+    <v-dialog v-model="isDialogOpen" max-width="600px">
+      <template #activator="{ props: activatorProps }">
         <simple-button
           :label="
-            toStateName(to_state) + (to_state === 'submitted' ? 'に戻す' : '')
+            toStateName(toState) + (toState === 'submitted' ? 'に戻す' : '')
           "
-          :variant="to_state === 'submitted' ? 'warning' : 'error'"
-          v-on="on"
+          :variant="
+            toState === 'submitted'
+              ? 'info'
+              : toState === 'fix_required'
+                ? 'warning'
+                : 'error'
+          "
+          v-bind="activatorProps"
         />
       </template>
 
       <v-card>
         <v-card-title>
-          <span v-if="to_state === `submitted`" class="headline"
-            >承認済み→{{ this.toStateName(to_state) }} へ戻す理由</span
+          <span v-if="toState === `submitted`" class="headline"
+            >承認済み→{{ toStateName(toState) }} へ戻す理由</span
           >
           <span v-else class="headline"
-            >承認待ち→{{ this.toStateName(to_state) }} への変更理由</span
+            >承認待ち→{{ toStateName(toState) }} への変更理由</span
           >
         </v-card-title>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="formRef" v-model="valid">
           <v-card-text>
             <v-container>
               <v-row>
                 <v-col cols="12">
                   <v-text-field
-                    @blur="blur"
-                    ref="reason"
-                    :autofocus="dialog"
                     v-model="reason"
+                    :autofocus="isDialogOpen"
                     :rules="nullRules"
-                  ></v-text-field>
+                    @blur="blur"
+                  />
                 </v-col>
               </v-row>
             </v-container>
           </v-card-text>
           <v-card-actions>
-            <v-spacer></v-spacer>
+            <v-spacer />
+            <simple-button :label="'戻る'" @click="isDialogOpen = false" />
             <simple-button
-              :label="'戻る'"
-              :variant="'secondary'"
-              @click="dialog = false"
-            />
-            <simple-button
-              :label="this.toStateName(to_state) + 'にする'"
-              :variant="'secondary'"
+              :label="toStateName(toState) + 'にする'"
               :disabled="!valid"
               @click="postReason"
             />
@@ -55,77 +55,80 @@
     </v-dialog>
   </div>
 </template>
-<script>
+<script setup lang="ts">
+import { useApplicationDetailStore } from "@/stores/applicationDetail";
+import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
-import Vue from "vue";
-import { mapActions } from "vuex";
-import SimpleButton from "@/views/shared/SimpleButton";
+import { storeToRefs } from "pinia";
+import { nextTick, ref, useTemplateRef, watch } from "vue";
 
-export default {
-  components: {
-    SimpleButton
-  },
-  data: () => ({
-    valid: true,
-    dialog: false,
-    reason: "",
-    nullRules: [v => !!v || ""]
-  }),
-  props: {
-    to_state: String
-  },
-  watch: {
-    dialog: function () {
-      if (this.dialog) {
-        let self = this;
-        Vue.nextTick().then(function () {
-          self.$refs.reason.focus();
-        });
-      }
+const props = withDefaults(
+  defineProps<{
+    toState?: string;
+  }>(),
+  {
+    toState: ""
+  }
+);
+
+const applicationDetailStore = useApplicationDetailStore();
+const { core: detailCore } = storeToRefs(applicationDetailStore);
+const { fetchApplicationDetail } = applicationDetailStore;
+
+import { VForm } from "vuetify/components";
+
+const valid = ref(true);
+const isDialogOpen = ref(false);
+const reason = ref("");
+const nullRules = [(v: unknown) => !!v || ""];
+const formRef = useTemplateRef<VForm>("formRef");
+
+watch(isDialogOpen, async () => {
+  if (isDialogOpen.value) {
+    await nextTick();
+    reason.value = "";
+    formRef.value?.resetValidation();
+  }
+});
+
+const blur = () => {
+  if (reason.value === "" || reason.value === undefined) {
+    formRef.value?.resetValidation();
+  }
+};
+
+const postReason = async () => {
+  const validateResult = await formRef.value?.validate();
+  if (validateResult?.valid) {
+    try {
+      await axios.put(
+        "/api/applications/" + detailCore.value.application_id + "/states",
+        {
+          to_state: props.toState,
+          reason: reason.value
+        }
+      );
+    } catch (e) {
+      alert(e);
+      return;
     }
-  },
-  methods: {
-    ...mapActions(["getApplicationDetail"]),
-    blur() {
-      if (this.reason === "" || this.reason === undefined) {
-        this.$refs.form.reset();
-      }
-    },
-    async postReason() {
-      if (this.$refs.form.validate()) {
-        await axios
-          .put(
-            "../api/applications/" +
-              this.$store.state.application_detail_paper.core.application_id +
-              "/states",
-            {
-              to_state: this.to_state,
-              reason: this.reason
-            }
-          )
-          .catch(e => {
-            alert(e);
-            return;
-          });
-        this.$refs.form.reset();
-        this.dialog = false;
-        this.getApplicationDetail(
-          this.$store.state.application_detail_paper.core.application_id
-        );
-      }
-    },
-    toStateName: function (to_state) {
-      switch (to_state) {
-        case "submitted":
-          return "提出済み";
-        case "fix_required":
-          return "要修正";
-        case "rejected":
-          return "取り下げ";
-        default:
-          return "状態が間違っています";
-      }
-    }
+    reason.value = "";
+    formRef.value?.resetValidation();
+    isDialogOpen.value = false;
+    await fetchApplicationDetail(detailCore.value.application_id);
+  }
+};
+
+const toStateName = (toState: string) => {
+  switch (toState) {
+    case "submitted":
+      return "提出済み";
+    case "fix_required":
+      return "要修正";
+    case "rejected":
+      return "取り下げ";
+    default:
+      return "状態が間違っています";
   }
 };
 </script>

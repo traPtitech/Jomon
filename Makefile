@@ -11,7 +11,7 @@ server-test:
 
 .PHONY: client
 client:
-	cd client; npm run lint; npm run serve
+	cd client; npm run lint; npm run dev
 
 .PHONY: mock
 mock:

@@ -1,14 +1,22 @@
 <template>
   <div>
-    <v-dialog v-model="dialog" scrollable max-width="500px">
-      <template v-slot:activator="{ on }">
-        <simple-button :label="'払い戻し済みのユーザーを選択'" v-on="on" />
+    <v-dialog v-model="dialog" max-width="500px">
+      <template #activator="{ props }">
+        <simple-button
+          :label="'払い戻し済みのユーザーを選択'"
+          :variant="'done'"
+          v-bind="props"
+        />
       </template>
       <v-card :class="$style.container">
         <h3>払い戻し日</h3>
-        <v-date-picker v-model="date" full-width flat @input="menu = false" />
-        <v-autocomplete
-          ref="traPID"
+        <v-text-field
+          v-model="date"
+          type="date"
+          variant="outlined"
+          density="compact"
+        />
+        <v-select
           v-model="traPID"
           :rules="[
             traPID =>
@@ -17,13 +25,16 @@
           ]"
           :items="repaidToTraPId"
           label="払い戻し済みのユーザーを選択"
+          :menu-props="{ zIndex: 3000 }"
           required
           multiple
+          chips
+          closable-chips
         />
         <simple-button
           :label="'OK'"
           :disabled="traPID.length === 0"
-          :variant="'secondary'"
+          :variant="'done'"
           @click="putRepaid(traPID, date)"
         />
       </v-card>
@@ -33,60 +44,51 @@
     </span>
   </div>
 </template>
-<script>
+<script setup lang="ts">
+import { useApplicationDetailStore } from "@/stores/applicationDetail";
+import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
-import { mapActions } from "vuex";
-import SimpleButton from "@/views/shared/SimpleButton";
+import { storeToRefs } from "pinia";
+import { computed, ref } from "vue";
 
-export default {
-  components: {
-    SimpleButton
-  },
-  data: () => ({
-    date: new Date().toISOString().substr(0, 10),
-    menu: false,
-    dialog: false,
-    traPID: []
-  }),
-  methods: {
-    ...mapActions(["getApplicationDetail"]),
-    async putRepaid(traPIDs, date) {
-      await Promise.all(
-        traPIDs.map(async traPID => {
-          await axios
-            .put(
-              "../api/applications/" +
-                this.$store.state.application_detail_paper.core.application_id +
-                "/states/repaid/" +
-                traPID,
-              {
-                repaid_at: date
-              }
-            )
-            .catch(e => alert(e));
-        })
-      ).then(() => {
-        this.traPID = [];
-        this.dialog = false;
-        this.getApplicationDetail(
-          this.$store.state.application_detail_paper.core.application_id
-        );
-      });
+const applicationDetailStore = useApplicationDetailStore();
+const { core: detailCore } = storeToRefs(applicationDetailStore);
+const { fetchApplicationDetail } = applicationDetailStore;
+
+const date = ref(new Date().toISOString().substr(0, 10));
+const dialog = ref(false);
+const traPID = ref<string[]>([]);
+
+const repaidToTraPId = computed(() => {
+  const trap_ids: string[] = [];
+  detailCore.value.repayment_logs.forEach(log => {
+    if (log.repaid_at === "" || log.repaid_at === null) {
+      trap_ids.push(log.repaid_to_user.trap_id);
     }
-  },
-  computed: {
-    repaidToTraPId() {
-      let trap_ids = [];
-      this.$store.state.application_detail_paper.core.repayment_logs.forEach(
-        log => {
-          if (log.repaid_at === "" || log.repaid_at === null) {
-            trap_ids.push(log.repaid_to_user.trap_id);
+  });
+  return trap_ids;
+});
+
+const putRepaid = async (traPIDs: string[], date: string) => {
+  await Promise.all(
+    traPIDs.map(async traPID => {
+      await axios
+        .put(
+          "/api/applications/" +
+            detailCore.value.application_id +
+            "/states/repaid/" +
+            traPID,
+          {
+            repaid_at: date
           }
-        }
-      );
-      return trap_ids;
-    }
-  }
+        )
+        .catch(e => alert(e));
+    })
+  ).then(async () => {
+    traPID.value = [];
+    dialog.value = false;
+    await fetchApplicationDetail(detailCore.value.application_id);
+  });
 };
 </script>
 

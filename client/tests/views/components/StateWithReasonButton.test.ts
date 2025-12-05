@@ -1,0 +1,63 @@
+import StateWithReasonButton from "@/views/components/StateWithReasonButton.vue";
+import SimpleButton from "@/views/shared/SimpleButton.vue"; // Import mocked component
+import { createTestingPinia } from "@pinia/testing";
+import { mount } from "@vue/test-utils";
+import { describe, expect, it, vi } from "vitest";
+
+// Mock SimpleButton
+vi.mock("@/views/shared/SimpleButton.vue", () => ({
+  default: {
+    name: "SimpleButton",
+    template: '<button class="simple-button"><slot/></button>',
+    props: ["label", "variant", "disabled"]
+  }
+}));
+
+describe("StateWithReasonButton.vue", () => {
+  it("renders correctly with info variant for 'submitted'", () => {
+    const wrapper = mount(StateWithReasonButton, {
+      global: {
+        plugins: [createTestingPinia({ createSpy: vi.fn })]
+      },
+      props: {
+        toState: "submitted"
+      }
+    });
+
+    // Find using the imported component definition
+    const btn = wrapper.findComponent(SimpleButton);
+    expect(btn.exists()).toBe(true);
+    expect(btn.props("variant")).toBe("info");
+    expect(btn.props("label")).toContain("提出済みに戻す");
+  });
+
+  it("renders correctly with warning variant for 'fix_required'", () => {
+    const wrapper = mount(StateWithReasonButton, {
+      global: {
+        plugins: [createTestingPinia({ createSpy: vi.fn })]
+      },
+      props: {
+        toState: "fix_required"
+      }
+    });
+
+    const btn = wrapper.findComponent(SimpleButton);
+    expect(btn.props("variant")).toBe("warning");
+    expect(btn.props("label")).toContain("要修正");
+  });
+
+  it("renders correctly with error variant for 'rejected'", () => {
+    const wrapper = mount(StateWithReasonButton, {
+      global: {
+        plugins: [createTestingPinia({ createSpy: vi.fn })]
+      },
+      props: {
+        toState: "rejected"
+      }
+    });
+
+    const btn = wrapper.findComponent(SimpleButton);
+    expect(btn.props("variant")).toBe("error");
+    expect(btn.props("label")).toContain("取り下げ");
+  });
+});
