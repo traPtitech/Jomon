@@ -31,7 +31,7 @@ jobs:
           images: ghcr.io/traptitech/jomon
           tags: |
             type=raw,value=latest
-            type=sha,format=long
+            type=sha,format=long,prefix=
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -40,3 +40,4 @@ jobs:
           platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
