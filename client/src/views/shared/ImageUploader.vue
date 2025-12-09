@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-file-input
-      v-model="images"
+      v-model="inputImages"
       label="画像"
       filled
       multiple
@@ -18,25 +18,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, nextTick } from "vue";
 
 const images = defineModel<File[]>({ default: () => [] });
+const inputImages = ref<File[]>([]);
 const uploadImageUrl = ref<string[]>([]);
-const uploadImageBlob = ref<File[]>([]);
 
 const imageChange = (files: File | File[]) => {
-  uploadImageUrl.value = [];
-  uploadImageBlob.value = [];
   if (!files) return;
   const fileList = Array.isArray(files) ? files : [files];
+  if (fileList.length === 0) return;
+
+  const newImages = [...images.value];
+
   fileList.forEach((file: File) => {
     const fr = new FileReader();
     fr.readAsDataURL(file);
-    uploadImageBlob.value.push(file);
-    images.value = uploadImageBlob.value;
+    newImages.push(file);
     fr.addEventListener("load", () => {
       uploadImageUrl.value.push(fr.result as string);
     });
+  });
+
+  images.value = newImages;
+
+  nextTick(() => {
+    inputImages.value = [];
   });
 };
 </script>
