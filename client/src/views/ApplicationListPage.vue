@@ -129,6 +129,7 @@
 <script setup lang="ts">
 import { useApplicationListStore } from "@/stores/applicationList";
 import { useUserListStore } from "@/stores/userList";
+import { getStateLabel } from "@/use/stateColor";
 import { storeToRefs } from "pinia";
 import { onMounted, reactive, ref } from "vue";
 import { useDisplay } from "vuetify";
@@ -159,11 +160,11 @@ const type_items = [
 ];
 
 const state_items = [
-  { state: "submitted", jpn: "提出済み" },
-  { state: "rejected", jpn: "却下" },
-  { state: "fix_required", jpn: "要修正" },
-  { state: "accepted", jpn: "払い戻し待ち" },
-  { state: "fully_repaid", jpn: "払い戻し完了" }
+  { state: "submitted", jpn: getStateLabel("submitted") },
+  { state: "rejected", jpn: getStateLabel("rejected") },
+  { state: "fix_required", jpn: getStateLabel("fix_required") },
+  { state: "accepted", jpn: getStateLabel("accepted") },
+  { state: "fully_repaid", jpn: getStateLabel("fully_repaid") }
 ];
 
 const header = {

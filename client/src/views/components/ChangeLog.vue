@@ -56,6 +56,6 @@ defineProps<{
   flex-wrap: wrap;
   max-width: 100%;
   margin-bottom: 8px;
-  color: $color-grey;
+  color: rgb(var(--v-theme-grey));
 }
 </style>

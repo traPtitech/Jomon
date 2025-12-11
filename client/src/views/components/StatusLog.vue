@@ -55,6 +55,6 @@ const dayPrint = (time: string | Date) => {
   flex-wrap: wrap;
   max-width: 100%;
   align-items: center;
-  color: $color-grey;
+  color: rgb(var(--v-theme-grey));
 }
 </style>

@@ -24,40 +24,39 @@ describe("StateWithReasonButton.vue", () => {
       }
     });
 
-    // Find using the imported component definition
     const btn = wrapper.findComponent(SimpleButton);
     expect(btn.exists()).toBe(true);
-    expect(btn.props("variant")).toBe("info");
-    expect(btn.props("label")).toContain("提出済みに戻す");
+    expect(btn.props("variant")).toBe("state_submitted");
+    expect(btn.props("label")).toContain("承認待ちに戻す");
   });
 
   it("renders correctly with warning variant for 'fix_required'", () => {
     const wrapper = mount(StateWithReasonButton, {
-      global: {
-        plugins: [createTestingPinia({ createSpy: vi.fn })]
-      },
       props: {
         toState: "fix_required"
+      },
+      global: {
+        plugins: [createTestingPinia()]
       }
     });
 
     const btn = wrapper.findComponent(SimpleButton);
-    expect(btn.props("variant")).toBe("warning");
+    expect(btn.props("variant")).toBe("state_fix_required");
     expect(btn.props("label")).toContain("要修正");
   });
 
   it("renders correctly with error variant for 'rejected'", () => {
     const wrapper = mount(StateWithReasonButton, {
-      global: {
-        plugins: [createTestingPinia({ createSpy: vi.fn })]
-      },
       props: {
         toState: "rejected"
+      },
+      global: {
+        plugins: [createTestingPinia()]
       }
     });
 
     const btn = wrapper.findComponent(SimpleButton);
-    expect(btn.props("variant")).toBe("error");
-    expect(btn.props("label")).toContain("取り下げ");
+    expect(btn.props("variant")).toBe("state_rejected");
+    expect(btn.props("label")).toContain("却下");
   });
 });

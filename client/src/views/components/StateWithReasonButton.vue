@@ -4,15 +4,9 @@
       <template #activator="{ props: activatorProps }">
         <simple-button
           :label="
-            toStateName(toState) + (toState === 'submitted' ? 'に戻す' : '')
+            getStateLabel(toState) + (toState === 'submitted' ? 'に戻す' : '')
           "
-          :variant="
-            toState === 'submitted'
-              ? 'info'
-              : toState === 'fix_required'
-                ? 'warning'
-                : 'error'
-          "
+          :variant="getStateColor(toState)"
           v-bind="activatorProps"
         />
       </template>
@@ -20,10 +14,10 @@
       <v-card>
         <v-card-title>
           <span v-if="toState === `submitted`" class="headline"
-            >承認済み→{{ toStateName(toState) }} へ戻す理由</span
+            >承認済み→{{ getStateLabel(toState) }} へ戻す理由</span
           >
           <span v-else class="headline"
-            >承認待ち→{{ toStateName(toState) }} への変更理由</span
+            >承認待ち→{{ getStateLabel(toState) }} への変更理由</span
           >
         </v-card-title>
         <v-form ref="formRef" v-model="valid">
@@ -45,7 +39,7 @@
             <v-spacer />
             <simple-button :label="'戻る'" @click="isDialogOpen = false" />
             <simple-button
-              :label="toStateName(toState) + 'にする'"
+              :label="getStateLabel(toState) + 'にする'"
               :disabled="!valid"
               @click="postReason"
             />
@@ -57,6 +51,7 @@
 </template>
 <script setup lang="ts">
 import { useApplicationDetailStore } from "@/stores/applicationDetail";
+import { getStateColor, getStateLabel } from "@/use/stateColor";
 import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
 import { storeToRefs } from "pinia";
@@ -116,19 +111,6 @@ const postReason = async () => {
     formRef.value?.resetValidation();
     isDialogOpen.value = false;
     await fetchApplicationDetail(detailCore.value.application_id);
-  }
-};
-
-const toStateName = (toState: string) => {
-  switch (toState) {
-    case "submitted":
-      return "提出済み";
-    case "fix_required":
-      return "要修正";
-    case "rejected":
-      return "取り下げ";
-    default:
-      return "状態が間違っています";
   }
 };
 </script>
