@@ -87,12 +87,12 @@ onMounted(async () => {
   padding: 8px;
 }
 .before {
-  background: #ffeef0;
+  background: rgb(var(--v-theme-diff_removed));
   display: flex;
   padding: 8px;
 }
 .after {
-  background: #e6ffed;
+  background: rgb(var(--v-theme-diff_added));
   display: flex;
   padding: 8px;
 }

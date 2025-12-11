@@ -156,12 +156,12 @@ const cancelChange = () => {
 <style lang="scss" module>
 .text {
   display: flex;
-  color: $color-grey;
+  color: rgb(var(--v-theme-grey));
 }
 .button {
   margin: 8px 8px 0 0;
 }
 .grey_text {
-  color: $color-grey;
+  color: rgb(var(--v-theme-grey));
 }
 </style>

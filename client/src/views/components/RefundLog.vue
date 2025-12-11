@@ -64,6 +64,6 @@ const datePrint = (date: string) => {
 
 <style lang="scss" module>
 .text {
-  color: $color-grey;
+  color: rgb(var(--v-theme-grey));
 }
 </style>

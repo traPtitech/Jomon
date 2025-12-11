@@ -8,7 +8,10 @@ export const colors = {
   info: "#00d3ee",
   success: "#5cb860",
   warning: "#ffa21a",
-  done: "#009688"
+  done: "#009688",
+  diff_added: "#e6ffed",
+  diff_removed: "#ffeef0",
+  text_primary_disabled: "#888888"
 };
 
 export default colors;

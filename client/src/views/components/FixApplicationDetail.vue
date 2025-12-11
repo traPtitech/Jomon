@@ -330,10 +330,10 @@ onMounted(async () => {
 }
 .section {
   margin: 16px 0;
-  border-bottom: 1px solid $color-grey;
+  border-bottom: 1px solid rgb(var(--v-theme-grey));
 }
 .section_title {
-  color: $color-text-primary-disabled;
+  color: rgb(var(--v-theme-text_primary_disabled));
 }
 .section_item {
   margin-left: 8px;

@@ -13,6 +13,11 @@
 </template>
 
 <script setup lang="ts">
+import {
+  getStateColor,
+  getStateLabel,
+  getStateTextColor
+} from "@/use/stateColor";
 import { computed } from "vue";
 
 const props = withDefaults(
@@ -26,52 +31,9 @@ const props = withDefaults(
   }
 );
 
-const state_ja = computed(() => {
-  switch (props.state) {
-    case "submitted":
-      return "承認待ち";
-    case "fix_required":
-      return "要修正";
-    case "accepted":
-      return "承認済み";
-    case "fully_repaid":
-      return "返済完了";
-    case "rejected":
-      return "却下";
-    default:
-      return "ERROR";
-  }
-});
-
-const chip_color = computed(() => {
-  switch (props.state) {
-    case "submitted":
-      return "info";
-    case "rejected":
-      return "grey";
-    case "fix_required":
-      return "warning";
-    case "accepted":
-      return "success";
-    case "fully_repaid":
-      return "done";
-    default:
-      return "white";
-  }
-});
-
-const text_color = computed(() => {
-  switch (props.state) {
-    case "fix_required":
-      return "text-black";
-    case "submitted":
-    case "rejected":
-    case "accepted":
-    case "fully_repaid":
-    default:
-      return "text-white";
-  }
-});
+const state_ja = computed(() => getStateLabel(props.state));
+const chip_color = computed(() => getStateColor(props.state));
+const text_color = computed(() => getStateTextColor(props.state));
 </script>
 
 <style lang="scss" module>
