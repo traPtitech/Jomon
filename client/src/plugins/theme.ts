@@ -9,6 +9,11 @@ export const colors = {
   success: "#5cb860",
   warning: "#ffa21a",
   done: "#009688",
+  state_submitted: "#00d3ee",
+  state_fix_required: "#ffa21a",
+  state_accepted: "#5cb860",
+  state_fully_repaid: "#009688",
+  state_rejected: "#f55a4e",
   diff_added: "#e6ffed",
   diff_removed: "#ffeef0",
   text_primary_disabled: "#888888"

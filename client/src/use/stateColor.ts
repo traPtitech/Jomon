@@ -18,15 +18,15 @@ export const getStateLabel = (state: string): string => {
 export const getStateColor = (state: string): string => {
   switch (state) {
     case "submitted":
-      return "info";
+      return "state_submitted";
     case "rejected":
-      return "error"; // Changed from 'grey' to 'error' to unify with button
+      return "state_rejected";
     case "fix_required":
-      return "warning";
+      return "state_fix_required";
     case "accepted":
-      return "success";
+      return "state_accepted";
     case "fully_repaid":
-      return "done";
+      return "state_fully_repaid";
     default:
       return "white";
   }

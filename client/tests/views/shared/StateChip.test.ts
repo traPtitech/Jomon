@@ -19,40 +19,55 @@ describe("StateChip.vue", () => {
     expect(wrapper.text()).toBe("承認待ち");
     const chip = wrapper.find(".v-chip");
     // Vuetify 3 classes for colors can be bg-<color> or text-<color>
-    expect(chip.classes()).toContain("bg-info");
-    expect(chip.classes()).toContain("text-white"); // Correction: We changed submitted to info (blue) + white text in previous steps
+    expect(chip.classes()).toContain("bg-state_submitted");
   });
 
   it("renders 'fix_required' with warning color and black text", () => {
-    const wrapper = mountStateChip("fix_required");
+    const wrapper = mount(StateChip, {
+      props: {
+        state: "fix_required"
+      }
+    });
+
     expect(wrapper.text()).toBe("要修正");
     const chip = wrapper.find(".v-chip");
-    expect(chip.classes()).toContain("bg-warning");
+    expect(chip.classes()).toContain("bg-state_fix_required");
     expect(chip.classes()).toContain("text-black");
   });
 
   it("renders 'accepted' with success color", () => {
-    const wrapper = mountStateChip("accepted");
+    const wrapper = mount(StateChip, {
+      props: {
+        state: "accepted"
+      }
+    });
+
     expect(wrapper.text()).toBe("承認済み");
     const chip = wrapper.find(".v-chip");
-    expect(chip.classes()).toContain("bg-success");
-    expect(chip.classes()).toContain("text-white");
+    expect(chip.classes()).toContain("bg-state_accepted");
   });
 
   it("renders 'fully_repaid' with done color", () => {
-    const wrapper = mountStateChip("fully_repaid");
+    const wrapper = mount(StateChip, {
+      props: {
+        state: "fully_repaid"
+      }
+    });
+
     expect(wrapper.text()).toBe("返済完了");
     const chip = wrapper.find(".v-chip");
-    // 'done' is a custom theme color, so it might appear as text-done or bg-done if defined in theme,
-    // but in unit test without full theme setup, it might just apply the class.
-    // Vuetify applies 'bg-<color>' for variant="flat"
-    expect(chip.classes()).toContain("bg-done");
+    expect(chip.classes()).toContain("bg-state_fully_repaid");
   });
 
   it("renders 'rejected' with grey color", () => {
-    const wrapper = mountStateChip("rejected");
+    const wrapper = mount(StateChip, {
+      props: {
+        state: "rejected"
+      }
+    });
+
     expect(wrapper.text()).toBe("却下");
     const chip = wrapper.find(".v-chip");
-    expect(chip.classes()).toContain("bg-error");
+    expect(chip.classes()).toContain("bg-state_rejected");
   });
 });
