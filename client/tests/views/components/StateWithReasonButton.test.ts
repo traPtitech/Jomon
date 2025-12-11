@@ -28,7 +28,7 @@ describe("StateWithReasonButton.vue", () => {
     const btn = wrapper.findComponent(SimpleButton);
     expect(btn.exists()).toBe(true);
     expect(btn.props("variant")).toBe("info");
-    expect(btn.props("label")).toContain("提出済みに戻す");
+    expect(btn.props("label")).toContain("承認待ちに戻す");
   });
 
   it("renders correctly with warning variant for 'fix_required'", () => {
@@ -58,6 +58,6 @@ describe("StateWithReasonButton.vue", () => {
 
     const btn = wrapper.findComponent(SimpleButton);
     expect(btn.props("variant")).toBe("error");
-    expect(btn.props("label")).toContain("取り下げ");
+    expect(btn.props("label")).toContain("却下");
   });
 });

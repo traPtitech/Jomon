@@ -53,6 +53,6 @@ describe("StateChip.vue", () => {
     const wrapper = mountStateChip("rejected");
     expect(wrapper.text()).toBe("却下");
     const chip = wrapper.find(".v-chip");
-    expect(chip.classes()).toContain("bg-grey");
+    expect(chip.classes()).toContain("bg-error");
   });
 });
