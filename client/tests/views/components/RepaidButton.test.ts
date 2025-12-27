@@ -33,7 +33,7 @@ describe("RepaidButton.vue", () => {
     const btn = wrapper.findComponent(SimpleButton);
     expect(btn.exists()).toBe(true);
     expect(btn.props("label")).toBe("払い戻し済みのユーザーを選択");
-    expect(btn.props("variant")).toBe("done");
+    expect(btn.props("variant")).toBe("state_fully_repaid");
   });
 
   it("disables OK button when no user is selected", async () => {

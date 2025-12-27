@@ -4,7 +4,7 @@
       <template #activator="{ props }">
         <simple-button
           :label="'払い戻し済みのユーザーを選択'"
-          :variant="'done'"
+          :variant="'state_fully_repaid'"
           v-bind="props"
         />
       </template>
@@ -34,7 +34,7 @@
         <simple-button
           :label="'OK'"
           :disabled="traPID.length === 0"
-          :variant="'done'"
+          :variant="'state_fully_repaid'"
           @click="putRepaid(traPID, date)"
         />
       </v-card>
