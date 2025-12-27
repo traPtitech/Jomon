@@ -49,7 +49,7 @@ import { useApplicationDetailStore } from "@/stores/applicationDetail";
 import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
 import { storeToRefs } from "pinia";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 
 const applicationDetailStore = useApplicationDetailStore();
 const { core: detailCore } = storeToRefs(applicationDetailStore);
@@ -67,6 +67,13 @@ const repaidToTraPId = computed(() => {
     }
   });
   return trap_ids;
+});
+
+// ダイアログが開いたとき、返金対象者が1人であればデフォルトで選択
+watch(dialog, newVal => {
+  if (newVal && repaidToTraPId.value.length === 1) {
+    traPID.value = [repaidToTraPId.value[0]];
+  }
 });
 
 const putRepaid = async (traPIDs: string[], date: string) => {
