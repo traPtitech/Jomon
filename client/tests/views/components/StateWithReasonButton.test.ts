@@ -56,7 +56,7 @@ describe("StateWithReasonButton.vue", () => {
     });
 
     const btn = wrapper.findComponent(SimpleButton);
-    expect(btn.props("variant")).toBe("state_rejected");
+    expect(btn.props("variant")).toBe("error");
     expect(btn.props("label")).toContain("却下");
   });
 });
