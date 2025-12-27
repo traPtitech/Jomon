@@ -44,3 +44,12 @@ export const getStateTextColor = (state: string): string => {
       return "text-white";
   }
 };
+
+export const getStateButtonColor = (state: string): string => {
+  switch (state) {
+    case "rejected":
+      return "error";
+    default:
+      return getStateColor(state);
+  }
+};

@@ -6,7 +6,7 @@
           :label="
             getStateLabel(toState) + (toState === 'submitted' ? 'に戻す' : '')
           "
-          :variant="getStateColor(toState)"
+          :variant="getStateButtonColor(toState)"
           v-bind="activatorProps"
         />
       </template>
@@ -51,7 +51,7 @@
 </template>
 <script setup lang="ts">
 import { useApplicationDetailStore } from "@/stores/applicationDetail";
-import { getStateColor, getStateLabel } from "@/use/stateColor";
+import { getStateButtonColor, getStateLabel } from "@/use/stateColor";
 import SimpleButton from "@/views/shared/SimpleButton.vue";
 import axios from "axios";
 import { storeToRefs } from "pinia";

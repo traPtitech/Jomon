@@ -13,7 +13,7 @@ export const colors = {
   state_fix_required: "#FFA726",
   state_accepted: "#66BB6A",
   state_fully_repaid: "#AB47BC",
-  state_rejected: "#EF5350",
+  state_rejected: "#9e9e9e",
   diff_added: "#e6ffed",
   diff_removed: "#ffeef0",
   text_primary_disabled: "#888888"
