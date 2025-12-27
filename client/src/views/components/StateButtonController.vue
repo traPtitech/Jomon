@@ -10,7 +10,11 @@
   </div>
   <div v-else-if="displayFixResubmitBottom" :class="$style.button_container">
     <simple-button :label="'修正'" @click="changeFix" />
-    <simple-button :label="'再申請'" :variant="'info'" @click="reSubmit" />
+    <simple-button
+      :label="'再申請'"
+      :variant="'state_submitted'"
+      @click="reSubmit"
+    />
   </div>
 </template>
 <script setup lang="ts">
