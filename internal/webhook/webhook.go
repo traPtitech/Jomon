@@ -68,7 +68,7 @@ type Service struct {
 	webhookID string
 }
 
-func LoadWebhookService() (*Service, error) {
+func Load() (*Service, error) {
 	loadEnv := func(key string) (string, error) {
 		value := os.Getenv(key)
 		if value == "" {
@@ -87,10 +87,10 @@ func LoadWebhookService() (*Service, error) {
 		return nil, err
 	}
 
-	return NewWebhookService(secret, channelID, webhookID), nil
+	return New(secret, channelID, webhookID), nil
 }
 
-func NewWebhookService(secret, channelID, webhookID string) *Service {
+func New(secret, channelID, webhookID string) *Service {
 	return &Service{
 		secret:    secret,
 		channelID: channelID,

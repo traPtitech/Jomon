@@ -50,7 +50,7 @@ func main() {
 		panic(err)
 	}
 	// Setup webhook service
-	ws, err := webhook.LoadWebhookService()
+	ws, err := webhook.Load()
 	if err != nil {
 		panic(err)
 	}
