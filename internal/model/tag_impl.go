@@ -74,6 +74,6 @@ func ConvertEntTagToModelTag(enttag *ent.Tag) *Tag {
 		Name:      enttag.Name,
 		CreatedAt: enttag.CreatedAt,
 		UpdatedAt: enttag.UpdatedAt,
-		DeletedAt: nulltime.TimeToNullTime(enttag.DeletedAt).Time,
+		DeletedAt: nulltime.FromTime(enttag.DeletedAt).Time,
 	}
 }

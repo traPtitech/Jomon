@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/internal/nulltime"
 )
 
 type ApplicationRepository interface {
@@ -60,8 +61,8 @@ type ApplicationQuery struct {
 	Sort      *string
 	Target    uuid.UUID
 	Status    *string
-	Since     time.Time
-	Until     time.Time
+	Since     nulltime.NullTime
+	Until     nulltime.NullTime
 	Limit     int
 	Offset    int
 	Tag       *string

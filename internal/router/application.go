@@ -145,18 +145,18 @@ func (h Handlers) GetApplications(c echo.Context) error {
 		}
 		target = t
 	}
-	var since time.Time
+	var since nulltime.NullTime
 	if c.QueryParam("since") != "" {
-		s, err := nulltime.StrToDate(c.QueryParam("since"))
+		s, err := nulltime.ParseDate(c.QueryParam("since"))
 		if err != nil {
 			logger.Info("could not parse query parameter `since` as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
 		}
 		since = s
 	}
-	var until time.Time
+	var until nulltime.NullTime
 	if c.QueryParam("until") != "" {
-		u, err := nulltime.StrToDate(c.QueryParam("until"))
+		u, err := nulltime.ParseDate(c.QueryParam("until"))
 		if err != nil {
 			logger.Info("could not parse query parameter `until` as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -246,7 +246,7 @@ func (h Handlers) GetApplications(c echo.Context) error {
 						ID:        target.ID,
 						Target:    target.Target,
 						Amount:    target.Amount,
-						PaidAt:    nulltime.TimeToNullTime(&target.PaidAt),
+						PaidAt:    nulltime.FromTime(&target.PaidAt),
 						CreatedAt: target.CreatedAt,
 					}
 				},
@@ -317,7 +317,7 @@ func (h Handlers) PostApplication(c echo.Context) error {
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    nulltime.TimeToNullTime(&target.PaidAt),
+				PaidAt:    nulltime.FromTime(&target.PaidAt),
 				CreatedAt: target.CreatedAt,
 			}
 		},
@@ -411,7 +411,7 @@ func (h Handlers) GetApplication(c echo.Context) error {
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    nulltime.TimeToNullTime(&target.PaidAt),
+				PaidAt:    nulltime.FromTime(&target.PaidAt),
 				CreatedAt: target.CreatedAt,
 			}
 		},
@@ -549,7 +549,7 @@ func (h Handlers) PutApplication(c echo.Context) error {
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    nulltime.TimeToNullTime(&target.PaidAt),
+				PaidAt:    nulltime.FromTime(&target.PaidAt),
 				CreatedAt: target.CreatedAt,
 			}
 		},

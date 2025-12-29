@@ -41,7 +41,7 @@ func (h Handlers) GetUsers(c echo.Context) error {
 			AccountManager: user.AccountManager,
 			CreatedAt:      user.CreatedAt,
 			UpdatedAt:      user.UpdatedAt,
-			DeletedAt:      nulltime.TimeToNullTime(&user.DeletedAt),
+			DeletedAt:      nulltime.FromTime(&user.DeletedAt),
 		}
 	})
 
@@ -93,7 +93,7 @@ func userFromModelUser(u model.User) User {
 		AccountManager: u.AccountManager,
 		CreatedAt:      u.CreatedAt,
 		UpdatedAt:      u.UpdatedAt,
-		DeletedAt:      nulltime.TimeToNullTime(&u.DeletedAt),
+		DeletedAt:      nulltime.FromTime(&u.DeletedAt),
 	}
 }
 

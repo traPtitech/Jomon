@@ -29,7 +29,7 @@ func modelUserToUser(user *model.User) *User {
 		AccountManager: user.AccountManager,
 		CreatedAt:      user.CreatedAt,
 		UpdatedAt:      user.UpdatedAt,
-		DeletedAt:      nulltime.TimeToNullTime(&user.DeletedAt),
+		DeletedAt:      nulltime.FromTime(&user.DeletedAt),
 	}
 }
 
