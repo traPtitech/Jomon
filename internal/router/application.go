@@ -14,7 +14,7 @@ import (
 	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
-	"github.com/traPtitech/Jomon/internal/service"
+	"github.com/traPtitech/Jomon/internal/nulltime"
 	"go.uber.org/zap"
 )
 
@@ -110,11 +110,11 @@ type Target struct {
 }
 
 type TargetOverview struct {
-	ID        uuid.UUID        `json:"id"`
-	Target    uuid.UUID        `json:"target"`
-	Amount    int              `json:"amount"`
-	PaidAt    service.NullTime `json:"paid_at"`
-	CreatedAt time.Time        `json:"created_at"`
+	ID        uuid.UUID         `json:"id"`
+	Target    uuid.UUID         `json:"target"`
+	Amount    int               `json:"amount"`
+	PaidAt    nulltime.NullTime `json:"paid_at"`
+	CreatedAt time.Time         `json:"created_at"`
 }
 
 func (h Handlers) GetApplications(c echo.Context) error {
@@ -147,7 +147,7 @@ func (h Handlers) GetApplications(c echo.Context) error {
 	}
 	var since time.Time
 	if c.QueryParam("since") != "" {
-		s, err := service.StrToDate(c.QueryParam("since"))
+		s, err := nulltime.StrToDate(c.QueryParam("since"))
 		if err != nil {
 			logger.Info("could not parse query parameter `since` as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -156,7 +156,7 @@ func (h Handlers) GetApplications(c echo.Context) error {
 	}
 	var until time.Time
 	if c.QueryParam("until") != "" {
-		u, err := service.StrToDate(c.QueryParam("until"))
+		u, err := nulltime.StrToDate(c.QueryParam("until"))
 		if err != nil {
 			logger.Info("could not parse query parameter `until` as time.Time", zap.Error(err))
 			return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -246,7 +246,7 @@ func (h Handlers) GetApplications(c echo.Context) error {
 						ID:        target.ID,
 						Target:    target.Target,
 						Amount:    target.Amount,
-						PaidAt:    service.TimeToNullTime(&target.PaidAt),
+						PaidAt:    nulltime.TimeToNullTime(&target.PaidAt),
 						CreatedAt: target.CreatedAt,
 					}
 				},
@@ -317,7 +317,7 @@ func (h Handlers) PostApplication(c echo.Context) error {
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    service.TimeToNullTime(&target.PaidAt),
+				PaidAt:    nulltime.TimeToNullTime(&target.PaidAt),
 				CreatedAt: target.CreatedAt,
 			}
 		},
@@ -411,7 +411,7 @@ func (h Handlers) GetApplication(c echo.Context) error {
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    service.TimeToNullTime(&target.PaidAt),
+				PaidAt:    nulltime.TimeToNullTime(&target.PaidAt),
 				CreatedAt: target.CreatedAt,
 			}
 		},
@@ -549,7 +549,7 @@ func (h Handlers) PutApplication(c echo.Context) error {
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    service.TimeToNullTime(&target.PaidAt),
+				PaidAt:    nulltime.TimeToNullTime(&target.PaidAt),
 				CreatedAt: target.CreatedAt,
 			}
 		},
