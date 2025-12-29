@@ -124,11 +124,7 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 		return err
 	}
 
-	// nolint:lll
-	to := fmt.Sprintf(
-		"%s/oauth2/authorize?response_type=code&client_id=%s&code_challenge=%s&code_challenge_method=%s",
-		traq.TraQBaseURL,
-		traq.JomonClientID,
+	to := traq.AuthorizeURL(
 		encoder.EncodeToString(codeVerifierHash[:]),
 		codeChallengeMethod,
 	)

@@ -25,6 +25,16 @@ const TraQBaseURL = "https://q.trap.jp/api/v3"
 
 var JomonClientID = os.Getenv("TRAQ_CLIENT_ID")
 
+func AuthorizeURL(challenge, challengeMethod string) string {
+	queries := url.Values(map[string][]string{
+		"response_type":         {"code"},
+		"client_id":             {JomonClientID},
+		"code_challenge":        {challenge},
+		"code_challenge_method": {challengeMethod},
+	})
+	return fmt.Sprintf("%s/oauth2/authorize?%s", TraQBaseURL, queries.Encode())
+}
+
 func RequestAccessToken(code, codeVerifier string) (Authority, error) {
 	form := url.Values{}
 	form.Set("grant_type", "authorization_code")
