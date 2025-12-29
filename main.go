@@ -7,8 +7,8 @@ import (
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/router"
-	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/storage"
+	"github.com/traPtitech/Jomon/internal/webhook"
 	"go.uber.org/zap"
 )
 
@@ -50,7 +50,7 @@ func main() {
 		panic(err)
 	}
 	// Setup webhook service
-	ws, err := service.LoadWebhookService()
+	ws, err := webhook.Load()
 	if err != nil {
 		panic(err)
 	}

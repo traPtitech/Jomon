@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/model"
-	"github.com/traPtitech/Jomon/internal/service"
+	"github.com/traPtitech/Jomon/internal/nulltime"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 	"go.uber.org/mock/gomock"
@@ -278,7 +278,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 
 		date1 := time.Now()
 		date2str := date1.Add(time.Hour).Format("2006-01-02")
-		date2, err := service.StrToDate(date2str)
+		date2, err := nulltime.ParseDate(date2str)
 		require.NoError(t, err)
 		application1 := &model.ApplicationResponse{
 			ID:        uuid.New(),
@@ -340,7 +340,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 
 		date1 := time.Now()
 		date2str := date1.Add(-time.Hour).Format("2006-01-02")
-		date2, err := service.StrToDate(date2str)
+		date2, err := nulltime.ParseDate(date2str)
 		require.NoError(t, err)
 		application1 := &model.ApplicationResponse{
 			ID:        uuid.New(),

@@ -9,18 +9,18 @@ import (
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
-	"github.com/traPtitech/Jomon/internal/service"
+	"github.com/traPtitech/Jomon/internal/nulltime"
 	"go.uber.org/zap"
 )
 
 type User struct {
-	ID             uuid.UUID        `json:"id"`
-	Name           string           `json:"name"`
-	DisplayName    string           `json:"display_name"`
-	AccountManager bool             `json:"account_manager"`
-	CreatedAt      time.Time        `json:"created_at"`
-	UpdatedAt      time.Time        `json:"updated_at"`
-	DeletedAt      service.NullTime `json:"deleted_at"`
+	ID             uuid.UUID         `json:"id"`
+	Name           string            `json:"name"`
+	DisplayName    string            `json:"display_name"`
+	AccountManager bool              `json:"account_manager"`
+	CreatedAt      time.Time         `json:"created_at"`
+	UpdatedAt      time.Time         `json:"updated_at"`
+	DeletedAt      nulltime.NullTime `json:"deleted_at"`
 }
 
 func (h Handlers) GetUsers(c echo.Context) error {
@@ -41,7 +41,7 @@ func (h Handlers) GetUsers(c echo.Context) error {
 			AccountManager: user.AccountManager,
 			CreatedAt:      user.CreatedAt,
 			UpdatedAt:      user.UpdatedAt,
-			DeletedAt:      service.TimeToNullTime(&user.DeletedAt),
+			DeletedAt:      nulltime.FromTime(&user.DeletedAt),
 		}
 	})
 
@@ -93,7 +93,7 @@ func userFromModelUser(u model.User) User {
 		AccountManager: u.AccountManager,
 		CreatedAt:      u.CreatedAt,
 		UpdatedAt:      u.UpdatedAt,
-		DeletedAt:      service.TimeToNullTime(&u.DeletedAt),
+		DeletedAt:      nulltime.FromTime(&u.DeletedAt),
 	}
 }
 

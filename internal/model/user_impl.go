@@ -8,7 +8,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/ent/user"
-	"github.com/traPtitech/Jomon/internal/service"
+	"github.com/traPtitech/Jomon/internal/nulltime"
 )
 
 func (repo *EntRepository) CreateUser(
@@ -88,6 +88,6 @@ func convertEntUserToModelUser(user *ent.User) *User {
 		AccountManager: user.AccountManager,
 		CreatedAt:      user.CreatedAt,
 		UpdatedAt:      user.UpdatedAt,
-		DeletedAt:      service.TimeToNullTime(user.DeletedAt).Time,
+		DeletedAt:      nulltime.FromTime(user.DeletedAt).Time,
 	}
 }

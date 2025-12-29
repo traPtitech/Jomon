@@ -1,4 +1,4 @@
-package service
+package webhook
 
 import (
 	"crypto/hmac"
@@ -59,7 +59,7 @@ type Webhook struct {
 	ID        string
 }
 
-type WebhookService struct {
+type Service struct {
 	// WEBHOOK_SECRET
 	secret string
 	// WEBHOOK_CHANNEL_ID
@@ -68,7 +68,7 @@ type WebhookService struct {
 	webhookID string
 }
 
-func LoadWebhookService() (*WebhookService, error) {
+func Load() (*Service, error) {
 	loadEnv := func(key string) (string, error) {
 		value := os.Getenv(key)
 		if value == "" {
@@ -87,18 +87,18 @@ func LoadWebhookService() (*WebhookService, error) {
 		return nil, err
 	}
 
-	return NewWebhookService(secret, channelID, webhookID), nil
+	return New(secret, channelID, webhookID), nil
 }
 
-func NewWebhookService(secret, channelID, webhookID string) *WebhookService {
-	return &WebhookService{
+func New(secret, channelID, webhookID string) *Service {
+	return &Service{
 		secret:    secret,
 		channelID: channelID,
 		webhookID: webhookID,
 	}
 }
 
-func (ws *WebhookService) WebhookApplicationsEventHandler(c echo.Context, reqBody, resBody []byte) {
+func (ws *Service) WebhookApplicationsEventHandler(c echo.Context, reqBody, resBody []byte) {
 	var message string
 
 	if strings.Contains(c.Request().URL.Path, "/comments") {
@@ -156,7 +156,7 @@ func (ws *WebhookService) WebhookApplicationsEventHandler(c echo.Context, reqBod
 	_ = ws.RequestWebhook(message, 1)
 }
 
-func (ws *WebhookService) RequestWebhook(message string, embed int) error {
+func (ws *Service) RequestWebhook(message string, embed int) error {
 	u, err := url.Parse("https://q.trap.jp/api/v3/webhooks")
 	if err != nil {
 		return err
@@ -187,7 +187,7 @@ func (ws *WebhookService) RequestWebhook(message string, embed int) error {
 	return nil
 }
 
-func (ws *WebhookService) calcSignature(message string) string {
+func (ws *Service) calcSignature(message string) string {
 	mac := hmac.New(sha1.New, []byte(ws.secret))
 	mac.Write([]byte(message))
 	return hex.EncodeToString(mac.Sum(nil))

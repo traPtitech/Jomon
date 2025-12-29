@@ -14,7 +14,7 @@ import (
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/router/wrapsession"
-	"github.com/traPtitech/Jomon/internal/service"
+	"github.com/traPtitech/Jomon/internal/traq"
 	"go.uber.org/zap"
 )
 
@@ -48,13 +48,13 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 		return err
 	}
 
-	res, err := service.RequestAccessToken(code, codeVerifier)
+	res, err := traq.RequestAccessToken(code, codeVerifier)
 	if err != nil {
 		logger.Error("failed to get access token", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	u, err := service.FetchTraQUserInfo(res.AccessToken)
+	u, err := traq.FetchTraQUserInfo(res.AccessToken)
 	if err != nil {
 		logger.Error("failed to fetch traQ user info", zap.Error(err))
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
@@ -124,11 +124,7 @@ func (h Handlers) GeneratePKCE(c echo.Context) error {
 		return err
 	}
 
-	// nolint:lll
-	to := fmt.Sprintf(
-		"%s/oauth2/authorize?response_type=code&client_id=%s&code_challenge=%s&code_challenge_method=%s",
-		service.TraQBaseURL,
-		service.JomonClientID,
+	to := traq.AuthorizeURL(
 		encoder.EncodeToString(codeVerifierHash[:]),
 		codeChallengeMethod,
 	)

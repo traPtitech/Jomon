@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/internal/nulltime"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 )
@@ -383,7 +384,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 
 		since := application1.CreatedAt.Add(10 * time.Millisecond)
 		got, err := repo6.GetApplications(ctx, ApplicationQuery{
-			Since: since,
+			Since: nulltime.FromTime(&since),
 		})
 		require.NoError(t, err)
 		require.Len(t, got, 1)
@@ -434,7 +435,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 
 		until := application2.CreatedAt.Add(-1 * time.Second)
 		got, err := repo7.GetApplications(ctx, ApplicationQuery{
-			Until: until,
+			Until: nulltime.FromTime(&until),
 		})
 		require.NoError(t, err)
 		require.Len(t, got, 1)

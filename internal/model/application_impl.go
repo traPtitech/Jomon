@@ -78,14 +78,14 @@ func (repo *EntRepository) GetApplications(
 			)
 	}
 
-	if !query.Since.IsZero() {
+	if query.Since.Valid {
 		applicationsq = applicationsq.
-			Where(application.CreatedAtGTE(query.Since))
+			Where(application.CreatedAtGTE(query.Since.Time))
 	}
 
-	if !query.Until.IsZero() {
+	if query.Until.Valid {
 		applicationsq = applicationsq.
-			Where(application.CreatedAtLT(query.Until))
+			Where(application.CreatedAtLT(query.Until.Time))
 	}
 
 	if query.Tag != nil && *query.Tag != "" {

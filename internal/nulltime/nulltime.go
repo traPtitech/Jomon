@@ -1,4 +1,4 @@
-package service
+package nulltime
 
 import (
 	"bytes"
@@ -6,17 +6,25 @@ import (
 	"time"
 )
 
-func StrToDate(str string) (time.Time, error) {
+func ParseDate(str string) (NullTime, error) {
 	loc, _ := time.LoadLocation("Local")
-	return time.ParseInLocation("2006-01-02", str, loc)
+	t, err := time.ParseInLocation("2006-01-02", str, loc)
+	if err != nil {
+		return NullTime{}, err
+	}
+	return FromTime(&t), nil
 }
 
-func StrToTime(str string) (time.Time, error) {
+func ParseTime(str string) (NullTime, error) {
 	loc, _ := time.LoadLocation("Local")
-	return time.ParseInLocation("2006-01-02T15:04:05", str, loc)
+	t, err := time.ParseInLocation("2006-01-02T15:04:05", str, loc)
+	if err != nil {
+		return NullTime{}, err
+	}
+	return FromTime(&t), nil
 }
 
-func TimeToNullTime(t *time.Time) NullTime {
+func FromTime(t *time.Time) NullTime {
 	if t == nil {
 		return NullTime{}
 	}
