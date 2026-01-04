@@ -1,9 +1,9 @@
 module github.com/traPtitech/Jomon
 
-go 1.24.6
+go 1.24.11
 
 require (
-	ariga.io/atlas v0.38.0
+	ariga.io/atlas v1.0.0
 	entgo.io/ent v0.14.5
 	github.com/aws/aws-sdk-go-v2 v1.41.0
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.20.18
@@ -48,6 +48,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/spf13/cobra v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
