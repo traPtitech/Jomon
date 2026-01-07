@@ -15,7 +15,7 @@ func (repo *EntRepository) GetAccountManagers(ctx context.Context) ([]*AccountMa
 		Where(user.AccountManager(true)).
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, defaultEntErrorConverter.convert(err)
 	}
 
 	accountManagers := lo.Map(users, func(u *ent.User, _ int) *AccountManager {
@@ -34,7 +34,7 @@ func (repo *EntRepository) AddAccountManagers(ctx context.Context, userIDs []uui
 		SetAccountManager(true).
 		Save(ctx)
 
-	return err
+	return defaultEntErrorConverter.convert(err)
 }
 
 func (repo *EntRepository) DeleteAccountManagers(ctx context.Context, userIDs []uuid.UUID) error {
@@ -44,5 +44,5 @@ func (repo *EntRepository) DeleteAccountManagers(ctx context.Context, userIDs []
 		SetAccountManager(false).
 		Save(ctx)
 
-	return err
+	return defaultEntErrorConverter.convert(err)
 }

@@ -8,6 +8,11 @@ import (
 	"github.com/traPtitech/Jomon/internal/ent/file"
 )
 
+var fileErrorConverter = &entErrorConverter{
+	msgBadInput: "failed to process file due to invalid input",
+	msgNotFound: "file not found",
+}
+
 func (repo *EntRepository) CreateFile(
 	ctx context.Context, name string, mimetype string, applicationID uuid.UUID, userID uuid.UUID,
 ) (*File, error) {
@@ -21,7 +26,7 @@ func (repo *EntRepository) CreateFile(
 		SetUserID(userID).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fileErrorConverter.convert(err)
 	}
 
 	_, err = repo.client.Application.
@@ -29,7 +34,7 @@ func (repo *EntRepository) CreateFile(
 		AddFile(created).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fileErrorConverter.convert(err)
 	}
 
 	f := &File{
@@ -50,16 +55,17 @@ func (repo *EntRepository) GetFile(ctx context.Context, fileID uuid.UUID) (*File
 		WithUser().
 		Only(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fileErrorConverter.convert(err)
 	}
 
 	return ConvertEntFileToModelFile(f), nil
 }
 
 func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) error {
-	return repo.client.File.
+	err := repo.client.File.
 		DeleteOneID(fileID).
 		Exec(ctx)
+	return fileErrorConverter.convert(err)
 }
 
 func ConvertEntFileToModelFile(entfile *ent.File) *File {

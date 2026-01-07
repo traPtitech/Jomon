@@ -12,6 +12,10 @@ import (
 func (repo *EntRepository) CreateStatus(
 	ctx context.Context, applicationID uuid.UUID, userID uuid.UUID, status Status,
 ) (*ApplicationStatus, error) {
+	errorConverter := &entErrorConverter{
+		msgBadInput: "failed to create application status due to invalid input",
+		msgNotFound: "application status not found",
+	}
 	c, err := repo.client.ApplicationStatus.
 		Create().
 		SetStatus(applicationstatus.Status(status.String())).
@@ -20,7 +24,7 @@ func (repo *EntRepository) CreateStatus(
 		SetUserID(userID).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errorConverter.convert(err)
 	}
 	created, err := repo.client.ApplicationStatus.
 		Query().
@@ -28,7 +32,7 @@ func (repo *EntRepository) CreateStatus(
 		WithUser().
 		Only(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errorConverter.convert(err)
 	}
 	return convertEntApplicationStatusToModelApplicationStatus(created), nil
 }
