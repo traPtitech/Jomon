@@ -833,8 +833,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 
 		err = h.Handlers.PostApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, http.StatusNotFound, rec.Code)
 	})
 
 	t.Run("UnknownUserID", func(t *testing.T) {
