@@ -4,16 +4,17 @@ import (
 	crand "crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"math/rand/v2"
 	"net/http"
 	"sync"
 
 	"github.com/labstack/echo/v4"
-	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/router/wrapsession"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/traq"
 	"go.uber.org/zap"
 )
@@ -30,17 +31,15 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 
 	code := c.QueryParam("code")
 	if len(code) == 0 {
-		return echo.NewHTTPError(http.StatusBadRequest, "code is required")
+		return service.NewBadInputError("code is required")
 	}
 
 	codeVerifier, err := wrapsession.WithSession(
 		c, h.SessionName, func(w *wrapsession.W) (string, error) {
 			v, ok := w.GetCodeVerifier()
 			if !ok {
-				err := echo.NewHTTPError(
-					http.StatusInternalServerError,
-					fmt.Errorf("code_verifier is not found in session"))
-				return "", err
+				err := fmt.Errorf("code_verifier is not found in session")
+				return "", service.NewUnexpectedError(err)
 			}
 			return v, nil
 		})
@@ -51,28 +50,30 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	res, err := traq.RequestAccessToken(code, codeVerifier)
 	if err != nil {
 		logger.Error("failed to get access token", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return service.NewUnexpectedError(err)
 	}
 
 	u, err := traq.FetchTraQUserInfo(res.AccessToken)
 	if err != nil {
 		logger.Error("failed to fetch traQ user info", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return service.NewUnexpectedError(err)
 	}
 
 	var modelUser *model.User
 	modelUser, err = h.Repository.GetUserByName(ctx, u.Name)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			modelUser, err = h.Repository.CreateUser(ctx, u.Name, u.DisplayName, false)
-			if err != nil {
-				logger.Error("failed to create user", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
-			}
-		} else {
-			logger.Error("failed to get user by name", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+	if err == nil {
+		// User found, do nothing
+	} else if nfErr := new(service.NotFoundError); errors.As(err, &nfErr) {
+		// User not found, create new user
+		modelUser, err = h.Repository.CreateUser(ctx, u.Name, u.DisplayName, false)
+		if err != nil {
+			logger.Error("failed to create user", zap.Error(err))
+			return err
 		}
+	} else {
+		// Some other error occurred
+		logger.Error("failed to get user by name", zap.Error(err))
+		return err
 	}
 
 	_, err = wrapsession.WithSession(c, h.SessionName, func(w *wrapsession.W) (struct{}, error) {

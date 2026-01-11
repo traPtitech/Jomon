@@ -14,9 +14,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
-	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 	"go.uber.org/mock/gomock"
@@ -540,8 +540,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 
 		err = h.Handlers.GetApplications(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, "invalid status"), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("FailedToGetApplications", func(t *testing.T) {
@@ -567,8 +566,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 
 		err = h.Handlers.GetApplications(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -821,8 +819,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		var resErr *ent.NotFoundError
-		errors.As(errors.New("unknown id"), &resErr)
+		resErr := service.NewNotFoundError("tag not found")
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -833,7 +830,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 
 		err = h.Handlers.PostApplication(c)
 		require.Error(t, err)
-		require.Equal(t, http.StatusNotFound, rec.Code)
+		require.Equal(t, http.StatusNotFound, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("UnknownUserID", func(t *testing.T) {
@@ -868,8 +865,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		var resErr *ent.NotFoundError
-		errors.As(errors.New("unknown id"), &resErr)
+		resErr := service.NewNotFoundError("user not found")
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -884,8 +880,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 
 		err = h.Handlers.PostApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, http.StatusNotFound, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -1094,8 +1089,6 @@ func TestHandlers_GetApplication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		invalidUUID := "invalid-uuid"
-		_, resErr := uuid.Parse(invalidUUID)
-
 		e := echo.New()
 		path := fmt.Sprintf("/api/applications/%s", invalidUUID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
@@ -1110,8 +1103,7 @@ func TestHandlers_GetApplication(t *testing.T) {
 
 		err = h.Handlers.GetApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -1131,12 +1123,9 @@ func TestHandlers_GetApplication(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		resErr := errors.New("invalid UUID")
-
 		err = h.Handlers.GetApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("UnknownID", func(t *testing.T) {
@@ -1155,9 +1144,7 @@ func TestHandlers_GetApplication(t *testing.T) {
 		c.SetParamNames("applicationID")
 		c.SetParamValues(unknownID.String())
 
-		var resErr *ent.NotFoundError
-		errors.As(errors.New("unknown id"), &resErr)
-
+		resErr := service.NewNotFoundError("user not found")
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
@@ -1167,8 +1154,7 @@ func TestHandlers_GetApplication(t *testing.T) {
 
 		err = h.Handlers.GetApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, http.StatusNotFound, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -1618,8 +1604,6 @@ func TestHandlers_PutApplication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		invalidUUID := "invalid-uuid"
-		_, resErr := uuid.Parse(invalidUUID)
-
 		e := echo.New()
 		path := fmt.Sprintf("/api/applications/%s", invalidUUID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, nil)
@@ -1635,8 +1619,7 @@ func TestHandlers_PutApplication(t *testing.T) {
 
 		err = h.Handlers.PutApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -1657,12 +1640,9 @@ func TestHandlers_PutApplication(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		resErr := errors.New("invalid UUID")
-
 		err = h.Handlers.PutApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("UnknownID", func(t *testing.T) {
@@ -1693,20 +1673,16 @@ func TestHandlers_PutApplication(t *testing.T) {
 		c.SetParamValues(unknownID.String())
 		c.Set(loginUserKey, user)
 
-		var resErr *ent.NotFoundError
-		errors.As(errors.New("unknown id"), &resErr)
-
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
 			GetApplication(c.Request().Context(), unknownID).
-			Return(nil, resErr)
+			Return(nil, service.NewNotFoundError("application not found"))
 
 		err = h.Handlers.PutApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, http.StatusNotFound, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("UnknownTagID", func(t *testing.T) {
@@ -1762,9 +1738,6 @@ func TestHandlers_PutApplication(t *testing.T) {
 		c.SetParamValues(application.ID.String())
 		c.Set(loginUserKey, user)
 
-		var resErr *ent.NotFoundError
-		errors.As(errors.New("unknown id"), &resErr)
-
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
@@ -1774,12 +1747,11 @@ func TestHandlers_PutApplication(t *testing.T) {
 		h.Repository.MockTagRepository.
 			EXPECT().
 			GetTag(c.Request().Context(), tag.ID).
-			Return(nil, resErr)
+			Return(nil, service.NewNotFoundError("tag not found"))
 
 		err = h.Handlers.PutApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, http.StatusNotFound, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -2418,17 +2390,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		resErr := echo.NewHTTPError(http.StatusBadRequest)
-		resErrMessage := echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Sprintf("invalid Status %s", invalidStatus))
-		resErrMessage.Internal = fmt.Errorf("invalid Status %s", invalidStatus)
-		resErr.Message = resErrMessage
 
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい
-		require.Equal(t, resErr, err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
@@ -2439,7 +2404,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		invalidUUID := "invalid-uuid"
-		_, resErr := uuid.Parse(invalidUUID)
 		reqStatus := PutStatus{
 			Status:  model.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
@@ -2463,8 +2427,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("NillUUID", func(t *testing.T) {
@@ -2495,12 +2458,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		_, resErr := uuid.Parse(c.Param("applicationID"))
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("SameStatusError", func(t *testing.T) {
@@ -2556,12 +2516,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplication(ctx, application.ID).
 			Return(application, nil)
 
-		resErr := errors.New("invalid application: same status")
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("CommentRequiredErrorFromSubmittedToFixRequired", func(t *testing.T) {
@@ -2617,15 +2574,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplication(ctx, application.ID).
 			Return(application, nil)
 
-		resErr := fmt.Errorf(
-			"unable to change %v to %v without comment",
-			application.Status.String(),
-			reqStatus.Status.String())
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("CommentRequiredErrorFromSubmittedToRejected", func(t *testing.T) {
@@ -2680,15 +2631,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplication(ctx, application.ID).
 			Return(application, nil)
 
-		resErr := fmt.Errorf(
-			"unable to change %v to %v without comment",
-			application.Status.String(),
-			reqStatus.Status.String())
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("CommentRequiredErrorFromAcceptedToSubmitted", func(t *testing.T) {
@@ -2743,15 +2688,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplication(ctx, application.ID).
 			Return(application, nil)
 
-		resErr := fmt.Errorf(
-			"unable to change %v to %v without comment",
-			application.Status.String(),
-			reqStatus.Status.String())
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("AccountManagerNoPrivilege", func(t *testing.T) {
@@ -2807,15 +2746,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplication(ctx, application.ID).
 			Return(application, nil)
 
-		resErr := fmt.Errorf(
-			"accountManager unable to change %v to %v",
-			application.Status.String(),
-			reqStatus.Status.String())
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusForbiddenだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("AlreadyPaid", func(t *testing.T) {
@@ -2883,12 +2816,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplicationTargets(ctx, application.ID).
 			Return(targets, nil)
 
-		resErr := errors.New("someone already paid")
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("CreatorNoPrivilege", func(t *testing.T) {
@@ -2944,14 +2874,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplication(ctx, application.ID).
 			Return(application, nil)
 
-		resErr := fmt.Errorf(
-			"creator unable to change %v to %v",
-			application.Status.String(), reqStatus.Status.String())
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusForbiddenだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusForbidden, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("NoPrivilege", func(t *testing.T) {
@@ -3009,11 +2934,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusForbiddenだけ判定したい
-		require.Equal(
-			t,
-			echo.NewHTTPError(http.StatusForbidden, "you are not application creator"),
-			err)
+		require.Equal(t, http.StatusForbidden, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
