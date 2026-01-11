@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/traPtitech/Jomon/internal/router/wrapsession"
 	"github.com/traPtitech/Jomon/internal/service"
 )
 
@@ -29,6 +30,12 @@ func HTTPErrorHandlerInner(err error) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusUnauthorized, e.Message).SetInternal(e)
 	}
 	if e := new(service.UnexpectedError); errors.As(err, &e) {
+		return echo.ErrInternalServerError.WithInternal(e)
+	}
+	if e := new(wrapsession.GetSessionError); errors.As(err, &e) {
+		return echo.ErrInternalServerError.WithInternal(e)
+	}
+	if e := new(wrapsession.SaveSessionError); errors.As(err, &e) {
 		return echo.ErrInternalServerError.WithInternal(e)
 	}
 	return echo.ErrInternalServerError.WithInternal(err)
