@@ -2,7 +2,6 @@ package router
 
 import (
 	"encoding/gob"
-	"errors"
 	"os"
 
 	"github.com/google/uuid"
@@ -14,7 +13,6 @@ import (
 
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
-	"github.com/traPtitech/Jomon/internal/router/wrapsession"
 	"github.com/traPtitech/Jomon/internal/storage"
 	"github.com/traPtitech/Jomon/internal/webhook"
 )
@@ -31,24 +29,9 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	e.Debug = os.Getenv("IS_DEBUG_MODE") != ""
 	e.HTTPErrorHandler = func(err error, c echo.Context) {
 		logger := logging.GetLogger(c.Request().Context())
-		var httpErr *echo.HTTPError
-		var getSessionErr *wrapsession.GetSessionError
-		var saveSessionErr *wrapsession.SaveSessionError
-		var retErr error
-		if errors.As(err, &httpErr) {
-			retErr = httpErr
-		} else if errors.As(err, &getSessionErr) {
-			inner := getSessionErr.Unwrap()
-			logger.Error("failed to get session", zap.Error(inner))
-			retErr = echo.ErrInternalServerError.WithInternal(inner)
-		} else if errors.As(err, &saveSessionErr) {
-			inner := saveSessionErr.Unwrap()
-			logger.Error("failed to save session", zap.Error(inner))
-			retErr = echo.ErrInternalServerError.WithInternal(inner)
-		} else {
-			retErr = err
-		}
-		c.Echo().DefaultHTTPErrorHandler(retErr, c)
+		logger.Debug("handling error", zap.Error(err))
+		he := HTTPErrorHandlerInner(err)
+		c.Echo().DefaultHTTPErrorHandler(he, c)
 	}
 	e.Use(middleware.RequestID())
 	e.Use(h.setLoggerMiddleware(logger))

@@ -2,7 +2,6 @@ package router
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -11,10 +10,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/samber/lo"
-	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 	"go.uber.org/zap"
 )
 
@@ -130,7 +129,7 @@ func (h Handlers) GetApplications(c echo.Context) error {
 	if s := c.QueryParam("status"); s != "" {
 		status = Status(s)
 		if !status.Valid() {
-			return echo.NewHTTPError(http.StatusBadRequest, "invalid status")
+			return service.NewBadInputError("invalid status")
 		}
 	}
 	if s := status.String(); s != "" {
@@ -141,7 +140,8 @@ func (h Handlers) GetApplications(c echo.Context) error {
 		t, err := uuid.Parse(c.QueryParam("target"))
 		if err != nil {
 			logger.Info("could not parse query parameter `target` as UUID", zap.Error(err))
-			return echo.NewHTTPError(http.StatusBadRequest, err)
+			return service.NewBadInputError("received parameter `target` is not a valid UUID").
+				WithInternal(err)
 		}
 		target = t
 	}
@@ -150,7 +150,8 @@ func (h Handlers) GetApplications(c echo.Context) error {
 		s, err := nulltime.ParseDate(c.QueryParam("since"))
 		if err != nil {
 			logger.Info("could not parse query parameter `since` as time.Time", zap.Error(err))
-			return echo.NewHTTPError(http.StatusBadRequest, err)
+			return service.NewBadInputError("received parameter `since` is not a valid date").
+				WithInternal(err)
 		}
 		since = s
 	}
@@ -159,7 +160,8 @@ func (h Handlers) GetApplications(c echo.Context) error {
 		u, err := nulltime.ParseDate(c.QueryParam("until"))
 		if err != nil {
 			logger.Info("could not parse query parameter `until` as time.Time", zap.Error(err))
-			return echo.NewHTTPError(http.StatusBadRequest, err)
+			return service.NewBadInputError("received parameter `until` is not a valid date").
+				WithInternal(err)
 		}
 		until = u
 	}
@@ -168,14 +170,12 @@ func (h Handlers) GetApplications(c echo.Context) error {
 		limitI, err := strconv.Atoi(limitQuery)
 		if err != nil {
 			logger.Info("could not parse limit as integer", zap.Error(err))
-			return echo.NewHTTPError(http.StatusBadRequest, err)
+			return service.NewBadInputError("received parameter `limit` is not a valid integer").
+				WithInternal(err)
 		}
 		if limitI < 0 {
 			logger.Info("received negative limit", zap.Int("limit", limitI))
-			return echo.NewHTTPError(
-				http.StatusBadRequest,
-				fmt.Errorf("negative limit(=%d) is invalid", limitI),
-			)
+			return service.NewBadInputError(fmt.Sprintf("negative limit(=%d) is invalid", limitI))
 		}
 		limit = limitI
 	}
@@ -184,14 +184,12 @@ func (h Handlers) GetApplications(c echo.Context) error {
 		offsetI, err := strconv.Atoi(offsetQuery)
 		if err != nil {
 			logger.Info("could not parse offset as integer", zap.Error(err))
-			return echo.NewHTTPError(http.StatusBadRequest, err)
+			return service.NewBadInputError("received parameter `offset` is not a valid integer").
+				WithInternal(err)
 		}
 		if offsetI < 0 {
 			logger.Info("received negative offset", zap.Int("offset", offsetI))
-			return echo.NewHTTPError(
-				http.StatusBadRequest,
-				fmt.Errorf("negative offset(=%d) is invalid", offsetI),
-			)
+			return service.NewBadInputError(fmt.Sprintf("negative offset(=%d) is invalid", offsetI))
 		}
 		offset = offsetI
 	}
@@ -200,14 +198,15 @@ func (h Handlers) GetApplications(c echo.Context) error {
 		t := c.QueryParam("tag")
 		tag = &t
 	}
-	var cratedBy uuid.UUID
+	var createdBy uuid.UUID
 	if c.QueryParam("created_by") != "" {
 		u, err := uuid.Parse(c.QueryParam("created_by"))
 		if err != nil {
 			logger.Info("could not parse query parameter `created_by` as UUID", zap.Error(err))
-			return echo.NewHTTPError(http.StatusBadRequest, err)
+			return service.NewBadInputError("received parameter `created_by` is not a valid UUID").
+				WithInternal(err)
 		}
-		cratedBy = u
+		createdBy = u
 	}
 	query := model.ApplicationQuery{
 		Sort:      sort,
@@ -218,13 +217,13 @@ func (h Handlers) GetApplications(c echo.Context) error {
 		Limit:     limit,
 		Offset:    offset,
 		Tag:       tag,
-		CreatedBy: cratedBy,
+		CreatedBy: createdBy,
 	}
 
 	modelapplications, err := h.Repository.GetApplications(ctx, query)
 	if err != nil {
 		logger.Error("failed to get applications from repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 
 	applications := lo.Map(
@@ -273,7 +272,8 @@ func (h Handlers) PostApplication(c echo.Context) error {
 	var req Application
 	var err error
 	if err = c.Bind(&req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("failed to get application from request").
+			WithInternal(err)
 	}
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
@@ -282,12 +282,7 @@ func (h Handlers) PostApplication(c echo.Context) error {
 	for _, tagID := range req.Tags {
 		tag, err := h.Repository.GetTag(ctx, tagID)
 		if err != nil {
-			if ent.IsNotFound(err) {
-				logger.Info("could not find tag in repository", zap.String("ID", tagID.String()))
-				return echo.NewHTTPError(http.StatusNotFound, err)
-			}
-			logger.Error("failed to get tag from repository", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return err
 		}
 		tags = append(tags, tag)
 	}
@@ -301,14 +296,8 @@ func (h Handlers) PostApplication(c echo.Context) error {
 		ctx,
 		req.Title, req.Content, tags, targets, req.CreatedBy)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			logger.Info(
-				"could not find application in repository",
-				zap.String("ID", req.CreatedBy.String()))
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
 		logger.Error("failed to create application in repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 	restargets := lo.Map(
 		application.Targets,
@@ -380,29 +369,23 @@ func (h Handlers) GetApplication(c echo.Context) error {
 	applicationID, err := uuid.Parse(c.Param("applicationID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `applicationID` as UUID", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("received parameter `applicationID` is not a valid UUID").
+			WithInternal(err)
 	}
 	if applicationID == uuid.Nil {
 		logger.Info("invalid UUID")
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+		return service.NewBadInputError("received parameter `applicationID` is not a valid UUID")
 	}
 
 	application, err := h.Repository.GetApplication(ctx, applicationID)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			logger.Info(
-				"could not find application in repository",
-				zap.String("ID", applicationID.String()),
-				zap.Error(err))
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
 		logger.Error("failed to get application from repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 	modelcomments, err := h.Repository.GetComments(ctx, applicationID)
 	if err != nil {
 		logger.Error("failed to get comments from repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 	restargets := lo.Map(
 		application.Targets,
@@ -473,44 +456,35 @@ func (h Handlers) PutApplication(c echo.Context) error {
 	applicationID, err := uuid.Parse(c.Param("applicationID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `applicationID` as UUID", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("received parameter `applicationID` is not a valid UUID").
+			WithInternal(err)
 	}
 	if applicationID == uuid.Nil {
 		logger.Info("invalid UUID")
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid UUID"))
+		return service.NewBadInputError("received parameter `applicationID` is not a valid UUID")
 	}
 	isApplicationCreator, err := h.isApplicationCreator(ctx, loginUser.ID, applicationID)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			logger.Info(
-				"could not find application in repository",
-				zap.String("ID", applicationID.String()),
-				zap.Error(err))
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
 		logger.Error("failed to check application creator", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 	if !isApplicationCreator {
 		logger.Info("user is not application creator", zap.String("ID", loginUser.ID.String()))
-		return echo.NewHTTPError(http.StatusForbidden, "you are not application creator")
+		return service.NewForbiddenError("you are not application creator")
 	}
 
 	var req PutApplication
 	if err = c.Bind(&req); err != nil {
 		logger.Info("failed to get application from request", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("failed to get application from request").
+			WithInternal(err)
 	}
 	tags := []*model.Tag{}
 	for _, tagID := range req.Tags {
 		tag, err := h.Repository.GetTag(ctx, tagID)
 		if err != nil {
-			if ent.IsNotFound(err) {
-				logger.Info("could not find tag in repository", zap.String("ID", tagID.String()))
-				return echo.NewHTTPError(http.StatusNotFound, err)
-			}
 			logger.Error("failed to get tag from repository", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return err
 		}
 		tags = append(tags, tag)
 	}
@@ -524,14 +498,8 @@ func (h Handlers) PutApplication(c echo.Context) error {
 		ctx,
 		applicationID, req.Title, req.Content, tags, targets)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			logger.Info(
-				"could not find request in repository",
-				zap.String("ID", applicationID.String()))
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
 		logger.Error("failed to update application in repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 	restags := lo.Map(application.Tags, func(tag *model.Tag, _ int) *TagResponse {
 		return &TagResponse{
@@ -603,29 +571,25 @@ func (h Handlers) PostComment(c echo.Context) error {
 	applicationID, err := uuid.Parse(c.Param("applicationID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `applicationID` as UUID", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("received parameter `applicationID` is not a valid UUID").
+			WithInternal(err)
 	}
 	if applicationID == uuid.Nil {
 		logger.Info("invalid UUID")
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("received parameter `applicationID` is not a valid UUID")
 	}
 
 	var req Comment
 	if err := c.Bind(&req); err != nil {
 		logger.Info("failed to get comment from request", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("failed to get comment from request").
+			WithInternal(err)
 	}
 
 	comment, err := h.Repository.CreateComment(ctx, req.Comment, applicationID, loginUser.ID)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			logger.Info(
-				"could not find application in repository",
-				zap.String("ID", applicationID.String()))
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
 		logger.Error("failed to create comment in repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 	res := &CommentDetail{
 		ID:        comment.ID,
@@ -645,29 +609,25 @@ func (h Handlers) PutStatus(c echo.Context) error {
 	applicationID, err := uuid.Parse(c.Param("applicationID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `applicationID` as UUID", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("received parameter `applicationID` is not a valid UUID").
+			WithInternal(err)
 	}
 	if applicationID == uuid.Nil {
 		logger.Info("invalid UUID")
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("received parameter `applicationID` is not a valid UUID")
 	}
 
 	var req PutStatus
 	if err = c.Bind(&req); err != nil {
 		logger.Info("could not get status from request", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("could not get status from request").
+			WithInternal(err)
 	}
 
 	application, err := h.Repository.GetApplication(ctx, applicationID)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			logger.Info(
-				"could not find application in repository",
-				zap.String("ID", applicationID.String()))
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
 		logger.Error("failed to get application from repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 	if err := h.filterAccountManagerOrApplicationCreator(ctx, &loginUser, application); err != nil {
 		return err
@@ -675,33 +635,30 @@ func (h Handlers) PutStatus(c echo.Context) error {
 
 	// judging privilege
 	if req.Status == application.Status {
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			errors.New("invalid application: same status"),
-		)
+		return service.NewBadInputError("status is the same as current status")
 	}
 	if req.Comment == "" {
 		if !IsAbleNoCommentChangeStatus(req.Status, application.Status) {
-			err := fmt.Errorf(
+			message := fmt.Sprintf(
 				"unable to change %v to %v without comment",
 				application.Status.String(), req.Status.String())
-			return echo.NewHTTPError(http.StatusBadRequest, err)
+			return service.NewBadInputError(message)
 		}
 	}
 
 	if loginUser.AccountManager {
 		if !IsAbleAccountManagerChangeState(req.Status, application.Status) {
 			logger.Info("accountManager unable to change status")
-			err := fmt.Errorf(
+			message := fmt.Sprintf(
 				"accountManager unable to change %v to %v",
 				application.Status.String(), req.Status.String())
-			return echo.NewHTTPError(http.StatusBadRequest, err)
+			return service.NewBadInputError(message)
 		}
 		if req.Status == model.Submitted && application.Status == model.Accepted {
 			targets, err := h.Repository.GetApplicationTargets(ctx, applicationID)
 			if err != nil {
 				logger.Error("failed to get application targets from repository", zap.Error(err))
-				return echo.NewHTTPError(http.StatusInternalServerError, err)
+				return err
 			}
 			paid := lo.Reduce(
 				targets,
@@ -712,7 +669,7 @@ func (h Handlers) PutStatus(c echo.Context) error {
 			)
 			if paid {
 				logger.Info("someone already paid")
-				return echo.NewHTTPError(http.StatusBadRequest, errors.New("someone already paid"))
+				return service.NewBadInputError("someone already paid")
 			}
 		}
 	}
@@ -720,30 +677,30 @@ func (h Handlers) PutStatus(c echo.Context) error {
 	if !loginUser.AccountManager && loginUser.ID == application.CreatedBy {
 		if !IsAbleCreatorChangeStatus(req.Status, application.Status) {
 			logger.Info("creator unable to change status")
-			err := fmt.Errorf(
+			message := fmt.Sprintf(
 				"creator unable to change %v to %v",
 				application.Status.String(), req.Status.String())
-			return echo.NewHTTPError(http.StatusBadRequest, err)
+			return service.NewForbiddenError(message)
 		}
 	}
 
 	if loginUser.ID != application.CreatedBy && !loginUser.AccountManager {
-		logger.Info("use is not creator or accountManager")
-		return echo.NewHTTPError(http.StatusForbidden)
+		logger.Info("user is not creator or accountManager")
+		return service.NewForbiddenError("you are not application creator")
 	}
 
 	// create status and comment: keep the two in this order
 	created, err := h.Repository.CreateStatus(ctx, applicationID, loginUser.ID, req.Status)
 	if err != nil {
 		logger.Error("failed to create status in repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 	var resComment CommentDetail
 	if req.Comment != "" {
 		comment, err := h.Repository.CreateComment(ctx, req.Comment, application.ID, loginUser.ID)
 		if err != nil {
 			logger.Error("failed to create comment in repository", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return err
 		}
 		resComment = CommentDetail{
 			ID:        comment.ID,
@@ -801,7 +758,7 @@ func (h Handlers) isApplicationCreator(
 
 func (h Handlers) filterAccountManagerOrApplicationCreator(
 	ctx context.Context, user *User, application *model.ApplicationDetail,
-) *echo.HTTPError {
+) *service.ForbiddenError {
 	logger := logging.GetLogger(ctx)
 	if user.AccountManager {
 		return nil
@@ -813,5 +770,5 @@ func (h Handlers) filterAccountManagerOrApplicationCreator(
 		"user is not accountManager or application creator",
 		zap.String("ID", user.ID.String()),
 	)
-	return echo.NewHTTPError(http.StatusForbidden, "you are not application creator")
+	return service.NewForbiddenError("you are not application creator")
 }

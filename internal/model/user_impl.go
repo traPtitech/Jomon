@@ -11,6 +11,11 @@ import (
 	"github.com/traPtitech/Jomon/internal/nulltime"
 )
 
+var userErrorConverter = &entErrorConverter{
+	msgBadInput: "failed to process user due to invalid input",
+	msgNotFound: "user not found",
+}
+
 func (repo *EntRepository) CreateUser(
 	ctx context.Context, name string, dn string, accountManager bool,
 ) (*User, error) {
@@ -21,7 +26,7 @@ func (repo *EntRepository) CreateUser(
 		SetAccountManager(accountManager).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, userErrorConverter.convert(err)
 	}
 	return convertEntUserToModelUser(u), nil
 }
@@ -32,7 +37,7 @@ func (repo *EntRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (*
 		Where(user.IDEQ(userID)).
 		Only(ctx)
 	if err != nil {
-		return nil, err
+		return nil, userErrorConverter.convert(err)
 	}
 	return convertEntUserToModelUser(u), nil
 }
@@ -43,7 +48,7 @@ func (repo *EntRepository) GetUserByName(ctx context.Context, name string) (*Use
 		Where(user.NameEQ(name)).
 		Only(ctx)
 	if err != nil {
-		return nil, err
+		return nil, userErrorConverter.convert(err)
 	}
 	return convertEntUserToModelUser(u), nil
 }
@@ -53,7 +58,7 @@ func (repo *EntRepository) GetUsers(ctx context.Context) ([]*User, error) {
 		Query().
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, userErrorConverter.convert(err)
 	}
 	modelusers := lo.Map(users, func(u *ent.User, _ int) *User {
 		return convertEntUserToModelUser(u)
@@ -72,7 +77,7 @@ func (repo *EntRepository) UpdateUser(
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, userErrorConverter.convert(err)
 	}
 	return convertEntUserToModelUser(u), nil
 }
