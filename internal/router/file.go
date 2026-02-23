@@ -8,7 +8,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
-	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/service"
 	"go.uber.org/zap"
@@ -118,12 +117,10 @@ func (h Handlers) GetFile(c *echo.Context) error {
 
 	file, err := h.Repository.GetFile(ctx, fileID)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			logger.Info("could not find file in repository", zap.String("ID", fileID.String()))
-			return echo.ErrNotFound.Wrap(err)
-		}
-		logger.Error("failed to get file from repository", zap.Error(err))
-		return service.NewUnexpectedError(err)
+		logger.Info(
+			"file not found in repository",
+			zap.String("ID", fileID.String()), zap.Error(err))
+		return err
 	}
 
 	modifiedAt := file.CreatedAt.Truncate(time.Second)
@@ -174,12 +171,10 @@ func (h Handlers) GetFileMeta(c *echo.Context) error {
 
 	file, err := h.Repository.GetFile(ctx, fileID)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			logger.Info("could not find file in repository", zap.String("ID", fileID.String()))
-			return echo.ErrNotFound.Wrap(err)
-		}
-		logger.Error("failed to get file from repository", zap.Error(err))
-		return service.NewUnexpectedError(err)
+		logger.Info(
+			"file not found in repository",
+			zap.String("ID", fileID.String()), zap.Error(err))
+		return err
 	}
 
 	return c.JSON(http.StatusOK, &FileMetaResponse{
@@ -208,17 +203,16 @@ func (h Handlers) DeleteFile(c *echo.Context) error {
 
 	err = h.Repository.DeleteFile(ctx, fileID)
 	if err != nil {
-		if ent.IsConstraintError(err) {
-			logger.Info("constraint error while deleting file", zap.Error(err))
-			return echo.ErrBadRequest.Wrap(err)
-		}
-		logger.Error("failed to delete file in repository", zap.Error(err))
+		logger.Error("failed to delete file in repository",
+			zap.String("ID", fileID.String()), zap.Error(err))
 		return service.NewUnexpectedError(err)
 	}
 
 	err = h.Storage.Delete(ctx, fileID.String())
 	if err != nil {
-		logger.Error("failed to delete file in storage", zap.Error(err))
+		logger.Error(
+			"failed to delete file in storage",
+			zap.String("ID", fileID.String()), zap.Error(err))
 		return service.NewUnexpectedError(err)
 	}
 
