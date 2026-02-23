@@ -24,7 +24,7 @@ type Handlers struct {
 	SessionName    string
 }
 
-var defaultHttpErrorHandler = echo.DefaultHTTPErrorHandler(false)
+var defaultHTTPErrorHandler = echo.DefaultHTTPErrorHandler(false)
 
 func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	e := echo.New()
@@ -33,7 +33,7 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 		logger := logging.GetLogger(c.Request().Context())
 		logger.Debug("handling error", zap.Error(err))
 		he := HTTPErrorHandlerInner(err)
-		defaultHttpErrorHandler(c, he)
+		defaultHTTPErrorHandler(c, he)
 	}
 	e.Use(middleware.RequestID())
 	e.Use(h.setLoggerMiddleware(logger))

@@ -39,31 +39,37 @@ func (h Handlers) AccessLoggingMiddleware(next echo.HandlerFunc) echo.HandlerFun
 		start := time.Now()
 		err := next(c)
 		if err != nil {
-			defaultHttpErrorHandler(c, HTTPErrorHandlerInner(err))
+			defaultHTTPErrorHandler(c, HTTPErrorHandlerInner(err))
 		}
 		stop := time.Now()
 
 		req := c.Request()
-		rw, uErr := echo.UnwrapResponse(c.Response())
-		if uErr != nil {
-			logger := logging.GetLogger(req.Context())
-			logger.Error("failed to unwrap response", zap.Error(uErr))
-			return uErr
-		}
-		logger := logging.GetLogger(req.Context())
 		latency := strconv.FormatFloat(stop.Sub(start).Seconds(), 'f', 9, 64) + "s"
 		fields := []zapcore.Field{
 			zap.String("requestMethod", req.Method),
-			zap.Int("status", rw.Status),
 			zap.String("userAgent", req.UserAgent()),
 			zap.String("remoteIp", c.RealIP()),
 			zap.String("referer", req.Referer()),
 			zap.String("protocol", req.Proto),
 			zap.String("requestUrl", req.URL.String()),
 			zap.String("requestSize", req.Header.Get(echo.HeaderContentLength)),
-			zap.String("responseSize", strconv.FormatInt(rw.Size, 10)),
 			zap.String("latency", latency),
 		}
+		rw, uErr := echo.UnwrapResponse(c.Response())
+		if uErr != nil {
+			logger := logging.GetLogger(req.Context())
+			fields = append(
+				fields,
+				zap.Error(uErr),
+				zap.String("status", "unknown"),
+				zap.String("responseSize", "unknown"))
+			logger.Error("failed to unwrap response for access logging", fields...)
+			return nil
+		}
+		fields = append(fields,
+			zap.Int("status", rw.Status),
+			zap.String("responseSize", strconv.FormatInt(rw.Size, 10)))
+		logger := logging.GetLogger(req.Context())
 		httpCode := rw.Status
 		switch {
 		case httpCode >= 500:
