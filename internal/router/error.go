@@ -18,25 +18,25 @@ func HTTPErrorHandlerInner(err error) *echo.HTTPError {
 		return he
 	}
 	if e := new(service.BadInputError); errors.As(err, &e) {
-		return echo.NewHTTPError(http.StatusBadRequest, e.Message).SetInternal(e)
+		return echo.NewHTTPError(http.StatusBadRequest, e.Message).Wrap(e).(*echo.HTTPError)
 	}
 	if e := new(service.NotFoundError); errors.As(err, &e) {
-		return echo.NewHTTPError(http.StatusNotFound, e.Message).SetInternal(e)
+		return echo.NewHTTPError(http.StatusNotFound, e.Message).Wrap(e).(*echo.HTTPError)
 	}
 	if e := new(service.ForbiddenError); errors.As(err, &e) {
-		return echo.NewHTTPError(http.StatusForbidden, e.Message).SetInternal(e)
+		return echo.NewHTTPError(http.StatusForbidden, e.Message).Wrap(e).(*echo.HTTPError)
 	}
 	if e := new(service.UnauthenticatedError); errors.As(err, &e) {
-		return echo.NewHTTPError(http.StatusUnauthorized, e.Message).SetInternal(e)
+		return echo.NewHTTPError(http.StatusUnauthorized, e.Message).Wrap(e).(*echo.HTTPError)
 	}
 	if e := new(service.UnexpectedError); errors.As(err, &e) {
-		return echo.ErrInternalServerError.WithInternal(e)
+		return echo.ErrInternalServerError.Wrap(e).(*echo.HTTPError)
 	}
 	if e := new(wrapsession.GetSessionError); errors.As(err, &e) {
-		return echo.ErrInternalServerError.WithInternal(e)
+		return echo.ErrInternalServerError.Wrap(e).(*echo.HTTPError)
 	}
 	if e := new(wrapsession.SaveSessionError); errors.As(err, &e) {
-		return echo.ErrInternalServerError.WithInternal(e)
+		return echo.ErrInternalServerError.Wrap(e).(*echo.HTTPError)
 	}
-	return echo.ErrInternalServerError.WithInternal(err)
+	return echo.ErrInternalServerError.Wrap(err).(*echo.HTTPError)
 }

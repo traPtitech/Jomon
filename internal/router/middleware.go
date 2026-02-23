@@ -34,31 +34,37 @@ func (h Handlers) setLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 
 // AccessLoggingMiddleware ですべてのエラーを出力する
 func (h Handlers) AccessLoggingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	// TODO(logging): https://echo.labstack.com/docs/middleware/logger を使う
 	return func(c *echo.Context) error {
 		start := time.Now()
 		err := next(c)
 		if err != nil {
-			c.Error(err)
+			defaultHttpErrorHandler(c, HTTPErrorHandlerInner(err))
 		}
 		stop := time.Now()
 
 		req := c.Request()
-		res := c.Response()
+		rw, uErr := echo.UnwrapResponse(c.Response())
+		if uErr != nil {
+			logger := logging.GetLogger(req.Context())
+			logger.Error("failed to unwrap response", zap.Error(uErr))
+			return uErr
+		}
 		logger := logging.GetLogger(req.Context())
 		latency := strconv.FormatFloat(stop.Sub(start).Seconds(), 'f', 9, 64) + "s"
 		fields := []zapcore.Field{
 			zap.String("requestMethod", req.Method),
-			zap.Int("status", res.Status),
+			zap.Int("status", rw.Status),
 			zap.String("userAgent", req.UserAgent()),
 			zap.String("remoteIp", c.RealIP()),
 			zap.String("referer", req.Referer()),
 			zap.String("protocol", req.Proto),
 			zap.String("requestUrl", req.URL.String()),
 			zap.String("requestSize", req.Header.Get(echo.HeaderContentLength)),
-			zap.String("responseSize", strconv.FormatInt(res.Size, 10)),
+			zap.String("responseSize", strconv.FormatInt(rw.Size, 10)),
 			zap.String("latency", latency),
 		}
-		httpCode := res.Status
+		httpCode := rw.Status
 		switch {
 		case httpCode >= 500:
 			fields = append(fields, zap.Error(err))
@@ -99,7 +105,7 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 				return echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
 			}
 			logger.Error("failed to get user from repository", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return echo.ErrInternalServerError.Wrap(err)
 		}
 		c.Set(loginUserKey, userFromModelUser(*user))
 

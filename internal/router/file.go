@@ -120,7 +120,7 @@ func (h Handlers) GetFile(c *echo.Context) error {
 	if err != nil {
 		if ent.IsNotFound(err) {
 			logger.Info("could not find file in repository", zap.String("ID", fileID.String()))
-			return echo.NewHTTPError(http.StatusNotFound, err)
+			return echo.ErrNotFound.Wrap(err)
 		}
 		logger.Error("failed to get file from repository", zap.Error(err))
 		return service.NewUnexpectedError(err)
@@ -176,7 +176,7 @@ func (h Handlers) GetFileMeta(c *echo.Context) error {
 	if err != nil {
 		if ent.IsNotFound(err) {
 			logger.Info("could not find file in repository", zap.String("ID", fileID.String()))
-			return echo.NewHTTPError(http.StatusNotFound, err)
+			return echo.ErrNotFound.Wrap(err)
 		}
 		logger.Error("failed to get file from repository", zap.Error(err))
 		return service.NewUnexpectedError(err)
@@ -210,16 +210,16 @@ func (h Handlers) DeleteFile(c *echo.Context) error {
 	if err != nil {
 		if ent.IsConstraintError(err) {
 			logger.Info("constraint error while deleting file", zap.Error(err))
-			return echo.NewHTTPError(http.StatusBadRequest, err)
+			return echo.ErrBadRequest.Wrap(err)
 		}
 		logger.Error("failed to delete file in repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return service.NewUnexpectedError(err)
 	}
 
 	err = h.Storage.Delete(ctx, fileID.String())
 	if err != nil {
 		logger.Error("failed to delete file in storage", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return service.NewUnexpectedError(err)
 	}
 
 	return c.NoContent(http.StatusOK)
@@ -236,7 +236,7 @@ func (h Handlers) isFileCreator(ctx context.Context, userID, fileID uuid.UUID) (
 
 func (h Handlers) filterAccountManagerOrFileCreator(
 	ctx context.Context, user *User, fileID uuid.UUID,
-) *echo.HTTPError {
+) error {
 	logger := logging.GetLogger(ctx)
 	if user.AccountManager {
 		return nil
@@ -244,10 +244,10 @@ func (h Handlers) filterAccountManagerOrFileCreator(
 	isCreator, err := h.isFileCreator(ctx, user.ID, fileID)
 	if err != nil {
 		logger.Error("failed to check if user is file creator", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return echo.ErrInternalServerError.Wrap(err)
 	}
 	if isCreator {
 		return nil
 	}
-	return echo.NewHTTPError(http.StatusForbidden, errUserIsNotAccountManagerOrFileCreator)
+	return echo.ErrForbidden.Wrap(errUserIsNotAccountManagerOrFileCreator)
 }

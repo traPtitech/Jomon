@@ -238,8 +238,9 @@ func TestHandlers_GetFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -275,8 +276,9 @@ func TestHandlers_GetFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 
 		resErr := service.NewUnexpectedError(errors.New("file not found"))
 
@@ -310,8 +312,9 @@ func TestHandlers_GetFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -342,8 +345,9 @@ func TestHandlers_GetFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues("po")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: "po"},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -376,8 +380,9 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID/meta")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -420,8 +425,9 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID/meta")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 
 		resErr := service.NewUnexpectedError(errors.New("file not found"))
 
@@ -447,8 +453,9 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID/meta")
-		c.SetParamNames("fileID")
-		c.SetParamValues("po")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: "po"},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -484,8 +491,9 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -529,8 +537,9 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		resErr := service.NewUnexpectedError(errors.New("file could not be deleted"))
@@ -573,8 +582,9 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -616,8 +626,9 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(invalidUUID)
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: invalidUUID},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
