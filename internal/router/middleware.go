@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
-	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/router/wrapsession"
 	"go.uber.org/zap"
@@ -90,7 +89,6 @@ func (h Handlers) AccessLoggingMiddleware(next echo.HandlerFunc) echo.HandlerFun
 func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		ctx := c.Request().Context()
-		logger := logging.GetLogger(ctx)
 
 		id, err := wrapsession.WithSession(
 			c, h.SessionName, func(w *wrapsession.W) (uuid.UUID, error) {
@@ -106,12 +104,7 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		user, err := h.Repository.GetUserByID(ctx, id)
 		if err != nil {
-			if ent.IsNotFound(err) {
-				logger.Info("user not found in repository", zap.Error(err))
-				return echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
-			}
-			logger.Error("failed to get user from repository", zap.Error(err))
-			return echo.ErrInternalServerError.Wrap(err)
+			return err
 		}
 		c.Set(loginUserKey, userFromModelUser(*user))
 
