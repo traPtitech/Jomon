@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/router/wrapsession"
@@ -25,7 +25,7 @@ type AuthResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-func (h Handlers) AuthCallback(c echo.Context) error {
+func (h Handlers) AuthCallback(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -99,7 +99,7 @@ func (h Handlers) AuthCallback(c echo.Context) error {
 	return c.Redirect(http.StatusSeeOther, location)
 }
 
-func (h Handlers) GeneratePKCE(c echo.Context) error {
+func (h Handlers) GeneratePKCE(c *echo.Context) error {
 	codeVerifier := randAlphabetAndNumberString(43)
 
 	_, err := wrapsession.WithSession(c, h.SessionName, func(w *wrapsession.W) (struct{}, error) {

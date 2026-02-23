@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/internal/model"
@@ -919,8 +919,9 @@ func TestHandlers_GetApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -990,8 +991,9 @@ func TestHandlers_GetApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1056,8 +1058,9 @@ func TestHandlers_GetApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1095,8 +1098,9 @@ func TestHandlers_GetApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(invalidUUID)
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: invalidUUID},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1117,8 +1121,9 @@ func TestHandlers_GetApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(uuid.Nil.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: uuid.Nil.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1141,8 +1146,9 @@ func TestHandlers_GetApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(unknownID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: unknownID.String()},
+		})
 
 		resErr := service.NewNotFoundError("user not found")
 		h, err := NewTestHandlers(t, ctrl)
@@ -1218,9 +1224,10 @@ func TestHandlers_PutApplication(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		targets := lo.Map(
@@ -1335,9 +1342,10 @@ func TestHandlers_PutApplication(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -1448,9 +1456,10 @@ func TestHandlers_PutApplication(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		targets := lo.Map(
@@ -1559,9 +1568,10 @@ func TestHandlers_PutApplication(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		targets := lo.Map(
@@ -1611,8 +1621,9 @@ func TestHandlers_PutApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(invalidUUID)
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: invalidUUID},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1634,8 +1645,9 @@ func TestHandlers_PutApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(uuid.Nil.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: uuid.Nil.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1669,8 +1681,9 @@ func TestHandlers_PutApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(unknownID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: unknownID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -1734,8 +1747,9 @@ func TestHandlers_PutApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -1811,9 +1825,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -1906,9 +1921,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2001,9 +2017,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2098,8 +2115,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2192,9 +2210,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2294,9 +2313,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2383,9 +2403,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2417,9 +2438,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(invalidUUID)
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: invalidUUID},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2450,9 +2472,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(uuid.Nil.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: uuid.Nil.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2503,9 +2526,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2561,9 +2585,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2618,9 +2643,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2675,9 +2701,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2733,9 +2760,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2798,9 +2826,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2861,9 +2890,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2919,9 +2949,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)

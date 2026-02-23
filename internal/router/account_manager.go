@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (h Handlers) GetAccountManagers(c echo.Context) error {
+func (h Handlers) GetAccountManagers(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 	accountManagers, err := h.Repository.GetAccountManagers(ctx)
@@ -28,7 +28,7 @@ func (h Handlers) GetAccountManagers(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h Handlers) PostAccountManagers(c echo.Context) error {
+func (h Handlers) PostAccountManagers(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -48,7 +48,7 @@ func (h Handlers) PostAccountManagers(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-func (h Handlers) DeleteAccountManagers(c echo.Context) error {
+func (h Handlers) DeleteAccountManagers(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 

@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/internal/model"
@@ -251,8 +251,9 @@ func TestHandlers_PutTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(tag.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: tag.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -302,8 +303,9 @@ func TestHandlers_PutTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(tag.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: tag.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -345,8 +347,9 @@ func TestHandlers_PutTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(invalidUUID)
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: invalidUUID},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -381,8 +384,9 @@ func TestHandlers_PutTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(tag.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: tag.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -416,8 +420,9 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(tag.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: tag.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -451,8 +456,9 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(tag.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: tag.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -482,8 +488,9 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(invalidUUID)
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: invalidUUID},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -513,8 +520,9 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(tag.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: tag.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
