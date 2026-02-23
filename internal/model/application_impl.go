@@ -14,12 +14,16 @@ import (
 	"github.com/traPtitech/Jomon/internal/ent/user"
 )
 
+var applicationErrorConverter = &entErrorConverter{
+	msgBadInput: "failed to process application due to invalid input",
+	msgNotFound: "application not found",
+}
+
 func (repo *EntRepository) GetApplications(
 	ctx context.Context, query ApplicationQuery,
 ) ([]*ApplicationResponse, error) {
 	// Querying
 	var applicationsq *ent.ApplicationQuery
-	var err error
 	if query.Sort == nil || *query.Sort == "" || *query.Sort == "created_at" {
 		applicationsq = repo.client.Application.
 			Query().
@@ -110,7 +114,7 @@ func (repo *EntRepository) GetApplications(
 
 	applications, err := applicationsq.All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 
 	reqres := lo.Map(applications, func(r *ent.Application, _ int) *ApplicationResponse {
@@ -127,7 +131,7 @@ func (repo *EntRepository) CreateApplication(
 ) (*ApplicationDetail, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	defer func() {
 		if v := recover(); v != nil {
@@ -149,12 +153,12 @@ func (repo *EntRepository) CreateApplication(
 		Save(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	t, err := created.QueryUser().Select(user.FieldID).First(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	s, err := tx.Client().ApplicationStatus.
 		Create().
@@ -165,7 +169,7 @@ func (repo *EntRepository) CreateApplication(
 		Save(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	status, err := tx.Client().ApplicationStatus.
 		Query().
@@ -174,16 +178,16 @@ func (repo *EntRepository) CreateApplication(
 		First(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	ts, err := repo.createApplicationTargets(ctx, tx, created.ID, targets)
 	if err != nil {
 		err = RollbackWithError(tx, err)
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	err = tx.Commit()
 	if err != nil {
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	statuses := []*ApplicationStatus{convertEntApplicationStatusToModelApplicationStatus(status)}
 	reqdetail := &ApplicationDetail{
@@ -222,7 +226,7 @@ func (repo *EntRepository) GetApplication(
 		WithFile().
 		Only(ctx)
 	if err != nil {
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	tags := lo.Map(r.Edges.Tag, func(t *ent.Tag, _ int) *Tag {
 		return ConvertEntTagToModelTag(t)
@@ -268,7 +272,7 @@ func (repo *EntRepository) UpdateApplication(
 ) (*ApplicationDetail, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	defer func() {
 		if v := recover(); v != nil {
@@ -288,7 +292,7 @@ func (repo *EntRepository) UpdateApplication(
 		Save(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 
 	_, err = tx.Client().Application.
@@ -296,7 +300,7 @@ func (repo *EntRepository) UpdateApplication(
 		Save(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 
 	entstatuses, err := updated.QueryStatus().
@@ -305,18 +309,18 @@ func (repo *EntRepository) UpdateApplication(
 		All(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	status := entstatuses[0]
 	u, err := updated.QueryUser().Select(user.FieldID).First(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	enttags, err := updated.QueryTag().All(ctx)
 	if err != nil {
 		err = RollbackWithError(tx, err)
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	modeltags := lo.Map(enttags, func(enttag *ent.Tag, _ int) *Tag {
 		return ConvertEntTagToModelTag(enttag)
@@ -325,18 +329,18 @@ func (repo *EntRepository) UpdateApplication(
 	err = repo.deleteApplicationTargets(ctx, tx, applicationID)
 	if err != nil {
 		err = RollbackWithError(tx, err)
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	modeltargets, err := repo.createApplicationTargets(ctx, tx, applicationID, targets)
 	if err != nil {
 		err = RollbackWithError(tx, err)
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	entcomments, err := updated.QueryComment().
 		WithUser().
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	comments := lo.Map(entcomments, func(c *ent.Comment, _ int) *Comment {
 		return ConvertEntCommentToModelComment(c, c.Edges.User.ID)
@@ -346,14 +350,14 @@ func (repo *EntRepository) UpdateApplication(
 	})
 	entfiles, err := updated.QueryFile().All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 	files := lo.Map(entfiles, func(f *ent.File, _ int) uuid.UUID {
 		return f.ID
 	})
 	err = tx.Commit()
 	if err != nil {
-		return nil, err
+		return nil, applicationErrorConverter.convert(err)
 	}
 
 	reqdetail := &ApplicationDetail{

@@ -14,6 +14,10 @@ import (
 func (repo *EntRepository) GetApplicationTargets(
 	ctx context.Context, applicationID uuid.UUID,
 ) ([]*ApplicationTargetDetail, error) {
+	errorConverter := &entErrorConverter{
+		msgBadInput: "failed to get application targets due to invalid input",
+		msgNotFound: "application targets not found",
+	}
 	// Querying
 	ts, err := repo.client.ApplicationTarget.
 		Query().
@@ -25,12 +29,12 @@ func (repo *EntRepository) GetApplicationTargets(
 		WithUser().
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errorConverter.convert(err)
 	}
 	targets := lo.Map(ts, func(t *ent.ApplicationTarget, _ int) *ApplicationTargetDetail {
 		return ConvertEntApplicationTargetToModelApplicationTargetDetail(t)
 	})
-	return targets, err
+	return targets, nil
 }
 
 func (repo *EntRepository) createApplicationTargets(

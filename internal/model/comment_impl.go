@@ -11,6 +11,11 @@ import (
 	"github.com/traPtitech/Jomon/internal/ent/comment"
 )
 
+var commentErrorConverter = &entErrorConverter{
+	msgBadInput: "failed to process comment due to invalid input",
+	msgNotFound: "comment not found",
+}
+
 func (repo *EntRepository) GetComments(
 	ctx context.Context, applicationID uuid.UUID,
 ) ([]*Comment, error) {
@@ -19,7 +24,7 @@ func (repo *EntRepository) GetComments(
 		Where(application.IDEQ(applicationID)).
 		First(ctx)
 	if err != nil {
-		return nil, err
+		return nil, commentErrorConverter.convert(err)
 	}
 
 	comments, err := repo.client.Comment.
@@ -32,7 +37,7 @@ func (repo *EntRepository) GetComments(
 		WithUser().
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, commentErrorConverter.convert(err)
 	}
 	modelcomments := lo.Map(comments, func(c *ent.Comment, _ int) *Comment {
 		return ConvertEntCommentToModelComment(c, c.Edges.User.ID)
@@ -50,7 +55,7 @@ func (repo *EntRepository) CreateComment(
 		SetUserID(userID).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, commentErrorConverter.convert(err)
 	}
 	return ConvertEntCommentToModelComment(created, userID), nil
 }
@@ -65,7 +70,7 @@ func (repo *EntRepository) UpdateComment(
 		SetApplicationID(applicationID).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, commentErrorConverter.convert(err)
 	}
 	updatedWithUser, err := repo.client.Comment.
 		Query().
@@ -73,7 +78,7 @@ func (repo *EntRepository) UpdateComment(
 		WithUser().
 		Only(ctx)
 	if err != nil {
-		return nil, err
+		return nil, commentErrorConverter.convert(err)
 	}
 	return ConvertEntCommentToModelComment(updated, updatedWithUser.Edges.User.ID), nil
 }
@@ -91,12 +96,12 @@ func (repo *EntRepository) DeleteComment(
 		Where(comment.IDEQ(commentID)).
 		Only(ctx)
 	if err != nil {
-		return err
+		return commentErrorConverter.convert(err)
 	}
 	err = repo.client.Comment.
 		DeleteOne(c).
 		Exec(ctx)
-	return err
+	return commentErrorConverter.convert(err)
 }
 
 func ConvertEntCommentToModelComment(comment *ent.Comment, userID uuid.UUID) *Comment {

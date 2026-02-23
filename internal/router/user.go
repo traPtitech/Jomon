@@ -10,6 +10,7 @@ import (
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 	"go.uber.org/zap"
 )
 
@@ -30,7 +31,7 @@ func (h Handlers) GetUsers(c echo.Context) error {
 	users, err := h.Repository.GetUsers(ctx)
 	if err != nil {
 		logger.Error("failed to get users from repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 
 	res := lo.Map(users, func(user *model.User, _ int) User {
@@ -61,20 +62,21 @@ func (h Handlers) UpdateUserInfo(c echo.Context) error {
 	var newUser PutUserRequest
 	if err := c.Bind(&newUser); err != nil {
 		logger.Info("could not get user info from request", zap.Error(err))
-		return c.NoContent(http.StatusBadRequest)
+		return service.NewBadInputError("could not get user info from request").
+			WithInternal(err)
 	}
 
 	user, err := h.Repository.GetUserByName(ctx, newUser.Name)
 	if err != nil {
 		logger.Error("failed to get user from repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return err
 	}
 
 	updated, err := h.Repository.UpdateUser(
 		ctx, user.ID, newUser.Name, newUser.DisplayName, newUser.AccountManager)
 	if err != nil {
 		logger.Error("failed to update user in repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 
 	return c.JSON(http.StatusOK, User{

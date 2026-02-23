@@ -11,12 +11,17 @@ import (
 	"github.com/traPtitech/Jomon/internal/nulltime"
 )
 
+var tagErrorConverter = &entErrorConverter{
+	msgBadInput: "failed to process tag due to invalid input",
+	msgNotFound: "tag not found",
+}
+
 func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
 	tags, err := repo.client.Tag.
 		Query().
 		All(ctx)
 	if err != nil {
-		return nil, err
+		return nil, tagErrorConverter.convert(err)
 	}
 	modeltags := lo.Map(tags, func(t *ent.Tag, _ int) *Tag {
 		return ConvertEntTagToModelTag(t)
@@ -31,7 +36,7 @@ func (repo *EntRepository) GetTag(ctx context.Context, tagID uuid.UUID) (*Tag, e
 		Where(tag.IDEQ(tagID)).
 		Only(ctx)
 	if err != nil {
-		return nil, err
+		return nil, tagErrorConverter.convert(err)
 	}
 	return ConvertEntTagToModelTag(t), nil
 }
@@ -42,7 +47,7 @@ func (repo *EntRepository) CreateTag(ctx context.Context, name string) (*Tag, er
 		SetName(name).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, tagErrorConverter.convert(err)
 	}
 	return ConvertEntTagToModelTag(created), nil
 }
@@ -56,7 +61,7 @@ func (repo *EntRepository) UpdateTag(
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
-		return nil, err
+		return nil, tagErrorConverter.convert(err)
 	}
 	return ConvertEntTagToModelTag(t), nil
 }
@@ -65,7 +70,7 @@ func (repo *EntRepository) DeleteTag(ctx context.Context, tagID uuid.UUID) error
 	err := repo.client.Tag.
 		DeleteOneID(tagID).
 		Exec(ctx)
-	return err
+	return tagErrorConverter.convert(err)
 }
 
 func ConvertEntTagToModelTag(enttag *ent.Tag) *Tag {

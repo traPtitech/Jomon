@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 	"go.uber.org/mock/gomock"
@@ -113,16 +114,15 @@ func TestHandlers_GetUsers(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		mocErr := errors.New("failed to get users")
+		resErr := service.NewUnexpectedError(errors.New("failed to get users"))
 		h.Repository.MockUserRepository.
 			EXPECT().
 			GetUsers(c.Request().Context()).
-			Return(nil, mocErr)
+			Return(nil, resErr)
 
 		err = h.Handlers.GetUsers(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -221,18 +221,17 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 			EXPECT().
 			GetUserByName(c.Request().Context(), updateUser.Name).
 			Return(user, nil)
-		mocErr := errors.New("failed to get users.")
+		resErr := service.NewUnexpectedError(errors.New("failed to get users."))
 		h.Repository.MockUserRepository.
 			EXPECT().
 			UpdateUser(
 				c.Request().Context(),
 				user.ID, updateUser.Name, updateUser.DisplayName, updateUser.AccountManager).
-			Return(nil, mocErr)
+			Return(nil, resErr)
 
 		err = h.Handlers.UpdateUserInfo(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("FailedToGetUser", func(t *testing.T) {
@@ -266,16 +265,15 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		mocErr := errors.New("user not found.")
+		resErr := service.NewNotFoundError("user not found")
 		h.Repository.MockUserRepository.
 			EXPECT().
 			GetUserByName(c.Request().Context(), updateUser.Name).
-			Return(nil, mocErr)
+			Return(nil, resErr)
 
 		err = h.Handlers.UpdateUserInfo(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
+		require.Equal(t, http.StatusNotFound, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
