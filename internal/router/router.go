@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo-contrib/v5/session"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"go.uber.org/zap"
 
 	"github.com/traPtitech/Jomon/internal/logging"
@@ -27,7 +27,7 @@ type Handlers struct {
 func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	e := echo.New()
 	e.Debug = os.Getenv("IS_DEBUG_MODE") != ""
-	e.HTTPErrorHandler = func(err error, c echo.Context) {
+	e.HTTPErrorHandler = func(err error, c *echo.Context) {
 		logger := logging.GetLogger(c.Request().Context())
 		logger.Debug("handling error", zap.Error(err))
 		he := HTTPErrorHandlerInner(err)

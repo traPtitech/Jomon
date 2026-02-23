@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
@@ -24,7 +24,7 @@ type User struct {
 	DeletedAt      nulltime.NullTime `json:"deleted_at"`
 }
 
-func (h Handlers) GetUsers(c echo.Context) error {
+func (h Handlers) GetUsers(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -55,7 +55,7 @@ type PutUserRequest struct {
 	AccountManager bool   `json:"account_manager"`
 }
 
-func (h Handlers) UpdateUserInfo(c echo.Context) error {
+func (h Handlers) UpdateUserInfo(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -99,7 +99,7 @@ func userFromModelUser(u model.User) User {
 	}
 }
 
-func (h Handlers) GetMe(c echo.Context) error {
+func (h Handlers) GetMe(c *echo.Context) error {
 	loginUser, _ := c.Get(loginUserKey).(User)
 	return c.JSON(http.StatusOK, loginUser)
 }

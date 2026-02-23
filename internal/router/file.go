@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/service"
@@ -40,7 +40,7 @@ var (
 		"user is not accountManager or file creator")
 )
 
-func (h Handlers) PostFile(c echo.Context) error {
+func (h Handlers) PostFile(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -105,7 +105,7 @@ func (h Handlers) PostFile(c echo.Context) error {
 	return c.JSON(http.StatusOK, &FileResponse{file.ID})
 }
 
-func (h Handlers) GetFile(c echo.Context) error {
+func (h Handlers) GetFile(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -161,7 +161,7 @@ func (h Handlers) GetFile(c echo.Context) error {
 	return c.Stream(http.StatusOK, file.MimeType, f)
 }
 
-func (h Handlers) GetFileMeta(c echo.Context) error {
+func (h Handlers) GetFileMeta(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -191,7 +191,7 @@ func (h Handlers) GetFileMeta(c echo.Context) error {
 	})
 }
 
-func (h Handlers) DeleteFile(c echo.Context) error {
+func (h Handlers) DeleteFile(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 

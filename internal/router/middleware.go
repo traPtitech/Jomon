@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/router/wrapsession"
@@ -20,7 +20,7 @@ const (
 
 func (h Handlers) setLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			req := c.Request()
 			ctx := req.Context()
 			reqID := req.Header.Get(echo.HeaderXRequestID)
@@ -34,7 +34,7 @@ func (h Handlers) setLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 
 // AccessLoggingMiddleware ですべてのエラーを出力する
 func (h Handlers) AccessLoggingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		start := time.Now()
 		err := next(c)
 		if err != nil {
@@ -76,7 +76,7 @@ func (h Handlers) AccessLoggingMiddleware(next echo.HandlerFunc) echo.HandlerFun
 }
 
 func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		ctx := c.Request().Context()
 		logger := logging.GetLogger(ctx)
 
@@ -108,7 +108,7 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func (h Handlers) CheckAccountManagerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		loginUser, _ := c.Get(loginUserKey).(User)
 		if !loginUser.AccountManager {
 			return echo.NewHTTPError(http.StatusForbidden, "you are not accountManager")

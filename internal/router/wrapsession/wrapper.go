@@ -3,7 +3,7 @@ package wrapsession
 import (
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // NOTE: ここの値は外から変更する必要がないので非公開にしている
@@ -49,7 +49,7 @@ func (w *W) setValue(key string, value interface{}) {
 	w.changed = true
 }
 
-func (w *W) drop(c echo.Context) error {
+func (w *W) drop(c *echo.Context) error {
 	if !w.changed {
 		return nil
 	}

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
@@ -26,7 +26,7 @@ type TagResponse struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func (h Handlers) GetTags(c echo.Context) error {
+func (h Handlers) GetTags(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -48,7 +48,7 @@ func (h Handlers) GetTags(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h Handlers) PostTag(c echo.Context) error {
+func (h Handlers) PostTag(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -75,7 +75,7 @@ func (h Handlers) PostTag(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h Handlers) PutTag(c echo.Context) error {
+func (h Handlers) PutTag(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -112,7 +112,7 @@ func (h Handlers) PutTag(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h Handlers) DeleteTag(c echo.Context) error {
+func (h Handlers) DeleteTag(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
@@ -116,7 +116,7 @@ type TargetOverview struct {
 	CreatedAt time.Time         `json:"created_at"`
 }
 
-func (h Handlers) GetApplications(c echo.Context) error {
+func (h Handlers) GetApplications(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -268,7 +268,7 @@ func (h Handlers) GetApplications(c echo.Context) error {
 	return c.JSON(http.StatusOK, applications)
 }
 
-func (h Handlers) PostApplication(c echo.Context) error {
+func (h Handlers) PostApplication(c *echo.Context) error {
 	var req Application
 	var err error
 	if err = c.Bind(&req); err != nil {
@@ -362,7 +362,7 @@ func (h Handlers) PostApplication(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h Handlers) GetApplication(c echo.Context) error {
+func (h Handlers) GetApplication(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -448,7 +448,7 @@ func (h Handlers) GetApplication(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h Handlers) PutApplication(c echo.Context) error {
+func (h Handlers) PutApplication(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -563,7 +563,7 @@ func (h Handlers) PutApplication(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h Handlers) PostComment(c echo.Context) error {
+func (h Handlers) PostComment(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -601,7 +601,7 @@ func (h Handlers) PostComment(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h Handlers) PutStatus(c echo.Context) error {
+func (h Handlers) PutStatus(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
