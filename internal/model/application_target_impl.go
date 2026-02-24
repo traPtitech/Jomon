@@ -2,18 +2,19 @@ package model
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/ent/application"
 	"github.com/traPtitech/Jomon/internal/ent/applicationtarget"
+	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
 func (repo *EntRepository) GetApplicationTargets(
 	ctx context.Context, applicationID uuid.UUID,
-) ([]*ApplicationTargetDetail, error) {
+) ([]*service.ApplicationTargetDetail, error) {
 	errorConverter := &entErrorConverter{
 		msgBadInput: "failed to get application targets due to invalid input",
 		msgNotFound: "application targets not found",
@@ -31,16 +32,16 @@ func (repo *EntRepository) GetApplicationTargets(
 	if err != nil {
 		return nil, errorConverter.convert(err)
 	}
-	targets := lo.Map(ts, func(t *ent.ApplicationTarget, _ int) *ApplicationTargetDetail {
+	targets := lo.Map(ts, func(t *ent.ApplicationTarget, _ int) *service.ApplicationTargetDetail {
 		return ConvertEntApplicationTargetToModelApplicationTargetDetail(t)
 	})
 	return targets, nil
 }
 
 func (repo *EntRepository) createApplicationTargets(
-	ctx context.Context, tx *ent.Tx, applicationID uuid.UUID, targets []*ApplicationTarget,
-) ([]*ApplicationTargetDetail, error) {
-	bulk := lo.Map(targets, func(t *ApplicationTarget, _ int) *ent.ApplicationTargetCreate {
+	ctx context.Context, tx *ent.Tx, applicationID uuid.UUID, targets []*service.ApplicationTarget,
+) ([]*service.ApplicationTargetDetail, error) {
+	bulk := lo.Map(targets, func(t *service.ApplicationTarget, _ int) *ent.ApplicationTargetCreate {
 		return tx.Client().ApplicationTarget.
 			Create().
 			SetAmount(t.Amount).
@@ -66,7 +67,7 @@ func (repo *EntRepository) createApplicationTargets(
 		return nil, err
 	}
 	// []*ent.ApplicationTarget to []*ApplicationTargetDetail
-	ts := lo.Map(created, func(t *ent.ApplicationTarget, _ int) *ApplicationTargetDetail {
+	ts := lo.Map(created, func(t *ent.ApplicationTarget, _ int) *service.ApplicationTargetDetail {
 		return ConvertEntApplicationTargetToModelApplicationTargetDetail(t)
 	})
 	return ts, nil
@@ -88,17 +89,12 @@ func (repo *EntRepository) deleteApplicationTargets(
 
 func ConvertEntApplicationTargetToModelApplicationTargetDetail(
 	t *ent.ApplicationTarget,
-) *ApplicationTargetDetail {
-	paidAt := time.Time{}
-	if t.PaidAt != nil {
-		paidAt = *t.PaidAt
-	}
-
-	return &ApplicationTargetDetail{
+) *service.ApplicationTargetDetail {
+	return &service.ApplicationTargetDetail{
 		ID:        t.ID,
 		Target:    t.Edges.User.ID,
 		Amount:    t.Amount,
-		PaidAt:    paidAt,
+		PaidAt:    nulltime.FromTime(t.PaidAt),
 		CreatedAt: t.CreatedAt,
 	}
 }

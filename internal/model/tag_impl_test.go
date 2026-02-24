@@ -7,6 +7,8 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 )
@@ -29,10 +31,10 @@ func TestEntRepository_GetTags(t *testing.T) {
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.SortSlices(func(l, r *Tag) bool {
+			cmpopts.SortSlices(func(l, r *service.Tag) bool {
 				return l.ID.ID() < r.ID.ID()
 			}))
-		exp := []*Tag{tag1, tag2}
+		exp := []*service.Tag{tag1, tag2}
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
@@ -58,12 +60,12 @@ func TestEntRepository_CreateTag(t *testing.T) {
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.IgnoreFields(Tag{}, "ID"))
-		exp := &Tag{
+			cmpopts.IgnoreFields(service.Tag{}, "ID"))
+		exp := &service.Tag{
 			Name:      name,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
-			DeletedAt: time.Time{},
+			DeletedAt: nulltime.NullTime{},
 		}
 		testutil.RequireEqual(t, exp, tag, opts...)
 	})
@@ -94,12 +96,12 @@ func TestEntRepository_UpdateTag(t *testing.T) {
 
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := &Tag{
+		exp := &service.Tag{
 			ID:        created.ID,
 			Name:      name,
 			CreatedAt: created.CreatedAt,
 			UpdatedAt: time.Now(),
-			DeletedAt: time.Time{},
+			DeletedAt: nulltime.NullTime{},
 		}
 		testutil.RequireEqual(t, exp, updated, opts...)
 	})

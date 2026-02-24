@@ -12,6 +12,7 @@ import (
 	"github.com/traPtitech/Jomon/internal/ent/applicationtarget"
 	"github.com/traPtitech/Jomon/internal/ent/tag"
 	"github.com/traPtitech/Jomon/internal/ent/user"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
 var applicationErrorConverter = &entErrorConverter{
@@ -20,8 +21,8 @@ var applicationErrorConverter = &entErrorConverter{
 }
 
 func (repo *EntRepository) GetApplications(
-	ctx context.Context, query ApplicationQuery,
-) ([]*ApplicationResponse, error) {
+	ctx context.Context, query service.ApplicationQuery,
+) ([]*service.ApplicationResponse, error) {
 	// Querying
 	var applicationsq *ent.ApplicationQuery
 	if query.Sort == nil || *query.Sort == "" || *query.Sort == "created_at" {
@@ -117,7 +118,7 @@ func (repo *EntRepository) GetApplications(
 		return nil, applicationErrorConverter.convert(err)
 	}
 
-	reqres := lo.Map(applications, func(r *ent.Application, _ int) *ApplicationResponse {
+	reqres := lo.Map(applications, func(r *ent.Application, _ int) *service.ApplicationResponse {
 		return convertEntApplicationResponseToModelApplicationResponse(
 			r, r.Edges.Tag, r.Edges.Status[0], r.Edges.User)
 	})
@@ -127,8 +128,8 @@ func (repo *EntRepository) GetApplications(
 
 func (repo *EntRepository) CreateApplication(
 	ctx context.Context, title string, content string,
-	tags []*Tag, targets []*ApplicationTarget, userID uuid.UUID,
-) (*ApplicationDetail, error) {
+	tags []*service.Tag, targets []*service.ApplicationTarget, userID uuid.UUID,
+) (*service.ApplicationDetail, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
 		return nil, applicationErrorConverter.convert(err)
@@ -139,7 +140,7 @@ func (repo *EntRepository) CreateApplication(
 			panic(v)
 		}
 	}()
-	tagIDs := lo.Map(tags, func(t *Tag, _ int) uuid.UUID {
+	tagIDs := lo.Map(tags, func(t *service.Tag, _ int) uuid.UUID {
 		return t.ID
 	})
 	created, err := tx.Client().Application.
@@ -189,8 +190,10 @@ func (repo *EntRepository) CreateApplication(
 	if err != nil {
 		return nil, applicationErrorConverter.convert(err)
 	}
-	statuses := []*ApplicationStatus{convertEntApplicationStatusToModelApplicationStatus(status)}
-	reqdetail := &ApplicationDetail{
+	statuses := []*service.ApplicationStatus{
+		convertEntApplicationStatusToModelApplicationStatus(status),
+	}
+	reqdetail := &service.ApplicationDetail{
 		ID:        created.ID,
 		Status:    convertEntApplicationStatusToModelStatus(&status.Status),
 		Title:     created.Title,
@@ -200,7 +203,7 @@ func (repo *EntRepository) CreateApplication(
 		CreatedAt: created.CreatedAt,
 		UpdatedAt: created.UpdatedAt,
 		CreatedBy: t.ID,
-		Comments:  []*Comment{},
+		Comments:  []*service.Comment{},
 		Statuses:  statuses,
 		Files:     []uuid.UUID{},
 	}
@@ -209,7 +212,7 @@ func (repo *EntRepository) CreateApplication(
 
 func (repo *EntRepository) GetApplication(
 	ctx context.Context, applicationID uuid.UUID,
-) (*ApplicationDetail, error) {
+) (*service.ApplicationDetail, error) {
 	r, err := repo.client.Application.
 		Query().
 		Where(application.IDEQ(applicationID)).
@@ -228,28 +231,28 @@ func (repo *EntRepository) GetApplication(
 	if err != nil {
 		return nil, applicationErrorConverter.convert(err)
 	}
-	tags := lo.Map(r.Edges.Tag, func(t *ent.Tag, _ int) *Tag {
+	tags := lo.Map(r.Edges.Tag, func(t *ent.Tag, _ int) *service.Tag {
 		return ConvertEntTagToModelTag(t)
 	})
 	targets := lo.Map(
 		r.Edges.Target,
-		func(target *ent.ApplicationTarget, _ int) *ApplicationTargetDetail {
+		func(target *ent.ApplicationTarget, _ int) *service.ApplicationTargetDetail {
 			return ConvertEntApplicationTargetToModelApplicationTargetDetail(target)
 		},
 	)
-	comments := lo.Map(r.Edges.Comment, func(c *ent.Comment, _ int) *Comment {
+	comments := lo.Map(r.Edges.Comment, func(c *ent.Comment, _ int) *service.Comment {
 		return ConvertEntCommentToModelComment(c, c.Edges.User.ID)
 	})
 	statuses := lo.Map(
 		r.Edges.Status,
-		func(status *ent.ApplicationStatus, _ int) *ApplicationStatus {
+		func(status *ent.ApplicationStatus, _ int) *service.ApplicationStatus {
 			return convertEntApplicationStatusToModelApplicationStatus(status)
 		},
 	)
 	files := lo.Map(r.Edges.File, func(f *ent.File, _ int) uuid.UUID {
 		return f.ID
 	})
-	reqdetail := &ApplicationDetail{
+	reqdetail := &service.ApplicationDetail{
 		ID:        r.ID,
 		Status:    convertEntApplicationStatusToModelStatus(&r.Edges.Status[0].Status),
 		Title:     r.Title,
@@ -268,8 +271,8 @@ func (repo *EntRepository) GetApplication(
 
 func (repo *EntRepository) UpdateApplication(
 	ctx context.Context, applicationID uuid.UUID, title string, content string,
-	tags []*Tag, targets []*ApplicationTarget,
-) (*ApplicationDetail, error) {
+	tags []*service.Tag, targets []*service.ApplicationTarget,
+) (*service.ApplicationDetail, error) {
 	tx, err := repo.client.Tx(ctx)
 	if err != nil {
 		return nil, applicationErrorConverter.convert(err)
@@ -280,7 +283,7 @@ func (repo *EntRepository) UpdateApplication(
 			panic(v)
 		}
 	}()
-	tagIDs := lo.Map(tags, func(t *Tag, _ int) uuid.UUID {
+	tagIDs := lo.Map(tags, func(t *service.Tag, _ int) uuid.UUID {
 		return t.ID
 	})
 	updated, err := tx.Client().Application.
@@ -322,7 +325,7 @@ func (repo *EntRepository) UpdateApplication(
 		err = RollbackWithError(tx, err)
 		return nil, applicationErrorConverter.convert(err)
 	}
-	modeltags := lo.Map(enttags, func(enttag *ent.Tag, _ int) *Tag {
+	modeltags := lo.Map(enttags, func(enttag *ent.Tag, _ int) *service.Tag {
 		return ConvertEntTagToModelTag(enttag)
 	})
 
@@ -342,12 +345,13 @@ func (repo *EntRepository) UpdateApplication(
 	if err != nil {
 		return nil, applicationErrorConverter.convert(err)
 	}
-	comments := lo.Map(entcomments, func(c *ent.Comment, _ int) *Comment {
+	comments := lo.Map(entcomments, func(c *ent.Comment, _ int) *service.Comment {
 		return ConvertEntCommentToModelComment(c, c.Edges.User.ID)
 	})
-	statuses := lo.Map(entstatuses, func(s *ent.ApplicationStatus, _ int) *ApplicationStatus {
-		return convertEntApplicationStatusToModelApplicationStatus(s)
-	})
+	statuses := lo.Map(entstatuses,
+		func(s *ent.ApplicationStatus, _ int) *service.ApplicationStatus {
+			return convertEntApplicationStatusToModelApplicationStatus(s)
+		})
 	entfiles, err := updated.QueryFile().All(ctx)
 	if err != nil {
 		return nil, applicationErrorConverter.convert(err)
@@ -360,7 +364,7 @@ func (repo *EntRepository) UpdateApplication(
 		return nil, applicationErrorConverter.convert(err)
 	}
 
-	reqdetail := &ApplicationDetail{
+	reqdetail := &service.ApplicationDetail{
 		ID:        updated.ID,
 		Status:    convertEntApplicationStatusToModelStatus(&status.Status),
 		Title:     updated.Title,
@@ -380,14 +384,14 @@ func (repo *EntRepository) UpdateApplication(
 func convertEntApplicationResponseToModelApplicationResponse(
 	application *ent.Application, tags []*ent.Tag,
 	status *ent.ApplicationStatus, user *ent.User,
-) *ApplicationResponse {
+) *service.ApplicationResponse {
 	if application == nil {
 		return nil
 	}
-	modeltags := lo.Map(tags, func(t *ent.Tag, _ int) *Tag {
+	modeltags := lo.Map(tags, func(t *ent.Tag, _ int) *service.Tag {
 		return ConvertEntTagToModelTag(t)
 	})
-	return &ApplicationResponse{
+	return &service.ApplicationResponse{
 		ID:        application.ID,
 		Status:    convertEntApplicationStatusToModelStatus(&status.Status),
 		CreatedAt: application.CreatedAt,

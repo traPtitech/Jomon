@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 )
@@ -33,13 +34,13 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 			user.ID)
 		require.NoError(t, err)
 
-		status := Status(random.Numeric(t, 5) + 1)
+		status := service.Status(random.Numeric(t, 5) + 1)
 		created, err := repo.CreateStatus(ctx, application.ID, user.ID, status)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.IgnoreFields(ApplicationStatus{}, "ID"))
-		exp := &ApplicationStatus{
+			cmpopts.IgnoreFields(service.ApplicationStatus{}, "ID"))
+		exp := &service.ApplicationStatus{
 			CreatedBy: user.ID,
 			Status:    status,
 			CreatedAt: time.Now(),
@@ -63,7 +64,7 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 			user.ID)
 		require.NoError(t, err)
 
-		invalidStatus := Status(6)
+		invalidStatus := service.Status(6)
 		_, err = repo.CreateStatus(ctx, application.ID, user.ID, invalidStatus)
 		require.Error(t, err)
 	})
@@ -77,7 +78,7 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 			true)
 		require.NoError(t, err)
 
-		status := Status(random.Numeric(t, 5) + 1)
+		status := service.Status(random.Numeric(t, 5) + 1)
 		_, err = repo.CreateStatus(ctx, uuid.New(), user.ID, status)
 		require.Error(t, err)
 	})
@@ -98,7 +99,7 @@ func TestEntRepository_CreateStatus(t *testing.T) {
 			user.ID)
 		require.NoError(t, err)
 
-		status := Status(random.Numeric(t, 5) + 1)
+		status := service.Status(random.Numeric(t, 5) + 1)
 		_, err = repo.CreateStatus(ctx, application.ID, uuid.New(), status)
 		require.Error(t, err)
 	})

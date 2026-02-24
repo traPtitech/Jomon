@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 )
@@ -32,7 +33,7 @@ func TestEntRepository_GetComments(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{}, []*ApplicationTarget{},
+			[]*service.Tag{}, []*service.ApplicationTarget{},
 			user.ID)
 		require.NoError(t, err)
 
@@ -55,10 +56,10 @@ func TestEntRepository_GetComments(t *testing.T) {
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.SortSlices(func(l, r *Comment) bool {
+			cmpopts.SortSlices(func(l, r *service.Comment) bool {
 				return l.ID.ID() < r.ID.ID()
 			}))
-		exp := []*Comment{comment1, comment2}
+		exp := []*service.Comment{comment1, comment2}
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 
@@ -74,7 +75,7 @@ func TestEntRepository_GetComments(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{}, []*ApplicationTarget{},
+			[]*service.Tag{}, []*service.ApplicationTarget{},
 			user.ID)
 		require.NoError(t, err)
 
@@ -108,7 +109,7 @@ func TestEntRepository_CreateComment(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{}, []*ApplicationTarget{},
+			[]*service.Tag{}, []*service.ApplicationTarget{},
 			user.ID)
 		require.NoError(t, err)
 
@@ -123,8 +124,8 @@ func TestEntRepository_CreateComment(t *testing.T) {
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.IgnoreFields(Comment{}, "ID"))
-		exp := &Comment{
+			cmpopts.IgnoreFields(service.Comment{}, "ID"))
+		exp := &service.Comment{
 			User:      user2.ID,
 			Comment:   comment,
 			CreatedAt: time.Now(),
@@ -157,7 +158,7 @@ func TestEntRepository_CreateComment(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{}, []*ApplicationTarget{},
+			[]*service.Tag{}, []*service.ApplicationTarget{},
 			user.ID)
 		require.NoError(t, err)
 
@@ -184,7 +185,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{}, []*ApplicationTarget{},
+			[]*service.Tag{}, []*service.ApplicationTarget{},
 			user.ID)
 		require.NoError(t, err)
 		created, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), application.ID, user.ID)
@@ -194,7 +195,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 		updated, err := repo.UpdateComment(ctx, comment, application.ID, created.ID)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := &Comment{
+		exp := &service.Comment{
 			ID:        created.ID,
 			User:      created.User,
 			Comment:   comment,
@@ -216,7 +217,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{}, []*ApplicationTarget{},
+			[]*service.Tag{}, []*service.ApplicationTarget{},
 			user.ID)
 		require.NoError(t, err)
 		comment, err := repo.CreateComment(
@@ -231,13 +232,13 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{}, []*ApplicationTarget{},
+			[]*service.Tag{}, []*service.ApplicationTarget{},
 			user.ID)
 		require.NoError(t, err)
 		updated, err := repo.UpdateComment(ctx, comment.Comment, application2.ID, comment.ID)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := &Comment{
+		exp := &service.Comment{
 			ID:        comment.ID,
 			User:      comment.User,
 			Comment:   comment.Comment,
@@ -248,7 +249,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 
 		got, err := repo.GetComments(ctx, application2.ID)
 		require.NoError(t, err)
-		testutil.RequireEqual(t, []*Comment{updated}, got, opts...)
+		testutil.RequireEqual(t, []*service.Comment{updated}, got, opts...)
 	})
 
 	t.Run("UnknownComment", func(t *testing.T) {
@@ -263,7 +264,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{}, []*ApplicationTarget{},
+			[]*service.Tag{}, []*service.ApplicationTarget{},
 			user.ID)
 		require.NoError(t, err)
 
@@ -286,7 +287,7 @@ func TestEntRepository_UpdateComment(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{}, []*ApplicationTarget{},
+			[]*service.Tag{}, []*service.ApplicationTarget{},
 			user.ID)
 		require.NoError(t, err)
 		comment, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), application.ID, user.ID)
@@ -315,7 +316,7 @@ func TestEntRepository_DeleteComment(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{}, []*ApplicationTarget{},
+			[]*service.Tag{}, []*service.ApplicationTarget{},
 			user.ID)
 		require.NoError(t, err)
 		comment, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), application.ID, user.ID)
@@ -341,7 +342,7 @@ func TestEntRepository_DeleteComment(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{}, []*ApplicationTarget{},
+			[]*service.Tag{}, []*service.ApplicationTarget{},
 			user.ID)
 		require.NoError(t, err)
 		comment, err := repo.CreateComment(ctx, random.AlphaNumeric(t, 30), application.ID, user.ID)
@@ -363,7 +364,7 @@ func TestEntRepository_DeleteComment(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{}, []*ApplicationTarget{},
+			[]*service.Tag{}, []*service.ApplicationTarget{},
 			user.ID)
 		require.NoError(t, err)
 

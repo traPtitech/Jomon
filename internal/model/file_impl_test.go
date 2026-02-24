@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 )
@@ -21,8 +22,8 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 
-		var tags []*Tag
-		var targets []*ApplicationTarget
+		var tags []*service.Tag
+		var targets []*service.ApplicationTarget
 		user, err := repo.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -45,8 +46,8 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.IgnoreFields(File{}, "ID"))
-		exp := &File{
+			cmpopts.IgnoreFields(service.File{}, "ID"))
+		exp := &service.File{
 			Name:      name,
 			MimeType:  mimetype,
 			CreatedBy: user.ID,
@@ -65,7 +66,7 @@ func TestEntRepository_CreateFile(t *testing.T) {
 			random.AlphaNumeric(t, 30),
 			true)
 		require.NoError(t, err)
-		application := Application{
+		application := service.Application{
 			ID: uuid.New(),
 		}
 
@@ -81,8 +82,8 @@ func TestEntRepository_CreateFile(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 
-		var tags []*Tag
-		var targets []*ApplicationTarget
+		var tags []*service.Tag
+		var targets []*service.ApplicationTarget
 		user, err := repo.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -114,8 +115,8 @@ func TestEntRepository_GetFile(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 
-		var tags []*Tag
-		var targets []*ApplicationTarget
+		var tags []*service.Tag
+		var targets []*service.ApplicationTarget
 		user, err := repo.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),
@@ -139,7 +140,7 @@ func TestEntRepository_GetFile(t *testing.T) {
 		got, err := repo.GetFile(ctx, file.ID)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := &File{
+		exp := &service.File{
 			ID:        file.ID,
 			Name:      name,
 			MimeType:  mimetype,
@@ -168,8 +169,8 @@ func TestEntRepository_DeleteFile(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 
-		var tags []*Tag
-		var targets []*ApplicationTarget
+		var tags []*service.Tag
+		var targets []*service.ApplicationTarget
 		user, err := repo.CreateUser(
 			ctx,
 			random.AlphaNumeric(t, 20),

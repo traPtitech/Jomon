@@ -7,6 +7,8 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 )
@@ -43,10 +45,10 @@ func TestEntRepository_GetUsers(t *testing.T) {
 		require.Len(t, got, 2)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.SortSlices(func(l, r *User) bool {
+			cmpopts.SortSlices(func(l, r *service.User) bool {
 				return l.ID.ID() < r.ID.ID()
 			}))
-		exp := []*User{user1, user2}
+		exp := []*service.User{user1, user2}
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
 }
@@ -68,14 +70,14 @@ func TestEntRepository_CreateUser(t *testing.T) {
 		user, err := repo.CreateUser(ctx, name, dn, accountManager)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		opts = append(opts, cmpopts.IgnoreFields(User{}, "ID"))
-		exp := &User{
+		opts = append(opts, cmpopts.IgnoreFields(service.User{}, "ID"))
+		exp := &service.User{
 			Name:           name,
 			DisplayName:    dn,
 			AccountManager: accountManager,
 			CreatedAt:      time.Now(),
 			UpdatedAt:      time.Now(),
-			DeletedAt:      time.Time{},
+			DeletedAt:      nulltime.NullTime{},
 		}
 		testutil.RequireEqual(t, exp, user, opts...)
 	})
@@ -182,13 +184,14 @@ func TestEntRepository_UpdateUser(t *testing.T) {
 		got, err := repo.UpdateUser(ctx, user.ID, uname, udn, uaccountManager)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := &User{
+		exp := &service.User{
 			ID:             user.ID,
 			Name:           uname,
 			DisplayName:    udn,
 			AccountManager: uaccountManager,
 			CreatedAt:      user.CreatedAt,
 			UpdatedAt:      time.Now(),
+			DeletedAt:      nulltime.NullTime{},
 		}
 		testutil.RequireEqual(t, exp, got, opts...)
 	})

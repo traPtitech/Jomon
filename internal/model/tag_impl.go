@@ -9,6 +9,7 @@ import (
 	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/ent/tag"
 	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
 var tagErrorConverter = &entErrorConverter{
@@ -16,21 +17,21 @@ var tagErrorConverter = &entErrorConverter{
 	msgNotFound: "tag not found",
 }
 
-func (repo *EntRepository) GetTags(ctx context.Context) ([]*Tag, error) {
+func (repo *EntRepository) GetTags(ctx context.Context) ([]*service.Tag, error) {
 	tags, err := repo.client.Tag.
 		Query().
 		All(ctx)
 	if err != nil {
 		return nil, tagErrorConverter.convert(err)
 	}
-	modeltags := lo.Map(tags, func(t *ent.Tag, _ int) *Tag {
+	modeltags := lo.Map(tags, func(t *ent.Tag, _ int) *service.Tag {
 		return ConvertEntTagToModelTag(t)
 	})
 
 	return modeltags, nil
 }
 
-func (repo *EntRepository) GetTag(ctx context.Context, tagID uuid.UUID) (*Tag, error) {
+func (repo *EntRepository) GetTag(ctx context.Context, tagID uuid.UUID) (*service.Tag, error) {
 	t, err := repo.client.Tag.
 		Query().
 		Where(tag.IDEQ(tagID)).
@@ -41,7 +42,7 @@ func (repo *EntRepository) GetTag(ctx context.Context, tagID uuid.UUID) (*Tag, e
 	return ConvertEntTagToModelTag(t), nil
 }
 
-func (repo *EntRepository) CreateTag(ctx context.Context, name string) (*Tag, error) {
+func (repo *EntRepository) CreateTag(ctx context.Context, name string) (*service.Tag, error) {
 	created, err := repo.client.Tag.
 		Create().
 		SetName(name).
@@ -54,7 +55,7 @@ func (repo *EntRepository) CreateTag(ctx context.Context, name string) (*Tag, er
 
 func (repo *EntRepository) UpdateTag(
 	ctx context.Context, tagID uuid.UUID, name string,
-) (*Tag, error) {
+) (*service.Tag, error) {
 	t, err := repo.client.Tag.
 		UpdateOneID(tagID).
 		SetName(name).
@@ -73,12 +74,12 @@ func (repo *EntRepository) DeleteTag(ctx context.Context, tagID uuid.UUID) error
 	return tagErrorConverter.convert(err)
 }
 
-func ConvertEntTagToModelTag(enttag *ent.Tag) *Tag {
-	return &Tag{
+func ConvertEntTagToModelTag(enttag *ent.Tag) *service.Tag {
+	return &service.Tag{
 		ID:        enttag.ID,
 		Name:      enttag.Name,
 		CreatedAt: enttag.CreatedAt,
 		UpdatedAt: enttag.UpdatedAt,
-		DeletedAt: nulltime.FromTime(enttag.DeletedAt).Time,
+		DeletedAt: nulltime.FromTime(enttag.DeletedAt),
 	}
 }

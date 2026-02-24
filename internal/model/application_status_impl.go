@@ -7,11 +7,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/ent/applicationstatus"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
 func (repo *EntRepository) CreateStatus(
-	ctx context.Context, applicationID uuid.UUID, userID uuid.UUID, status Status,
-) (*ApplicationStatus, error) {
+	ctx context.Context, applicationID uuid.UUID, userID uuid.UUID, status service.Status,
+) (*service.ApplicationStatus, error) {
 	errorConverter := &entErrorConverter{
 		msgBadInput: "failed to create application status due to invalid input",
 		msgNotFound: "application status not found",
@@ -39,11 +40,11 @@ func (repo *EntRepository) CreateStatus(
 
 func convertEntApplicationStatusToModelApplicationStatus(
 	applicationStatus *ent.ApplicationStatus,
-) *ApplicationStatus {
+) *service.ApplicationStatus {
 	if applicationStatus == nil {
 		return nil
 	}
-	return &ApplicationStatus{
+	return &service.ApplicationStatus{
 		ID:        applicationStatus.ID,
 		CreatedBy: applicationStatus.Edges.User.ID,
 		Status:    convertEntApplicationStatusToModelStatus(&applicationStatus.Status),
@@ -51,19 +52,19 @@ func convertEntApplicationStatusToModelApplicationStatus(
 	}
 }
 
-func convertEntApplicationStatusToModelStatus(entStatus *applicationstatus.Status) Status {
-	var status Status
+func convertEntApplicationStatusToModelStatus(entStatus *applicationstatus.Status) service.Status {
+	var status service.Status
 	switch entStatus.String() {
 	case "submitted":
-		status = Submitted
+		status = service.Submitted
 	case "fix_required":
-		status = FixRequired
+		status = service.FixRequired
 	case "accepted":
-		status = Accepted
+		status = service.Accepted
 	case "completed":
-		status = Completed
+		status = service.Completed
 	case "rejected":
-		status = Rejected
+		status = service.Rejected
 	}
 	return status
 }

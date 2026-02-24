@@ -9,6 +9,7 @@ import (
 	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/ent/user"
 	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
 var userErrorConverter = &entErrorConverter{
@@ -18,7 +19,7 @@ var userErrorConverter = &entErrorConverter{
 
 func (repo *EntRepository) CreateUser(
 	ctx context.Context, name string, dn string, accountManager bool,
-) (*User, error) {
+) (*service.User, error) {
 	u, err := repo.client.User.
 		Create().
 		SetName(name).
@@ -31,7 +32,9 @@ func (repo *EntRepository) CreateUser(
 	return convertEntUserToModelUser(u), nil
 }
 
-func (repo *EntRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (*User, error) {
+func (repo *EntRepository) GetUserByID(
+	ctx context.Context, userID uuid.UUID,
+) (*service.User, error) {
 	u, err := repo.client.User.
 		Query().
 		Where(user.IDEQ(userID)).
@@ -42,7 +45,7 @@ func (repo *EntRepository) GetUserByID(ctx context.Context, userID uuid.UUID) (*
 	return convertEntUserToModelUser(u), nil
 }
 
-func (repo *EntRepository) GetUserByName(ctx context.Context, name string) (*User, error) {
+func (repo *EntRepository) GetUserByName(ctx context.Context, name string) (*service.User, error) {
 	u, err := repo.client.User.
 		Query().
 		Where(user.NameEQ(name)).
@@ -53,14 +56,14 @@ func (repo *EntRepository) GetUserByName(ctx context.Context, name string) (*Use
 	return convertEntUserToModelUser(u), nil
 }
 
-func (repo *EntRepository) GetUsers(ctx context.Context) ([]*User, error) {
+func (repo *EntRepository) GetUsers(ctx context.Context) ([]*service.User, error) {
 	users, err := repo.client.User.
 		Query().
 		All(ctx)
 	if err != nil {
 		return nil, userErrorConverter.convert(err)
 	}
-	modelusers := lo.Map(users, func(u *ent.User, _ int) *User {
+	modelusers := lo.Map(users, func(u *ent.User, _ int) *service.User {
 		return convertEntUserToModelUser(u)
 	})
 	return modelusers, nil
@@ -68,7 +71,7 @@ func (repo *EntRepository) GetUsers(ctx context.Context) ([]*User, error) {
 
 func (repo *EntRepository) UpdateUser(
 	ctx context.Context, userID uuid.UUID, name string, dn string, accountManager bool,
-) (*User, error) {
+) (*service.User, error) {
 	u, err := repo.client.User.
 		UpdateOneID(userID).
 		SetName(name).
@@ -82,17 +85,17 @@ func (repo *EntRepository) UpdateUser(
 	return convertEntUserToModelUser(u), nil
 }
 
-func convertEntUserToModelUser(user *ent.User) *User {
+func convertEntUserToModelUser(user *ent.User) *service.User {
 	if user == nil {
 		return nil
 	}
-	return &User{
+	return &service.User{
 		ID:             user.ID,
 		Name:           user.Name,
 		DisplayName:    user.DisplayName,
 		AccountManager: user.AccountManager,
 		CreatedAt:      user.CreatedAt,
 		UpdatedAt:      user.UpdatedAt,
-		DeletedAt:      nulltime.FromTime(user.DeletedAt).Time,
+		DeletedAt:      nulltime.FromTime(user.DeletedAt),
 	}
 }

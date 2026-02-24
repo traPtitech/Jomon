@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 )
@@ -35,7 +36,7 @@ func TestEntRepository_GetAccountManagers(t *testing.T) {
 
 		got, err := repo.GetAccountManagers(ctx)
 		require.NoError(t, err)
-		exp := []*AccountManager{
+		exp := []*service.AccountManager{
 			{ID: user1.ID},
 			{ID: user2.ID},
 		}

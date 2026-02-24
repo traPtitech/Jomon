@@ -7,9 +7,12 @@ import (
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/ent/user"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
-func (repo *EntRepository) GetAccountManagers(ctx context.Context) ([]*AccountManager, error) {
+func (repo *EntRepository) GetAccountManagers(
+	ctx context.Context,
+) ([]*service.AccountManager, error) {
 	users, err := repo.client.User.
 		Query().
 		Where(user.AccountManager(true)).
@@ -18,8 +21,8 @@ func (repo *EntRepository) GetAccountManagers(ctx context.Context) ([]*AccountMa
 		return nil, defaultEntErrorConverter.convert(err)
 	}
 
-	accountManagers := lo.Map(users, func(u *ent.User, _ int) *AccountManager {
-		return &AccountManager{
+	accountManagers := lo.Map(users, func(u *ent.User, _ int) *service.AccountManager {
+		return &service.AccountManager{
 			ID: u.ID,
 		}
 	})

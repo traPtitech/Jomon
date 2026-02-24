@@ -9,6 +9,7 @@ import (
 	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/ent/application"
 	"github.com/traPtitech/Jomon/internal/ent/comment"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
 var commentErrorConverter = &entErrorConverter{
@@ -18,7 +19,7 @@ var commentErrorConverter = &entErrorConverter{
 
 func (repo *EntRepository) GetComments(
 	ctx context.Context, applicationID uuid.UUID,
-) ([]*Comment, error) {
+) ([]*service.Comment, error) {
 	_, err := repo.client.Application.
 		Query().
 		Where(application.IDEQ(applicationID)).
@@ -39,7 +40,7 @@ func (repo *EntRepository) GetComments(
 	if err != nil {
 		return nil, commentErrorConverter.convert(err)
 	}
-	modelcomments := lo.Map(comments, func(c *ent.Comment, _ int) *Comment {
+	modelcomments := lo.Map(comments, func(c *ent.Comment, _ int) *service.Comment {
 		return ConvertEntCommentToModelComment(c, c.Edges.User.ID)
 	})
 	return modelcomments, nil
@@ -47,7 +48,7 @@ func (repo *EntRepository) GetComments(
 
 func (repo *EntRepository) CreateComment(
 	ctx context.Context, comment string, applicationID uuid.UUID, userID uuid.UUID,
-) (*Comment, error) {
+) (*service.Comment, error) {
 	created, err := repo.client.Comment.
 		Create().
 		SetComment(comment).
@@ -62,7 +63,7 @@ func (repo *EntRepository) CreateComment(
 
 func (repo *EntRepository) UpdateComment(
 	ctx context.Context, commentContent string, applicationID uuid.UUID, commentID uuid.UUID,
-) (*Comment, error) {
+) (*service.Comment, error) {
 	updated, err := repo.client.Comment.
 		UpdateOneID(commentID).
 		SetComment(commentContent).
@@ -104,8 +105,8 @@ func (repo *EntRepository) DeleteComment(
 	return commentErrorConverter.convert(err)
 }
 
-func ConvertEntCommentToModelComment(comment *ent.Comment, userID uuid.UUID) *Comment {
-	return &Comment{
+func ConvertEntCommentToModelComment(comment *ent.Comment, userID uuid.UUID) *service.Comment {
+	return &service.Comment{
 		ID:        comment.ID,
 		User:      userID,
 		Comment:   comment.Comment,

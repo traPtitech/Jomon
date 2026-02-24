@@ -11,7 +11,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/require"
-	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"go.uber.org/mock/gomock"
@@ -25,11 +24,11 @@ func TestHandler_GetAccountManagers(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		accountManager := &model.AccountManager{
+		accountManager := &service.AccountManager{
 			ID: uuid.New(),
 		}
 
-		accountManagers := []*model.AccountManager{
+		accountManagers := []*service.AccountManager{
 			accountManager,
 		}
 
@@ -59,7 +58,7 @@ func TestHandler_GetAccountManagers(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		var accountManagers []*model.AccountManager
+		var accountManagers []*service.AccountManager
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/account-managers", nil)

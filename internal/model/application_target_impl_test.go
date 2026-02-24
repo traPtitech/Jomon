@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/require"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 )
@@ -33,11 +34,11 @@ func TestEntRepository_GetApplicationTargets(t *testing.T) {
 			random.AlphaNumeric(t, 30),
 			true)
 		require.NoError(t, err)
-		target1 := &ApplicationTarget{
+		target1 := &service.ApplicationTarget{
 			Target: user1.ID,
 			Amount: random.Numeric(t, 100000),
 		}
-		target2 := &ApplicationTarget{
+		target2 := &service.ApplicationTarget{
 			Target: user2.ID,
 			Amount: random.Numeric(t, 100000),
 		}
@@ -46,11 +47,11 @@ func TestEntRepository_GetApplicationTargets(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
-			nil, []*ApplicationTarget{target1, target2},
+			nil, []*service.ApplicationTarget{target1, target2},
 			user1.ID)
 		require.NoError(t, err)
 		// CreatedAt の差を1秒以内に収めるためにここで time.Now を取る
-		exp := []*ApplicationTargetDetail{
+		exp := []*service.ApplicationTargetDetail{
 			{Target: target1.Target, Amount: target1.Amount, CreatedAt: time.Now()},
 			{Target: target2.Target, Amount: target2.Amount, CreatedAt: time.Now()},
 		}
@@ -58,8 +59,8 @@ func TestEntRepository_GetApplicationTargets(t *testing.T) {
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.IgnoreFields(ApplicationTargetDetail{}, "ID", "PaidAt"),
-			cmpopts.SortSlices(func(l, r *ApplicationTargetDetail) bool {
+			cmpopts.IgnoreFields(service.ApplicationTargetDetail{}, "ID", "PaidAt"),
+			cmpopts.SortSlices(func(l, r *service.ApplicationTargetDetail) bool {
 				return l.Target.ID() < r.Target.ID()
 			}))
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -107,11 +108,11 @@ func TestEntRepository_createApplicationTargets(t *testing.T) {
 			random.AlphaNumeric(t, 30),
 			true)
 		require.NoError(t, err)
-		target1 := &ApplicationTarget{
+		target1 := &service.ApplicationTarget{
 			Target: user1.ID,
 			Amount: random.Numeric(t, 100000),
 		}
-		target2 := &ApplicationTarget{
+		target2 := &service.ApplicationTarget{
 			Target: user2.ID,
 			Amount: random.Numeric(t, 100000),
 		}
@@ -120,17 +121,17 @@ func TestEntRepository_createApplicationTargets(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
-			nil, []*ApplicationTarget{target1, target2},
+			nil, []*service.ApplicationTarget{target1, target2},
 			user1.ID)
 		require.NoError(t, err)
-		exp := []*ApplicationTargetDetail{
+		exp := []*service.ApplicationTargetDetail{
 			{Target: target1.Target, Amount: target1.Amount, CreatedAt: time.Now()},
 			{Target: target2.Target, Amount: target2.Amount, CreatedAt: time.Now()},
 		}
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.IgnoreFields(ApplicationTargetDetail{}, "ID", "PaidAt"),
-			cmpopts.SortSlices(func(l, r *ApplicationTargetDetail) bool {
+			cmpopts.IgnoreFields(service.ApplicationTargetDetail{}, "ID", "PaidAt"),
+			cmpopts.SortSlices(func(l, r *service.ApplicationTargetDetail) bool {
 				return l.Target.ID() < r.Target.ID()
 			}))
 		testutil.RequireEqual(t, exp, got.Targets, opts...)
@@ -160,11 +161,11 @@ func TestEntRepository_deleteApplicationTargets(t *testing.T) {
 			random.AlphaNumeric(t, 30),
 			true)
 		require.NoError(t, err)
-		target1 := &ApplicationTarget{
+		target1 := &service.ApplicationTarget{
 			Target: user1.ID,
 			Amount: random.Numeric(t, 100000),
 		}
-		target2 := &ApplicationTarget{
+		target2 := &service.ApplicationTarget{
 			Target: user2.ID,
 			Amount: random.Numeric(t, 100000),
 		}
@@ -173,7 +174,7 @@ func TestEntRepository_deleteApplicationTargets(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
-			nil, []*ApplicationTarget{target1, target2},
+			nil, []*service.ApplicationTarget{target1, target2},
 			user1.ID)
 		require.NoError(t, err)
 		_, err = repo.UpdateApplication(
@@ -181,7 +182,7 @@ func TestEntRepository_deleteApplicationTargets(t *testing.T) {
 			application.ID,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
-			nil, []*ApplicationTarget{})
+			nil, []*service.ApplicationTarget{})
 		require.NoError(t, err)
 		got, err := repo.GetApplicationTargets(ctx, application.ID)
 		require.NoError(t, err)
@@ -202,11 +203,11 @@ func TestEntRepository_deleteApplicationTargets(t *testing.T) {
 			random.AlphaNumeric(t, 30),
 			true)
 		require.NoError(t, err)
-		target1 := &ApplicationTarget{
+		target1 := &service.ApplicationTarget{
 			Target: user1.ID,
 			Amount: random.Numeric(t, 100000),
 		}
-		target2 := &ApplicationTarget{
+		target2 := &service.ApplicationTarget{
 			Target: user2.ID,
 			Amount: random.Numeric(t, 100000),
 		}
@@ -223,7 +224,7 @@ func TestEntRepository_deleteApplicationTargets(t *testing.T) {
 			application.ID,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 40),
-			nil, []*ApplicationTarget{target1, target2})
+			nil, []*service.ApplicationTarget{target1, target2})
 		require.NoError(t, err)
 		got, err := repo2.GetApplicationTargets(ctx, application.ID)
 		require.NoError(t, err)

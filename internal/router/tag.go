@@ -8,7 +8,6 @@ import (
 	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/internal/logging"
-	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/service"
 	"go.uber.org/zap"
 )
@@ -36,7 +35,7 @@ func (h Handlers) GetTags(c *echo.Context) error {
 		return err
 	}
 
-	res := lo.Map(tags, func(tag *model.Tag, _ int) *TagResponse {
+	res := lo.Map(tags, func(tag *service.Tag, _ int) *TagResponse {
 		return &TagResponse{
 			ID:        tag.ID,
 			Name:      tag.Name,

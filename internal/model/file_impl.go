@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/internal/ent"
 	"github.com/traPtitech/Jomon/internal/ent/file"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
 var fileErrorConverter = &entErrorConverter{
@@ -15,7 +16,7 @@ var fileErrorConverter = &entErrorConverter{
 
 func (repo *EntRepository) CreateFile(
 	ctx context.Context, name string, mimetype string, applicationID uuid.UUID, userID uuid.UUID,
-) (*File, error) {
+) (*service.File, error) {
 	id := uuid.New()
 
 	created, err := repo.client.File.
@@ -37,7 +38,7 @@ func (repo *EntRepository) CreateFile(
 		return nil, fileErrorConverter.convert(err)
 	}
 
-	f := &File{
+	f := &service.File{
 		ID:        created.ID,
 		Name:      name,
 		MimeType:  mimetype,
@@ -48,7 +49,7 @@ func (repo *EntRepository) CreateFile(
 	return f, nil
 }
 
-func (repo *EntRepository) GetFile(ctx context.Context, fileID uuid.UUID) (*File, error) {
+func (repo *EntRepository) GetFile(ctx context.Context, fileID uuid.UUID) (*service.File, error) {
 	f, err := repo.client.File.
 		Query().
 		Where(file.IDEQ(fileID)).
@@ -68,9 +69,9 @@ func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) err
 	return fileErrorConverter.convert(err)
 }
 
-func ConvertEntFileToModelFile(entfile *ent.File) *File {
+func ConvertEntFileToModelFile(entfile *ent.File) *service.File {
 	// be careful to check existing edges
-	return &File{
+	return &service.File{
 		ID:        entfile.ID,
 		Name:      entfile.Name,
 		MimeType:  entfile.MimeType,

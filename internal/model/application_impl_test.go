@@ -8,13 +8,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 )
 
-func (rd *ApplicationDetail) toExpectedApplicationResponse(t *testing.T) *ApplicationResponse {
+func toExpectedApplicationResponse(
+	t *testing.T, rd *service.ApplicationDetail,
+) *service.ApplicationResponse {
 	t.Helper()
-	return &ApplicationResponse{
+	return &service.ApplicationResponse{
 		ID:        rd.ID,
 		Status:    rd.Status,
 		CreatedAt: rd.CreatedAt,
@@ -75,7 +78,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -84,8 +87,8 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user1.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
@@ -93,25 +96,25 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user2.ID)
 		require.NoError(t, err)
 
 		sort := "created_at"
 
-		got, err := repo.GetApplications(ctx, ApplicationQuery{
+		got, err := repo.GetApplications(ctx, service.ApplicationQuery{
 			Sort: &sort,
 		})
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.SortSlices(func(a, b *ApplicationResponse) bool {
+			cmpopts.SortSlices(func(a, b *service.ApplicationResponse) bool {
 				return a.ID.ID() < b.ID.ID()
 			}))
-		exp := []*ApplicationResponse{
-			application1.toExpectedApplicationResponse(t),
-			application2.toExpectedApplicationResponse(t),
+		exp := []*service.ApplicationResponse{
+			toExpectedApplicationResponse(t, application1),
+			toExpectedApplicationResponse(t, application2),
 		}
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
@@ -133,7 +136,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo2.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -142,8 +145,8 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user1.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
@@ -151,25 +154,25 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user2.ID)
 		require.NoError(t, err)
 
 		sort := "-created_at"
 
-		got, err := repo2.GetApplications(ctx, ApplicationQuery{
+		got, err := repo2.GetApplications(ctx, service.ApplicationQuery{
 			Sort: &sort,
 		})
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.SortSlices(func(a, b *ApplicationResponse) bool {
+			cmpopts.SortSlices(func(a, b *service.ApplicationResponse) bool {
 				return a.ID.ID() < b.ID.ID()
 			}))
-		exp := []*ApplicationResponse{
-			application1.toExpectedApplicationResponse(t),
-			application2.toExpectedApplicationResponse(t),
+		exp := []*service.ApplicationResponse{
+			toExpectedApplicationResponse(t, application1),
+			toExpectedApplicationResponse(t, application2),
 		}
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
@@ -191,7 +194,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo3.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -200,33 +203,33 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			"b",
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user1.ID)
 		require.NoError(t, err)
 		application2, err := repo3.CreateApplication(
 			ctx,
 			"a",
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user2.ID)
 		require.NoError(t, err)
 
 		sort := "title"
 
-		got, err := repo3.GetApplications(ctx, ApplicationQuery{
+		got, err := repo3.GetApplications(ctx, service.ApplicationQuery{
 			Sort: &sort,
 		})
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.SortSlices(func(a, b *ApplicationResponse) bool {
+			cmpopts.SortSlices(func(a, b *service.ApplicationResponse) bool {
 				return a.ID.ID() < b.ID.ID()
 			}))
-		exp := []*ApplicationResponse{
-			application2.toExpectedApplicationResponse(t),
-			application1.toExpectedApplicationResponse(t),
+		exp := []*service.ApplicationResponse{
+			toExpectedApplicationResponse(t, application2),
+			toExpectedApplicationResponse(t, application1),
 		}
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
@@ -248,7 +251,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo4.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -257,33 +260,33 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			"b",
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user1.ID)
 		require.NoError(t, err)
 		application2, err := repo4.CreateApplication(
 			ctx,
 			"a",
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user2.ID)
 		require.NoError(t, err)
 
 		sort := "-title"
 
-		got, err := repo4.GetApplications(ctx, ApplicationQuery{
+		got, err := repo4.GetApplications(ctx, service.ApplicationQuery{
 			Sort: &sort,
 		})
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.SortSlices(func(a, b *ApplicationResponse) bool {
+			cmpopts.SortSlices(func(a, b *service.ApplicationResponse) bool {
 				return a.ID.ID() < b.ID.ID()
 			}))
-		exp := []*ApplicationResponse{
-			application1.toExpectedApplicationResponse(t),
-			application2.toExpectedApplicationResponse(t),
+		exp := []*service.ApplicationResponse{
+			toExpectedApplicationResponse(t, application1),
+			toExpectedApplicationResponse(t, application2),
 		}
 		testutil.RequireEqual(t, exp, got, opts...)
 	})
@@ -305,11 +308,11 @@ func TestEntRepository_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo5.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target1 := &ApplicationTarget{
+		target1 := &service.ApplicationTarget{
 			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
-		target2 := &ApplicationTarget{
+		target2 := &service.ApplicationTarget{
 			Target: user2.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -318,26 +321,26 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			"b",
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target1},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target1},
 			user1.ID)
 		require.NoError(t, err)
 		_, err = repo5.CreateApplication(
 			ctx,
 			"a",
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target2},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target2},
 			user2.ID)
 		require.NoError(t, err)
 
 		target := target1.Target
-		got, err := repo5.GetApplications(ctx, ApplicationQuery{
+		got, err := repo5.GetApplications(ctx, service.ApplicationQuery{
 			Target: target,
 		})
 		require.NoError(t, err)
 		require.Len(t, got, 1)
-		exp := application1.toExpectedApplicationResponse(t)
+		exp := toExpectedApplicationResponse(t, application1)
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, exp, got[0], opts...)
 	})
@@ -359,7 +362,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo6.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -368,8 +371,8 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			"b",
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user1.ID)
 		require.NoError(t, err)
 		time.Sleep(1 * time.Second)
@@ -377,18 +380,18 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			"a",
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user2.ID)
 		require.NoError(t, err)
 
 		since := application1.CreatedAt.Add(10 * time.Millisecond)
-		got, err := repo6.GetApplications(ctx, ApplicationQuery{
+		got, err := repo6.GetApplications(ctx, service.ApplicationQuery{
 			Since: nulltime.FromTime(&since),
 		})
 		require.NoError(t, err)
 		require.Len(t, got, 1)
-		exp := application2.toExpectedApplicationResponse(t)
+		exp := toExpectedApplicationResponse(t, application2)
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, exp, got[0], opts...)
 	})
@@ -410,7 +413,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo7.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -419,8 +422,8 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			"b",
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user1.ID)
 		require.NoError(t, err)
 		time.Sleep(2 * time.Second)
@@ -428,18 +431,18 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			"a",
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user2.ID)
 		require.NoError(t, err)
 
 		until := application2.CreatedAt.Add(-1 * time.Second)
-		got, err := repo7.GetApplications(ctx, ApplicationQuery{
+		got, err := repo7.GetApplications(ctx, service.ApplicationQuery{
 			Until: nulltime.FromTime(&until),
 		})
 		require.NoError(t, err)
 		require.Len(t, got, 1)
-		exp := application1.toExpectedApplicationResponse(t)
+		exp := toExpectedApplicationResponse(t, application1)
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, exp, got[0], opts...)
 	})
@@ -461,7 +464,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo8.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -470,8 +473,8 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			"b",
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user1.ID)
 		require.NoError(t, err)
 		time.Sleep(2 * time.Second)
@@ -479,24 +482,24 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			"a",
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{tag},
+			[]*service.ApplicationTarget{target},
 			user2.ID)
 		require.NoError(t, err)
 
 		time.Sleep(1 * time.Second)
 
 		status := "accepted"
-		_, err = repo8.CreateStatus(ctx, application1.ID, user1.ID, Accepted)
+		_, err = repo8.CreateStatus(ctx, application1.ID, user1.ID, service.Accepted)
 		require.NoError(t, err)
 
-		got, err := repo8.GetApplications(ctx, ApplicationQuery{
+		got, err := repo8.GetApplications(ctx, service.ApplicationQuery{
 			Status: &status,
 		})
 		require.NoError(t, err)
 		require.Len(t, got, 1)
-		exp := application1.toExpectedApplicationResponse(t)
-		exp.Status = Accepted
+		exp := toExpectedApplicationResponse(t, application1)
+		exp.Status = service.Accepted
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, exp, got[0], opts...)
 	})
@@ -516,7 +519,7 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			random.AlphaNumeric(t, 30),
 			true)
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user1.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -525,25 +528,25 @@ func TestEntRepository_GetApplications(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{},
+			[]*service.ApplicationTarget{target},
 			user1.ID)
 		require.NoError(t, err)
 		_, err = repo9.CreateApplication(
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{},
-			[]*ApplicationTarget{target},
+			[]*service.Tag{},
+			[]*service.ApplicationTarget{target},
 			user2.ID)
 		require.NoError(t, err)
 
-		got, err := repo9.GetApplications(ctx, ApplicationQuery{
+		got, err := repo9.GetApplications(ctx, service.ApplicationQuery{
 			CreatedBy: user1.ID,
 		})
 		require.NoError(t, err)
 		require.Len(t, got, 1)
-		exp := application1.toExpectedApplicationResponse(t)
+		exp := toExpectedApplicationResponse(t, application1)
 		opts := testutil.ApproxEqualOptions()
 		testutil.RequireEqual(t, exp, got[0], opts...)
 	})
@@ -574,7 +577,7 @@ func TestEntRepository_CreateApplication(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -582,21 +585,21 @@ func TestEntRepository_CreateApplication(t *testing.T) {
 		application, err := repo.CreateApplication(
 			ctx,
 			title, content,
-			[]*Tag{tag}, []*ApplicationTarget{target},
+			[]*service.Tag{tag}, []*service.ApplicationTarget{target},
 			user.ID)
 		require.NoError(t, err)
-		exp := &ApplicationDetail{
-			Status:  Submitted,
+		exp := &service.ApplicationDetail{
+			Status:  service.Submitted,
 			Title:   title,
 			Content: content,
-			Tags:    []*Tag{tag},
-			Targets: []*ApplicationTargetDetail{{
+			Tags:    []*service.Tag{tag},
+			Targets: []*service.ApplicationTargetDetail{{
 				Target: target.Target,
 				Amount: target.Amount,
 			}},
-			Statuses: []*ApplicationStatus{{
+			Statuses: []*service.ApplicationStatus{{
 				CreatedBy: user.ID,
-				Status:    Submitted,
+				Status:    service.Submitted,
 			}},
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
@@ -604,9 +607,9 @@ func TestEntRepository_CreateApplication(t *testing.T) {
 		}
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.IgnoreFields(ApplicationDetail{}, "ID"),
-			cmpopts.IgnoreFields(ApplicationTargetDetail{}, "ID", "PaidAt", "CreatedAt"),
-			cmpopts.IgnoreFields(ApplicationStatus{}, "ID", "CreatedAt"))
+			cmpopts.IgnoreFields(service.ApplicationDetail{}, "ID"),
+			cmpopts.IgnoreFields(service.ApplicationTargetDetail{}, "ID", "PaidAt", "CreatedAt"),
+			cmpopts.IgnoreFields(service.ApplicationStatus{}, "ID", "CreatedAt"))
 		testutil.AssertEqual(t, exp, application, opts...)
 	})
 
@@ -621,7 +624,7 @@ func TestEntRepository_CreateApplication(t *testing.T) {
 		_, err = repo2.CreateApplication(
 			ctx,
 			title, content,
-			[]*Tag{tag}, []*ApplicationTarget{},
+			[]*service.Tag{tag}, []*service.ApplicationTarget{},
 			uuid.New())
 		require.Error(t, err)
 	})
@@ -639,7 +642,7 @@ func TestEntRepository_CreateApplication(t *testing.T) {
 		require.NoError(t, err)
 
 		date := time.Now()
-		tag := &Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -649,7 +652,7 @@ func TestEntRepository_CreateApplication(t *testing.T) {
 		_, err = repo3.CreateApplication(
 			ctx,
 			title, content,
-			[]*Tag{tag}, []*ApplicationTarget{},
+			[]*service.Tag{tag}, []*service.ApplicationTarget{},
 			user.ID)
 		require.Error(t, err)
 	})
@@ -675,7 +678,7 @@ func TestEntRepository_GetApplication(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -684,7 +687,7 @@ func TestEntRepository_GetApplication(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag}, []*ApplicationTarget{target},
+			[]*service.Tag{tag}, []*service.ApplicationTarget{target},
 			user.ID)
 		require.NoError(t, err)
 
@@ -728,7 +731,7 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -736,11 +739,11 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag}, []*ApplicationTarget{target},
+			[]*service.Tag{tag}, []*service.ApplicationTarget{target},
 			user.ID)
 		require.NoError(t, err)
 		// CreatedAt の差を1秒以内に収めるためにここで time.Now を取る
-		expTarget := &ApplicationTargetDetail{
+		expTarget := &service.ApplicationTargetDetail{
 			Target:    target.Target,
 			Amount:    target.Amount,
 			CreatedAt: time.Now(),
@@ -749,17 +752,17 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		updatedApplication, err := repo.UpdateApplication(
 			ctx,
 			application.ID, application.Title, application.Content,
-			[]*Tag{tag}, []*ApplicationTarget{target})
+			[]*service.Tag{tag}, []*service.ApplicationTarget{target})
 		require.NoError(t, err)
-		exp := &ApplicationDetail{
+		exp := &service.ApplicationDetail{
 			ID:        application.ID,
 			Status:    application.Status,
 			Title:     application.Title,
 			Content:   application.Content,
 			Comments:  application.Comments,
 			Files:     application.Files,
-			Tags:      []*Tag{tag},
-			Targets:   []*ApplicationTargetDetail{expTarget},
+			Tags:      []*service.Tag{tag},
+			Targets:   []*service.ApplicationTargetDetail{expTarget},
 			Statuses:  application.Statuses,
 			CreatedAt: application.CreatedAt,
 			UpdatedAt: time.Now(),
@@ -767,7 +770,7 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		}
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.IgnoreFields(ApplicationTargetDetail{}, "ID", "PaidAt"))
+			cmpopts.IgnoreFields(service.ApplicationTargetDetail{}, "ID", "PaidAt"))
 		testutil.AssertEqual(t, exp, updatedApplication, opts...)
 	})
 
@@ -782,7 +785,7 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo2.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -790,11 +793,11 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag}, []*ApplicationTarget{target},
+			[]*service.Tag{tag}, []*service.ApplicationTarget{target},
 			user.ID)
 		require.NoError(t, err)
 		// CreatedAt の差を1秒以内に収めるためにここで time.Now を取る
-		expTarget := &ApplicationTargetDetail{
+		expTarget := &service.ApplicationTargetDetail{
 			Target:    target.Target,
 			Amount:    target.Amount,
 			CreatedAt: time.Now(),
@@ -804,17 +807,17 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		updatedApplication, err := repo2.UpdateApplication(
 			ctx,
 			application.ID, title, application.Content,
-			[]*Tag{tag}, []*ApplicationTarget{target})
+			[]*service.Tag{tag}, []*service.ApplicationTarget{target})
 		require.NoError(t, err)
-		exp := &ApplicationDetail{
+		exp := &service.ApplicationDetail{
 			ID:        application.ID,
 			Status:    application.Status,
 			Title:     title,
 			Content:   application.Content,
 			Comments:  application.Comments,
 			Files:     application.Files,
-			Tags:      []*Tag{tag},
-			Targets:   []*ApplicationTargetDetail{expTarget},
+			Tags:      []*service.Tag{tag},
+			Targets:   []*service.ApplicationTargetDetail{expTarget},
 			Statuses:  application.Statuses,
 			CreatedAt: application.CreatedAt,
 			UpdatedAt: time.Now(),
@@ -822,7 +825,7 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		}
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.IgnoreFields(ApplicationTargetDetail{}, "ID", "PaidAt"))
+			cmpopts.IgnoreFields(service.ApplicationTargetDetail{}, "ID", "PaidAt"))
 		testutil.AssertEqual(t, exp, updatedApplication, opts...)
 	})
 
@@ -837,7 +840,7 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo3.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -845,11 +848,11 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag}, []*ApplicationTarget{target},
+			[]*service.Tag{tag}, []*service.ApplicationTarget{target},
 			user.ID)
 		require.NoError(t, err)
 		// CreatedAt の差を1秒以内に収めるためにここで time.Now を取る
-		expTarget := &ApplicationTargetDetail{
+		expTarget := &service.ApplicationTargetDetail{
 			Target:    target.Target,
 			Amount:    target.Amount,
 			CreatedAt: time.Now(),
@@ -858,17 +861,17 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		updatedApplication, err := repo3.UpdateApplication(
 			ctx,
 			application.ID, application.Title, content,
-			[]*Tag{tag}, []*ApplicationTarget{target})
+			[]*service.Tag{tag}, []*service.ApplicationTarget{target})
 		require.NoError(t, err)
-		exp := &ApplicationDetail{
+		exp := &service.ApplicationDetail{
 			ID:        application.ID,
 			Status:    application.Status,
 			Title:     application.Title,
 			Content:   content,
 			Comments:  application.Comments,
 			Files:     application.Files,
-			Tags:      []*Tag{tag},
-			Targets:   []*ApplicationTargetDetail{expTarget},
+			Tags:      []*service.Tag{tag},
+			Targets:   []*service.ApplicationTargetDetail{expTarget},
 			Statuses:  application.Statuses,
 			CreatedAt: application.CreatedAt,
 			UpdatedAt: time.Now(),
@@ -876,7 +879,7 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		}
 		opts := testutil.ApproxEqualOptions()
 		opts = append(opts,
-			cmpopts.IgnoreFields(ApplicationTargetDetail{}, "ID", "PaidAt"))
+			cmpopts.IgnoreFields(service.ApplicationTargetDetail{}, "ID", "PaidAt"))
 		testutil.AssertEqual(t, exp, updatedApplication, opts...)
 	})
 
@@ -891,7 +894,7 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		require.NoError(t, err)
 		tag, err := repo4.CreateTag(ctx, random.AlphaNumeric(t, 20))
 		require.NoError(t, err)
-		target := &ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: user.ID,
 			Amount: random.Numeric(t, 10000),
 		}
@@ -899,12 +902,12 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 			ctx,
 			random.AlphaNumeric(t, 40),
 			random.AlphaNumeric(t, 100),
-			[]*Tag{tag}, []*ApplicationTarget{target},
+			[]*service.Tag{tag}, []*service.ApplicationTarget{target},
 			user.ID)
 		require.NoError(t, err)
 
 		date := time.Now()
-		unknownTag := &Tag{
+		unknownTag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -913,7 +916,7 @@ func TestEntRepository_UpdateApplication(t *testing.T) {
 		_, err = repo4.UpdateApplication(
 			ctx,
 			application.ID, application.Title, application.Content,
-			[]*Tag{unknownTag}, []*ApplicationTarget{target})
+			[]*service.Tag{unknownTag}, []*service.ApplicationTarget{target})
 		require.Error(t, err)
 	})
 }

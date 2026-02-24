@@ -12,7 +12,6 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/traPtitech/Jomon/internal/logging"
-	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/router/wrapsession"
 	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/traq"
@@ -59,7 +58,7 @@ func (h Handlers) AuthCallback(c *echo.Context) error {
 		return service.NewUnexpectedError(err)
 	}
 
-	var modelUser *model.User
+	var modelUser *service.User
 	modelUser, err = h.Repository.GetUserByName(ctx, u.Name)
 	if err == nil {
 		// User found, do nothing
