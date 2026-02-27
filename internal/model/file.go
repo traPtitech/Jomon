@@ -14,8 +14,9 @@ var fileErrorConverter = &entErrorConverter{
 	msgNotFound: "file not found",
 }
 
+// TODO: トランザクションを適用する
 func (repo *EntRepository) CreateFile(
-	ctx context.Context, name string, mimetype string, applicationID uuid.UUID, userID uuid.UUID,
+	ctx context.Context, name, mimetype string, applicationID, userID uuid.UUID,
 ) (*service.File, error) {
 	id := uuid.New()
 

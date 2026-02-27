@@ -123,6 +123,8 @@ func (repo *EntRepository) GetApplications(
 	}
 
 	reqres := lo.Map(applications, func(r *ent.Application, _ int) *service.ApplicationResponse {
+		// NOTE: applicationstatusは必ず1件以上存在する前提であるため、Edges.Status[0]でアクセスしている
+		//       CreateApplicationを参照
 		return convertEntApplicationResponseToModelApplicationResponse(
 			r, r.Edges.Tag, r.Edges.Status[0], r.Edges.User)
 	})
@@ -347,6 +349,7 @@ func (repo *EntRepository) UpdateApplication(
 		WithUser().
 		All(ctx)
 	if err != nil {
+		err = RollbackWithError(tx, err)
 		return nil, applicationErrorConverter.convert(err)
 	}
 	comments := lo.Map(entcomments, func(c *ent.Comment, _ int) *service.Comment {
@@ -358,6 +361,7 @@ func (repo *EntRepository) UpdateApplication(
 		})
 	entfiles, err := updated.QueryFile().All(ctx)
 	if err != nil {
+		err = RollbackWithError(tx, err)
 		return nil, applicationErrorConverter.convert(err)
 	}
 	files := lo.Map(entfiles, func(f *ent.File, _ int) uuid.UUID {

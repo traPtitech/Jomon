@@ -34,13 +34,27 @@ func (s Status) String() string {
 	case Rejected:
 		return "rejected"
 	default:
+		// FIXME: ここerrorにしたい
 		return ""
 	}
 }
 
 // dbにstringいれる今の実装だとMarshalJson入らなそう。
 func (s Status) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.String())
+	switch s {
+	case Submitted:
+		return json.Marshal("submitted")
+	case FixRequired:
+		return json.Marshal("fix_required")
+	case Accepted:
+		return json.Marshal("accepted")
+	case Completed:
+		return json.Marshal("completed")
+	case Rejected:
+		return json.Marshal("rejected")
+	default:
+		return nil, fmt.Errorf("invalid status: %d", s)
+	}
 }
 
 func (s *Status) UnmarshalJSON(data []byte) error {
