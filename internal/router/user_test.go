@@ -13,8 +13,6 @@ import (
 	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
-	"github.com/traPtitech/Jomon/internal/model"
-	"github.com/traPtitech/Jomon/internal/nulltime"
 	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
@@ -22,7 +20,7 @@ import (
 )
 
 // TODO: これ消す userFromModelUserがある
-func modelUserToUser(user *model.User) *User {
+func modelUserToUser(user *service.User) *User {
 	return &User{
 		ID:             user.ID,
 		Name:           user.Name,
@@ -30,7 +28,7 @@ func modelUserToUser(user *model.User) *User {
 		AccountManager: user.AccountManager,
 		CreatedAt:      user.CreatedAt,
 		UpdatedAt:      user.UpdatedAt,
-		DeletedAt:      nulltime.FromTime(&user.DeletedAt),
+		DeletedAt:      user.DeletedAt,
 	}
 }
 
@@ -44,7 +42,7 @@ func TestHandlers_GetUsers(t *testing.T) {
 
 		user1 := makeUser(t, random.Numeric(t, 2) == 1)
 		user2 := makeUser(t, random.Numeric(t, 2) == 1)
-		users := []*model.User{user1, user2}
+		users := []*service.User{user1, user2}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/users", nil)
@@ -64,7 +62,7 @@ func TestHandlers_GetUsers(t *testing.T) {
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := lo.Map(users, func(u *model.User, _ int) *User {
+		exp := lo.Map(users, func(u *service.User, _ int) *User {
 			return modelUserToUser(u)
 		})
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -75,7 +73,7 @@ func TestHandlers_GetUsers(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		users := []*model.User{}
+		users := []*service.User{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/users", nil)
@@ -95,7 +93,7 @@ func TestHandlers_GetUsers(t *testing.T) {
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := lo.Map(users, func(u *model.User, _ int) *User {
+		exp := lo.Map(users, func(u *service.User, _ int) *User {
 			return modelUserToUser(u)
 		})
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -135,7 +133,7 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		user := makeUser(t, random.Numeric(t, 2) == 1)
-		updateUser := &model.User{
+		updateUser := &service.User{
 			ID:             user.ID,
 			Name:           user.Name,
 			DisplayName:    user.DisplayName,
@@ -192,7 +190,7 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		user := makeUser(t, random.Numeric(t, 2) == 1)
-		updateUser := &model.User{
+		updateUser := &service.User{
 			ID:             user.ID,
 			Name:           user.Name,
 			DisplayName:    user.DisplayName,
@@ -240,7 +238,7 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		user := makeUser(t, random.Numeric(t, 2) == 1)
-		updateUser := &model.User{
+		updateUser := &service.User{
 			ID:             user.ID,
 			Name:           user.Name,
 			DisplayName:    user.DisplayName,

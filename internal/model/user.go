@@ -1,4 +1,3 @@
-//go:generate go tool mockgen -source=$GOFILE -destination=mock_$GOPACKAGE/mock_$GOFILE -package=mock_$GOPACKAGE
 package model
 
 import (
@@ -6,24 +5,97 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
+	"github.com/traPtitech/Jomon/internal/ent"
+	"github.com/traPtitech/Jomon/internal/ent/user"
+	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
-type User struct {
-	ID             uuid.UUID
-	Name           string
-	DisplayName    string
-	AccountManager bool
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	DeletedAt      time.Time
+var userErrorConverter = &entErrorConverter{
+	msgBadInput: "failed to process user due to invalid input",
+	msgNotFound: "user not found",
 }
 
-type UserRepository interface {
-	CreateUser(ctx context.Context, name string, dn string, accountManager bool) (*User, error)
-	GetUserByID(ctx context.Context, userID uuid.UUID) (*User, error)
-	GetUserByName(ctx context.Context, name string) (*User, error)
-	GetUsers(ctx context.Context) ([]*User, error)
-	UpdateUser(
-		ctx context.Context, userID uuid.UUID, name string, dn string, accountManager bool,
-	) (*User, error)
+func (repo *EntRepository) CreateUser(
+	ctx context.Context, name string, dn string, accountManager bool,
+) (*service.User, error) {
+	u, err := repo.client.User.
+		Create().
+		SetName(name).
+		SetDisplayName(dn).
+		SetAccountManager(accountManager).
+		Save(ctx)
+	if err != nil {
+		return nil, userErrorConverter.convert(err)
+	}
+	return convertEntUserToModelUser(u), nil
+}
+
+func (repo *EntRepository) GetUserByID(
+	ctx context.Context, userID uuid.UUID,
+) (*service.User, error) {
+	u, err := repo.client.User.
+		Query().
+		Where(user.IDEQ(userID)).
+		Only(ctx)
+	if err != nil {
+		return nil, userErrorConverter.convert(err)
+	}
+	return convertEntUserToModelUser(u), nil
+}
+
+func (repo *EntRepository) GetUserByName(ctx context.Context, name string) (*service.User, error) {
+	u, err := repo.client.User.
+		Query().
+		Where(user.NameEQ(name)).
+		Only(ctx)
+	if err != nil {
+		return nil, userErrorConverter.convert(err)
+	}
+	return convertEntUserToModelUser(u), nil
+}
+
+func (repo *EntRepository) GetUsers(ctx context.Context) ([]*service.User, error) {
+	users, err := repo.client.User.
+		Query().
+		All(ctx)
+	if err != nil {
+		return nil, userErrorConverter.convert(err)
+	}
+	modelusers := lo.Map(users, func(u *ent.User, _ int) *service.User {
+		return convertEntUserToModelUser(u)
+	})
+	return modelusers, nil
+}
+
+func (repo *EntRepository) UpdateUser(
+	ctx context.Context, userID uuid.UUID, name string, dn string, accountManager bool,
+) (*service.User, error) {
+	u, err := repo.client.User.
+		UpdateOneID(userID).
+		SetName(name).
+		SetDisplayName(dn).
+		SetAccountManager(accountManager).
+		SetUpdatedAt(time.Now()).
+		Save(ctx)
+	if err != nil {
+		return nil, userErrorConverter.convert(err)
+	}
+	return convertEntUserToModelUser(u), nil
+}
+
+func convertEntUserToModelUser(user *ent.User) *service.User {
+	if user == nil {
+		return nil
+	}
+	return &service.User{
+		ID:             user.ID,
+		Name:           user.Name,
+		DisplayName:    user.DisplayName,
+		AccountManager: user.AccountManager,
+		CreatedAt:      user.CreatedAt,
+		UpdatedAt:      user.UpdatedAt,
+		DeletedAt:      nulltime.FromTime(user.DeletedAt),
+	}
 }

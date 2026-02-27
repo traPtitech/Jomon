@@ -1,29 +1,82 @@
-//go:generate go tool mockgen -source=$GOFILE -destination=mock_$GOPACKAGE/mock_$GOFILE -package=mock_$GOPACKAGE
 package model
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/internal/ent"
+	"github.com/traPtitech/Jomon/internal/ent/file"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
-type FileRepository interface {
-	CreateFile(
-		ctx context.Context,
-		name string,
-		mimetype string,
-		applicationID uuid.UUID,
-		userID uuid.UUID,
-	) (*File, error)
-	GetFile(ctx context.Context, fileID uuid.UUID) (*File, error)
-	DeleteFile(ctx context.Context, fileID uuid.UUID) error
+var fileErrorConverter = &entErrorConverter{
+	msgBadInput: "failed to process file due to invalid input",
+	msgNotFound: "file not found",
 }
 
-type File struct {
-	ID        uuid.UUID
-	Name      string
-	MimeType  string
-	CreatedBy uuid.UUID
-	CreatedAt time.Time
+// TODO: トランザクションを適用する
+func (repo *EntRepository) CreateFile(
+	ctx context.Context, name, mimetype string, applicationID, userID uuid.UUID,
+) (*service.File, error) {
+	id := uuid.New()
+
+	created, err := repo.client.File.
+		Create().
+		SetID(id).
+		SetName(name).
+		SetMimeType(mimetype).
+		SetUserID(userID).
+		Save(ctx)
+	if err != nil {
+		return nil, fileErrorConverter.convert(err)
+	}
+
+	_, err = repo.client.Application.
+		UpdateOneID(applicationID).
+		AddFile(created).
+		Save(ctx)
+	if err != nil {
+		return nil, fileErrorConverter.convert(err)
+	}
+
+	f := &service.File{
+		ID:        created.ID,
+		Name:      name,
+		MimeType:  mimetype,
+		CreatedBy: userID,
+		CreatedAt: created.CreatedAt,
+	}
+
+	return f, nil
+}
+
+func (repo *EntRepository) GetFile(ctx context.Context, fileID uuid.UUID) (*service.File, error) {
+	f, err := repo.client.File.
+		Query().
+		Where(file.IDEQ(fileID)).
+		WithUser().
+		Only(ctx)
+	if err != nil {
+		return nil, fileErrorConverter.convert(err)
+	}
+
+	return ConvertEntFileToModelFile(f), nil
+}
+
+func (repo *EntRepository) DeleteFile(ctx context.Context, fileID uuid.UUID) error {
+	err := repo.client.File.
+		DeleteOneID(fileID).
+		Exec(ctx)
+	return fileErrorConverter.convert(err)
+}
+
+func ConvertEntFileToModelFile(entfile *ent.File) *service.File {
+	// be careful to check existing edges
+	return &service.File{
+		ID:        entfile.ID,
+		Name:      entfile.Name,
+		MimeType:  entfile.MimeType,
+		CreatedBy: entfile.Edges.User.ID,
+		CreatedAt: entfile.CreatedAt,
+	}
 }

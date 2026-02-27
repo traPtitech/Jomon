@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
 type Local struct {
@@ -55,4 +57,4 @@ func (l *Local) getFilePath(filename string) string {
 	return filepath.Join(l.localDir, filename)
 }
 
-var _ Storage = (*Local)(nil)
+var _ service.Storage = (*Local)(nil)

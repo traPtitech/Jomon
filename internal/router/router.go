@@ -12,15 +12,14 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/traPtitech/Jomon/internal/logging"
-	"github.com/traPtitech/Jomon/internal/model"
-	"github.com/traPtitech/Jomon/internal/storage"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/webhook"
 )
 
 type Handlers struct {
 	WebhookService *webhook.Service
-	Repository     model.Repository
-	Storage        storage.Storage
+	Repository     service.Repository
+	Storage        service.Storage
 	SessionName    string
 }
 

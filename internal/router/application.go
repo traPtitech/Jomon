@@ -11,7 +11,6 @@ import (
 	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/internal/logging"
-	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/nulltime"
 	"github.com/traPtitech/Jomon/internal/service"
 	"go.uber.org/zap"
@@ -57,7 +56,7 @@ type PutApplication struct {
 
 type ApplicationResponse struct {
 	ID        uuid.UUID         `json:"id"`
-	Status    model.Status      `json:"status"`
+	Status    service.Status    `json:"status"`
 	CreatedAt time.Time         `json:"created_at"`
 	UpdatedAt time.Time         `json:"updated_at"`
 	CreatedBy uuid.UUID         `json:"created_by"`
@@ -86,21 +85,21 @@ type CommentDetail struct {
 }
 
 type PutStatus struct {
-	Status  model.Status `json:"status"`
-	Comment string       `json:"comment"`
+	Status  service.Status `json:"status"`
+	Comment string         `json:"comment"`
 }
 
 type StatusResponseOverview struct {
-	CreatedBy uuid.UUID    `json:"created_by"`
-	Status    model.Status `json:"status"`
-	CreatedAt time.Time    `json:"created_at"`
+	CreatedBy uuid.UUID      `json:"created_by"`
+	Status    service.Status `json:"status"`
+	CreatedAt time.Time      `json:"created_at"`
 }
 
 type StatusResponse struct {
-	CreatedBy uuid.UUID     `json:"created_by"`
-	Status    model.Status  `json:"status"`
-	Comment   CommentDetail `json:"comment"`
-	CreatedAt time.Time     `json:"created_at"`
+	CreatedBy uuid.UUID      `json:"created_by"`
+	Status    service.Status `json:"status"`
+	Comment   CommentDetail  `json:"comment"`
+	CreatedAt time.Time      `json:"created_at"`
 }
 
 type Target struct {
@@ -208,7 +207,7 @@ func (h Handlers) GetApplications(c *echo.Context) error {
 		}
 		createdBy = u
 	}
-	query := model.ApplicationQuery{
+	query := service.ApplicationQuery{
 		Sort:      sort,
 		Target:    target,
 		Status:    ss,
@@ -228,8 +227,8 @@ func (h Handlers) GetApplications(c *echo.Context) error {
 
 	applications := lo.Map(
 		modelapplications,
-		func(application *model.ApplicationResponse, _ int) *ApplicationResponse {
-			restags := lo.Map(application.Tags, func(tag *model.Tag, _ int) *TagResponse {
+		func(application *service.ApplicationResponse, _ int) *ApplicationResponse {
+			restags := lo.Map(application.Tags, func(tag *service.Tag, _ int) *TagResponse {
 				return &TagResponse{
 					ID:        tag.ID,
 					Name:      tag.Name,
@@ -240,12 +239,12 @@ func (h Handlers) GetApplications(c *echo.Context) error {
 
 			restargets := lo.Map(
 				application.Targets,
-				func(target *model.ApplicationTargetDetail, _ int) *TargetOverview {
+				func(target *service.ApplicationTargetDetail, _ int) *TargetOverview {
 					return &TargetOverview{
 						ID:        target.ID,
 						Target:    target.Target,
 						Amount:    target.Amount,
-						PaidAt:    nulltime.FromTime(&target.PaidAt),
+						PaidAt:    target.PaidAt,
 						CreatedAt: target.CreatedAt,
 					}
 				},
@@ -278,7 +277,7 @@ func (h Handlers) PostApplication(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	tags := []*model.Tag{}
+	tags := []*service.Tag{}
 	for _, tagID := range req.Tags {
 		tag, err := h.Repository.GetTag(ctx, tagID)
 		if err != nil {
@@ -286,8 +285,8 @@ func (h Handlers) PostApplication(c *echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
-	targets := lo.Map(req.Targets, func(target *Target, _ int) *model.ApplicationTarget {
-		return &model.ApplicationTarget{
+	targets := lo.Map(req.Targets, func(target *Target, _ int) *service.ApplicationTarget {
+		return &service.ApplicationTarget{
 			Target: target.Target,
 			Amount: target.Amount,
 		}
@@ -301,17 +300,17 @@ func (h Handlers) PostApplication(c *echo.Context) error {
 	}
 	restargets := lo.Map(
 		application.Targets,
-		func(target *model.ApplicationTargetDetail, _ int) *TargetOverview {
+		func(target *service.ApplicationTargetDetail, _ int) *TargetOverview {
 			return &TargetOverview{
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    nulltime.FromTime(&target.PaidAt),
+				PaidAt:    target.PaidAt,
 				CreatedAt: target.CreatedAt,
 			}
 		},
 	)
-	restags := lo.Map(application.Tags, func(tag *model.Tag, _ int) *TagResponse {
+	restags := lo.Map(application.Tags, func(tag *service.Tag, _ int) *TagResponse {
 		return &TagResponse{
 			ID:        tag.ID,
 			Name:      tag.Name,
@@ -321,7 +320,7 @@ func (h Handlers) PostApplication(c *echo.Context) error {
 	})
 	comments := lo.Map(
 		application.Comments,
-		func(comment *model.Comment, _ int) *CommentDetail {
+		func(comment *service.Comment, _ int) *CommentDetail {
 			return &CommentDetail{
 				ID:        comment.ID,
 				User:      comment.User,
@@ -333,7 +332,7 @@ func (h Handlers) PostApplication(c *echo.Context) error {
 	)
 	statuses := lo.Map(
 		application.Statuses,
-		func(status *model.ApplicationStatus, _ int) *StatusResponseOverview {
+		func(status *service.ApplicationStatus, _ int) *StatusResponseOverview {
 			return &StatusResponseOverview{
 				Status:    status.Status,
 				CreatedAt: status.CreatedAt,
@@ -389,17 +388,17 @@ func (h Handlers) GetApplication(c *echo.Context) error {
 	}
 	restargets := lo.Map(
 		application.Targets,
-		func(target *model.ApplicationTargetDetail, _ int) *TargetOverview {
+		func(target *service.ApplicationTargetDetail, _ int) *TargetOverview {
 			return &TargetOverview{
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    nulltime.FromTime(&target.PaidAt),
+				PaidAt:    target.PaidAt,
 				CreatedAt: target.CreatedAt,
 			}
 		},
 	)
-	restags := lo.Map(application.Tags, func(tag *model.Tag, _ int) *TagResponse {
+	restags := lo.Map(application.Tags, func(tag *service.Tag, _ int) *TagResponse {
 		return &TagResponse{
 			ID:        tag.ID,
 			Name:      tag.Name,
@@ -408,7 +407,7 @@ func (h Handlers) GetApplication(c *echo.Context) error {
 		}
 	})
 
-	comments := lo.Map(modelcomments, func(modelcomment *model.Comment, _ int) *CommentDetail {
+	comments := lo.Map(modelcomments, func(modelcomment *service.Comment, _ int) *CommentDetail {
 		return &CommentDetail{
 			ID:        modelcomment.ID,
 			User:      modelcomment.User,
@@ -419,7 +418,7 @@ func (h Handlers) GetApplication(c *echo.Context) error {
 	})
 	statuses := lo.Map(
 		application.Statuses,
-		func(status *model.ApplicationStatus, _ int) *StatusResponseOverview {
+		func(status *service.ApplicationStatus, _ int) *StatusResponseOverview {
 			return &StatusResponseOverview{
 				CreatedBy: status.CreatedBy,
 				Status:    status.Status,
@@ -479,7 +478,7 @@ func (h Handlers) PutApplication(c *echo.Context) error {
 		return service.NewBadInputError("failed to get application from request").
 			WithInternal(err)
 	}
-	tags := []*model.Tag{}
+	tags := []*service.Tag{}
 	for _, tagID := range req.Tags {
 		tag, err := h.Repository.GetTag(ctx, tagID)
 		if err != nil {
@@ -488,8 +487,8 @@ func (h Handlers) PutApplication(c *echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
-	targets := lo.Map(req.Targets, func(target *Target, _ int) *model.ApplicationTarget {
-		return &model.ApplicationTarget{
+	targets := lo.Map(req.Targets, func(target *Target, _ int) *service.ApplicationTarget {
+		return &service.ApplicationTarget{
 			Target: target.Target,
 			Amount: target.Amount,
 		}
@@ -501,7 +500,7 @@ func (h Handlers) PutApplication(c *echo.Context) error {
 		logger.Error("failed to update application in repository", zap.Error(err))
 		return err
 	}
-	restags := lo.Map(application.Tags, func(tag *model.Tag, _ int) *TagResponse {
+	restags := lo.Map(application.Tags, func(tag *service.Tag, _ int) *TagResponse {
 		return &TagResponse{
 			ID:        tag.ID,
 			Name:      tag.Name,
@@ -512,18 +511,18 @@ func (h Handlers) PutApplication(c *echo.Context) error {
 
 	restargets := lo.Map(
 		application.Targets,
-		func(target *model.ApplicationTargetDetail, _ int) *TargetOverview {
+		func(target *service.ApplicationTargetDetail, _ int) *TargetOverview {
 			return &TargetOverview{
 				ID:        target.ID,
 				Target:    target.Target,
 				Amount:    target.Amount,
-				PaidAt:    nulltime.FromTime(&target.PaidAt),
+				PaidAt:    target.PaidAt,
 				CreatedAt: target.CreatedAt,
 			}
 		},
 	)
 
-	comments := lo.Map(application.Comments, func(c *model.Comment, _ int) *CommentDetail {
+	comments := lo.Map(application.Comments, func(c *service.Comment, _ int) *CommentDetail {
 		return &CommentDetail{
 			ID:        c.ID,
 			User:      c.User,
@@ -534,7 +533,7 @@ func (h Handlers) PutApplication(c *echo.Context) error {
 	})
 	statuses := lo.Map(
 		application.Statuses,
-		func(status *model.ApplicationStatus, _ int) *StatusResponseOverview {
+		func(status *service.ApplicationStatus, _ int) *StatusResponseOverview {
 			return &StatusResponseOverview{
 				CreatedBy: status.CreatedBy,
 				Status:    status.Status,
@@ -654,7 +653,7 @@ func (h Handlers) PutStatus(c *echo.Context) error {
 				application.Status.String(), req.Status.String())
 			return service.NewBadInputError(message)
 		}
-		if req.Status == model.Submitted && application.Status == model.Accepted {
+		if req.Status == service.Submitted && application.Status == service.Accepted {
 			targets, err := h.Repository.GetApplicationTargets(ctx, applicationID)
 			if err != nil {
 				logger.Error("failed to get application targets from repository", zap.Error(err))
@@ -662,8 +661,8 @@ func (h Handlers) PutStatus(c *echo.Context) error {
 			}
 			paid := lo.Reduce(
 				targets,
-				func(p bool, target *model.ApplicationTargetDetail, _ int) bool {
-					return p || !target.PaidAt.IsZero()
+				func(p bool, target *service.ApplicationTargetDetail, _ int) bool {
+					return p || target.PaidAt.Valid
 				},
 				false,
 			)
@@ -721,29 +720,29 @@ func (h Handlers) PutStatus(c *echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-func IsAbleNoCommentChangeStatus(status, latestStatus model.Status) bool {
+func IsAbleNoCommentChangeStatus(status, latestStatus service.Status) bool {
 	switch latestStatus {
-	case model.Submitted:
-		return status != model.FixRequired && status != model.Rejected
-	case model.Accepted:
-		return status != model.Submitted
-	case model.FixRequired, model.Completed, model.Rejected:
+	case service.Submitted:
+		return status != service.FixRequired && status != service.Rejected
+	case service.Accepted:
+		return status != service.Submitted
+	case service.FixRequired, service.Completed, service.Rejected:
 		return true
 	}
 	// the switch above performs exhaustive check
 	panic("unreachable")
 }
 
-func IsAbleCreatorChangeStatus(status, latestStatus model.Status) bool {
-	return status == model.Submitted && latestStatus == model.FixRequired
+func IsAbleCreatorChangeStatus(status, latestStatus service.Status) bool {
+	return status == service.Submitted && latestStatus == service.FixRequired
 }
 
-func IsAbleAccountManagerChangeState(status, latestStatus model.Status) bool {
-	return status == model.Rejected && latestStatus == model.Submitted ||
-		status == model.Submitted && latestStatus == model.FixRequired ||
-		status == model.Accepted && latestStatus == model.Submitted ||
-		status == model.Submitted && latestStatus == model.Accepted ||
-		status == model.FixRequired && latestStatus == model.Submitted
+func IsAbleAccountManagerChangeState(status, latestStatus service.Status) bool {
+	return status == service.Rejected && latestStatus == service.Submitted ||
+		status == service.Submitted && latestStatus == service.FixRequired ||
+		status == service.Accepted && latestStatus == service.Submitted ||
+		status == service.Submitted && latestStatus == service.Accepted ||
+		status == service.FixRequired && latestStatus == service.Submitted
 }
 
 func (h Handlers) isApplicationCreator(
@@ -757,7 +756,7 @@ func (h Handlers) isApplicationCreator(
 }
 
 func (h Handlers) filterAccountManagerOrApplicationCreator(
-	ctx context.Context, user *User, application *model.ApplicationDetail,
+	ctx context.Context, user *User, application *service.ApplicationDetail,
 ) *service.ForbiddenError {
 	logger := logging.GetLogger(ctx)
 	if user.AccountManager {

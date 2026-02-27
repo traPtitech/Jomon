@@ -8,7 +8,6 @@ import (
 	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/internal/logging"
-	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/nulltime"
 	"github.com/traPtitech/Jomon/internal/service"
 	"go.uber.org/zap"
@@ -34,7 +33,7 @@ func (h Handlers) GetUsers(c *echo.Context) error {
 		return err
 	}
 
-	res := lo.Map(users, func(user *model.User, _ int) User {
+	res := lo.Map(users, func(user *service.User, _ int) User {
 		return User{
 			ID:             user.ID,
 			Name:           user.Name,
@@ -42,7 +41,7 @@ func (h Handlers) GetUsers(c *echo.Context) error {
 			AccountManager: user.AccountManager,
 			CreatedAt:      user.CreatedAt,
 			UpdatedAt:      user.UpdatedAt,
-			DeletedAt:      nulltime.FromTime(&user.DeletedAt),
+			DeletedAt:      user.DeletedAt,
 		}
 	})
 
@@ -87,7 +86,7 @@ func (h Handlers) UpdateUserInfo(c *echo.Context) error {
 	})
 }
 
-func userFromModelUser(u model.User) User {
+func userFromModelUser(u service.User) User {
 	return User{
 		ID:             u.ID,
 		Name:           u.Name,
@@ -95,7 +94,7 @@ func userFromModelUser(u model.User) User {
 		AccountManager: u.AccountManager,
 		CreatedAt:      u.CreatedAt,
 		UpdatedAt:      u.UpdatedAt,
-		DeletedAt:      nulltime.FromTime(&u.DeletedAt),
+		DeletedAt:      u.DeletedAt,
 	}
 }
 

@@ -17,7 +17,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/require"
-	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
@@ -38,7 +37,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		applicationID := uuid.New()
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -155,7 +154,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		applicationID := uuid.New()
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -221,7 +220,7 @@ func TestHandlers_GetFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -263,7 +262,7 @@ func TestHandlers_GetFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -299,7 +298,7 @@ func TestHandlers_GetFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -366,7 +365,7 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -411,7 +410,7 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -476,7 +475,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -522,7 +521,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -567,7 +566,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",

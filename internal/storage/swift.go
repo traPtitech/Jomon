@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/ncw/swift"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
 type Swift struct {
@@ -67,4 +68,4 @@ func (s *Swift) Delete(_ context.Context, filename string) error {
 	return nil
 }
 
-var _ Storage = (*Swift)(nil)
+var _ service.Storage = (*Swift)(nil)

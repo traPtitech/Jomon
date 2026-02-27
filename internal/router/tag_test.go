@@ -14,7 +14,6 @@ import (
 	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
-	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
@@ -30,19 +29,19 @@ func TestHandlers_GetTags(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag1 := &model.Tag{
+		tag1 := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		tag2 := &model.Tag{
+		tag2 := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		tags := []*model.Tag{tag1, tag2}
+		tags := []*service.Tag{tag1, tag2}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/tags", nil)
@@ -62,7 +61,7 @@ func TestHandlers_GetTags(t *testing.T) {
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := lo.Map(tags, func(tag *model.Tag, _ int) *TagResponse {
+		exp := lo.Map(tags, func(tag *service.Tag, _ int) *TagResponse {
 			return &TagResponse{
 				ID:        tag.ID,
 				Name:      tag.Name,
@@ -78,7 +77,7 @@ func TestHandlers_GetTags(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		tags := []*model.Tag{}
+		tags := []*service.Tag{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/tags", nil)
@@ -135,7 +134,7 @@ func TestHandlers_PostTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -183,7 +182,7 @@ func TestHandlers_PostTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      "",
 			CreatedAt: date,
@@ -226,7 +225,7 @@ func TestHandlers_PutTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -237,7 +236,7 @@ func TestHandlers_PutTag(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
-		updateTag := &model.Tag{
+		updateTag := &service.Tag{
 			ID:        tag.ID,
 			Name:      reqTag.Name,
 			CreatedAt: date,
@@ -284,7 +283,7 @@ func TestHandlers_PutTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -328,7 +327,7 @@ func TestHandlers_PutTag(t *testing.T) {
 
 		invalidUUID := "invalid-uuid"
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -365,7 +364,7 @@ func TestHandlers_PutTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.Nil,
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -406,7 +405,7 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -442,7 +441,7 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -506,7 +505,7 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.Nil,
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,

@@ -7,7 +7,6 @@ import (
 	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/internal/logging"
-	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/service"
 	"go.uber.org/zap"
 )
@@ -21,7 +20,7 @@ func (h Handlers) GetAccountManagers(c *echo.Context) error {
 		return err
 	}
 
-	res := lo.Map(accountManagers, func(accountManager *model.AccountManager, _ int) *uuid.UUID {
+	res := lo.Map(accountManagers, func(accountManager *service.AccountManager, _ int) *uuid.UUID {
 		return &accountManager.ID
 	})
 
