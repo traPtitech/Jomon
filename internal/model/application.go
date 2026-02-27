@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -61,6 +62,9 @@ func (repo *EntRepository) GetApplications(
 			}).
 			WithUser().
 			Order(ent.Desc(application.FieldTitle))
+	} else {
+		err := service.NewBadInputError(fmt.Sprintf("invalid sort field: %s", *query.Sort))
+		return nil, err
 	}
 
 	if query.Target != uuid.Nil {

@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -65,6 +66,8 @@ func convertEntApplicationStatusToModelStatus(entStatus *applicationstatus.Statu
 		status = service.Completed
 	case "rejected":
 		status = service.Rejected
+	default:
+		panic(fmt.Sprintf("unknown application status: %s", entStatus.String()))
 	}
 	return status
 }
