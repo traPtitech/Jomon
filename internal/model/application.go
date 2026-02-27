@@ -11,6 +11,7 @@ import (
 	"github.com/traPtitech/Jomon/internal/ent/application"
 	"github.com/traPtitech/Jomon/internal/ent/applicationstatus"
 	"github.com/traPtitech/Jomon/internal/ent/applicationtarget"
+	"github.com/traPtitech/Jomon/internal/ent/comment"
 	"github.com/traPtitech/Jomon/internal/ent/tag"
 	"github.com/traPtitech/Jomon/internal/ent/user"
 	"github.com/traPtitech/Jomon/internal/service"
@@ -231,7 +232,10 @@ func (repo *EntRepository) GetApplication(
 			q.WithUser()
 		}).
 		WithUser().
-		WithComment().
+		WithComment(func(q *ent.CommentQuery) {
+			q.Order(ent.Desc(comment.FieldCreatedAt))
+			q.WithUser()
+		}).
 		WithFile().
 		Only(ctx)
 	if err != nil {
