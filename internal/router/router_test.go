@@ -7,7 +7,6 @@ import (
 
 	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/service/mock_service"
-	"github.com/traPtitech/Jomon/internal/storage/mock_storage"
 
 	"github.com/google/uuid"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
@@ -28,7 +27,7 @@ type MockRepository struct {
 }
 
 type MockStorage struct {
-	*mock_storage.MockStorage
+	*mock_service.MockStorage
 }
 
 func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
@@ -48,7 +47,7 @@ func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 
 func NewMockStorage(ctrl *gomock.Controller) *MockStorage {
 	return &MockStorage{
-		MockStorage: mock_storage.NewMockStorage(ctrl),
+		MockStorage: mock_service.NewMockStorage(ctrl),
 	}
 }
 

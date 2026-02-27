@@ -13,14 +13,13 @@ import (
 
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/service"
-	"github.com/traPtitech/Jomon/internal/storage"
 	"github.com/traPtitech/Jomon/internal/webhook"
 )
 
 type Handlers struct {
 	WebhookService *webhook.Service
 	Repository     service.Repository
-	Storage        storage.Storage
+	Storage        service.Storage
 	SessionName    string
 }
 
