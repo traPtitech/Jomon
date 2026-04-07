@@ -3,10 +3,14 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
+	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/nulltime"
+	"go.uber.org/zap"
 )
 
 type ApplicationRepository interface {
@@ -67,4 +71,226 @@ type ApplicationQuery struct {
 	Offset    int
 	Tag       *string
 	CreatedBy uuid.UUID
+}
+
+func (s *Service) GetApplications(
+	ctx context.Context, query ApplicationQuery,
+) ([]*ApplicationResponse, error) {
+	logger := logging.GetLogger(ctx)
+	applications, err := s.repository.GetApplications(ctx, query)
+	if err != nil {
+		logger.Error("failed to get applications from repository", zap.Error(err))
+		return nil, err
+	}
+	return applications, nil
+}
+
+type CreateApplicationInputs struct {
+	Title   string
+	Content string
+	Tags    []*Tag
+	Targets []*ApplicationTarget
+}
+
+func (s *Service) CreateApplication(
+	ctx context.Context, userID uuid.UUID, inputs CreateApplicationInputs,
+) (*ApplicationDetail, error) {
+	logger := logging.GetLogger(ctx)
+	application, err := s.repository.CreateApplication(
+		ctx, inputs.Title, inputs.Content, inputs.Tags, inputs.Targets, userID,
+	)
+	if err != nil {
+		logger.Error("failed to create application in repository", zap.Error(err))
+		return nil, err
+	}
+	return application, nil
+}
+
+func (s *Service) GetApplication(
+	ctx context.Context, applicationID uuid.UUID,
+) (*ApplicationDetail, error) {
+	logger := logging.GetLogger(ctx)
+	application, err := s.repository.GetApplication(ctx, applicationID)
+	if err != nil {
+		logger.Error("failed to get application from repository", zap.Error(err))
+		return nil, err
+	}
+	comments, err := s.repository.GetComments(ctx, applicationID)
+	if err != nil {
+		logger.Error("failed to get comments from repository", zap.Error(err))
+		return nil, err
+	}
+	application.Comments = comments
+	return application, nil
+}
+
+type UpdateApplicationInputs struct {
+	Title   string
+	Content string
+	TagIDs  []uuid.UUID
+	Targets []*ApplicationTarget
+}
+
+func (s *Service) UpdateApplication(
+	ctx context.Context,
+	applicationID uuid.UUID, userID uuid.UUID, inputs UpdateApplicationInputs,
+) (*ApplicationDetail, error) {
+	logger := logging.GetLogger(ctx).With(
+		zap.String("applicationID", applicationID.String()), zap.String("userID", userID.String()))
+	currentApplication, err := s.repository.GetApplication(ctx, applicationID)
+	if err != nil {
+		logger.Error("failed to get application from repository", zap.Error(err))
+		return nil, err
+	}
+	if !s.isApplicationCreator(currentApplication, userID) {
+		logger.Info("user is not application creator")
+		return nil, NewForbiddenError("user is not application creator")
+	}
+	tags := []*Tag{}
+	for _, tagID := range inputs.TagIDs {
+		// FIXME: N+1
+		tag, err := s.repository.GetTag(ctx, tagID)
+		if err != nil {
+			logger.Error("failed to get tag from repository", zap.Error(err))
+			return nil, err
+		}
+		tags = append(tags, tag)
+	}
+	application, err := s.repository.UpdateApplication(
+		ctx, applicationID, inputs.Title, inputs.Content, tags, inputs.Targets)
+	if err != nil {
+		logger.Error("failed to update application in repository", zap.Error(err))
+		return nil, err
+	}
+	return application, nil
+}
+
+func (s *Service) isApplicationCreator(
+	application *ApplicationDetail, userID uuid.UUID,
+) bool {
+	return application.CreatedBy == userID
+}
+
+func (s *Service) CreateCommentToApplication(
+	ctx context.Context, applicationID uuid.UUID, userID uuid.UUID, content string,
+) (*Comment, error) {
+	logger := logging.GetLogger(ctx).With(
+		zap.String("applicationID", applicationID.String()), zap.String("userID", userID.String()))
+	comment, err := s.repository.CreateComment(ctx, content, applicationID, userID)
+	if err != nil {
+		logger.Error("failed to create comment in repository", zap.Error(err))
+		return nil, err
+	}
+	return comment, nil
+}
+
+type UpdateStatusInputs struct {
+	Status  Status
+	Comment string
+}
+
+func (s *Service) UpdateApplicationStatus(
+	ctx context.Context, applicationID uuid.UUID, userID uuid.UUID, inputs UpdateStatusInputs,
+) (*ApplicationStatus, *Comment, error) {
+	logger := logging.GetLogger(ctx).With(
+		zap.String("applicationID", applicationID.String()), zap.String("userID", userID.String()))
+	user, err := s.repository.GetUserByID(ctx, userID)
+	if err != nil {
+		logger.Error("failed to get user from repository", zap.Error(err))
+		return nil, nil, err
+	}
+	application, err := s.repository.GetApplication(ctx, applicationID)
+	if err != nil {
+		logger.Error("failed to get application from repository", zap.Error(err))
+		return nil, nil, err
+	}
+	if !s.isApplicationCreator(application, userID) && !s.isAccountManager(user) {
+		logger.Info("user is not application creator nor account manager")
+		return nil, nil, NewForbiddenError("user is not application creator nor account manager")
+	}
+	if inputs.Status == application.Status {
+		return nil, nil, NewBadInputError("status is not changed")
+	}
+	if inputs.Comment == "" && !s.isAbleNoCommentUpdateStatus(application.Status, inputs.Status) {
+		message := fmt.Sprintf(
+			"unable to change %v to %v without comment",
+			application.Status.String(), inputs.Status.String())
+		return nil, nil, NewBadInputError(message)
+	}
+	if s.isAccountManager(user) &&
+		!s.isAbleAccountManagerUpdateStatus(application.Status, inputs.Status) {
+		message := fmt.Sprintf(
+			"account manager is unable to change %v to %v",
+			application.Status.String(), inputs.Status.String())
+		return nil, nil, NewBadInputError(message)
+	}
+	if s.isAccountManagerRevertingAcceptedApplication(user, application.Status, inputs.Status) {
+		targets, err := s.repository.GetApplicationTargets(ctx, applicationID)
+		if err != nil {
+			logger.Error("failed to get application targets from repository", zap.Error(err))
+			return nil, nil, err
+		}
+		paid := lo.Reduce(targets, func(p bool, target *ApplicationTargetDetail, _ int) bool {
+			return p || target.PaidAt.Valid
+		}, false)
+		if paid {
+			return nil, nil, NewBadInputError("someone already paid")
+		}
+	}
+	if s.isApplicationCreator(application, userID) &&
+		!s.isAbleCreatorChangeStatus(application.Status, inputs.Status) {
+		message := fmt.Sprintf(
+			"application creator is unable to change %v to %v",
+			application.Status.String(), inputs.Status.String())
+		return nil, nil, NewBadInputError(message)
+	}
+	newStatus, err := s.repository.CreateStatus(ctx, applicationID, userID, inputs.Status)
+	if err != nil {
+		logger.Error("failed to create status in repository", zap.Error(err))
+		return nil, nil, err
+	}
+	var comment *Comment
+	if inputs.Comment != "" {
+		comment, err = s.repository.CreateComment(ctx, inputs.Comment, applicationID, userID)
+		if err != nil {
+			logger.Error("failed to create comment in repository", zap.Error(err))
+			return nil, nil, err
+		}
+	}
+	return newStatus, comment, nil
+}
+
+func (s *Service) isAccountManager(user *User) bool {
+	return user.AccountManager
+}
+
+func (s *Service) isAbleNoCommentUpdateStatus(currentStatus, newStatus Status) bool {
+	switch currentStatus {
+	case Submitted:
+		return newStatus != FixRequired && newStatus != Rejected
+	case Accepted:
+		return newStatus != Submitted
+	case FixRequired, Completed, Rejected:
+		return true
+	}
+	// the switch above performs exhaustive check
+	panic("unreachable")
+}
+
+func (s *Service) isAbleAccountManagerUpdateStatus(currentStatus, newStatus Status) bool {
+	return newStatus == Rejected && currentStatus == Submitted ||
+		newStatus == Submitted && currentStatus == FixRequired ||
+		newStatus == Accepted && currentStatus == Submitted ||
+		newStatus == Submitted && currentStatus == Accepted ||
+		newStatus == FixRequired && currentStatus == Submitted
+}
+
+func (s *Service) isAbleCreatorChangeStatus(currentStatus, newStatus Status) bool {
+	return currentStatus == FixRequired && newStatus == Submitted
+}
+
+func (s *Service) isAccountManagerRevertingAcceptedApplication(
+	user *User, currentStatus, newStatus Status,
+) bool {
+	return user.AccountManager && currentStatus == Accepted && newStatus == Submitted
 }
