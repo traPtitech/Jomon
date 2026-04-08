@@ -61,12 +61,14 @@ func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, erro
 	gob.Register(User{})
 	repository := NewMockRepository(ctrl)
 	storage := NewMockStorage(ctrl)
+	service := service.New(repository, storage)
 	sessionName := "session"
 
 	return &TestHandlers{
 		Handlers{
 			Repository:  repository,
 			Storage:     storage,
+			Service:     service,
 			SessionName: sessionName,
 		},
 		repository,
