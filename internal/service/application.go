@@ -93,11 +93,11 @@ type CreateApplicationInputs struct {
 }
 
 func (s *Service) CreateApplication(
-	ctx context.Context, userID uuid.UUID, inputs CreateApplicationInputs,
+	ctx context.Context, user *User, inputs CreateApplicationInputs,
 ) (*ApplicationDetail, error) {
 	logger := logging.GetLogger(ctx)
 	application, err := s.repository.CreateApplication(
-		ctx, inputs.Title, inputs.Content, inputs.Tags, inputs.Targets, userID,
+		ctx, inputs.Title, inputs.Content, inputs.Tags, inputs.Targets, user.ID,
 	)
 	if err != nil {
 		logger.Error("failed to create application in repository", zap.Error(err))
@@ -133,16 +133,16 @@ type UpdateApplicationInputs struct {
 
 func (s *Service) UpdateApplication(
 	ctx context.Context,
-	applicationID uuid.UUID, userID uuid.UUID, inputs UpdateApplicationInputs,
+	applicationID uuid.UUID, user *User, inputs UpdateApplicationInputs,
 ) (*ApplicationDetail, error) {
 	logger := logging.GetLogger(ctx).With(
-		zap.String("applicationID", applicationID.String()), zap.String("userID", userID.String()))
+		zap.String("applicationID", applicationID.String()), zap.String("userID", user.ID.String()))
 	currentApplication, err := s.repository.GetApplication(ctx, applicationID)
 	if err != nil {
 		logger.Error("failed to get application from repository", zap.Error(err))
 		return nil, err
 	}
-	if !s.isApplicationCreator(currentApplication, userID) {
+	if !s.isApplicationCreator(currentApplication, user.ID) {
 		logger.Info("user is not application creator")
 		return nil, NewForbiddenError("user is not application creator")
 	}
@@ -172,11 +172,11 @@ func (s *Service) isApplicationCreator(
 }
 
 func (s *Service) CreateCommentToApplication(
-	ctx context.Context, applicationID uuid.UUID, userID uuid.UUID, content string,
+	ctx context.Context, applicationID uuid.UUID, user *User, content string,
 ) (*Comment, error) {
 	logger := logging.GetLogger(ctx).With(
-		zap.String("applicationID", applicationID.String()), zap.String("userID", userID.String()))
-	comment, err := s.repository.CreateComment(ctx, content, applicationID, userID)
+		zap.String("applicationID", applicationID.String()), zap.String("userID", user.ID.String()))
+	comment, err := s.repository.CreateComment(ctx, content, applicationID, user.ID)
 	if err != nil {
 		logger.Error("failed to create comment in repository", zap.Error(err))
 		return nil, err
@@ -190,21 +190,16 @@ type UpdateStatusInputs struct {
 }
 
 func (s *Service) UpdateApplicationStatus(
-	ctx context.Context, applicationID uuid.UUID, userID uuid.UUID, inputs UpdateStatusInputs,
+	ctx context.Context, applicationID uuid.UUID, user *User, inputs UpdateStatusInputs,
 ) (*ApplicationStatus, *Comment, error) {
 	logger := logging.GetLogger(ctx).With(
-		zap.String("applicationID", applicationID.String()), zap.String("userID", userID.String()))
-	user, err := s.repository.GetUserByID(ctx, userID)
-	if err != nil {
-		logger.Error("failed to get user from repository", zap.Error(err))
-		return nil, nil, err
-	}
+		zap.String("applicationID", applicationID.String()), zap.String("userID", user.ID.String()))
 	application, err := s.repository.GetApplication(ctx, applicationID)
 	if err != nil {
 		logger.Error("failed to get application from repository", zap.Error(err))
 		return nil, nil, err
 	}
-	if !s.isApplicationCreator(application, userID) && !s.isAccountManager(user) {
+	if !s.isApplicationCreator(application, user.ID) && !s.isAccountManager(user) {
 		logger.Info("user is not application creator nor account manager")
 		return nil, nil, NewForbiddenError("user is not application creator nor account manager")
 	}
@@ -237,21 +232,21 @@ func (s *Service) UpdateApplicationStatus(
 			return nil, nil, NewBadInputError("someone already paid")
 		}
 	}
-	if s.isApplicationCreator(application, userID) &&
+	if s.isApplicationCreator(application, user.ID) &&
 		!s.isAbleCreatorChangeStatus(application.Status, inputs.Status) {
 		message := fmt.Sprintf(
 			"application creator is unable to change %v to %v",
 			application.Status.String(), inputs.Status.String())
 		return nil, nil, NewBadInputError(message)
 	}
-	newStatus, err := s.repository.CreateStatus(ctx, applicationID, userID, inputs.Status)
+	newStatus, err := s.repository.CreateStatus(ctx, applicationID, user.ID, inputs.Status)
 	if err != nil {
 		logger.Error("failed to create status in repository", zap.Error(err))
 		return nil, nil, err
 	}
 	var comment *Comment
 	if inputs.Comment != "" {
-		comment, err = s.repository.CreateComment(ctx, inputs.Comment, applicationID, userID)
+		comment, err = s.repository.CreateComment(ctx, inputs.Comment, applicationID, user.ID)
 		if err != nil {
 			logger.Error("failed to create comment in repository", zap.Error(err))
 			return nil, nil, err

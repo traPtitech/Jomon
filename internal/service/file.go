@@ -43,14 +43,14 @@ var acceptedMimeTypes = map[string]bool{
 
 func (s *Service) WriteFile(
 	ctx context.Context,
-	userID, applicationID uuid.UUID,
+	user *User, applicationID uuid.UUID,
 	name string, mimetype string, content io.Reader,
 ) (*File, error) {
 	if !acceptedMimeTypes[mimetype] {
 		return nil, NewBadInputError("unsupported mime type")
 	}
 	logger := logging.GetLogger(ctx)
-	file, err := s.repository.CreateFile(ctx, name, mimetype, applicationID, userID)
+	file, err := s.repository.CreateFile(ctx, name, mimetype, applicationID, user.ID)
 	if err != nil {
 		logger.Error("failed to create file in repository", zap.Error(err))
 		return nil, NewUnexpectedError(err)
