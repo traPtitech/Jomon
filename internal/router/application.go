@@ -290,12 +290,13 @@ func (h Handlers) PostApplication(c *echo.Context) error {
 		}
 		tags = append(tags, tag)
 	}
-	application, err := h.Service.CreateApplication(ctx, req.CreatedBy, service.CreateApplicationInputs{
+	inputs := service.CreateApplicationInputs{
 		Title:   req.Title,
 		Content: req.Content,
 		Tags:    tags,
 		Targets: targets,
-	})
+	}
+	application, err := h.Service.CreateApplication(ctx, req.CreatedBy, inputs)
 	if err != nil {
 		logger.Error("failed to create application in service", zap.Error(err))
 		return err
@@ -471,12 +472,13 @@ func (h Handlers) PutApplication(c *echo.Context) error {
 			Amount: target.Amount,
 		}
 	})
-	application, err := h.Service.UpdateApplication(ctx, applicationID, loginUser.ID, service.UpdateApplicationInputs{
+	inputs := service.UpdateApplicationInputs{
 		Title:   req.Title,
 		Content: req.Content,
 		TagIDs:  req.Tags,
 		Targets: targets,
-	})
+	}
+	application, err := h.Service.UpdateApplication(ctx, applicationID, loginUser.ID, inputs)
 	if err != nil {
 		logger.Error("failed to update application in service", zap.Error(err))
 		return err
@@ -566,7 +568,8 @@ func (h Handlers) PostComment(c *echo.Context) error {
 			WithInternal(err)
 	}
 
-	comment, err := h.Service.CreateCommentToApplication(ctx, applicationID, loginUser.ID, req.Comment)
+	comment, err := h.Service.CreateCommentToApplication(
+		ctx, applicationID, loginUser.ID, req.Comment)
 	if err != nil {
 		logger.Error("failed to create comment in service", zap.Error(err))
 		return err
@@ -604,10 +607,12 @@ func (h Handlers) PutStatus(c *echo.Context) error {
 			WithInternal(err)
 	}
 
-	created, comment, err := h.Service.UpdateApplicationStatus(ctx, applicationID, loginUser.ID, service.UpdateStatusInputs{
+	inputs := service.UpdateStatusInputs{
 		Status:  req.Status,
 		Comment: req.Comment,
-	})
+	}
+	created, comment, err := h.Service.UpdateApplicationStatus(
+		ctx, applicationID, loginUser.ID, inputs)
 	if err != nil {
 		logger.Error("failed to update application status in service", zap.Error(err))
 		return err
