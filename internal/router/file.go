@@ -26,15 +26,6 @@ type FileMetaResponse struct {
 }
 
 var (
-	acceptedMimeTypes = map[string]bool{
-		"image/jpeg":         true,
-		"image/png":          true,
-		"image/gif":          true,
-		"image/bmp":          true,
-		"application/pdf":    true,
-		"application/msword": true,
-		"application/zip":    true,
-	}
 	errUserIsNotAccountManagerOrFileCreator = errors.New(
 		"user is not accountManager or file creator")
 )
@@ -74,12 +65,6 @@ func (h Handlers) PostFile(c *echo.Context) error {
 	}
 
 	mimetype := reqfile.Header.Get(echo.HeaderContentType)
-	if !acceptedMimeTypes[mimetype] {
-		logger.Info("requested unsupported mime type", zap.String("mime-type", mimetype))
-		return echo.NewHTTPError(
-			http.StatusUnsupportedMediaType,
-			"unsupported media type")
-	}
 
 	src, err := reqfile.Open()
 	if err != nil {
@@ -88,17 +73,10 @@ func (h Handlers) PostFile(c *echo.Context) error {
 	}
 	defer src.Close()
 
-	file, err := h.Repository.CreateFile(ctx, name, mimetype, applicationID, loginUser.ID)
+	file, err := h.Service.WriteFile(ctx, loginUser.ID, applicationID, name, mimetype, src)
 	if err != nil {
-		logger.Error("failed to create file in repository", zap.Error(err))
-		return service.NewUnexpectedError(err)
-	}
-
-	err = h.Storage.Save(ctx, file.ID.String(), src)
-	if err != nil {
-		logger.Error("failed to save file id in storage", zap.Error(err))
-		// TODO: storageが返すエラーはそのまま返したい
-		return service.NewUnexpectedError(err)
+		logger.Error("failed to write file in service", zap.Error(err))
+		return err
 	}
 
 	return c.JSON(http.StatusOK, &FileResponse{file.ID})

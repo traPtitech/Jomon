@@ -59,7 +59,7 @@ func (h Handlers) AuthCallback(c *echo.Context) error {
 	}
 
 	var modelUser *service.User
-	modelUser, err = h.Repository.GetUserByName(ctx, u.Name)
+	modelUser, err = h.Service.GetUserByName(ctx, u.Name)
 	if err == nil {
 		// User found, do nothing
 	} else if nfErr := new(service.NotFoundError); errors.As(err, &nfErr) {
@@ -71,7 +71,7 @@ func (h Handlers) AuthCallback(c *echo.Context) error {
 		}
 	} else {
 		// Some other error occurred
-		logger.Error("failed to get user by name", zap.Error(err))
+		logger.Error("failed to get user by name from service", zap.Error(err))
 		return err
 	}
 

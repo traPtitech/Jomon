@@ -29,9 +29,9 @@ func (h Handlers) GetTags(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	tags, err := h.Repository.GetTags(ctx)
+	tags, err := h.Service.GetTags(ctx)
 	if err != nil {
-		logger.Error("failed to get tags from repository", zap.Error(err))
+		logger.Error("failed to get tags from service", zap.Error(err))
 		return err
 	}
 
@@ -58,9 +58,9 @@ func (h Handlers) PostTag(c *echo.Context) error {
 			WithInternal(err)
 	}
 
-	created, err := h.Repository.CreateTag(ctx, tag.Name)
+	created, err := h.Service.CreateTag(ctx, tag.Name)
 	if err != nil {
-		logger.Error("failed to create tag in repository", zap.Error(err))
+		logger.Error("failed to create tag in service", zap.Error(err))
 		return err
 	}
 
@@ -95,9 +95,9 @@ func (h Handlers) PutTag(c *echo.Context) error {
 			WithInternal(err)
 	}
 
-	tag, err := h.Repository.UpdateTag(ctx, tagID, req.Name)
+	tag, err := h.Service.UpdateTag(ctx, tagID, req.Name)
 	if err != nil {
-		logger.Error("failed to update tag in repository", zap.Error(err))
+		logger.Error("failed to update tag in service", zap.Error(err))
 		return err
 	}
 
@@ -126,9 +126,9 @@ func (h Handlers) DeleteTag(c *echo.Context) error {
 		return service.NewBadInputError("invalid tag ID")
 	}
 
-	err = h.Repository.DeleteTag(ctx, tagID)
+	err = h.Service.DeleteTag(ctx, tagID)
 	if err != nil {
-		logger.Error("failed to delete tag in repository", zap.Error(err))
+		logger.Error("failed to delete tag in service", zap.Error(err))
 		return err
 	}
 
