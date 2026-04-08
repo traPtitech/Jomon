@@ -5,50 +5,49 @@ import (
 	"testing"
 	"time"
 
-	"github.com/traPtitech/Jomon/internal/storage/mock_storage"
+	"github.com/traPtitech/Jomon/internal/service"
+	"github.com/traPtitech/Jomon/internal/service/mock_service"
 
 	"github.com/google/uuid"
-	"github.com/traPtitech/Jomon/internal/model"
-	"github.com/traPtitech/Jomon/internal/model/mock_model"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 	"go.uber.org/mock/gomock"
 )
 
 type MockRepository struct {
-	*mock_model.MockAccountManagerRepository
-	*mock_model.MockCommentRepository
-	*mock_model.MockFileRepository
-	*mock_model.MockApplicationRepository
-	*mock_model.MockApplicationStatusRepository
-	*mock_model.MockApplicationFileRepository
-	*mock_model.MockApplicationTagRepository
-	*mock_model.MockApplicationTargetRepository
-	*mock_model.MockTagRepository
-	*mock_model.MockUserRepository
+	*mock_service.MockAccountManagerRepository
+	*mock_service.MockCommentRepository
+	*mock_service.MockFileRepository
+	*mock_service.MockApplicationRepository
+	*mock_service.MockApplicationStatusRepository
+	*mock_service.MockApplicationFileRepository
+	*mock_service.MockApplicationTagRepository
+	*mock_service.MockApplicationTargetRepository
+	*mock_service.MockTagRepository
+	*mock_service.MockUserRepository
 }
 
 type MockStorage struct {
-	*mock_storage.MockStorage
+	*mock_service.MockStorage
 }
 
 func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 	return &MockRepository{
-		MockAccountManagerRepository:    mock_model.NewMockAccountManagerRepository(ctrl),
-		MockCommentRepository:           mock_model.NewMockCommentRepository(ctrl),
-		MockFileRepository:              mock_model.NewMockFileRepository(ctrl),
-		MockApplicationRepository:       mock_model.NewMockApplicationRepository(ctrl),
-		MockApplicationStatusRepository: mock_model.NewMockApplicationStatusRepository(ctrl),
-		MockApplicationFileRepository:   mock_model.NewMockApplicationFileRepository(ctrl),
-		MockApplicationTagRepository:    mock_model.NewMockApplicationTagRepository(ctrl),
-		MockApplicationTargetRepository: mock_model.NewMockApplicationTargetRepository(ctrl),
-		MockTagRepository:               mock_model.NewMockTagRepository(ctrl),
-		MockUserRepository:              mock_model.NewMockUserRepository(ctrl),
+		MockAccountManagerRepository:    mock_service.NewMockAccountManagerRepository(ctrl),
+		MockCommentRepository:           mock_service.NewMockCommentRepository(ctrl),
+		MockFileRepository:              mock_service.NewMockFileRepository(ctrl),
+		MockApplicationRepository:       mock_service.NewMockApplicationRepository(ctrl),
+		MockApplicationStatusRepository: mock_service.NewMockApplicationStatusRepository(ctrl),
+		MockApplicationFileRepository:   mock_service.NewMockApplicationFileRepository(ctrl),
+		MockApplicationTagRepository:    mock_service.NewMockApplicationTagRepository(ctrl),
+		MockApplicationTargetRepository: mock_service.NewMockApplicationTargetRepository(ctrl),
+		MockTagRepository:               mock_service.NewMockTagRepository(ctrl),
+		MockUserRepository:              mock_service.NewMockUserRepository(ctrl),
 	}
 }
 
 func NewMockStorage(ctrl *gomock.Controller) *MockStorage {
 	return &MockStorage{
-		MockStorage: mock_storage.NewMockStorage(ctrl),
+		MockStorage: mock_service.NewMockStorage(ctrl),
 	}
 }
 
@@ -75,11 +74,11 @@ func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, erro
 	}, nil
 }
 
-func makeUser(t *testing.T, accountManager bool) *model.User {
+func makeUser(t *testing.T, accountManager bool) *service.User {
 	t.Helper()
 	date := time.Now()
 
-	return &model.User{
+	return &service.User{
 		ID:             uuid.New(),
 		Name:           random.AlphaNumeric(t, 20),
 		DisplayName:    random.AlphaNumeric(t, 20),

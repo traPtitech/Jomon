@@ -3,14 +3,13 @@ package router
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/traPtitech/Jomon/internal/ent"
+	"github.com/labstack/echo/v5"
 	"github.com/traPtitech/Jomon/internal/logging"
+	"github.com/traPtitech/Jomon/internal/service"
 	"go.uber.org/zap"
 )
 
@@ -40,7 +39,7 @@ var (
 		"user is not accountManager or file creator")
 )
 
-func (h Handlers) PostFile(c echo.Context) error {
+func (h Handlers) PostFile(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -48,29 +47,30 @@ func (h Handlers) PostFile(c echo.Context) error {
 	form, err := c.MultipartForm()
 	if err != nil {
 		logger.Error("failed to parse request as multipart/form-data", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return service.NewUnexpectedError(err)
 	}
 	files, ok := form.File["file"]
 	if !ok || len(files) != 1 {
 		logger.Info("could not find field `file` in request, or its length is not 1")
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid file"))
+		return service.NewBadInputError("invalid file")
 	}
 	reqfile := files[0]
 	names, ok := form.Value["name"]
 	if !ok || len(names) != 1 {
 		logger.Info("could not find field `name` in request, or its length is not 1")
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid file name"))
+		return service.NewBadInputError("invalid file name")
 	}
 	name := names[0]
 	applicationIDs, ok := form.Value["application_id"]
 	if !ok || len(applicationIDs) != 1 {
 		logger.Info("could not find field `application_id` in request, or its length is not 1")
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid file application id"))
+		return service.NewBadInputError("invalid file application id")
 	}
 	applicationID, err := uuid.Parse(applicationIDs[0])
 	if err != nil {
 		logger.Info("could not parse application_id as UUID", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("invalid file application id").
+			WithInternal(err)
 	}
 
 	mimetype := reqfile.Header.Get(echo.HeaderContentType)
@@ -78,49 +78,49 @@ func (h Handlers) PostFile(c echo.Context) error {
 		logger.Info("requested unsupported mime type", zap.String("mime-type", mimetype))
 		return echo.NewHTTPError(
 			http.StatusUnsupportedMediaType,
-			fmt.Errorf("unsupported media type"))
+			"unsupported media type")
 	}
 
 	src, err := reqfile.Open()
 	if err != nil {
 		logger.Error("failed to open requested file", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return service.NewUnexpectedError(err)
 	}
 	defer src.Close()
 
 	file, err := h.Repository.CreateFile(ctx, name, mimetype, applicationID, loginUser.ID)
 	if err != nil {
 		logger.Error("failed to create file in repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return service.NewUnexpectedError(err)
 	}
 
 	err = h.Storage.Save(ctx, file.ID.String(), src)
 	if err != nil {
 		logger.Error("failed to save file id in storage", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		// TODO: storageが返すエラーはそのまま返したい
+		return service.NewUnexpectedError(err)
 	}
 
 	return c.JSON(http.StatusOK, &FileResponse{file.ID})
 }
 
-func (h Handlers) GetFile(c echo.Context) error {
+func (h Handlers) GetFile(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
 	fileID, err := uuid.Parse(c.Param("fileID"))
 	if err != nil {
 		logger.Error("could not parse query parameter `fileID` as UUID", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("invalid file ID").
+			WithInternal(err)
 	}
 
 	file, err := h.Repository.GetFile(ctx, fileID)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			logger.Info("could not find file in repository", zap.String("ID", fileID.String()))
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
-		logger.Error("failed to get file from repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		logger.Info(
+			"file not found in repository",
+			zap.String("ID", fileID.String()), zap.Error(err))
+		return err
 	}
 
 	modifiedAt := file.CreatedAt.Truncate(time.Second)
@@ -130,7 +130,8 @@ func (h Handlers) GetFile(c echo.Context) error {
 		imt, err := http.ParseTime(im)
 		if err != nil {
 			logger.Info("could not parse time in request header", zap.Error(err))
-			return echo.NewHTTPError(http.StatusBadRequest, err)
+			return service.NewBadInputError("invalid If-Modified-Since header").
+				WithInternal(err)
 		}
 		if modifiedAt.Before(imt) || modifiedAt.Equal(imt) {
 			logger.Info(
@@ -147,7 +148,7 @@ func (h Handlers) GetFile(c echo.Context) error {
 			"failed to open file in storage",
 			zap.String("ID", fileID.String()),
 			zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return service.NewUnexpectedError(err)
 	}
 	defer f.Close()
 
@@ -157,24 +158,23 @@ func (h Handlers) GetFile(c echo.Context) error {
 	return c.Stream(http.StatusOK, file.MimeType, f)
 }
 
-func (h Handlers) GetFileMeta(c echo.Context) error {
+func (h Handlers) GetFileMeta(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
 	fileID, err := uuid.Parse(c.Param("fileID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `fileID` as UUID", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("invalid file ID").
+			WithInternal(err)
 	}
 
 	file, err := h.Repository.GetFile(ctx, fileID)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			logger.Info("could not find file in repository", zap.String("ID", fileID.String()))
-			return echo.NewHTTPError(http.StatusNotFound, err)
-		}
-		logger.Error("failed to get file from repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		logger.Info(
+			"file not found in repository",
+			zap.String("ID", fileID.String()), zap.Error(err))
+		return err
 	}
 
 	return c.JSON(http.StatusOK, &FileMetaResponse{
@@ -186,7 +186,7 @@ func (h Handlers) GetFileMeta(c echo.Context) error {
 	})
 }
 
-func (h Handlers) DeleteFile(c echo.Context) error {
+func (h Handlers) DeleteFile(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
@@ -194,7 +194,8 @@ func (h Handlers) DeleteFile(c echo.Context) error {
 	fileID, err := uuid.Parse(c.Param("fileID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `fileID` as UUID", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return service.NewBadInputError("invalid file ID").
+			WithInternal(err)
 	}
 	if err := h.filterAccountManagerOrFileCreator(ctx, &loginUser, fileID); err != nil {
 		return err
@@ -202,18 +203,17 @@ func (h Handlers) DeleteFile(c echo.Context) error {
 
 	err = h.Repository.DeleteFile(ctx, fileID)
 	if err != nil {
-		if ent.IsConstraintError(err) {
-			logger.Info("constraint error while deleting file", zap.Error(err))
-			return echo.NewHTTPError(http.StatusBadRequest, err)
-		}
-		logger.Error("failed to delete file in repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		logger.Error("failed to delete file in repository",
+			zap.String("ID", fileID.String()), zap.Error(err))
+		return service.NewUnexpectedError(err)
 	}
 
 	err = h.Storage.Delete(ctx, fileID.String())
 	if err != nil {
-		logger.Error("failed to delete file in storage", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		logger.Error(
+			"failed to delete file in storage",
+			zap.String("ID", fileID.String()), zap.Error(err))
+		return service.NewUnexpectedError(err)
 	}
 
 	return c.NoContent(http.StatusOK)
@@ -230,7 +230,7 @@ func (h Handlers) isFileCreator(ctx context.Context, userID, fileID uuid.UUID) (
 
 func (h Handlers) filterAccountManagerOrFileCreator(
 	ctx context.Context, user *User, fileID uuid.UUID,
-) *echo.HTTPError {
+) error {
 	logger := logging.GetLogger(ctx)
 	if user.AccountManager {
 		return nil
@@ -238,10 +238,10 @@ func (h Handlers) filterAccountManagerOrFileCreator(
 	isCreator, err := h.isFileCreator(ctx, user.ID, fileID)
 	if err != nil {
 		logger.Error("failed to check if user is file creator", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return echo.ErrInternalServerError.Wrap(err)
 	}
 	if isCreator {
 		return nil
 	}
-	return echo.NewHTTPError(http.StatusForbidden, errUserIsNotAccountManagerOrFileCreator)
+	return echo.ErrForbidden.Wrap(errUserIsNotAccountManagerOrFileCreator)
 }

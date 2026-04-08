@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
 type S3Storage struct {
@@ -28,7 +29,7 @@ func NewS3Storage(cfg aws.Config, bucket string) *S3Storage {
 	return s
 }
 
-// FIXME : 引数に`key string`を受け取り、`Key`フィールドに渡したいがinterfaceの定義上一時的に`filename`で代用してる　あとで分ける
+// FIXME: 引数に`key string`を受け取り、`Key`フィールドに渡したいがinterfaceの定義上一時的に`filename`で代用してる　あとで分ける
 func (fs *S3Storage) Save(ctx context.Context, filename string, src io.Reader) error {
 	input := &s3.PutObjectInput{
 		Bucket: aws.String(fs.bucket),
@@ -77,4 +78,4 @@ func (fs *S3Storage) Delete(ctx context.Context, key string) error {
 	return nil
 }
 
-var _ Storage = (*S3Storage)(nil)
+var _ service.Storage = (*S3Storage)(nil)

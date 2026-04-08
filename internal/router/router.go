@@ -2,53 +2,37 @@ package router
 
 import (
 	"encoding/gob"
-	"errors"
 	"os"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo-contrib/v5/session"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"go.uber.org/zap"
 
 	"github.com/traPtitech/Jomon/internal/logging"
-	"github.com/traPtitech/Jomon/internal/model"
-	"github.com/traPtitech/Jomon/internal/router/wrapsession"
-	"github.com/traPtitech/Jomon/internal/storage"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/webhook"
 )
 
 type Handlers struct {
 	WebhookService *webhook.Service
-	Repository     model.Repository
-	Storage        storage.Storage
+	Repository     service.Repository
+	Storage        service.Storage
 	SessionName    string
 }
 
+var defaultHTTPErrorHandler = echo.DefaultHTTPErrorHandler(false)
+
 func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 	e := echo.New()
-	e.Debug = os.Getenv("IS_DEBUG_MODE") != ""
-	e.HTTPErrorHandler = func(err error, c echo.Context) {
+	// TODO(logging): e.Loggerに与えられたloggerを適用する
+	e.HTTPErrorHandler = func(c *echo.Context, err error) {
 		logger := logging.GetLogger(c.Request().Context())
-		var httpErr *echo.HTTPError
-		var getSessionErr *wrapsession.GetSessionError
-		var saveSessionErr *wrapsession.SaveSessionError
-		var retErr error
-		if errors.As(err, &httpErr) {
-			retErr = httpErr
-		} else if errors.As(err, &getSessionErr) {
-			inner := getSessionErr.Unwrap()
-			logger.Error("failed to get session", zap.Error(inner))
-			retErr = echo.ErrInternalServerError.WithInternal(inner)
-		} else if errors.As(err, &saveSessionErr) {
-			inner := saveSessionErr.Unwrap()
-			logger.Error("failed to save session", zap.Error(inner))
-			retErr = echo.ErrInternalServerError.WithInternal(inner)
-		} else {
-			retErr = err
-		}
-		c.Echo().DefaultHTTPErrorHandler(retErr, c)
+		logger.Debug("handling error", zap.Error(err))
+		he := HTTPErrorHandlerInner(err)
+		defaultHTTPErrorHandler(c, he)
 	}
 	e.Use(middleware.RequestID())
 	e.Use(h.setLoggerMiddleware(logger))

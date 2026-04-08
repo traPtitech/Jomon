@@ -7,6 +7,7 @@ import (
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/router"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/storage"
 	"github.com/traPtitech/Jomon/internal/webhook"
 	"go.uber.org/zap"
@@ -21,7 +22,7 @@ func main() {
 	defer client.Close()
 
 	// Setup storage
-	var strg storage.Storage
+	var strg service.Storage
 	if os.Getenv("IS_DEBUG_MODE") != "" {
 		strg, err = storage.NewLocalStorage(os.Getenv("UPLOAD_DIR"))
 		if err != nil {

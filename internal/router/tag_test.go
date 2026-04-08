@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
-	"github.com/traPtitech/Jomon/internal/model"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 	"go.uber.org/mock/gomock"
@@ -29,19 +29,19 @@ func TestHandlers_GetTags(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag1 := &model.Tag{
+		tag1 := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		tag2 := &model.Tag{
+		tag2 := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		tags := []*model.Tag{tag1, tag2}
+		tags := []*service.Tag{tag1, tag2}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/tags", nil)
@@ -61,7 +61,7 @@ func TestHandlers_GetTags(t *testing.T) {
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
-		exp := lo.Map(tags, func(tag *model.Tag, _ int) *TagResponse {
+		exp := lo.Map(tags, func(tag *service.Tag, _ int) *TagResponse {
 			return &TagResponse{
 				ID:        tag.ID,
 				Name:      tag.Name,
@@ -77,7 +77,7 @@ func TestHandlers_GetTags(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		tags := []*model.Tag{}
+		tags := []*service.Tag{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/tags", nil)
@@ -113,16 +113,15 @@ func TestHandlers_GetTags(t *testing.T) {
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		mocErr := errors.New("failed to get tags")
+		resErr := service.NewUnexpectedError(errors.New("failed to get tags"))
 		h.Repository.MockTagRepository.
 			EXPECT().
 			GetTags(c.Request().Context()).
-			Return(nil, mocErr)
+			Return(nil, resErr)
 
 		err = h.Handlers.GetTags(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -135,7 +134,7 @@ func TestHandlers_PostTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -183,7 +182,7 @@ func TestHandlers_PostTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      "",
 			CreatedAt: date,
@@ -205,16 +204,15 @@ func TestHandlers_PostTag(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		mocErr := errors.New("Tag name can't be empty.")
+		resErr := service.NewBadInputError("Tag name can't be empty.")
 		h.Repository.MockTagRepository.
 			EXPECT().
 			CreateTag(c.Request().Context(), tag.Name).
-			Return(nil, mocErr)
+			Return(nil, resErr)
 
 		err = h.Handlers.PostTag(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -227,7 +225,7 @@ func TestHandlers_PutTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -238,7 +236,7 @@ func TestHandlers_PutTag(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqTag)
 		require.NoError(t, err)
-		updateTag := &model.Tag{
+		updateTag := &service.Tag{
 			ID:        tag.ID,
 			Name:      reqTag.Name,
 			CreatedAt: date,
@@ -252,8 +250,9 @@ func TestHandlers_PutTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(tag.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: tag.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -284,7 +283,7 @@ func TestHandlers_PutTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -303,22 +302,22 @@ func TestHandlers_PutTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(tag.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: tag.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		mocErr := errors.New("Tag name can't be empty.")
+		resErr := service.NewBadInputError("Tag name can't be empty.")
 		h.Repository.MockTagRepository.
 			EXPECT().
 			UpdateTag(c.Request().Context(), tag.ID, reqTag.Name).
-			Return(nil, mocErr)
+			Return(nil, resErr)
 
 		err = h.Handlers.PutTag(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
@@ -327,10 +326,8 @@ func TestHandlers_PutTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		invalidUUID := "invalid-uuid"
-		_, resErr := uuid.Parse(invalidUUID)
-
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -349,16 +346,16 @@ func TestHandlers_PutTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(invalidUUID)
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: invalidUUID},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
 		err = h.Handlers.PutTag(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -367,7 +364,7 @@ func TestHandlers_PutTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.Nil,
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -386,17 +383,16 @@ func TestHandlers_PutTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(tag.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: tag.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		resErr := errors.New("invalid tag ID")
 		err = h.Handlers.PutTag(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -409,7 +405,7 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -423,8 +419,9 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(tag.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: tag.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -444,7 +441,7 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -458,22 +455,22 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(tag.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: tag.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		mocErr := errors.New("Unknown Tag ID")
+		resErr := service.NewUnexpectedError(errors.New("Unknown Tag ID"))
 		h.Repository.MockTagRepository.
 			EXPECT().
 			DeleteTag(c.Request().Context(), tag.ID).
-			Return(mocErr)
+			Return(resErr)
 
 		err = h.Handlers.DeleteTag(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
@@ -482,8 +479,6 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		invalidUUID := "invalid-uuid"
-		_, resErr := uuid.Parse(invalidUUID)
-
 		e := echo.New()
 		path := fmt.Sprintf("/api/tags/%s", invalidUUID)
 		req := httptest.NewRequestWithContext(
@@ -492,16 +487,16 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(invalidUUID)
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: invalidUUID},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
 		err = h.Handlers.DeleteTag(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -510,7 +505,7 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.Nil,
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -524,16 +519,15 @@ func TestHandlers_DeleteTag(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/tags/:tagID")
-		c.SetParamNames("tagID")
-		c.SetParamValues(tag.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "tagID", Value: tag.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		resErr := errors.New("invalid tag ID")
 		err = h.Handlers.DeleteTag(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 }

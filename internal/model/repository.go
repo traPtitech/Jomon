@@ -4,19 +4,6 @@ import (
 	"github.com/traPtitech/Jomon/internal/ent"
 )
 
-type Repository interface {
-	AccountManagerRepository
-	CommentRepository
-	FileRepository
-	ApplicationFileRepository
-	ApplicationStatusRepository
-	ApplicationTagRepository
-	ApplicationTargetRepository
-	ApplicationRepository
-	TagRepository
-	UserRepository
-}
-
 type EntRepository struct {
 	client *ent.Client
 }

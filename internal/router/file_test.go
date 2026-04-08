@@ -15,9 +15,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/require"
-	"github.com/traPtitech/Jomon/internal/model"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 	"go.uber.org/mock/gomock"
@@ -37,7 +37,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		applicationID := uuid.New()
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -133,7 +133,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		mocErr := errors.New("failed to create file")
+		mocErr := service.NewUnexpectedError(errors.New("failed to create file"))
 
 		require.NoError(t, err)
 		h.Repository.MockFileRepository.
@@ -143,8 +143,7 @@ func TestHandlers_PostFile(t *testing.T) {
 
 		err = h.Handlers.PostFile(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("FailedToServiceCreateFile", func(t *testing.T) {
@@ -155,7 +154,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		applicationID := uuid.New()
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -200,7 +199,7 @@ func TestHandlers_PostFile(t *testing.T) {
 			CreateFile(c.Request().Context(), "test", "image/jpeg", applicationID, user.ID).
 			Return(file, nil)
 
-		mocErr := errors.New("failed to save file")
+		mocErr := service.NewUnexpectedError(errors.New("failed to save file"))
 
 		h.Storage.
 			EXPECT().
@@ -209,8 +208,7 @@ func TestHandlers_PostFile(t *testing.T) {
 
 		err = h.Handlers.PostFile(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -222,7 +220,7 @@ func TestHandlers_GetFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -239,8 +237,9 @@ func TestHandlers_GetFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -263,7 +262,7 @@ func TestHandlers_GetFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -276,22 +275,22 @@ func TestHandlers_GetFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 
-		mocErr := errors.New("file not found")
+		resErr := service.NewUnexpectedError(errors.New("file not found"))
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
 			GetFile(c.Request().Context(), file.ID).
-			Return(nil, mocErr)
+			Return(nil, resErr)
 
 		err = h.Handlers.GetFile(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("FailedToOpenFile", func(t *testing.T) {
@@ -299,7 +298,7 @@ func TestHandlers_GetFile(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -312,8 +311,9 @@ func TestHandlers_GetFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -322,7 +322,7 @@ func TestHandlers_GetFile(t *testing.T) {
 			GetFile(c.Request().Context(), file.ID).
 			Return(file, nil)
 
-		mocErr := errors.New("failed to open file")
+		mocErr := service.NewUnexpectedError(errors.New("failed to open file"))
 
 		h.Storage.
 			EXPECT().
@@ -331,8 +331,7 @@ func TestHandlers_GetFile(t *testing.T) {
 
 		err = h.Handlers.GetFile(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {
@@ -345,18 +344,16 @@ func TestHandlers_GetFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues("po")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: "po"},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		_, mocErr := uuid.Parse("po")
-
 		err = h.Handlers.GetFile(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -368,7 +365,7 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -382,8 +379,9 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID/meta")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -412,7 +410,7 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -426,22 +424,22 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID/meta")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 
-		mocErr := errors.New("file not found")
+		resErr := service.NewUnexpectedError(errors.New("file not found"))
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockFileRepository.
 			EXPECT().
 			GetFile(c.Request().Context(), file.ID).
-			Return(nil, mocErr)
+			Return(nil, resErr)
 
 		err = h.Handlers.GetFileMeta(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {
@@ -454,18 +452,16 @@ func TestHandlers_GetFileMeta(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID/meta")
-		c.SetParamNames("fileID")
-		c.SetParamValues("po")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: "po"},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		_, mocErr := uuid.Parse("po")
-
 		err = h.Handlers.GetFileMeta(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -479,7 +475,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -494,8 +490,9 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -524,7 +521,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -539,11 +536,12 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
-		mocErr := errors.New("file could not be deleted")
+		resErr := service.NewUnexpectedError(errors.New("file could not be deleted"))
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -554,12 +552,11 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		h.Repository.MockFileRepository.
 			EXPECT().
 			DeleteFile(c.Request().Context(), file.ID).
-			Return(mocErr)
+			Return(resErr)
 
 		err = h.Handlers.DeleteFile(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("FailedToServiceDeleteFile", func(t *testing.T) {
@@ -569,7 +566,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
-		file := &model.File{
+		file := &service.File{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			MimeType:  "image/jpeg",
@@ -584,8 +581,9 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(file.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: file.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -599,17 +597,16 @@ func TestHandlers_DeleteFile(t *testing.T) {
 			DeleteFile(c.Request().Context(), file.ID).
 			Return(nil)
 
-		mocErr := errors.New("failed to delete file")
+		resErr := service.NewUnexpectedError(errors.New("failed to delete file"))
 
 		h.Storage.
 			EXPECT().
 			Delete(c.Request().Context(), file.ID.String()).
-			Return(mocErr)
+			Return(resErr)
 
 		err = h.Handlers.DeleteFile(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, mocErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("UnknownFile", func(t *testing.T) {
@@ -620,7 +617,6 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		invalidUUID := "invalid-uuid"
-		_, mocErr := uuid.Parse(invalidUUID)
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/files/%s", invalidUUID)
@@ -629,8 +625,9 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files/:fileID")
-		c.SetParamNames("fileID")
-		c.SetParamValues(invalidUUID)
+		c.SetPathValues([]echo.PathValue{
+			{Name: "fileID", Value: invalidUUID},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -638,7 +635,6 @@ func TestHandlers_DeleteFile(t *testing.T) {
 
 		err = h.Handlers.DeleteFile(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; mocErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, mocErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 }

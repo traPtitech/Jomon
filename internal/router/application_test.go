@@ -11,18 +11,17 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
-	"github.com/traPtitech/Jomon/internal/ent"
-	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"github.com/traPtitech/Jomon/internal/testutil/random"
 	"go.uber.org/mock/gomock"
 )
 
-func modelTagToTagOverview(t *model.Tag) *TagResponse {
+func modelTagToTagOverview(t *service.Tag) *TagResponse {
 	return &TagResponse{
 		ID:        t.ID,
 		Name:      t.Name,
@@ -32,7 +31,7 @@ func modelTagToTagOverview(t *model.Tag) *TagResponse {
 }
 
 func modelApplicationTargetDetailToTargetOverview(
-	t *model.ApplicationTargetDetail,
+	t *service.ApplicationTargetDetail,
 ) *TargetOverview {
 	return &TargetOverview{
 		ID:        t.ID,
@@ -43,7 +42,7 @@ func modelApplicationTargetDetailToTargetOverview(
 }
 
 func modelApplicationStatusToStatusResponseOverview(
-	s *model.ApplicationStatus,
+	s *service.ApplicationStatus,
 ) *StatusResponseOverview {
 	return &StatusResponseOverview{
 		CreatedBy: s.CreatedBy,
@@ -52,7 +51,7 @@ func modelApplicationStatusToStatusResponseOverview(
 	}
 }
 
-func modelCommentToCommentDetail(c *model.Comment) *CommentDetail {
+func modelCommentToCommentDetail(c *service.Comment) *CommentDetail {
 	return &CommentDetail{
 		ID:        c.ID,
 		User:      c.User,
@@ -64,7 +63,7 @@ func modelCommentToCommentDetail(c *model.Comment) *CommentDetail {
 
 // FIXME: この処理はapplication.goにも書かれてある
 func modelApplicationDetailToApplicationResponse(
-	r *model.ApplicationDetail,
+	r *service.ApplicationDetail,
 ) *ApplicationDetailResponse {
 	return &ApplicationDetailResponse{
 		ApplicationResponse: ApplicationResponse{
@@ -77,21 +76,21 @@ func modelApplicationDetailToApplicationResponse(
 			UpdatedAt: r.UpdatedAt,
 			Targets: lo.Map(
 				r.Targets,
-				func(m *model.ApplicationTargetDetail, _ int) *TargetOverview {
+				func(m *service.ApplicationTargetDetail, _ int) *TargetOverview {
 					return modelApplicationTargetDetailToTargetOverview(m)
 				},
 			),
-			Tags: lo.Map(r.Tags, func(m *model.Tag, _ int) *TagResponse {
+			Tags: lo.Map(r.Tags, func(m *service.Tag, _ int) *TagResponse {
 				return modelTagToTagOverview(m)
 			}),
 		},
 		Statuses: lo.Map(
 			r.Statuses,
-			func(m *model.ApplicationStatus, _ int) *StatusResponseOverview {
+			func(m *service.ApplicationStatus, _ int) *StatusResponseOverview {
 				return modelApplicationStatusToStatusResponseOverview(m)
 			},
 		),
-		Comments: lo.Map(r.Comments, func(m *model.Comment, _ int) *CommentDetail {
+		Comments: lo.Map(r.Comments, func(m *service.Comment, _ int) *CommentDetail {
 			return modelCommentToCommentDetail(m)
 		}),
 		Files: r.Files,
@@ -108,31 +107,31 @@ func TestHandlers_GetApplications(t *testing.T) {
 
 		date1 := time.Now()
 		date2 := date1.Add(time.Hour)
-		application1 := &model.ApplicationResponse{
+		application1 := &service.ApplicationResponse{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date1,
 			UpdatedAt: date1,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses:  []*model.ApplicationStatus{},
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses:  []*service.ApplicationStatus{},
 		}
-		application2 := &model.ApplicationResponse{
+		application2 := &service.ApplicationResponse{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date2,
 			UpdatedAt: date2,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses:  []*model.ApplicationStatus{},
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses:  []*service.ApplicationStatus{},
 		}
-		applications := []*model.ApplicationResponse{application2, application1}
+		applications := []*service.ApplicationResponse{application2, application1}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/applications", nil)
@@ -143,7 +142,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplications(c.Request().Context(), model.ApplicationQuery{
+			GetApplications(c.Request().Context(), service.ApplicationQuery{
 				Limit:  100,
 				Offset: 0,
 			}).
@@ -186,7 +185,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		applications := []*model.ApplicationResponse{}
+		applications := []*service.ApplicationResponse{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/applications", nil)
@@ -197,7 +196,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplications(c.Request().Context(), model.ApplicationQuery{
+			GetApplications(c.Request().Context(), service.ApplicationQuery{
 				Limit:  100,
 				Offset: 0,
 			}).
@@ -217,19 +216,19 @@ func TestHandlers_GetApplications(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date1 := time.Now()
-		application1 := &model.ApplicationResponse{
+		application1 := &service.ApplicationResponse{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date1,
 			UpdatedAt: date1,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses:  []*model.ApplicationStatus{},
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses:  []*service.ApplicationStatus{},
 		}
-		applications := []*model.ApplicationResponse{application1}
+		applications := []*service.ApplicationResponse{application1}
 
 		e := echo.New()
 		status := "submitted"
@@ -242,7 +241,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplications(c.Request().Context(), model.ApplicationQuery{
+			GetApplications(c.Request().Context(), service.ApplicationQuery{
 				Status: &status,
 				Limit:  100,
 				Offset: 0,
@@ -280,19 +279,19 @@ func TestHandlers_GetApplications(t *testing.T) {
 		date2str := date1.Add(time.Hour).Format("2006-01-02")
 		date2, err := nulltime.ParseDate(date2str)
 		require.NoError(t, err)
-		application1 := &model.ApplicationResponse{
+		application1 := &service.ApplicationResponse{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date1,
 			UpdatedAt: date1,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses:  []*model.ApplicationStatus{},
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses:  []*service.ApplicationStatus{},
 		}
-		applications := []*model.ApplicationResponse{application1}
+		applications := []*service.ApplicationResponse{application1}
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/applications?until=%s", date2str)
@@ -304,7 +303,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplications(c.Request().Context(), model.ApplicationQuery{
+			GetApplications(c.Request().Context(), service.ApplicationQuery{
 				Until:  date2,
 				Limit:  100,
 				Offset: 0,
@@ -342,19 +341,19 @@ func TestHandlers_GetApplications(t *testing.T) {
 		date2str := date1.Add(-time.Hour).Format("2006-01-02")
 		date2, err := nulltime.ParseDate(date2str)
 		require.NoError(t, err)
-		application1 := &model.ApplicationResponse{
+		application1 := &service.ApplicationResponse{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date1,
 			UpdatedAt: date1,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses:  []*model.ApplicationStatus{},
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses:  []*service.ApplicationStatus{},
 		}
-		applications := []*model.ApplicationResponse{application1}
+		applications := []*service.ApplicationResponse{application1}
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/applications?since=%s", date2str)
@@ -366,7 +365,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplications(c.Request().Context(), model.ApplicationQuery{
+			GetApplications(c.Request().Context(), service.ApplicationQuery{
 				Since:  date2,
 				Limit:  100,
 				Offset: 0,
@@ -400,7 +399,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date1 := time.Now()
-		tag1 := model.Tag{
+		tag1 := service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 10),
 			CreatedAt: date1,
@@ -412,19 +411,19 @@ func TestHandlers_GetApplications(t *testing.T) {
 			CreatedAt: tag1.CreatedAt,
 			UpdatedAt: tag1.UpdatedAt,
 		}
-		application1 := &model.ApplicationResponse{
+		application1 := &service.ApplicationResponse{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date1,
 			UpdatedAt: date1,
-			Tags:      []*model.Tag{&tag1},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses:  []*model.ApplicationStatus{},
+			Tags:      []*service.Tag{&tag1},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses:  []*service.ApplicationStatus{},
 		}
-		applications := []*model.ApplicationResponse{application1}
+		applications := []*service.ApplicationResponse{application1}
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/applications?tag=%s", tag1.Name)
@@ -436,7 +435,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplications(c.Request().Context(), model.ApplicationQuery{
+			GetApplications(c.Request().Context(), service.ApplicationQuery{
 				Tag:    &tag1.Name,
 				Limit:  100,
 				Offset: 0,
@@ -470,19 +469,19 @@ func TestHandlers_GetApplications(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		application := &model.ApplicationResponse{
+		application := &service.ApplicationResponse{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses:  []*model.ApplicationStatus{},
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses:  []*service.ApplicationStatus{},
 		}
-		modelApplications := []*model.ApplicationResponse{application}
+		modelApplications := []*service.ApplicationResponse{application}
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/applications?created_by=%s", application.CreatedBy.String())
@@ -494,7 +493,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplications(c.Request().Context(), model.ApplicationQuery{
+			GetApplications(c.Request().Context(), service.ApplicationQuery{
 				Limit:     100,
 				Offset:    0,
 				CreatedBy: application.CreatedBy},
@@ -540,8 +539,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 
 		err = h.Handlers.GetApplications(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, "invalid status"), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("FailedToGetApplications", func(t *testing.T) {
@@ -559,7 +557,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 		resErr := errors.New("Failed to get applications.")
 		h.Repository.MockApplicationRepository.
 			EXPECT().
-			GetApplications(c.Request().Context(), model.ApplicationQuery{
+			GetApplications(c.Request().Context(), service.ApplicationQuery{
 				Limit:  100,
 				Offset: 0,
 			}).
@@ -567,8 +565,7 @@ func TestHandlers_GetApplications(t *testing.T) {
 
 		err = h.Handlers.GetApplications(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -581,23 +578,24 @@ func TestHandlers_PostApplication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
+
 				ID:        uuid.New(),
 				CreatedBy: uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqApplication := Application{
@@ -607,8 +605,8 @@ func TestHandlers_PostApplication(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
-		tags := []*model.Tag{}
-		targets := []*model.ApplicationTarget{}
+		tags := []*service.Tag{}
+		targets := []*service.ApplicationTarget{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -644,30 +642,30 @@ func TestHandlers_PostApplication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		tags := []*model.Tag{tag}
-		application := &model.ApplicationDetail{
+		tags := []*service.Tag{tag}
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
 			Tags:      tags,
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
 				CreatedBy: uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqApplication := Application{
@@ -678,7 +676,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
-		targets := []*model.ApplicationTarget{}
+		targets := []*service.ApplicationTarget{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -718,33 +716,33 @@ func TestHandlers_PostApplication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		target := &model.ApplicationTarget{
+		target := &service.ApplicationTarget{
 			Target: uuid.New(),
 			Amount: random.Numeric(t, 1000000),
 		}
-		tgd := &model.ApplicationTargetDetail{
+		tgd := &service.ApplicationTargetDetail{
 			ID:        uuid.New(),
 			Target:    target.Target,
 			Amount:    target.Amount,
 			CreatedAt: date,
 		}
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
 			CreatedBy: uuid.New(),
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{tgd},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{tgd},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
 				CreatedBy: uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		tg := &Target{
@@ -759,7 +757,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
-		tags := []*model.Tag{}
+		tags := []*service.Tag{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -775,7 +773,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 			CreateApplication(
 				c.Request().Context(),
 				reqApplication.Title, reqApplication.Content,
-				tags, []*model.ApplicationTarget{target},
+				tags, []*service.ApplicationTarget{target},
 				reqApplication.CreatedBy).
 			Return(application, nil)
 
@@ -795,9 +793,9 @@ func TestHandlers_PostApplication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
@@ -821,8 +819,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		var resErr *ent.NotFoundError
-		errors.As(errors.New("unknown id"), &resErr)
+		resErr := service.NewNotFoundError("tag not found")
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -833,8 +830,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 
 		err = h.Handlers.PostApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, http.StatusNotFound, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("UnknownUserID", func(t *testing.T) {
@@ -843,9 +839,9 @@ func TestHandlers_PostApplication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
@@ -859,8 +855,8 @@ func TestHandlers_PostApplication(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
-		tags := []*model.Tag{}
-		targets := []*model.ApplicationTarget{}
+		tags := []*service.Tag{}
+		targets := []*service.ApplicationTarget{}
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(
@@ -869,8 +865,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		var resErr *ent.NotFoundError
-		errors.As(errors.New("unknown id"), &resErr)
+		resErr := service.NewNotFoundError("user not found")
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -885,8 +880,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 
 		err = h.Handlers.PostApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, http.StatusNotFound, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -899,23 +893,23 @@ func TestHandlers_GetApplication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 
@@ -925,8 +919,9 @@ func TestHandlers_GetApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -955,40 +950,40 @@ func TestHandlers_GetApplication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		date := time.Now()
 
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
-		comment1 := &model.Comment{
+		comment1 := &service.Comment{
 			ID:        uuid.New(),
 			User:      application.CreatedBy,
 			Comment:   random.AlphaNumeric(t, 100),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		comment2 := &model.Comment{
+		comment2 := &service.Comment{
 			ID:        uuid.New(),
 			User:      application.CreatedBy,
 			Comment:   random.AlphaNumeric(t, 100),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		comments := []*model.Comment{comment1, comment2}
+		comments := []*service.Comment{comment1, comment2}
 
 		e := echo.New()
 		path := fmt.Sprintf("/api/applications/%s", application.ID.String())
@@ -996,8 +991,9 @@ func TestHandlers_GetApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1017,7 +1013,7 @@ func TestHandlers_GetApplication(t *testing.T) {
 		require.NoError(t, err)
 		opts := testutil.ApproxEqualOptions()
 		exp := modelApplicationDetailToApplicationResponse(application)
-		exp.Comments = lo.Map(comments, func(c *model.Comment, _ int) *CommentDetail {
+		exp.Comments = lo.Map(comments, func(c *service.Comment, _ int) *CommentDetail {
 			return modelCommentToCommentDetail(c)
 		})
 		testutil.RequireEqual(t, exp, got, opts...)
@@ -1029,30 +1025,30 @@ func TestHandlers_GetApplication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		date := time.Now()
-		target := &model.ApplicationTargetDetail{
+		target := &service.ApplicationTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 1000000),
-			PaidAt:    time.Time{},
+			PaidAt:    nulltime.NullTime{},
 			CreatedAt: date,
 		}
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{target},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{target},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 
@@ -1062,8 +1058,9 @@ func TestHandlers_GetApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1095,24 +1092,22 @@ func TestHandlers_GetApplication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		invalidUUID := "invalid-uuid"
-		_, resErr := uuid.Parse(invalidUUID)
-
 		e := echo.New()
 		path := fmt.Sprintf("/api/applications/%s", invalidUUID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(invalidUUID)
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: invalidUUID},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
 		err = h.Handlers.GetApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -1126,18 +1121,16 @@ func TestHandlers_GetApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(uuid.Nil.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: uuid.Nil.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		resErr := errors.New("invalid UUID")
-
 		err = h.Handlers.GetApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("UnknownID", func(t *testing.T) {
@@ -1153,12 +1146,11 @@ func TestHandlers_GetApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(unknownID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: unknownID.String()},
+		})
 
-		var resErr *ent.NotFoundError
-		errors.As(errors.New("unknown id"), &resErr)
-
+		resErr := service.NewNotFoundError("user not found")
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
@@ -1168,8 +1160,7 @@ func TestHandlers_GetApplication(t *testing.T) {
 
 		err = h.Handlers.GetApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, http.StatusNotFound, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -1184,23 +1175,23 @@ func TestHandlers_PutApplication(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: user.ID,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqApplication := PutApplication{
@@ -1211,8 +1202,8 @@ func TestHandlers_PutApplication(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
-		tags := []*model.Tag{}
-		updateApplication := &model.ApplicationDetail{
+		tags := []*service.Tag{}
+		updateApplication := &service.ApplicationDetail{
 			ID:        application.ID,
 			Status:    application.Status,
 			CreatedBy: application.CreatedBy,
@@ -1221,7 +1212,7 @@ func TestHandlers_PutApplication(t *testing.T) {
 			Title:     reqApplication.Title,
 			Content:   reqApplication.Content,
 			Tags:      tags,
-			Targets:   []*model.ApplicationTargetDetail{},
+			Targets:   []*service.ApplicationTargetDetail{},
 			Statuses:  application.Statuses,
 			Comments:  application.Comments,
 			Files:     application.Files,
@@ -1233,15 +1224,16 @@ func TestHandlers_PutApplication(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		targets := lo.Map(
 			updateApplication.Targets,
-			func(t *model.ApplicationTargetDetail, _ int) *model.ApplicationTarget {
-				return &model.ApplicationTarget{
+			func(t *service.ApplicationTargetDetail, _ int) *service.ApplicationTarget {
+				return &service.ApplicationTarget{
 					Target: t.Target,
 					Amount: t.Amount,
 				}
@@ -1280,38 +1272,38 @@ func TestHandlers_PutApplication(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: user.ID,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
-		tag1 := &model.Tag{
+		tag1 := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		tag2 := &model.Tag{
+		tag2 := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		tags := []*model.Tag{tag1, tag2}
+		tags := []*service.Tag{tag1, tag2}
 		reqApplication := PutApplication{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
@@ -1320,7 +1312,7 @@ func TestHandlers_PutApplication(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
-		updateApplication := &model.ApplicationDetail{
+		updateApplication := &service.ApplicationDetail{
 			ID:        application.ID,
 			Status:    application.Status,
 			CreatedBy: application.CreatedBy,
@@ -1329,7 +1321,7 @@ func TestHandlers_PutApplication(t *testing.T) {
 			CreatedAt: application.CreatedAt,
 			UpdatedAt: time.Now(),
 			Tags:      tags,
-			Targets:   []*model.ApplicationTargetDetail{},
+			Targets:   []*service.ApplicationTargetDetail{},
 			Statuses:  application.Statuses,
 			Comments:  application.Comments,
 			Files:     application.Files,
@@ -1337,8 +1329,8 @@ func TestHandlers_PutApplication(t *testing.T) {
 
 		targets := lo.Map(
 			updateApplication.Targets,
-			func(t *model.ApplicationTargetDetail, _ int) *model.ApplicationTarget {
-				return &model.ApplicationTarget{
+			func(t *service.ApplicationTargetDetail, _ int) *service.ApplicationTarget {
+				return &service.ApplicationTarget{
 					Target: t.Target,
 					Amount: t.Amount,
 				}
@@ -1350,9 +1342,10 @@ func TestHandlers_PutApplication(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -1396,40 +1389,40 @@ func TestHandlers_PutApplication(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: user.ID,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
-		target1 := &model.ApplicationTargetDetail{
+		target1 := &service.ApplicationTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 100000),
-			PaidAt:    time.Time{},
+			PaidAt:    nulltime.NullTime{},
 			CreatedAt: date,
 		}
-		target2 := &model.ApplicationTargetDetail{
+		target2 := &service.ApplicationTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
 			Amount:    random.Numeric(t, 100000),
-			PaidAt:    time.Time{},
+			PaidAt:    nulltime.NullTime{},
 			CreatedAt: date,
 		}
-		targetDetails := []*model.ApplicationTargetDetail{target1, target2}
+		targetDetails := []*service.ApplicationTargetDetail{target1, target2}
 		reqApplication := PutApplication{
 			Title:   random.AlphaNumeric(t, 30),
 			Content: random.AlphaNumeric(t, 50),
@@ -1441,8 +1434,8 @@ func TestHandlers_PutApplication(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
-		tags := []*model.Tag{}
-		updateApplication := &model.ApplicationDetail{
+		tags := []*service.Tag{}
+		updateApplication := &service.ApplicationDetail{
 			ID:        application.ID,
 			Status:    application.Status,
 			CreatedBy: application.CreatedBy,
@@ -1463,15 +1456,16 @@ func TestHandlers_PutApplication(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		targets := lo.Map(
 			updateApplication.Targets,
-			func(t *model.ApplicationTargetDetail, _ int) *model.ApplicationTarget {
-				return &model.ApplicationTarget{
+			func(t *service.ApplicationTargetDetail, _ int) *service.ApplicationTarget {
+				return &service.ApplicationTarget{
 					Target: t.Target,
 					Amount: t.Amount,
 				}
@@ -1510,23 +1504,23 @@ func TestHandlers_PutApplication(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: user.ID,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqApplication := PutApplication{
@@ -1537,23 +1531,23 @@ func TestHandlers_PutApplication(t *testing.T) {
 		}
 		reqBody, err := json.Marshal(reqApplication)
 		require.NoError(t, err)
-		tags := []*model.Tag{}
-		comment1 := &model.Comment{
+		tags := []*service.Tag{}
+		comment1 := &service.Comment{
 			ID:        uuid.New(),
 			User:      application.CreatedBy,
 			Comment:   random.AlphaNumeric(t, 100),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		comment2 := &model.Comment{
+		comment2 := &service.Comment{
 			ID:        uuid.New(),
 			User:      application.CreatedBy,
 			Comment:   random.AlphaNumeric(t, 100),
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		comments := []*model.Comment{comment1, comment2}
-		updateApplication := &model.ApplicationDetail{
+		comments := []*service.Comment{comment1, comment2}
+		updateApplication := &service.ApplicationDetail{
 			ID:        application.ID,
 			Status:    application.Status,
 			CreatedBy: application.CreatedBy,
@@ -1562,7 +1556,7 @@ func TestHandlers_PutApplication(t *testing.T) {
 			CreatedAt: application.CreatedAt,
 			UpdatedAt: time.Now(),
 			Tags:      tags,
-			Targets:   []*model.ApplicationTargetDetail{},
+			Targets:   []*service.ApplicationTargetDetail{},
 			Statuses:  application.Statuses,
 			Comments:  comments,
 			Files:     application.Files,
@@ -1574,15 +1568,16 @@ func TestHandlers_PutApplication(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		targets := lo.Map(
 			updateApplication.Targets,
-			func(t *model.ApplicationTargetDetail, _ int) *model.ApplicationTarget {
-				return &model.ApplicationTarget{
+			func(t *service.ApplicationTargetDetail, _ int) *service.ApplicationTarget {
+				return &service.ApplicationTarget{
 					Target: t.Target,
 					Amount: t.Amount,
 				}
@@ -1619,8 +1614,6 @@ func TestHandlers_PutApplication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		invalidUUID := "invalid-uuid"
-		_, resErr := uuid.Parse(invalidUUID)
-
 		e := echo.New()
 		path := fmt.Sprintf("/api/applications/%s", invalidUUID)
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, path, nil)
@@ -1628,16 +1621,16 @@ func TestHandlers_PutApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(invalidUUID)
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: invalidUUID},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
 		err = h.Handlers.PutApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("NilUUID", func(t *testing.T) {
@@ -1652,18 +1645,16 @@ func TestHandlers_PutApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(uuid.Nil.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: uuid.Nil.String()},
+		})
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		resErr := errors.New("invalid UUID")
-
 		err = h.Handlers.PutApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("UnknownID", func(t *testing.T) {
@@ -1690,24 +1681,21 @@ func TestHandlers_PutApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(unknownID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: unknownID.String()},
+		})
 		c.Set(loginUserKey, user)
-
-		var resErr *ent.NotFoundError
-		errors.As(errors.New("unknown id"), &resErr)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockApplicationRepository.
 			EXPECT().
 			GetApplication(c.Request().Context(), unknownID).
-			Return(nil, resErr)
+			Return(nil, service.NewNotFoundError("application not found"))
 
 		err = h.Handlers.PutApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, http.StatusNotFound, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("UnknownTagID", func(t *testing.T) {
@@ -1718,26 +1706,26 @@ func TestHandlers_PutApplication(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: user.ID,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
-		tag := &model.Tag{
+		tag := &service.Tag{
 			ID:        uuid.New(),
 			Name:      random.AlphaNumeric(t, 20),
 			CreatedAt: date,
@@ -1759,12 +1747,10 @@ func TestHandlers_PutApplication(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
-
-		var resErr *ent.NotFoundError
-		errors.As(errors.New("unknown id"), &resErr)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1775,12 +1761,11 @@ func TestHandlers_PutApplication(t *testing.T) {
 		h.Repository.MockTagRepository.
 			EXPECT().
 			GetTag(c.Request().Context(), tag.ID).
-			Return(nil, resErr)
+			Return(nil, service.NewNotFoundError("tag not found"))
 
 		err = h.Handlers.PutApplication(c)
 		require.Error(t, err)
-		// FIXME: http.StatusNotFoundだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusNotFound, resErr), err)
+		require.Equal(t, http.StatusNotFound, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -1795,39 +1780,39 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.FixRequired,
+			Status:    service.FixRequired,
 			CreatedBy: user.ID,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.FixRequired,
+				Status:    service.FixRequired,
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
-			Status:  model.Submitted,
+			Status:  service.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
-		comment := &model.Comment{
+		comment := &service.Comment{
 			ID:        uuid.New(),
 			User:      user.ID,
 			Comment:   reqStatus.Comment,
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		status := &model.ApplicationStatus{
+		status := &service.ApplicationStatus{
 			ID:        uuid.New(),
 			CreatedBy: user.ID,
 			Status:    reqStatus.Status,
@@ -1840,9 +1825,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -1890,39 +1876,39 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
-			Status:  model.FixRequired,
+			Status:  service.FixRequired,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
-		comment := &model.Comment{
+		comment := &service.Comment{
 			ID:        uuid.New(),
 			User:      user.ID,
 			Comment:   reqStatus.Comment,
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		status := &model.ApplicationStatus{
+		status := &service.ApplicationStatus{
 			ID:        uuid.New(),
 			CreatedBy: user.ID,
 			Status:    reqStatus.Status,
@@ -1935,9 +1921,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -1985,39 +1972,39 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
-			Status:  model.Accepted,
+			Status:  service.Accepted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
-		comment := &model.Comment{
+		comment := &service.Comment{
 			ID:        uuid.New(),
 			User:      user.ID,
 			Comment:   reqStatus.Comment,
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		status := &model.ApplicationStatus{
+		status := &service.ApplicationStatus{
 			ID:        uuid.New(),
 			CreatedBy: user.ID,
 			Status:    reqStatus.Status,
@@ -2030,9 +2017,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2080,40 +2068,40 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
-			Status:  model.FixRequired,
+			Status:  service.FixRequired,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
 
-		comment := &model.Comment{
+		comment := &service.Comment{
 			ID:        uuid.New(),
 			User:      user.ID,
 			Comment:   reqStatus.Comment,
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		status := &model.ApplicationStatus{
+		status := &service.ApplicationStatus{
 			ID:        uuid.New(),
 			CreatedBy: user.ID,
 			Status:    reqStatus.Status,
@@ -2127,8 +2115,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2176,39 +2165,39 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.FixRequired,
+			Status:    service.FixRequired,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.FixRequired,
+				Status:    service.FixRequired,
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
-			Status:  model.Submitted,
+			Status:  service.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
-		comment := &model.Comment{
+		comment := &service.Comment{
 			ID:        uuid.New(),
 			User:      user.ID,
 			Comment:   reqStatus.Comment,
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		status := &model.ApplicationStatus{
+		status := &service.ApplicationStatus{
 			ID:        uuid.New(),
 			CreatedBy: user.ID,
 			Status:    reqStatus.Status,
@@ -2221,9 +2210,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2271,46 +2261,46 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Accepted,
+			Status:    service.Accepted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Accepted,
+				Status:    service.Accepted,
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
-		target := &model.ApplicationTargetDetail{
+		target := &service.ApplicationTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
-			PaidAt:    time.Time{},
+			PaidAt:    nulltime.NullTime{},
 			CreatedAt: date,
 		}
-		targets := []*model.ApplicationTargetDetail{target}
+		targets := []*service.ApplicationTargetDetail{target}
 		reqStatus := PutStatus{
-			Status:  model.Submitted,
+			Status:  service.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
-		comment := &model.Comment{
+		comment := &service.Comment{
 			ID:        uuid.New(),
 			User:      user.ID,
 			Comment:   reqStatus.Comment,
 			CreatedAt: date,
 			UpdatedAt: date,
 		}
-		status := &model.ApplicationStatus{
+		status := &service.ApplicationStatus{
 			ID:        uuid.New(),
 			CreatedBy: user.ID,
 			Status:    reqStatus.Status,
@@ -2323,9 +2313,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2377,23 +2368,23 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.FixRequired,
+			Status:    service.FixRequired,
 			CreatedBy: user.ID,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.FixRequired,
+				Status:    service.FixRequired,
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		invalidStatus := random.AlphaNumeric(t, 20)
@@ -2412,24 +2403,18 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
-		resErr := echo.NewHTTPError(http.StatusBadRequest)
-		resErrMessage := echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Sprintf("invalid Status %s", invalidStatus))
-		resErrMessage.Internal = fmt.Errorf("invalid Status %s", invalidStatus)
-		resErr.Message = resErrMessage
 
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい
-		require.Equal(t, resErr, err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("InvalidUUID", func(t *testing.T) {
@@ -2440,9 +2425,8 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		invalidUUID := "invalid-uuid"
-		_, resErr := uuid.Parse(invalidUUID)
 		reqStatus := PutStatus{
-			Status:  model.Submitted,
+			Status:  service.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2454,9 +2438,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(invalidUUID)
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: invalidUUID},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2464,8 +2449,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("NillUUID", func(t *testing.T) {
@@ -2476,7 +2460,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		reqStatus := PutStatus{
-			Status:  model.Submitted,
+			Status:  service.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2488,20 +2472,18 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(uuid.Nil.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: uuid.Nil.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 
-		_, resErr := uuid.Parse(c.Param("applicationID"))
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("SameStatusError", func(t *testing.T) {
@@ -2512,23 +2494,23 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Status(random.Numeric(t, 5) + 1),
+			Status:    service.Status(random.Numeric(t, 5) + 1),
 			CreatedBy: user.ID,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Status(random.Numeric(t, 5) + 1),
+				Status:    service.Status(random.Numeric(t, 5) + 1),
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
@@ -2544,9 +2526,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2557,12 +2540,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplication(ctx, application.ID).
 			Return(application, nil)
 
-		resErr := errors.New("invalid application: same status")
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("CommentRequiredErrorFromSubmittedToFixRequired", func(t *testing.T) {
@@ -2573,28 +2553,28 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: user.ID,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 
 		reqStatus := PutStatus{
-			Status: model.FixRequired,
+			Status: service.FixRequired,
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
@@ -2605,9 +2585,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2618,15 +2599,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplication(ctx, application.ID).
 			Return(application, nil)
 
-		resErr := fmt.Errorf(
-			"unable to change %v to %v without comment",
-			application.Status.String(),
-			reqStatus.Status.String())
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("CommentRequiredErrorFromSubmittedToRejected", func(t *testing.T) {
@@ -2637,27 +2612,27 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: user.ID,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
-			Status: model.Rejected,
+			Status: service.Rejected,
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
@@ -2668,9 +2643,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2681,15 +2657,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplication(ctx, application.ID).
 			Return(application, nil)
 
-		resErr := fmt.Errorf(
-			"unable to change %v to %v without comment",
-			application.Status.String(),
-			reqStatus.Status.String())
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("CommentRequiredErrorFromAcceptedToSubmitted", func(t *testing.T) {
@@ -2700,27 +2670,27 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Accepted,
+			Status:    service.Accepted,
 			CreatedBy: user.ID,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Accepted,
+				Status:    service.Accepted,
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
-			Status: model.Submitted,
+			Status: service.Submitted,
 		}
 		reqBody, err := json.Marshal(reqStatus)
 		require.NoError(t, err)
@@ -2731,9 +2701,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2744,15 +2715,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplication(ctx, application.ID).
 			Return(application, nil)
 
-		resErr := fmt.Errorf(
-			"unable to change %v to %v without comment",
-			application.Status.String(),
-			reqStatus.Status.String())
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("AccountManagerNoPrivilege", func(t *testing.T) {
@@ -2763,27 +2728,27 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.FixRequired,
+			Status:    service.FixRequired,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.FixRequired,
+				Status:    service.FixRequired,
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
-			Status:  model.Accepted,
+			Status:  service.Accepted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2795,9 +2760,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2808,15 +2774,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplication(ctx, application.ID).
 			Return(application, nil)
 
-		resErr := fmt.Errorf(
-			"accountManager unable to change %v to %v",
-			application.Status.String(),
-			reqStatus.Status.String())
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusForbiddenだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("AlreadyPaid", func(t *testing.T) {
@@ -2827,34 +2787,34 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, true)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Accepted,
+			Status:    service.Accepted,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Accepted,
+				Status:    service.Accepted,
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
-		target := &model.ApplicationTargetDetail{
+		target := &service.ApplicationTargetDetail{
 			ID:        uuid.New(),
 			Target:    uuid.New(),
-			PaidAt:    date,
+			PaidAt:    nulltime.FromTime(&date),
 			CreatedAt: date,
 		}
-		targets := []*model.ApplicationTargetDetail{target}
+		targets := []*service.ApplicationTargetDetail{target}
 		reqStatus := PutStatus{
-			Status:  model.Submitted,
+			Status:  service.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2866,9 +2826,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2884,12 +2845,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplicationTargets(ctx, application.ID).
 			Return(targets, nil)
 
-		resErr := errors.New("someone already paid")
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("CreatorNoPrivilege", func(t *testing.T) {
@@ -2900,27 +2858,27 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.Submitted,
+			Status:    service.Submitted,
 			CreatedBy: user.ID,
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.Submitted,
+				Status:    service.Submitted,
 				CreatedAt: date,
 				CreatedBy: user.ID,
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
-			Status:  model.Accepted,
+			Status:  service.Accepted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2932,9 +2890,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -2945,14 +2904,9 @@ func TestHandlers_PutStatus(t *testing.T) {
 			GetApplication(ctx, application.ID).
 			Return(application, nil)
 
-		resErr := fmt.Errorf(
-			"creator unable to change %v to %v",
-			application.Status.String(), reqStatus.Status.String())
-
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusForbiddenだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusForbidden, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("NoPrivilege", func(t *testing.T) {
@@ -2963,27 +2917,27 @@ func TestHandlers_PutStatus(t *testing.T) {
 		accessUser := makeUser(t, false)
 		user := userFromModelUser(*accessUser)
 		date := time.Now()
-		application := &model.ApplicationDetail{
+		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
-			Status:    model.FixRequired,
+			Status:    service.FixRequired,
 			CreatedBy: uuid.New(),
 			Title:     random.AlphaNumeric(t, 20),
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			Tags:      []*model.Tag{},
-			Targets:   []*model.ApplicationTargetDetail{},
-			Statuses: []*model.ApplicationStatus{{
+			Tags:      []*service.Tag{},
+			Targets:   []*service.ApplicationTargetDetail{},
+			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				Status:    model.FixRequired,
+				Status:    service.FixRequired,
 				CreatedAt: date,
 				CreatedBy: uuid.New(),
 			}},
-			Comments: []*model.Comment{},
+			Comments: []*service.Comment{},
 			Files:    []uuid.UUID{},
 		}
 		reqStatus := PutStatus{
-			Status:  model.Submitted,
+			Status:  service.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
 		}
 		reqBody, err := json.Marshal(reqStatus)
@@ -2995,9 +2949,10 @@ func TestHandlers_PutStatus(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetPath("api/applications/:applicationID/status")
-		c.SetParamNames("applicationID")
-		c.SetParamValues(application.ID.String())
+		c.SetPath("/api/applications/:applicationID/status")
+		c.SetPathValues([]echo.PathValue{
+			{Name: "applicationID", Value: application.ID.String()},
+		})
 		c.Set(loginUserKey, user)
 
 		h, err := NewTestHandlers(t, ctrl)
@@ -3010,11 +2965,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 
 		err = h.Handlers.PutStatus(c)
 		require.Error(t, err)
-		// FIXME: http.StatusForbiddenだけ判定したい
-		require.Equal(
-			t,
-			echo.NewHTTPError(http.StatusForbidden, "you are not application creator"),
-			err)
+		require.Equal(t, http.StatusForbidden, HTTPErrorHandlerInner(err).Code)
 	})
 }
 

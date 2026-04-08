@@ -9,10 +9,9 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/require"
-	"github.com/traPtitech/Jomon/internal/ent"
-	"github.com/traPtitech/Jomon/internal/model"
+	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/testutil"
 	"go.uber.org/mock/gomock"
 )
@@ -25,11 +24,11 @@ func TestHandler_GetAccountManagers(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		accountManager := &model.AccountManager{
+		accountManager := &service.AccountManager{
 			ID: uuid.New(),
 		}
 
-		accountManagers := []*model.AccountManager{
+		accountManagers := []*service.AccountManager{
 			accountManager,
 		}
 
@@ -59,7 +58,7 @@ func TestHandler_GetAccountManagers(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-		var accountManagers []*model.AccountManager
+		var accountManagers []*service.AccountManager
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/account-managers", nil)
@@ -93,7 +92,7 @@ func TestHandler_GetAccountManagers(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		resErr := errors.New("failed to get accountManagers")
+		resErr := service.NewUnexpectedError(errors.New("failed to get accountManagers"))
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -103,8 +102,7 @@ func TestHandler_GetAccountManagers(t *testing.T) {
 			Return(nil, resErr)
 
 		err = h.Handlers.GetAccountManagers(c)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -156,7 +154,7 @@ func TestHandler_PostAccountManager(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		resErr := errors.New("failed to create accountManager")
+		resErr := service.NewUnexpectedError(errors.New("failed to create accountManager"))
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -167,11 +165,10 @@ func TestHandler_PostAccountManager(t *testing.T) {
 
 		err = h.Handlers.PostAccountManagers(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 
-	t.Run("FailedWithEntConstraintError", func(t *testing.T) {
+	t.Run("FailedWithBadInputError", func(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
@@ -188,8 +185,7 @@ func TestHandler_PostAccountManager(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		var resErr *ent.ConstraintError
-		errors.As(errors.New("failed to create accountManager"), &resErr)
+		resErr := service.NewBadInputError("failed to create accountManager")
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -200,8 +196,7 @@ func TestHandler_PostAccountManager(t *testing.T) {
 
 		err = h.Handlers.PostAccountManagers(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusBadRequest, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 }
 
@@ -253,7 +248,7 @@ func TestHandler_DeleteAccountManager(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		resErr := errors.New("failed to delete accountManager")
+		resErr := service.NewUnexpectedError(errors.New("failed to delete accountManager"))
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -264,8 +259,7 @@ func TestHandler_DeleteAccountManager(t *testing.T) {
 
 		err = h.Handlers.DeleteAccountManagers(c)
 		require.Error(t, err)
-		// FIXME: http.StatusInternalServerErrorだけ判定したい; resErrの内容は関係ない
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
 	})
 
 	t.Run("InvalidAccountManagerID", func(t *testing.T) {
@@ -290,38 +284,6 @@ func TestHandler_DeleteAccountManager(t *testing.T) {
 		err = h.Handlers.DeleteAccountManagers(c)
 
 		require.Error(t, err)
-		// FIXME: http.StatusBadRequestの判定をしたい
-	})
-
-	t.Run("FailedWithEntConstraintError", func(t *testing.T) {
-		t.Parallel()
-		ctx := testutil.NewContext(t)
-		ctrl := gomock.NewController(t)
-
-		accountManager := uuid.New()
-		accountManagers := []uuid.UUID{accountManager}
-		reqBody, err := json.Marshal(accountManagers)
-		require.NoError(t, err)
-
-		e := echo.New()
-		req := httptest.NewRequestWithContext(
-			ctx, http.MethodDelete, "/api/account-managers", bytes.NewReader(reqBody))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-
-		var resErr *ent.ConstraintError
-		errors.As(errors.New("failed to delete accountManager"), &resErr)
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-		h.Repository.MockAccountManagerRepository.
-			EXPECT().
-			DeleteAccountManagers(c.Request().Context(), accountManagers).
-			Return(resErr)
-
-		err = h.Handlers.DeleteAccountManagers(c)
-		require.Error(t, err)
-		require.Equal(t, echo.NewHTTPError(http.StatusInternalServerError, resErr), err)
+		require.Equal(t, http.StatusBadRequest, HTTPErrorHandlerInner(err).Code)
 	})
 }

@@ -2,7 +2,7 @@
 
 // wrapsession は `*session.Session` のラッパーを提供します.
 //
-//	var c echo.Context, sessionName string
+//	var c *echo.Context, sessionName string
 //	v, err := wrapsession.WithSession(c, sessionName, func (w *wrapsession.W) (T, error) {
 //		return doSomething(w)
 //	})
@@ -11,8 +11,8 @@
 package wrapsession
 
 import (
-	"github.com/labstack/echo-contrib/session"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo-contrib/v5/session"
+	"github.com/labstack/echo/v5"
 )
 
 // `WithSession` はセッションを使用するスコープを提供します.
@@ -44,7 +44,7 @@ import (
 // エラーの型が区別されるため, type switchを用いて詳細なハンドリングが可能です.
 //
 // nolint:ireturn
-func WithSession[T any](c echo.Context, sessionName string, op func(w *W) (T, error)) (T, error) {
+func WithSession[T any](c *echo.Context, sessionName string, op func(w *W) (T, error)) (T, error) {
 	var res T
 	sess, err := session.Get(sessionName, c)
 	if err != nil {

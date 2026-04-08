@@ -1,82 +1,73 @@
-//go:generate go tool mockgen -source=$GOFILE -destination=mock_$GOPACKAGE/mock_$GOFILE -package=mock_$GOPACKAGE
 package model
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/traPtitech/Jomon/internal/ent"
+	"github.com/traPtitech/Jomon/internal/ent/applicationstatus"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
-type Status int
+func (repo *EntRepository) CreateStatus(
+	ctx context.Context, applicationID uuid.UUID, userID uuid.UUID, status service.Status,
+) (*service.ApplicationStatus, error) {
+	errorConverter := &entErrorConverter{
+		msgBadInput: "failed to create application status due to invalid input",
+		msgNotFound: "application status not found",
+	}
+	c, err := repo.client.ApplicationStatus.
+		Create().
+		SetStatus(applicationstatus.Status(status.String())).
+		SetCreatedAt(time.Now()).
+		SetApplicationID(applicationID).
+		SetUserID(userID).
+		Save(ctx)
+	if err != nil {
+		return nil, errorConverter.convert(err)
+	}
+	created, err := repo.client.ApplicationStatus.
+		Query().
+		Where(applicationstatus.ID(c.ID)).
+		WithUser().
+		Only(ctx)
+	if err != nil {
+		return nil, errorConverter.convert(err)
+	}
+	return convertEntApplicationStatusToModelApplicationStatus(created), nil
+}
 
-const (
-	_ Status = iota
-	Submitted
-	FixRequired
-	Accepted
-	Completed
-	Rejected
-)
-
-func (s Status) String() string {
-	switch s {
-	case Submitted:
-		return "submitted"
-	case FixRequired:
-		return "fix_required"
-	case Accepted:
-		return "accepted"
-	case Completed:
-		return "completed"
-	case Rejected:
-		return "rejected"
-	default:
-		return ""
+func convertEntApplicationStatusToModelApplicationStatus(
+	applicationStatus *ent.ApplicationStatus,
+) *service.ApplicationStatus {
+	if applicationStatus == nil {
+		return nil
+	}
+	return &service.ApplicationStatus{
+		ID:        applicationStatus.ID,
+		CreatedBy: applicationStatus.Edges.User.ID,
+		Status:    convertEntApplicationStatusToModelStatus(&applicationStatus.Status),
+		CreatedAt: applicationStatus.CreatedAt,
 	}
 }
 
-// dbにstringいれる今の実装だとMarshalJson入らなそう。
-func (s Status) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.String())
-}
-
-func (s *Status) UnmarshalJSON(data []byte) error {
-	var str string
-	if err := json.Unmarshal(data, &str); err != nil {
-		return fmt.Errorf("data should be a string, got %s", data)
-	}
-
-	var st Status
-	switch str {
+func convertEntApplicationStatusToModelStatus(entStatus *applicationstatus.Status) service.Status {
+	var status service.Status
+	switch entStatus.String() {
 	case "submitted":
-		st = Submitted
+		status = service.Submitted
 	case "fix_required":
-		st = FixRequired
+		status = service.FixRequired
 	case "accepted":
-		st = Accepted
+		status = service.Accepted
 	case "completed":
-		st = Completed
+		status = service.Completed
 	case "rejected":
-		st = Rejected
+		status = service.Rejected
 	default:
-		return fmt.Errorf("invalid Status %s", str)
+		panic(fmt.Sprintf("unknown application status: %s", entStatus.String()))
 	}
-	*s = st
-	return nil
-}
-
-type ApplicationStatusRepository interface {
-	CreateStatus(
-		ctx context.Context, applicationID uuid.UUID, userID uuid.UUID, status Status,
-	) (*ApplicationStatus, error)
-}
-
-type ApplicationStatus struct {
-	ID        uuid.UUID
-	CreatedBy uuid.UUID
-	Status    Status
-	CreatedAt time.Time
+	return status
 }

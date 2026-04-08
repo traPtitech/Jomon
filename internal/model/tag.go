@@ -1,4 +1,3 @@
-//go:generate go tool mockgen -source=$GOFILE -destination=mock_$GOPACKAGE/mock_$GOFILE -package=mock_$GOPACKAGE
 package model
 
 import (
@@ -6,20 +5,81 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
+	"github.com/traPtitech/Jomon/internal/ent"
+	"github.com/traPtitech/Jomon/internal/ent/tag"
+	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
-type Tag struct {
-	ID        uuid.UUID
-	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt time.Time
+var tagErrorConverter = &entErrorConverter{
+	msgBadInput: "failed to process tag due to invalid input",
+	msgNotFound: "tag not found",
 }
 
-type TagRepository interface {
-	GetTags(ctx context.Context) ([]*Tag, error)
-	GetTag(ctx context.Context, tagID uuid.UUID) (*Tag, error)
-	CreateTag(ctx context.Context, name string) (*Tag, error)
-	UpdateTag(ctx context.Context, tagID uuid.UUID, name string) (*Tag, error)
-	DeleteTag(ctx context.Context, tagID uuid.UUID) error
+func (repo *EntRepository) GetTags(ctx context.Context) ([]*service.Tag, error) {
+	tags, err := repo.client.Tag.
+		Query().
+		All(ctx)
+	if err != nil {
+		return nil, tagErrorConverter.convert(err)
+	}
+	modeltags := lo.Map(tags, func(t *ent.Tag, _ int) *service.Tag {
+		return ConvertEntTagToModelTag(t)
+	})
+
+	return modeltags, nil
+}
+
+func (repo *EntRepository) GetTag(ctx context.Context, tagID uuid.UUID) (*service.Tag, error) {
+	t, err := repo.client.Tag.
+		Query().
+		Where(tag.IDEQ(tagID)).
+		Only(ctx)
+	if err != nil {
+		return nil, tagErrorConverter.convert(err)
+	}
+	return ConvertEntTagToModelTag(t), nil
+}
+
+func (repo *EntRepository) CreateTag(ctx context.Context, name string) (*service.Tag, error) {
+	created, err := repo.client.Tag.
+		Create().
+		SetName(name).
+		Save(ctx)
+	if err != nil {
+		return nil, tagErrorConverter.convert(err)
+	}
+	return ConvertEntTagToModelTag(created), nil
+}
+
+func (repo *EntRepository) UpdateTag(
+	ctx context.Context, tagID uuid.UUID, name string,
+) (*service.Tag, error) {
+	t, err := repo.client.Tag.
+		UpdateOneID(tagID).
+		SetName(name).
+		SetUpdatedAt(time.Now()).
+		Save(ctx)
+	if err != nil {
+		return nil, tagErrorConverter.convert(err)
+	}
+	return ConvertEntTagToModelTag(t), nil
+}
+
+func (repo *EntRepository) DeleteTag(ctx context.Context, tagID uuid.UUID) error {
+	err := repo.client.Tag.
+		DeleteOneID(tagID).
+		Exec(ctx)
+	return tagErrorConverter.convert(err)
+}
+
+func ConvertEntTagToModelTag(enttag *ent.Tag) *service.Tag {
+	return &service.Tag{
+		ID:        enttag.ID,
+		Name:      enttag.Name,
+		CreatedAt: enttag.CreatedAt,
+		UpdatedAt: enttag.UpdatedAt,
+		DeletedAt: nulltime.FromTime(enttag.DeletedAt),
+	}
 }

@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 )
 
@@ -98,7 +98,13 @@ func New(secret, channelID, webhookID string) *Service {
 	}
 }
 
-func (ws *Service) WebhookApplicationsEventHandler(c echo.Context, reqBody, resBody []byte) {
+func (ws *Service) WebhookApplicationsEventHandler(
+	c *echo.Context, reqBody, resBody []byte, err error,
+) {
+	if err != nil {
+		return
+	}
+
 	var message string
 
 	if strings.Contains(c.Request().URL.Path, "/comments") {

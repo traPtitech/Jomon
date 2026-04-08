@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/traPtitech/Jomon/internal/logging"
-	"github.com/traPtitech/Jomon/internal/model"
 	"github.com/traPtitech/Jomon/internal/nulltime"
+	"github.com/traPtitech/Jomon/internal/service"
 	"go.uber.org/zap"
 )
 
@@ -23,17 +23,17 @@ type User struct {
 	DeletedAt      nulltime.NullTime `json:"deleted_at"`
 }
 
-func (h Handlers) GetUsers(c echo.Context) error {
+func (h Handlers) GetUsers(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
 	users, err := h.Repository.GetUsers(ctx)
 	if err != nil {
 		logger.Error("failed to get users from repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 
-	res := lo.Map(users, func(user *model.User, _ int) User {
+	res := lo.Map(users, func(user *service.User, _ int) User {
 		return User{
 			ID:             user.ID,
 			Name:           user.Name,
@@ -41,7 +41,7 @@ func (h Handlers) GetUsers(c echo.Context) error {
 			AccountManager: user.AccountManager,
 			CreatedAt:      user.CreatedAt,
 			UpdatedAt:      user.UpdatedAt,
-			DeletedAt:      nulltime.FromTime(&user.DeletedAt),
+			DeletedAt:      user.DeletedAt,
 		}
 	})
 
@@ -54,27 +54,28 @@ type PutUserRequest struct {
 	AccountManager bool   `json:"account_manager"`
 }
 
-func (h Handlers) UpdateUserInfo(c echo.Context) error {
+func (h Handlers) UpdateUserInfo(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
 	var newUser PutUserRequest
 	if err := c.Bind(&newUser); err != nil {
 		logger.Info("could not get user info from request", zap.Error(err))
-		return c.NoContent(http.StatusBadRequest)
+		return service.NewBadInputError("could not get user info from request").
+			WithInternal(err)
 	}
 
 	user, err := h.Repository.GetUserByName(ctx, newUser.Name)
 	if err != nil {
 		logger.Error("failed to get user from repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return err
 	}
 
 	updated, err := h.Repository.UpdateUser(
 		ctx, user.ID, newUser.Name, newUser.DisplayName, newUser.AccountManager)
 	if err != nil {
 		logger.Error("failed to update user in repository", zap.Error(err))
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return err
 	}
 
 	return c.JSON(http.StatusOK, User{
@@ -85,7 +86,7 @@ func (h Handlers) UpdateUserInfo(c echo.Context) error {
 	})
 }
 
-func userFromModelUser(u model.User) User {
+func userFromModelUser(u service.User) User {
 	return User{
 		ID:             u.ID,
 		Name:           u.Name,
@@ -93,11 +94,11 @@ func userFromModelUser(u model.User) User {
 		AccountManager: u.AccountManager,
 		CreatedAt:      u.CreatedAt,
 		UpdatedAt:      u.UpdatedAt,
-		DeletedAt:      nulltime.FromTime(&u.DeletedAt),
+		DeletedAt:      u.DeletedAt,
 	}
 }
 
-func (h Handlers) GetMe(c echo.Context) error {
+func (h Handlers) GetMe(c *echo.Context) error {
 	loginUser, _ := c.Get(loginUserKey).(User)
 	return c.JSON(http.StatusOK, loginUser)
 }

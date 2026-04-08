@@ -6,8 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/traPtitech/Jomon/internal/ent"
+	"github.com/labstack/echo/v5"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/router/wrapsession"
 	"go.uber.org/zap"
@@ -20,7 +19,7 @@ const (
 
 func (h Handlers) setLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			req := c.Request()
 			ctx := req.Context()
 			reqID := req.Header.Get(echo.HeaderXRequestID)
@@ -34,31 +33,43 @@ func (h Handlers) setLoggerMiddleware(logger *zap.Logger) echo.MiddlewareFunc {
 
 // AccessLoggingMiddleware ですべてのエラーを出力する
 func (h Handlers) AccessLoggingMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	// TODO(logging): https://echo.labstack.com/docs/middleware/logger を使う
+	return func(c *echo.Context) error {
 		start := time.Now()
 		err := next(c)
 		if err != nil {
-			c.Error(err)
+			defaultHTTPErrorHandler(c, HTTPErrorHandlerInner(err))
 		}
 		stop := time.Now()
 
 		req := c.Request()
-		res := c.Response()
-		logger := logging.GetLogger(req.Context())
 		latency := strconv.FormatFloat(stop.Sub(start).Seconds(), 'f', 9, 64) + "s"
 		fields := []zapcore.Field{
 			zap.String("requestMethod", req.Method),
-			zap.Int("status", res.Status),
 			zap.String("userAgent", req.UserAgent()),
 			zap.String("remoteIp", c.RealIP()),
 			zap.String("referer", req.Referer()),
 			zap.String("protocol", req.Proto),
 			zap.String("requestUrl", req.URL.String()),
 			zap.String("requestSize", req.Header.Get(echo.HeaderContentLength)),
-			zap.String("responseSize", strconv.FormatInt(res.Size, 10)),
 			zap.String("latency", latency),
 		}
-		httpCode := res.Status
+		rw, uErr := echo.UnwrapResponse(c.Response())
+		if uErr != nil {
+			logger := logging.GetLogger(req.Context())
+			fields = append(
+				fields,
+				zap.Error(uErr),
+				zap.String("status", "unknown"),
+				zap.String("responseSize", "unknown"))
+			logger.Error("failed to unwrap response for access logging", fields...)
+			return nil
+		}
+		fields = append(fields,
+			zap.Int("status", rw.Status),
+			zap.String("responseSize", strconv.FormatInt(rw.Size, 10)))
+		logger := logging.GetLogger(req.Context())
+		httpCode := rw.Status
 		switch {
 		case httpCode >= 500:
 			fields = append(fields, zap.Error(err))
@@ -76,9 +87,8 @@ func (h Handlers) AccessLoggingMiddleware(next echo.HandlerFunc) echo.HandlerFun
 }
 
 func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		ctx := c.Request().Context()
-		logger := logging.GetLogger(ctx)
 
 		id, err := wrapsession.WithSession(
 			c, h.SessionName, func(w *wrapsession.W) (uuid.UUID, error) {
@@ -94,12 +104,7 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		user, err := h.Repository.GetUserByID(ctx, id)
 		if err != nil {
-			if ent.IsNotFound(err) {
-				logger.Info("user not found in repository", zap.Error(err))
-				return echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
-			}
-			logger.Error("failed to get user from repository", zap.Error(err))
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return err
 		}
 		c.Set(loginUserKey, userFromModelUser(*user))
 
@@ -108,7 +113,7 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func (h Handlers) CheckAccountManagerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		loginUser, _ := c.Get(loginUserKey).(User)
 		if !loginUser.AccountManager {
 			return echo.NewHTTPError(http.StatusForbidden, "you are not accountManager")

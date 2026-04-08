@@ -1,18 +1,51 @@
-//go:generate go tool mockgen -source=$GOFILE -destination=mock_$GOPACKAGE/mock_$GOFILE -package=mock_$GOPACKAGE
 package model
 
 import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
+	"github.com/traPtitech/Jomon/internal/ent"
+	"github.com/traPtitech/Jomon/internal/ent/user"
+	"github.com/traPtitech/Jomon/internal/service"
 )
 
-type AccountManager struct {
-	ID uuid.UUID `json:"id"`
+func (repo *EntRepository) GetAccountManagers(
+	ctx context.Context,
+) ([]*service.AccountManager, error) {
+	users, err := repo.client.User.
+		Query().
+		Where(user.AccountManager(true)).
+		All(ctx)
+	if err != nil {
+		return nil, defaultEntErrorConverter.convert(err)
+	}
+
+	accountManagers := lo.Map(users, func(u *ent.User, _ int) *service.AccountManager {
+		return &service.AccountManager{
+			ID: u.ID,
+		}
+	})
+
+	return accountManagers, nil
 }
 
-type AccountManagerRepository interface {
-	GetAccountManagers(ctx context.Context) ([]*AccountManager, error)
-	AddAccountManagers(ctx context.Context, userIDs []uuid.UUID) error
-	DeleteAccountManagers(ctx context.Context, userIDs []uuid.UUID) error
+func (repo *EntRepository) AddAccountManagers(ctx context.Context, userIDs []uuid.UUID) error {
+	_, err := repo.client.User.
+		Update().
+		Where(user.IDIn(userIDs...)).
+		SetAccountManager(true).
+		Save(ctx)
+
+	return defaultEntErrorConverter.convert(err)
+}
+
+func (repo *EntRepository) DeleteAccountManagers(ctx context.Context, userIDs []uuid.UUID) error {
+	_, err := repo.client.User.
+		Update().
+		Where(user.IDIn(userIDs...)).
+		SetAccountManager(false).
+		Save(ctx)
+
+	return defaultEntErrorConverter.convert(err)
 }
