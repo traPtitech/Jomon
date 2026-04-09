@@ -64,7 +64,11 @@ func (h Handlers) AuthCallback(c *echo.Context) error {
 		// User found, do nothing
 	} else if nfErr := new(service.NotFoundError); errors.As(err, &nfErr) {
 		// User not found, create new user
-		modelUser, err = h.Repository.CreateUser(ctx, u.Name, u.DisplayName, false)
+		inputs := service.CreateUserInputs{
+			Name:        u.Name,
+			DisplayName: u.DisplayName,
+		}
+		modelUser, err = h.Service.CreateUser(ctx, inputs)
 		if err != nil {
 			logger.Error("failed to create user", zap.Error(err))
 			return err

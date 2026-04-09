@@ -61,6 +61,23 @@ func (s *Service) GetUserByName(ctx context.Context, name string) (*User, error)
 	return user, nil
 }
 
+type CreateUserInputs struct {
+	Name        string
+	DisplayName string
+}
+
+func (s *Service) CreateUser(ctx context.Context, inputs CreateUserInputs) (*User, error) {
+	logger := logging.GetLogger(ctx)
+	user, err := s.repository.CreateUser(
+		ctx, inputs.Name, inputs.DisplayName, false,
+	)
+	if err != nil {
+		logger.Error("failed to create user in repository", zap.Error(err))
+		return nil, err
+	}
+	return user, nil
+}
+
 type UpdateUserInputs struct {
 	Name           string
 	DisplayName    string
