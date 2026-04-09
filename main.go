@@ -76,8 +76,6 @@ func main() {
 	handlers := router.Handlers{
 		WebhookService: ws,
 		Service:        service,
-		Repository:     repo,
-		Storage:        strg,
 		SessionName:    sessionName,
 	}
 

@@ -19,8 +19,6 @@ import (
 type Handlers struct {
 	WebhookService *webhook.Service
 	Service        *service.Service
-	Repository     service.Repository
-	Storage        service.Storage
 	SessionName    string
 }
 

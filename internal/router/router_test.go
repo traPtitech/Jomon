@@ -66,8 +66,6 @@ func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, erro
 
 	return &TestHandlers{
 		Handlers{
-			Repository:  repository,
-			Storage:     storage,
 			Service:     service,
 			SessionName: sessionName,
 		},
