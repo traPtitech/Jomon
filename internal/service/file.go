@@ -41,6 +41,57 @@ var acceptedMimeTypes = map[string]bool{
 	"application/zip":    true,
 }
 
+func (s *Service) GetFile(ctx context.Context, fileID uuid.UUID) (*File, error) {
+	logger := logging.GetLogger(ctx)
+	file, err := s.repository.GetFile(ctx, fileID)
+	if err != nil {
+		logger.Error("failed to get file from repository", zap.Error(err))
+		return nil, err
+	}
+	return file, nil
+}
+
+func (s *Service) ReadFile(ctx context.Context, fileID uuid.UUID) (io.ReadCloser, error) {
+	logger := logging.GetLogger(ctx)
+	content, err := s.storage.Open(ctx, fileID.String())
+	if err != nil {
+		logger.Error("failed to open file from storage", zap.Error(err))
+		return nil, err
+	}
+	return content, nil
+}
+
+func (s *Service) DeleteFile(ctx context.Context, user *User, fileID uuid.UUID) error {
+	logger := logging.GetLogger(ctx)
+	file, err := s.repository.GetFile(ctx, fileID)
+	if err != nil {
+		logger.Error("failed to get file from repository", zap.Error(err))
+		return err
+	}
+	if !s.isAccountManagerOrFileCreator(user, file) {
+		logger.Info(
+			"user is not account manager or file creator",
+			zap.String("userID", user.ID.String()),
+			zap.String("fileID", fileID.String()))
+		return NewForbiddenError("user is not accountManager or file creator")
+	}
+	err = s.repository.DeleteFile(ctx, fileID)
+	if err != nil {
+		logger.Error("failed to delete file from repository", zap.Error(err))
+		return err
+	}
+	err = s.storage.Delete(ctx, fileID.String())
+	if err != nil {
+		logger.Error("failed to delete file from storage", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (s *Service) isAccountManagerOrFileCreator(user *User, file *File) bool {
+	return s.isAccountManager(user) || file.CreatedBy == user.ID
+}
+
 func (s *Service) WriteFile(
 	ctx context.Context,
 	user *User, applicationID uuid.UUID,

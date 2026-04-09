@@ -1,8 +1,6 @@
 package router
 
 import (
-	"context"
-	"errors"
 	"net/http"
 	"time"
 
@@ -24,11 +22,6 @@ type FileMetaResponse struct {
 	CreatedBy uuid.UUID `json:"created_by"`
 	CreatedAt time.Time `json:"created_at"`
 }
-
-var (
-	errUserIsNotAccountManagerOrFileCreator = errors.New(
-		"user is not accountManager or file creator")
-)
 
 func (h Handlers) PostFile(c *echo.Context) error {
 	ctx := c.Request().Context()
@@ -93,11 +86,8 @@ func (h Handlers) GetFile(c *echo.Context) error {
 			WithInternal(err)
 	}
 
-	file, err := h.Repository.GetFile(ctx, fileID)
+	file, err := h.Service.GetFile(ctx, fileID)
 	if err != nil {
-		logger.Info(
-			"file not found in repository",
-			zap.String("ID", fileID.String()), zap.Error(err))
 		return err
 	}
 
@@ -120,20 +110,16 @@ func (h Handlers) GetFile(c *echo.Context) error {
 		}
 	}
 
-	f, err := h.Storage.Open(ctx, fileID.String())
+	content, err := h.Service.ReadFile(ctx, fileID)
 	if err != nil {
-		logger.Error(
-			"failed to open file in storage",
-			zap.String("ID", fileID.String()),
-			zap.Error(err))
-		return service.NewUnexpectedError(err)
+		return err
 	}
-	defer f.Close()
+	defer content.Close()
 
 	c.Response().Header().Set("Cache-Control", "private, no-cache, max-age=0")
 	c.Response().Header().Set(echo.HeaderLastModified, modifiedAt.UTC().Format(http.TimeFormat))
 
-	return c.Stream(http.StatusOK, file.MimeType, f)
+	return c.Stream(http.StatusOK, file.MimeType, content)
 }
 
 func (h Handlers) GetFileMeta(c *echo.Context) error {
@@ -147,11 +133,8 @@ func (h Handlers) GetFileMeta(c *echo.Context) error {
 			WithInternal(err)
 	}
 
-	file, err := h.Repository.GetFile(ctx, fileID)
+	file, err := h.Service.GetFile(ctx, fileID)
 	if err != nil {
-		logger.Info(
-			"file not found in repository",
-			zap.String("ID", fileID.String()), zap.Error(err))
 		return err
 	}
 
@@ -175,51 +158,10 @@ func (h Handlers) DeleteFile(c *echo.Context) error {
 		return service.NewBadInputError("invalid file ID").
 			WithInternal(err)
 	}
-	if err := h.filterAccountManagerOrFileCreator(ctx, loginUser, fileID); err != nil {
-		return err
-	}
-
-	err = h.Repository.DeleteFile(ctx, fileID)
+	err = h.Service.DeleteFile(ctx, loginUser, fileID)
 	if err != nil {
-		logger.Error("failed to delete file in repository",
-			zap.String("ID", fileID.String()), zap.Error(err))
-		return service.NewUnexpectedError(err)
-	}
-
-	err = h.Storage.Delete(ctx, fileID.String())
-	if err != nil {
-		logger.Error(
-			"failed to delete file in storage",
-			zap.String("ID", fileID.String()), zap.Error(err))
 		return service.NewUnexpectedError(err)
 	}
 
 	return c.NoContent(http.StatusOK)
-}
-
-// isFileCreator 与えられたユーザーがファイルの作成者かどうかを確認します
-func (h Handlers) isFileCreator(ctx context.Context, userID, fileID uuid.UUID) (bool, error) {
-	file, err := h.Repository.GetFile(ctx, fileID)
-	if err != nil {
-		return false, err
-	}
-	return file.CreatedBy == userID, nil
-}
-
-func (h Handlers) filterAccountManagerOrFileCreator(
-	ctx context.Context, user *service.User, fileID uuid.UUID,
-) error {
-	logger := logging.GetLogger(ctx)
-	if user.AccountManager {
-		return nil
-	}
-	isCreator, err := h.isFileCreator(ctx, user.ID, fileID)
-	if err != nil {
-		logger.Error("failed to check if user is file creator", zap.Error(err))
-		return echo.ErrInternalServerError.Wrap(err)
-	}
-	if isCreator {
-		return nil
-	}
-	return echo.ErrForbidden.Wrap(errUserIsNotAccountManagerOrFileCreator)
 }
