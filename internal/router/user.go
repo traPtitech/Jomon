@@ -102,6 +102,7 @@ func userFromModelUser(u service.User) User {
 }
 
 func (h Handlers) GetMe(c *echo.Context) error {
-	loginUser, _ := c.Get(loginUserKey).(User)
-	return c.JSON(http.StatusOK, loginUser)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
+	user := userFromModelUser(*loginUser)
+	return c.JSON(http.StatusOK, user)
 }

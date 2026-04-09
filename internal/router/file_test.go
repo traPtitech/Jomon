@@ -73,7 +73,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files")
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -128,7 +128,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files")
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -190,7 +190,7 @@ func TestHandlers_PostFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/files")
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -493,7 +493,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "fileID", Value: file.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -539,7 +539,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "fileID", Value: file.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		resErr := service.NewUnexpectedError(errors.New("file could not be deleted"))
 
@@ -584,7 +584,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "fileID", Value: file.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -615,7 +615,6 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		accessUser := makeUser(t, false)
-		user := userFromModelUser(*accessUser)
 		invalidUUID := "invalid-uuid"
 
 		e := echo.New()
@@ -628,7 +627,7 @@ func TestHandlers_DeleteFile(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "fileID", Value: invalidUUID},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)

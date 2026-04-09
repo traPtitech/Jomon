@@ -275,6 +275,7 @@ func (h Handlers) PostApplication(c *echo.Context) error {
 	}
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 
 	targets := lo.Map(req.Targets, func(target *Target, _ int) *service.ApplicationTarget {
 		return &service.ApplicationTarget{
@@ -296,7 +297,7 @@ func (h Handlers) PostApplication(c *echo.Context) error {
 		Tags:    tags,
 		Targets: targets,
 	}
-	application, err := h.Service.CreateApplication(ctx, req.CreatedBy, inputs)
+	application, err := h.Service.CreateApplication(ctx, loginUser, inputs)
 	if err != nil {
 		logger.Error("failed to create application in service", zap.Error(err))
 		return err
@@ -449,7 +450,7 @@ func (h Handlers) PutApplication(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	loginUser, _ := c.Get(loginUserKey).(User)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 	applicationID, err := uuid.Parse(c.Param("applicationID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `applicationID` as UUID", zap.Error(err))
@@ -478,7 +479,7 @@ func (h Handlers) PutApplication(c *echo.Context) error {
 		TagIDs:  req.Tags,
 		Targets: targets,
 	}
-	application, err := h.Service.UpdateApplication(ctx, applicationID, loginUser.ID, inputs)
+	application, err := h.Service.UpdateApplication(ctx, applicationID, loginUser, inputs)
 	if err != nil {
 		logger.Error("failed to update application in service", zap.Error(err))
 		return err
@@ -549,7 +550,7 @@ func (h Handlers) PostComment(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	loginUser, _ := c.Get(loginUserKey).(User)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 	applicationID, err := uuid.Parse(c.Param("applicationID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `applicationID` as UUID", zap.Error(err))
@@ -569,7 +570,7 @@ func (h Handlers) PostComment(c *echo.Context) error {
 	}
 
 	comment, err := h.Service.CreateCommentToApplication(
-		ctx, applicationID, loginUser.ID, req.Comment)
+		ctx, applicationID, loginUser, req.Comment)
 	if err != nil {
 		logger.Error("failed to create comment in service", zap.Error(err))
 		return err
@@ -588,7 +589,7 @@ func (h Handlers) PutStatus(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	loginUser, _ := c.Get(loginUserKey).(User)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 	applicationID, err := uuid.Parse(c.Param("applicationID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `applicationID` as UUID", zap.Error(err))
@@ -612,7 +613,7 @@ func (h Handlers) PutStatus(c *echo.Context) error {
 		Comment: req.Comment,
 	}
 	created, comment, err := h.Service.UpdateApplicationStatus(
-		ctx, applicationID, loginUser.ID, inputs)
+		ctx, applicationID, loginUser, inputs)
 	if err != nil {
 		logger.Error("failed to update application status in service", zap.Error(err))
 		return err

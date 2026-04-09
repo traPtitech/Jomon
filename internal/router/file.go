@@ -34,7 +34,7 @@ func (h Handlers) PostFile(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	loginUser, _ := c.Get(loginUserKey).(User)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 	form, err := c.MultipartForm()
 	if err != nil {
 		logger.Error("failed to parse request as multipart/form-data", zap.Error(err))
@@ -73,7 +73,7 @@ func (h Handlers) PostFile(c *echo.Context) error {
 	}
 	defer src.Close()
 
-	file, err := h.Service.WriteFile(ctx, loginUser.ID, applicationID, name, mimetype, src)
+	file, err := h.Service.WriteFile(ctx, loginUser, applicationID, name, mimetype, src)
 	if err != nil {
 		logger.Error("failed to write file in service", zap.Error(err))
 		return err
@@ -168,14 +168,14 @@ func (h Handlers) DeleteFile(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	loginUser, _ := c.Get(loginUserKey).(User)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 	fileID, err := uuid.Parse(c.Param("fileID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `fileID` as UUID", zap.Error(err))
 		return service.NewBadInputError("invalid file ID").
 			WithInternal(err)
 	}
-	if err := h.filterAccountManagerOrFileCreator(ctx, &loginUser, fileID); err != nil {
+	if err := h.filterAccountManagerOrFileCreator(ctx, loginUser, fileID); err != nil {
 		return err
 	}
 
@@ -207,7 +207,7 @@ func (h Handlers) isFileCreator(ctx context.Context, userID, fileID uuid.UUID) (
 }
 
 func (h Handlers) filterAccountManagerOrFileCreator(
-	ctx context.Context, user *User, fileID uuid.UUID,
+	ctx context.Context, user *service.User, fileID uuid.UUID,
 ) error {
 	logger := logging.GetLogger(ctx)
 	if user.AccountManager {

@@ -237,7 +237,7 @@ func (s *Service) UpdateApplicationStatus(
 		message := fmt.Sprintf(
 			"application creator is unable to change %v to %v",
 			application.Status.String(), inputs.Status.String())
-		return nil, nil, NewBadInputError(message)
+		return nil, nil, NewForbiddenError(message)
 	}
 	newStatus, err := s.repository.CreateStatus(ctx, applicationID, user.ID, inputs.Status)
 	if err != nil {

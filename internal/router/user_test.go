@@ -284,7 +284,6 @@ func TestHandlers_GetMe(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		accessUser := makeUser(t, random.Numeric(t, 2) == 1)
-		user := userFromModelUser(*accessUser)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, "/api/users/me", nil)
@@ -292,7 +291,7 @@ func TestHandlers_GetMe(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/users/me")
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
