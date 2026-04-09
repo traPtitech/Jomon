@@ -102,22 +102,12 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return err
 		}
-		user, err := h.Repository.GetUserByID(ctx, id)
+		accessUser, err := h.Service.GetUserByID(ctx, id)
 		if err != nil {
 			return err
 		}
-		c.Set(loginUserKey, userFromModelUser(*user))
+		c.Set(loginUserKey, accessUser)
 
-		return next(c)
-	}
-}
-
-func (h Handlers) CheckAccountManagerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c *echo.Context) error {
-		loginUser, _ := c.Get(loginUserKey).(User)
-		if !loginUser.AccountManager {
-			return echo.NewHTTPError(http.StatusForbidden, "you are not accountManager")
-		}
 		return next(c)
 	}
 }

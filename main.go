@@ -55,6 +55,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	service := service.New(repo, strg)
 
 	// Setup server
 	logMode := logging.ModeFromEnv("IS_DEBUG_MODE")
@@ -74,8 +75,7 @@ func main() {
 	}
 	handlers := router.Handlers{
 		WebhookService: ws,
-		Repository:     repo,
-		Storage:        strg,
+		Service:        service,
 		SessionName:    sessionName,
 	}
 
