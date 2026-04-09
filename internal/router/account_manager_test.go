@@ -24,10 +24,10 @@ func TestHandler_GetAccountManagers(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, true)
 		accountManager := &service.AccountManager{
-			ID: uuid.New(),
+			ID: accessUser.ID,
 		}
-
 		accountManagers := []*service.AccountManager{
 			accountManager,
 		}
@@ -36,6 +36,7 @@ func TestHandler_GetAccountManagers(t *testing.T) {
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/account-managers", nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -58,12 +59,14 @@ func TestHandler_GetAccountManagers(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+		accessUser := makeUser(t, true)
 		var accountManagers []*service.AccountManager
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/account-managers", nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -86,11 +89,13 @@ func TestHandler_GetAccountManagers(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+		accessUser := makeUser(t, true)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/api/account-managers", nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		resErr := service.NewUnexpectedError(errors.New("failed to get accountManagers"))
 
@@ -113,6 +118,7 @@ func TestHandler_PostAccountManager(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+		accessUser := makeUser(t, true)
 
 		accountManager := uuid.New()
 		accountManagers := []uuid.UUID{accountManager}
@@ -125,7 +131,7 @@ func TestHandler_PostAccountManager(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-
+		c.Set(loginUserKey, accessUser)
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockAccountManagerRepository.
@@ -141,6 +147,7 @@ func TestHandler_PostAccountManager(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+		accessUser := makeUser(t, true)
 
 		accountManager := uuid.New()
 		accountManagers := []uuid.UUID{accountManager}
@@ -153,6 +160,7 @@ func TestHandler_PostAccountManager(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		resErr := service.NewUnexpectedError(errors.New("failed to create accountManager"))
 
@@ -172,6 +180,7 @@ func TestHandler_PostAccountManager(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+		accessUser := makeUser(t, true)
 
 		accountManager := uuid.New()
 		accountManagers := []uuid.UUID{accountManager}
@@ -184,6 +193,7 @@ func TestHandler_PostAccountManager(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		resErr := service.NewBadInputError("failed to create accountManager")
 
@@ -207,6 +217,7 @@ func TestHandler_DeleteAccountManager(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+		accessUser := makeUser(t, true)
 
 		accountManager := uuid.New()
 		accountManagers := []uuid.UUID{accountManager}
@@ -219,6 +230,7 @@ func TestHandler_DeleteAccountManager(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -235,6 +247,7 @@ func TestHandler_DeleteAccountManager(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
+		accessUser := makeUser(t, true)
 
 		accountManager := uuid.New()
 		accountManagers := []uuid.UUID{accountManager}
@@ -247,6 +260,7 @@ func TestHandler_DeleteAccountManager(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		resErr := service.NewUnexpectedError(errors.New("failed to delete accountManager"))
 
@@ -266,7 +280,7 @@ func TestHandler_DeleteAccountManager(t *testing.T) {
 		t.Parallel()
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
-
+		accessUser := makeUser(t, true)
 		invalidUUID := "invalid-uuid"
 		reqBody, err := json.Marshal([]string{invalidUUID})
 		require.NoError(t, err)
@@ -277,6 +291,7 @@ func TestHandler_DeleteAccountManager(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
