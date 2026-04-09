@@ -20,7 +20,10 @@ type AccountManagerRepository interface {
 	DeleteAccountManagers(ctx context.Context, userIDs []uuid.UUID) error
 }
 
-func (s *Service) GetAccountManagers(ctx context.Context) ([]*AccountManager, error) {
+func (s *Service) GetAccountManagers(ctx context.Context, user *User) ([]*AccountManager, error) {
+	if !s.isAccountManager(user) {
+		return nil, NewForbiddenError("user is not account manager")
+	}
 	logger := logging.GetLogger(ctx)
 	accountManagers, err := s.repository.GetAccountManagers(ctx)
 	if err != nil {
@@ -30,7 +33,10 @@ func (s *Service) GetAccountManagers(ctx context.Context) ([]*AccountManager, er
 	return accountManagers, nil
 }
 
-func (s *Service) AddAccountManagers(ctx context.Context, userIDs []uuid.UUID) error {
+func (s *Service) AddAccountManagers(ctx context.Context, user *User, userIDs []uuid.UUID) error {
+	if !s.isAccountManager(user) {
+		return NewForbiddenError("user is not account manager")
+	}
 	logger := logging.GetLogger(ctx)
 	err := s.repository.AddAccountManagers(ctx, userIDs)
 	if err != nil {
@@ -40,7 +46,12 @@ func (s *Service) AddAccountManagers(ctx context.Context, userIDs []uuid.UUID) e
 	return nil
 }
 
-func (s *Service) DeleteAccountManagers(ctx context.Context, userIDs []uuid.UUID) error {
+func (s *Service) DeleteAccountManagers(
+	ctx context.Context, user *User, userIDs []uuid.UUID,
+) error {
+	if !s.isAccountManager(user) {
+		return NewForbiddenError("user is not account manager")
+	}
 	logger := logging.GetLogger(ctx)
 	err := s.repository.DeleteAccountManagers(ctx, userIDs)
 	if err != nil {

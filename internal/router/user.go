@@ -57,6 +57,7 @@ type PutUserRequest struct {
 func (h Handlers) UpdateUserInfo(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 
 	var newUser PutUserRequest
 	if err := c.Bind(&newUser); err != nil {
@@ -71,11 +72,12 @@ func (h Handlers) UpdateUserInfo(c *echo.Context) error {
 		return err
 	}
 
-	updated, err := h.Service.UpdateUser(ctx, user.ID, service.UpdateUserInputs{
+	inputs := service.UpdateUserInputs{
 		Name:           newUser.Name,
 		DisplayName:    newUser.DisplayName,
 		AccountManager: newUser.AccountManager,
-	})
+	}
+	updated, err := h.Service.UpdateUser(ctx, loginUser, user.ID, inputs)
 	if err != nil {
 		logger.Error("failed to update user in service", zap.Error(err))
 		return err

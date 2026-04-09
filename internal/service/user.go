@@ -85,8 +85,11 @@ type UpdateUserInputs struct {
 }
 
 func (s *Service) UpdateUser(
-	ctx context.Context, userID uuid.UUID, inputs UpdateUserInputs,
+	ctx context.Context, accessUser *User, userID uuid.UUID, inputs UpdateUserInputs,
 ) (*User, error) {
+	if !s.isAccountManager(accessUser) {
+		return nil, NewForbiddenError("user is not account manager")
+	}
 	logger := logging.GetLogger(ctx)
 	user, err := s.repository.UpdateUser(
 		ctx, userID, inputs.Name, inputs.DisplayName, inputs.AccountManager,
