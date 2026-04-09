@@ -239,6 +239,7 @@ func (s *Service) UpdateApplicationStatus(
 			application.Status.String(), inputs.Status.String())
 		return nil, nil, NewForbiddenError(message)
 	}
+	// TODO(db-transaction): CreateStatusとCreateCommentは同一トランザクションで実行するべき
 	newStatus, err := s.repository.CreateStatus(ctx, applicationID, user.ID, inputs.Status)
 	if err != nil {
 		logger.Error("failed to create status in repository", zap.Error(err))
@@ -267,9 +268,9 @@ func (s *Service) isAbleNoCommentUpdateStatus(currentStatus, newStatus Status) b
 		return newStatus != Submitted
 	case FixRequired, Completed, Rejected:
 		return true
+	default:
+		return false
 	}
-	// the switch above performs exhaustive check
-	panic("unreachable")
 }
 
 func (s *Service) isAbleAccountManagerUpdateStatus(currentStatus, newStatus Status) bool {

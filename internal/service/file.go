@@ -75,6 +75,7 @@ func (s *Service) DeleteFile(ctx context.Context, user *User, fileID uuid.UUID) 
 			zap.String("fileID", fileID.String()))
 		return NewForbiddenError("user is not accountManager or file creator")
 	}
+	// TODO(db-transaction): DeleteFileはストレージとリポジトリ両方で成功させるべき
 	err = s.repository.DeleteFile(ctx, fileID)
 	if err != nil {
 		logger.Error("failed to delete file from repository", zap.Error(err))
@@ -101,6 +102,7 @@ func (s *Service) WriteFile(
 		return nil, NewBadInputError("unsupported mime type")
 	}
 	logger := logging.GetLogger(ctx)
+	// TODO(db-transaction): WriteFileはストレージとリポジトリ両方で成功させるべき
 	file, err := s.repository.CreateFile(ctx, name, mimetype, applicationID, user.ID)
 	if err != nil {
 		logger.Error("failed to create file in repository", zap.Error(err))

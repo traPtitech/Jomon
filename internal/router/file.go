@@ -160,7 +160,7 @@ func (h Handlers) DeleteFile(c *echo.Context) error {
 	}
 	err = h.Service.DeleteFile(ctx, loginUser, fileID)
 	if err != nil {
-		return service.NewUnexpectedError(err)
+		return err
 	}
 
 	return c.NoContent(http.StatusOK)
