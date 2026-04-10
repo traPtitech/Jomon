@@ -11,4 +11,5 @@ type Repository interface {
 	ApplicationRepository
 	TagRepository
 	UserRepository
+	UserSubjectRepository
 }
