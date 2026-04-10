@@ -26,6 +26,8 @@ type Tx struct {
 	Tag *TagClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserSubject is the client for interacting with the UserSubject builders.
+	UserSubject *UserSubjectClient
 
 	// lazily loaded.
 	client     *Client
@@ -164,6 +166,7 @@ func (tx *Tx) init() {
 	tx.File = NewFileClient(tx.config)
 	tx.Tag = NewTagClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.UserSubject = NewUserSubjectClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

@@ -178,6 +178,25 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// UserSubjectsColumns holds the columns for the "user_subjects" table.
+	UserSubjectsColumns = []*schema.Column{
+		{Name: "subject", Type: field.TypeString, Size: 36},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// UserSubjectsTable holds the schema information for the "user_subjects" table.
+	UserSubjectsTable = &schema.Table{
+		Name:       "user_subjects",
+		Columns:    UserSubjectsColumns,
+		PrimaryKey: []*schema.Column{UserSubjectsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_subjects_users_user",
+				Columns:    []*schema.Column{UserSubjectsColumns[1]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// ApplicationTagColumns holds the columns for the "application_tag" table.
 	ApplicationTagColumns = []*schema.Column{
 		{Name: "application_id", Type: field.TypeUUID},
@@ -212,6 +231,7 @@ var (
 		FilesTable,
 		TagsTable,
 		UsersTable,
+		UserSubjectsTable,
 		ApplicationTagTable,
 	}
 )
@@ -226,6 +246,7 @@ func init() {
 	CommentsTable.ForeignKeys[1].RefTable = UsersTable
 	FilesTable.ForeignKeys[0].RefTable = ApplicationsTable
 	FilesTable.ForeignKeys[1].RefTable = UsersTable
+	UserSubjectsTable.ForeignKeys[0].RefTable = UsersTable
 	ApplicationTagTable.ForeignKeys[0].RefTable = ApplicationsTable
 	ApplicationTagTable.ForeignKeys[1].RefTable = TagsTable
 }

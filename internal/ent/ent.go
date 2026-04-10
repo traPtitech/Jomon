@@ -19,6 +19,7 @@ import (
 	"github.com/traPtitech/Jomon/internal/ent/file"
 	"github.com/traPtitech/Jomon/internal/ent/tag"
 	"github.com/traPtitech/Jomon/internal/ent/user"
+	"github.com/traPtitech/Jomon/internal/ent/usersubject"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -86,6 +87,7 @@ func checkColumn(t, c string) error {
 			file.Table:              file.ValidColumn,
 			tag.Table:               tag.ValidColumn,
 			user.Table:              user.ValidColumn,
+			usersubject.Table:       usersubject.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

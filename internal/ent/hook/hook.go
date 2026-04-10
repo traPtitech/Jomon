@@ -93,6 +93,18 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
 }
 
+// The UserSubjectFunc type is an adapter to allow the use of ordinary
+// function as UserSubject mutator.
+type UserSubjectFunc func(context.Context, *ent.UserSubjectMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserSubjectFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.UserSubjectMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserSubjectMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 

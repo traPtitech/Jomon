@@ -14,6 +14,7 @@ import (
 	"github.com/traPtitech/Jomon/internal/ent/schema"
 	"github.com/traPtitech/Jomon/internal/ent/tag"
 	"github.com/traPtitech/Jomon/internal/ent/user"
+	"github.com/traPtitech/Jomon/internal/ent/usersubject"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -130,4 +131,10 @@ func init() {
 	userDescID := userFields[0].Descriptor()
 	// user.DefaultID holds the default value on creation for the id field.
 	user.DefaultID = userDescID.Default.(func() uuid.UUID)
+	usersubjectFields := schema.UserSubject{}.Fields()
+	_ = usersubjectFields
+	// usersubjectDescID is the schema descriptor for id field.
+	usersubjectDescID := usersubjectFields[0].Descriptor()
+	// usersubject.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	usersubject.IDValidator = usersubjectDescID.Validators[0].(func(string) error)
 }
