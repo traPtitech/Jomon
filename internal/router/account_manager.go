@@ -14,9 +14,10 @@ import (
 func (h Handlers) GetAccountManagers(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
-	accountManagers, err := h.Repository.GetAccountManagers(ctx)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
+	accountManagers, err := h.Service.GetAccountManagers(ctx, loginUser)
 	if err != nil {
-		logger.Error("failed to get accountManagers from repository", zap.Error(err))
+		logger.Error("failed to get accountManagers from service", zap.Error(err))
 		return err
 	}
 
@@ -30,6 +31,7 @@ func (h Handlers) GetAccountManagers(c *echo.Context) error {
 func (h Handlers) PostAccountManagers(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 
 	var accountManager []uuid.UUID
 	if err := c.Bind(&accountManager); err != nil {
@@ -38,9 +40,9 @@ func (h Handlers) PostAccountManagers(c *echo.Context) error {
 			WithInternal(err)
 	}
 
-	err := h.Repository.AddAccountManagers(ctx, accountManager)
+	err := h.Service.AddAccountManagers(ctx, loginUser, accountManager)
 	if err != nil {
-		logger.Error("failed to add accountManager in repository", zap.Error(err))
+		logger.Error("failed to add accountManager in service", zap.Error(err))
 		return err
 	}
 
@@ -50,6 +52,7 @@ func (h Handlers) PostAccountManagers(c *echo.Context) error {
 func (h Handlers) DeleteAccountManagers(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 
 	var accountManager []uuid.UUID
 	if err := c.Bind(&accountManager); err != nil {
@@ -58,9 +61,9 @@ func (h Handlers) DeleteAccountManagers(c *echo.Context) error {
 			WithInternal(err)
 	}
 
-	err := h.Repository.DeleteAccountManagers(ctx, accountManager)
+	err := h.Service.DeleteAccountManagers(ctx, loginUser, accountManager)
 	if err != nil {
-		logger.Error("failed to delete accountManager from repository", zap.Error(err))
+		logger.Error("failed to delete accountManager from service", zap.Error(err))
 		return err
 	}
 

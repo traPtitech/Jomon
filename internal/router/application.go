@@ -1,7 +1,6 @@
 package router
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -219,9 +218,9 @@ func (h Handlers) GetApplications(c *echo.Context) error {
 		CreatedBy: createdBy,
 	}
 
-	modelapplications, err := h.Repository.GetApplications(ctx, query)
+	modelapplications, err := h.Service.GetApplications(ctx, query)
 	if err != nil {
-		logger.Error("failed to get applications from repository", zap.Error(err))
+		logger.Error("failed to get applications from service", zap.Error(err))
 		return err
 	}
 
@@ -276,26 +275,31 @@ func (h Handlers) PostApplication(c *echo.Context) error {
 	}
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 
-	tags := []*service.Tag{}
-	for _, tagID := range req.Tags {
-		tag, err := h.Repository.GetTag(ctx, tagID)
-		if err != nil {
-			return err
-		}
-		tags = append(tags, tag)
-	}
 	targets := lo.Map(req.Targets, func(target *Target, _ int) *service.ApplicationTarget {
 		return &service.ApplicationTarget{
 			Target: target.Target,
 			Amount: target.Amount,
 		}
 	})
-	application, err := h.Repository.CreateApplication(
-		ctx,
-		req.Title, req.Content, tags, targets, req.CreatedBy)
+	tags := make([]*service.Tag, 0, len(req.Tags))
+	for _, tagID := range req.Tags {
+		tag, err := h.Service.GetTag(ctx, tagID)
+		if err != nil {
+			return err
+		}
+		tags = append(tags, tag)
+	}
+	inputs := service.CreateApplicationInputs{
+		Title:   req.Title,
+		Content: req.Content,
+		Tags:    tags,
+		Targets: targets,
+	}
+	application, err := h.Service.CreateApplication(ctx, loginUser, inputs)
 	if err != nil {
-		logger.Error("failed to create application in repository", zap.Error(err))
+		logger.Error("failed to create application in service", zap.Error(err))
 		return err
 	}
 	restargets := lo.Map(
@@ -376,14 +380,9 @@ func (h Handlers) GetApplication(c *echo.Context) error {
 		return service.NewBadInputError("received parameter `applicationID` is not a valid UUID")
 	}
 
-	application, err := h.Repository.GetApplication(ctx, applicationID)
+	application, err := h.Service.GetApplication(ctx, applicationID)
 	if err != nil {
-		logger.Error("failed to get application from repository", zap.Error(err))
-		return err
-	}
-	modelcomments, err := h.Repository.GetComments(ctx, applicationID)
-	if err != nil {
-		logger.Error("failed to get comments from repository", zap.Error(err))
+		logger.Error("failed to get application from service", zap.Error(err))
 		return err
 	}
 	restargets := lo.Map(
@@ -407,13 +406,13 @@ func (h Handlers) GetApplication(c *echo.Context) error {
 		}
 	})
 
-	comments := lo.Map(modelcomments, func(modelcomment *service.Comment, _ int) *CommentDetail {
+	comments := lo.Map(application.Comments, func(comment *service.Comment, _ int) *CommentDetail {
 		return &CommentDetail{
-			ID:        modelcomment.ID,
-			User:      modelcomment.User,
-			Comment:   modelcomment.Comment,
-			CreatedAt: modelcomment.CreatedAt,
-			UpdatedAt: modelcomment.UpdatedAt,
+			ID:        comment.ID,
+			User:      comment.User,
+			Comment:   comment.Comment,
+			CreatedAt: comment.CreatedAt,
+			UpdatedAt: comment.UpdatedAt,
 		}
 	})
 	statuses := lo.Map(
@@ -451,7 +450,7 @@ func (h Handlers) PutApplication(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	loginUser, _ := c.Get(loginUserKey).(User)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 	applicationID, err := uuid.Parse(c.Param("applicationID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `applicationID` as UUID", zap.Error(err))
@@ -462,30 +461,11 @@ func (h Handlers) PutApplication(c *echo.Context) error {
 		logger.Info("invalid UUID")
 		return service.NewBadInputError("received parameter `applicationID` is not a valid UUID")
 	}
-	isApplicationCreator, err := h.isApplicationCreator(ctx, loginUser.ID, applicationID)
-	if err != nil {
-		logger.Error("failed to check application creator", zap.Error(err))
-		return err
-	}
-	if !isApplicationCreator {
-		logger.Info("user is not application creator", zap.String("ID", loginUser.ID.String()))
-		return service.NewForbiddenError("you are not application creator")
-	}
-
 	var req PutApplication
 	if err = c.Bind(&req); err != nil {
 		logger.Info("failed to get application from request", zap.Error(err))
 		return service.NewBadInputError("failed to get application from request").
 			WithInternal(err)
-	}
-	tags := []*service.Tag{}
-	for _, tagID := range req.Tags {
-		tag, err := h.Repository.GetTag(ctx, tagID)
-		if err != nil {
-			logger.Error("failed to get tag from repository", zap.Error(err))
-			return err
-		}
-		tags = append(tags, tag)
 	}
 	targets := lo.Map(req.Targets, func(target *Target, _ int) *service.ApplicationTarget {
 		return &service.ApplicationTarget{
@@ -493,11 +473,15 @@ func (h Handlers) PutApplication(c *echo.Context) error {
 			Amount: target.Amount,
 		}
 	})
-	application, err := h.Repository.UpdateApplication(
-		ctx,
-		applicationID, req.Title, req.Content, tags, targets)
+	inputs := service.UpdateApplicationInputs{
+		Title:   req.Title,
+		Content: req.Content,
+		TagIDs:  req.Tags,
+		Targets: targets,
+	}
+	application, err := h.Service.UpdateApplication(ctx, applicationID, loginUser, inputs)
 	if err != nil {
-		logger.Error("failed to update application in repository", zap.Error(err))
+		logger.Error("failed to update application in service", zap.Error(err))
 		return err
 	}
 	restags := lo.Map(application.Tags, func(tag *service.Tag, _ int) *TagResponse {
@@ -566,7 +550,7 @@ func (h Handlers) PostComment(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	loginUser, _ := c.Get(loginUserKey).(User)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 	applicationID, err := uuid.Parse(c.Param("applicationID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `applicationID` as UUID", zap.Error(err))
@@ -585,9 +569,10 @@ func (h Handlers) PostComment(c *echo.Context) error {
 			WithInternal(err)
 	}
 
-	comment, err := h.Repository.CreateComment(ctx, req.Comment, applicationID, loginUser.ID)
+	comment, err := h.Service.CreateCommentToApplication(
+		ctx, applicationID, loginUser, req.Comment)
 	if err != nil {
-		logger.Error("failed to create comment in repository", zap.Error(err))
+		logger.Error("failed to create comment in service", zap.Error(err))
 		return err
 	}
 	res := &CommentDetail{
@@ -604,7 +589,7 @@ func (h Handlers) PutStatus(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	loginUser, _ := c.Get(loginUserKey).(User)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 	applicationID, err := uuid.Parse(c.Param("applicationID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `applicationID` as UUID", zap.Error(err))
@@ -623,84 +608,18 @@ func (h Handlers) PutStatus(c *echo.Context) error {
 			WithInternal(err)
 	}
 
-	application, err := h.Repository.GetApplication(ctx, applicationID)
+	inputs := service.UpdateStatusInputs{
+		Status:  req.Status,
+		Comment: req.Comment,
+	}
+	created, comment, err := h.Service.UpdateApplicationStatus(
+		ctx, applicationID, loginUser, inputs)
 	if err != nil {
-		logger.Error("failed to get application from repository", zap.Error(err))
+		logger.Error("failed to update application status in service", zap.Error(err))
 		return err
 	}
-	if err := h.filterAccountManagerOrApplicationCreator(ctx, &loginUser, application); err != nil {
-		return err
-	}
-
-	// judging privilege
-	if req.Status == application.Status {
-		return service.NewBadInputError("status is the same as current status")
-	}
-	if req.Comment == "" {
-		if !IsAbleNoCommentChangeStatus(req.Status, application.Status) {
-			message := fmt.Sprintf(
-				"unable to change %v to %v without comment",
-				application.Status.String(), req.Status.String())
-			return service.NewBadInputError(message)
-		}
-	}
-
-	if loginUser.AccountManager {
-		if !IsAbleAccountManagerChangeState(req.Status, application.Status) {
-			logger.Info("accountManager unable to change status")
-			message := fmt.Sprintf(
-				"accountManager unable to change %v to %v",
-				application.Status.String(), req.Status.String())
-			return service.NewBadInputError(message)
-		}
-		if req.Status == service.Submitted && application.Status == service.Accepted {
-			targets, err := h.Repository.GetApplicationTargets(ctx, applicationID)
-			if err != nil {
-				logger.Error("failed to get application targets from repository", zap.Error(err))
-				return err
-			}
-			paid := lo.Reduce(
-				targets,
-				func(p bool, target *service.ApplicationTargetDetail, _ int) bool {
-					return p || target.PaidAt.Valid
-				},
-				false,
-			)
-			if paid {
-				logger.Info("someone already paid")
-				return service.NewBadInputError("someone already paid")
-			}
-		}
-	}
-
-	if !loginUser.AccountManager && loginUser.ID == application.CreatedBy {
-		if !IsAbleCreatorChangeStatus(req.Status, application.Status) {
-			logger.Info("creator unable to change status")
-			message := fmt.Sprintf(
-				"creator unable to change %v to %v",
-				application.Status.String(), req.Status.String())
-			return service.NewForbiddenError(message)
-		}
-	}
-
-	if loginUser.ID != application.CreatedBy && !loginUser.AccountManager {
-		logger.Info("user is not creator or accountManager")
-		return service.NewForbiddenError("you are not application creator")
-	}
-
-	// create status and comment: keep the two in this order
-	created, err := h.Repository.CreateStatus(ctx, applicationID, loginUser.ID, req.Status)
-	if err != nil {
-		logger.Error("failed to create status in repository", zap.Error(err))
-		return err
-	}
-	var resComment CommentDetail
-	if req.Comment != "" {
-		comment, err := h.Repository.CreateComment(ctx, req.Comment, application.ID, loginUser.ID)
-		if err != nil {
-			logger.Error("failed to create comment in repository", zap.Error(err))
-			return err
-		}
+	resComment := CommentDetail{}
+	if comment != nil {
 		resComment = CommentDetail{
 			ID:        comment.ID,
 			User:      comment.User,
@@ -711,63 +630,11 @@ func (h Handlers) PutStatus(c *echo.Context) error {
 	}
 
 	res := &StatusResponse{
-		CreatedBy: loginUser.ID,
+		CreatedBy: created.CreatedBy,
 		Status:    created.Status,
 		Comment:   resComment,
 		CreatedAt: created.CreatedAt,
 	}
 
 	return c.JSON(http.StatusOK, res)
-}
-
-func IsAbleNoCommentChangeStatus(status, latestStatus service.Status) bool {
-	switch latestStatus {
-	case service.Submitted:
-		return status != service.FixRequired && status != service.Rejected
-	case service.Accepted:
-		return status != service.Submitted
-	case service.FixRequired, service.Completed, service.Rejected:
-		return true
-	}
-	// the switch above performs exhaustive check
-	panic("unreachable")
-}
-
-func IsAbleCreatorChangeStatus(status, latestStatus service.Status) bool {
-	return status == service.Submitted && latestStatus == service.FixRequired
-}
-
-func IsAbleAccountManagerChangeState(status, latestStatus service.Status) bool {
-	return status == service.Rejected && latestStatus == service.Submitted ||
-		status == service.Submitted && latestStatus == service.FixRequired ||
-		status == service.Accepted && latestStatus == service.Submitted ||
-		status == service.Submitted && latestStatus == service.Accepted ||
-		status == service.FixRequired && latestStatus == service.Submitted
-}
-
-func (h Handlers) isApplicationCreator(
-	ctx context.Context, userID, applicationID uuid.UUID,
-) (bool, error) {
-	application, err := h.Repository.GetApplication(ctx, applicationID)
-	if err != nil {
-		return false, err
-	}
-	return application.CreatedBy == userID, nil
-}
-
-func (h Handlers) filterAccountManagerOrApplicationCreator(
-	ctx context.Context, user *User, application *service.ApplicationDetail,
-) *service.ForbiddenError {
-	logger := logging.GetLogger(ctx)
-	if user.AccountManager {
-		return nil
-	}
-	if application.CreatedBy == user.ID {
-		return nil
-	}
-	logger.Info(
-		"user is not accountManager or application creator",
-		zap.String("ID", user.ID.String()),
-	)
-	return service.NewForbiddenError("you are not application creator")
 }

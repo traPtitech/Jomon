@@ -132,13 +132,13 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		user := makeUser(t, random.Numeric(t, 2) == 1)
+		accessUser := makeUser(t, true)
 		updateUser := &service.User{
-			ID:             user.ID,
-			Name:           user.Name,
-			DisplayName:    user.DisplayName,
-			AccountManager: !user.AccountManager,
-			CreatedAt:      user.CreatedAt,
+			ID:             accessUser.ID,
+			Name:           accessUser.Name,
+			DisplayName:    accessUser.DisplayName,
+			AccountManager: !accessUser.AccountManager,
+			CreatedAt:      accessUser.CreatedAt,
 			UpdatedAt:      time.Now(),
 		}
 
@@ -156,6 +156,7 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -163,12 +164,12 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		h.Repository.MockUserRepository.
 			EXPECT().
 			GetUserByName(c.Request().Context(), updateUser.Name).
-			Return(user, nil)
+			Return(accessUser, nil)
 		h.Repository.MockUserRepository.
 			EXPECT().
 			UpdateUser(
 				c.Request().Context(),
-				user.ID, updateUser.Name, updateUser.DisplayName, updateUser.AccountManager).
+				accessUser.ID, updateUser.Name, updateUser.DisplayName, updateUser.AccountManager).
 			Return(updateUser, nil)
 
 		require.NoError(t, h.Handlers.UpdateUserInfo(c))
@@ -189,13 +190,13 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		user := makeUser(t, random.Numeric(t, 2) == 1)
+		accessUser := makeUser(t, true)
 		updateUser := &service.User{
-			ID:             user.ID,
-			Name:           user.Name,
-			DisplayName:    user.DisplayName,
-			AccountManager: !user.AccountManager,
-			CreatedAt:      user.CreatedAt,
+			ID:             accessUser.ID,
+			Name:           accessUser.Name,
+			DisplayName:    accessUser.DisplayName,
+			AccountManager: !accessUser.AccountManager,
+			CreatedAt:      accessUser.CreatedAt,
 			UpdatedAt:      time.Now(),
 		}
 		reqUser := PutUserRequest{
@@ -212,19 +213,20 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
 		h.Repository.MockUserRepository.
 			EXPECT().
 			GetUserByName(c.Request().Context(), updateUser.Name).
-			Return(user, nil)
+			Return(accessUser, nil)
 		resErr := service.NewUnexpectedError(errors.New("failed to get users."))
 		h.Repository.MockUserRepository.
 			EXPECT().
 			UpdateUser(
 				c.Request().Context(),
-				user.ID, updateUser.Name, updateUser.DisplayName, updateUser.AccountManager).
+				accessUser.ID, updateUser.Name, updateUser.DisplayName, updateUser.AccountManager).
 			Return(nil, resErr)
 
 		err = h.Handlers.UpdateUserInfo(c)
@@ -237,13 +239,13 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
-		user := makeUser(t, random.Numeric(t, 2) == 1)
+		accessUser := makeUser(t, true)
 		updateUser := &service.User{
-			ID:             user.ID,
-			Name:           user.Name,
-			DisplayName:    user.DisplayName,
-			AccountManager: !user.AccountManager,
-			CreatedAt:      user.CreatedAt,
+			ID:             accessUser.ID,
+			Name:           accessUser.Name,
+			DisplayName:    accessUser.DisplayName,
+			AccountManager: !accessUser.AccountManager,
+			CreatedAt:      accessUser.CreatedAt,
 			UpdatedAt:      time.Now(),
 		}
 		reqUser := PutUserRequest{
@@ -260,6 +262,7 @@ func TestHandlers_UpdateUserInfo(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -284,7 +287,6 @@ func TestHandlers_GetMe(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		accessUser := makeUser(t, random.Numeric(t, 2) == 1)
-		user := userFromModelUser(*accessUser)
 
 		e := echo.New()
 		req := httptest.NewRequestWithContext(ctx, http.MethodPut, "/api/users/me", nil)
@@ -292,7 +294,7 @@ func TestHandlers_GetMe(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPath("/api/users/me")
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)

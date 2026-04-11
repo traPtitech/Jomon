@@ -27,9 +27,9 @@ func (h Handlers) GetUsers(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	users, err := h.Repository.GetUsers(ctx)
+	users, err := h.Service.GetUsers(ctx)
 	if err != nil {
-		logger.Error("failed to get users from repository", zap.Error(err))
+		logger.Error("failed to get users from service", zap.Error(err))
 		return err
 	}
 
@@ -57,6 +57,7 @@ type PutUserRequest struct {
 func (h Handlers) UpdateUserInfo(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 
 	var newUser PutUserRequest
 	if err := c.Bind(&newUser); err != nil {
@@ -65,16 +66,20 @@ func (h Handlers) UpdateUserInfo(c *echo.Context) error {
 			WithInternal(err)
 	}
 
-	user, err := h.Repository.GetUserByName(ctx, newUser.Name)
+	user, err := h.Service.GetUserByName(ctx, newUser.Name)
 	if err != nil {
-		logger.Error("failed to get user from repository", zap.Error(err))
+		logger.Error("failed to get user from service", zap.Error(err))
 		return err
 	}
 
-	updated, err := h.Repository.UpdateUser(
-		ctx, user.ID, newUser.Name, newUser.DisplayName, newUser.AccountManager)
+	inputs := service.UpdateUserInputs{
+		Name:           newUser.Name,
+		DisplayName:    newUser.DisplayName,
+		AccountManager: newUser.AccountManager,
+	}
+	updated, err := h.Service.UpdateUser(ctx, loginUser, user.ID, inputs)
 	if err != nil {
-		logger.Error("failed to update user in repository", zap.Error(err))
+		logger.Error("failed to update user in service", zap.Error(err))
 		return err
 	}
 
@@ -99,6 +104,7 @@ func userFromModelUser(u service.User) User {
 }
 
 func (h Handlers) GetMe(c *echo.Context) error {
-	loginUser, _ := c.Get(loginUserKey).(User)
-	return c.JSON(http.StatusOK, loginUser)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
+	user := userFromModelUser(*loginUser)
+	return c.JSON(http.StatusOK, user)
 }

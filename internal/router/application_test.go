@@ -577,6 +577,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
 		date := time.Now()
 		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
@@ -585,13 +586,12 @@ func TestHandlers_PostApplication(t *testing.T) {
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			CreatedBy: uuid.New(),
+			CreatedBy: accessUser.ID,
 			Tags:      []*service.Tag{},
 			Targets:   []*service.ApplicationTargetDetail{},
 			Statuses: []*service.ApplicationStatus{{
-
 				ID:        uuid.New(),
-				CreatedBy: uuid.New(),
+				CreatedBy: accessUser.ID,
 				Status:    service.Submitted,
 				CreatedAt: date,
 			}},
@@ -614,6 +614,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -641,6 +642,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
 		date := time.Now()
 		tag := &service.Tag{
 			ID:        uuid.New(),
@@ -656,12 +658,12 @@ func TestHandlers_PostApplication(t *testing.T) {
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			CreatedBy: uuid.New(),
+			CreatedBy: accessUser.ID,
 			Tags:      tags,
 			Targets:   []*service.ApplicationTargetDetail{},
 			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				CreatedBy: uuid.New(),
+				CreatedBy: accessUser.ID,
 				Status:    service.Submitted,
 				CreatedAt: date,
 			}},
@@ -684,6 +686,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -715,6 +718,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
 		date := time.Now()
 		target := &service.ApplicationTarget{
 			Target: uuid.New(),
@@ -733,12 +737,12 @@ func TestHandlers_PostApplication(t *testing.T) {
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			CreatedBy: uuid.New(),
+			CreatedBy: accessUser.ID,
 			Tags:      []*service.Tag{},
 			Targets:   []*service.ApplicationTargetDetail{tgd},
 			Statuses: []*service.ApplicationStatus{{
 				ID:        uuid.New(),
-				CreatedBy: uuid.New(),
+				CreatedBy: accessUser.ID,
 				Status:    service.Submitted,
 				CreatedAt: date,
 			}},
@@ -765,6 +769,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -792,6 +797,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
 		date := time.Now()
 		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
@@ -800,7 +806,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			CreatedBy: uuid.New(),
+			CreatedBy: accessUser.ID,
 		}
 		unknownTagID := uuid.New()
 		reqApplication := Application{
@@ -818,6 +824,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		resErr := service.NewNotFoundError("tag not found")
 
@@ -838,6 +845,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		ctx := testutil.NewContext(t)
 		ctrl := gomock.NewController(t)
 
+		accessUser := makeUser(t, false)
 		date := time.Now()
 		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
@@ -846,7 +854,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 			Content:   random.AlphaNumeric(t, 50),
 			CreatedAt: date,
 			UpdatedAt: date,
-			CreatedBy: uuid.New(),
+			CreatedBy: accessUser.ID,
 		}
 		reqApplication := Application{
 			CreatedBy: application.CreatedBy,
@@ -864,6 +872,7 @@ func TestHandlers_PostApplication(t *testing.T) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
+		c.Set(loginUserKey, accessUser)
 
 		resErr := service.NewNotFoundError("user not found")
 
@@ -1228,7 +1237,7 @@ func TestHandlers_PutApplication(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		targets := lo.Map(
 			updateApplication.Targets,
@@ -1346,7 +1355,7 @@ func TestHandlers_PutApplication(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1460,7 +1469,7 @@ func TestHandlers_PutApplication(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		targets := lo.Map(
 			updateApplication.Targets,
@@ -1572,7 +1581,7 @@ func TestHandlers_PutApplication(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		targets := lo.Map(
 			updateApplication.Targets,
@@ -1663,7 +1672,6 @@ func TestHandlers_PutApplication(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		accessUser := makeUser(t, false)
-		user := userFromModelUser(*accessUser)
 		unknownID := uuid.New()
 		reqApplication := PutApplication{
 			Title:   random.AlphaNumeric(t, 30),
@@ -1684,7 +1692,7 @@ func TestHandlers_PutApplication(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: unknownID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1750,7 +1758,7 @@ func TestHandlers_PutApplication(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1829,7 +1837,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -1925,7 +1933,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2021,7 +2029,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2118,7 +2126,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2214,7 +2222,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2317,7 +2325,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2407,7 +2415,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2423,7 +2431,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		accessUser := makeUser(t, false)
-		user := userFromModelUser(*accessUser)
 		invalidUUID := "invalid-uuid"
 		reqStatus := PutStatus{
 			Status:  service.Submitted,
@@ -2442,7 +2449,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: invalidUUID},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2458,7 +2465,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		accessUser := makeUser(t, false)
-		user := userFromModelUser(*accessUser)
 		reqStatus := PutStatus{
 			Status:  service.Submitted,
 			Comment: random.AlphaNumeric(t, 20),
@@ -2476,7 +2482,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: uuid.Nil.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2530,7 +2536,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2589,7 +2595,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2647,7 +2653,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2705,7 +2711,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2726,7 +2732,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		accessUser := makeUser(t, true)
-		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
@@ -2764,7 +2769,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2785,7 +2790,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		accessUser := makeUser(t, true)
-		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
@@ -2830,7 +2834,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2894,7 +2898,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)
@@ -2915,7 +2919,6 @@ func TestHandlers_PutStatus(t *testing.T) {
 		ctrl := gomock.NewController(t)
 
 		accessUser := makeUser(t, false)
-		user := userFromModelUser(*accessUser)
 		date := time.Now()
 		application := &service.ApplicationDetail{
 			ID:        uuid.New(),
@@ -2953,7 +2956,7 @@ func TestHandlers_PutStatus(t *testing.T) {
 		c.SetPathValues([]echo.PathValue{
 			{Name: "applicationID", Value: application.ID.String()},
 		})
-		c.Set(loginUserKey, user)
+		c.Set(loginUserKey, accessUser)
 
 		h, err := NewTestHandlers(t, ctrl)
 		require.NoError(t, err)

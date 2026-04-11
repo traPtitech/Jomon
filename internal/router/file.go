@@ -1,8 +1,6 @@
 package router
 
 import (
-	"context"
-	"errors"
 	"net/http"
 	"time"
 
@@ -25,25 +23,11 @@ type FileMetaResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-var (
-	acceptedMimeTypes = map[string]bool{
-		"image/jpeg":         true,
-		"image/png":          true,
-		"image/gif":          true,
-		"image/bmp":          true,
-		"application/pdf":    true,
-		"application/msword": true,
-		"application/zip":    true,
-	}
-	errUserIsNotAccountManagerOrFileCreator = errors.New(
-		"user is not accountManager or file creator")
-)
-
 func (h Handlers) PostFile(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	loginUser, _ := c.Get(loginUserKey).(User)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 	form, err := c.MultipartForm()
 	if err != nil {
 		logger.Error("failed to parse request as multipart/form-data", zap.Error(err))
@@ -74,12 +58,6 @@ func (h Handlers) PostFile(c *echo.Context) error {
 	}
 
 	mimetype := reqfile.Header.Get(echo.HeaderContentType)
-	if !acceptedMimeTypes[mimetype] {
-		logger.Info("requested unsupported mime type", zap.String("mime-type", mimetype))
-		return echo.NewHTTPError(
-			http.StatusUnsupportedMediaType,
-			"unsupported media type")
-	}
 
 	src, err := reqfile.Open()
 	if err != nil {
@@ -88,17 +66,10 @@ func (h Handlers) PostFile(c *echo.Context) error {
 	}
 	defer src.Close()
 
-	file, err := h.Repository.CreateFile(ctx, name, mimetype, applicationID, loginUser.ID)
+	file, err := h.Service.WriteFile(ctx, loginUser, applicationID, name, mimetype, src)
 	if err != nil {
-		logger.Error("failed to create file in repository", zap.Error(err))
-		return service.NewUnexpectedError(err)
-	}
-
-	err = h.Storage.Save(ctx, file.ID.String(), src)
-	if err != nil {
-		logger.Error("failed to save file id in storage", zap.Error(err))
-		// TODO: storageが返すエラーはそのまま返したい
-		return service.NewUnexpectedError(err)
+		logger.Error("failed to write file in service", zap.Error(err))
+		return err
 	}
 
 	return c.JSON(http.StatusOK, &FileResponse{file.ID})
@@ -115,11 +86,8 @@ func (h Handlers) GetFile(c *echo.Context) error {
 			WithInternal(err)
 	}
 
-	file, err := h.Repository.GetFile(ctx, fileID)
+	file, err := h.Service.GetFile(ctx, fileID)
 	if err != nil {
-		logger.Info(
-			"file not found in repository",
-			zap.String("ID", fileID.String()), zap.Error(err))
 		return err
 	}
 
@@ -142,20 +110,16 @@ func (h Handlers) GetFile(c *echo.Context) error {
 		}
 	}
 
-	f, err := h.Storage.Open(ctx, fileID.String())
+	content, err := h.Service.ReadFile(ctx, fileID)
 	if err != nil {
-		logger.Error(
-			"failed to open file in storage",
-			zap.String("ID", fileID.String()),
-			zap.Error(err))
-		return service.NewUnexpectedError(err)
+		return err
 	}
-	defer f.Close()
+	defer content.Close()
 
 	c.Response().Header().Set("Cache-Control", "private, no-cache, max-age=0")
 	c.Response().Header().Set(echo.HeaderLastModified, modifiedAt.UTC().Format(http.TimeFormat))
 
-	return c.Stream(http.StatusOK, file.MimeType, f)
+	return c.Stream(http.StatusOK, file.MimeType, content)
 }
 
 func (h Handlers) GetFileMeta(c *echo.Context) error {
@@ -169,11 +133,8 @@ func (h Handlers) GetFileMeta(c *echo.Context) error {
 			WithInternal(err)
 	}
 
-	file, err := h.Repository.GetFile(ctx, fileID)
+	file, err := h.Service.GetFile(ctx, fileID)
 	if err != nil {
-		logger.Info(
-			"file not found in repository",
-			zap.String("ID", fileID.String()), zap.Error(err))
 		return err
 	}
 
@@ -190,58 +151,17 @@ func (h Handlers) DeleteFile(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	loginUser, _ := c.Get(loginUserKey).(User)
+	loginUser, _ := c.Get(loginUserKey).(*service.User)
 	fileID, err := uuid.Parse(c.Param("fileID"))
 	if err != nil {
 		logger.Info("could not parse query parameter `fileID` as UUID", zap.Error(err))
 		return service.NewBadInputError("invalid file ID").
 			WithInternal(err)
 	}
-	if err := h.filterAccountManagerOrFileCreator(ctx, &loginUser, fileID); err != nil {
+	err = h.Service.DeleteFile(ctx, loginUser, fileID)
+	if err != nil {
 		return err
 	}
 
-	err = h.Repository.DeleteFile(ctx, fileID)
-	if err != nil {
-		logger.Error("failed to delete file in repository",
-			zap.String("ID", fileID.String()), zap.Error(err))
-		return service.NewUnexpectedError(err)
-	}
-
-	err = h.Storage.Delete(ctx, fileID.String())
-	if err != nil {
-		logger.Error(
-			"failed to delete file in storage",
-			zap.String("ID", fileID.String()), zap.Error(err))
-		return service.NewUnexpectedError(err)
-	}
-
 	return c.NoContent(http.StatusOK)
-}
-
-// isFileCreator 与えられたユーザーがファイルの作成者かどうかを確認します
-func (h Handlers) isFileCreator(ctx context.Context, userID, fileID uuid.UUID) (bool, error) {
-	file, err := h.Repository.GetFile(ctx, fileID)
-	if err != nil {
-		return false, err
-	}
-	return file.CreatedBy == userID, nil
-}
-
-func (h Handlers) filterAccountManagerOrFileCreator(
-	ctx context.Context, user *User, fileID uuid.UUID,
-) error {
-	logger := logging.GetLogger(ctx)
-	if user.AccountManager {
-		return nil
-	}
-	isCreator, err := h.isFileCreator(ctx, user.ID, fileID)
-	if err != nil {
-		logger.Error("failed to check if user is file creator", zap.Error(err))
-		return echo.ErrInternalServerError.Wrap(err)
-	}
-	if isCreator {
-		return nil
-	}
-	return echo.ErrForbidden.Wrap(errUserIsNotAccountManagerOrFileCreator)
 }
