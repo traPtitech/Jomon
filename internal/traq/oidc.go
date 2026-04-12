@@ -66,8 +66,8 @@ func (c *Client) ExchangeCodeToToken(
 	oauth2Token, err := c.oauth2Config.Exchange(ctx, code,
 		oauth2.S256ChallengeOption(authProofs.CodeVerifier))
 	if err != nil {
-		err = fmt.Errorf("failed to exchange code to token: %w", err)
-		return "", service.NewUnexpectedError(err)
+		return "", service.NewUnauthenticatedError("failed to exchange code to token").
+			WithInternal(err)
 	}
 	idToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
