@@ -9,6 +9,7 @@ import (
 	"github.com/traPtitech/Jomon/internal/router"
 	"github.com/traPtitech/Jomon/internal/service"
 	"github.com/traPtitech/Jomon/internal/storage"
+	"github.com/traPtitech/Jomon/internal/traq"
 	"github.com/traPtitech/Jomon/internal/webhook"
 	"go.uber.org/zap"
 )
@@ -55,7 +56,18 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	service := service.New(repo, strg)
+	// Setup OIDC client
+	oidcClientConfig := traq.ClientConfig{
+		ClientID:     os.Getenv("TRAQ_CLIENT_ID"),
+		ClientSecret: os.Getenv("TRAQ_CLIENT_SECRET"),
+		RedirectURL:  os.Getenv("TRAQ_OIDC_CALLBACK_URL"),
+		ProviderURL:  "https://q.trap.jp",
+	}
+	oidcClient, err := traq.LoadClient(context.Background(), oidcClientConfig)
+	if err != nil {
+		panic(err)
+	}
+	service := service.New(repo, strg, oidcClient)
 
 	// Setup server
 	logMode := logging.ModeFromEnv("IS_DEBUG_MODE")
