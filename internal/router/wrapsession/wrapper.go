@@ -1,7 +1,6 @@
 package wrapsession
 
 import (
-	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v5"
 )
@@ -9,9 +8,10 @@ import (
 // NOTE: ここの値は外から変更する必要がないので非公開にしている
 
 const (
-	userIDKey       = "user_id"
 	codeVerifierKey = "code_verifier"
+	nonceKey        = "nonce"
 	refererKey      = "referer"
+	idTokenKey      = "id_token"
 )
 
 // TODO: この設定は外から与えられるようにしたい
@@ -60,15 +60,6 @@ func (w *W) drop(c *echo.Context) error {
 	return nil
 }
 
-func (w *W) GetUserID() (uuid.UUID, bool) {
-	v, ok := w.getValue(userIDKey).(uuid.UUID)
-	return v, ok
-}
-
-func (w *W) SetUserID(value uuid.UUID) {
-	w.setValue(userIDKey, value)
-}
-
 func (w *W) GetCodeVerifier() (string, bool) {
 	v, ok := w.getValue(codeVerifierKey).(string)
 	return v, ok
@@ -78,6 +69,15 @@ func (w *W) SetCodeVerifier(value string) {
 	w.setValue(codeVerifierKey, value)
 }
 
+func (w *W) GetNonce() (string, bool) {
+	v, ok := w.getValue(nonceKey).(string)
+	return v, ok
+}
+
+func (w *W) SetNonce(value string) {
+	w.setValue(nonceKey, value)
+}
+
 func (w *W) GetReferer() (string, bool) {
 	v, ok := w.getValue(refererKey).(string)
 	return v, ok
@@ -85,4 +85,13 @@ func (w *W) GetReferer() (string, bool) {
 
 func (w *W) SetReferer(value string) {
 	w.setValue(refererKey, value)
+}
+
+func (w *W) GetIDToken() (string, bool) {
+	v, ok := w.getValue(idTokenKey).(string)
+	return v, ok
+}
+
+func (w *W) SetIDToken(value string) {
+	w.setValue(idTokenKey, value)
 }
