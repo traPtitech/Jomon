@@ -1,6 +1,7 @@
 package traq
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -8,8 +9,47 @@ import (
 	"os"
 	"strings"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/labstack/echo/v5"
+	"github.com/traPtitech/Jomon/internal/service"
+	"golang.org/x/oauth2"
 )
+
+type Client struct {
+	oauth2Config    *oauth2.Config
+	idTokenVerifier *oidc.IDTokenVerifier
+}
+
+type ClientConfig struct {
+	ClientID     string
+	ClientSecret string
+	RedirectURL  string
+	ProviderURL  string
+}
+
+func LoadClient(ctx context.Context, config ClientConfig) (*Client, error) {
+	provider, err := oidc.NewProvider(ctx, config.ProviderURL)
+	if err != nil {
+		err = fmt.Errorf("failed to create OIDC provider: %w", err)
+		return nil, service.NewUnexpectedError(err)
+	}
+	oauth2Config := &oauth2.Config{
+		ClientID:     config.ClientID,
+		ClientSecret: config.ClientSecret,
+		RedirectURL:  config.RedirectURL,
+		Endpoint:     provider.Endpoint(),
+		Scopes:       []string{oidc.ScopeOpenID},
+	}
+	idTokenVerifier := provider.Verifier(&oidc.Config{
+		ClientID: config.ClientID,
+		// 他のアプリが発行したトークンも受け入れるため、クライアントIDのチェックはスキップする
+		SkipClientIDCheck:          true,
+		SkipExpiryCheck:            false,
+		SkipIssuerCheck:            false,
+		InsecureSkipSignatureCheck: false,
+	})
+	return &Client{oauth2Config: oauth2Config, idTokenVerifier: idTokenVerifier}, nil
+}
 
 type Auth struct {
 	ClientID string
