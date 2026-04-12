@@ -21,51 +21,60 @@ type authCallbackQueryParams struct {
 	State string `query:"state"`
 }
 
-func (h Handlers) bindAuthCodeWithProofs(c *echo.Context) (string, *service.AuthProofs, error) {
+func (h Handlers) bindAuthCodeWithProofs(
+	c *echo.Context,
+) (code string, state string, authProofs *service.AuthProofs, err error) {
+	type sessionValues struct {
+		State        string
+		CodeVerifier string
+		Nonce        string
+	}
 	var params authCallbackQueryParams
 	if err := c.Bind(&params); err != nil {
-		return "", nil, service.NewUnauthenticatedError("unexpected query params").WithInternal(err)
+		return "", "", nil, service.NewUnauthenticatedError("unexpected query params").
+			WithInternal(err)
 	}
-	codeVerifier, err := wrapsession.WithSession(
-		c, h.SessionName, func(w *wrapsession.W) (string, error) {
-			v, ok := w.GetCodeVerifier()
+	sessValues, err := wrapsession.WithSession(
+		c, h.SessionName, func(w *wrapsession.W) (*sessionValues, error) {
+			state, ok := w.GetState()
 			if !ok {
-				return "", service.NewUnauthenticatedError("code_verifier not found in session")
+				return nil, service.NewUnauthenticatedError("state not found in session")
 			}
-			return v, nil
+			codeVerifier, ok := w.GetCodeVerifier()
+			if !ok {
+				return nil, service.NewUnauthenticatedError("code verifier not found in session")
+			}
+			nonce, ok := w.GetNonce()
+			if !ok {
+				return nil, service.NewUnauthenticatedError("nonce not found in session")
+			}
+			return &sessionValues{
+				State:        state,
+				CodeVerifier: codeVerifier,
+				Nonce:        nonce,
+			}, nil
 		})
 	if err != nil {
-		return "", nil, err
+		return "", "", nil, err
 	}
-	nonce, err := wrapsession.WithSession(
-		c, h.SessionName, func(w *wrapsession.W) (string, error) {
-			v, ok := w.GetNonce()
-			if !ok {
-				return "", service.NewUnauthenticatedError("nonce not found in session")
-			}
-			return v, nil
-		})
-	if err != nil {
-		return "", nil, err
-	}
-	authProofs := &service.AuthProofs{
+	authProofs = &service.AuthProofs{
 		State:        params.State,
-		CodeVerifier: codeVerifier,
-		Nonce:        nonce,
+		CodeVerifier: sessValues.CodeVerifier,
+		Nonce:        sessValues.Nonce,
 	}
-	return params.Code, authProofs, nil
+	return params.Code, sessValues.State, authProofs, nil
 }
 
 func (h Handlers) AuthCallback(c *echo.Context) error {
 	ctx := c.Request().Context()
 	logger := logging.GetLogger(ctx)
 
-	code, authProofs, err := h.bindAuthCodeWithProofs(c)
+	code, state, authProofs, err := h.bindAuthCodeWithProofs(c)
 	if err != nil {
 		logger.Error("failed to bind auth code with proofs", zap.Error(err))
 		return err
 	}
-	token, err := h.Service.ExchangeCodeToToken(ctx, code, authProofs)
+	token, err := h.Service.ExchangeCodeToToken(ctx, code, state, authProofs)
 	if err != nil {
 		logger.Error("failed to exchange authorization code to token", zap.Error(err))
 		return err
@@ -103,6 +112,7 @@ func (h Handlers) BeginAuth(c *echo.Context) error {
 		return err
 	}
 	_, err = wrapsession.WithSession(c, h.SessionName, func(w *wrapsession.W) (struct{}, error) {
+		w.SetState(authProofs.State)
 		w.SetCodeVerifier(authProofs.CodeVerifier)
 		w.SetNonce(authProofs.Nonce)
 		referer := c.Request().Referer()

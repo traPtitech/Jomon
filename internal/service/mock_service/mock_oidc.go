@@ -44,18 +44,18 @@ func (m *MockOIDCClient) EXPECT() *MockOIDCClientMockRecorder {
 }
 
 // ExchangeCodeToToken mocks base method.
-func (m *MockOIDCClient) ExchangeCodeToToken(ctx context.Context, code string, authProofs *service.AuthProofs) (service.Token, error) {
+func (m *MockOIDCClient) ExchangeCodeToToken(ctx context.Context, code, state string, authProofs *service.AuthProofs) (service.Token, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExchangeCodeToToken", ctx, code, authProofs)
+	ret := m.ctrl.Call(m, "ExchangeCodeToToken", ctx, code, state, authProofs)
 	ret0, _ := ret[0].(service.Token)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ExchangeCodeToToken indicates an expected call of ExchangeCodeToToken.
-func (mr *MockOIDCClientMockRecorder) ExchangeCodeToToken(ctx, code, authProofs any) *gomock.Call {
+func (mr *MockOIDCClientMockRecorder) ExchangeCodeToToken(ctx, code, state, authProofs any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExchangeCodeToToken", reflect.TypeOf((*MockOIDCClient)(nil).ExchangeCodeToToken), ctx, code, authProofs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExchangeCodeToToken", reflect.TypeOf((*MockOIDCClient)(nil).ExchangeCodeToToken), ctx, code, state, authProofs)
 }
 
 // GetUserInfo mocks base method.

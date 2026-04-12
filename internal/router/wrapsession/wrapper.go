@@ -8,6 +8,7 @@ import (
 // NOTE: ここの値は外から変更する必要がないので非公開にしている
 
 const (
+	stateKey        = "state"
 	codeVerifierKey = "code_verifier"
 	nonceKey        = "nonce"
 	refererKey      = "referer"
@@ -28,6 +29,8 @@ var defaultSessionOptions = &sessions.Options{
 //   - ログインしているユーザーのID: `(*W).GetUserID`, `(*W).SetUserID`
 //   - OAuth2.0 Authorization Code Flowで使用される `code_verifier`:
 //     `(*W).GetCodeVerifier`, `(*W).SetCodeVerifier`
+//   - OAuth2.0 Authorization Code Flowで使用される `state`:
+//     `(*W).GetState`, `(*W).SetState`
 type W struct {
 	inner   *sessions.Session
 	changed bool
@@ -58,6 +61,15 @@ func (w *W) drop(c *echo.Context) error {
 		return newSaveSessionError(err)
 	}
 	return nil
+}
+
+func (w *W) GetState() (string, bool) {
+	v, ok := w.getValue(stateKey).(string)
+	return v, ok
+}
+
+func (w *W) SetState(value string) {
+	w.setValue(stateKey, value)
 }
 
 func (w *W) GetCodeVerifier() (string, bool) {

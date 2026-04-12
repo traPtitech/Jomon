@@ -4,6 +4,7 @@ import (
 	"context"
 	crand "crypto/rand"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -61,20 +62,35 @@ func (c *Client) NewAuthCodeURL(ctx context.Context) (*url.URL, *service.AuthPro
 }
 
 func (c *Client) ExchangeCodeToToken(
-	ctx context.Context, code string, authProofs *service.AuthProofs,
+	ctx context.Context, code, state string, authProofs *service.AuthProofs,
 ) (service.Token, error) {
+	if state != authProofs.State {
+		err := errors.New("state mismatch")
+		return "", service.NewUnauthenticatedError("invalid authorization code").
+			WithInternal(err)
+	}
 	oauth2Token, err := c.oauth2Config.Exchange(ctx, code,
 		oauth2.S256ChallengeOption(authProofs.CodeVerifier))
 	if err != nil {
 		return "", service.NewUnauthenticatedError("failed to exchange code to token").
 			WithInternal(err)
 	}
-	idToken, ok := oauth2Token.Extra("id_token").(string)
+	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
 		err = fmt.Errorf("id_token not found in token response")
 		return "", service.NewUnexpectedError(err)
 	}
-	return service.Token(idToken), nil
+	idToken, err := c.idTokenVerifier.Verify(ctx, rawIDToken)
+	if err != nil {
+		return "", service.NewUnauthenticatedError("failed to verify id token").
+			WithInternal(err)
+	}
+	if idToken.Nonce != authProofs.Nonce {
+		err = errors.New("nonce mismatch")
+		return "", service.NewUnauthenticatedError("invalid authorization code").
+			WithInternal(err)
+	}
+	return service.Token(rawIDToken), nil
 }
 
 func (c *Client) GetUserInfo(

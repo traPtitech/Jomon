@@ -26,7 +26,9 @@ type OIDCUserInfo struct {
 
 type OIDCClient interface {
 	NewAuthCodeURL(ctx context.Context) (*url.URL, *AuthProofs, error)
-	ExchangeCodeToToken(ctx context.Context, code string, authProofs *AuthProofs) (Token, error)
+	ExchangeCodeToToken(
+		ctx context.Context, code, state string, authProofs *AuthProofs,
+	) (Token, error)
 	GetUserInfo(ctx context.Context, token Token) (*OIDCUserInfo, error)
 }
 
@@ -46,10 +48,10 @@ func (s *Service) NewAuthCodeURL(ctx context.Context) (*url.URL, *AuthProofs, er
 }
 
 func (s *Service) ExchangeCodeToToken(
-	ctx context.Context, code string, authProofs *AuthProofs,
+	ctx context.Context, code, state string, authProofs *AuthProofs,
 ) (Token, error) {
 	logger := logging.GetLogger(ctx)
-	token, err := s.oidcClient.ExchangeCodeToToken(ctx, code, authProofs)
+	token, err := s.oidcClient.ExchangeCodeToToken(ctx, code, state, authProofs)
 	if err != nil {
 		logger.Error("failed to exchange code to token", zap.Error(err))
 		return "", err
