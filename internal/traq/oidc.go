@@ -70,7 +70,7 @@ func (c *Client) ExchangeCodeToToken(
 			WithInternal(err)
 	}
 	oauth2Token, err := c.oauth2Config.Exchange(ctx, code,
-		oauth2.S256ChallengeOption(authProofs.CodeVerifier))
+		oauth2.VerifierOption(authProofs.CodeVerifier))
 	if err != nil {
 		return "", service.NewUnauthenticatedError("failed to exchange code to token").
 			WithInternal(err)
