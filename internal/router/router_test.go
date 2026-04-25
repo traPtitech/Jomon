@@ -24,6 +24,7 @@ type MockRepository struct {
 	*mock_service.MockApplicationTargetRepository
 	*mock_service.MockTagRepository
 	*mock_service.MockUserRepository
+	*mock_service.MockUserSubjectRepository
 }
 
 type MockStorage struct {
@@ -42,6 +43,7 @@ func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
 		MockApplicationTargetRepository: mock_service.NewMockApplicationTargetRepository(ctrl),
 		MockTagRepository:               mock_service.NewMockTagRepository(ctrl),
 		MockUserRepository:              mock_service.NewMockUserRepository(ctrl),
+		MockUserSubjectRepository:       mock_service.NewMockUserSubjectRepository(ctrl),
 	}
 }
 
@@ -55,13 +57,15 @@ type TestHandlers struct {
 	Handlers   Handlers
 	Repository *MockRepository
 	Storage    *MockStorage
+	OIDCClient *mock_service.MockOIDCClient
 }
 
 func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, error) {
 	gob.Register(User{})
 	repository := NewMockRepository(ctrl)
 	storage := NewMockStorage(ctrl)
-	service := service.New(repository, storage)
+	oidcClient := mock_service.NewMockOIDCClient(ctrl)
+	service := service.New(repository, storage, oidcClient)
 	sessionName := "session"
 
 	return &TestHandlers{
@@ -71,6 +75,7 @@ func NewTestHandlers(_ *testing.T, ctrl *gomock.Controller) (*TestHandlers, erro
 		},
 		repository,
 		storage,
+		oidcClient,
 	}, nil
 }
 

@@ -51,6 +51,10 @@ func dropAll(t *testing.T, ctx context.Context, client *ent.Client) error {
 	if err != nil {
 		return err
 	}
+	_, err = client.UserSubject.Delete().Exec(ctx)
+	if err != nil {
+		return err
+	}
 	_, err = client.User.Delete().Exec(ctx)
 	if err != nil {
 		return err

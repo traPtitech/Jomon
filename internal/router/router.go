@@ -47,7 +47,7 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 		apiAuth := api.Group("/auth")
 		{
 			apiAuth.GET("/callback", h.AuthCallback)
-			apiAuth.GET("/genpkce", h.GeneratePKCE)
+			apiAuth.GET("/signin", h.BeginAuth)
 		}
 
 		apiApplications := api.Group("/applications", h.CheckLoginMiddleware)

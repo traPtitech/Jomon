@@ -1,93 +1,52 @@
 package traq
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"net/http"
-	"net/url"
-	"os"
-	"strings"
 
-	"github.com/labstack/echo/v5"
+	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/traPtitech/Jomon/internal/service"
+	"golang.org/x/oauth2"
 )
 
-type Auth struct {
-	ClientID string
+type Client struct {
+	clientID        string
+	oauth2Config    *oauth2.Config
+	idTokenVerifier *oidc.IDTokenVerifier
 }
 
-type Authority struct {
-	AccessToken  string `json:"access_token"`
-	ExpiresIn    int    `json:"expires_in"`
-	RefreshToken string `json:"refresh_token"`
+type ClientConfig struct {
+	ClientID     string
+	ClientSecret string
+	RedirectURL  string
+	ProviderURL  string
 }
 
-const TraQBaseURL = "https://q.trap.jp/api/v3"
-
-var JomonClientID = os.Getenv("TRAQ_CLIENT_ID")
-
-func AuthorizeURL(challenge, challengeMethod string) string {
-	queries := url.Values(map[string][]string{
-		"response_type":         {"code"},
-		"client_id":             {JomonClientID},
-		"code_challenge":        {challenge},
-		"code_challenge_method": {challengeMethod},
+func LoadClient(ctx context.Context, config ClientConfig) (*Client, error) {
+	provider, err := oidc.NewProvider(ctx, config.ProviderURL)
+	if err != nil {
+		err = fmt.Errorf("failed to create OIDC provider: %w", err)
+		return nil, service.NewUnexpectedError(err)
+	}
+	oauth2Config := &oauth2.Config{
+		ClientID:     config.ClientID,
+		ClientSecret: config.ClientSecret,
+		RedirectURL:  config.RedirectURL,
+		Endpoint:     provider.Endpoint(),
+		Scopes:       []string{oidc.ScopeOpenID},
+	}
+	idTokenVerifier := provider.Verifier(&oidc.Config{
+		ClientID: config.ClientID,
+		// 他のアプリが発行したトークンも受け入れるため、クライアントIDのチェックはスキップする
+		// 必要に応じてaudのチェックを入れる; checkIDTokenAudienceを参照
+		SkipClientIDCheck:          true,
+		SkipExpiryCheck:            false,
+		SkipIssuerCheck:            false,
+		InsecureSkipSignatureCheck: false,
 	})
-	return fmt.Sprintf("%s/oauth2/authorize?%s", TraQBaseURL, queries.Encode())
-}
-
-func RequestAccessToken(code, codeVerifier string) (Authority, error) {
-	form := url.Values{}
-	form.Set("grant_type", "authorization_code")
-	form.Set("client_id", JomonClientID)
-	form.Set("code", code)
-	form.Set("code_verifier", codeVerifier)
-
-	reqBody := strings.NewReader(form.Encode())
-	req, err := http.NewRequest(http.MethodPost, TraQBaseURL+"/oauth2/token", reqBody)
-	if err != nil {
-		return Authority{}, err
-	}
-	req.Header.Set(echo.HeaderContentType, "application/x-www-form-urlencoded")
-	httpClient := http.DefaultClient
-	res, err := httpClient.Do(req)
-	if err != nil {
-		return Authority{}, err
-	} else if res.StatusCode != http.StatusOK {
-		return Authority{}, fmt.Errorf("failed to acquire access token")
-	}
-
-	var authRes Authority
-	err = json.NewDecoder(res.Body).Decode(&authRes)
-	if err != nil {
-		return Authority{}, err
-	}
-
-	return authRes, nil
-}
-
-type TraQUser struct {
-	DisplayName string `json:"displayName"`
-	Name        string `json:"name"`
-}
-
-func FetchTraQUserInfo(token string) (TraQUser, error) { //GetMe
-	req, err := http.NewRequest(http.MethodGet, TraQBaseURL+"/users/me", nil)
-	if err != nil {
-		return TraQUser{}, err
-	}
-	req.Header.Set("Authorization", "Bearer "+token)
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return TraQUser{}, err
-	} else if res.StatusCode != http.StatusOK {
-		return TraQUser{}, fmt.Errorf("failed to fetch user info")
-	}
-
-	var user TraQUser
-	if err := json.NewDecoder(res.Body).Decode(&user); err != nil {
-		return TraQUser{}, err
-	}
-
-	return user, nil
+	return &Client{
+		clientID:        config.ClientID,
+		oauth2Config:    oauth2Config,
+		idTokenVerifier: idTokenVerifier,
+	}, nil
 }

@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
 	"github.com/traPtitech/Jomon/internal/logging"
 	"github.com/traPtitech/Jomon/internal/router/wrapsession"
+	"github.com/traPtitech/Jomon/internal/service"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -90,19 +90,19 @@ func (h Handlers) CheckLoginMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		ctx := c.Request().Context()
 
-		id, err := wrapsession.WithSession(
-			c, h.SessionName, func(w *wrapsession.W) (uuid.UUID, error) {
-				v, ok := w.GetUserID()
+		idToken, err := wrapsession.WithSession(
+			c, h.SessionName, func(w *wrapsession.W) (string, error) {
+				v, ok := w.GetIDToken()
 				if !ok {
 					err := echo.NewHTTPError(http.StatusUnauthorized, "you are not logged in")
-					return uuid.Nil, err
+					return "", err
 				}
 				return v, nil
 			})
 		if err != nil {
 			return err
 		}
-		accessUser, err := h.Service.GetUserByID(ctx, id)
+		accessUser, err := h.Service.DecodeToken(ctx, service.Token(idToken))
 		if err != nil {
 			return err
 		}
