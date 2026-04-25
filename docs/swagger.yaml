@@ -869,7 +869,7 @@ components:
         - name
         - mime_type
         - created_at
-    ApplicationTargetPostInput:
+    PostApplicationTargetInput:
       type: object
       properties:
         amount:
@@ -881,7 +881,7 @@ components:
       required:
         - amount
         - target
-    ApplicationTargetPutInput:
+    PutApplicationTargetInput:
       type: object
       properties:
         amount:
@@ -1047,7 +1047,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/ApplicationTargetPostInput"
+            $ref: "#/components/schemas/PostApplicationTargetInput"
       required:
         - title
         - content
@@ -1077,7 +1077,7 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/ApplicationTargetPutInput"
+            $ref: "#/components/schemas/PutApplicationTargetInput"
       required:
         - title
         - content
