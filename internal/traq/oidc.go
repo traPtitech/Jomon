@@ -44,6 +44,15 @@ func generateAuthProofs() (*service.AuthProofs, error) {
 	}, nil
 }
 
+func (c *Client) checkIDTokenAudience(idToken *oidc.IDToken) error {
+	for _, aud := range idToken.Audience {
+		if aud == c.clientID {
+			return nil
+		}
+	}
+	return service.NewUnauthenticatedError("invalid id token: audience mismatch")
+}
+
 func (c *Client) NewAuthCodeURL(ctx context.Context) (*url.URL, *service.AuthProofs, error) {
 	authProofs, err := generateAuthProofs()
 	if err != nil {
@@ -89,6 +98,9 @@ func (c *Client) ExchangeCodeToToken(
 		err = errors.New("nonce mismatch")
 		return "", service.NewUnauthenticatedError("invalid authorization code").
 			WithInternal(err)
+	}
+	if err := c.checkIDTokenAudience(idToken); err != nil {
+		return "", err
 	}
 	return service.Token(rawIDToken), nil
 }

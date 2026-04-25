@@ -10,6 +10,7 @@ import (
 )
 
 type Client struct {
+	clientID        string
 	oauth2Config    *oauth2.Config
 	idTokenVerifier *oidc.IDTokenVerifier
 }
@@ -37,10 +38,15 @@ func LoadClient(ctx context.Context, config ClientConfig) (*Client, error) {
 	idTokenVerifier := provider.Verifier(&oidc.Config{
 		ClientID: config.ClientID,
 		// 他のアプリが発行したトークンも受け入れるため、クライアントIDのチェックはスキップする
+		// 必要に応じてaudのチェックを入れる; checkIDTokenAudienceを参照
 		SkipClientIDCheck:          true,
 		SkipExpiryCheck:            false,
 		SkipIssuerCheck:            false,
 		InsecureSkipSignatureCheck: false,
 	})
-	return &Client{oauth2Config: oauth2Config, idTokenVerifier: idTokenVerifier}, nil
+	return &Client{
+		clientID:        config.ClientID,
+		oauth2Config:    oauth2Config,
+		idTokenVerifier: idTokenVerifier,
+	}, nil
 }
