@@ -24,6 +24,7 @@ tags:
     description: "accountManager用API"
 
 paths:
+  # NOTE: /auth/callback は内部OAuthコールバック用エンドポイントのため、公開API仕様には含めない。
   # MARK: /auth/signin
   /auth/signin:
     get:
@@ -338,6 +339,7 @@ paths:
           description: 削除に成功した場合。
         "404":
           $ref: "#/components/responses/404"
+  # NOTE: 以下のPartition系APIは将来仕様。現行のrouter実装(v2)では未実装。
   # MARK: /partitions
   /partitions:
     get:
@@ -647,6 +649,28 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/User"
+    put:
+      operationId: updateUserInfo
+      description: "ユーザー情報を更新する。accountManager権限が必要。"
+      tags:
+        - "Users"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserInput"
+      responses:
+        "200":
+          description: "更新に成功した場合。"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/400"
+        "403":
+          $ref: "#/components/responses/403"
   # MARK: /users/me
   /users/me:
     get:
@@ -1193,6 +1217,22 @@ components:
         - created_at
         - updated_at
         - deleted_at
+    # MARK: UpdateUserInput
+    UpdateUserInput:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "nagatech"
+        display_name:
+          type: string
+          example: "ながてち"
+        account_manager:
+          type: boolean
+      required:
+        - name
+        - display_name
+        - account_manager
   # MARK: responses
   responses:
     304:
