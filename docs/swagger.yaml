@@ -34,7 +34,6 @@ paths:
       responses:
         "302":
           description: 取得できた場合｡traQのoauthページにリダイレクトされる。
-
   # MARK: /applications
   /applications:
     get:
@@ -533,7 +532,7 @@ paths:
           $ref: "#/components/responses/403"
         "404":
           $ref: "#/components/responses/404"
-
+  # MARK: /files
   /files:
     post:
       operationId: postFile
@@ -632,7 +631,7 @@ paths:
           $ref: "#/components/responses/404"
         "500":
           $ref: "#/components/responses/500"
-
+  # MARK: /users
   /users:
     get:
       operationId: getUsers
