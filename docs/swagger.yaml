@@ -74,7 +74,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApplicationInput"
+              $ref: "#/components/schemas/PostApplicationInput"
       responses:
         "201":
           description: 作成できた場合。作成された申請の詳細を返す。
@@ -117,7 +117,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApplicationInput"
+              $ref: "#/components/schemas/PutApplicationInput"
       responses:
         "200":
           description: 修正できた場合。修正後の詳細を返す。
@@ -869,7 +869,7 @@ components:
         - name
         - mime_type
         - created_at
-    ApplicationTargetInput:
+    PostApplicationTargetInput:
       type: object
       properties:
         amount:
@@ -881,6 +881,23 @@ components:
       required:
         - amount
         - target
+    PutApplicationTargetInput:
+      type: object
+      properties:
+        amount:
+          type: integer
+          example: 1200
+        target:
+          type: string
+          format: uuid
+        paid_at:
+          type: string
+          nullable: true
+          format: date-time
+      required:
+        - amount
+        - target
+        - paid_at
     ApplicationTarget:
       type: object
       properties:
@@ -1008,7 +1025,7 @@ components:
         - targets
         - created_at
         - updated_at
-    ApplicationInput:
+    PostApplicationInput:
       type: object
       properties:
         created_by:
@@ -1030,7 +1047,37 @@ components:
         targets:
           type: array
           items:
-            $ref: "#/components/schemas/ApplicationTargetInput"
+            $ref: "#/components/schemas/PostApplicationTargetInput"
+      required:
+        - title
+        - content
+        - created_by
+        - tags
+        - partition
+        - targets
+    PutApplicationInput:
+      type: object
+      properties:
+        created_by:
+          $ref: "#/components/schemas/UserID"
+        title:
+          type: string
+          example: "SysAd講習会の開催費用"
+        content:
+          type: string
+          example: "サーバー代 1200円"
+        tags:
+          type: array
+          items:
+            type: string
+            format: uuid
+        partition:
+          type: string
+          format: uuid
+        targets:
+          type: array
+          items:
+            $ref: "#/components/schemas/PutApplicationTargetInput"
       required:
         - title
         - content
