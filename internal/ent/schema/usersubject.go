@@ -15,9 +15,10 @@ type UserSubject struct {
 // Fields of the UserSubject.
 func (UserSubject) Fields() []ent.Field {
 	return []ent.Field{
+		// https://openid.net/specs/openid-connect-core-1_0-36.html#IDToken
 		field.String("id").
 			StorageKey("subject").
-			MaxLen(36),
+			MaxLen(255),
 		field.UUID("user_id", uuid.UUID{}),
 	}
 }

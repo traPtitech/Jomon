@@ -180,7 +180,7 @@ var (
 	}
 	// UserSubjectsColumns holds the columns for the "user_subjects" table.
 	UserSubjectsColumns = []*schema.Column{
-		{Name: "subject", Type: field.TypeString, Size: 36},
+		{Name: "subject", Type: field.TypeString, Size: 255},
 		{Name: "user_id", Type: field.TypeUUID},
 	}
 	// UserSubjectsTable holds the schema information for the "user_subjects" table.
