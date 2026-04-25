@@ -650,7 +650,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/User"
     put:
-      operationId: updateUserInfo
+      operationId: putUserInfo
       description: "ユーザー情報を更新する。accountManager権限が必要。"
       tags:
         - "Users"
@@ -659,7 +659,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateUserInput"
+              $ref: "#/components/schemas/PutUserInput"
       responses:
         "200":
           description: "更新に成功した場合。"
@@ -1217,8 +1217,8 @@ components:
         - created_at
         - updated_at
         - deleted_at
-    # MARK: UpdateUserInput
-    UpdateUserInput:
+    # MARK: PutUserInput
+    PutUserInput:
       type: object
       properties:
         name:
