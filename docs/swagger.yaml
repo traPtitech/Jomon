@@ -665,18 +665,6 @@ paths:
 
 components:
   schemas:
-    # MARK: AuthInfo
-    AuthInfo:
-      type: object
-      properties:
-        code_challenge:
-          type: string
-        code_challenge_method:
-          type: string
-        client_id:
-          type: string
-        response_type:
-          type: string
     # MARK: StatusEnum
     StatusEnum:
       type: string
@@ -838,19 +826,6 @@ components:
           enum:
             - "available"
             - "unavailable"
-    # MARK: ApplicationFile
-    ApplicationFile:
-      type: object
-      properties:
-        file:
-          type: string
-          format: binary
-        name:
-          type: string
-          example: "hoge.png"
-      required:
-        - file
-        - name
     # MARK: FileInput
     FileInput:
       type: object
