@@ -74,7 +74,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApplicationPostInput"
+              $ref: "#/components/schemas/PostApplicationInput"
       responses:
         "201":
           description: 作成できた場合。作成された申請の詳細を返す。
@@ -117,7 +117,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApplicationPutInput"
+              $ref: "#/components/schemas/PutApplicationInput"
       responses:
         "200":
           description: 修正できた場合。修正後の詳細を返す。
@@ -1025,7 +1025,7 @@ components:
         - targets
         - created_at
         - updated_at
-    ApplicationPostInput:
+    PostApplicationInput:
       type: object
       properties:
         created_by:
@@ -1055,7 +1055,7 @@ components:
         - tags
         - partition
         - targets
-    ApplicationPutInput:
+    PutApplicationInput:
       type: object
       properties:
         created_by:
