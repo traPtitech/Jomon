@@ -2,7 +2,6 @@ package model
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
@@ -67,22 +66,6 @@ func (repo *EntRepository) GetUsers(ctx context.Context) ([]*service.User, error
 		return convertEntUserToModelUser(u)
 	})
 	return modelusers, nil
-}
-
-func (repo *EntRepository) UpdateUser(
-	ctx context.Context, userID uuid.UUID, name string, dn string, accountManager bool,
-) (*service.User, error) {
-	u, err := repo.client.User.
-		UpdateOneID(userID).
-		SetName(name).
-		SetDisplayName(dn).
-		SetAccountManager(accountManager).
-		SetUpdatedAt(time.Now()).
-		Save(ctx)
-	if err != nil {
-		return nil, userErrorConverter.convert(err)
-	}
-	return convertEntUserToModelUser(u), nil
 }
 
 func convertEntUserToModelUser(user *ent.User) *service.User {

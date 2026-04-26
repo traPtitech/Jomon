@@ -101,18 +101,3 @@ func (mr *MockUserRepositoryMockRecorder) GetUsers(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsers", reflect.TypeOf((*MockUserRepository)(nil).GetUsers), ctx)
 }
-
-// UpdateUser mocks base method.
-func (m *MockUserRepository) UpdateUser(ctx context.Context, userID uuid.UUID, name, dn string, accountManager bool) (*service.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUser", ctx, userID, name, dn, accountManager)
-	ret0, _ := ret[0].(*service.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateUser indicates an expected call of UpdateUser.
-func (mr *MockUserRepositoryMockRecorder) UpdateUser(ctx, userID, name, dn, accountManager any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockUserRepository)(nil).UpdateUser), ctx, userID, name, dn, accountManager)
-}

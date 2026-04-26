@@ -1,15 +1,12 @@
 package router
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/labstack/echo/v5"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
@@ -121,160 +118,6 @@ func TestHandlers_GetUsers(t *testing.T) {
 		err = h.Handlers.GetUsers(c)
 		require.Error(t, err)
 		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
-	})
-}
-
-func TestHandlers_UpdateUserInfo(t *testing.T) {
-	t.Parallel()
-
-	t.Run("Success", func(t *testing.T) {
-		t.Parallel()
-		ctx := testutil.NewContext(t)
-		ctrl := gomock.NewController(t)
-
-		accessUser := makeUser(t, true)
-		updateUser := &service.User{
-			ID:             accessUser.ID,
-			Name:           accessUser.Name,
-			DisplayName:    accessUser.DisplayName,
-			AccountManager: !accessUser.AccountManager,
-			CreatedAt:      accessUser.CreatedAt,
-			UpdatedAt:      time.Now(),
-		}
-
-		reqUser := PutUserRequest{
-			Name:           updateUser.Name,
-			DisplayName:    updateUser.DisplayName,
-			AccountManager: updateUser.AccountManager,
-		}
-		reqBody, err := json.Marshal(reqUser)
-		require.NoError(t, err)
-
-		e := echo.New()
-		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPut, "/api/users", bytes.NewReader(reqBody))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.Set(loginUserKey, accessUser)
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-
-		h.Repository.MockUserRepository.
-			EXPECT().
-			GetUserByName(c.Request().Context(), updateUser.Name).
-			Return(accessUser, nil)
-		h.Repository.MockUserRepository.
-			EXPECT().
-			UpdateUser(
-				c.Request().Context(),
-				accessUser.ID, updateUser.Name, updateUser.DisplayName, updateUser.AccountManager).
-			Return(updateUser, nil)
-
-		require.NoError(t, h.Handlers.UpdateUserInfo(c))
-		require.Equal(t, http.StatusOK, rec.Code)
-		var got User
-		err = json.Unmarshal(rec.Body.Bytes(), &got)
-		require.NoError(t, err)
-		opts := testutil.ApproxEqualOptions()
-		// FIXME: #835
-		opts = append(opts,
-			cmpopts.IgnoreFields(User{}, "CreatedAt", "UpdatedAt", "DeletedAt"))
-		exp := modelUserToUser(updateUser)
-		testutil.RequireEqual(t, exp, &got, opts...)
-	})
-
-	t.Run("FailedToUpdateUser", func(t *testing.T) {
-		t.Parallel()
-		ctx := testutil.NewContext(t)
-		ctrl := gomock.NewController(t)
-
-		accessUser := makeUser(t, true)
-		updateUser := &service.User{
-			ID:             accessUser.ID,
-			Name:           accessUser.Name,
-			DisplayName:    accessUser.DisplayName,
-			AccountManager: !accessUser.AccountManager,
-			CreatedAt:      accessUser.CreatedAt,
-			UpdatedAt:      time.Now(),
-		}
-		reqUser := PutUserRequest{
-			Name:           updateUser.Name,
-			DisplayName:    updateUser.DisplayName,
-			AccountManager: updateUser.AccountManager,
-		}
-		bodyReqUser, err := json.Marshal(reqUser)
-		require.NoError(t, err)
-
-		e := echo.New()
-		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPut, "/api/users", bytes.NewReader(bodyReqUser))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.Set(loginUserKey, accessUser)
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-		h.Repository.MockUserRepository.
-			EXPECT().
-			GetUserByName(c.Request().Context(), updateUser.Name).
-			Return(accessUser, nil)
-		resErr := service.NewUnexpectedError(errors.New("failed to get users."))
-		h.Repository.MockUserRepository.
-			EXPECT().
-			UpdateUser(
-				c.Request().Context(),
-				accessUser.ID, updateUser.Name, updateUser.DisplayName, updateUser.AccountManager).
-			Return(nil, resErr)
-
-		err = h.Handlers.UpdateUserInfo(c)
-		require.Error(t, err)
-		require.Equal(t, http.StatusInternalServerError, HTTPErrorHandlerInner(err).Code)
-	})
-
-	t.Run("FailedToGetUser", func(t *testing.T) {
-		t.Parallel()
-		ctx := testutil.NewContext(t)
-		ctrl := gomock.NewController(t)
-
-		accessUser := makeUser(t, true)
-		updateUser := &service.User{
-			ID:             accessUser.ID,
-			Name:           accessUser.Name,
-			DisplayName:    accessUser.DisplayName,
-			AccountManager: !accessUser.AccountManager,
-			CreatedAt:      accessUser.CreatedAt,
-			UpdatedAt:      time.Now(),
-		}
-		reqUser := PutUserRequest{
-			Name:           updateUser.Name,
-			DisplayName:    updateUser.DisplayName,
-			AccountManager: updateUser.AccountManager,
-		}
-		bodyReqUser, err := json.Marshal(reqUser)
-		require.NoError(t, err)
-
-		e := echo.New()
-		req := httptest.NewRequestWithContext(
-			ctx, http.MethodPut, "/api/users", bytes.NewReader(bodyReqUser))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-		c.Set(loginUserKey, accessUser)
-
-		h, err := NewTestHandlers(t, ctrl)
-		require.NoError(t, err)
-		resErr := service.NewNotFoundError("user not found")
-		h.Repository.MockUserRepository.
-			EXPECT().
-			GetUserByName(c.Request().Context(), updateUser.Name).
-			Return(nil, resErr)
-
-		err = h.Handlers.UpdateUserInfo(c)
-		require.Error(t, err)
-		require.Equal(t, http.StatusNotFound, HTTPErrorHandlerInner(err).Code)
 	})
 }
 

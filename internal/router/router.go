@@ -96,7 +96,6 @@ func (h Handlers) NewServer(logger *zap.Logger) *echo.Echo {
 		apiUsers := api.Group("/users", h.CheckLoginMiddleware)
 		{
 			apiUsers.GET("", h.GetUsers)
-			apiUsers.PUT("", h.UpdateUserInfo)
 			apiUsers.GET("/me", h.GetMe)
 		}
 
