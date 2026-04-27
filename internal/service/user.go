@@ -26,9 +26,6 @@ type UserRepository interface {
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*User, error)
 	GetUserByName(ctx context.Context, name string) (*User, error)
 	GetUsers(ctx context.Context) ([]*User, error)
-	UpdateUser(
-		ctx context.Context, userID uuid.UUID, name string, dn string, accountManager bool,
-	) (*User, error)
 }
 
 func (s *Service) GetUsers(ctx context.Context) ([]*User, error) {
@@ -73,29 +70,6 @@ func (s *Service) CreateUser(ctx context.Context, inputs CreateUserInputs) (*Use
 	)
 	if err != nil {
 		logger.Error("failed to create user in repository", zap.Error(err))
-		return nil, err
-	}
-	return user, nil
-}
-
-type UpdateUserInputs struct {
-	Name           string
-	DisplayName    string
-	AccountManager bool
-}
-
-func (s *Service) UpdateUser(
-	ctx context.Context, accessUser *User, userID uuid.UUID, inputs UpdateUserInputs,
-) (*User, error) {
-	if !s.isAccountManager(accessUser) {
-		return nil, NewForbiddenError("user is not account manager")
-	}
-	logger := logging.GetLogger(ctx)
-	user, err := s.repository.UpdateUser(
-		ctx, userID, inputs.Name, inputs.DisplayName, inputs.AccountManager,
-	)
-	if err != nil {
-		logger.Error("failed to update user in repository", zap.Error(err))
 		return nil, err
 	}
 	return user, nil
