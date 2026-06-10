@@ -31,7 +31,7 @@ type File struct {
 	CreatedAt time.Time
 }
 
-var acceptedMimeTypes = map[string]bool{
+var ApprovedMimeTypes = map[string]bool{
 	"image/jpeg":         true,
 	"image/png":          true,
 	"image/gif":          true,
@@ -98,7 +98,7 @@ func (s *Service) WriteFile(
 	user *User, applicationID uuid.UUID,
 	name string, mimetype string, content io.Reader,
 ) (*File, error) {
-	if !acceptedMimeTypes[mimetype] {
+	if !ApprovedMimeTypes[mimetype] {
 		return nil, NewBadInputError("unsupported mime type")
 	}
 	logger := logging.GetLogger(ctx)

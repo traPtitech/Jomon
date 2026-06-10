@@ -14,23 +14,23 @@ type Status int
 
 const (
 	_ Status = iota
-	Submitted
-	FixRequired
-	Accepted
-	Completed
+	PendingReview
+	ChangeRequested
+	Approved
+	PaymentFinished
 	Rejected
 )
 
 func (s Status) String() string {
 	switch s {
-	case Submitted:
-		return "submitted"
-	case FixRequired:
-		return "fix_required"
-	case Accepted:
-		return "accepted"
-	case Completed:
-		return "completed"
+	case PendingReview:
+		return "pending_review"
+	case ChangeRequested:
+		return "change_requested"
+	case Approved:
+		return "approved"
+	case PaymentFinished:
+		return "payment_finished"
 	case Rejected:
 		return "rejected"
 	default:
@@ -42,14 +42,14 @@ func (s Status) String() string {
 // dbにstringいれる今の実装だとMarshalJson入らなそう。
 func (s Status) MarshalJSON() ([]byte, error) {
 	switch s {
-	case Submitted:
-		return json.Marshal("submitted")
-	case FixRequired:
-		return json.Marshal("fix_required")
-	case Accepted:
-		return json.Marshal("accepted")
-	case Completed:
-		return json.Marshal("completed")
+	case PendingReview:
+		return json.Marshal("pending_review")
+	case ChangeRequested:
+		return json.Marshal("change_requested")
+	case Approved:
+		return json.Marshal("approved")
+	case PaymentFinished:
+		return json.Marshal("payment_finished")
 	case Rejected:
 		return json.Marshal("rejected")
 	default:
@@ -65,14 +65,14 @@ func (s *Status) UnmarshalJSON(data []byte) error {
 
 	var st Status
 	switch str {
-	case "submitted":
-		st = Submitted
-	case "fix_required":
-		st = FixRequired
-	case "accepted":
-		st = Accepted
-	case "completed":
-		st = Completed
+	case "pending_review":
+		st = PendingReview
+	case "change_requested":
+		st = ChangeRequested
+	case "approved":
+		st = Approved
+	case "payment_finished":
+		st = PaymentFinished
 	case "rejected":
 		st = Rejected
 	default:
