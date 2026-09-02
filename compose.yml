@@ -1,6 +1,6 @@
 services:
   proxy:
-    image: nginx
+    image: nginx:latest@sha256:b34848eff6db786b6b1282d3a9c3fd0b5563dfb6d261df4923378b419e0d24f0
     ports:
       - "3000:80"
     volumes:
@@ -66,7 +66,7 @@ services:
       retries: 3
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest@sha256:42a200db07b4e70fbf32c594ad4521cf16399b8e54bbb5adceae98e7566dfbeb
     environment:
       - PMA_ARBITRARY=1
       - PMA_HOST=db
