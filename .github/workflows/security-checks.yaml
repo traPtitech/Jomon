@@ -1,0 +1,51 @@
+# 各リポジトリに配置する caller ワークフロー（PR 時のセキュリティチェック一式）。
+# https://github.com/traPtitech/gha-security
+
+name: security-checks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # 未固定の action / イメージ参照を検出し、修正を suggestion で提案する
+  pin-support:
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: traPtitech/gha-security/.github/workflows/pin-support.yaml@6bb89207cf517f2811cc0b4c4053a16aec47959b
+    with:
+      mode: suggest # commit にすると PR ブランチへ直接修正コミットを push する（要 contents: write）
+
+  # 未固定の参照があれば fail（導入直後は required check にせず様子見を推奨）
+  pin-check:
+    permissions:
+      contents: read
+    uses: traPtitech/gha-security/.github/workflows/pin-check.yaml@6bb89207cf517f2811cc0b4c4053a16aec47959b
+
+  # CI の lockfile 強制と package.json の range / tag 指定を検出して fail。
+  # Go integrity warningはannotationとsticky PR commentで通知する。
+  dependency-policy:
+    permissions:
+      contents: read
+      pull-requests: write # Go integrity warningのPRコメント用（無効化する場合は不要）
+    uses: traPtitech/gha-security/.github/workflows/dependency-policy.yaml@1892d11b3f49302ff8e0885d7baf4a3d167eea60
+    # with:
+    #   go-warning-pr-comment: false # Go integrityのPRコメントだけを無効化
+
+  # npm / GitHub Actionsの公開直後更新を検出し、npm artifact identity変更は常にfailする
+  # `cooldown-override` は公開日時cooldownだけをskipし、identity検査は継続する
+  # 不要な job はまるごと削除してよい（各機能は独立してオン/オフ可能）
+  # 組織内依存も既定で検査対象。cooldownの例外は `with.exclude` に明示する。
+  cooldown-check:
+    permissions:
+      contents: read
+      pull-requests: write # 違反の PR コメント投稿用（pr-comment: false なら read のみで可）
+    uses: traPtitech/gha-security/.github/workflows/cooldown-check.yaml@4137fb75387547f926dd6ea3057f86c03c888c3c
+    # with:
+    #   pr-comment: false        # PR コメント通知を無効化する場合
+    #   npm-min-age-days: 0      # npm公開日時cooldownだけを無効化（identityは継続）
+    #   actions-min-age-days: 0  # GitHub Actions公開日時cooldownを無効化
+    #   max-lookups: 25          # 外部metadata lookupの上限をさらに下げる

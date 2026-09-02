@@ -3,6 +3,8 @@
 # Please see the documentation for all configuration options:
 # https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
+# cooldown: 公開直後の版を短期quarantineする（traPtitech/gha-security 準拠）
+# https://github.com/traPtitech/gha-security
 version: 2
 updates:
   - package-ecosystem: "gomod"
@@ -16,6 +18,8 @@ updates:
       - H1rono
     labels:
       - "dependencies"
+    cooldown:
+      default-days: 3
 
   - package-ecosystem: docker
     directory: "/"
@@ -28,6 +32,8 @@ updates:
       - H1rono
     labels:
       - "dependencies"
+    cooldown:
+      default-days: 3
 
   - package-ecosystem: github-actions
     directory: "/"
@@ -40,3 +46,5 @@ updates:
       - H1rono
     labels:
       - "dependencies"
+    cooldown:
+      default-days: 3
