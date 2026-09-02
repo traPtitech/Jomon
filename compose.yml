@@ -39,7 +39,7 @@ services:
             - uploads
 
   db:
-    image: mariadb:10.11.4
+    image: mariadb:10.11.4@sha256:385c0ba6270307511a511ad915350736602c33fafb3f63f663c853920424c365
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: password
