@@ -1,0 +1,11 @@
+version: 3
+
+rules:
+  # traPtitech/gha-security はタグを打っていないため、pinactがSHA固定に
+  # 検証可能なtagコメントを自動付与できない。SHAは当該リポジトリのコミット
+  # 履歴で直接確認済みのため、このリポジトリからの参照はcheckの対象外にする。
+  # https://github.com/traPtitech/gha-security
+  - ignore: true
+    conditions:
+      - expr: |
+          ActionRepoFullName == "traPtitech/gha-security"
