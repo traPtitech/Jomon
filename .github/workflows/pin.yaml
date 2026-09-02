@@ -1,0 +1,27 @@
+# 各リポジトリに配置する caller ワークフロー（定期的な固定 PR の自動作成）。
+# https://github.com/traPtitech/gha-security
+
+name: pin
+
+on:
+  schedule:
+    - cron: "0 21 * * 0" # 月曜 6:00 JST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  pin:
+    uses: traPtitech/gha-security/.github/workflows/pin.yaml@6bb89207cf517f2811cc0b4c4053a16aec47959b
+    with:
+      # Dependabot を導入済みのため、追従更新はDependabotに任せる
+      update: false
+      # 組織内も既定で固定対象。必要な例外だけ明示する
+      # pinact-exclude-regex: '^traPtitech/example$'
+      # image-exclude-regex: '^ghcr\.io/traptitech/example(?:[:@]|$)'
+    # App トークンを渡すと、作成された PR で CI が走るようになる（org secrets を想定）
+    secrets:
+      app-id: ${{ secrets.GHA_SECURITY_APP_ID }}
+      app-private-key: ${{ secrets.GHA_SECURITY_APP_PRIVATE_KEY }}
