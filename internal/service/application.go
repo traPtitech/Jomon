@@ -219,7 +219,7 @@ func (s *Service) UpdateApplicationStatus(
 			application.Status.String(), inputs.Status.String())
 		return nil, nil, NewBadInputError(message)
 	}
-	if s.isAccountManagerRevertingAcceptedApplication(user, application.Status, inputs.Status) {
+	if s.isAccountManagerRevertingApprovedApplication(user, application.Status, inputs.Status) {
 		targets, err := s.repository.GetApplicationTargets(ctx, applicationID)
 		if err != nil {
 			logger.Error("failed to get application targets from repository", zap.Error(err))
@@ -262,11 +262,11 @@ func (s *Service) isAccountManager(user *User) bool {
 
 func (s *Service) isAbleNoCommentUpdateStatus(currentStatus, newStatus Status) bool {
 	switch currentStatus {
-	case Submitted:
-		return newStatus != FixRequired && newStatus != Rejected
-	case Accepted:
-		return newStatus != Submitted
-	case FixRequired, Completed, Rejected:
+	case PendingReview:
+		return newStatus != ChangeRequested && newStatus != Rejected
+	case Approved:
+		return newStatus != PendingReview
+	case ChangeRequested, PaymentFinished, Rejected:
 		return true
 	default:
 		return false
@@ -274,19 +274,19 @@ func (s *Service) isAbleNoCommentUpdateStatus(currentStatus, newStatus Status) b
 }
 
 func (s *Service) isAbleAccountManagerUpdateStatus(currentStatus, newStatus Status) bool {
-	return newStatus == Rejected && currentStatus == Submitted ||
-		newStatus == Submitted && currentStatus == FixRequired ||
-		newStatus == Accepted && currentStatus == Submitted ||
-		newStatus == Submitted && currentStatus == Accepted ||
-		newStatus == FixRequired && currentStatus == Submitted
+	return newStatus == Rejected && currentStatus == PendingReview ||
+		newStatus == PendingReview && currentStatus == ChangeRequested ||
+		newStatus == Approved && currentStatus == PendingReview ||
+		newStatus == PendingReview && currentStatus == Approved ||
+		newStatus == ChangeRequested && currentStatus == PendingReview
 }
 
 func (s *Service) isAbleCreatorChangeStatus(currentStatus, newStatus Status) bool {
-	return currentStatus == FixRequired && newStatus == Submitted
+	return currentStatus == ChangeRequested && newStatus == PendingReview
 }
 
-func (s *Service) isAccountManagerRevertingAcceptedApplication(
+func (s *Service) isAccountManagerRevertingApprovedApplication(
 	user *User, currentStatus, newStatus Status,
 ) bool {
-	return user.AccountManager && currentStatus == Accepted && newStatus == Submitted
+	return user.AccountManager && currentStatus == Approved && newStatus == PendingReview
 }
