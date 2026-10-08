@@ -22,15 +22,14 @@ RUN npm run build
 
 ## run
 
-FROM alpine:3.9
+FROM alpine:3.24
 ENV TZ Asia/Tokyo
 
 RUN apk --update --no-cache add tzdata \
   && cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
   && apk del tzdata
 RUN apk --update --no-cache add ca-certificates \
-  && update-ca-certificates \
-  && rm -rf /usr/share/ca-certificates /etc/ssl/certs
+  && update-ca-certificates
 
 WORKDIR /app
 COPY --from=server-build /Jomon ./
