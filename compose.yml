@@ -1,6 +1,6 @@
 services:
   proxy:
-    image: nginx:latest@sha256:b34848eff6db786b6b1282d3a9c3fd0b5563dfb6d261df4923378b419e0d24f0
+    image: nginx:latest@sha256:689fbc6acfefc8a172d86d5779265fd52dd82e8c6b0c68c7d4aa35734340eb2a
     ports:
       - "3000:80"
     volumes:
