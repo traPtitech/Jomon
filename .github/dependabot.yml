@@ -35,6 +35,20 @@ updates:
     cooldown:
       default-days: 3
 
+  - package-ecosystem: docker-compose
+    directory: "/"
+    schedule:
+      interval: monthly
+      time: "00:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 10
+    reviewers:
+      - H1rono
+    labels:
+      - "dependencies"
+    cooldown:
+      default-days: 3
+
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
