@@ -66,7 +66,7 @@ services:
       retries: 3
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest@sha256:42a200db07b4e70fbf32c594ad4521cf16399b8e54bbb5adceae98e7566dfbeb
+    image: phpmyadmin/phpmyadmin:latest@sha256:16d0f09c25a2dee07739af9dc11e72c1bf7fb776a449f6cc03ec00b33d0c6d9b
     environment:
       - PMA_ARBITRARY=1
       - PMA_HOST=db
